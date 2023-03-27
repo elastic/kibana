@@ -20,7 +20,7 @@ import {
   asDynamicBytes,
   asInteger,
 } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SizeLabel } from './size_label';
 
@@ -100,8 +100,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
     },
   ];
 
-  const loading =
-    status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING;
+  const loading = isPending(status);
 
   return (
     <>

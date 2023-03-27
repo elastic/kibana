@@ -41,7 +41,13 @@ const filterExistsInFiltersArray = (
   key: string,
   value: string
 ): Filter | undefined =>
-  filters.find((f: Filter) => f.meta.key === key && f.meta.params.query === value);
+  filters.find(
+    (f: Filter) =>
+      f.meta.key === key &&
+      typeof f.meta.params === 'object' &&
+      'query' in f.meta.params &&
+      f.meta.params?.query === value
+  );
 
 /**
  * Returns true if the filter exists and should be removed, false otherwise (depending on a FilterIn or FilterOut action)

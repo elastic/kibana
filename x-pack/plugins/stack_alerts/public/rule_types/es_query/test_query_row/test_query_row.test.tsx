@@ -21,7 +21,15 @@ jest.mock('@elastic/eui', () => {
 });
 
 const COPIED_QUERY = 'COPIED QUERY';
-const onFetch = () => Promise.resolve({ nrOfDocs: 42, timeWindow: '5m' });
+const onFetch = () =>
+  Promise.resolve({
+    testResults: {
+      results: [{ group: 'all documents', hits: [], count: 42 }],
+      truncated: false,
+    },
+    isGrouped: false,
+    timeWindow: '5m',
+  });
 const onCopyQuery = () => COPIED_QUERY;
 
 describe('TestQueryRow', () => {

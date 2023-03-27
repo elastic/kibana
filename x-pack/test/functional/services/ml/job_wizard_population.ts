@@ -7,15 +7,32 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 
-export function MachineLearningJobWizardPopulationProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardPopulationProvider(
+  { getService }: FtrProviderContext,
+  mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
   return {
     async assertPopulationFieldInputExists() {
       await testSubjects.existOrFail('mlPopulationSplitFieldSelect > comboBoxInput');
+    },
+
+    async assertFieldStatFlyoutContentFromPopulationFieldInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValues?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlPopulationSplitFieldSelect',
+        fieldName,
+        fieldType,
+        expectedTopValues
+      );
     },
 
     async assertPopulationFieldSelection(expectedIdentifier: string[]) {

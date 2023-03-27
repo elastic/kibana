@@ -10,7 +10,7 @@ import { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 
 interface TextBasedLanguagesErrorResponse {
@@ -22,7 +22,7 @@ interface TextBasedLanguagesErrorResponse {
 
 export function fetchDataFromAggregateQuery(
   query: Query | AggregateQuery,
-  dataViewsService: DataViewsContract,
+  dataView: DataView,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
   filters?: Filter[],
@@ -33,7 +33,7 @@ export function fetchDataFromAggregateQuery(
     filters,
     query,
     time: timeRange,
-    dataViewsService,
+    dataView,
     inputQuery,
   })
     .then((ast) => {

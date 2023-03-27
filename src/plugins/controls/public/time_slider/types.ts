@@ -7,7 +7,7 @@
  */
 
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiRangeTick } from '@elastic/eui';
 
 import { ControlOutput } from '../types';
 import { TimeSliderControlEmbeddableInput } from '../../common/time_slider/types';

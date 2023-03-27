@@ -72,6 +72,7 @@ export const logViewAttributesRT = rt.strict({
   logIndices: logIndexReferenceRT,
   logColumns: rt.array(logViewColumnConfigurationRT),
 });
+
 export type LogViewAttributes = rt.TypeOf<typeof logViewAttributesRT>;
 
 export const logViewRT = rt.exact(
@@ -101,3 +102,20 @@ export const logViewStatusRT = rt.strict({
   index: logViewIndexStatusRT,
 });
 export type LogViewStatus = rt.TypeOf<typeof logViewStatusRT>;
+
+export const persistedLogViewReferenceRT = rt.type({
+  logViewId: rt.string,
+  type: rt.literal('log-view-reference'),
+});
+
+export type PersistedLogViewReference = rt.TypeOf<typeof persistedLogViewReferenceRT>;
+
+export const inlineLogViewReferenceRT = rt.type({
+  type: rt.literal('log-view-inline'),
+  id: rt.string,
+  attributes: logViewAttributesRT,
+});
+
+export const logViewReferenceRT = rt.union([persistedLogViewReferenceRT, inlineLogViewReferenceRT]);
+
+export type LogViewReference = rt.TypeOf<typeof logViewReferenceRT>;

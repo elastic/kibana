@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { DataStream, PolicyConfig, MonitorFields } from './types';
-import { usePolicyConfigContext } from './contexts';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DeprecateNoticeModal } from './deprecate_notice_modal';
+import { PolicyConfig } from './types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { CustomFields } from './custom_fields';
-import { useUpdatePolicy } from './hooks/use_update_policy';
-import { usePolicy } from './hooks/use_policy';
-import { validate } from './validation';
 
 export const defaultConfig: PolicyConfig = DEFAULT_FIELDS;
 
@@ -27,39 +24,16 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
 
-    const { monitorType } = usePolicyConfigContext();
-    const policyConfig: PolicyConfig = usePolicy(newPolicy.name);
+    const { application } = useKibana().services;
 
-    const dataStreams: DataStream[] = useMemo(() => {
-      return newPolicy.inputs.map((input) => {
-        return input.type.replace(/synthetics\//g, '') as DataStream;
+    const { package: pkg } = newPolicy;
+
+    const onCancel = useCallback(() => {
+      application?.navigateToApp('integrations', {
+        path: `/detail/${pkg?.name}-${pkg?.version}/overview`,
       });
-    }, [newPolicy]);
-
-    useUpdatePolicy({
-      monitorType,
-      defaultConfig: defaultConfig[monitorType] as Partial<MonitorFields>,
-      config: policyConfig[monitorType] as Partial<MonitorFields>,
-      newPolicy,
-      onChange,
-      validate,
-    });
-
-    // Fleet will initialize the create form with a default name for the integratin policy, however,
-    // for synthetics, we want the user to explicitely type in a name to use as the monitor name,
-    // so we blank it out only during 1st component render (thus why the eslint disabled rule below).
-    useEffect(() => {
-      onChange({
-        isValid: false,
-        updatedPolicy: {
-          ...newPolicy,
-          name: '',
-        },
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    return <CustomFields validate={validate[monitorType]} dataStreams={dataStreams} />;
+    }, [application, pkg?.name, pkg?.version]);
+    return <DeprecateNoticeModal onCancel={onCancel} />;
   }
 );
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';

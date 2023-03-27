@@ -31,14 +31,18 @@ import { EmptyPrompt } from './components/empty_prompt';
 import { FileGrid } from './components/file_grid';
 import { SearchField } from './components/search_field';
 import { ModalFooter } from './components/modal_footer';
-
 import { ClearFilterButton } from './components/clear_filter_button';
+import { DeletePrompt } from './components/delete_prompt/delete_prompt';
 
 export interface Props<Kind extends string = string> {
   /**
    * The file kind that was passed to the registry.
    */
   kind: Kind;
+  /**
+   * A function which determines whether to show a delete button for a file.
+   */
+  shouldAllowDelete?: (file: FileJSON) => boolean;
   /**
    * Will be called when the modal is closed
    */
@@ -51,6 +55,10 @@ export interface Props<Kind extends string = string> {
    * When a user has successfully uploaded some files this callback will be called
    */
   onUpload?: (done: DoneNotification[]) => void;
+  /**
+   * `meta` value to be used for file uploads
+   */
+  uploadMeta?: FileJSON['meta'];
   /**
    * The number of results to show per page.
    */
@@ -80,7 +88,7 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
     <ModalFooter kind={kind} onDone={onDone} onUpload={onUpload} multiple={multiple} />
   );
 
-  return (
+  const modal = (
     <EuiModal
       data-test-subj="filePickerModal"
       className="filesFilePicker filesFilePicker--fixed"
@@ -133,16 +141,31 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       )}
     </EuiModal>
   );
+
+  return (
+    <>
+      {modal}
+      <DeletePrompt />
+    </>
+  );
 };
 
 export const FilePicker: FunctionComponent<Props> = ({
   pageSize = 20,
   kind,
+  shouldAllowDelete,
   multiple = false,
+  uploadMeta,
   onUpload = () => {},
   ...rest
 }) => (
-  <FilePickerContext pageSize={pageSize} kind={kind} multiple={multiple}>
+  <FilePickerContext
+    pageSize={pageSize}
+    kind={kind}
+    uploadMeta={uploadMeta}
+    multiple={multiple}
+    shouldAllowDelete={shouldAllowDelete}
+  >
     <Component {...rest} {...{ pageSize, kind, multiple, onUpload }} />
   </FilePickerContext>
 );

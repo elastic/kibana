@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type { Store } from 'redux';
 import { applyMiddleware, createStore } from 'redux';
@@ -52,15 +53,16 @@ jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendBulkGetPackagePolicies: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
-  sendGetFleetAgentsWithEndpoint: () => Promise.resolve({ total: 0 }),
 }));
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('rxjs');
 
 type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
 
 describe('endpoint list middleware', () => {
   const getKibanaServicesMock = KibanaServices.get as jest.Mock;
+  const firstValueFromMock = firstValueFrom as jest.Mock;
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
@@ -120,6 +122,7 @@ describe('endpoint list middleware', () => {
   });
 
   it('handles `appRequestedEndpointList`', async () => {
+    firstValueFromMock.mockResolvedValue({ indexFields: [] });
     endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.get.mockResolvedValue(apiResponse);
@@ -137,11 +140,9 @@ describe('endpoint list middleware', () => {
     await Promise.all([
       waitForAction('serverReturnedEndpointList'),
       waitForAction('endpointPendingActionsStateChanged'),
-      waitForAction('serverReturnedEndpointsTotal'),
       waitForAction('serverReturnedMetadataPatterns'),
       waitForAction('serverCancelledPolicyItemsLoading'),
       waitForAction('serverReturnedEndpointExistValue'),
-      waitForAction('serverReturnedAgenstWithEndpointsTotal'),
     ]);
 
     expect(fakeHttpServices.get).toHaveBeenNthCalledWith(1, HOST_METADATA_LIST_ROUTE, {

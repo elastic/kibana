@@ -3,6 +3,11 @@
   "locations": [],
   "journey_id": "",
   "enabled": true,
+  "alert": {
+    "status": {
+      "enabled": true
+    }
+  },
   "schedule": {
     "number": "3",
     "unit": "m"

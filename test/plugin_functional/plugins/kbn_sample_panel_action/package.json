@@ -1,5 +1,5 @@
 {
-  "name": "kbn_sample_panel_action",
+  "name": "@kbn/kbn-sample-panel-action-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/kbn_sample_panel_action",
   "kibana": {

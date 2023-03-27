@@ -12,6 +12,8 @@ export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 export const HOST_BY_RISK_TABLE_CELL =
   '[data-test-subj="table-hostRisk-loading-false"] .euiTableCellContent';
 
+export const HOST_BY_RISK_TABLE = '[data-test-subj="table-hostRisk-loading-false"]';
+
 export const HOST_BY_RISK_TABLE_FILTER = '[data-test-subj="risk-filter-button"]';
 
 export const HOST_BY_RISK_TABLE_FILTER_CRITICAL = '[data-test-subj="risk-filter-item-Critical"]';
@@ -27,4 +29,5 @@ export const HOST_BY_RISK_TABLE_PERPAGE_OPTIONS =
 export const HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON =
   '[data-test-subj="numberedPagination"] [data-test-subj="pagination-button-next"]';
 
-export const HOST_BY_RISK_TABLE_HOSTNAME_CELL = '[data-test-subj="render-content-host.name"]';
+export const HOST_BY_RISK_TABLE_HOSTNAME_CELL =
+  '[data-test-subj="cellActions-renderContent-host.name"]';

@@ -10,6 +10,7 @@ import { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/p
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { Query } from '@kbn/es-query';
+import { getColorPalette } from '../synthetics/single_metric_config';
 import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { ColumnFilter, MetricOption } from '../../types';
 import { SeriesConfig } from '../../../../..';
@@ -48,7 +49,8 @@ export class SingleMetricLensAttributes extends LensAttributes {
   }
 
   getSingleMetricLayer() {
-    const { seriesConfig, selectedMetricField, operationType, dataView } = this.layerConfigs[0];
+    const { seriesConfig, selectedMetricField, operationType, dataView, name } =
+      this.layerConfigs[0];
 
     const metricOption = parseCustomFieldName(seriesConfig, selectedMetricField);
 
@@ -61,6 +63,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         formula,
         metricStateOptions,
         format,
+        emptyAsNull = true,
       } = metricOption;
 
       this.metricStateOptions = metricStateOptions;
@@ -68,7 +71,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       if (columnType === FORMULA_COLUMN && formula) {
         return this.getFormulaLayer({
           formula,
-          label: columnLabel,
+          label: name ?? columnLabel,
           dataView,
           format,
           filter: columnFilter,
@@ -103,11 +106,11 @@ export class SingleMetricLensAttributes extends LensAttributes {
         columns: {
           [this.columnId]: {
             ...buildNumberColumn(sourceField),
-            label: columnLabel ?? '',
+            label: name ?? columnLabel,
             operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
             filter: columnFilter,
             params: {
-              emptyAsNull: true,
+              emptyAsNull,
             },
           },
         },
@@ -180,11 +183,18 @@ export class SingleMetricLensAttributes extends LensAttributes {
   }
 
   getMetricState(): MetricState {
+    const { color } = this.layerConfigs[0];
+
+    const metricStateOptions: MetricOption['metricStateOptions'] = {
+      ...(this.metricStateOptions ?? {}),
+      ...(color ? { colorMode: 'Labels', palette: getColorPalette(color) } : {}),
+    };
+
     return {
       accessor: this.columnId,
       layerId: 'layer0',
       layerType: 'data',
-      ...(this.metricStateOptions ?? {}),
+      ...metricStateOptions,
       size: 's',
     };
   }

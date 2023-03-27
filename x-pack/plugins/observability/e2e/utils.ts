@@ -9,19 +9,17 @@ import { expect, Page } from '@elastic/synthetics';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
   while (true) {
-    if ((await page.$(byTestId('kbnLoadingMessage'))) === null) break;
-    await page.waitForTimeout(5 * 1000);
+    if (!(await page.isVisible(byTestId('kbnLoadingMessage'), { timeout: 5000 }))) break;
+    await page.waitForTimeout(1000);
   }
 }
 
 export async function loginToKibana({
   page,
   user,
-  dismissTour = true,
 }: {
   page: Page;
   user?: { username: string; password: string };
-  dismissTour?: boolean;
 }) {
   await page.fill('[data-test-subj=loginUsername]', user?.username ?? 'elastic', {
     timeout: 60 * 1000,
@@ -32,10 +30,6 @@ export async function loginToKibana({
   await page.click('[data-test-subj=loginSubmit]');
 
   await waitForLoadingToFinish({ page });
-  if (dismissTour) {
-    // Close Monitor Management tour added in 8.2.0
-    await page.click('[data-test-subj=syntheticsManagementTourDismiss]');
-  }
 }
 
 export const byTestId = (testId: string) => {
@@ -43,8 +37,8 @@ export const byTestId = (testId: string) => {
 };
 
 export const assertText = async ({ page, text }: { page: Page; text: string }) => {
-  await page.waitForSelector(`text=${text}`);
-  expect(await page.$(`text=${text}`)).toBeTruthy();
+  const element = await page.waitForSelector(`text=${text}`);
+  expect(await element.isVisible()).toBeTruthy();
 };
 
 export const assertNotText = async ({ page, text }: { page: Page; text: string }) => {

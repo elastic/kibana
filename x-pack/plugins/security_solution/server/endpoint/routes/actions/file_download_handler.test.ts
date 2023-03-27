@@ -12,22 +12,23 @@ import {
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
-import { getActionDetailsById as _getActionDetailsById } from '../../services';
+import {
+  getFileDownloadStream as _getFileDownloadStream,
+  validateActionId as _validateActionId,
+  validateActionFileId as _validateActionFileId,
+} from '../../services';
 import { EndpointAuthorizationError, NotFoundError } from '../../errors';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { getFileDownloadStream as _getFileDownloadStream } from '../../services/actions/action_files';
 import stream from 'stream';
-import type { ActionDetails } from '../../../../common/endpoint/types';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 jest.mock('../../services');
-jest.mock('../../services/actions/action_files');
 
 describe('Response Actions file download API', () => {
-  const getActionDetailsById = _getActionDetailsById as jest.Mock;
   const getFileDownloadStream = _getFileDownloadStream as jest.Mock;
+  const validateActionIdMock = _validateActionId as jest.Mock;
+  const validateFileIdMock = _validateActionFileId as jest.Mock;
 
   let apiTestSetup: HttpApiTestSetupMock;
   let httpRequestMock: ReturnType<
@@ -41,7 +42,7 @@ describe('Response Actions file download API', () => {
 
     ({ httpHandlerContextMock, httpResponseMock } = apiTestSetup);
     httpRequestMock = apiTestSetup.createRequestMock({
-      params: { action_id: '111', agent_id: '222' },
+      params: { action_id: '111', file_id: '111.222' },
     });
   });
 
@@ -79,19 +80,13 @@ describe('Response Actions file download API', () => {
   describe('Route handler', () => {
     let fileDownloadHandler: ReturnType<typeof getActionFileDownloadRouteHandler>;
     let esClientMock: ReturnType<HttpApiTestSetupMock['getEsClientMock']>;
-    let action: ActionDetails;
 
     beforeEach(() => {
       esClientMock = apiTestSetup.getEsClientMock();
-      action = new EndpointActionGenerator().generateActionDetails({
-        id: '111',
-        agents: ['222'],
-      });
       fileDownloadHandler = getActionFileDownloadRouteHandler(apiTestSetup.endpointAppContextMock);
 
-      getActionDetailsById.mockImplementation(async () => {
-        return action;
-      });
+      validateActionIdMock.mockImplementation(async () => {});
+      validateFileIdMock.mockImplementation(async () => {});
 
       getFileDownloadStream.mockImplementation(async () => {
         return {
@@ -103,16 +98,14 @@ describe('Response Actions file download API', () => {
     });
 
     it('should error if action ID is invalid', async () => {
-      getActionDetailsById.mockImplementationOnce(async () => {
-        throw new NotFoundError('not found');
-      });
+      validateActionIdMock.mockRejectedValueOnce(new NotFoundError('not found'));
       await fileDownloadHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.notFound).toHaveBeenCalled();
     });
 
-    it('should error if agent id is not in the action', async () => {
-      action.agents = ['333'];
+    it('should error if file ID is invalid', async () => {
+      validateFileIdMock.mockRejectedValueOnce(new CustomHttpRequestError('invalid', 400));
       await fileDownloadHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.customError).toHaveBeenCalledWith({

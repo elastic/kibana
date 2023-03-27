@@ -16,7 +16,7 @@ const completeData: ChartDataWithNullValues = [
   [1666846800000, 6],
 ];
 
-describe('buildBaseFilterCriteria', () => {
+describe('fillMissingChartData', () => {
   it('returns chart data with missing timestamps in middle of dataset filled in to null', () => {
     const dataWithMissingValues: ChartDataWithNullValues = [
       [1666828800000, 7],

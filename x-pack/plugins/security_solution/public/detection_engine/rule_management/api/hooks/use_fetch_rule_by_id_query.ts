@@ -35,6 +35,10 @@ export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<Rule
     {
       ...DEFAULT_QUERY_OPTIONS,
       ...options,
+      // Mark this query as immediately stale helps to avoid problems related to filtering.
+      // e.g. enabled and disabled state filter require data update which happens at the backend side
+      staleTime: 0,
+      enabled: !!id,
     }
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { generateGroupOption } from './agent_grouper';
 import {
   getNumOverlapped,
@@ -37,13 +37,13 @@ describe('generateAgentSelection', () => {
     const options: GroupOption[] = [];
     const policyOptions = generateGroupOption('policy', AGENT_GROUP_KEY.Policy, [
       { name: 'policy 1', id: 'policy 1', size: 5 },
-      { name: 'policy 2', id: uuid.v4(), size: 5 },
+      { name: 'policy 2', id: uuidv4(), size: 5 },
     ]).options;
     options.push(...policyOptions);
 
     const platformOptions = generateGroupOption('platform', AGENT_GROUP_KEY.Platform, [
       { name: 'platform 1', id: 'platform 1', size: 5 },
-      { name: 'platform 2', id: uuid.v4(), size: 5 },
+      { name: 'platform 2', id: uuidv4(), size: 5 },
     ]).options;
     options.push(...platformOptions);
 

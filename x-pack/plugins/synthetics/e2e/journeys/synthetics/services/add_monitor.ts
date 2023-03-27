@@ -6,6 +6,10 @@
  */
 
 import axios from 'axios';
+import {
+  privateLocationsSavedObjectId,
+  privateLocationsSavedObjectName,
+} from '../../../../common/saved_objects/private_locations';
 
 export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   try {
@@ -25,15 +29,30 @@ export const addTestMonitor = async (
   params: Record<string, any> = { type: 'browser' }
 ) => {
   const testData = {
-    ...(params?.type !== 'browser' ? {} : data),
+    locations: [{ id: 'us_central', isServiceManaged: true }],
+    ...(params?.type !== 'browser' ? {} : testDataMonitor),
     ...(params || {}),
     name,
-    locations: [{ id: 'us_central', isServiceManaged: true }],
   };
   try {
     await axios.post(kibanaUrl + '/internal/uptime/service/monitors', testData, {
       auth: { username: 'elastic', password: 'changeme' },
       headers: { 'kbn-xsrf': 'true' },
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+};
+
+export const getPrivateLocations = async (params: Record<string, any>) => {
+  const getService = params.getService;
+  const server = getService('kibanaServer');
+
+  try {
+    return await server.savedObjects.get({
+      id: privateLocationsSavedObjectId,
+      type: privateLocationsSavedObjectName,
     });
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -53,8 +72,35 @@ export const cleanTestMonitors = async (params: Record<string, any>) => {
   }
 };
 
-const data = {
+export const cleanPrivateLocations = async (params: Record<string, any>) => {
+  const getService = params.getService;
+  const server = getService('kibanaServer');
+
+  try {
+    await server.savedObjects.clean({
+      types: [privateLocationsSavedObjectName, 'ingest-agent-policies', 'ingest-package-policies'],
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+};
+
+export const cleanTestParams = async (params: Record<string, any>) => {
+  const getService = params.getService;
+  const server = getService('kibanaServer');
+
+  try {
+    await server.savedObjects.clean({ types: ['synthetics-param'] });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+};
+
+export const testDataMonitor = {
   type: 'browser',
+  alert: { status: { enabled: true } },
   form_monitor_type: 'single',
   enabled: true,
   schedule: { unit: 'm', number: '10' },

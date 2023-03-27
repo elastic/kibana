@@ -8,21 +8,13 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { UPDATED, UPDATING } from './translations';
 
 interface UpdateStatusProps {
   updatedAt: number;
   isUpdating: boolean;
 }
-
-const UPDATING = i18n.translate('xpack.threatIntelligence.updateStatus.updating', {
-  defaultMessage: 'Updating...',
-});
-
-const UPDATED = i18n.translate('xpack.threatIntelligence.updateStatus.updated', {
-  defaultMessage: 'Updated',
-});
 
 export const UpdateStatus: React.FC<UpdateStatusProps> = ({ isUpdating, updatedAt }) => (
   <EuiFlexGroup>

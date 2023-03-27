@@ -7,9 +7,10 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { DefaultPageLayout, TITLE_TEST_ID } from './layout';
+import { DefaultPageLayout } from './layout';
 import '@testing-library/jest-dom';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
+import { TITLE_TEST_ID } from './test_ids';
 
 describe('<Layout />', () => {
   describe('when pageTitle is not specified', () => {

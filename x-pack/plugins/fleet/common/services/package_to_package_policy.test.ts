@@ -360,6 +360,50 @@ describe('Fleet - packageToPackagePolicy', () => {
       });
     });
 
+    it('returns package policy with experimental datastream features', () => {
+      expect(
+        packageToPackagePolicy(
+          {
+            ...mockPackage,
+            savedObject: {
+              attributes: {
+                experimental_data_stream_features: [
+                  {
+                    data_stream: 'metrics-test.testdataset',
+                    features: {
+                      synthetic_source: true,
+                      tsdb: true,
+                    },
+                  },
+                ],
+              },
+            } as any,
+          },
+          '1'
+        )
+      ).toEqual({
+        policy_id: '1',
+        namespace: '',
+        enabled: true,
+        inputs: [],
+        name: 'mock-package-1',
+        package: {
+          name: 'mock-package',
+          title: 'Mock package',
+          version: '0.0.0',
+          experimental_data_stream_features: [
+            {
+              data_stream: 'metrics-test.testdataset',
+              features: {
+                synthetic_source: true,
+                tsdb: true,
+              },
+            },
+          ],
+        },
+      });
+    });
+
     it('returns package policy with custom name', () => {
       expect(packageToPackagePolicy(mockPackage, '1', 'default', 'pkgPolicy-1')).toEqual({
         policy_id: '1',

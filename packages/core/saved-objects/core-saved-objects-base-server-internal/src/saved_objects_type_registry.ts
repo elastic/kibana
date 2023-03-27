@@ -41,6 +41,11 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
     return [...this.types.values()].filter((type) => !this.isHidden(type.name));
   }
 
+  /** {@inheritDoc ISavedObjectTypeRegistry.getVisibleToHttpApisTypes}  */
+  public getVisibleToHttpApisTypes() {
+    return [...this.types.values()].filter((type) => !this.isHiddenFromHttpApis(type.name));
+  }
+
   /** {@inheritDoc ISavedObjectTypeRegistry.getAllTypes} */
   public getAllTypes() {
     return [...this.types.values()];
@@ -78,6 +83,11 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
     return this.types.get(type)?.hidden ?? false;
   }
 
+  /** {@inheritDoc ISavedObjectTypeRegistry.isHiddenFromHttpApi} */
+  public isHiddenFromHttpApis(type: string) {
+    return !!this.types.get(type)?.hiddenFromHttpApis;
+  }
+
   /** {@inheritDoc ISavedObjectTypeRegistry.getType} */
   public getIndex(type: string) {
     return this.types.get(type)?.indexPattern;
@@ -89,7 +99,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   }
 }
 
-const validateType = ({ name, management }: SavedObjectsType) => {
+const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {
   if (management) {
     if (management.onExport && !management.importableAndExportable) {
       throw new Error(
@@ -101,5 +111,11 @@ const validateType = ({ name, management }: SavedObjectsType) => {
         `Type ${name}: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'`
       );
     }
+  }
+  // throw error if a type is registered as `hidden:true` and `hiddenFromHttpApis:false` explicitly
+  if (hidden === true && hiddenFromHttpApis === false) {
+    throw new Error(
+      `Type ${name}: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'`
+    );
   }
 };

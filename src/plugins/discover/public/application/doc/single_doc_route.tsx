@@ -55,7 +55,7 @@ export const SingleDocRoute = () => {
   if (error) {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         title={
           <FormattedMessage
@@ -84,7 +84,8 @@ export const SingleDocRoute = () => {
         error={
           new Error(
             i18n.translate('discover.discoverError.missingIdParamError', {
-              defaultMessage: 'URL query string is missing id.',
+              defaultMessage:
+                'No document ID provided. Return to Discover to select another document.',
             })
           )
         }

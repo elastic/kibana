@@ -47,6 +47,12 @@ export interface KueryQueryOptions {
    * The `nestedIgnoreUnmapped` param allows creating queries with "ignore_unmapped": true
    */
   nestedIgnoreUnmapped?: boolean;
+  /**
+   * Whether term-level queries should be treated as case-insensitive or not. For example, `agent.keyword: foobar` won't
+   * match a value of "FooBar" unless this parameter is `true`.
+   * (See https://www.elastic.co/guide/en/elasticsearch/reference/8.6/query-dsl-term-query.html#term-field-params)
+   */
+  caseInsensitive?: boolean;
 }
 
 /** @public */

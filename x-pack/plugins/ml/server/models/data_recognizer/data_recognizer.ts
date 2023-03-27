@@ -18,6 +18,7 @@ import moment from 'moment';
 import { merge } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
@@ -54,7 +55,6 @@ import { resultsServiceProvider } from '../results_service';
 import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import type { MLSavedObjectService } from '../../saved_objects';
-import { isDefined } from '../../../common/types/guards';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -754,11 +754,11 @@ export class DataRecognizer {
       .map((o) => o.savedObject!);
     if (filteredSavedObjects.length) {
       results = await this._savedObjectsClient.bulkCreate(
-        // Add an empty migrationVersion attribute to each saved object to ensure
+        // Add an empty typeMigrationVersion attribute to each saved object to ensure
         // it is automatically migrated to the 7.0+ format with a references attribute.
         filteredSavedObjects.map((doc) => ({
           ...doc,
-          migrationVersion: {},
+          typeMigrationVersion: '',
         }))
       );
     }

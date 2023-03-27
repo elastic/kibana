@@ -37,10 +37,12 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         </>
       }
       color={color}
-      iconType="alert"
+      iconType="warning"
       data-test-subj="ruleStatusFailedCallOut"
     >
-      <p>{message}</p>
+      {message.split('\n').map((line) => (
+        <p>{line}</p>
+      ))}
     </EuiCallOut>
   );
 };

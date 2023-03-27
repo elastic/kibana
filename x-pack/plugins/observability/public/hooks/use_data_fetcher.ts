@@ -25,6 +25,7 @@ export const useDataFetcher = <ApiCallParams, AlertDataType>({
 }) => {
   const { http } = useKibana().services;
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [data, setData] = useState<AlertDataType>(initialDataState);
 
   const { fetch, cancel } = useMemo(() => {
@@ -34,12 +35,18 @@ export const useDataFetcher = <ApiCallParams, AlertDataType>({
     return {
       fetch: async () => {
         if (shouldExecuteApiCall(paramsForApiCall)) {
+          setError(false);
           setLoading(true);
 
-          const results = await executeApiCall(paramsForApiCall, abortController, http);
-          if (!isCanceled) {
+          try {
+            const results = await executeApiCall(paramsForApiCall, abortController, http);
+            if (!isCanceled) {
+              setLoading(false);
+              setData(results);
+            }
+          } catch (e) {
+            setError(true);
             setLoading(false);
-            setData(results);
           }
         }
       },
@@ -59,7 +66,8 @@ export const useDataFetcher = <ApiCallParams, AlertDataType>({
   }, [fetch, cancel]);
 
   return {
-    loading,
     data,
+    loading,
+    error,
   };
 };

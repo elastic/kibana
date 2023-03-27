@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
+import type { DateRange } from '../../../../../../common/types';
 import type { IndexPattern } from '../../../../../types';
 import {
   OperationDefinition,
@@ -41,6 +42,7 @@ function parseAndExtract(
   columnId: string,
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
+  dateRange: DateRange | undefined,
   label?: string
 ) {
   const { root, error } = tryToParse(text, operations);
@@ -48,7 +50,14 @@ function parseAndExtract(
     return { extracted: [], isValid: false };
   }
   // before extracting the data run the validation task and throw if invalid
-  const errors = runASTValidation(root, layer, indexPattern, operations, layer.columns[columnId]);
+  const errors = runASTValidation(
+    root,
+    layer,
+    indexPattern,
+    operations,
+    layer.columns[columnId],
+    dateRange
+  );
   if (errors.length) {
     return { extracted: [], isValid: false };
   }
@@ -210,6 +219,8 @@ function extractColumns(
 interface ExpandColumnProperties {
   indexPattern: IndexPattern;
   operations?: Record<string, GenericOperationDefinition>;
+  dateRange?: DateRange;
+  strictShiftValidation?: boolean;
 }
 
 const getEmptyColumnsWithFormulaMeta = (): {
@@ -228,7 +239,7 @@ function generateFormulaColumns(
   id: string,
   column: FormulaIndexPatternColumn,
   layer: FormBasedLayer,
-  { indexPattern, operations = operationDefinitionMap }: ExpandColumnProperties
+  { indexPattern, operations = operationDefinitionMap, dateRange }: ExpandColumnProperties
 ) {
   const { columns, meta } = getEmptyColumnsWithFormulaMeta();
   const formula = column.params.formula || '';
@@ -239,6 +250,7 @@ function generateFormulaColumns(
     id,
     indexPattern,
     filterByVisibleOperation(operations),
+    dateRange,
     column.customLabel ? column.label : undefined
   );
 

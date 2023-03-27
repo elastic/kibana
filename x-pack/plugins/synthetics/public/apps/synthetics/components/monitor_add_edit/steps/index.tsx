@@ -6,18 +6,23 @@
  */
 
 import React from 'react';
-import { EuiSteps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSteps, EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { ConfigKey, FormMonitorType, StepMap } from '../types';
 import { AdvancedConfig } from '../advanced';
 import { MonitorTypePortal } from './monitor_type_portal';
+import { ReadOnlyCallout } from './read_only_callout';
 
 export const MonitorSteps = ({
   stepMap,
+  projectId,
   isEditFlow = false,
+  readOnly = false,
 }: {
   stepMap: StepMap;
+  readOnly?: boolean;
   isEditFlow?: boolean;
+  projectId?: string;
 }) => {
   const { watch } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
@@ -25,9 +30,15 @@ export const MonitorSteps = ({
 
   return (
     <>
+      {readOnly ? (
+        <>
+          <ReadOnlyCallout projectId={projectId} />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       {isEditFlow ? (
         steps.map((step) => (
-          <>
+          <div key={step.title}>
             <EuiPanel hasBorder>
               <EuiText size="s">
                 <h2>{step.title}</h2>
@@ -36,12 +47,12 @@ export const MonitorSteps = ({
               {step.children}
             </EuiPanel>
             <EuiSpacer size="m" />
-          </>
+          </div>
         ))
       ) : (
         <EuiSteps steps={steps} headingElement="h2" />
       )}
-      <AdvancedConfig />
+      <AdvancedConfig readOnly={readOnly} />
       <MonitorTypePortal monitorType={type} />
     </>
   );

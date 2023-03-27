@@ -87,7 +87,28 @@ describe('fetchSearchResults lib function', () => {
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
-      q: JSON.stringify(query),
+      q: query,
+      size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+    });
+  });
+
+  it('should escape quotes in queries and return results with hits', async () => {
+    mockClient.asCurrentUser.search.mockImplementation(
+      () => regularSearchResultsResponse as SearchResponseBody
+    );
+
+    await expect(
+      fetchSearchResults(
+        mockClient as unknown as IScopedClusterClient,
+        indexName,
+        '"yellow banana"'
+      )
+    ).resolves.toEqual(regularSearchResultsResponse);
+
+    expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+      from: DEFAULT_FROM_VALUE,
+      index: indexName,
+      q: '\\"yellow banana\\"',
       size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
     });
   });
@@ -120,7 +141,7 @@ describe('fetchSearchResults lib function', () => {
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
-      q: JSON.stringify(query),
+      q: query,
       size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
     });
   });

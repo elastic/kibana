@@ -52,8 +52,13 @@ export const useInvestigateInTimeline = ({
     generateDataProvider(e, value as string)
   );
 
-  const to = unwrapValue(indicator, RawIndicatorFieldId.TimeStamp) as string;
-  const from = moment(to).subtract(10, 'm').toISOString();
+  const indicatorTimestamp: string = unwrapValue(
+    indicator,
+    RawIndicatorFieldId.TimeStamp
+  ) as string;
+
+  const from = moment(indicatorTimestamp).subtract(7, 'd').toISOString();
+  const to = moment(indicatorTimestamp).add(7, 'd').toISOString();
 
   if (!to || !from) {
     return {} as unknown as UseInvestigateInTimelineValue;

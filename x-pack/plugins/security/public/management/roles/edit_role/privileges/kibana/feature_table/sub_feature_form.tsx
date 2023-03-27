@@ -64,15 +64,30 @@ export const SubFeatureForm = (props: Props) => {
   if (groupsWithPrivileges.length === 0) {
     return null;
   }
-
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiText size="s">
-          {props.subFeature.name} {getTooltip()}
-        </EuiText>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={3}>
+        <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexItem>
+            <EuiText size="s">
+              {props.subFeature.name} {getTooltip()}
+            </EuiText>
+          </EuiFlexItem>
+          {props.subFeature.description && (
+            <EuiFlexItem>
+              <EuiText
+                color={'subdued'}
+                size={'xs'}
+                data-test-subj="subFeatureDescription"
+                aria-describedby={`${props.subFeature.name} description text`}
+              >
+                {props.subFeature.description}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
+      <EuiFlexItem grow={2}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -157,6 +172,7 @@ export const SubFeatureForm = (props: Props) => {
         key={index}
         buttonSize="compressed"
         data-test-subj="mutexSubFeaturePrivilegeControl"
+        isFullWidth
         options={options}
         idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
         isDisabled={props.disabled}

@@ -7,19 +7,20 @@
   height: 100%;
 }
 
-.optionsList__items {
-  @include euiScrollBar;
-
-  overflow-y: auto;
-  max-height: $euiSize * 30;
-  width: $euiSize * 25;
-  max-width: 100%;
-}
-
 .optionsList__actions {
   padding: $euiSizeS;
+  padding-bottom: 0;
   border-bottom: $euiBorderThin;
   border-color: darken($euiColorLightestShade, 2%);
+
+  .optionsList__actionsRow {
+    margin: ($euiSizeS / 2) 0 !important;
+
+    .optionsList__actionBarDivider {
+      height: $euiSize;
+      border-right: $euiBorderThin;
+    }
+  }
 }
 
 .optionsList__popoverTitle {
@@ -39,13 +40,17 @@
   font-style: italic;
 }
 
+.optionsList__loadMore {
+  font-style: italic;
+}
+
 .optionsList__negateLabel {
   font-weight: bold;
   font-size: $euiSizeM;
   color: $euiColorDanger;
 }
 
-.optionsList__ignoredBadge {
+.optionsList__actionBarFirstBadge {
   margin-left: $euiSizeS;
 }
 
@@ -94,4 +99,19 @@
 
 .optionsList--sortPopover {
   width: $euiSizeXL * 7;
+}
+
+.optionslist--loadingMoreGroupLabel {
+  text-align: center;
+  padding: $euiSizeM;
+  font-style: italic;
+  height:  $euiSizeXXL !important;
+}
+
+.optionslist--endOfOptionsGroupLabel {
+  text-align: center;
+  font-size: $euiSizeM;
+  height:  auto !important;
+  color: $euiTextSubduedColor;
+  padding: $euiSizeM;
 }

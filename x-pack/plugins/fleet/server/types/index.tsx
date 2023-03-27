@@ -12,7 +12,9 @@ export type {
   AgentStatus,
   AgentType,
   AgentAction,
+  AgentActionType,
   ActionStatus,
+  ActionErrorResult,
   CurrentUpgrade,
   PackagePolicy,
   PackagePolicyInput,
@@ -30,6 +32,7 @@ export type {
   PreconfiguredAgentPolicy,
   AgentPolicyStatus,
   DataStream,
+  ShipperOutput,
   Output,
   NewOutput,
   OutputSOAttributes,
@@ -87,6 +90,7 @@ export type {
   PackageVerificationStatus,
   BulkInstallPackageInfo,
   PackageAssetReference,
+  ExperimentalDataStreamFeature,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';

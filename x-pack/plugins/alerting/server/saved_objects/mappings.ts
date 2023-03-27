@@ -41,6 +41,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
     },
     actions: {
+      dynamic: false,
       type: 'nested',
       properties: {
         group: {
@@ -53,8 +54,24 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           type: 'keyword',
         },
         params: {
-          enabled: false,
-          type: 'object',
+          dynamic: false,
+          properties: {},
+        },
+        frequency: {
+          properties: {
+            summary: {
+              index: false,
+              type: 'boolean',
+            },
+            notifyWhen: {
+              index: false,
+              type: 'keyword',
+            },
+            throttle: {
+              index: false,
+              type: 'keyword',
+            },
+          },
         },
       },
     },
@@ -180,6 +197,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           },
         },
       },
+    },
+    revision: {
+      index: true, // Explicitly setting to `true` as there is need to query for a rule by a specific revision
+      type: 'long',
     },
     snoozeSchedule: {
       type: 'nested',
@@ -322,6 +343,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           },
         },
       },
+    },
+    running: {
+      type: 'boolean',
     },
   },
 };

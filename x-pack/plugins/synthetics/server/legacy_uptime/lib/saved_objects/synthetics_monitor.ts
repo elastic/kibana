@@ -104,6 +104,9 @@ export const getSyntheticsMonitorSavedObjectType = (
                 },
               },
             },
+            label: {
+              type: 'text',
+            },
           },
         },
         custom_heartbeat_id: {
@@ -129,6 +132,17 @@ export const getSyntheticsMonitorSavedObjectType = (
         },
         enabled: {
           type: 'boolean',
+        },
+        alert: {
+          properties: {
+            status: {
+              properties: {
+                enabled: {
+                  type: 'boolean',
+                },
+              },
+            },
+          },
         },
       },
     },

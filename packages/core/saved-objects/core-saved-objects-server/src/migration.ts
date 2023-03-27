@@ -51,11 +51,6 @@ export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes
 export interface SavedObjectsMigrationLogger {
   debug: (msg: string) => void;
   info: (msg: string) => void;
-  /**
-   * @deprecated Use `warn` instead.
-   * @removeBy 8.8.0
-   */
-  warning: (msg: string) => void;
   warn: (msg: string) => void;
   error: <Meta extends LogMeta = LogMeta>(msg: string, meta: Meta) => void;
 }
@@ -76,6 +71,7 @@ export interface SavedObjectMigrationContext {
   readonly migrationVersion: string;
   /**
    * The version in which this object type is being converted to a multi-namespace type
+   * @deprecated Converting to multi-namespace clashes with the ZDT requirement for serverless
    */
   readonly convertToMultiNamespaceTypeVersion?: string;
   /**

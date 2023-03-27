@@ -21,6 +21,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useGlobalQueryString } from '../../../utils/global_query_string';
 import { useUserPrivileges } from '../../user_privileges';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -37,6 +38,7 @@ export const usePrimaryNavigationItems = ({
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
+        track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LEGACY_NAVIGATION}${id}`);
         navigateTo({ deepLinkId: id, path: urlSearch });
       };
 
@@ -91,6 +93,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs[SecurityPageName.detectionAndResponse],
                 navTabs[SecurityPageName.cloudSecurityPostureDashboard],
                 navTabs[SecurityPageName.entityAnalytics],
+                navTabs[SecurityPageName.dataQuality],
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
                   : []),

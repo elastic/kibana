@@ -126,6 +126,7 @@ describe('Lens Attribute', () => {
         operationType: 'date_histogram',
         params: {
           interval: 'auto',
+          includeEmptyRows: true,
         },
         scale: 'interval',
         sourceField: '@timestamp',
@@ -299,6 +300,7 @@ describe('Lens Attribute', () => {
       operationType: 'date_histogram',
       params: {
         interval: 'auto',
+        includeEmptyRows: true,
       },
       scale: 'interval',
       sourceField: '@timestamp',

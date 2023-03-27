@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -26,6 +26,8 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
   textTruncate?: boolean;
   /** Displays an additional info when hover an item */
   hoverInfo?: React.ReactNode;
+  /** Disables navigation */
+  isNavigationDisabled?: boolean;
   children: React.ReactNode;
 }
 
@@ -43,7 +45,12 @@ const StyledEuiContextMenuItem = styled(EuiContextMenuItem)`
 
 const StyledEuiFlexItem = styled('div')`
   max-width: 50%;
-  padding-right: 10px;
+  padding-right: ${(props) => props.theme.eui.euiSizeS};
+`;
+
+const StyledEuiText = styled(EuiText)`
+  padding: ${(props) => props.theme.eui.euiSizeM};
+  line-height: ${(props) => props.theme.eui.euiFontSizeM};
 `;
 
 /**
@@ -59,6 +66,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     textTruncate,
     hoverInfo,
     children,
+    isNavigationDisabled = false,
     ...otherMenuItemProps
   }) => {
     const handleOnClickViaNavigateToApp = useNavigateToAppEventHandler(navigateAppId ?? '', {
@@ -79,32 +87,42 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       ) : null;
     }, [hoverInfo]);
 
-    return (
+    const content = textTruncate ? (
+      <>
+        <div
+          className="eui-textTruncate"
+          data-test-subj={getTestId('truncateWrapper')}
+          {
+            /* Add the html `title` prop if children is a string */
+            ...('string' === typeof children ? { title: children } : {})
+          }
+        >
+          {children}
+        </div>
+        {hoverComponentInstance}
+      </>
+    ) : (
+      <>
+        <EuiFlexItem>{children}</EuiFlexItem>
+        {hoverComponentInstance}
+      </>
+    );
+
+    return isNavigationDisabled ? (
+      <StyledEuiText
+        size="s"
+        className="eui-textTruncate"
+        data-test-subj={otherMenuItemProps['data-test-subj']}
+      >
+        {content}
+      </StyledEuiText>
+    ) : (
       <StyledEuiContextMenuItem
         {...otherMenuItemProps}
         onClick={navigateAppId ? handleOnClickViaNavigateToApp : onClick}
       >
         <EuiFlexGroup alignItems="center" gutterSize="none">
-          {textTruncate ? (
-            <>
-              <div
-                className="eui-textTruncate"
-                data-test-subj={getTestId('truncateWrapper')}
-                {
-                  /* Add the html `title` prop if children is a string */
-                  ...('string' === typeof children ? { title: children } : {})
-                }
-              >
-                {children}
-              </div>
-              {hoverComponentInstance}
-            </>
-          ) : (
-            <>
-              <EuiFlexItem>{children}</EuiFlexItem>
-              {hoverComponentInstance}
-            </>
-          )}
+          {content}
         </EuiFlexGroup>
       </StyledEuiContextMenuItem>
     );

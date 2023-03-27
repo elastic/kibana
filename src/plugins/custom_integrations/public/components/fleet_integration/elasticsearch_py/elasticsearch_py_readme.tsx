@@ -148,7 +148,7 @@ export const ElasticsearchPyClientReadme = () => {
 from elasticsearch import Elasticsearch
 
 # Found in the 'Manage this deployment' page
-CLOUD_ID = "deployment-name:dXMtZWFzdDQuZ2Nw..."
+CLOUD_ID = "YOUR_CLOUD_ID"
 
 # Found in the 'Management' page under the section 'Security'
 API_KEY = "YOUR_API_KEY"

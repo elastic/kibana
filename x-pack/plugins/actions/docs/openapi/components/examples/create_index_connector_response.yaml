@@ -1,0 +1,12 @@
+summary: A new index connector.
+value:
+  id: c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
+  connector_type_id: .index
+  name: my-connector
+  config:
+    index: test-index
+    refresh: false
+    executionTimeField: null
+  is_preconfigured: false
+  is_deprecated: false
+  is_missing_secrets: false

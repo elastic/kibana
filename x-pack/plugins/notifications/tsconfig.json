@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "server/**/*",
@@ -14,8 +11,15 @@
     "common/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../actions/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/actions-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

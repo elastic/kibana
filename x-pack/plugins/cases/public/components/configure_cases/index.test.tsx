@@ -28,15 +28,15 @@ import {
 import { ConnectorTypes } from '../../../common/api';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 
 jest.mock('../../common/lib/kibana');
-jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../../containers/configure/use_action_types');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const useGetUrlSearchMock = jest.fn();
 const useGetActionTypesMock = useGetActionTypes as jest.Mock;
@@ -417,7 +417,7 @@ describe('ConfigureCases', () => {
       expect(persistCaseConfigure).toHaveBeenCalledWith({
         connector: {
           id: 'resilient-2',
-          name: 'My Connector 2',
+          name: 'My Resilient connector',
           type: ConnectorTypes.resilient,
           fields: null,
         },
@@ -440,7 +440,7 @@ describe('ConfigureCases', () => {
           ...useCaseConfigureResponse,
           connector: {
             id: 'resilient-2',
-            name: 'My connector 2',
+            name: 'My Resilient connector',
             type: ConnectorTypes.resilient,
             fields: null,
           },
@@ -459,7 +459,7 @@ describe('ConfigureCases', () => {
         wrapper
           .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
           .text()
-      ).toBe('Update My Connector 2');
+      ).toBe('Update My Resilient connector');
     });
   });
 

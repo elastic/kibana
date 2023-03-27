@@ -13,11 +13,12 @@ export interface UtilityBarTextProps {
   children: string | JSX.Element;
   dataTestSubj?: string;
   shouldWrap?: boolean;
+  className?: string;
 }
 
 export const UtilityBarText = React.memo<UtilityBarTextProps>(
-  ({ children, dataTestSubj, shouldWrap = false }) => (
-    <BarText data-test-subj={dataTestSubj} shouldWrap={shouldWrap}>
+  ({ children, dataTestSubj, shouldWrap = false, className }) => (
+    <BarText data-test-subj={dataTestSubj} shouldWrap={shouldWrap} className={className}>
       {children}
     </BarText>
   )

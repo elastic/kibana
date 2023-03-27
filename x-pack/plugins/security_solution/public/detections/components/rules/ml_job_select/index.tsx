@@ -31,6 +31,7 @@ import * as i18n from './translations';
 interface MlJobValue {
   id: string;
   description: string;
+  name?: string;
 }
 
 const JobDisplayContainer = styled.div`
@@ -50,9 +51,9 @@ const MlJobEuiButton = styled(EuiButton)`
   margin-top: 20px;
 `;
 
-const JobDisplay: React.FC<MlJobValue> = ({ id, description }) => (
+const JobDisplay: React.FC<MlJobValue> = ({ description, name, id }) => (
   <JobDisplayContainer>
-    <strong>{id}</strong>
+    <strong>{name ?? id}</strong>
     <EuiToolTip content={description}>
       <EuiText size="xs" color="subdued">
         <p>{description}</p>
@@ -67,8 +68,13 @@ interface MlJobSelectProps {
 }
 
 const renderJobOption = (option: MlJobOption) => (
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  <JobDisplay id={option.value!.id} description={option.value!.description} />
+  <JobDisplay
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    id={option.value!.id}
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    description={option.value!.description}
+    name={option.value?.name}
+  />
 );
 
 export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
@@ -90,11 +96,17 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
     value: {
       id: job.id,
       description: job.description,
+      name: job.customSettings?.security_app_display_name,
     },
-    label: job.id,
+    // Make sure users can search for id or name.
+    // The label contains the name and id because EuiComboBox uses it for the textual search.
+    label: `${job.customSettings?.security_app_display_name} ${job.id}`,
   }));
 
-  const selectedJobOptions = jobOptions.filter((option) => jobIds.includes(option.value.id));
+  const selectedJobOptions = jobOptions
+    .filter((option) => jobIds.includes(option.value.id))
+    // 'label' defines what is rendered inside the selected ComboBoxPill
+    .map((options) => ({ ...options, label: options.value.name ?? options.value.id }));
 
   const notRunningJobIds = useMemo<string[]>(() => {
     const selectedJobs = jobs.filter(({ id }) => jobIds.includes(id));

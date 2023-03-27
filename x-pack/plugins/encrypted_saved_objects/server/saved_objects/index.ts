@@ -177,7 +177,7 @@ export function setupSavedObjects({
           }
         }
 
-        return { ...finder, find: () => encryptedFinder() };
+        return { find: () => encryptedFinder(), close: finder.close.bind(finder) };
       },
     };
   };

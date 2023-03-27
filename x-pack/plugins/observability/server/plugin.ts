@@ -13,14 +13,25 @@ import {
   DEFAULT_APP_CATEGORIES,
   Logger,
 } from '@kbn/core/server';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
-import { createUICapabilities } from '@kbn/cases-plugin/common';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import {
+  createUICapabilities as createCasesUICapabilities,
+  getApiTags as getCasesApiTags,
+} from '@kbn/cases-plugin/common';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import {
+  kubernetesGuideId,
+  kubernetesGuideConfig,
+} from '../common/guided_onboarding/kubernetes_guide_config';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -29,19 +40,23 @@ import {
 } from './lib/annotations/bootstrap_annotations';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
-import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { casesFeatureId, observabilityFeatureId } from '../common';
-import { slo } from './saved_objects';
-import { OBSERVABILITY_FEATURE_ID, RULE_REGISTRATION_CONTEXT } from './common/constants';
+import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
+import { slo, SO_SLO_TYPE } from './saved_objects';
+import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
+import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
+import { registerSloUsageCollector } from './lib/collectors/register';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
-  features: FeaturesSetup;
-  ruleRegistry: RuleRegistryPluginSetupContract;
-  spaces: SpacesPluginStart;
   alerting: PluginSetupContract;
+  features: FeaturesSetup;
+  guidedOnboarding: GuidedOnboardingPluginSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces?: SpacesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -53,7 +68,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   }
 
   public setup(core: CoreSetup, plugins: PluginSetup) {
-    const casesCapabilities = createUICapabilities();
+    const casesCapabilities = createCasesUICapabilities();
+    const casesApiTags = getCasesApiTags(observabilityFeatureId);
+
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     plugins.features.registerKibanaFeature({
@@ -68,7 +85,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       cases: [observabilityFeatureId],
       privileges: {
         all: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: casesApiTags.all,
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -78,13 +95,13 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             push: [observabilityFeatureId],
           },
           savedObject: {
-            all: [],
-            read: [],
+            all: [...filesSavedObjectTypes],
+            read: [...filesSavedObjectTypes],
           },
           ui: casesCapabilities.all,
         },
         read: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: casesApiTags.read,
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -92,7 +109,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           savedObject: {
             all: [],
-            read: [],
+            read: [...filesSavedObjectTypes],
           },
           ui: casesCapabilities.read,
         },
@@ -107,7 +124,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
               groupType: 'independent',
               privileges: [
                 {
-                  api: [],
+                  api: casesApiTags.delete,
                   id: 'cases_delete',
                   name: i18n.translate(
                     'xpack.observability.featureRegistry.deleteSubFeatureDetails',
@@ -150,36 +167,86 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const { ruleDataService } = plugins.ruleRegistry;
 
-    if (config.unsafe.slo.enabled) {
-      core.savedObjects.registerType(slo);
-
-      const ruleDataClient = ruleDataService.initializeIndex({
-        feature: OBSERVABILITY_FEATURE_ID,
-        registrationContext: RULE_REGISTRATION_CONTEXT,
-        dataset: Dataset.alerts,
-        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
-        componentTemplates: [
-          {
-            name: 'mappings',
-            mappings: mappingFromFieldMap(experimentalRuleFieldMap, 'strict'),
+    plugins.features.registerKibanaFeature({
+      id: sloFeatureId,
+      name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
+        defaultMessage: 'SLOs',
+      }),
+      order: 1200,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      app: [sloFeatureId, 'kibana'],
+      catalogue: [sloFeatureId, 'observability'],
+      alerting: [SLO_BURN_RATE_RULE_ID],
+      privileges: {
+        all: {
+          app: [sloFeatureId, 'kibana'],
+          catalogue: [sloFeatureId, 'observability'],
+          api: ['slo_write', 'slo_read', 'rac'],
+          savedObject: {
+            all: [SO_SLO_TYPE],
+            read: [],
           },
-        ],
-      });
+          alerting: {
+            rule: {
+              all: [SLO_BURN_RATE_RULE_ID],
+            },
+            alert: {
+              all: [SLO_BURN_RATE_RULE_ID],
+            },
+          },
+          ui: ['read', 'write'],
+        },
+        read: {
+          app: [sloFeatureId, 'kibana'],
+          catalogue: [sloFeatureId, 'observability'],
+          api: ['slo_read', 'rac'],
+          savedObject: {
+            all: [],
+            read: [SO_SLO_TYPE],
+          },
+          alerting: {
+            rule: {
+              read: [SLO_BURN_RATE_RULE_ID],
+            },
+            alert: {
+              read: [SLO_BURN_RATE_RULE_ID],
+            },
+          },
+          ui: ['read'],
+        },
+      },
+    });
 
-      registerRuleTypes(plugins.alerting, this.logger, ruleDataClient);
-    }
+    core.savedObjects.registerType(slo);
 
-    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
+    const ruleDataClient = ruleDataService.initializeIndex({
+      feature: sloFeatureId,
+      registrationContext: SLO_RULE_REGISTRATION_CONTEXT,
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(legacyExperimentalFieldMap, 'strict'),
+        },
+      ],
+    });
+    registerRuleTypes(plugins.alerting, this.logger, ruleDataClient);
+    registerSloUsageCollector(plugins.usageCollection);
 
     registerRoutes({
-      core: {
-        setup: core,
-        start,
+      core,
+      dependencies: {
+        ruleDataService,
       },
       logger: this.logger,
-      repository: getGlobalObservabilityServerRouteRepository(config),
-      ruleDataService,
+      repository: getObservabilityServerRouteRepository(),
     });
+
+    /**
+     * Register a config for the observability guide
+     */
+    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
 
     return {
       getAlertDetailsConfig() {

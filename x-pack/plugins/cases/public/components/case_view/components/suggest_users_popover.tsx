@@ -10,7 +10,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { MAX_ASSIGNEES_PER_CASE } from '../../../../common/constants';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../../cases_context/use_cases_context';
@@ -58,6 +58,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
 }) => {
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
+  const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
 
   const selectedProfiles = useMemo(() => {
     return bringCurrentUserToFrontAndSort(
@@ -67,7 +68,6 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   }, [assignedUsersWithProfiles, currentUserProfile]);
 
   const [selectedUsers, setSelectedUsers] = useState<UserProfileWithAvatar[] | undefined>();
-  const [isUserTyping, setIsUserTyping] = useState(false);
 
   const onChange = useCallback(
     (users: UserProfileWithAvatar[]) => {
@@ -87,8 +87,6 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
     (limit: number) => i18n.MAX_SELECTED_ASSIGNEES(limit),
     []
   );
-
-  const onDebounce = useCallback(() => setIsUserTyping(false), []);
 
   const {
     data: userProfiles,
@@ -121,10 +119,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
         onChange,
         onSearchChange: (term) => {
           setSearchTerm(term);
-
-          if (!isEmpty(term)) {
-            setIsUserTyping(true);
-          }
+          onContentChange(term);
         },
         selectedStatusMessage,
         options: searchResultProfiles,

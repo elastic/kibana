@@ -30,7 +30,10 @@ import { HistogramResult } from '../../../../../common/runtime_types';
 import { useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 import { getDateRangeFromChartElement } from './utils';
-import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
+import {
+  STATUS_DOWN_LABEL,
+  STATUS_UP_LABEL,
+} from '../../../../../common/translations/translations';
 
 export interface PingHistogramComponentProps {
   /**

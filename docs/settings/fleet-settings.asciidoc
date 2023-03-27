@@ -197,3 +197,6 @@ xpack.fleet.agentPolicies:
           - type: winlog
             enabled: false
 ----
+
+`xpack.fleet.enableExperimental`::
+List of experimental feature flag to enable in Fleet.

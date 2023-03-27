@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
@@ -253,11 +253,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       const url = await discoverLocator.getRedirectUrl({
         indexPatternId: dataViewId,
-        refreshInterval: {
-          display: 'Off',
-          pause: true,
-          value: 0,
-        },
         timeRange: {
           from,
           to,
@@ -271,7 +266,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           dataViewId === null
             ? []
             : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
-        sort: [['timestamp, asc']],
       });
 
       if (!unmounted) {
@@ -567,13 +561,15 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             },
           });
 
-          const appStateProps: RisonValue = {
+          const appStateProps = {
             index: dataViewId,
             filters: getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
+            ...(query !== null
+              ? {
+                  query,
+                }
+              : {}),
           };
-          if (query !== null) {
-            appStateProps.query = query;
-          }
           const _a = rison.encode(appStateProps);
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.

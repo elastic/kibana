@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiLink } from '@elastic
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { sumBy } from 'lodash/fp';
-import { useRiskScoreKpi } from '../../../../risk_score/containers';
+import { useRiskScoreKpi } from '../../../../explore/containers/risk_score';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import {
   Direction,
@@ -20,11 +20,11 @@ import {
 import * as i18n from './translations';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
-import { HostsTableType, HostsType } from '../../../../hosts/store/model';
-import { hostsActions } from '../../../../hosts/store';
-import { usersActions } from '../../../../users/store';
+import { HostsTableType, HostsType } from '../../../../explore/hosts/store/model';
+import { hostsActions } from '../../../../explore/hosts/store';
+import { usersActions } from '../../../../explore/users/store';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../../users/store/model';
+import { UsersTableType } from '../../../../explore/users/store/model';
 import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';

@@ -88,7 +88,7 @@ export interface Props<Kind extends string = string> {
   onUploadStart?: () => void;
 
   /**
-   * Will be called when attempt ends, in error otherwise
+   * Will always be called when upload ends, whether success or failure
    */
   onUploadEnd?: () => void;
 

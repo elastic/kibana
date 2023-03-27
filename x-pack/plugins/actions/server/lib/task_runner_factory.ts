@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
-import type { Request } from '@hapi/hapi';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
   Logger,
   SavedObjectsClientContract,
   KibanaRequest,
   CoreKibanaRequest,
-  SavedObjectReference,
   IBasePath,
   SavedObject,
+  Headers,
+  FakeRawRequest,
+  SavedObjectReference,
 } from '@kbn/core/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract } from './action_executor';
-import { ExecutorError } from './executor_error';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -32,7 +32,11 @@ import {
   isPersistedActionTask,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import { asSavedObjectExecutionSource } from './action_execution_source';
+import {
+  ActionExecutionSourceType,
+  asEmptySource,
+  asSavedObjectExecutionSource,
+} from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
@@ -83,6 +87,7 @@ export class TaskRunnerFactory {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
     };
+    const actionExecutionId = uuidv4();
 
     return {
       async run() {
@@ -90,7 +95,15 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, params, apiKey, executionId, consumer, relatedSavedObjects },
+          attributes: {
+            actionId,
+            params,
+            apiKey,
+            executionId,
+            consumer,
+            source,
+            relatedSavedObjects,
+          },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -102,10 +115,9 @@ export class TaskRunnerFactory {
         const request = getFakeRequest(apiKey);
         basePathService.set(request, path);
 
-        // Throwing an executor error means we will attempt to retry the task
         // TM will treat a task as a failure if `attempts >= maxAttempts`
         // so we need to handle that here to avoid TM persisting the failed task
-        const isRetryableBasedOnAttempts = taskInfo.attempts < (maxAttempts ?? 1);
+        const isRetryableBasedOnAttempts = taskInfo.attempts < maxAttempts;
         const willRetryMessage = `and will retry`;
         const willNotRetryMessage = `and will not retry`;
 
@@ -116,11 +128,12 @@ export class TaskRunnerFactory {
             actionId: actionId as string,
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
-            ...getSourceFromReferences(references),
             taskInfo,
             executionId,
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
+            actionExecutionId,
+            ...getSource(references, source),
           });
         } catch (e) {
           logger.error(
@@ -129,9 +142,8 @@ export class TaskRunnerFactory {
             }: ${e.message}`
           );
           if (isRetryableBasedOnAttempts) {
-            // In order for retry to work, we need to indicate to task manager this task
-            // failed
-            throw new ExecutorError(e.message, {}, true);
+            // To retry, we will throw a Task Manager RetryableError
+            throw throwRetryableError(new Error(e.message), true);
           }
         }
 
@@ -148,11 +160,9 @@ export class TaskRunnerFactory {
               !!executorResult.retry ? willRetryMessage : willNotRetryMessage
             }: ${executorResult.message}`
           );
-          // Task manager error handler only kicks in when an error thrown (at this time)
-          // So what we have to do is throw when the return status is `error`.
-          throw new ExecutorError(
-            executorResult.message,
-            executorResult.data,
+          // When the return status is `error`, we will throw a Task Manager RetryableError
+          throw throwRetryableError(
+            new Error(executorResult.message),
             executorResult.retry as boolean | Date
           );
         } else if (executorResult && executorResult?.status === 'error') {
@@ -188,7 +198,7 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, apiKey, executionId, consumer, relatedSavedObjects },
+          attributes: { actionId, apiKey, executionId, consumer, source, relatedSavedObjects },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -206,7 +216,8 @@ export class TaskRunnerFactory {
           consumer,
           executionId,
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
-          ...getSourceFromReferences(references),
+          actionExecutionId,
+          ...getSource(references, source),
         });
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
@@ -221,26 +232,19 @@ export class TaskRunnerFactory {
 }
 
 function getFakeRequest(apiKey?: string) {
-  const requestHeaders: Record<string, string> = {};
+  const requestHeaders: Headers = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
   }
 
-  // Since we're using API keys and accessing elasticsearch can only be done
-  // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = CoreKibanaRequest.from({
+  const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
     path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as unknown as Request);
+  };
+
+  // Since we're using API keys and accessing elasticsearch can only be done
+  // via a request, we're faking one with the proper authorization headers.
+  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
 
   return fakeRequest;
 }
@@ -281,12 +285,11 @@ async function getActionTaskParams(
   }
 }
 
-function getSourceFromReferences(references: SavedObjectReference[]) {
-  return pipe(
-    fromNullable(references.find((ref) => ref.name === 'source')),
-    map((source) => ({
-      source: asSavedObjectExecutionSource(pick(source, 'id', 'type')),
-    })),
-    getOrElse(() => ({}))
-  );
+function getSource(references: SavedObjectReference[], sourceType?: string) {
+  const sourceInReferences = references.find((ref) => ref.name === 'source');
+  if (sourceInReferences) {
+    return { source: asSavedObjectExecutionSource(pick(sourceInReferences, 'id', 'type')) };
+  }
+
+  return sourceType ? { source: asEmptySource(sourceType as ActionExecutionSourceType) } : {};
 }

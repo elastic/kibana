@@ -43,7 +43,7 @@ export const WizardHorizontalSteps: FC<Props> = ({
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
-        defaultMessage: 'Pick fields',
+        defaultMessage: 'Choose fields',
       }),
       ...createStepProps(WIZARD_STEPS.PICK_FIELDS),
     },

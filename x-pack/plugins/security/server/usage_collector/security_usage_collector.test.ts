@@ -49,6 +49,7 @@ describe('Security UsageCollector', () => {
     sessionIdleTimeoutInMinutes: 480,
     sessionLifespanInMinutes: 43200,
     sessionCleanupInMinutes: 60,
+    sessionConcurrentSessionsMaxSessions: 0,
     anonymousCredentialType: undefined,
   };
 
@@ -110,6 +111,7 @@ describe('Security UsageCollector', () => {
       sessionIdleTimeoutInMinutes: 0,
       sessionLifespanInMinutes: 0,
       sessionCleanupInMinutes: 0,
+      sessionConcurrentSessionsMaxSessions: 0,
       anonymousCredentialType: undefined,
     });
   });
@@ -476,10 +478,15 @@ describe('Security UsageCollector', () => {
 
   describe('session', () => {
     // Note: can't easily test deprecated 'sessionTimeout' value here because of the way that config deprecation renaming works
-    it('reports customized session idleTimeout, lifespan, and cleanupInterval', async () => {
+    it('reports customized session idleTimeout, lifespan, cleanupInterval, and max concurrent sessions', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
-          session: { idleTimeout: '123m', lifespan: '456m', cleanupInterval: '789m' },
+          session: {
+            idleTimeout: '123m',
+            lifespan: '456m',
+            cleanupInterval: '789m',
+            concurrentSessions: { maxSessions: 321 },
+          },
         })
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -495,6 +502,7 @@ describe('Security UsageCollector', () => {
         sessionIdleTimeoutInMinutes: 123,
         sessionLifespanInMinutes: 456,
         sessionCleanupInMinutes: 789,
+        sessionConcurrentSessionsMaxSessions: 321,
       });
     });
   });

@@ -25,7 +25,7 @@ export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = asy
       indexExists: total > 0,
     };
   } catch (e) {
-    if (e.meta.statusCode === 404) {
+    if (e.meta?.statusCode === 404) {
       // we don't throw an error for index not found
       return {
         indices: '',

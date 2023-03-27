@@ -65,6 +65,7 @@ const getTestUtils = (
                 name: 'abc',
                 tags: ['foo'],
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
@@ -81,6 +82,7 @@ const getTestUtils = (
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
+                revision: 0,
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
                 ...(describeType === 'internal'

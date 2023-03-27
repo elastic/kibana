@@ -302,6 +302,7 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        eventLog: eventLogMock.createStart(),
       };
     });
 
@@ -380,6 +381,7 @@ describe('Actions Plugin', () => {
           licensing: licensingMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
         };
       }
 

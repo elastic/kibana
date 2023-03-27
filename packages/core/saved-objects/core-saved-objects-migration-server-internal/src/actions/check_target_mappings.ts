@@ -13,8 +13,8 @@ import { diffMappings } from '../core/build_active_mappings';
 
 /** @internal */
 export interface CheckTargetMappingsParams {
-  sourceIndexMappings?: IndexMapping;
-  targetIndexMappings: IndexMapping;
+  actualMappings?: IndexMapping;
+  expectedMappings: IndexMapping;
 }
 
 /** @internal */
@@ -24,13 +24,13 @@ export interface TargetMappingsCompareResult {
 
 export const checkTargetMappings =
   ({
-    sourceIndexMappings,
-    targetIndexMappings,
+    actualMappings,
+    expectedMappings,
   }: CheckTargetMappingsParams): TaskEither.TaskEither<never, TargetMappingsCompareResult> =>
   async () => {
-    if (!sourceIndexMappings) {
+    if (!actualMappings) {
       return Either.right({ match: false });
     }
-    const diff = diffMappings(sourceIndexMappings, targetIndexMappings);
+    const diff = diffMappings(actualMappings, expectedMappings);
     return Either.right({ match: !diff });
   };

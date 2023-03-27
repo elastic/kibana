@@ -13,7 +13,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, noCreateCasesPermissions } from '../../common/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock, useGetCasesMockState } from '../../containers/mock';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
@@ -26,14 +26,14 @@ jest.mock('../../containers/use_get_action_license', () => {
     useGetActionLicense: jest.fn(),
   };
 });
-jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../api');
 
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;

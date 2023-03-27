@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../src/setup_node_env');
+require('@kbn/babel-register').install();
 
 const path = require('path');
 const webpack = require('webpack');
@@ -20,14 +20,6 @@ const {
 } = require('./constants');
 
 const isProd = process.env.NODE_ENV === 'production';
-
-const nodeModulesButNotKbnPackages = (_path) => {
-  if (!_path.includes('node_modules')) {
-    return false;
-  }
-
-  return !_path.includes(`node_modules${path.sep}@kbn${path.sep}`);
-};
 
 module.exports = {
   context: KIBANA_ROOT,
@@ -45,7 +37,6 @@ module.exports = {
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
-    symlinks: false,
   },
   module: {
     rules: [
@@ -112,7 +103,7 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               postcssOptions: {
-                config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                config: require.resolve('@kbn/optimizer/postcss.config'),
               },
             },
           },
@@ -127,7 +118,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        exclude: [nodeModulesButNotKbnPackages, /\.module\.s(a|c)ss$/],
+        exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
         use: [
           {
             loader: 'style-loader',

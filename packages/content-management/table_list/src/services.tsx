@@ -12,7 +12,7 @@ import type { FormattedRelative } from '@kbn/i18n-react';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
-import { InspectorKibanaProvider } from '@kbn/content-management-inspector';
+import { ContentEditorKibanaProvider } from '@kbn/content-management-content-editor';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
@@ -47,11 +47,11 @@ export interface Services {
   notifyError: NotifyFn;
   currentAppId$: Observable<string | undefined>;
   navigateToUrl: (url: string) => Promise<void> | void;
-  searchQueryParser?: (searchQuery: string) => {
+  searchQueryParser?: (searchQuery: string) => Promise<{
     searchQuery: string;
     references?: SavedObjectsFindOptionsReference[];
     referencesToExclude?: SavedObjectsFindOptionsReference[];
-  };
+  }>;
   DateFormatterComp?: DateFormatter;
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
@@ -142,12 +142,12 @@ export interface TableListViewKibanaDependencies {
           useName?: boolean;
           tagField?: string;
         }
-      ) => {
+      ) => Promise<{
         searchTerm: string;
         tagReferences: SavedObjectsFindOptionsReference[];
         tagReferencesToExclude: SavedObjectsFindOptionsReference[];
         valid: boolean;
-      };
+      }>;
       getTagList: () => Tag[];
       getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
     };
@@ -167,8 +167,8 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
-      return (searchQuery: string) => {
-        const res = savedObjectsTagging.ui.parseSearchQuery(searchQuery, { useName: true });
+      return async (searchQuery: string) => {
+        const res = await savedObjectsTagging.ui.parseSearchQuery(searchQuery, { useName: true });
         return {
           searchQuery: res.searchTerm,
           references: res.tagReferences,
@@ -218,7 +218,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
 
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <InspectorKibanaProvider
+      <ContentEditorKibanaProvider
         core={core}
         toMountPoint={toMountPoint}
         savedObjectsTagging={savedObjectsTagging}
@@ -245,7 +245,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
         >
           {children}
         </TableListViewProvider>
-      </InspectorKibanaProvider>
+      </ContentEditorKibanaProvider>
     </RedirectAppLinksKibanaProvider>
   );
 };

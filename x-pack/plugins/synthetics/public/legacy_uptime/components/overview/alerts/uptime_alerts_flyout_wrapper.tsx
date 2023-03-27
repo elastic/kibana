@@ -12,7 +12,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 interface Props {
   alertFlyoutVisible: boolean;
   alertTypeId?: string;
-  setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  setAlertFlyoutVisibility: (value: boolean) => void;
 }
 
 interface KibanaDeps {
@@ -31,7 +31,7 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   );
   const AddAlertFlyout = useMemo(
     () =>
-      triggersActionsUi.getAddAlertFlyout({
+      triggersActionsUi.getAddRuleFlyout({
         consumer: 'uptime',
         onClose: onCloseAlertFlyout,
         ruleTypeId: alertTypeId,

@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupInput } from '../types';
-import { pluginServices } from '../../services';
-import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools';
+import { type IEmbeddable } from '@kbn/embeddable-plugin/public';
 
-export const getNextPanelOrder = (initialInput: Partial<ControlGroupInput>) => {
+import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools';
+import { type ControlGroupContainer } from './control_group_container';
+import { pluginServices } from '../../services';
+import { CONTROL_GROUP_TYPE } from '../types';
+import { ControlsPanels } from '../types';
+
+export const getNextPanelOrder = (panels?: ControlsPanels) => {
   let nextOrder = 0;
-  if (Object.keys(initialInput.panels ?? {}).length > 0) {
+  if (Object.keys(panels ?? {}).length > 0) {
     nextOrder =
-      Object.values(initialInput.panels ?? {}).reduce((highestSoFar, panel) => {
+      Object.values(panels ?? {}).reduce((highestSoFar, panel) => {
         if (panel.order > highestSoFar) highestSoFar = panel.order;
         return highestSoFar;
       }, 0) + 1;
@@ -33,4 +37,8 @@ export const getCompatibleControlType = async ({
   const fieldRegistry = await getDataControlFieldRegistry(dataView);
   const field = fieldRegistry[fieldName];
   return field.compatibleControlTypes[0];
+};
+
+export const isControlGroup = (embeddable: IEmbeddable): embeddable is ControlGroupContainer => {
+  return embeddable.isContainer && embeddable.type === CONTROL_GROUP_TYPE;
 };

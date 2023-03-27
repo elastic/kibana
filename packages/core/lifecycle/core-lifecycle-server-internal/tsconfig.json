@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -11,5 +9,32 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/core-logging-server-internal",
+    "@kbn/core-analytics-server",
+    "@kbn/core-preboot-server-internal",
+    "@kbn/core-http-context-server-internal",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/core-ui-settings-server-internal",
+    "@kbn/core-http-resources-server-internal",
+    "@kbn/core-capabilities-server",
+    "@kbn/core-doc-links-server",
+    "@kbn/core-i18n-server",
+    "@kbn/core-environment-server-internal",
+    "@kbn/core-execution-context-server-internal",
+    "@kbn/core-deprecations-server-internal",
+    "@kbn/core-metrics-server-internal",
+    "@kbn/core-rendering-server-internal",
+    "@kbn/core-saved-objects-server-internal",
+    "@kbn/core-status-server-internal",
+    "@kbn/core-usage-data-base-server-internal",
+    "@kbn/core-usage-data-server",
+    "@kbn/core-custom-branding-server-internal",
+    "@kbn/core-custom-branding-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -26,8 +26,12 @@ export interface EmbeddableOutput {
   editApp?: string;
   editPath?: string;
   defaultTitle?: string;
+  defaultDescription?: string;
   title?: string;
+  description?: string;
   editable?: boolean;
+  // Whether the embeddable can be edited inline by re-requesting the explicit input from the user
+  editableWithExplicitInput?: boolean;
   savedObjectId?: string;
 }
 
@@ -163,6 +167,11 @@ export interface IEmbeddable<
    * Returns the title of this embeddable.
    */
   getTitle(): string | undefined;
+
+  /**
+   * Returns the description of this embeddable.
+   */
+  getDescription(): string | undefined;
 
   /**
    * Returns the top most parent embeddable, or itself if this embeddable

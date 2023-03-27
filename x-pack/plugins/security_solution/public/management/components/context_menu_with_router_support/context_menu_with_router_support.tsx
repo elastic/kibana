@@ -9,7 +9,7 @@ import type { CSSProperties, HTMLAttributes } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { CommonProps, EuiContextMenuPanelProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiContextMenuPanel, EuiPopover, EuiPopoverTitle, EuiLoadingContent } from '@elastic/eui';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ContextMenuItemNavByRouterProps } from './context_menu_item_nav_by_router';
 import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_router';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -39,6 +39,7 @@ export interface ContextMenuWithRouterSupportProps
   title?: string;
   loading?: boolean;
   hoverInfo?: React.ReactNode;
+  isNavigationDisabled?: boolean;
 }
 
 /**
@@ -58,6 +59,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     title,
     loading = false,
     hoverInfo,
+    isNavigationDisabled = false,
     ...commonProps
   }) => {
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
@@ -76,7 +78,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           return (
             <EuiLoadingContent
               lines={1}
-              key={uuid.v4()}
+              key={uuidv4()}
               data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-loading-${index}`)}
             />
           );
@@ -84,7 +86,8 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         return (
           <ContextMenuItemNavByRouter
             {...itemProps}
-            key={uuid.v4()}
+            isNavigationDisabled={isNavigationDisabled}
+            key={uuidv4()}
             data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-${index}`)}
             textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
             hoverInfo={hoverInfo}
@@ -97,7 +100,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           />
         );
       });
-    }, [getTestId, handleCloseMenu, items, maxWidth, loading, hoverInfo]);
+    }, [items, loading, isNavigationDisabled, getTestId, maxWidth, hoverInfo, handleCloseMenu]);
 
     type AdditionalPanelProps = Partial<
       Omit<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>, 'style'>

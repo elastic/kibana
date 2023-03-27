@@ -27,6 +27,7 @@ interface ResultTabsProps {
   failedAgentsCount?: number;
   endDate?: string;
   liveQueryActionId?: string;
+  error?: string;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -37,6 +38,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   failedAgentsCount,
   startDate,
   liveQueryActionId,
+  error,
 }) => {
   const tabs = useMemo(
     () => [
@@ -52,6 +54,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             startDate={startDate}
             endDate={endDate}
             liveQueryActionId={liveQueryActionId}
+            error={error}
           />
         ),
       },
@@ -60,7 +63,12 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         name: 'Status',
         'data-test-subj': 'osquery-status-tab',
         content: (
-          <ActionResultsSummary actionId={actionId} agentIds={agentIds} expirationDate={endDate} />
+          <ActionResultsSummary
+            actionId={actionId}
+            agentIds={agentIds}
+            expirationDate={endDate}
+            error={error}
+          />
         ),
         append: failedAgentsCount ? (
           <EuiNotificationBadge className="eui-alignCenter" size="m">
@@ -69,7 +77,16 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ) : null,
       },
     ],
-    [actionId, agentIds, ecsMapping, startDate, endDate, liveQueryActionId, failedAgentsCount]
+    [
+      actionId,
+      agentIds,
+      ecsMapping,
+      startDate,
+      endDate,
+      liveQueryActionId,
+      error,
+      failedAgentsCount,
+    ]
   );
 
   return (

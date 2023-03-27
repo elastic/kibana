@@ -6,11 +6,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -19,6 +20,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   KibanaRequest,
@@ -46,12 +48,17 @@ import {
   IEventLogService,
   IEventLogClientService,
 } from '@kbn/event-log-plugin/server';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import {
+  PluginStartContract as FeaturesPluginStart,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '@kbn/features-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
+import { RulesSettingsClientFactory } from './rules_settings_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
 import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
@@ -80,6 +87,13 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
+import {
+  AlertsService,
+  type PublicFrameworkAlertsService,
+  type InitializationPromise,
+  errorResult,
+} from './alerts_service';
+import { rulesSettingsFeature } from './rules_settings_feature';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -117,6 +131,7 @@ export interface PluginSetupContract {
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;
   getConfig: () => AlertingRulesConfig;
+  frameworkAlerts: PublicFrameworkAlertsService;
 }
 
 export interface PluginStartContract {
@@ -144,6 +159,7 @@ export interface AlertingPluginsSetup {
   statusService: StatusServiceSetup;
   monitoringCollection: MonitoringCollectionSetup;
   data: DataPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -153,9 +169,11 @@ export interface AlertingPluginsStart {
   features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
   licensing: LicensingPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
+  share: SharePluginStart;
 }
 
 export class AlertingPlugin {
@@ -168,6 +186,7 @@ export class AlertingPlugin {
   private security?: SecurityPluginSetup;
   private readonly rulesClientFactory: RulesClientFactory;
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
+  private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
@@ -175,6 +194,8 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
+  private alertsService?: AlertsService;
+  private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -182,9 +203,11 @@ export class AlertingPlugin {
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
+    this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
+    this.pluginStop$ = new ReplaySubject(1);
   }
 
   public setup(
@@ -206,6 +229,8 @@ export class AlertingPlugin {
       };
     });
 
+    plugins.features.registerKibanaFeature(rulesSettingsFeature);
+
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
     if (!this.isESOCanEncrypt) {
@@ -221,12 +246,24 @@ export class AlertingPlugin {
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
+    if (this.config.enableFrameworkAlerts) {
+      this.alertsService = new AlertsService({
+        logger: this.logger,
+        pluginStop$: this.pluginStop$,
+        kibanaVersion: this.kibanaVersion,
+        elasticsearchClientPromise: core
+          .getStartServices()
+          .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      });
+    }
+
     const ruleTypeRegistry = new RuleTypeRegistry({
       logger: this.logger,
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
       licenseState: this.licenseState,
       licensing: plugins.licensing,
+      alertsService: this.alertsService,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       inMemoryMetrics: this.inMemoryMetrics,
     });
@@ -335,6 +372,7 @@ export class AlertingPlugin {
         ruleType.cancelAlertsOnRuleTimeout =
           ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
         ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
+        ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
         ruleTypeRegistry.register(ruleType);
       },
       getSecurityHealth: async () => {
@@ -353,6 +391,16 @@ export class AlertingPlugin {
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
+      frameworkAlerts: {
+        enabled: () => this.config.enableFrameworkAlerts,
+        getContextInitializationPromise: (context: string): Promise<InitializationPromise> => {
+          if (this.alertsService) {
+            return this.alertsService.getContextInitializationPromise(context);
+          }
+
+          return Promise.resolve(errorResult(`Framework alerts service not available`));
+        },
+      },
     };
   }
 
@@ -364,6 +412,7 @@ export class AlertingPlugin {
       ruleTypeRegistry,
       rulesClientFactory,
       alertingAuthorizationClientFactory,
+      rulesSettingsClientFactory,
       security,
       licenseState,
     } = this;
@@ -385,10 +434,10 @@ export class AlertingPlugin {
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
-        return plugins.spaces.spacesService.getActiveSpace(request);
+        return plugins.spaces?.spacesService.getActiveSpace(request);
       },
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces.spacesService.getSpaceId(request);
+        return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
       features: plugins.features,
     });
@@ -402,7 +451,7 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request);
+        return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
       actions: plugins.actions,
       eventLog: plugins.eventLog,
@@ -410,6 +459,12 @@ export class AlertingPlugin {
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+    });
+
+    rulesSettingsClientFactory.initialize({
+      logger: this.logger,
+      savedObjectsService: core.savedObjects,
+      securityPluginStart: plugins.security,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {
@@ -425,9 +480,15 @@ export class AlertingPlugin {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
+    const getRulesSettingsClientWithRequest = (request: KibanaRequest) => {
+      return rulesSettingsClientFactory!.create(request);
+    };
+
     taskRunnerFactory.initialize({
       logger,
       data: plugins.data,
+      share: plugins.share,
+      dataViews: plugins.dataViews,
       savedObjects: core.savedObjects,
       uiSettings: core.uiSettings,
       elasticsearch: core.elasticsearch,
@@ -447,6 +508,7 @@ export class AlertingPlugin {
       maxAlerts: this.config.rules.run.alerts.max,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
+      getRulesSettingsClientWithRequest,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
@@ -477,12 +539,15 @@ export class AlertingPlugin {
   private createRouteHandlerContext = (
     core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
-    const { ruleTypeRegistry, rulesClientFactory } = this;
+    const { ruleTypeRegistry, rulesClientFactory, rulesSettingsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
+        },
+        getRulesSettingsClient: () => {
+          return rulesSettingsClientFactory.createWithAuthorization(request);
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>
@@ -499,5 +564,7 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
   }
 }

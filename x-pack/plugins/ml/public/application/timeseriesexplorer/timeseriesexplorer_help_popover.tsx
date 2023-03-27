@@ -27,7 +27,7 @@ export const TimeSeriesExplorerHelpPopover = () => {
       <p>
         <FormattedMessage
           id="xpack.ml.timeSeriesExplorer.popoverAnomalyExplanation"
-          defaultMessage="An anomaly score is calculated for each bucket time interval, with a value from 0 to 100. Anomalous events are highlighted in colors that indicate their severity. If an anomaly is depicted with a cross symbol instead of a dot, it has a medium or high multi-bucket impact. This extra analysis can catch anomalies even when they fall within the bounds of expected behavior."
+          defaultMessage="An anomaly score is calculated for each bucket time interval, with a value from 0 to 100. Anomalous events are highlighted in colors that indicate their severity. If an anomaly is depicted with a cross symbol instead of a dot, it has a moderate, significant, or high multi-bucket impact. This extra analysis can catch anomalies even when they fall within the bounds of expected behavior."
         />
       </p>
       <p>

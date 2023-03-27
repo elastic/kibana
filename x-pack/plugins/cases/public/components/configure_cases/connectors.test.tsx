@@ -121,7 +121,7 @@ describe('Connectors', () => {
       newWrapper
         .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
         .text()
-    ).toBe('Update My Connector');
+    ).toBe('Update My SN connector');
   });
 
   it('shows the deprecated callout when the connector is deprecated', async () => {

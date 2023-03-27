@@ -65,7 +65,10 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
 
   const loadingIds = useMemo(
-    () => (['disable', 'enable', 'edit'].includes(loadingRulesAction ?? '') ? loadingRuleIds : []),
+    () =>
+      ['disable', 'enable', 'edit', 'delete'].includes(loadingRulesAction ?? '')
+        ? loadingRuleIds
+        : [],
     [loadingRuleIds, loadingRulesAction]
   );
 
@@ -232,7 +235,6 @@ export const useRulesColumns = ({
 }: UseColumnsProps): TableColumn[] => {
   const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
   const ruleNameColumn = useRuleNameColumn();
-  const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
@@ -241,7 +243,7 @@ export const useRulesColumns = ({
     startMlJobs,
   });
   const executionStatusColumn = useRuleExecutionStatusColumn({
-    sortable: !!isInMemorySorting,
+    sortable: true,
     width: '16%',
     isLoadingJobs,
     mlJobs,
@@ -276,18 +278,22 @@ export const useRulesColumns = ({
         field: 'execution_summary.last_execution.date',
         name: i18n.COLUMN_LAST_COMPLETE_RUN,
         render: (value: RuleExecutionSummary['last_execution']['date'] | undefined) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <FormattedRelativePreferenceDate
-              tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
-              relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
-              value={value}
-              tooltipAnchorClassName="eui-textTruncate"
-            />
+          return (
+            <EuiFlexGroup data-test-subj="ruleLastRun">
+              {value == null ? (
+                getEmptyTagValue()
+              ) : (
+                <FormattedRelativePreferenceDate
+                  tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+                  relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+                  value={value}
+                  tooltipAnchorClassName="eui-textTruncate"
+                />
+              )}
+            </EuiFlexGroup>
           );
         },
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '16%',
       },
@@ -311,22 +317,6 @@ export const useRulesColumns = ({
         width: '18%',
         truncateText: true,
       },
-      {
-        field: 'version',
-        name: i18n.COLUMN_VERSION,
-        render: (value: Rule['version']) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <EuiText data-test-subj="version" size="s">
-              {value}
-            </EuiText>
-          );
-        },
-        sortable: !!isInMemorySorting,
-        truncateText: true,
-        width: '65px',
-      },
       enabledColumn,
       ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
@@ -335,7 +325,6 @@ export const useRulesColumns = ({
       enabledColumn,
       executionStatusColumn,
       hasCRUDPermissions,
-      isInMemorySorting,
       ruleNameColumn,
       showRelatedIntegrations,
     ]
@@ -352,7 +341,6 @@ export const useMonitoringColumns = ({
   const docLinks = useKibana().services.docLinks;
   const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
   const ruleNameColumn = useRuleNameColumn();
-  const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
@@ -361,7 +349,7 @@ export const useMonitoringColumns = ({
     startMlJobs,
   });
   const executionStatusColumn = useRuleExecutionStatusColumn({
-    sortable: !!isInMemorySorting,
+    sortable: true,
     width: '12%',
     isLoadingJobs,
     mlJobs,
@@ -388,7 +376,7 @@ export const useMonitoringColumns = ({
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '16%',
       },
@@ -405,7 +393,7 @@ export const useMonitoringColumns = ({
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '14%',
       },
@@ -445,7 +433,7 @@ export const useMonitoringColumns = ({
             {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '14%',
       },
@@ -454,18 +442,22 @@ export const useMonitoringColumns = ({
         field: 'execution_summary.last_execution.date',
         name: i18n.COLUMN_LAST_COMPLETE_RUN,
         render: (value: RuleExecutionSummary['last_execution']['date'] | undefined) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <FormattedRelativePreferenceDate
-              tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
-              relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
-              value={value}
-              tooltipAnchorClassName="eui-textTruncate"
-            />
+          return (
+            <EuiFlexGroup data-test-subj="ruleLastRun">
+              {value == null ? (
+                getEmptyTagValue()
+              ) : (
+                <FormattedRelativePreferenceDate
+                  tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+                  relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+                  value={value}
+                  tooltipAnchorClassName="eui-textTruncate"
+                />
+              )}
+            </EuiFlexGroup>
           );
         },
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '16%',
       },
@@ -478,7 +470,6 @@ export const useMonitoringColumns = ({
       enabledColumn,
       executionStatusColumn,
       hasCRUDPermissions,
-      isInMemorySorting,
       ruleNameColumn,
       showRelatedIntegrations,
     ]

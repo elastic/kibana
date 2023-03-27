@@ -1,5 +1,5 @@
 {
-  "name": "core_history_block",
+  "name": "@kbn/core-history-block-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/core_history_block",
   "kibana": {

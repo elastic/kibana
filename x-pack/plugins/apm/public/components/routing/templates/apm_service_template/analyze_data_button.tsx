@@ -25,7 +25,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../common/environment_filter_values';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 
 function getEnvironmentDefinition(environment: string) {
   switch (environment) {
@@ -43,7 +43,10 @@ export function AnalyzeDataButton() {
 
   const {
     query: { rangeFrom, rangeTo, environment },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const basepath = services.http?.basePath.get();
   const canShowDashboard = services.application?.capabilities.dashboard.show;
@@ -82,7 +85,11 @@ export function AnalyzeDataButton() {
             'Explore Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
         })}
       >
-        <EuiButtonEmpty href={href} iconType="visBarVerticalStacked">
+        <EuiButtonEmpty
+          data-test-subj="apmAnalyzeDataButtonExploreDataButton"
+          href={href}
+          iconType="visBarVerticalStacked"
+        >
           {i18n.translate('xpack.apm.analyzeDataButton.label', {
             defaultMessage: 'Explore data',
           })}

@@ -16,7 +16,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO(), {
         good: 10,
         total: 0,
-        date_range: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(sixHoursRolling()),
       })
     ).toEqual(0);
   });
@@ -26,7 +26,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO(), {
         good: 9999,
         total: 1,
-        date_range: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(sixHoursRolling()),
       })
     ).toEqual(0);
   });
@@ -36,7 +36,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO({ objective: { target: 0.9 } }), {
         good: 90,
         total: 100,
-        date_range: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(sixHoursRolling()),
       })
     ).toEqual(1);
   });
@@ -46,7 +46,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO({ objective: { target: 0.99 } }), {
         good: 90,
         total: 100,
-        date_range: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(sixHoursRolling()),
       })
     ).toEqual(10);
   });
@@ -56,7 +56,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO({ objective: { target: 0.8 } }), {
         good: 90,
         total: 100,
-        date_range: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(sixHoursRolling()),
       })
     ).toEqual(0.5);
   });

@@ -12,7 +12,7 @@ import { memoize } from 'lodash';
 import { UI_SETTINGS, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
-import { AutocompleteUsageCollector } from '../collectors';
+import type { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 

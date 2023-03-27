@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PhraseFilter, FilterStateStore } from '..';
+import { FilterStateStore } from '..';
 
-export const phraseFilter: PhraseFilter = {
+export const phraseFilter = {
   meta: {
     negate: false,
     index: 'logstash-*',
@@ -24,5 +24,7 @@ export const phraseFilter: PhraseFilter = {
   $state: {
     store: FilterStateStore.APP_STATE,
   },
-  query: {},
+  query: {
+    match_phrase: {},
+  },
 };

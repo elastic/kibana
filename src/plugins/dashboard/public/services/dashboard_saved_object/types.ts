@@ -43,24 +43,28 @@ export interface DashboardSavedObjectRequiredServices {
   dashboardSessionStorage: DashboardSessionStorageServiceType;
 }
 
+export interface FindDashboardsService {
+  findSavedObjects: (
+    props: Pick<
+      FindDashboardSavedObjectsArgs,
+      'hasReference' | 'hasNoReference' | 'search' | 'size'
+    >
+  ) => Promise<FindDashboardSavedObjectsResponse>;
+  findByIds: (ids: string[]) => Promise<FindDashboardBySavedObjectIdsResult[]>;
+  findByTitle: (title: string) => Promise<{ id: string } | undefined>;
+}
+
 export interface DashboardSavedObjectService {
   loadDashboardStateFromSavedObject: (
-    props: Pick<LoadDashboardFromSavedObjectProps, 'id' | 'getScopedHistory'>
+    props: Pick<LoadDashboardFromSavedObjectProps, 'id'>
   ) => Promise<LoadDashboardFromSavedObjectReturn>;
 
   saveDashboardStateToSavedObject: (
-    props: Pick<SaveDashboardProps, 'currentState' | 'redirectTo' | 'saveOptions'>
+    props: Pick<SaveDashboardProps, 'currentState' | 'saveOptions' | 'lastSavedId'>
   ) => Promise<SaveDashboardReturn>;
-  findDashboards: {
-    findSavedObjects: (
-      props: Pick<
-        FindDashboardSavedObjectsArgs,
-        'hasReference' | 'hasNoReference' | 'search' | 'size'
-      >
-    ) => Promise<FindDashboardSavedObjectsResponse>;
-    findByIds: (ids: string[]) => Promise<FindDashboardBySavedObjectIdsResult[]>;
-    findByTitle: (title: string) => Promise<{ id: string } | undefined>;
-  };
+  findDashboards: FindDashboardsService;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+export type { SaveDashboardReturn };

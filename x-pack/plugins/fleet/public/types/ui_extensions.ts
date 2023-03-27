@@ -10,7 +10,9 @@ import type { ComponentType, LazyExoticComponent } from 'react';
 
 import type { FleetServerAgentComponentUnit } from '../../common/types/models/agent';
 
-import type { Agent, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
+import type { PackagePolicyValidationResults } from '../services';
+
+import type { Agent, AgentPolicy, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -19,6 +21,22 @@ export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint)
 export interface UIExtensionsStorage {
   [key: string]: Partial<Record<UIExtensionPoint['view'], UIExtensionPoint>>;
 }
+
+/**
+ * UI Component Extension is used to replace the Define Step on
+ * the pages displaying the ability to edit/create an Integration Policy
+ */
+export type PackagePolicyReplaceDefineStepExtensionComponent =
+  ComponentType<PackagePolicyReplaceDefineStepExtensionComponentProps>;
+
+export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
+  | (PackagePolicyEditExtensionComponentProps & { isEditPage: true })
+  | (PackagePolicyCreateExtensionComponentProps & { isEditPage: false })
+) & {
+  validationResults?: PackagePolicyValidationResults;
+  agentPolicy?: AgentPolicy;
+  packageInfo: PackageInfo;
+};
 
 /**
  * UI Component Extension is used on the pages displaying the ability to edit an
@@ -71,6 +89,12 @@ export type PackageGenericErrorsListComponent = ComponentType<PackageGenericErro
 export interface PackageGenericErrorsListProps {
   /** A list of errors from a package */
   packageErrors: FleetServerAgentComponentUnit[];
+}
+
+export interface PackagePolicyReplaceDefineStepExtension {
+  package: string;
+  view: 'package-policy-replace-define-step';
+  Component: LazyExoticComponent<PackagePolicyReplaceDefineStepExtensionComponent>;
 }
 
 /** Extension point registration contract for Integration Policy Edit views */
@@ -184,6 +208,7 @@ export interface AgentEnrollmentFlyoutFinalStepExtension {
 
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
+  | PackagePolicyReplaceDefineStepExtension
   | PackagePolicyEditExtension
   | PackagePolicyResponseExtension
   | PackagePolicyEditTabsExtension

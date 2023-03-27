@@ -12,13 +12,13 @@ import { ReactWrapper } from 'enzyme';
 import { EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { FieldVisualizeButton } from './field_visualize_button';
 import {
   ACTION_VISUALIZE_LENS_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
-  createAction,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
@@ -26,7 +26,7 @@ import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 const ORIGINATING_APP = 'test';
 const mockExecuteAction = jest.fn();
 const uiActions = uiActionsPluginMock.createStartContract();
-const visualizeAction = createAction<VisualizeFieldContext>({
+const visualizeAction = new ActionInternal({
   type: ACTION_VISUALIZE_LENS_FIELD,
   id: ACTION_VISUALIZE_LENS_FIELD,
   getDisplayName: () => 'test',
@@ -37,7 +37,9 @@ const visualizeAction = createAction<VisualizeFieldContext>({
   getHref: async () => '/app/test',
 });
 
-jest.spyOn(uiActions, 'getTriggerCompatibleActions').mockResolvedValue([visualizeAction]);
+jest
+  .spyOn(uiActions, 'getTriggerCompatibleActions')
+  .mockResolvedValue([visualizeAction as ActionInternal<object>]);
 jest.spyOn(uiActions, 'getTrigger').mockReturnValue({
   id: ACTION_VISUALIZE_LENS_FIELD,
   exec: mockExecuteAction,

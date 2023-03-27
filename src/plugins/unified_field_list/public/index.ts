@@ -13,7 +13,11 @@ export type {
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
-export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list';
+export { FieldList, type FieldListProps } from './components/field_list';
+export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list_grouped';
+export { FieldListFilters, type FieldListFiltersProps } from './components/field_list_filters';
+export { FieldIcon, type FieldIconProps, getFieldIconProps } from './components/field_icon';
+export { FieldItemButton, type FieldItemButtonProps } from './components/field_item_button';
 export type {
   FieldTopValuesBucketProps,
   FieldTopValuesBucketParams,
@@ -55,6 +59,8 @@ export type {
   AddFieldFilterHandler,
   FieldListGroups,
   FieldsGroupDetails,
+  FieldTypeKnown,
+  GetCustomFieldType,
 } from './types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './types';
 
@@ -75,7 +81,22 @@ export {
 } from './hooks/use_grouped_fields';
 
 export {
+  useFieldFilters,
+  type FieldFiltersParams,
+  type FieldFiltersResult,
+} from './hooks/use_field_filters';
+
+export {
   useQuerySubscriber,
+  hasQuerySubscriberData,
   type QuerySubscriberResult,
   type QuerySubscriberParams,
 } from './hooks/use_query_subscriber';
+
+export {
+  getFieldTypeName,
+  getFieldTypeDescription,
+  KNOWN_FIELD_TYPES,
+  getFieldType,
+  getFieldIconType,
+} from './utils/field_types';

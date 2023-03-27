@@ -35,7 +35,7 @@ export const DataRetentionTab = () => {
       }),
     },
     {
-      field: 'name',
+      field: 'policy.name',
       name: i18n.translate('xpack.synthetics.settingsRoute.table.policy', {
         defaultMessage: 'Policy',
       }),
@@ -53,7 +53,10 @@ export const DataRetentionTab = () => {
             values={{
               stackManagement: <strong>{STACK_MANAGEMENT}</strong>,
               docsLink: (
-                <EuiLink href="https://www.elastic.co/guide/en/observability/current/synthetics-manage-retention.html">
+                <EuiLink
+                  data-test-subj="syntheticsDataRetentionTabLink"
+                  href="https://www.elastic.co/guide/en/observability/current/synthetics-manage-retention.html"
+                >
                   {READ_OUR_DOCS}
                 </EuiLink>
               ),

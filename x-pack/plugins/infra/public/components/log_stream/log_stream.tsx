@@ -137,7 +137,6 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
   } = useLogView({
     logViewId: logView.logViewId,
     logViews,
-    fetch: http.fetch,
   });
 
   const parsedQuery = useMemo<BuiltEsQuery | undefined>(() => {

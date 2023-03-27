@@ -6,10 +6,6 @@
  */
 
 import React from 'react';
+import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 
-export interface AlertEcsData {
-  _id: string;
-  _index?: string;
-}
-
-export const AlertAttachmentContext = React.createContext<AlertEcsData | null>(null);
+export const AlertAttachmentContext = React.createContext<EcsSecurityExtension | null>(null);

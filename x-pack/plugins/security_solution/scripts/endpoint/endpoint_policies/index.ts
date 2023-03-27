@@ -53,11 +53,11 @@ export const cli = () => {
         string: ['kibana'],
         default: {
           count: 15,
-          kibana: 'http://elastic:changeme@localhost:5601',
+          kibana: 'http://elastic:changeme@127.0.0.1:5601',
         },
         help: `
         --count            Number of Endpoint Policies to create. Default: 15
-        --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@localhost:5601
+        --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@127.0.0.1:5601
       `,
       },
     }

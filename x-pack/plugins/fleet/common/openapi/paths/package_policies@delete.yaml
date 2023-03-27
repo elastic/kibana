@@ -1,5 +1,7 @@
 post:
-  summary: Package policy - Delete
+  summary: Delete package policy
+  tags:
+    - Package policies
   operationId: post-delete-package-policy
   requestBody:
     content:
@@ -34,5 +36,7 @@ post:
               required:
                 - id
                 - success
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

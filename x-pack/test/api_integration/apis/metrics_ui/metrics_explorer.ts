@@ -118,6 +118,52 @@ export default function ({ getService }: FtrProviderContext) {
         expect(firstSeries.rows).to.have.length(0);
       });
 
+      it('should work for custom metrics', async () => {
+        const postBody = {
+          timerange: {
+            field: '@timestamp',
+            to: max,
+            from: min,
+            interval: '>=1m',
+          },
+          indexPattern: 'metricbeat-*',
+          metrics: [
+            {
+              aggregation: 'custom',
+              custom_metrics: [
+                { name: 'A', aggregation: 'avg', field: 'system.cpu.user.pct' },
+                { name: 'B', aggregation: 'avg', field: 'system.cpu.user.pct' },
+              ],
+              equation: '(A + B) * 100',
+            },
+          ],
+        };
+        const response = await supertest
+          .post('/api/infra/metrics_explorer')
+          .set('kbn-xsrf', 'xxx')
+          .send(postBody)
+          .expect(200);
+        const body = decodeOrThrow(metricsExplorerResponseRT)(response.body);
+        expect(body.series).length(1);
+        const firstSeries = first(body.series) as any;
+        expect(firstSeries).to.have.property('id', '*');
+        expect(firstSeries.columns).to.eql([
+          { name: 'timestamp', type: 'date' },
+          { name: 'metric_0', type: 'number' },
+        ]);
+        expect(firstSeries.rows).to.have.length(8);
+        expect(firstSeries.rows).to.eql([
+          { timestamp: 1547571300000, metric_0: 1.0666666666666667 },
+          { timestamp: 1547571360000, metric_0: 0.4333333333333334 },
+          { timestamp: 1547571420000, metric_0: 0.36666666666666664 },
+          { timestamp: 1547571480000, metric_0: 0.30000000000000004 },
+          { timestamp: 1547571540000, metric_0: 0.33333333333333337 },
+          { timestamp: 1547571600000, metric_0: 0.26666666666666666 },
+          { timestamp: 1547571660000, metric_0: 0.36666666666666664 },
+          { timestamp: 1547571720000, metric_0: 0.36666666666666664 },
+        ]);
+      });
+
       it('should work with groupBy', async () => {
         const postBody = {
           timerange: {

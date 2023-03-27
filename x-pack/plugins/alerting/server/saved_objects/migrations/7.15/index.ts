@@ -9,7 +9,7 @@ import {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectReference,
-} from '@kbn/core-saved-objects-common';
+} from '@kbn/core-saved-objects-server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isString } from 'lodash/fp';

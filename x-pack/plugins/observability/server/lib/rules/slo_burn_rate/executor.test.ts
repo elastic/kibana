@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ElasticsearchClientMock,
@@ -19,22 +19,24 @@ import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { Alert, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import {
-  BurnRateAlertContext,
-  BurnRateAlertState,
-  BurnRateAllowedActionGroups,
-  BurnRateRuleParams,
-  FIRED_ACTION,
-  AlertStates,
-  getRuleExecutor,
-} from './executor';
+import { FIRED_ACTION, getRuleExecutor } from './executor';
 import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';
 import { SLO } from '../../../domain/models';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import {
+  BurnRateAlertState,
+  BurnRateAlertContext,
+  BurnRateAllowedActionGroups,
+  BurnRateRuleParams,
+  AlertStates,
+} from './types';
 
 const commonEsResponse = {
   took: 100,
@@ -93,7 +95,53 @@ describe('BurnRateRuleExecutor', () => {
       getAlertStartedDate: jest.fn(),
       getAlertUuid: jest.fn(),
       getAlertByAlertUuid: jest.fn(),
+      share: {} as SharePluginStart,
+      dataViews: dataViewPluginMocks.createStartContract(),
     };
+  });
+
+  it('throws when the slo is not found', async () => {
+    soClientMock.get.mockRejectedValue(new Error('NotFound'));
+    const executor = getRuleExecutor();
+
+    await expect(
+      executor({
+        params: someRuleParams({ sloId: 'inexistent', burnRateThreshold: BURN_RATE_THRESHOLD }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      })
+    ).rejects.toThrowError();
+  });
+
+  it('returns early when the slo is disabled', async () => {
+    const slo = createSLO({ objective: { target: 0.9 }, enabled: false });
+    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
+    const executor = getRuleExecutor();
+
+    const result = await executor({
+      params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
+      startedAt: new Date(),
+      services: servicesMock,
+      executionId: 'irrelevant',
+      logger: loggerMock,
+      previousStartedAt: null,
+      rule: {} as SanitizedRuleConfig,
+      spaceId: 'irrelevant',
+      state: {},
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+    });
+
+    expect(esClientMock.search).not.toHaveBeenCalled();
+    expect(alertWithLifecycleMock).not.toHaveBeenCalled();
+    expect(alertFactoryMock.done).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: {} });
   });
 
   it('does not schedule an alert when both windows burn rates are below the threshold', async () => {
@@ -106,7 +154,7 @@ describe('BurnRateRuleExecutor', () => {
 
     const executor = getRuleExecutor();
     await executor({
-      params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
+      params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
       startedAt: new Date(),
       services: servicesMock,
       executionId: 'irrelevant',
@@ -115,6 +163,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -130,7 +179,7 @@ describe('BurnRateRuleExecutor', () => {
 
     const executor = getRuleExecutor();
     await executor({
-      params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
+      params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
       startedAt: new Date(),
       services: servicesMock,
       executionId: 'irrelevant',
@@ -139,6 +188,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -163,6 +213,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -183,7 +234,7 @@ describe('BurnRateRuleExecutor', () => {
 
     const executor = getRuleExecutor();
     await executor({
-      params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
+      params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
       startedAt: new Date(),
       services: servicesMock,
       executionId: 'irrelevant',
@@ -192,6 +243,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).toBeCalledWith({
@@ -208,7 +260,7 @@ describe('BurnRateRuleExecutor', () => {
       expect.objectContaining({
         longWindow: { burnRate: 2, duration: '1h' },
         shortWindow: { burnRate: 2, duration: '5m' },
-        threshold: 2,
+        burnRateThreshold: 2,
         reason:
           'The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
       })
@@ -230,7 +282,7 @@ describe('BurnRateRuleExecutor', () => {
     const executor = getRuleExecutor();
 
     await executor({
-      params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
+      params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
       startedAt: new Date(),
       services: servicesMock,
       executionId: 'irrelevant',
@@ -239,6 +291,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -246,7 +299,7 @@ describe('BurnRateRuleExecutor', () => {
       expect.objectContaining({
         longWindow: { burnRate: 2.01, duration: '1h' },
         shortWindow: { burnRate: 1.99, duration: '5m' },
-        threshold: 2,
+        burnRateThreshold: 2,
       })
     );
   });
@@ -254,10 +307,11 @@ describe('BurnRateRuleExecutor', () => {
 
 function someRuleParams(params: Partial<BurnRateRuleParams> = {}): BurnRateRuleParams {
   return {
-    sloId: uuid(),
-    threshold: 2,
-    longWindow: { duration: 1, unit: 'h' },
-    shortWindow: { duration: 5, unit: 'm' },
+    sloId: uuidv4(),
+    burnRateThreshold: 2,
+    maxBurnRateThreshold: 720,
+    longWindow: { value: 1, unit: 'h' },
+    shortWindow: { value: 5, unit: 'm' },
     ...params,
   };
 }

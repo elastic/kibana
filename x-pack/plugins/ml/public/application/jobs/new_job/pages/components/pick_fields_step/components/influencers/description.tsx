@@ -20,11 +20,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.influencers.description"
-          defaultMessage="Select which categorical fields have influence on the results. Who/what might you 'blame' for an anomaly? Recommend 1-3 influencers."
+          defaultMessage="Categorical fields that influence the results. Who/what might you 'blame' for an anomaly? 1-3 influencers are recommended."
         />
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

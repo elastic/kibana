@@ -9,10 +9,15 @@
 import { getServices, chance } from './lib';
 
 export const docExistsSuite = (savedObjectsIndex: string) => () => {
-  async function setup(options: { initialSettings?: Record<string, any> } = {}) {
-    const { initialSettings } = options;
+  async function setup(
+    options: {
+      initialSettings?: Record<string, any>;
+      initialGlobalSettings?: Record<string, any>;
+    } = {}
+  ) {
+    const { initialSettings, initialGlobalSettings } = options;
 
-    const { uiSettings, esClient, supertest } = getServices();
+    const { uiSettings, uiSettingsGlobal, esClient, supertest } = getServices();
 
     // delete the kibana index to ensure we start fresh
     await esClient.deleteByQuery({
@@ -28,8 +33,11 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
     if (initialSettings) {
       await uiSettings.setMany(initialSettings);
     }
+    if (initialGlobalSettings) {
+      await uiSettingsGlobal.setMany(initialGlobalSettings);
+    }
 
-    return { uiSettings, supertest };
+    return { uiSettings, uiSettingsGlobal, supertest };
   }
 
   describe('get route', () => {
@@ -187,6 +195,157 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
         error: 'Bad Request',
         message: 'Unable to update "foo" because it is overridden',
         statusCode: 400,
+      });
+    });
+  });
+
+  describe('global', () => {
+    describe('get route', () => {
+      it('returns a 200 and includes userValues', async () => {
+        const defaultIndex = chance.word({ length: 10 });
+
+        const { supertest } = await setup({
+          initialGlobalSettings: {
+            defaultIndex,
+          },
+        });
+
+        const { body } = await supertest('get', '/api/kibana/global_settings').expect(200);
+
+        expect(body).toMatchObject({
+          settings: {
+            buildNum: {
+              userValue: expect.any(Number),
+            },
+            defaultIndex: {
+              userValue: defaultIndex,
+            },
+          },
+        });
+      });
+    });
+
+    describe('set route', () => {
+      it('returns a 200 and all values including update', async () => {
+        const { supertest } = await setup();
+
+        const defaultIndex = chance.word();
+
+        const { body } = await supertest('post', '/api/kibana/global_settings/defaultIndex')
+          .send({
+            value: defaultIndex,
+          })
+          .expect(200);
+
+        expect(body).toMatchObject({
+          settings: {
+            buildNum: {
+              userValue: expect.any(Number),
+            },
+            defaultIndex: {
+              userValue: defaultIndex,
+            },
+          },
+        });
+      });
+
+      // kbn server only created with uiSettings overrides. Global settings don't seem to support overrides from kibana.yml
+      it.skip('returns a 400 if trying to set overridden value', async () => {
+        const { supertest } = await setup();
+
+        const { body } = await supertest('delete', '/api/kibana/global_settings/foo')
+          .send({
+            value: 'baz',
+          })
+          .expect(400);
+
+        expect(body).toEqual({
+          error: 'Bad Request',
+          message: 'Unable to update "foo" because it is overridden',
+          statusCode: 400,
+        });
+      });
+    });
+
+    describe('setMany route', () => {
+      it('returns a 200 and all values including updates', async () => {
+        const { supertest } = await setup();
+
+        const defaultIndex = chance.word();
+        const { body } = await supertest('post', '/api/kibana/global_settings')
+          .send({
+            changes: {
+              defaultIndex,
+            },
+          })
+          .expect(200);
+
+        expect(body).toMatchObject({
+          settings: {
+            buildNum: {
+              userValue: expect.any(Number),
+            },
+            defaultIndex: {
+              userValue: defaultIndex,
+            },
+          },
+        });
+      });
+
+      // kbn server only created with uiSettings overrides. Global settings don't seem to support overrides from kibana.yml
+      it.skip('returns a 400 if trying to set overridden value', async () => {
+        const { supertest } = await setup();
+
+        const { body } = await supertest('post', '/api/kibana/global_settings')
+          .send({
+            changes: {
+              foo: 'baz',
+            },
+          })
+          .expect(400);
+
+        expect(body).toEqual({
+          error: 'Bad Request',
+          message: 'Unable to update "foo" because it is overridden',
+          statusCode: 400,
+        });
+      });
+    });
+
+    describe('delete route', () => {
+      it('returns a 200 and deletes the setting', async () => {
+        const defaultIndex = chance.word({ length: 10 });
+
+        const { uiSettingsGlobal, supertest } = await setup({
+          initialGlobalSettings: { defaultIndex },
+        });
+
+        expect(await uiSettingsGlobal.get('defaultIndex')).toBe(defaultIndex);
+
+        const { body } = await supertest(
+          'delete',
+          '/api/kibana/global_settings/defaultIndex'
+        ).expect(200);
+
+        expect(body).toMatchObject({
+          settings: {
+            buildNum: {
+              userValue: expect.any(Number),
+            },
+          },
+        });
+      });
+      // kbn server only created with uiSettings overrides. Global settings don't seem to support overrides from kibana.yml
+      it.skip('returns a 400 if deleting overridden value', async () => {
+        const { supertest } = await setup();
+
+        const { body } = await supertest('delete', '/api/kibana/global_settings/foo').expect(400);
+
+        expect(body).toEqual({
+          error: 'Bad Request',
+          message: 'Unable to update "foo" because it is overridden',
+          statusCode: 400,
+        });
       });
     });
   });

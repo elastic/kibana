@@ -24,12 +24,13 @@ import { UseQueryResult } from '@tanstack/react-query';
 import { CloudPosturePage } from './cloud_posture_page';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
+import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 
 const chance = new Chance();
+
 jest.mock('../common/api/use_setup_status_api');
-jest.mock('../common/navigation/use_navigate_to_cis_integration');
 jest.mock('../common/hooks/use_subscription_status');
+jest.mock('../common/navigation/use_csp_integration_link');
 
 describe('<CloudPosturePage />', () => {
   beforeEach(() => {
@@ -143,10 +144,17 @@ describe('<CloudPosturePage />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'not-installed' },
+        data: {
+          kspm: { status: 'not-installed' },
+          cspm: { status: 'not-installed' },
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     const children = chance.sentence();
     renderCloudPosturePage({ children });

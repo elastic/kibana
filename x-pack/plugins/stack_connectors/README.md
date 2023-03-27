@@ -384,7 +384,7 @@ We suggest following the template provided in `docs/action-type-template.asciido
 
 ## Tests
 
-The connector type should have both unit tests and functional tests. For functional tests, if your connector interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service to test with. See the existing functional test servers in the directory [`x-pack/test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server`](../../test/alerting_api_integration/common/fixtures/plugins/actions_simulators/server)
+The connector type should have both unit tests and functional tests. For functional tests, if your connector interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service to test with. See the existing functional test servers in the directory [`x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server`](../../test/alerting_api_integration/common/plugins/actions_simulators/server)
 
 ## Connector type config and secrets
 

@@ -48,7 +48,7 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
         body: getCardinalityOfFieldsSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
@@ -83,7 +83,7 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
         body: getTimeFieldRangeSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {

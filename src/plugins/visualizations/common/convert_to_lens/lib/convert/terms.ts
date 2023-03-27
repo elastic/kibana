@@ -7,7 +7,7 @@
  */
 
 import { BUCKET_TYPES } from '@kbn/data-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DataType, TermsParams } from '../../types';
 import { getFieldNameFromField, isColumnWithMeta } from '../utils';
 import { convertToSchemaConfig } from '../../../vis_schemas';
@@ -137,7 +137,7 @@ export const convertToTermsColumn = (
   }
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     operationType: 'terms',
     label,
     dataType: (field.type as DataType) ?? undefined,

@@ -19,11 +19,13 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { CommandList } from '../command_list';
 import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
 import { SidePanelContentLayout } from './side_panel_content_layout';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
+import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   padding-top: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};
@@ -33,6 +35,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 export const SidePanelContentManager = memo(() => {
   const dispatch = useConsoleStateDispatch();
   const commands = useWithCommandList();
+  const getTestId = useTestIdGenerator(useDataTestSubj('sidePanel'));
   const show = useWithSidePanel().show;
 
   const closeHelpPanel = useCallback(() => {
@@ -48,7 +51,7 @@ export const SidePanelContentManager = memo(() => {
         <>
           <StyledEuiFlexGroup>
             <EuiFlexItem>
-              <EuiTitle size="s">
+              <EuiTitle size="s" data-test-subj={getTestId('headerTitle')}>
                 <h3>
                   <FormattedMessage
                     id="xpack.securitySolution.console.sidePanel.helpTitle"
@@ -63,6 +66,7 @@ export const SidePanelContentManager = memo(() => {
                 iconType="cross"
                 color="text"
                 onClick={closeHelpPanel}
+                data-test-subj={getTestId('headerCloseButton')}
               />
             </EuiFlexItem>
           </StyledEuiFlexGroup>
@@ -80,15 +84,19 @@ export const SidePanelContentManager = memo(() => {
       );
     }
     return null;
-  }, [show, closeHelpPanel]);
+  }, [show, getTestId, closeHelpPanel]);
 
   const panelBody: ReactNode = useMemo(() => {
     if (show === 'help') {
-      return <CommandList commands={commands} display="table" />;
+      return (
+        <div data-test-subj={getTestId('helpContent')}>
+          <CommandList commands={commands} display="table" />
+        </div>
+      );
     }
 
     return null;
-  }, [commands, show]);
+  }, [commands, getTestId, show]);
 
   if (!show) {
     return null;

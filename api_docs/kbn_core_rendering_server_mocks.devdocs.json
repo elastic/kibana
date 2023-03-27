@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-rendering-server-mocks",
-        "id": "def-server.renderingServiceMock",
+        "id": "def-common.renderingServiceMock",
         "type": "Object",
         "tags": [],
         "label": "renderingServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-rendering-server-mocks",
-            "id": "def-server.renderingServiceMock.create",
+            "id": "def-common.renderingServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -45,7 +53,7 @@
           },
           {
             "parentPluginId": "@kbn/core-rendering-server-mocks",
-            "id": "def-server.renderingServiceMock.createPrebootContract",
+            "id": "def-common.renderingServiceMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
@@ -63,7 +71,7 @@
           },
           {
             "parentPluginId": "@kbn/core-rendering-server-mocks",
-            "id": "def-server.renderingServiceMock.createSetupContract",
+            "id": "def-common.renderingServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -83,13 +91,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

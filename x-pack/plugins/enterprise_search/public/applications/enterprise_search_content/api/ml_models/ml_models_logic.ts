@@ -19,6 +19,9 @@ export const getMLModels = async (size: GetMlModelsArgs = 1000) => {
   });
 };
 
-export const MLModelsApiLogic = createApiLogic(['ml_models_api_logic'], getMLModels);
+export const MLModelsApiLogic = createApiLogic(['ml_models_api_logic'], getMLModels, {
+  clearFlashMessagesOnMakeRequest: false,
+  showErrorFlash: false,
+});
 
 export type MLModelsApiLogicActions = Actions<GetMlModelsArgs, GetMlModelsResponse>;

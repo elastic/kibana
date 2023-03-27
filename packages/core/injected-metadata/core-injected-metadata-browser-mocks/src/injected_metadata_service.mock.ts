@@ -29,6 +29,7 @@ const createSetupContractMock = () => {
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
+    getCustomBranding: jest.fn(),
   };
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getExternalUrlConfig.mockReturnValue({ policy: [] });
@@ -41,6 +42,10 @@ const createSetupContractMock = () => {
     },
     nav: [],
     uiSettings: {
+      defaults: { legacyInjectedUiSettingDefaults: true },
+      user: { legacyInjectedUiSettingUserValues: true },
+    },
+    globalSettings: {
       defaults: { legacyInjectedUiSettingDefaults: true },
       user: { legacyInjectedUiSettingUserValues: true },
     },

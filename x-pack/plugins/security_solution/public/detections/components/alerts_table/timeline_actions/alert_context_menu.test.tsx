@@ -10,7 +10,7 @@ import { AlertContextMenu } from './alert_context_menu';
 import { TableId, TimelineId } from '../../../../../common/types';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
@@ -61,6 +61,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
+    remove: jest.fn(),
   }),
   useKibana: () => ({
     services: {

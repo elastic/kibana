@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { SavedSearchAttributes, SavedSearch } from './types';
+import type { SavedSearchAttributes } from '../../../common';
+import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../../../common';
+import type { SavedSearch } from './types';
 
 export { getSavedSearchUrl, getSavedSearchFullPathUrl } from '../../../common';
 
@@ -31,25 +33,8 @@ export const fromSavedSearchAttributes = (
   searchSource: SavedSearch['searchSource'],
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps']
 ): SavedSearch => ({
-  id,
-  searchSource,
+  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource),
   sharingSavedObjectProps,
-  title: attributes.title,
-  sort: attributes.sort,
-  columns: attributes.columns,
-  description: attributes.description,
-  tags,
-  grid: attributes.grid,
-  hideChart: attributes.hideChart,
-  viewMode: attributes.viewMode,
-  hideAggregatedPreview: attributes.hideAggregatedPreview,
-  rowHeight: attributes.rowHeight,
-  isTextBasedQuery: attributes.isTextBasedQuery,
-  usesAdHocDataView: attributes.usesAdHocDataView,
-  timeRestore: attributes.timeRestore,
-  timeRange: attributes.timeRange,
-  refreshInterval: attributes.refreshInterval,
-  rowsPerPage: attributes.rowsPerPage,
 });
 
 export const toSavedSearchAttributes = (
@@ -72,4 +57,5 @@ export const toSavedSearchAttributes = (
   timeRange: savedSearch.timeRange,
   refreshInterval: savedSearch.refreshInterval,
   rowsPerPage: savedSearch.rowsPerPage,
+  breakdownField: savedSearch.breakdownField,
 });

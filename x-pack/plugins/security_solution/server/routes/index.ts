@@ -55,7 +55,6 @@ import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
 } from '../lib/detection_engine/rule_types/types';
-import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
@@ -147,10 +146,6 @@ export const initRoutes = (
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
-
-  // Sourcerer API to generate default pattern
-  createSourcererDataViewRoute(router, getStartServices);
-  getSourcererDataViewRoute(router, getStartServices);
 
   // risky score module
   createEsIndexRoute(router, logger);

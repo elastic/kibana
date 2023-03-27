@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   cancelAction: () => void;
@@ -27,26 +27,26 @@ export const DeleteAnnotationModal: React.FC<Props> = ({
     <Fragment>
       {isVisible === true && (
         <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteAnnotationTitle"
-              defaultMessage="Delete this annotation?"
-            />
-          }
+          title={i18n.translate(
+            'xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteAnnotationTitle',
+            {
+              defaultMessage: 'Delete this annotation?',
+            }
+          )}
           onCancel={cancelAction}
           onConfirm={deleteAction}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteButtonLabel"
-              defaultMessage="Delete"
-            />
-          }
+          cancelButtonText={i18n.translate(
+            'xpack.ml.timeSeriesExplorer.deleteAnnotationModal.cancelButtonLabel',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteButtonLabel',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
           buttonColor="danger"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           className="eui-textBreakWord"

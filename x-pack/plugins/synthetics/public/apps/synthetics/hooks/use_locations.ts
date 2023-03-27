@@ -21,10 +21,15 @@ export function useLocations() {
     }
   }, [dispatch, locations, locationsLoaded]);
 
+  const getLocationByLabel = (label: string) => {
+    return locations.find((location) => location.label === label);
+  };
+
   return {
     error,
     loading,
     locations,
     throttling,
+    getLocationByLabel,
   };
 }

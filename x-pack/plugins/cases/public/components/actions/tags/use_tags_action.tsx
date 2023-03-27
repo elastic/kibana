@@ -6,71 +6,23 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
-import { difference, isEqual } from 'lodash';
-import type { CaseUpdateRequest } from '../../../../common/ui';
-import { useUpdateCases } from '../../../containers/use_bulk_update_case';
+import React from 'react';
 import type { Case } from '../../../../common';
-import { useCasesContext } from '../../cases_context/use_cases_context';
 import type { UseActionProps } from '../types';
+import { useItemsAction } from '../use_items_action';
 import * as i18n from './translations';
-import type { TagsSelectionState } from './types';
 
 export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
-  const { mutate: updateCases } = useUpdateCases();
-  const { permissions } = useCasesContext();
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const [selectedCasesToEditTags, setSelectedCasesToEditTags] = useState<Case[]>([]);
-  const canUpdateStatus = permissions.update;
-  const isActionDisabled = isDisabled || !canUpdateStatus;
-
-  const onFlyoutClosed = useCallback(() => setIsFlyoutOpen(false), []);
-  const openFlyout = useCallback(
-    (selectedCases: Case[]) => {
-      onAction();
-      setIsFlyoutOpen(true);
-      setSelectedCasesToEditTags(selectedCases);
-    },
-    [onAction]
-  );
-
-  const areTagsEqual = (originalTags: Set<string>, tagsToUpdate: Set<string>): boolean => {
-    return isEqual(originalTags, tagsToUpdate);
-  };
-
-  const onSaveTags = useCallback(
-    (tagsSelection: TagsSelectionState) => {
-      onAction();
-      onFlyoutClosed();
-
-      const casesToUpdate = selectedCasesToEditTags.reduce((acc, theCase) => {
-        const tagsWithoutUnselectedTags = difference(theCase.tags, tagsSelection.unSelectedTags);
-        const uniqueTags = new Set([...tagsWithoutUnselectedTags, ...tagsSelection.selectedTags]);
-
-        if (areTagsEqual(new Set([...theCase.tags]), uniqueTags)) {
-          return acc;
-        }
-
-        return [
-          ...acc,
-          {
-            tags: Array.from(uniqueTags.values()),
-            id: theCase.id,
-            version: theCase.version,
-          },
-        ];
-      }, [] as CaseUpdateRequest[]);
-
-      updateCases(
-        {
-          cases: casesToUpdate,
-          successToasterTitle: i18n.EDITED_TAGS(selectedCasesToEditTags.length),
-        },
-        { onSuccess: onActionSuccess }
-      );
-    },
-    [onAction, onActionSuccess, onFlyoutClosed, selectedCasesToEditTags, updateCases]
-  );
+  const { isFlyoutOpen, onFlyoutClosed, onSaveItems, openFlyout, isActionDisabled } =
+    useItemsAction<Case['tags']>({
+      fieldKey: 'tags',
+      isDisabled,
+      onAction,
+      onActionSuccess,
+      successToasterTitle: i18n.EDITED_CASES,
+      fieldSelector: (theCase) => theCase.tags,
+      itemsTransformer: (items) => items,
+    });
 
   const getAction = (selectedCases: Case[]) => {
     return {
@@ -83,7 +35,7 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
     };
   };
 
-  return { getAction, isFlyoutOpen, onFlyoutClosed, onSaveTags };
+  return { getAction, isFlyoutOpen, onFlyoutClosed, onSaveTags: onSaveItems };
 };
 
 export type UseTagsAction = ReturnType<typeof useTagsAction>;

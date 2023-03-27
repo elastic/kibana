@@ -24,6 +24,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 
 export function createInternalCoreSetupMock() {
   const setupDeps = {
@@ -45,6 +46,7 @@ export function createInternalCoreSetupMock() {
     deprecations: deprecationsServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     coreUsageData: coreUsageDataServiceMock.createSetupContract(),
+    customBranding: customBrandingServiceMock.createSetupContract(),
   };
   return setupDeps;
 }

@@ -149,3 +149,16 @@ export const INSIGHTS_UPSELL = i18n.translate(
     defaultMessage: 'Get more insights with a platinum subscription',
   }
 );
+
+export const SUPPRESSED_ALERTS_COUNT = (count?: number) =>
+  i18n.translate('xpack.securitySolution.alertDetails.overview.insights.suppressedAlertsCount', {
+    defaultMessage: '{count} suppressed {count, plural, =1 {alert} other {alerts}}',
+    values: { count },
+  });
+
+export const SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.insights.suppressedAlertsCountTechnicalPreview',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);

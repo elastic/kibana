@@ -29,6 +29,8 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
+        // override default to not allow hiddenFromHttpApis saved object types access to the HTTP Apis. see https://github.com/elastic/dev/issues/2200
+        '--savedObjects.allowHttpApiAccess=false',
 
         // to be re-enabled once kibana/issues/102552 is completed
         '--xpack.reporting.enabled=false',
@@ -68,6 +70,9 @@ export default async function ({ readConfigFile }) {
       },
       management: {
         pathname: '/app/management',
+      },
+      filesManagement: {
+        pathname: '/app/management/kibana/filesManagement',
       },
       /** @obsolete "management" should be instead of "settings" **/
       settings: {
@@ -388,7 +393,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['without-timefield', 'with-timefield'],
+                names: ['without-timefield', 'with-timefield', 'with-different-timefield'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

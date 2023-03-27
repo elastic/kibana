@@ -10,14 +10,18 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { HttpError, Status } from '../../../../../common/types/api';
 
+import { FetchAnalyticsCollectionAPILogic } from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';
+
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
 describe('fetchAnalyticsCollectionLogic', () => {
+  const { mount: apiLogicMount } = new LogicMounter(FetchAnalyticsCollectionAPILogic);
   const { mount } = new LogicMounter(FetchAnalyticsCollectionLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
+    apiLogicMount();
     mount();
   });
 
@@ -39,7 +43,7 @@ describe('fetchAnalyticsCollectionLogic', () => {
     });
 
     it('calls flashAPIErrors on apiError', () => {
-      FetchAnalyticsCollectionLogic.actions.apiError({} as HttpError);
+      FetchAnalyticsCollectionAPILogic.actions.apiError({} as HttpError);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
       expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
     });
@@ -58,7 +62,7 @@ describe('fetchAnalyticsCollectionLogic', () => {
   describe('selectors', () => {
     describe('analyticsCollections', () => {
       it('updates when apiSuccess listener triggered', () => {
-        FetchAnalyticsCollectionLogic.actions.apiSuccess({} as AnalyticsCollection);
+        FetchAnalyticsCollectionAPILogic.actions.apiSuccess({} as AnalyticsCollection);
 
         expect(FetchAnalyticsCollectionLogic.values).toEqual({
           ...DEFAULT_VALUES,

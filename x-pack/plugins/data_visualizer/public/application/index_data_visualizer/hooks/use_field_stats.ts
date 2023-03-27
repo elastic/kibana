@@ -12,6 +12,7 @@ import { last, cloneDeep } from 'lodash';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { Comparators } from '@elastic/eui';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
+import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
 import type {
   DataStatsFetchProgress,
   FieldStatsSearchStrategyReturnBase,
@@ -22,10 +23,6 @@ import type {
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type { FieldRequestConfig } from '../../../../common/types';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
-import {
-  buildBaseFilterCriteria,
-  getSafeAggregationName,
-} from '../../../../common/utils/query_utils';
 import type { FieldStats, FieldStatsError } from '../../../../common/types/field_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_EXAMPLES_DEFAULT } from '../search_strategy/requests/constants';

@@ -34,13 +34,6 @@ export const NO_DATA_MESSAGE = i18n.translate(
   }
 );
 
-export const EXPAND_LOCATIONS_LABEL = i18n.translate(
-  'xpack.synthetics.management.monitorList.locations.expand',
-  {
-    defaultMessage: 'Click to view remaining locations',
-  }
-);
-
 export const EXPAND_TAGS_LABEL = i18n.translate(
   'xpack.synthetics.management.monitorList.tags.expand',
   {
@@ -51,6 +44,17 @@ export const EXPAND_TAGS_LABEL = i18n.translate(
 export const EDIT_LABEL = i18n.translate('xpack.synthetics.management.editLabel', {
   defaultMessage: 'Edit',
 });
+
+export const ENABLE_STATUS_ALERT = i18n.translate('xpack.synthetics.management.enableStatusAlert', {
+  defaultMessage: 'Enable status alerts',
+});
+
+export const DISABLE_STATUS_ALERT = i18n.translate(
+  'xpack.synthetics.management.disableStatusAlert',
+  {
+    defaultMessage: 'Disable status alerts',
+  }
+);
 
 export const DUPLICATE_LABEL = i18n.translate('xpack.synthetics.management.duplicateLabel', {
   defaultMessage: 'Duplicate',
@@ -137,8 +141,8 @@ export const getRecordRangeLabel = ({
         total: <EuiI18nNumber value={total} />,
         monitorsLabel: (
           <strong>
-            {i18n.translate('xpack.synthetics.management.monitorList.recordRangeLabel', {
-              defaultMessage: '{monitorCount, plural, one {Monitor} other {Monitors}}',
+            {i18n.translate('xpack.synthetics.management.monitorList.configurationRangeLabel', {
+              defaultMessage: '{monitorCount, plural, one {Configuration} other {Configurations}}',
               values: {
                 monitorCount: total,
               },
@@ -206,4 +210,10 @@ export const getMonitorEnabledUpdateFailureMessage = (name: string) =>
   i18n.translate('xpack.synthetics.management.monitorEnabledUpdateFailureMessage', {
     defaultMessage: 'Unable to update monitor {name}.',
     values: { name },
+  });
+
+export const getFilterForTypeMessage = (typeName: string) =>
+  i18n.translate('xpack.synthetics.management.filter.clickTypeMessage', {
+    defaultMessage: 'Click to filter records for type {typeName}.',
+    values: { typeName },
   });

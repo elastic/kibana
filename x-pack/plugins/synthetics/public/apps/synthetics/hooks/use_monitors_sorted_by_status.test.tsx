@@ -55,80 +55,57 @@ describe('useMonitorsSortedByStatus', () => {
               sortOrder,
               sortField: 'name.keyword',
             },
-            status: {
-              upConfigs: [
-                {
-                  configId: 'test-monitor-1',
-                  heartbeatId: 'test-monitor-1',
-                  location: location2.label,
-                },
-                {
-                  configId: 'test-monitor-2',
-                  heartbeatId: 'test-monitor-2',
-                  location: location2.label,
-                },
-                {
-                  configId: 'test-monitor-3',
-                  heartbeatId: 'test-monitor-3',
-                  location: location2.label,
-                },
-              ],
-              downConfigs: [
-                {
-                  configId: 'test-monitor-1',
-                  heartbeatId: 'test-monitor-1',
-                  location: location1.label,
-                },
-                {
-                  configId: 'test-monitor-2',
-                  heartbeatId: 'test-monitor-2',
-                  location: location1.label,
-                },
-                {
-                  configId: 'test-monitor-3',
-                  heartbeatId: 'test-monitor-3',
-                  location: location1.label,
-                },
-              ],
-            },
             data: {
               total: 0,
               allMonitorIds: [],
               monitors: [
                 {
+                  configId: 'test-monitor-1',
                   id: 'test-monitor-1',
                   name: 'Test monitor 1',
                   location: location1,
                   isEnabled: false,
                 },
                 {
+                  configId: 'test-monitor-1',
                   id: 'test-monitor-1',
                   name: 'Test monitor 1',
                   location: location2,
                   isEnabled: true,
                 },
                 {
+                  configId: 'test-monitor-2',
                   id: 'test-monitor-2',
                   name: 'Test monitor 2',
                   location: location1,
                   isEnabled: true,
                 },
                 {
+                  configId: 'test-monitor-2',
                   id: 'test-monitor-2',
                   name: 'Test monitor 2',
                   location: location2,
                   isEnabled: true,
                 },
                 {
+                  configId: 'test-monitor-3',
                   id: 'test-monitor-3',
                   name: 'Test monitor 3',
                   location: location1,
                   isEnabled: true,
                 },
                 {
+                  configId: 'test-monitor-3',
                   id: 'test-monitor-3',
                   name: 'Test monitor 3',
                   location: location2,
+                  isEnabled: true,
+                },
+                {
+                  configId: 'test-monitor-4',
+                  id: 'test-monitor-4',
+                  name: 'Test monitor 4',
+                  location: location1,
                   isEnabled: true,
                 },
               ],
@@ -136,6 +113,51 @@ describe('useMonitorsSortedByStatus', () => {
             error: null,
             loaded: false,
             loading: false,
+          },
+          overviewStatus: {
+            status: {
+              upConfigs: {
+                [`test-monitor-1-${location2.label}`]: {
+                  configId: 'test-monitor-1',
+                  monitorQueryId: 'test-monitor-1',
+                  location: location2.label,
+                },
+                [`test-monitor-2-${location2.label}`]: {
+                  configId: 'test-monitor-2',
+                  monitorQueryId: 'test-monitor-2',
+                  location: location2.label,
+                },
+                [`test-monitor-3-${location2.label}`]: {
+                  configId: 'test-monitor-3',
+                  monitorQueryId: 'test-monitor-3',
+                  location: location2.label,
+                },
+              },
+              downConfigs: {
+                [`test-monitor-1-${location1.label}`]: {
+                  configId: 'test-monitor-1',
+                  monitorQueryId: 'test-monitor-1',
+                  location: location1.label,
+                },
+                [`test-monitor-2-${location1.label}`]: {
+                  configId: 'test-monitor-2',
+                  monitorQueryId: 'test-monitor-2',
+                  location: location1.label,
+                },
+                [`test-monitor-3${location1.label}`]: {
+                  configId: 'test-monitor-3',
+                  monitorQueryId: 'test-monitor-3',
+                  location: location1.label,
+                },
+              },
+              pendingConfigs: {
+                [`test-monitor-4-${location1.label}`]: {
+                  configId: 'test-monitor-4',
+                  monitorQueryId: 'test-monitor-4',
+                  location: location1.label,
+                },
+              },
+            },
           },
         }}
       >
@@ -151,40 +173,53 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location1,
           isEnabled: false,
+        },
+        {
+          configId: 'test-monitor-4',
+          id: 'test-monitor-4',
+          name: 'Test monitor 4',
+          location: location1,
+          isEnabled: true,
         },
       ],
       downMonitors: {
@@ -204,40 +239,53 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location1,
           isEnabled: false,
+        },
+        {
+          configId: 'test-monitor-4',
+          id: 'test-monitor-4',
+          name: 'Test monitor 4',
+          location: location1,
+          isEnabled: true,
         },
       ],
       downMonitors: {
@@ -261,18 +309,21 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location2,
@@ -300,12 +351,14 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location1,
@@ -333,6 +386,7 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location1,

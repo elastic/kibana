@@ -12,7 +12,8 @@ import '../../../__mocks__/engine_logic.mock';
 import React from 'react';
 
 import { shallow } from 'enzyme';
-import { set } from 'lodash/fp';
+
+import { set } from '@kbn/safer-lodash-set/fp';
 
 import { CurationsTable, EmptyState } from '../components';
 

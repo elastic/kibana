@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
-// @ts-ignore
 import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
 import { getClustersState } from './get_clusters_state';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';

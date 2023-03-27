@@ -13,17 +13,18 @@ import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
-import type { Usage } from '../../collectors/register';
+import type { FleetUsage } from '../../collectors/register';
 
 import { appContextService } from '../app_context';
 
-import { fleetUsagesSchema } from './fleet_usages_schema';
+import { fleetAgentsSchema, fleetUsagesSchema } from './fleet_usages_schema';
 
-const EVENT_TYPE = 'fleet_usage';
+const FLEET_USAGES_EVENT_TYPE = 'fleet_usage';
+const FLEET_AGENTS_EVENT_TYPE = 'fleet_agents';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '1.0.0';
+  private taskVersion = '1.1.0';
   private taskType = 'Fleet-Usage-Sender';
   private wasStarted: boolean = false;
   private interval = '1h';
@@ -33,7 +34,7 @@ export class FleetUsageSender {
   constructor(
     taskManager: TaskManagerSetupContract,
     core: CoreSetup,
-    fetchUsage: (abortController: AbortController) => Promise<Usage | undefined>
+    fetchUsage: (abortController: AbortController) => Promise<FleetUsage | undefined>
   ) {
     taskManager.registerTaskDefinitions({
       [this.taskType]: {
@@ -61,7 +62,7 @@ export class FleetUsageSender {
   private runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    fetchUsage: () => Promise<Usage | undefined>
+    fetchUsage: () => Promise<FleetUsage | undefined>
   ) => {
     if (!this.wasStarted) {
       appContextService.getLogger().debug('[runTask()] Aborted. Task not started yet');
@@ -79,8 +80,19 @@ export class FleetUsageSender {
       if (!usageData) {
         return;
       }
-      appContextService.getLogger().debug(JSON.stringify(usageData));
-      core.analytics.reportEvent(EVENT_TYPE, usageData);
+      const { agents_per_version: agentsPerVersion, ...fleetUsageData } = usageData;
+      appContextService
+        .getLogger()
+        .debug('Fleet usage telemetry: ' + JSON.stringify(fleetUsageData));
+
+      core.analytics.reportEvent(FLEET_USAGES_EVENT_TYPE, fleetUsageData);
+
+      appContextService
+        .getLogger()
+        .debug('Agents per version telemetry: ' + JSON.stringify(agentsPerVersion));
+      agentsPerVersion.forEach((byVersion) => {
+        core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { agents_per_version: byVersion });
+      });
     } catch (error) {
       appContextService
         .getLogger()
@@ -125,8 +137,13 @@ export class FleetUsageSender {
    */
   private registerTelemetryEventType(core: CoreSetup): void {
     core.analytics.registerEventType({
-      eventType: EVENT_TYPE,
+      eventType: FLEET_USAGES_EVENT_TYPE,
       schema: fleetUsagesSchema,
+    });
+
+    core.analytics.registerEventType({
+      eventType: FLEET_AGENTS_EVENT_TYPE,
+      schema: fleetAgentsSchema,
     });
   }
 }

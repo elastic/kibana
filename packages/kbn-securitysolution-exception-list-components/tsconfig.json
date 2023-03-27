@@ -1,9 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -15,5 +13,14 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts"
+  ],
+  "kbn_references": [
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/securitysolution-autocomplete",
+    "@kbn/ui-theme",
+    "@kbn/i18n",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

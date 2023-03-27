@@ -111,7 +111,9 @@ export interface AlertThreadPoolRejectionsState extends AlertNodeState {
 }
 
 export interface AlertLicenseState extends AlertState {
-  expiryDateMS: number;
+  meta: {
+    expiryDateMS: number;
+  };
 }
 
 export interface AlertNodesChangedState extends AlertState {
@@ -285,4 +287,8 @@ export interface AlertVersions {
   clusterUuid: string;
   ccs?: string;
   versions: string[];
+}
+
+export interface ExpressionConfig {
+  showDuration?: boolean;
 }

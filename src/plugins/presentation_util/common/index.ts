@@ -37,8 +37,6 @@ export {
 export {
   defaultTheme$,
   getElasticLogo,
-  fontStyle,
-  functionWrapper,
   getElasticOutline,
   isValidUrl,
   resolveWithMissingImage,

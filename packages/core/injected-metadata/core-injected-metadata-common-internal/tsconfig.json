@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -12,5 +10,14 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/core-base-common",
+    "@kbn/core-custom-branding-common"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

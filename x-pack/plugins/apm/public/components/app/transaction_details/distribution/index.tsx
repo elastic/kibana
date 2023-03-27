@@ -7,7 +7,7 @@
 
 import { XYBrushEvent } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -17,7 +17,7 @@ import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DurationDistributionChartWithScrubber } from '../../../shared/charts/duration_distribution_chart_with_scrubber';
 import { HeightRetainer } from '../../../shared/height_retainer';
@@ -43,8 +43,11 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo, showCriticalPath },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+    query: { rangeFrom, rangeTo, showCriticalPath, environment },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -56,10 +59,6 @@ export function TransactionDistribution({
     end,
   });
   const { waterfallItemId, detailTab } = urlParams;
-
-  const {
-    query: { environment },
-  } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { serviceName } = useApmServiceContext();
 
@@ -74,6 +73,30 @@ export function TransactionDistribution({
     status,
     totalDocCount,
   } = useTransactionDistributionChartData();
+
+  const onShowCriticalPathChange = useCallback(
+    (nextShowCriticalPath: boolean) => {
+      push(history, {
+        query: {
+          showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
+        },
+      });
+    },
+    [history]
+  );
+
+  const onTabClick = useCallback(
+    (tab: TransactionTab) => {
+      history.replace({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          detailTab: tab,
+        }),
+      });
+    },
+    [history]
+  );
 
   return (
     <HeightRetainer>
@@ -104,15 +127,7 @@ export function TransactionDistribution({
               }),
             });
           }}
-          onTabClick={(tab) => {
-            history.replace({
-              ...history.location,
-              search: fromQuery({
-                ...toQuery(history.location.search),
-                detailTab: tab,
-              }),
-            });
-          }}
+          onTabClick={onTabClick}
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
@@ -120,13 +135,7 @@ export function TransactionDistribution({
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
           traceSamples={traceSamplesFetchResult.data?.traceSamples}
           showCriticalPath={showCriticalPath}
-          onShowCriticalPathChange={(nextShowCriticalPath) => {
-            push(history, {
-              query: {
-                showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
-              },
-            });
-          }}
+          onShowCriticalPathChange={onShowCriticalPathChange}
         />
       </div>
     </HeightRetainer>

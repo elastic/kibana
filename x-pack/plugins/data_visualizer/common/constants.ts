@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DocLinksStart } from '@kbn/core/public';
 
 export const APP_ID = 'data_visualizer';
@@ -18,6 +18,8 @@ export const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
 export const ABSOLUTE_MAX_FILE_SIZE_BYTES = 1073741274; // 1GB
 export const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
+
+export const NO_TIME_FORMAT = 'null';
 
 // Value to use in the Elasticsearch index mapping meta data to identify the
 // index as having been created by the File Data Visualizer.

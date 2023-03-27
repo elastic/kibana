@@ -25,7 +25,7 @@ import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogViewContext } from '../../../hooks/use_log_view';
-import { LogsPageTemplate } from '../page_template';
+import { LogsPageTemplate } from '../shared/page_template';
 import { PageViewLogInContext } from '../stream/page_view_log_in_context';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';

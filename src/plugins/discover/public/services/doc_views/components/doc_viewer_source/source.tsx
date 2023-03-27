@@ -115,7 +115,7 @@ export const DocViewerSource = ({
     </div>
   );
   const errorState = (
-    <EuiEmptyPrompt iconType="alert" title={errorMessageTitle} body={errorMessage} />
+    <EuiEmptyPrompt iconType="warning" title={errorMessageTitle} body={errorMessage} />
   );
 
   if (reqState === ElasticRequestState.Error || reqState === ElasticRequestState.NotFound) {

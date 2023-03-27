@@ -50,7 +50,9 @@ export const GuideButtonPopover = ({
         </EuiTitle>
       )}
       <EuiSpacer />
-      <EuiText style={{ width: 300 }}>{description && <p>{description}</p>}</EuiText>
+      <EuiText size="s" style={{ width: 300 }}>
+        {description && <p>{description}</p>}
+      </EuiText>
     </EuiPopover>
   );
 };

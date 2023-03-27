@@ -3,7 +3,5 @@
   "version": "1.0.0",
   "description": "security solution elastic search utilities to use across plugins such lists, security_solution, cases, etc...",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "main": "./target_node/index.js",
-  "private": true,
-  "types": "./target_types/index.d.ts"
+  "private": true
 }

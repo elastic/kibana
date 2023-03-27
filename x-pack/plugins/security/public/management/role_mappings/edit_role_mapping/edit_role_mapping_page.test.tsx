@@ -8,7 +8,7 @@
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/test-jest-helpers/target_node/src/stub_web_worker';
+import '@kbn/web-worker-stub';
 
 import React from 'react';
 

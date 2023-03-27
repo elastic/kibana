@@ -1,0 +1,23 @@
+title: Create Swimlane connector request
+description: The Swimlane connector uses the Swimlane REST API to create Swimlane records.
+type: object
+required:
+  - config
+  - connector_type_id
+  - name
+  - secrets
+properties:
+  config:
+    $ref: 'config_properties_swimlane.yaml'
+  connector_type_id:
+    type: string
+    description: The type of connector.
+    enum:
+      - .swimlane
+    example: .swimlane
+  name:
+    type: string
+    description: The display name for the connector.
+    example: my-connector
+  secrets:
+    $ref: 'secrets_properties_swimlane.yaml'

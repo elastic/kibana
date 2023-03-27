@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { omit, pick } from 'lodash';
+import { omit } from 'lodash';
 
 import {
   type MockedPluginInitializer,
@@ -86,6 +86,7 @@ describe('PluginsService', () => {
         plugin: createManifest('pluginC', { required: ['pluginA'], optional: ['nonexist'] }),
       },
     ];
+    // @ts-expect-error this file was not being type checked properly in the past, error is legit
     mockSetupDeps = {
       analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       application: applicationServiceMock.createInternalSetupContract(),
@@ -98,11 +99,11 @@ describe('PluginsService', () => {
       theme: themeServiceMock.createSetupContract(),
     };
     mockSetupContext = {
-      ...mockSetupDeps,
+      ...omit(mockSetupDeps, 'injectedMetadata'),
       application: expect.any(Object),
       getStartServices: expect.any(Function),
-      injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
     };
+    // @ts-expect-error this file was not being type checked properly in the past, error is legit
     mockStartDeps = {
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),
       application: applicationServiceMock.createInternalStartContract(),
@@ -121,10 +122,9 @@ describe('PluginsService', () => {
       theme: themeServiceMock.createStartContract(),
     };
     mockStartContext = {
-      ...mockStartDeps,
+      ...omit(mockStartDeps, 'injectedMetadata'),
       application: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
-      injectedMetadata: pick(mockStartDeps.injectedMetadata, 'getInjectedVar'),
     };
 
     // Reset these for each test.

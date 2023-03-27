@@ -10,6 +10,6 @@ export type {
   UiSettingsType,
   DeprecationSettings,
   UiSettingsParams,
-  PublicUiSettingsParams,
   UserProvidedValues,
+  UiSettingsScope,
 } from './src/ui_settings';

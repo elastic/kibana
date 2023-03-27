@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { EuiImage } from '@elastic/eui';
 import React from 'react';
+import { of } from 'rxjs';
 
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import type { Space } from '../../common';
@@ -21,10 +25,30 @@ function getSpacesManager(spaces: Space[] = []) {
 
 test('it renders without crashing', () => {
   const spacesManager = getSpacesManager();
+  const customBranding$ = of({});
   const component = shallowWithIntl(
-    <SpaceSelector spacesManager={spacesManager as any} serverBasePath={'/server-base-path'} />
+    <SpaceSelector
+      spacesManager={spacesManager as any}
+      serverBasePath={'/server-base-path'}
+      customBranding$={customBranding$}
+    />
   );
   expect(component).toMatchSnapshot();
+});
+
+test('it renders with custom logo', () => {
+  const spacesManager = getSpacesManager();
+  const customBranding$ = of({ logo: 'img.jpg' });
+  const component = shallowWithIntl(
+    <SpaceSelector
+      spacesManager={spacesManager as any}
+      serverBasePath={'/server-base-path'}
+      customBranding$={customBranding$}
+    />
+  );
+  expect(component).toMatchSnapshot();
+  expect(component.find(KibanaSolutionAvatar).length).toBe(0);
+  expect(component.find(EuiImage).length).toBe(1);
 });
 
 test('it queries for spaces when loaded', () => {
@@ -40,7 +64,11 @@ test('it queries for spaces when loaded', () => {
   const spacesManager = getSpacesManager(spaces);
 
   shallowWithIntl(
-    <SpaceSelector spacesManager={spacesManager as any} serverBasePath={'/server-base-path'} />
+    <SpaceSelector
+      spacesManager={spacesManager as any}
+      serverBasePath={'/server-base-path'}
+      customBranding$={customBrandingServiceMock.createStartContract().customBranding$}
+    />
   );
 
   return Promise.resolve().then(() => {

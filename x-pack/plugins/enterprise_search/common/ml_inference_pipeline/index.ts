@@ -17,6 +17,7 @@ import {
   MlInferencePipeline,
   CreateMlInferencePipelineParameters,
   TrainedModelState,
+  InferencePipelineInferenceConfig,
 } from '../types/pipelines';
 
 // Getting an error importing this from @kbn/ml-plugin/common/constants/data_frame_analytics'
@@ -37,6 +38,7 @@ export const SUPPORTED_PYTORCH_TASKS = {
 export interface MlInferencePipelineParams {
   description?: string;
   destinationField: string;
+  inferenceConfig?: InferencePipelineInferenceConfig;
   model: MlTrainedModelConfig;
   pipelineName: string;
   sourceField: string;
@@ -50,6 +52,7 @@ export interface MlInferencePipelineParams {
 export const generateMlInferencePipelineBody = ({
   description,
   destinationField,
+  inferenceConfig,
   model,
   pipelineName,
   sourceField,
@@ -77,6 +80,7 @@ export const generateMlInferencePipelineBody = ({
           field_map: {
             [sourceField]: modelInputField,
           },
+          inference_config: inferenceConfig,
           model_id: model.model_id,
           on_failure: [
             {

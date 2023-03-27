@@ -93,6 +93,7 @@ export async function bulkInstallPackages({
         installSource: 'registry',
         spaceId,
         force,
+        prerelease,
       });
 
       if (installResult.error) {

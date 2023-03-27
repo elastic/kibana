@@ -45,8 +45,14 @@ export const exportRulesRoute = (
       const siemResponse = buildSiemResponse(response);
       const rulesClient = (await context.alerting).getRulesClient();
       const exceptionsClient = (await context.lists)?.getExceptionListClient();
-      const savedObjectsClient = (await context.core).savedObjects.client;
+      const {
+        getExporter,
+        getClient,
+        client: savedObjectsClient,
+      } = (await context.core).savedObjects;
 
+      const client = getClient({ includedHiddenTypes: ['action'] });
+      const actionsExporter = getExporter(client);
       try {
         const exportSizeLimit = config.maxRuleImportExportSize;
         if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
@@ -66,20 +72,29 @@ export const exportRulesRoute = (
           }
         }
 
-        const exportedRulesAndExceptions =
+        const exportedRulesAndReferences =
           request.body?.objects != null
             ? await getExportByObjectIds(
                 rulesClient,
                 exceptionsClient,
                 savedObjectsClient,
                 request.body.objects,
-                logger
+                logger,
+                actionsExporter,
+                request
               )
-            : await getExportAll(rulesClient, exceptionsClient, savedObjectsClient, logger);
+            : await getExportAll(
+                rulesClient,
+                exceptionsClient,
+                savedObjectsClient,
+                logger,
+                actionsExporter,
+                request
+              );
 
         const responseBody = request.query.exclude_export_details
-          ? exportedRulesAndExceptions.rulesNdjson
-          : `${exportedRulesAndExceptions.rulesNdjson}${exportedRulesAndExceptions.exceptionLists}${exportedRulesAndExceptions.exportDetails}`;
+          ? exportedRulesAndReferences.rulesNdjson
+          : `${exportedRulesAndReferences.rulesNdjson}${exportedRulesAndReferences.exceptionLists}${exportedRulesAndReferences.actionConnectors}${exportedRulesAndReferences.exportDetails}`;
 
         return response.ok({
           headers: {

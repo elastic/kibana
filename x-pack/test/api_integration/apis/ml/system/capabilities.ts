@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
-const NUMBER_OF_CAPABILITIES = 37;
+const NUMBER_OF_CAPABILITIES = 38;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -76,7 +76,8 @@ export default ({ getService }: FtrProviderContext) => {
           canStartStopDataFrameAnalytics: false,
           canCreateMlAlerts: false,
           canUseMlAlerts: true,
-          canAccessML: true,
+          canGetFieldInfo: true,
+          canGetMlInfo: true,
           canGetJobs: true,
           canGetDatafeeds: true,
           canGetCalendars: true,
@@ -120,7 +121,8 @@ export default ({ getService }: FtrProviderContext) => {
           canStartStopDataFrameAnalytics: true,
           canCreateMlAlerts: true,
           canUseMlAlerts: true,
-          canAccessML: true,
+          canGetFieldInfo: true,
+          canGetMlInfo: true,
           canGetJobs: true,
           canGetDatafeeds: true,
           canGetCalendars: true,

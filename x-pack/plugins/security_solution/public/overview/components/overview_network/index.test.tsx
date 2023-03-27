@@ -24,7 +24,6 @@ import { useNetworkOverview } from '../../containers/overview_network';
 import { SecurityPageName } from '../../../app/types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../common/components/link_to');
 const mockNavigateToApp = jest.fn();
@@ -87,26 +86,14 @@ describe('OverviewNetwork', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
     jest.clearAllMocks();
     useNetworkOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
     const myState = cloneDeep(state);
-    store = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('it renders the expected widget title', () => {

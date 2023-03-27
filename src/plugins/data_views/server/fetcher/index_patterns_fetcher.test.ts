@@ -40,8 +40,8 @@ describe('Index Pattern Fetcher - server', () => {
       .mockResponseOnce(emptyResponse as unknown as estypes.FieldCapsResponse)
       .mockResponse(response as unknown as estypes.FieldCapsResponse);
     // first field caps request returns empty
-    const result = await indexPatterns.validatePatternListActive(['-a', 'b', 'c']);
-    expect(result).toEqual(['-a', 'c']);
+    const result = await indexPatterns.validatePatternListActive(['-a', 'b', 'c', 'a:-b']);
+    expect(result).toEqual(['-a', 'c', 'a:-b']);
   });
   it('Returns all patterns when all match indices', async () => {
     esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);

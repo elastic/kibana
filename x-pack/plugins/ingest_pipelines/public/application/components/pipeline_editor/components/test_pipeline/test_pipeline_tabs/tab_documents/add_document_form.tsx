@@ -148,7 +148,7 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
           <EuiCallOut
             title={i18nTexts.addDocumentErrorMessage}
             color="danger"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="addDocumentError"
             size="s"
           >

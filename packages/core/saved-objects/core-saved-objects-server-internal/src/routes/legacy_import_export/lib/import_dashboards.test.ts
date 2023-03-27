@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { importDashboards } from './import_dashboards';
 
@@ -41,14 +41,14 @@ describe('importDashboards(req)', () => {
           type: 'dashboard',
           attributes: { panelJSON: '{}' },
           references: [],
-          migrationVersion: {},
+          typeMigrationVersion: '',
         },
         {
           id: 'panel-01',
           type: 'visualization',
           attributes: { visState: '{}' },
           references: [],
-          migrationVersion: {},
+          typeMigrationVersion: '',
         },
       ],
       { overwrite: false }
@@ -78,7 +78,7 @@ describe('importDashboards(req)', () => {
           type: 'dashboard',
           attributes: { panelJSON: '{}' },
           references: [],
-          migrationVersion: {},
+          typeMigrationVersion: '',
         },
       ],
       { overwrite: false }

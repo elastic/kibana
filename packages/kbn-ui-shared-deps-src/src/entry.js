@@ -53,11 +53,12 @@ export const Fflate = { unzlibSync, strFromU8 };
 
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
+export const Uuid = require('uuid');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnEsQuery = require('@kbn/es-query');
 export const KbnStd = require('@kbn/std');
 export const SaferLodashSet = require('@kbn/safer-lodash-set');
-export const RisonNode = require('rison-node');
+export const KbnRison = require('@kbn/rison');
 export const History = require('history');
 export const Classnames = require('classnames');
 export const ReactQuery = require('@tanstack/react-query');

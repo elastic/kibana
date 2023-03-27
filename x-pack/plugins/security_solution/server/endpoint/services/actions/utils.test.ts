@@ -29,7 +29,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Results } from '../../routes/actions/mocks';
 import { mockAuditLogSearchResult } from '../../routes/actions/mocks';
 
@@ -72,7 +72,7 @@ describe('When using Actions service utilities', () => {
         )
       ).toEqual({
         agents: ['6e6796b0-af39-4f12-b025-fcb06db499e5'],
-        command: 'unisolate',
+        command: 'kill-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'elastic',
@@ -92,7 +92,7 @@ describe('When using Actions service utilities', () => {
         )
       ).toEqual({
         agents: ['90d62689-f72d-4a05-b5e3-500cad0dc366'],
-        command: 'unisolate',
+        command: 'kill-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
         createdBy: 'Shanel',
@@ -230,7 +230,7 @@ describe('When using Actions service utilities', () => {
       let endpointResponseAtError: EndpointActivityLogActionResponse;
 
       beforeEach(() => {
-        const actionId = uuid.v4();
+        const actionId = uuidv4();
         fleetResponseAtError = fleetActionGenerator.generateActivityLogActionResponse({
           item: {
             data: { agent_id: '123', action_id: actionId, error: 'agent failed to deliver' },
@@ -326,7 +326,7 @@ describe('When using Actions service utilities', () => {
 
       beforeEach(() => {
         agentIds = ['123', '456', '789'];
-        actionId = uuid.v4();
+        actionId = uuidv4();
         action123Responses = [
           fleetActionGenerator.generateActivityLogActionResponse({
             item: { data: { agent_id: '123', error: '', action_id: actionId } },
@@ -406,6 +406,9 @@ describe('When using Actions service utilities', () => {
           ])
         ).toEqual({
           ...NOT_COMPLETED_OUTPUT,
+          outputs: {
+            '789': expect.any(Object),
+          },
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',
@@ -442,22 +445,8 @@ describe('When using Actions service utilities', () => {
           wasSuccessful: true,
           errors: undefined,
           outputs: {
-            '456': {
-              content: {
-                code: 'ra_get-file_success_done',
-                contents: [
-                  {
-                    file_name: 'bad_file.txt',
-                    path: '/some/path/bad_file.txt',
-                    sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-                    size: 1234,
-                    type: 'file',
-                  },
-                ],
-                zip_size: 123,
-              },
-              type: 'json',
-            },
+            456: expect.any(Object),
+            789: expect.any(Object),
           },
           agentState: {
             '123': {
@@ -500,7 +489,9 @@ describe('When using Actions service utilities', () => {
           errors: ['Fleet action response error: something is no good'],
           isCompleted: true,
           wasSuccessful: false,
-          outputs: {},
+          outputs: {
+            789: expect.any(Object),
+          },
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',
@@ -599,8 +590,8 @@ describe('When using Actions service utilities', () => {
     let errorResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
 
     beforeEach(() => {
-      const actionId0 = uuid.v4();
-      const actionId1 = uuid.v4();
+      const actionId0 = uuidv4();
+      const actionId1 = uuidv4();
       actionRequests123 = [
         fleetActionGenerator.generateActivityLogAction({
           item: {
@@ -723,7 +714,7 @@ describe('When using Actions service utilities', () => {
 
     beforeEach(() => {
       const agents = ['agent-id'];
-      const actionIds = [uuid.v4(), uuid.v4()];
+      const actionIds = [uuidv4(), uuidv4()];
 
       fleetActions = actionIds.map((id) => {
         return {

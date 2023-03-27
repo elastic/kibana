@@ -24,6 +24,7 @@ import { DataViewBase } from '@kbn/es-query';
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderEntryItem } from './entry_renderer';
+import { EntryFieldError } from './reducer';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
@@ -58,7 +59,7 @@ interface BuilderExceptionListItemProps {
   ) => DataViewBase;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
-  setErrorsExist: (arg: boolean) => void;
+  setErrorsExist: (arg: EntryFieldError) => void;
   setWarningsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
   isDisabled?: boolean;

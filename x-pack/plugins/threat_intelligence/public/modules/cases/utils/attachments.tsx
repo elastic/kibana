@@ -12,11 +12,10 @@ import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CASE_ATTACHMENT_TYPE_ID } from '../../../../common/constants';
 import { EMPTY_VALUE } from '../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { getIndicatorFieldAndValue } from '../../indicators';
-
-const ExternalAttachmentTypeId = 'indicator';
 
 /**
  * Indicator name, type, feed name and first seen values,
@@ -27,6 +26,10 @@ export interface AttachmentMetadata {
   indicatorType: string;
   indicatorFeedName: string;
 }
+
+const AttachmentChildrenLazy = React.lazy(
+  () => import('../components/attachment_children/attachment_children')
+);
 
 /**
  * Create an {@link ExternalReferenceAttachmentType} object used to register an external reference
@@ -39,7 +42,7 @@ export interface AttachmentMetadata {
  * - the component that renders the comment in teh case attachment
  */
 export const generateAttachmentType = (): ExternalReferenceAttachmentType => ({
-  id: ExternalAttachmentTypeId,
+  id: CASE_ATTACHMENT_TYPE_ID,
   displayName: 'indicator',
   getAttachmentViewObject: () => ({
     event: (
@@ -49,14 +52,7 @@ export const generateAttachmentType = (): ExternalReferenceAttachmentType => ({
       />
     ),
     timelineAvatar: <EuiAvatar name="indicator" color="subdued" iconType="crosshairs" />,
-    children: React.lazy(async () => {
-      const { initComponent } = await import(
-        '../components/attachment_children/attachment_children'
-      );
-      return {
-        default: initComponent(),
-      };
-    }),
+    children: AttachmentChildrenLazy,
   }),
   icon: 'crosshairs',
 });
@@ -85,7 +81,7 @@ export const generateAttachmentsWithoutOwner = (
       externalReferenceStorage: {
         type: ExternalReferenceStorageType.elasticSearchDoc,
       },
-      externalReferenceAttachmentTypeId: ExternalAttachmentTypeId,
+      externalReferenceAttachmentTypeId: CASE_ATTACHMENT_TYPE_ID,
       externalReferenceMetadata: attachmentMetadata as unknown as { [p: string]: JsonValue },
     },
   ];

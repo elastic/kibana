@@ -14,10 +14,12 @@ import path from 'path';
 const STORYBOOKS = [
   'apm',
   'canvas',
+  'cases',
   'ci_composite',
   'cloud_chat',
   'coloring',
   'chart_icons',
+  'content_management_examples',
   'controls',
   'custom_integrations',
   'dashboard_enhanced',

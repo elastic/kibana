@@ -49,6 +49,7 @@ jest.mock('@kbn/securitysolution-hook-utils', () => ({
 jest.mock('../../../rule_management/logic/use_rule');
 jest.mock('@kbn/lists-plugin/public');
 jest.mock('../../../rule_management/logic/use_find_rules');
+jest.mock('../../../rule_management/api/hooks/use_fetch_rule_by_id_query');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
   ReturnType<typeof getExceptionBuilderComponentLazy>

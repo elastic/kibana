@@ -63,7 +63,9 @@ describe('FileService', () => {
     });
     fileKindsRegistry.register({
       id: fileKindTinyFiles,
-      maxSizeBytes: 10,
+      maxSizeBytes: (file) => {
+        return file.mimeType === 'text/json' ? 3 : 10;
+      },
       http: {},
     });
     esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -179,6 +181,58 @@ describe('FileService', () => {
     }
   });
 
+  it('filters files by mime type', async () => {
+    await Promise.all([
+      createDisposableFile({ fileKind, name: 'My pic', mime: 'image/png' }),
+      createDisposableFile({ fileKind, name: 'Vern payslip', mime: 'application/pdf' }),
+    ]);
+
+    const result1 = await fileService.find({
+      kind: [fileKind],
+      mimeType: ['image/png'],
+    });
+
+    expect(result1.files.length).toBe(1);
+    expect(result1.files[0].name).toBe('My pic');
+
+    const result2 = await fileService.find({
+      kind: [fileKind],
+      mimeType: ['application/pdf'],
+    });
+
+    expect(result2.files.length).toBe(1);
+    expect(result2.files[0].name).toBe('Vern payslip');
+  });
+
+  it('filters files by user ID', async () => {
+    await Promise.all([
+      createDisposableFile({ fileKind, name: "Johnny's file", user: { id: '123' } }),
+      createDisposableFile({ fileKind, name: "Marry's file", user: { id: '456' } }),
+    ]);
+
+    const result1 = await fileService.find({
+      kind: [fileKind],
+      user: ['123'],
+    });
+
+    expect(result1.files.length).toBe(1);
+    expect(result1.files[0].name).toBe("Johnny's file");
+
+    const result2 = await fileService.find({
+      kind: [fileKind],
+      user: ['456'],
+    });
+
+    expect(result2.files.length).toBe(1);
+    expect(result2.files[0].name).toBe("Marry's file");
+
+    const result3 = await fileService.find({
+      user: ['456', '123'],
+    });
+
+    expect(result3.files.length).toBe(2);
+  });
+
   it('deletes files', async () => {
     const file = await fileService.create({ fileKind, name: 'test' });
     const result = await fileService.find({ kind: [fileKind] });
@@ -211,7 +265,7 @@ describe('FileService', () => {
     expect(updatedFile2.data.alt).toBe(updatableFields.alt);
   });
 
-  it('enforces max size settings', async () => {
+  it('enforces file kind max size settings', async () => {
     const file = await createDisposableFile({ fileKind: fileKindTinyFiles, name: 'test' });
     const tinyContent = Readable.from(['ok']);
     await file.uploadContent(tinyContent);
@@ -220,6 +274,26 @@ describe('FileService', () => {
     const notSoTinyContent = Readable.from(['nok'.repeat(10)]);
     await expect(() => file2.uploadContent(notSoTinyContent)).rejects.toThrow(
       new Error('Maximum of 10 bytes exceeded')
+    );
+  });
+
+  it('enforces per file max size settings, using mime type', async () => {
+    const file = await createDisposableFile({
+      fileKind: fileKindTinyFiles,
+      name: 'test',
+      mime: 'text/mime',
+    });
+    const tinyContent = Readable.from(['ok ok ok']);
+    await file.uploadContent(tinyContent);
+
+    const file2 = await createDisposableFile({
+      fileKind: fileKindTinyFiles,
+      name: 'test',
+      mime: 'text/json',
+    });
+    const notSoTinyContent = Readable.from(['[123]']);
+    await expect(() => file2.uploadContent(notSoTinyContent)).rejects.toThrow(
+      new Error('Maximum of 3 bytes exceeded')
     );
   });
 

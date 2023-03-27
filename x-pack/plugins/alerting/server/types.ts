@@ -11,6 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import {
@@ -20,9 +21,12 @@ import {
   Logger,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { type FieldMap } from '@kbn/alerts-as-data-utils';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
+import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
 export * from '../common';
 import {
   Rule,
@@ -45,8 +49,10 @@ import {
   RuleSnooze,
   IntervalSchedule,
   RuleLastRun,
+  SanitizedRule,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
+import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -55,6 +61,7 @@ export type { RuleTypeParams };
  */
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => RulesClient;
+  getRulesSettingsClient: () => RulesSettingsClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -84,6 +91,9 @@ export interface RuleExecutorServices<
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
+  share: SharePluginStart;
+  dataViews: DataViewsContract;
+  ruleResultService?: PublicRuleResultService;
 }
 
 export interface RuleExecutorOptions<
@@ -103,6 +113,7 @@ export interface RuleExecutorOptions<
   startedAt: Date;
   state: State;
   namespace?: string;
+  flappingSettings: RulesSettingsFlappingProperties;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -118,7 +129,7 @@ export type ExecutorType<
   ActionGroupIds extends string = never
 > = (
   options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
-) => Promise<State | void>;
+) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
@@ -131,6 +142,7 @@ export interface GetSummarizedAlertsFnOpts {
   executionUuid?: string;
   ruleId: string;
   spaceId: string;
+  excludedAlertInstanceIds: string[];
 }
 
 // TODO - add type for these alerts when we determine which alerts-as-data
@@ -138,18 +150,64 @@ export interface GetSummarizedAlertsFnOpts {
 export interface SummarizedAlerts {
   new: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   ongoing: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   recovered: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
+export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
+  rule: Omit<SanitizedRule<Params>, 'viewInAppRelativeUrl'>;
+}
+export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
+  opts: GetViewInAppRelativeUrlFnOpts<Params>
+) => string;
+
+interface ComponentTemplateSpec {
+  dynamic?: 'strict' | false; // defaults to 'strict'
+  fieldMap: FieldMap;
+}
+
+export interface IRuleTypeAlerts {
+  /**
+   * Specifies the target alerts-as-data resource
+   * for this rule type. All alerts created with the same
+   * context are written to the same alerts-as-data index.
+   *
+   * All custom mappings defined for a context must be the same!
+   */
+  context: string;
+
+  /**
+   * Specifies custom mappings for the target alerts-as-data
+   * index. These mappings will be translated into a component template
+   * and used in the index template for the index.
+   */
+  mappings: ComponentTemplateSpec;
+
+  /**
+   * Optional flag to include a reference to the ECS component template.
+   */
+  useEcs?: boolean;
+
+  /**
+   * Optional flag to include a reference to the legacy alert component template.
+   * Any rule type that is migrating from the rule registry should set this
+   * flag to true to ensure their alerts-as-data indices are backwards compatible.
+   */
+  useLegacyAlerts?: boolean;
+
+  /**
+   * Optional secondary alias to use. This alias should not include the namespace.
+   */
+  secondaryAlias?: string;
+}
 
 export interface RuleType<
   Params extends RuleTypeParams = never,
@@ -196,6 +254,13 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   getSummarizedAlerts?: GetSummarizedAlertsFn;
+  alerts?: IRuleTypeAlerts;
+  /**
+   * Determines whether framework should
+   * automatically make recovery determination. Defaults to true.
+   */
+  autoRecoverAlerts?: boolean;
+  getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -205,6 +270,7 @@ export type UntypedRuleType = RuleType<
 >;
 
 export interface RawRuleAction extends SavedObjectAttributes {
+  uuid: string;
   group: string;
   actionRef: string;
   actionTypeId: string;
@@ -284,6 +350,8 @@ export interface RawRule extends SavedObjectAttributes {
   isSnoozedUntil?: string | null;
   lastRun?: RawRuleLastRun | null;
   nextRun?: string | null;
+  revision: number;
+  running?: boolean | null;
 }
 
 export interface AlertingPlugin {
@@ -313,13 +381,26 @@ export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
-export interface PublicRuleMonitoringService {
+export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
+export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
+
+export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
   setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
   setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
   setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
 }
+
+export interface PublicLastRunSetters {
+  addLastRunError: (outcome: string) => void;
+  addLastRunWarning: (outcomeMsg: string) => void;
+  setLastRunOutcomeMessage: (warning: string) => void;
+}
+
+export type PublicRuleMonitoringService = PublicMetricsSetters;
+
+export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}

@@ -7,8 +7,12 @@
 
 export const MISSING_FINDINGS_NO_DATA_CONFIG = 'missing-findings-no-data-config';
 export const DASHBOARD_CONTAINER = 'dashboard-container';
+export const KUBERNETES_DASHBOARD_CONTAINER = 'kubernetes-dashboard-container';
+export const CLOUD_DASHBOARD_CONTAINER = 'cloud-dashboard-container';
 export const DASHBOARD_COUNTER_CARDS = {
   CLUSTERS_EVALUATED: 'dashboard-counter-card-clusters-evaluated',
   RESOURCES_EVALUATED: 'dashboard-counter-card-resources-evaluated',
   FAILING_FINDINGS: 'dashboard-counter-card-failing-findings',
 };
+export const DASHBOARD_TABLE_HEADER_SCORE_TEST_ID = 'csp:dashboard-sections-table-header-score';
+export const DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID = 'csp:dashboard-sections-table-column-score';

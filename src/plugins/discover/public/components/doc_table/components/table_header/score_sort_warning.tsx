@@ -15,5 +15,5 @@ export function DocViewTableScoreSortWarning() {
     defaultMessage: 'In order to retrieve values for _score, you must sort by it.',
   });
 
-  return <EuiIconTip content={tooltipContent} color="warning" size="s" type="alert" />;
+  return <EuiIconTip content={tooltipContent} color="warning" size="s" type="warning" />;
 }

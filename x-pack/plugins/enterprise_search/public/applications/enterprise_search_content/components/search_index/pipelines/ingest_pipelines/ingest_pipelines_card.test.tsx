@@ -12,8 +12,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
-
 import { DEFAULT_PIPELINE_NAME } from '../../../../../../../common/constants';
 
 import { CustomPipelineItem } from './custom_pipeline_item';
@@ -51,29 +49,5 @@ describe('IngestPipelinesCard', () => {
     expect(wrapper.find(DefaultPipelineItem)).toHaveLength(1);
     expect(wrapper.find(CustomizeIngestPipelineItem)).toHaveLength(1);
     expect(wrapper.find(CustomPipelineItem)).toHaveLength(0);
-  });
-  it('does not render customize cta with index ingest pipeline', () => {
-    const pipelineName = crawlerIndex.name;
-    const pipelines: Record<string, IngestPipeline | undefined> = {
-      [pipelineName]: {},
-      [`${pipelineName}@custom`]: {
-        processors: [],
-      },
-    };
-    setMockValues({
-      ...DEFAULT_VALUES,
-      data: pipelines,
-      hasIndexIngestionPipeline: true,
-      pipelineName,
-      pipelineState: {
-        ...DEFAULT_VALUES.pipelineState,
-        name: pipelineName,
-      },
-    });
-
-    const wrapper = shallow(<IngestPipelinesCard />);
-    expect(wrapper.find(CustomizeIngestPipelineItem)).toHaveLength(0);
-    expect(wrapper.find(DefaultPipelineItem)).toHaveLength(1);
-    expect(wrapper.find(CustomPipelineItem)).toHaveLength(1);
   });
 });

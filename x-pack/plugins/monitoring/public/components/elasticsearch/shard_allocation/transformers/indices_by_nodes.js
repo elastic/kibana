@@ -16,7 +16,7 @@ export function indicesByNodes() {
         return obj;
       }
       obj[id] = {
-        id: id,
+        id,
         name: id,
         children: [],
         unassigned: [],

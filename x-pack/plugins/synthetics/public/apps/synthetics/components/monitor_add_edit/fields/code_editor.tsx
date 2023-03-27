@@ -18,16 +18,27 @@ const CodeEditorContainer = styled(EuiPanel)`
   padding: 0;
 `;
 
-interface Props {
+export interface CodeEditorProps {
   ariaLabel: string;
   id: string;
   languageId: MonacoEditorLangId;
   onChange: (value: string) => void;
   value: string;
   placeholder?: string;
+  height?: string;
+  readOnly?: boolean;
 }
 
-export const CodeEditor = ({ ariaLabel, id, languageId, onChange, value, placeholder }: Props) => {
+export const CodeEditor = ({
+  ariaLabel,
+  id,
+  languageId,
+  onChange,
+  value,
+  placeholder,
+  height = '250px',
+  readOnly,
+}: CodeEditorProps) => {
   return (
     <CodeEditorContainer borderRadius="none" hasShadow={false} hasBorder={true}>
       <MonacoCodeContainer
@@ -38,11 +49,12 @@ export const CodeEditor = ({ ariaLabel, id, languageId, onChange, value, placeho
         <MonacoCodeEditor
           languageId={languageId}
           width="100%"
-          height="250px"
+          height={height}
           value={value}
           onChange={onChange}
           options={{
             renderValidationDecorations: value ? 'on' : 'off',
+            readOnly,
           }}
           isCopyable={true}
           allowFullScreen={true}

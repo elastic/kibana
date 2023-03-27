@@ -45,6 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
     }
 
+    await dashboardPanelActions.openContextMenu();
     await dashboardPanelActions.clickEdit();
     await PageObjects.maps.clickAddLayer();
     await PageObjects.maps.selectEMSBoundariesSource();

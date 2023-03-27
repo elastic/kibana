@@ -1,5 +1,9 @@
 {
   "ml.preview_datafeed": {
+    "url_params": {
+      "start": "",
+      "end": ""
+    },
     "methods": [
       "GET",
       "POST"

@@ -135,18 +135,53 @@ export class SampleDataInstaller {
     } catch (err) {
       // ignore delete errors
     }
+
+    try {
+      await this.esClient.asCurrentUser.indices.deleteDataStream({
+        name: index,
+      });
+    } catch (err) {
+      // ignore delete errors
+    }
+
+    try {
+      await this.esClient.asCurrentUser.indices.deleteIndexTemplate({
+        name: index,
+      });
+    } catch (err) {
+      // ignore error
+    }
   }
 
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     const index = createIndexName(dataset.id, dataIndex.id);
     try {
-      await this.esClient.asCurrentUser.indices.create({
-        index,
-        body: {
-          settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
-          mappings: { properties: dataIndex.fields },
-        },
-      });
+      if (dataIndex.isDataStream) {
+        const request = {
+          name: index,
+          body: {
+            template: {
+              settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+              mappings: { properties: dataIndex.fields },
+            },
+            index_patterns: [index],
+            data_stream: {},
+          },
+        };
+        await this.esClient.asCurrentUser.indices.putIndexTemplate(request);
+
+        await this.esClient.asCurrentUser.indices.createDataStream({
+          name: index,
+        });
+      } else {
+        await this.esClient.asCurrentUser.indices.create({
+          index,
+          body: {
+            settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
+            mappings: { properties: dataIndex.fields },
+          },
+        });
+      }
     } catch (err) {
       const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
       this.logger.warn(errMsg);

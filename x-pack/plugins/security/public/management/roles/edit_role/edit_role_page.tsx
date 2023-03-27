@@ -470,6 +470,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <KibanaPrivilegesRegion
           kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
           spaces={spaces.list}
+          spacesEnabled={spaces.enabled}
           uiCapabilities={uiCapabilities}
           canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
           editable={!isRoleReadOnly}
@@ -647,7 +648,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
             <EuiCallOut
               title={getExtendedRoleDeprecationNotice(role)}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             />
           </Fragment>
         )}

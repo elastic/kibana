@@ -8,6 +8,7 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
+import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { useHttp } from '../../../common/lib/kibana/hooks';
 import type {
@@ -36,7 +37,7 @@ export const useGetFileInfo = (
     queryFn: () => {
       const apiUrl = resolvePathVariables(ACTION_AGENT_FILE_INFO_ROUTE, {
         action_id: action.id,
-        agent_id: agentId ?? action.agents[0],
+        file_id: getFileDownloadId(action as ActionDetails, agentId),
       });
 
       return http.get<ActionFileInfoApiResponse>(apiUrl);

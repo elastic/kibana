@@ -1,4 +1,3 @@
-[role="xpack"]
 [[tines-action-type]]
 == Tines connector
 ++++
@@ -8,32 +7,45 @@
 The Tines connector uses Tines's https://www.tines.com/docs/actions/types/webhook[Webhook actions] to send events via POST request.
 
 [float]
-[[tines-connector-configuration]]
-=== Connector configuration
+[[define-tines-ui]]
+=== Create connectors in {kib}
 
-Tines connectors have the following configuration properties.
-
-URL::        The Tines tenant URL. If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-Email::      The email used to sign in to Tines.
-API Token::  A Tines API token created by the user. For more information, refer to the https://www.tines.com/api/authentication#generate-api-token[Tines documentation].
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule. For example:
 
 [role="screenshot"]
 image::management/connectors/images/tines-connector.png[Tines connector]
 
 [float]
-[[Preconfigured-tines-configuration]]
-==== Preconfigured connector type
+[[tines-connector-configuration]]
+==== Connector configuration
+
+Tines connectors have the following configuration properties:
+
+URL::        The Tines tenant URL. If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+Email::      The email used to sign in to Tines.
+API Token::  A Tines API token created by the user. For more information, refer to the https://www.tines.com/api/authentication#generate-api-token[Tines documentation].
+
+
+[float]
+[[preconfigured-tines-configuration]]
+=== Create preconfigured connectors
+
+If you are running {kib} on-prem, you can define connectors by
+adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
+For example:
 
 [source,text]
 --
- my-tines:
-   name: preconfigured-tines-connector-type
-   actionTypeId: .tines
-   config:
-     url: https://some-tenant-2345.tines.com
-   secrets:
-     email: some.address@test.com
-     token: ausergeneratedapitoken
+xpack.actions.preconfigured:
+  my-tines:
+    name: preconfigured-tines-connector-type
+    actionTypeId: .tines
+    config:
+      url: https://some-tenant-2345.tines.com
+    secrets:
+      email: some.address@test.com
+      token: ausergeneratedapitoken
 --
 
 Config defines information for the connector type.
@@ -47,21 +59,18 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[tines-action-parameters]]
-=== Action parameters
+=== Test connectors
 
-Tines action have the following parameters.
+Tines actions have the following parameters.
 
 Story::   The Story to send the events to.
 Webhook:: The Webhook action from the previous story that will receive the events, it is the data entry point. 
 
-Test Tines action parameters.
+You can test connectors with the <<execute-connector-api,run connector API>> or
+as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/tines-params-test.png[Tines params test]
-
-[float]
-[[tines-action-format]]
-=== Actions
 
 Once the Tines connector has been configured in an alerting rule:
 
@@ -84,16 +93,18 @@ image::management/connectors/images/tines-webhook-url-fallback.png[Tines Webhook
 
 [float]
 [[tines-story-library]]
-=== Tines Story Libary
+=== Tines story library
 
 In order to simplify the integration with Elastic, Tines offers a set of pre-defined Elastic stories in the Story library.
-They can be found by searching for "Elastic" in the Tines Story library:
+They can be found by searching for "Elastic" in the https://www.tines.com/story-library?s=elastic[Tines Story library]:
 
 [role="screenshot"]
 image::management/connectors/images/tines_elastic_stories.png[Tines Elastic stories]
 
 They can be imported directly into your Tines tenant.
 
+[float]
+[[tines-format]]
 === Format
 
 Tines connector will send the data in JSON format.

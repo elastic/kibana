@@ -138,7 +138,7 @@ exports[`NoDataCard props recommended 1`] = `
       class="emotion-euiCard__betaBadgeAnchor"
     >
       <span
-        class="euiBetaBadge emotion-euiBetaBadge-hollow-m-euiCard__betaBadge"
+        class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline-euiCard__betaBadge"
         id="generated-idBetaBadge"
         title="Recommended"
       >

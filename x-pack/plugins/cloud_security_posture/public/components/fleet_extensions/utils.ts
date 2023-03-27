@@ -4,57 +4,142 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
-import type { InputType } from './deployment_type_select';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackagePolicyConfigRecordEntry,
+} from '@kbn/fleet-plugin/common';
+import merge from 'lodash/merge';
+import {
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_VANILLA,
+  CLOUDBEAT_GCP,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_VULN_MGMT_AWS,
+  SUPPORTED_POLICY_TEMPLATES,
+  SUPPORTED_CLOUDBEAT_INPUTS,
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+} from '../../../common/constants';
+import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import { cloudPostureIntegrations } from '../../common/constants';
 
-export const isEksInput = (input: NewPackagePolicyInput) => input.type === CLOUDBEAT_EKS;
+// Posture policies only support the default namespace
+export const POSTURE_NAMESPACE = 'default';
 
-export const getEnabledInputType = (inputs: NewPackagePolicy['inputs']): InputType =>
-  (inputs.find((input) => input.enabled)?.type as InputType) || CLOUDBEAT_VANILLA;
+type PosturePolicyInput =
+  | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_GCP; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_AWS; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_VANILLA; policy_template: typeof KSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_EKS; policy_template: typeof KSPM_POLICY_TEMPLATE };
 
-export const getUpdatedDeploymentType = (newPolicy: NewPackagePolicy, inputType: InputType) => ({
-  isValid: true, // TODO: add validations
-  updatedPolicy: {
-    ...newPolicy,
-    inputs: newPolicy.inputs.map((item) => ({
-      ...item,
-      enabled: item.type === inputType,
-      streams: item.streams.map((stream) => ({
-        ...stream,
-        enabled: item.type === inputType,
-      })),
-    })),
-  },
-});
+// Extend NewPackagePolicyInput with known string literals for input type and policy template
+export type NewPackagePolicyPostureInput = NewPackagePolicyInput & PosturePolicyInput;
 
-export const getUpdatedEksVar = (newPolicy: NewPackagePolicy, key: string, value: string) => ({
-  isValid: true, // TODO: add validations
-  updatedPolicy: {
-    ...newPolicy,
-    inputs: newPolicy.inputs.map((item) =>
-      isEksInput(item) ? getUpdatedStreamVars(item, key, value) : item
-    ),
-  },
-});
+export const isPostureInput = (
+  input: NewPackagePolicyInput
+): input is NewPackagePolicyPostureInput =>
+  SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as CloudSecurityPolicyTemplate) &&
+  SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
 
-// TODO: remove access to first stream
-const getUpdatedStreamVars = (item: NewPackagePolicyInput, key: string, value: string) => {
-  if (!item.streams[0]) return item;
+const getPostureType = (policyTemplateInput: PostureInput) => {
+  switch (policyTemplateInput) {
+    case CLOUDBEAT_AWS:
+    case CLOUDBEAT_AZURE:
+    case CLOUDBEAT_GCP:
+      return 'cspm';
+    case CLOUDBEAT_VANILLA:
+    case CLOUDBEAT_EKS:
+      return 'kspm';
+    case CLOUDBEAT_VULN_MGMT_AWS:
+      return 'vuln_mgmt';
+    default:
+      return 'n/a';
+  }
+};
+
+const getDeploymentType = (policyTemplateInput: PostureInput) => {
+  switch (policyTemplateInput) {
+    case CLOUDBEAT_AWS:
+    case CLOUDBEAT_VULN_MGMT_AWS:
+      return 'aws';
+    case CLOUDBEAT_AZURE:
+      return 'azure';
+    case CLOUDBEAT_GCP:
+      return 'gcp';
+    case CLOUDBEAT_VANILLA:
+      return 'self_managed';
+    case CLOUDBEAT_EKS:
+      return 'eks';
+    default:
+      return 'n/a';
+  }
+};
+
+const getPostureInput = (
+  input: NewPackagePolicyInput,
+  inputType: PostureInput,
+  inputVars?: Record<string, PackagePolicyConfigRecordEntry>
+) => {
+  const isInputEnabled = input.type === inputType;
 
   return {
-    ...item,
-    streams: [
-      {
-        ...item.streams[0],
-        vars: {
-          ...item.streams[0]?.vars,
-          [key]: {
-            ...item.streams[0]?.vars?.[key],
-            value,
-          },
-        },
-      },
-    ],
+    ...input,
+    enabled: isInputEnabled,
+    streams: input.streams.map((stream) => ({
+      ...stream,
+      enabled: isInputEnabled,
+      // Merge new vars with existing vars
+      ...(isInputEnabled &&
+        stream.vars &&
+        inputVars && {
+          vars: merge({}, stream.vars, inputVars),
+        }),
+    })),
   };
 };
+
+/**
+ * Get a new object with the updated policy input and vars
+ */
+export const getPosturePolicy = (
+  newPolicy: NewPackagePolicy,
+  inputType: PostureInput,
+  inputVars?: Record<string, PackagePolicyConfigRecordEntry>
+): NewPackagePolicy => ({
+  ...newPolicy,
+  namespace: POSTURE_NAMESPACE,
+  // Enable new policy input and disable all others
+  inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
+  // Set hidden policy vars
+  vars: merge({}, newPolicy.vars, {
+    deployment: { value: getDeploymentType(inputType) },
+    posture: { value: getPostureType(inputType) },
+  }),
+});
+
+/**
+ * Input vars that are hidden from the user
+ */
+export const getPostureInputHiddenVars = (inputType: PostureInput) => {
+  switch (inputType) {
+    case 'cloudbeat/cis_aws':
+    case 'cloudbeat/cis_eks':
+      return { 'aws.credentials.type': { value: DEFAULT_AWS_VARS_GROUP } };
+    default:
+      return undefined;
+  }
+};
+
+export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolicyTemplate) =>
+  cloudPostureIntegrations[policyTemplate].options.map((o) => ({
+    tooltip: o.tooltip,
+    value: o.type,
+    id: o.type,
+    label: o.name,
+    icon: o.icon,
+    disabled: o.disabled,
+  }));

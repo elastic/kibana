@@ -13,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
-import { DatasourcePublicAPI, Datasource } from '../../types';
+import { DatasourcePublicAPI, Datasource, FrameDatasourceAPI } from '../../types';
 
 jest.mock('../../id_generator');
 
@@ -76,6 +76,10 @@ const expectedIndexPatterns = {
 };
 
 const indexPatterns = expectedIndexPatterns;
+const dateRange = {
+  fromDate: '2022-03-17T08:25:00.000Z',
+  toDate: '2022-04-17T08:25:00.000Z',
+};
 
 describe('Textbased Data Source', () => {
   let baseState: TextBasedPrivateState;
@@ -469,10 +473,31 @@ describe('Textbased Data Source', () => {
         layerId: 'newid',
       });
     });
+
+    it('should not return suggestions if no query is given', () => {
+      const state = {
+        layers: {},
+        initialContext: {
+          contextualFields: ['bytes', 'dest'],
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsForVisualizeField(
+        state,
+        '1',
+        '',
+        indexPatterns
+      );
+      expect(suggestions).toEqual([]);
+    });
   });
 
-  describe('#getErrorMessages', () => {
-    it('should use the results of getErrorMessages directly when single layer', () => {
+  describe('#getUserMessages', () => {
+    it('should use the results of getUserMessages directly when single layer', () => {
       const state = {
         layers: {
           a: {
@@ -514,10 +539,43 @@ describe('Textbased Data Source', () => {
           },
         },
       } as unknown as TextBasedPrivateState;
-      expect(TextBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
-        { longMessage: 'error 1', shortMessage: 'error 1' },
-        { longMessage: 'error 2', shortMessage: 'error 2' },
-      ]);
+      expect(
+        TextBasedDatasource.getUserMessages(state, {
+          frame: { dataViews: indexPatterns } as unknown as FrameDatasourceAPI,
+          setState: () => {},
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "visualization",
+              },
+              Object {
+                "id": "textBasedLanguagesQueryInput",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "error 1",
+            "severity": "error",
+            "shortMessage": "error 1",
+          },
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "visualization",
+              },
+              Object {
+                "id": "textBasedLanguagesQueryInput",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "error 2",
+            "severity": "error",
+            "shortMessage": "error 2",
+          },
+        ]
+      `);
     });
   });
 
@@ -622,7 +680,9 @@ describe('Textbased Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = TextBasedDatasource.initialize();
-      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns)).toEqual(null);
+      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange)).toEqual(
+        null
+      );
     });
 
     it('should generate an expression for an SQL query', async () => {
@@ -672,7 +732,7 @@ describe('Textbased Data Source', () => {
         ],
       } as unknown as TextBasedPrivateState;
 
-      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns))
+      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange))
         .toMatchInlineSnapshot(`
         Object {
           "chain": Array [

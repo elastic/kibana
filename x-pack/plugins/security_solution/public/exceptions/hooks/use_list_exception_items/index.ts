@@ -66,7 +66,7 @@ export const useListExceptionItems = ({
 
   const getReferences = useCallback(async () => {
     try {
-      const result: RuleReferences = await getExceptionItemsReferences(list);
+      const result: RuleReferences = await getExceptionItemsReferences([list]);
       setExceptionListReferences(result);
     } catch (error) {
       handleErrorStatus(error);

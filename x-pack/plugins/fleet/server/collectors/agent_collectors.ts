@@ -16,6 +16,8 @@ export interface AgentUsage {
   healthy: number;
   unhealthy: number;
   offline: number;
+  inactive: number;
+  unenrolled: number;
   total_all_statuses: number;
   updating: number;
 }
@@ -31,25 +33,32 @@ export const getAgentUsage = async (
       healthy: 0,
       unhealthy: 0,
       offline: 0,
+      inactive: 0,
+      unenrolled: 0,
       total_all_statuses: 0,
       updating: 0,
     };
   }
 
-  const { total, inactive, online, error, offline, updating } =
-    await AgentService.getAgentStatusForAgentPolicy(esClient);
+  const { total, inactive, online, error, offline, updating, unenrolled } =
+    await AgentService.getAgentStatusForAgentPolicy(esClient, soClient);
   return {
     total_enrolled: total,
     healthy: online,
     unhealthy: error,
     offline,
-    total_all_statuses: total + inactive,
+    inactive,
+    unenrolled,
+    total_all_statuses: total + unenrolled,
     updating,
   };
 };
 
 export interface AgentData {
-  agent_versions: string[];
+  agents_per_version: Array<{
+    version: string;
+    count: number;
+  }>;
   agent_checkin_status: {
     error: number;
     degraded: number;
@@ -58,9 +67,9 @@ export interface AgentData {
 }
 
 const DEFAULT_AGENT_DATA = {
-  agent_versions: [],
   agent_checkin_status: { error: 0, degraded: 0 },
   agents_per_policy: [],
+  agents_per_version: [],
 };
 
 export const getAgentData = async (
@@ -105,8 +114,8 @@ export const getAgentData = async (
       },
       { signal: abortController.signal }
     );
-    const versions = ((response?.aggregations?.versions as any).buckets ?? []).map(
-      (bucket: any) => bucket.key
+    const agentsPerVersion = ((response?.aggregations?.versions as any).buckets ?? []).map(
+      (bucket: any) => ({ version: bucket.key, count: bucket.doc_count })
     );
     const statuses = transformLastCheckinStatusBuckets(response);
 
@@ -115,9 +124,9 @@ export const getAgentData = async (
     );
 
     return {
-      agent_versions: versions,
       agent_checkin_status: statuses,
       agents_per_policy: agentsPerPolicy,
+      agents_per_version: agentsPerVersion,
     };
   } catch (error) {
     if (error.statusCode === 404) {

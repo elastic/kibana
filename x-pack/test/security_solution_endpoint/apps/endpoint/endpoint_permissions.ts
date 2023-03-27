@@ -59,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('should NOT allow access to endpoint management pages', async () => {
           await PageObjects.endpoint.navigateToEndpointList();
-          await testSubjects.existOrFail('noIngestPermissions');
+          await testSubjects.existOrFail('noPrivilegesPage');
         });
 
         it('should display endpoint data on Host Details', async () => {

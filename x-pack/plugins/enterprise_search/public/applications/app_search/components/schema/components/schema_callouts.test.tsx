@@ -18,6 +18,7 @@ import {
   UnsearchedFieldsCallout,
   UnconfirmedFieldsCallout,
   ConfirmSchemaButton,
+  MissingSubfieldsCallout,
 } from './schema_callouts';
 
 import { SchemaCallouts } from '.';
@@ -26,6 +27,8 @@ describe('SchemaCallouts', () => {
   const values = {
     hasUnconfirmedFields: false,
     hasNewUnsearchedFields: false,
+    hasIncompleteFields: false,
+    incompleteFields: [],
     mostRecentIndexJob: {
       hasErrors: false,
       activeReindexJobId: 'some-id',
@@ -79,6 +82,16 @@ describe('SchemaCallouts', () => {
     const wrapper = shallow(<SchemaCallouts />);
 
     expect(wrapper.find(UnconfirmedFieldsCallout)).toHaveLength(1);
+  });
+
+  it('renders a missing subfields callout if the schema has incomplete fields', () => {
+    setMockValues({
+      ...values,
+      hasIncompleteFields: true,
+    });
+    const wrapper = shallow(<SchemaCallouts />);
+
+    expect(wrapper.find(MissingSubfieldsCallout)).toHaveLength(1);
   });
 
   describe('non-owner/admins', () => {
@@ -140,6 +153,17 @@ describe('SchemaCallouts', () => {
 
       wrapper.simulate('click');
       expect(actions.updateSchema).toHaveBeenCalled();
+    });
+  });
+
+  describe('MissingSubfieldsCallout', () => {
+    it('renders a warning callout about incomplete fields with a link to the subfields support documentation', () => {
+      const wrapper = shallow(<MissingSubfieldsCallout />);
+
+      expect(wrapper.prop('title')).toMatch(/^(?:A field is|\d+ fields are) missing subfields$/);
+      expect(wrapper.find('[data-test-subj="missingSubfieldsLearnMoreLink"]').prop('href')).toEqual(
+        'https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines-text-subfields-support-conventions.html'
+      );
     });
   });
 });

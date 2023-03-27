@@ -52,9 +52,10 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
+import { TableId } from '../../../../common/types';
 
 import type { TimelineEventsType } from '../../../../common/types/timeline';
-import { TimelineId, TableId } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 import * as i18n from './translations';

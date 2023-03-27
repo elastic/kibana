@@ -7,72 +7,98 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedQuery } from '@kbn/data-plugin/public';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  type Filter,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGrid, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiHorizontalRule } from '@elastic/eui';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { ControlsContent } from './controls_content';
+import { useMetricsDataViewContext } from '../hooks/use_data_view';
 
-interface Props {
-  dataView: DataView;
-}
-
-export const UnifiedSearchBar = ({ dataView }: Props) => {
+export const UnifiedSearchBar = () => {
   const {
-    services: { unifiedSearch },
+    services: { unifiedSearch, application },
   } = useKibana<InfraClientStartDeps>();
-  const {
-    unifiedSearchDateRange,
-    unifiedSearchQuery,
-    unifiedSearchFilters,
-    onSubmit,
-    saveQuery,
-    clearSavedQuery,
-  } = useUnifiedSearchContext();
+  const { dataView } = useMetricsDataViewContext();
+  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
 
-  const onFilterChange = (filters: Filter[]) => {
-    onQueryChange({ filters });
-  };
-
-  const onQuerySubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
-    onQueryChange({ payload });
-  };
-
-  const onClearSavedQuery = () => {
-    clearSavedQuery();
-  };
-
-  const onQuerySave = (savedQuery: SavedQuery) => {
-    saveQuery(savedQuery);
+  const onPanelFiltersChange = (panelFilters: Filter[]) => {
+    if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
+      onQueryChange({ panelFilters });
+    }
   };
 
   const onQueryChange = ({
     payload,
-    filters,
+    panelFilters,
   }: {
     payload?: { dateRange: TimeRange; query?: Query };
-    filters?: Filter[];
+    panelFilters?: Filter[];
   }) => {
-    onSubmit(payload?.query, payload?.dateRange, filters);
+    onSubmit({ query: payload?.query, dateRange: payload?.dateRange, panelFilters });
+  };
+
+  const handleRefresh = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
+    // This makes sure `onQueryChange` is only called when the submit button is clicked
+    if (isUpdate === false) {
+      onQueryChange({ payload });
+    }
   };
 
   return (
-    <SearchBar
-      appName={'Infra Hosts'}
-      indexPatterns={[dataView]}
-      query={unifiedSearchQuery}
-      dateRangeFrom={unifiedSearchDateRange.from}
-      dateRangeTo={unifiedSearchDateRange.to}
-      filters={unifiedSearchFilters}
-      onQuerySubmit={onQuerySubmit}
-      onSaved={onQuerySave}
-      onSavedQueryUpdated={onQuerySave}
-      onClearSavedQuery={onClearSavedQuery}
-      showSaveQuery
-      showQueryInput
-      onFiltersUpdated={onFilterChange}
+    <StickyContainer>
+      <SearchBar
+        appName={'Infra Hosts'}
+        displayStyle="inPage"
+        indexPatterns={dataView && [dataView]}
+        placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
+          defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
+        })}
+        onQuerySubmit={handleRefresh}
+        showSaveQuery={Boolean(application?.capabilities?.visualize?.saveQuery)}
+        showDatePicker
+        showFilterBar
+        showQueryInput
+        showQueryMenu
+        useDefaultBehaviors
+      />
+      <ControlsContent
+        timeRange={searchCriteria.dateRange}
+        dataView={dataView}
+        query={searchCriteria.query}
+        filters={searchCriteria.filters}
+        onFiltersChange={onPanelFiltersChange}
+      />
+      <EuiHorizontalRule margin="none" />
+    </StickyContainer>
+  );
+};
+
+const StickyContainer = (props: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexGrid
+      gutterSize="none"
+      css={css`
+        position: sticky;
+        top: calc(${euiTheme.size.xxxl} * 2);
+        z-index: ${euiTheme.levels.header};
+        background: ${euiTheme.colors.emptyShade};
+        padding-top: ${euiTheme.size.m};
+        margin-top: -${euiTheme.size.l};
+      `}
+      {...props}
     />
   );
 };

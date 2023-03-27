@@ -102,6 +102,7 @@ describe('Pipeline Editor', () => {
       actions.openProcessorEditor('processors>2');
       expect(exists('editProcessorForm')).toBeTruthy();
       form.setInputValue('editProcessorForm.valueFieldInput', 'test44');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       await actions.submitProcessorForm();
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const {

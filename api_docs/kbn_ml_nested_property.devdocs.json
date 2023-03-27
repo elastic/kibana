@@ -1,0 +1,154 @@
+{
+  "id": "@kbn/ml-nested-property",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-nested-property",
+        "id": "def-common.getNestedProperty",
+        "type": "Function",
+        "tags": [],
+        "label": "getNestedProperty",
+        "description": [],
+        "signature": [
+          "(obj: Record<string, any>, accessor: string, defaultValue: any) => any"
+        ],
+        "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-nested-property",
+            "id": "def-common.getNestedProperty.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-nested-property",
+            "id": "def-common.getNestedProperty.$2",
+            "type": "string",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-nested-property",
+            "id": "def-common.getNestedProperty.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-nested-property",
+        "id": "def-common.setNestedProperty",
+        "type": "Function",
+        "tags": [],
+        "label": "setNestedProperty",
+        "description": [],
+        "signature": [
+          "(obj: Record<string, any>, accessor: string, value: any) => Record<string, any>"
+        ],
+        "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-nested-property",
+            "id": "def-common.setNestedProperty.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-nested-property",
+            "id": "def-common.setNestedProperty.$2",
+            "type": "string",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-nested-property",
+            "id": "def-common.setNestedProperty.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

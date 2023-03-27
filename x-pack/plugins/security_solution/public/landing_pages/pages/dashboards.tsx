@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
-import { DashboardConstants } from '@kbn/dashboard-plugin/public';
+import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { SecurityPageName } from '../../app/types';
 import { DashboardsTable } from '../../common/components/dashboards/dashboards_table';
 import { Title } from '../../common/components/header_page/title';
@@ -25,6 +25,7 @@ import { useCapabilities, useNavigateTo } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../components/landing_links_images';
 import * as i18n from './translations';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
@@ -45,6 +46,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
             href={url}
             onClick={(ev) => {
               ev.preventDefault();
+              track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.CREATE_DASHBOARD}`);
               navigateTo({ url });
             }}
             data-test-subj="createDashboardButton"
@@ -60,7 +62,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 export const DashboardsLandingPage = () => {
   const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboardsLanding)?.links ?? [];
   const { show: canReadDashboard, createNew: canCreateDashboard } =
-    useCapabilities<DashboardCapabilities>(DashboardConstants.DASHBOARD_ID);
+    useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
 
   return (
     <SecuritySolutionPageWrapper>

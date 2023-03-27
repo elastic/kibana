@@ -6,6 +6,12 @@
 
 Runs a connector by ID.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+====
+
 [[execute-connector-api-request]]
 === {api-request-title}
 
@@ -178,7 +184,7 @@ the `subAction` value.
 (Optional, array of strings) The custom actions available to the alert.
 
 `alias`::::
-(Optional, string) The unique identifier used for alert de-duplication in {opsgenie}.
+(Optional, string) The unique identifier used for alert deduplication in {opsgenie}.
 
 `description`::::
 (Optional, string) A description that provides detailed information about the alert.
@@ -258,7 +264,7 @@ required.
 [%collapsible%open]
 ======
 `alias`::::
-(Required, string) The unique identifier used for alert de-duplication in {opsgenie}.
+(Required, string) The unique identifier used for alert deduplication in {opsgenie}.
 The alias must match the value used when creating the alert.
 
 `note`::::
@@ -362,7 +368,7 @@ on the `subAction` value. This object is not required when `subAction` is
 [%collapsible%open]
 ======
 `comments`:::
-(Optional, array of objects) Additional information that is sent to {sn-sir}.
+(Optional, array of objects) Additional information that is sent to {sn-itsm}.
 +
 .Properties of `comments`
 [%collapsible%open]
@@ -381,7 +387,7 @@ version::::
 =======
 
 `incident`:::
-(Required, object) Information necessary to create or update a {sn-sir} incident.
+(Required, object) Information necessary to create or update a {sn-itsm} incident.
 +
 .Properties of `incident`
 [%collapsible%open]
@@ -520,6 +526,10 @@ to the security incident. The IPs are added as observables to the security incid
 updated. Otherwise, a new incident is created.
 
 `malware_hash`::::
+(Optional, string or array of strings) A list of malware hashes related to the
+security incident. The hashes are added as observables to the security incident.
+
+`malware_url`::::
 (Optional, string or array of strings) A list of malware URLs related to the
 security incident. The URLs are added as observables to the security incident.
 

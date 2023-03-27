@@ -103,7 +103,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           titlePosition: 'bottom',
         },
         columnType: FORMULA_COLUMN,
-        formula: 'unique_count(monitor.check_group)',
+        formula: "unique_count(monitor.check_group, kql='summary: *')",
         format: 'number',
       },
       {
@@ -129,7 +129,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           palette: getColorPalette('danger'),
         },
         columnType: FORMULA_COLUMN,
-        formula: 'unique_count(monitor.check_group, kql=\'monitor.status: "down"\')',
+        formula: 'unique_count(state.id, kql=\'monitor.status: "down"\')',
         format: 'number',
       },
       {
@@ -149,10 +149,15 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
   };
 }
 
-const getColorPalette = (color: 'danger' | 'warning' | 'success'): LegacyMetricState['palette'] => {
+export const getColorPalette = (
+  color: 'danger' | 'warning' | 'success' | string
+): LegacyMetricState['palette'] => {
   const statusPalette = euiPaletteForStatus(5);
 
-  // TODO: add more colors
+  let valueColor = color ?? statusPalette[3];
+  if (color === 'danger') {
+    valueColor = statusPalette[3];
+  }
 
   return {
     name: 'custom',
@@ -164,8 +169,8 @@ const getColorPalette = (color: 'danger' | 'warning' | 'success'): LegacyMetricS
       rangeType: 'number',
       rangeMin: 0,
       progression: 'fixed',
-      stops: [{ color: statusPalette[3], stop: 100 }],
-      colorStops: [{ color: statusPalette[3], stop: 0 }],
+      stops: [{ color: valueColor, stop: 100 }],
+      colorStops: [{ color: valueColor, stop: 0 }],
       continuity: 'above',
       maxSteps: 5,
     },

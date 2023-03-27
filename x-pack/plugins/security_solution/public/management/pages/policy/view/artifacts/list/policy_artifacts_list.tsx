@@ -37,7 +37,7 @@ interface PolicyArtifactsListProps {
   getPolicyArtifactsPath: (policyId: string) => string;
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
-  externalPrivileges?: boolean;
+  canWriteArtifact?: boolean;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
@@ -49,7 +49,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     getPolicyArtifactsPath,
     labels,
     onDeleteActionCallback,
-    externalPrivileges = true,
+    canWriteArtifact = false,
   }) => {
     useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
@@ -150,7 +150,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
         return {
           expanded: expandedItemsMap.get(item.id) || false,
           actions:
-            canCreateArtifactsByPolicy && externalPrivileges
+            canCreateArtifactsByPolicy && canWriteArtifact
               ? [fullDetailsAction, deleteAction]
               : [fullDetailsAction],
           policies: artifactCardPolicies,
@@ -160,7 +160,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
         artifactCardPolicies,
         canCreateArtifactsByPolicy,
         expandedItemsMap,
-        externalPrivileges,
+        canWriteArtifact,
         getAppUrl,
         getArtifactPath,
         labels.listFullDetailsActionTitle,

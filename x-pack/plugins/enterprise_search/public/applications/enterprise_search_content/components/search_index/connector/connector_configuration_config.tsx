@@ -26,12 +26,12 @@ import { ConnectorConfigurationForm } from './connector_configuration_form';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
 export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
-  const { error } = useValues(IndexViewLogic);
+  const { connectorError } = useValues(IndexViewLogic);
   const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
   const { setIsEditing } = useActions(ConnectorConfigurationLogic);
 
-  const displayList = configView.map(({ label, value }) => ({
-    description: value ?? '--',
+  const displayList = configView.map(({ label, isPasswordField, value }) => ({
+    description: isPasswordField && !!value ? '********' : value || '--',
     title: label,
   }));
 
@@ -45,7 +45,7 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
           displayList.length > 0 && (
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <EuiDescriptionList listItems={displayList} />
+                <EuiDescriptionList listItems={displayList} className="eui-textBreakWord" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup>
@@ -68,7 +68,7 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
           )
         )}
       </EuiFlexItem>
-      {!!error && (
+      {!!connectorError && (
         <EuiFlexItem>
           <EuiCallOut
             color="danger"
@@ -79,7 +79,7 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
               }
             )}
           >
-            <EuiText size="s">{error}</EuiText>
+            <EuiText size="s">{connectorError}</EuiText>
           </EuiCallOut>
         </EuiFlexItem>
       )}

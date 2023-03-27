@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { css } from '@emotion/react';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';

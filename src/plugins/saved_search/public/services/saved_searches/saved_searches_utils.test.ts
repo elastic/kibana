@@ -14,7 +14,8 @@ import {
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
-import type { SavedSearchAttributes, SavedSearch } from './types';
+import type { SavedSearchAttributes } from '../../../common';
+import type { SavedSearch } from './types';
 
 describe('saved_searches_utils', () => {
   describe('fromSavedSearchAttributes', () => {
@@ -41,6 +42,7 @@ describe('saved_searches_utils', () => {
         )
       ).toMatchInlineSnapshot(`
         Object {
+          "breakdownField": undefined,
           "columns": Array [
             "a",
             "b",
@@ -128,6 +130,7 @@ describe('saved_searches_utils', () => {
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
         Object {
+          "breakdownField": undefined,
           "columns": Array [
             "c",
             "d",

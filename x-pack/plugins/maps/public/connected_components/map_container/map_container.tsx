@@ -9,11 +9,10 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
-import moment from 'moment';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
@@ -21,7 +20,7 @@ import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
-import { getData, isScreenshotMode } from '../../kibana_services';
+import { isScreenshotMode } from '../../kibana_services';
 import { RawValue } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../../common/descriptor_types';
@@ -41,6 +40,7 @@ export interface Props {
   exitFullScreen: () => void;
   flyoutDisplay: FLYOUT_STATE;
   isFullScreen: boolean;
+  isTimesliderOpen: boolean;
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
   renderTooltipContent?: RenderToolTipContent;
@@ -70,7 +70,7 @@ export class MapContainer extends Component<Props, State> {
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
-    domId: uuid(),
+    domId: uuidv4(),
     showFitToBoundsButton: false,
     showTimesliderButton: false,
   };
@@ -154,13 +154,6 @@ export class MapContainer extends Component<Props, State> {
     }, 5000);
   };
 
-  _updateGlobalTimeRange(data: number[]) {
-    getData().query.timefilter.timefilter.setTime({
-      from: moment(data[0]).toISOString(),
-      to: moment(data[1]).toISOString(),
-    });
-  }
-
   render() {
     const {
       addFilters,
@@ -241,13 +234,10 @@ export class MapContainer extends Component<Props, State> {
             />
           )}
           <RightSideControls />
+          {this.props.isTimesliderOpen && (
+            <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
+          )}
         </EuiFlexItem>
-
-        <Timeslider
-          waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$}
-          updateGlobalTimeRange={this._updateGlobalTimeRange.bind(this)}
-        />
-
         <EuiFlexItem
           className={classNames('mapMapLayerPanel', {
             'mapMapLayerPanel-isVisible': !!flyoutPanel,

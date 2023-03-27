@@ -149,7 +149,7 @@ Array [
         <a
           class="euiLink emotion-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
-          rel="noopener"
+          rel="noopener noreferrer"
           target="_blank"
         >
           Elasticsearch Service Console
@@ -169,7 +169,7 @@ Array [
         <a
           class="euiLink emotion-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
-          rel="noopener"
+          rel="noopener noreferrer"
           target="_blank"
         >
           Logs and metrics
@@ -189,7 +189,7 @@ Array [
         <a
           class="euiLink emotion-euiLink-primary"
           href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
-          rel="noopener"
+          rel="noopener noreferrer"
           target="_blank"
         >
           the documentation page.

@@ -82,6 +82,69 @@ export default function (providerContext: FtrProviderContext) {
           .send({ hosts: ['https://test.fr'] })
           .expect(404);
       });
+      it('should allow to update an output with the shipper values', async function () {
+        await supertest
+          .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
+
+        expect(newOutput[0].shipper).to.eql({
+          compression_level: null,
+          disk_queue_compression_enabled: null,
+          disk_queue_enabled: true,
+          disk_queue_encryption_enabled: true,
+          disk_queue_max_size: null,
+          disk_queue_path: 'path/to/disk/queue',
+          loadbalance: null,
+          max_batch_bytes: null,
+          mem_queue_events: null,
+          queue_flush_timeout: null,
+        });
+      });
+
+      it('should discard the shipper values when shipper is disabled', async function () {
+        await supertest
+          .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default monitoring output 1',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default_monitoring: true,
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
+        expect(newOutput[0].shipper).to.equal(null);
+      });
     });
 
     describe('POST /outputs', () => {
@@ -220,6 +283,127 @@ export default function (providerContext: FtrProviderContext) {
         const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
         expect(defaultOutputs).to.have.length(1);
         expect(defaultOutputs[0].id).eql(output2.id);
+      });
+
+      it('should allow to create an ES output with the shipper values when shipper is enabled', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'output 1',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default_monitoring: true,
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.name === 'output 1');
+        expect(newOutput[0].shipper).to.eql({
+          compression_level: null,
+          disk_queue_compression_enabled: null,
+          disk_queue_enabled: true,
+          disk_queue_encryption_enabled: true,
+          disk_queue_max_size: null,
+          disk_queue_path: 'path/to/disk/queue',
+          loadbalance: null,
+          max_batch_bytes: null,
+          mem_queue_events: null,
+          queue_flush_timeout: null,
+        });
+      });
+
+      it('should discard the shipper values when shipper is disabled', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default monitoring output 1',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default_monitoring: true,
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
+        expect(defaultOutputs[0].shipper).to.equal(null);
+      });
+
+      it('should allow to create a logstash output with the shipper values', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+            config_yaml: 'shipper: {}',
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const newOutput = outputs.filter((o: any) => o.name === 'Logstash Output');
+        expect(newOutput[0].shipper).to.eql({
+          compression_level: null,
+          disk_queue_compression_enabled: null,
+          disk_queue_enabled: true,
+          disk_queue_encryption_enabled: true,
+          disk_queue_max_size: null,
+          disk_queue_path: 'path/to/disk/queue',
+          loadbalance: null,
+          max_batch_bytes: null,
+          mem_queue_events: null,
+          queue_flush_timeout: null,
+        });
+      });
+
+      it('should discard the shipper values when shipper is disabled', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'default monitoring output 1',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default_monitoring: true,
+            shipper: {
+              disk_queue_enabled: true,
+              disk_queue_path: 'path/to/disk/queue',
+              disk_queue_encryption_enabled: true,
+            },
+          })
+          .expect(200);
+        const {
+          body: { items: outputs },
+        } = await supertest.get(`/api/fleet/outputs`).expect(200);
+        const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
+        expect(defaultOutputs[0].shipper).to.equal(null);
       });
     });
 

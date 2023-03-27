@@ -1,0 +1,60 @@
+{
+  "attributes":{
+      "fieldAttrs":"{\"products.manufacturer\":{\"count\":1},\"products.price\":{\"count\":1},\"products.product_name\":{\"count\":1},\"total_quantity\":{\"count\":1}}",
+      "fieldFormatMap":"{\"taxful_total_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.[00]\"}},\"products.price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"taxless_total_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.taxless_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.taxful_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.min_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.base_unit_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.base_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}}}",
+      "fields":"[]",
+      "name":"Kibana Sample Data eCommerce",
+      "runtimeFieldMap":"{}",
+      "timeFieldName":"order_date",
+      "title":"ft_ecommerce",
+      "typeMeta":"{}"
+  },
+  "coreMigrationVersion":"8.7.0",
+  "created_at":"2023-01-03T22:03:10.614Z",
+  "id":"ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+  "migrationVersion":{
+    "index-pattern":"8.0.0"
+  },
+  "references":[],
+  "type":"index-pattern",
+  "updated_at":"2023-01-03T22:03:10.614Z",
+  "version":"WzIyMSwxXQ=="
+}
+
+{
+  "attributes":{
+    "description":"",
+    "kibanaSavedObjectMeta":{
+      "searchSourceJSON":"{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON":"{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON":"[{\"version\":\"8.7.0\",\"type\":\"map\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"87724519-117a-43c8-b2c1-fdba6476f05f\"},\"panelIndex\":\"87724519-117a-43c8-b2c1-fdba6476f05f\",\"embeddableConfig\":{\"attributes\":{\"title\":\"ecommerce-map\",\"description\":\"\",\"layerListJSON\":\"[{\\\"locale\\\":\\\"autoselect\\\",\\\"sourceDescriptor\\\":{\\\"type\\\":\\\"EMS_TMS\\\",\\\"isAutoSelect\\\":true,\\\"lightModeDefault\\\":\\\"road_map_desaturated\\\"},\\\"id\\\":\\\"a8fddec8-6488-4347-adbc-8ec15a8e33ce\\\",\\\"label\\\":null,\\\"minZoom\\\":0,\\\"maxZoom\\\":24,\\\"alpha\\\":1,\\\"visible\\\":true,\\\"style\\\":{\\\"type\\\":\\\"EMS_VECTOR_TILE\\\",\\\"color\\\":\\\"\\\"},\\\"includeInFitToBounds\\\":true,\\\"type\\\":\\\"EMS_VECTOR_TILE\\\"},{\\\"sourceDescriptor\\\":{\\\"geoField\\\":\\\"geoip.location\\\",\\\"scalingType\\\":\\\"MVT\\\",\\\"id\\\":\\\"06d9007b-f08a-4254-8bbf-bd4b3b99dc64\\\",\\\"type\\\":\\\"ES_SEARCH\\\",\\\"applyGlobalQuery\\\":true,\\\"applyGlobalTime\\\":true,\\\"applyForceRefresh\\\":true,\\\"filterByMapBounds\\\":true,\\\"tooltipProperties\\\":[],\\\"sortField\\\":\\\"\\\",\\\"sortOrder\\\":\\\"desc\\\",\\\"topHitsSplitField\\\":\\\"\\\",\\\"topHitsSize\\\":1,\\\"indexPatternRefName\\\":\\\"layer_1_source_index_pattern\\\"},\\\"id\\\":\\\"1b2b1491-47ff-4b00-b1b7-74ec08c70a86\\\",\\\"label\\\":\\\"Location layer\\\",\\\"minZoom\\\":0,\\\"maxZoom\\\":24,\\\"alpha\\\":0.75,\\\"visible\\\":true,\\\"style\\\":{\\\"type\\\":\\\"VECTOR\\\",\\\"properties\\\":{\\\"icon\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"value\\\":\\\"marker\\\"}},\\\"fillColor\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"color\\\":\\\"#54B399\\\"}},\\\"lineColor\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"color\\\":\\\"#41937c\\\"}},\\\"lineWidth\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"size\\\":0}},\\\"iconSize\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"size\\\":6}},\\\"iconOrientation\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"orientation\\\":0}},\\\"labelText\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"value\\\":\\\"\\\"}},\\\"labelColor\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"color\\\":\\\"#000000\\\"}},\\\"labelSize\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"size\\\":14}},\\\"labelZoomRange\\\":{\\\"options\\\":{\\\"useLayerZoomRange\\\":true,\\\"minZoom\\\":0,\\\"maxZoom\\\":24}},\\\"labelBorderColor\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"color\\\":\\\"#FFFFFF\\\"}},\\\"symbolizeAs\\\":{\\\"options\\\":{\\\"value\\\":\\\"circle\\\"}},\\\"labelBorderSize\\\":{\\\"options\\\":{\\\"size\\\":\\\"SMALL\\\"}},\\\"labelPosition\\\":{\\\"options\\\":{\\\"position\\\":\\\"CENTER\\\"}}},\\\"isTimeAware\\\":true},\\\"includeInFitToBounds\\\":true,\\\"type\\\":\\\"MVT_VECTOR\\\",\\\"joins\\\":[],\\\"disableTooltips\\\":false}]\",\"mapStateJSON\":\"{\\\"adHocDataViews\\\":[],\\\"zoom\\\":1.6,\\\"center\\\":{\\\"lon\\\":0,\\\"lat\\\":19.94277},\\\"timeFilters\\\":{\\\"from\\\":\\\"now-7d\\\",\\\"to\\\":\\\"now\\\"},\\\"refreshConfig\\\":{\\\"isPaused\\\":true,\\\"interval\\\":0},\\\"query\\\":{\\\"query\\\":\\\"\\\",\\\"language\\\":\\\"kuery\\\"},\\\"filters\\\":[],\\\"settings\\\":{\\\"autoFitToDataBounds\\\":false,\\\"backgroundColor\\\":\\\"#ffffff\\\",\\\"customIcons\\\":[],\\\"disableInteractive\\\":false,\\\"disableTooltipControl\\\":false,\\\"hideToolbarOverlay\\\":false,\\\"hideLayerControl\\\":false,\\\"hideViewControl\\\":false,\\\"initialLocation\\\":\\\"LAST_SAVED_LOCATION\\\",\\\"fixedLocation\\\":{\\\"lat\\\":0,\\\"lon\\\":0,\\\"zoom\\\":2},\\\"browserLocation\\\":{\\\"zoom\\\":2},\\\"keydownScrollZoom\\\":false,\\\"maxZoom\\\":24,\\\"minZoom\\\":0,\\\"showScaleControl\\\":false,\\\"showSpatialFilters\\\":true,\\\"showTimesliderToggleButton\\\":true,\\\"spatialFiltersAlpa\\\":0.3,\\\"spatialFiltersFillColor\\\":\\\"#DA8B45\\\",\\\"spatialFiltersLineColor\\\":\\\"#DA8B45\\\"}}\",\"uiStateJSON\":\"{\\\"isLayerTOCOpen\\\":true,\\\"openTOCDetails\\\":[]}\",\"references\":[]},\"mapCenter\":{\"lat\":19.94277,\"lon\":0,\"zoom\":1.6},\"mapBuffer\":{\"minLon\":-90,\"minLat\":-66.51326,\"maxLon\":90,\"maxLat\":66.51326},\"isLayerTOCOpen\":true,\"openTOCDetails\":[],\"hiddenLayers\":[],\"enhancements\":{}}}]",
+    "timeRestore":false,
+    "title":"map_to_ml",
+    "version":1
+  },
+  "coreMigrationVersion":"8.7.0",
+  "created_at":"2023-01-05T21:27:42.353Z",
+  "id":"c9a03810-8d3f-11ed-bd23-d1a357ce1325",
+  "migrationVersion":{
+      "dashboard":"8.7.0"
+  },
+  "references":[
+    {
+      "id":"ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name":"87724519-117a-43c8-b2c1-fdba6476f05f:layer_1_source_index_pattern",
+      "type":"index-pattern"
+    }
+  ],
+  "type":"dashboard",
+  "updated_at":"2023-01-05T21:27:42.353Z",
+  "version":"WzUwMjQsMV0="
+}
+
+{
+  "excludedObjects":[],
+  "excludedObjectsCount":0,
+  "exportedCount":2,
+  "missingRefCount":0,
+  "missingReferences":[]
+}

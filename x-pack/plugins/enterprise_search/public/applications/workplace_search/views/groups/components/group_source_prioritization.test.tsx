@@ -73,7 +73,7 @@ describe('GroupSourcePrioritization', () => {
     const wrapper = shallow(<GroupSourcePrioritization />);
 
     const slider = wrapper.find(EuiRange).first();
-    slider.simulate('change', { target: { value: 2 } });
+    slider.simulate('change', { currentTarget: { value: 2 } });
 
     expect(updatePriority).toHaveBeenCalledWith('123', 2);
   });

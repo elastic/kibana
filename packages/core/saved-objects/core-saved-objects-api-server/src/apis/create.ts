@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectsMigrationVersion,
-  SavedObjectReference,
-} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '../..';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
@@ -27,7 +25,10 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.
    **/
   version?: string;
-  /** {@inheritDoc SavedObjectsMigrationVersion} */
+  /**
+   * {@inheritDoc SavedObjectsMigrationVersion}
+   * @deprecated Use {@link SavedObjectsCreateOptions.typeMigrationVersion} instead.
+   */
   migrationVersion?: SavedObjectsMigrationVersion;
   /**
    * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
@@ -39,6 +40,10 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * field set and you want to create it again.
    */
   coreMigrationVersion?: string;
+  /**
+   * A semver value that is used when migrating documents between Kibana versions.
+   */
+  typeMigrationVersion?: string;
   /** Array of references to other saved objects */
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */

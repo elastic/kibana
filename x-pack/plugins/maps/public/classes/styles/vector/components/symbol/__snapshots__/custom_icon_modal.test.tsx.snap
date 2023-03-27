@@ -8,10 +8,10 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
   onClose={[Function]}
 >
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
-      <h3>
-        Edit custom icon
-      </h3>
+    <EuiModalHeaderTitle
+      component="h3"
+    >
+      Edit custom icon
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
@@ -230,10 +230,10 @@ exports[`should render an empty custom icon modal 1`] = `
   onClose={[Function]}
 >
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
-      <h3>
-        Custom Icon
-      </h3>
+    <EuiModalHeaderTitle
+      component="h3"
+    >
+      Custom Icon
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>

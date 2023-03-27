@@ -36,6 +36,7 @@ export interface PartitionLabelsArguments {
   values: boolean;
   valuesFormat: ValueFormats;
   percentDecimals: number;
+  colorOverrides?: string;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   truncate?: number | null;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
@@ -50,6 +51,7 @@ export type ExpressionValuePartitionLabels = ExpressionValueBoxed<
     values: boolean;
     valuesFormat: ValueFormats;
     percentDecimals: number;
+    colorOverrides: Record<string, string>;
     /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
     truncate?: number | null;
     /** @deprecated This field is deprecated and going to be removed in the futher release versions. */

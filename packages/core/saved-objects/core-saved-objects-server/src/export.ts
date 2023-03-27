@@ -8,8 +8,9 @@
 
 import type { Readable } from 'stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject } from '..';
 
 /**
  * Utility class used to export savedObjects.

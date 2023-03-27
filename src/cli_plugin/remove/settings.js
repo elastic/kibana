@@ -7,7 +7,7 @@
  */
 
 import { resolve } from 'path';
-import { fromRoot } from '@kbn/utils';
+import { fromRoot } from '@kbn/repo-info';
 
 export function parse(command, options) {
   const settings = {

@@ -5,8 +5,17 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { dateRangeSchema } from '../../types/schema';
 
+import {
+  dateRangeSchema,
+  historicalSummarySchema,
+  statusSchema,
+  summarySchema,
+} from '@kbn/slo-schema';
+
+type Status = t.TypeOf<typeof statusSchema>;
 type DateRange = t.TypeOf<typeof dateRangeSchema>;
+type HistoricalSummary = t.TypeOf<typeof historicalSummarySchema>;
+type Summary = t.TypeOf<typeof summarySchema>;
 
-export type { DateRange };
+export type { DateRange, HistoricalSummary, Status, Summary };

@@ -16,6 +16,14 @@ import { fireEvent } from '@testing-library/dom';
 import { uiQueryParams } from '../../../store/selectors';
 import type { EndpointIndexUIQueryParams } from '../../../types';
 
+jest.mock('rxjs', () => {
+  const actual = jest.requireActual('rxjs');
+  return {
+    ...actual,
+    firstValueFrom: async () => ({ indexFields: [] }),
+  };
+});
+
 describe('when rendering the endpoint list `AdminSearchBar`', () => {
   let render: (
     urlParams?: EndpointIndexUIQueryParams

@@ -17,7 +17,7 @@ export const dnsTopDomainsLensAttributes: LensAttributes = {
     visualization: {
       legend: {
         isVisible: true,
-        position: 'right',
+        position: 'left',
       },
       valueLabels: 'hide',
       fittingFunction: 'None',

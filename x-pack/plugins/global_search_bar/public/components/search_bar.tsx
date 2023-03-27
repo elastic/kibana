@@ -333,6 +333,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         buttonRef: setButtonRef,
+        panelStyle: { marginTop: '6px' },
       }}
       popoverButton={
         <EuiHeaderSectionItemButton

@@ -12,13 +12,13 @@ import { AlertInstanceContext } from '@kbn/alerting-plugin/common';
 import { Alert } from '@kbn/alerting-plugin/server';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState } from './common';
-import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
-import { createUptimeESClient } from '../lib';
+import { UptimeEsClient } from '../lib';
 import {
   DEFAULT_FROM,
   DEFAULT_SIZE,
@@ -115,10 +115,10 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
   async executor({ services: { alertFactory, scopedClusterClient, savedObjectsClient }, state }) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
-    const uptimeEsClient = createUptimeESClient({
-      esClient: scopedClusterClient.asCurrentUser,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-    });
+      scopedClusterClient.asCurrentUser
+    );
     const { certs, total }: CertResult = await libs.requests.getCerts({
       uptimeEsClient,
       from: DEFAULT_FROM,
@@ -161,6 +161,6 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
       alertInstance.scheduleActions(TLS_LEGACY.id);
     }
 
-    return updateState(state, foundCerts);
+    return { state: updateState(state, foundCerts) };
   },
 });

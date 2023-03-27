@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { Duration } from 'moment/moment';
 import { memoize } from 'lodash';
 import {
@@ -15,6 +15,7 @@ import {
   IFieldFormat,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
+import { isDefined } from '@kbn/ml-is-defined';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -32,7 +33,6 @@ import {
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
-import { isDefined } from '../../../common/types/guards';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';

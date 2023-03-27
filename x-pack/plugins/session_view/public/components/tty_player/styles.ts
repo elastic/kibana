@@ -26,12 +26,6 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       height: '100%',
       overflow: 'hidden',
       zIndex: 10,
-      '.euiRangeLevel--warning': {
-        backgroundColor: transparentize(colors.warning, 0.8),
-      },
-      '.euiRangeLevel--danger': {
-        backgroundColor: transparentize(colors.danger, 0.8),
-      },
       '.euiRangeTick,.euiRangeLevel': {
         transition: 'left 500ms',
       },

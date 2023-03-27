@@ -8,11 +8,15 @@
 import { createAction } from '@reduxjs/toolkit';
 import type { IHttpSerializedFetchError } from './http_error';
 
-export function createAsyncAction<Payload, SuccessPayload>(actionStr: string) {
+export function createAsyncAction<
+  Payload,
+  SuccessPayload,
+  FailurePayload = IHttpSerializedFetchError<Payload>
+>(actionStr: string) {
   return {
     get: createAction(actionStr, (payload: Payload) => prepareForTimestamp(payload)),
     success: createAction<SuccessPayload>(`${actionStr}_SUCCESS`),
-    fail: createAction<IHttpSerializedFetchError>(`${actionStr}_FAIL`),
+    fail: createAction<FailurePayload>(`${actionStr}_FAIL`),
   };
 }
 

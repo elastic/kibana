@@ -17,7 +17,6 @@ import {
 import { SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
 
 function getEnvironmentOptions(environments: Environment[]) {
@@ -41,18 +40,20 @@ export function EnvironmentSelect({
   environment,
   availableEnvironments,
   status,
+  serviceName,
+  rangeFrom,
+  rangeTo,
   onChange,
 }: {
   environment: Environment;
   availableEnvironments: Environment[];
   status: FETCH_STATUS;
+  serviceName?: string;
+  rangeFrom: string;
+  rangeTo: string;
   onChange: (value: string) => void;
 }) {
   const [searchValue, setSearchValue] = useState('');
-  const {
-    path: { serviceName },
-    query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

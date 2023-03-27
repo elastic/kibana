@@ -698,6 +698,7 @@ describe('Exceptions Lists API', () => {
       await exportExceptionList({
         http: httpMock,
         id: 'some-id',
+        includeExpiredExceptions: true,
         listId: 'list-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
@@ -707,6 +708,7 @@ describe('Exceptions Lists API', () => {
         method: 'POST',
         query: {
           id: 'some-id',
+          include_expired_exceptions: true,
           list_id: 'list-id',
           namespace_type: 'single',
         },
@@ -718,6 +720,7 @@ describe('Exceptions Lists API', () => {
       const exceptionResponse = await exportExceptionList({
         http: httpMock,
         id: 'some-id',
+        includeExpiredExceptions: true,
         listId: 'list-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,

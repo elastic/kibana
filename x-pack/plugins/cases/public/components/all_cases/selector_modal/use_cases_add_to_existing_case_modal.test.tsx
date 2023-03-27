@@ -83,6 +83,7 @@ describe('use cases add to existing case modal hook', () => {
   const defaultParams = () => {
     return { onRowClick: jest.fn() };
   };
+
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     dispatch.mockReset();
@@ -166,7 +167,7 @@ describe('use cases add to existing case modal hook', () => {
     expect(mockedToastSuccess).toHaveBeenCalled();
   });
 
-  it('should not call createAttachments nor show toast success when  a case is not selected', async () => {
+  it('should not call createAttachments nor show toast success when a case is not selected', async () => {
     const mockBulkCreateAttachments = jest.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
       createAttachments: mockBulkCreateAttachments,
@@ -178,11 +179,11 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick();
       return null;
     });
 
     const result = appMockRender.render(<TestComponent />);
+
     userEvent.click(result.getByTestId('open-modal'));
     // give a small delay for the reducer to run
 

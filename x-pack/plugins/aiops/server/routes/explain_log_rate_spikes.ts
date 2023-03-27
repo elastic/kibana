@@ -16,19 +16,18 @@ import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
 import type {
-  ChangePoint,
-  ChangePointGroup,
+  SignificantTerm,
+  SignificantTermGroup,
   NumericChartData,
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
-import { stringHash } from '@kbn/ml-string-hash';
 
 import {
-  addChangePointsAction,
-  addChangePointsGroupAction,
-  addChangePointsGroupHistogramAction,
-  addChangePointsHistogramAction,
+  addSignificantTermsAction,
+  addSignificantTermsGroupAction,
+  addSignificantTermsGroupHistogramAction,
+  addSignificantTermsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
   pingAction,
@@ -42,21 +41,12 @@ import { API_ENDPOINT } from '../../common/api';
 import { isRequestAbortedError } from '../lib/is_request_aborted_error';
 import type { AiopsLicense } from '../types';
 
-import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
+import { fetchSignificantTermPValues } from './queries/fetch_significant_term_p_values';
 import { fetchIndexInfo } from './queries/fetch_index_info';
-import {
-  dropDuplicates,
-  fetchFrequentItems,
-  groupDuplicates,
-} from './queries/fetch_frequent_items';
-import type { ItemsetResult } from './queries/fetch_frequent_items';
+import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { getHistogramQuery } from './queries/get_histogram_query';
-import {
-  getFieldValuePairCounts,
-  getSimpleHierarchicalTree,
-  getSimpleHierarchicalTreeLeaves,
-  markDuplicates,
-} from './queries/get_simple_hierarchical_tree';
+import { getGroupFilter } from './queries/get_group_filter';
+import { getSignificantTermGroups } from './queries/get_significant_term_groups';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -260,8 +250,8 @@ export const defineExplainLogRateSpikesRoute = (
 
           // Step 2: Significant Terms
 
-          const changePoints: ChangePoint[] = request.body.overrides?.changePoints
-            ? request.body.overrides?.changePoints
+          const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
+            ? request.body.overrides?.significantTerms
             : [];
           const fieldsToSample = new Set<string>();
 
@@ -289,10 +279,10 @@ export const defineExplainLogRateSpikesRoute = (
           const pValuesQueue = queue(async function (fieldCandidate: string) {
             loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
 
-            let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
+            let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
             try {
-              pValues = await fetchChangePointPValues(
+              pValues = await fetchSignificantTermPValues(
                 client,
                 request.body,
                 [fieldCandidate],
@@ -317,9 +307,9 @@ export const defineExplainLogRateSpikesRoute = (
               pValues.forEach((d) => {
                 fieldsToSample.add(d.fieldName);
               });
-              changePoints.push(...pValues);
+              significantTerms.push(...pValues);
 
-              push(addChangePointsAction(pValues));
+              push(addSignificantTermsAction(pValues));
             }
 
             push(
@@ -332,7 +322,7 @@ export const defineExplainLogRateSpikesRoute = (
                     defaultMessage:
                       'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
                     values: {
-                      fieldValuePairsCount: changePoints.length,
+                      fieldValuePairsCount: significantTerms.length,
                     },
                   }
                 ),
@@ -355,8 +345,8 @@ export const defineExplainLogRateSpikesRoute = (
           });
           await pValuesQueue.drain();
 
-          if (changePoints.length === 0) {
-            logDebugMessage('Stopping analysis, did not find change points.');
+          if (significantTerms.length === 0) {
+            logDebugMessage('Stopping analysis, did not find significant terms.');
             endWithUpdatedLoadingState();
             return;
           }
@@ -432,31 +422,12 @@ export const defineExplainLogRateSpikesRoute = (
               })
             );
 
-            // To optimize the `frequent_items` query, we identify duplicate change points by count attributes.
-            // Note this is a compromise and not 100% accurate because there could be change points that
-            // have the exact same counts but still don't co-occur.
-            const duplicateIdentifier: Array<keyof ChangePoint> = [
-              'doc_count',
-              'bg_count',
-              'total_doc_count',
-              'total_bg_count',
-            ];
-
-            // These are the deduplicated change points we pass to the `frequent_items` aggregation.
-            const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
-
-            // We use the grouped change points to later repopulate
-            // the `frequent_items` result with the missing duplicates.
-            const groupedChangePoints = groupDuplicates(changePoints, duplicateIdentifier).filter(
-              (g) => g.group.length > 1
-            );
-
             try {
-              const { fields, df } = await fetchFrequentItems(
+              const { fields, df } = await fetchFrequentItemSets(
                 client,
                 request.body.index,
                 JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
-                deduplicatedChangePoints,
+                significantTerms,
                 request.body.timeFieldName,
                 request.body.deviationMin,
                 request.body.deviationMax,
@@ -467,145 +438,24 @@ export const defineExplainLogRateSpikesRoute = (
               );
 
               if (shouldStop) {
-                logDebugMessage('shouldStop after fetching frequent_items.');
+                logDebugMessage('shouldStop after fetching frequent_item_sets.');
                 end();
                 return;
               }
 
               if (fields.length > 0 && df.length > 0) {
-                // The way the `frequent_items` aggregations works could return item sets that include
-                // field/value pairs that are not part of the original list of significant change points.
-                // This cleans up groups and removes those unrelated field/value pairs.
-                const filteredDf = df
-                  .map((fi) => {
-                    fi.set = Object.entries(fi.set).reduce<ItemsetResult['set']>(
-                      (set, [field, value]) => {
-                        if (
-                          changePoints.some(
-                            (cp) => cp.fieldName === field && cp.fieldValue === value
-                          )
-                        ) {
-                          set[field] = value;
-                        }
-                        return set;
-                      },
-                      {}
-                    );
-                    fi.size = Object.keys(fi.set).length;
-                    return fi;
-                  })
-                  .filter((fi) => fi.size > 1);
-
-                // `frequent_items` returns lot of different small groups of field/value pairs that co-occur.
-                // The following steps analyse these small groups, identify overlap between these groups,
-                // and then summarize them in larger groups where possible.
-
-                // Get a tree structure based on `frequent_items`.
-                const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
-
-                // Each leave of the tree will be a summarized group of co-occuring field/value pairs.
-                const treeLeaves = getSimpleHierarchicalTreeLeaves(root, []);
-
-                // To be able to display a more cleaned up results table in the UI, we identify field/value pairs
-                // that occur in multiple groups. This will allow us to highlight field/value pairs that are
-                // unique to a group in a better way. This step will also re-add duplicates we identified in the
-                // beginning and didn't pass on to the `frequent_items` agg.
-                const fieldValuePairCounts = getFieldValuePairCounts(treeLeaves);
-                const changePointGroups = markDuplicates(treeLeaves, fieldValuePairCounts).map(
-                  (g) => {
-                    const group = [...g.group];
-
-                    for (const groupItem of g.group) {
-                      const { duplicate } = groupItem;
-                      const duplicates = groupedChangePoints.find((d) =>
-                        d.group.some(
-                          (dg) =>
-                            dg.fieldName === groupItem.fieldName &&
-                            dg.fieldValue === groupItem.fieldValue
-                        )
-                      );
-
-                      if (duplicates !== undefined) {
-                        group.push(
-                          ...duplicates.group.map((d) => {
-                            return {
-                              fieldName: d.fieldName,
-                              fieldValue: d.fieldValue,
-                              duplicate,
-                            };
-                          })
-                        );
-                      }
-                    }
-
-                    return {
-                      ...g,
-                      group,
-                    };
-                  }
+                const significantTermGroups = getSignificantTermGroups(
+                  df,
+                  significantTerms,
+                  fields
                 );
 
-                // Some field/value pairs might not be part of the `frequent_items` result set, for example
-                // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
-                // In this next part we identify those missing pairs and add them as individual groups.
-                const missingChangePoints = deduplicatedChangePoints.filter((cp) => {
-                  return !changePointGroups.some((cpg) => {
-                    return cpg.group.some(
-                      (d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue
-                    );
-                  });
-                });
-
-                changePointGroups.push(
-                  ...missingChangePoints.map(
-                    ({ fieldName, fieldValue, doc_count: docCount, pValue }) => {
-                      const duplicates = groupedChangePoints.find((d) =>
-                        d.group.some(
-                          (dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue
-                        )
-                      );
-                      if (duplicates !== undefined) {
-                        return {
-                          id: `${stringHash(
-                            JSON.stringify(
-                              duplicates.group.map((d) => ({
-                                fieldName: d.fieldName,
-                                fieldValue: d.fieldValue,
-                              }))
-                            )
-                          )}`,
-                          group: duplicates.group.map((d) => ({
-                            fieldName: d.fieldName,
-                            fieldValue: d.fieldValue,
-                            duplicate: false,
-                          })),
-                          docCount,
-                          pValue,
-                        };
-                      } else {
-                        return {
-                          id: `${stringHash(JSON.stringify({ fieldName, fieldValue }))}`,
-                          group: [
-                            {
-                              fieldName,
-                              fieldValue,
-                              duplicate: false,
-                            },
-                          ],
-                          docCount,
-                          pValue,
-                        };
-                      }
-                    }
-                  )
-                );
-
-                // Finally, we'll find out if there's at least one group with at least two items,
+                // We'll find out if there's at least one group with at least two items,
                 // only then will we return the groups to the clients and make the grouping option available.
-                const maxItems = Math.max(...changePointGroups.map((g) => g.group.length));
+                const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
 
                 if (maxItems > 1) {
-                  push(addChangePointsGroupAction(changePointGroups));
+                  push(addSignificantTermsGroupAction(significantTermGroups));
                 }
 
                 loaded += PROGRESS_STEP_GROUPING;
@@ -618,9 +468,9 @@ export const defineExplainLogRateSpikesRoute = (
                   return;
                 }
 
-                logDebugMessage(`Fetch ${changePointGroups.length} group histograms.`);
+                logDebugMessage(`Fetch ${significantTermGroups.length} group histograms.`);
 
-                const groupHistogramQueue = queue(async function (cpg: ChangePointGroup) {
+                const groupHistogramQueue = queue(async function (cpg: SignificantTermGroup) {
                   if (shouldStop) {
                     logDebugMessage('shouldStop abort fetching group histograms.');
                     groupHistogramQueue.kill();
@@ -629,12 +479,7 @@ export const defineExplainLogRateSpikesRoute = (
                   }
 
                   if (overallTimeSeries !== undefined) {
-                    const histogramQuery = getHistogramQuery(
-                      request.body,
-                      cpg.group.map((d) => ({
-                        term: { [d.fieldName]: d.fieldValue },
-                      }))
-                    );
+                    const histogramQuery = getHistogramQuery(request.body, getGroupFilter(cpg));
 
                     let cpgTimeSeries: NumericChartData;
                     try {
@@ -681,13 +526,13 @@ export const defineExplainLogRateSpikesRoute = (
                         return {
                           key: o.key,
                           key_as_string: o.key_as_string ?? '',
-                          doc_count_change_point: current.doc_count,
+                          doc_count_significant_term: current.doc_count,
                           doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                         };
                       }) ?? [];
 
                     push(
-                      addChangePointsGroupHistogramAction([
+                      addSignificantTermsGroupHistogramAction([
                         {
                           id: cpg.id,
                           histogram,
@@ -697,7 +542,7 @@ export const defineExplainLogRateSpikesRoute = (
                   }
                 }, MAX_CONCURRENT_QUERIES);
 
-                groupHistogramQueue.push(changePointGroups);
+                groupHistogramQueue.push(significantTermGroups);
                 await groupHistogramQueue.drain();
               }
             } catch (e) {
@@ -712,11 +557,11 @@ export const defineExplainLogRateSpikesRoute = (
 
           loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
 
-          logDebugMessage(`Fetch ${changePoints.length} field/value histograms.`);
+          logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
 
           // time series filtered by fields
-          if (changePoints.length > 0 && overallTimeSeries !== undefined) {
-            const fieldValueHistogramQueue = queue(async function (cp: ChangePoint) {
+          if (significantTerms.length > 0 && overallTimeSeries !== undefined) {
+            const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
               if (shouldStop) {
                 logDebugMessage('shouldStop abort fetching field/value histograms.');
                 fieldValueHistogramQueue.kill();
@@ -778,17 +623,17 @@ export const defineExplainLogRateSpikesRoute = (
                     return {
                       key: o.key,
                       key_as_string: o.key_as_string ?? '',
-                      doc_count_change_point: current.doc_count,
+                      doc_count_significant_term: current.doc_count,
                       doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                     };
                   }) ?? [];
 
                 const { fieldName, fieldValue } = cp;
 
-                loaded += (1 / changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
+                loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
                 pushHistogramDataLoadingState();
                 push(
-                  addChangePointsHistogramAction([
+                  addSignificantTermsHistogramAction([
                     {
                       fieldName,
                       fieldValue,
@@ -799,7 +644,7 @@ export const defineExplainLogRateSpikesRoute = (
               }
             }, MAX_CONCURRENT_QUERIES);
 
-            fieldValueHistogramQueue.push(changePoints);
+            fieldValueHistogramQueue.push(significantTerms);
             await fieldValueHistogramQueue.drain();
           }
 

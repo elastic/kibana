@@ -16,19 +16,19 @@ import { AppState } from '../../state';
 import { rootReducer } from '../../state/reducers';
 import { rootEffect } from '../../state/effects';
 
-const createRealStore = (): Store => {
+export const createRealStore = (): Store => {
   const sagaMW = createSagaMiddleware();
   const store = createReduxStore(rootReducer, applyMiddleware(sagaMW));
   sagaMW.run(rootEffect);
   return store;
 };
 
-export const MountWithReduxProvider: React.FC<{ state?: AppState; useRealStore?: boolean }> = ({
-  children,
-  state,
-  useRealStore,
-}) => {
-  const store = useRealStore
+export const MountWithReduxProvider: React.FC<{
+  state?: AppState;
+  useRealStore?: boolean;
+  store?: Store;
+}> = ({ children, state, store, useRealStore }) => {
+  const newStore = useRealStore
     ? createRealStore()
     : {
         dispatch: jest.fn(),
@@ -38,5 +38,5 @@ export const MountWithReduxProvider: React.FC<{ state?: AppState; useRealStore?:
         [Symbol.observable]: jest.fn(),
       };
 
-  return <ReduxProvider store={store}>{children}</ReduxProvider>;
+  return <ReduxProvider store={store ?? newStore}>{children}</ReduxProvider>;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   DeserializerOrUndefined,
@@ -50,7 +50,7 @@ export const createListItem = async ({
   tieBreaker,
 }: CreateListItemOptions): Promise<ListItemSchema | null> => {
   const createdAt = dateNow ?? new Date().toISOString();
-  const tieBreakerId = tieBreaker ?? uuid.v4();
+  const tieBreakerId = tieBreaker ?? uuidv4();
   const baseBody = {
     created_at: createdAt,
     created_by: user,

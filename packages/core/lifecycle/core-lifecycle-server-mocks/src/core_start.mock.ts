@@ -18,6 +18,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 
 export function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
@@ -31,6 +32,7 @@ export function createCoreStartMock() {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
+    customBranding: customBrandingServiceMock.createStartContract(),
   };
 
   return mock;

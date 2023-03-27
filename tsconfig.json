@@ -1,13 +1,16 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/root_types"
+    "outDir": "target/types"
   },
   "include": [
     "kibana.d.ts",
     "package.json",
   ],
   "kbn_references": [
-    { "path": "./src/core/tsconfig.json" },
+    "@kbn/core",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

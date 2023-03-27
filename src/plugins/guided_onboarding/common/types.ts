@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { GuideState } from '@kbn/guided-onboarding';
+import type { GuideId, GuideState, GuideConfig } from '@kbn/guided-onboarding';
 
 /**
  * Guided onboarding overall status:
@@ -31,3 +31,7 @@ export interface PluginState {
   isActivePeriod: boolean;
   activeGuide?: GuideState;
 }
+
+export type GuidesConfig = {
+  [key in GuideId]: GuideConfig;
+};

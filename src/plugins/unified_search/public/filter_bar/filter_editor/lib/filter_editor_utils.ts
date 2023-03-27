@@ -7,15 +7,15 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { Filter, FieldFilter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 
-export function getFieldFromFilter(filter: FieldFilter, indexPattern: DataView) {
-  return indexPattern.fields.find((field) => field.name === filter.meta.key);
+export function getFieldFromFilter(filter: Filter, indexPattern?: DataView) {
+  return indexPattern?.fields.find((field) => field.name === filter.meta.key);
 }
 
 export function getOperatorFromFilter(filter: Filter) {
@@ -52,6 +52,8 @@ export function validateParams(params: any, field: DataViewField) {
         return isSemverValid(params);
       }
       return true;
+    case 'boolean':
+      return typeof params === 'boolean';
     default:
       return true;
   }
@@ -66,6 +68,7 @@ export function isFilterValid(
   if (!indexPattern || !field || !operator) {
     return false;
   }
+
   switch (operator.type) {
     case 'phrase':
       return validateParams(params, field);

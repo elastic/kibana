@@ -27,7 +27,7 @@ export const App: FunctionComponent = () => {
   const [showDiagnosticsFlyout, setShowDiagnosticsFlyout] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<undefined | FileJSON>(undefined);
   return (
-    <>
+    <div data-test-subj="filesManagementApp">
       <TableListView<FilesUserContentSchema>
         tableListTitle={i18nTexts.tableListTitle}
         tableListDescription={i18nTexts.tableListDescription}
@@ -78,6 +78,6 @@ export const App: FunctionComponent = () => {
       {Boolean(selectedFile) && (
         <FileFlyout file={selectedFile!} onClose={() => setSelectedFile(undefined)} />
       )}
-    </>
+    </div>
   );
 };

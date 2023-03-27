@@ -66,9 +66,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     config: uiSettings,
     dataView,
     dataViews,
-    state: appState,
     useNewFieldsApi,
     setAppState: stateContainer.setAppState,
+    columns: appState.columns,
+    sort: appState.sort,
   });
 
   useEffect(() => {

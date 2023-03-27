@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-plugins-server-mocks",
-        "id": "def-server.pluginServiceMock",
+        "id": "def-common.pluginServiceMock",
         "type": "Object",
         "tags": [],
         "label": "pluginServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-server.pluginServiceMock.create",
+            "id": "def-common.pluginServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +52,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-server.pluginServiceMock.createSetupContract",
+            "id": "def-common.pluginServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -61,7 +69,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-server.pluginServiceMock.createStartContract",
+            "id": "def-common.pluginServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -77,7 +85,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server-mocks",
-            "id": "def-server.pluginServiceMock.createUiPlugins",
+            "id": "def-common.pluginServiceMock.createUiPlugins",
             "type": "Function",
             "tags": [],
             "label": "createUiPlugins",
@@ -95,13 +103,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

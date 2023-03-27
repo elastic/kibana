@@ -12,9 +12,7 @@ import {
   ElasticsearchSourceKibanaStats,
   ElasticsearchMetricbeatSource,
 } from '../../../common/types/es';
-// @ts-ignore
 import { calculateOverallStatus } from '../calculate_overall_status';
-// @ts-ignore
 import { MonitoringLicenseError } from '../errors/custom_errors';
 
 export type EnhancedClusters = ElasticsearchModifiedSource & {

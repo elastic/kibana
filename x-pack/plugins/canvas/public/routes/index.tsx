@@ -6,7 +6,8 @@
  */
 
 import React, { FC } from 'react';
-import { Router, Switch, Route, RouteComponentProps, Redirect } from 'react-router-dom';
+import { Router, Switch, RouteComponentProps, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
 import { HomeRoute } from './home';

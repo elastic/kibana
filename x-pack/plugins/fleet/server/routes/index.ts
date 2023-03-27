@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FleetAuthzRouter } from '../services/security';
+
 import type { FleetConfigType } from '../config';
 
 import { registerRoutes as registerAgentPolicyRoutes } from './agent_policy';
@@ -22,7 +24,6 @@ import { registerRoutes as registerDownloadSourcesRoutes } from './download_sour
 import { registerRoutes as registerHealthCheckRoutes } from './health_check';
 import { registerRoutes as registerFleetServerHostRoutes } from './fleet_server_policy_config';
 import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
-import type { FleetAuthzRouter } from './security';
 
 export async function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking

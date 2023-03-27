@@ -179,27 +179,6 @@ describe('Vislib Dispatch Class Test Suite', function () {
     });
 
     describe('clickEvent handler', () => {
-      describe('for pie chart', () => {
-        test('prepares data points', () => {
-          const expectedResponse = [{ column: 0, row: 0, table: {}, value: 0 }];
-          const d = { rawData: { column: 0, row: 0, table: {}, value: 0 } };
-          const chart = _.first(vis.handler.charts);
-          const response = chart.events.clickEventResponse(d, { isSlices: true });
-          expect(response.data).toEqual(expectedResponse);
-        });
-
-        test('remove invalid points', () => {
-          const expectedResponse = [{ column: 0, row: 0, table: {}, value: 0 }];
-          const d = {
-            rawData: { column: 0, row: 0, table: {}, value: 0 },
-            yRaw: { table: {}, value: 0 },
-          };
-          const chart = _.first(vis.handler.charts);
-          const response = chart.events.clickEventResponse(d, { isSlices: true });
-          expect(response.data).toEqual(expectedResponse);
-        });
-      });
-
       describe('for xy charts', () => {
         test('prepares data points', () => {
           const expectedResponse = [{ column: 0, row: 0, table: {}, value: 0 }];

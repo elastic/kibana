@@ -8,7 +8,7 @@
 
 import { XYLayerConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import type { Panel } from '../../../../../common/types';
+import type { Panel, Metric } from '../../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
   Layer,
@@ -224,7 +224,7 @@ describe('getLayers', () => {
         },
       ],
     },
-  ];
+  ] as Metric[];
 
   const percentileRankMetrics = [
     {

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LangModuleType } from '../types';
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
-
-export const EsqlLang: LangModuleType = { ID, lexerRules };
+export { ESQL_LANG_ID, ESQL_THEME_ID } from './lib/constants';
+export { ESQLLang } from './language';
+export type { ESQLCustomAutocompleteCallbacks } from './lib/autocomplete/types';
+export { buildESQlTheme } from './lib/monaco/esql_theme';

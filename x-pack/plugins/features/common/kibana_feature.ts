@@ -33,6 +33,11 @@ export interface KibanaFeatureConfig {
   name: string;
 
   /**
+   * An optional description that will appear as subtext underneath the feature name
+   */
+  description?: string;
+
+  /**
    * The category for this feature.
    * This will be used to organize the list of features for display within the
    * Spaces and Roles management screens.
@@ -154,6 +159,10 @@ export class KibanaFeature {
 
   public get name() {
     return this.config.name;
+  }
+
+  public get description() {
+    return this.config.description;
   }
 
   public get order() {

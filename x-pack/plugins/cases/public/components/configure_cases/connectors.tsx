@@ -67,7 +67,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   const connectorsName = connector?.name ?? 'none';
 
   const actionTypeName = useMemo(
-    () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? 'Unknown',
+    () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? i18n.UNKNOWN,
     [actionTypes, selectedConnector.type]
   );
 

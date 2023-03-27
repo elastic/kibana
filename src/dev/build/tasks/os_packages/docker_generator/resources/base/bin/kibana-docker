@@ -101,6 +101,7 @@ kibana_vars=(
     logging.root
     logging.root.appenders
     logging.root.level
+    map.emsUrl
     map.includeElasticMapsService
     map.tilemap.options.attribution
     map.tilemap.options.maxZoom
@@ -139,6 +140,7 @@ kibana_vars=(
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes
+    savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
     server.compression.enabled
@@ -165,6 +167,7 @@ kibana_vars=(
     server.securityResponseHeaders.referrerPolicy
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions
+    server.securityResponseHeaders.crossOriginOpenerPolicy
     server.shutdownTimeout
     server.socketTimeout
     server.ssl.cert
@@ -298,8 +301,6 @@ kibana_vars=(
     xpack.ingestManager.fleet.tlsCheckDisabled
     xpack.ingestManager.registryUrl
     xpack.observability.annotations.index
-    xpack.observability.unsafe.slo.enabled
-    xpack.observability.unsafe.alertDetails.apm.enabled
     xpack.observability.unsafe.alertDetails.metrics.enabled
     xpack.observability.unsafe.alertDetails.logs.enabled
     xpack.observability.unsafe.alertDetails.uptime.enabled
@@ -380,6 +381,7 @@ kibana_vars=(
     xpack.security.sameSiteCookies
     xpack.security.secureCookies
     xpack.security.session.cleanupInterval
+    xpack.security.session.concurrentSessions.maxSessions
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
@@ -392,8 +394,7 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportExportSize
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
-    xpack.securitySolution.prebuiltRulesFromFileSystem
-    xpack.securitySolution.prebuiltRulesFromSavedObjects
+    xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles

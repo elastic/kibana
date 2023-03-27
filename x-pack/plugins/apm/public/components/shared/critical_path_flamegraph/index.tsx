@@ -15,7 +15,11 @@ import { css } from '@emotion/css';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  useFetcher,
+  isPending,
+} from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
 
@@ -71,10 +75,7 @@ export function CriticalPathFlamegraph(
   const chartTheme = useChartTheme();
 
   const isLoading =
-    traceIdsFetchStatus === FETCH_STATUS.NOT_INITIATED ||
-    traceIdsFetchStatus === FETCH_STATUS.LOADING ||
-    criticalPathFetchStatus === FETCH_STATUS.NOT_INITIATED ||
-    criticalPathFetchStatus === FETCH_STATUS.LOADING;
+    isPending(traceIdsFetchStatus) || isPending(criticalPathFetchStatus);
 
   const flameGraph = useMemo(() => {
     if (!criticalPath) {

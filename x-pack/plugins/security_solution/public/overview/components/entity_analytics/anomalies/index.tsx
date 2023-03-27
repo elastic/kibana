@@ -29,11 +29,11 @@ import {
   LinkButton,
   useGetSecuritySolutionLinkProps,
 } from '../../../../common/components/links';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../../users/store/model';
+import { UsersTableType } from '../../../../explore/users/store/model';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
@@ -171,7 +171,7 @@ export const EntityAnalyticsAnomalies = () => {
                 title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
                 data-test-subj="incompatible_jobs_warnings"
                 color="warning"
-                iconType="alert"
+                iconType="warning"
                 size="s"
               >
                 <p>

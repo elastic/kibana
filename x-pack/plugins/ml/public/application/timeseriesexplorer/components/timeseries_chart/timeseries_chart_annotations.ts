@@ -165,7 +165,7 @@ export function renderAnnotations(
   rects
     .attr('x', (d: Annotation) => {
       const date = moment(d.timestamp);
-      return focusXScale(date);
+      return Math.max(focusXScale(date), 0);
     })
     .attr('y', (d: Annotation) => {
       const level = d.key !== undefined ? levels[d.key] : ANNOTATION_DEFAULT_LEVEL;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataType, FormatParams } from '../../types';
 import { SchemaConfig } from '../../../types';
@@ -24,7 +24,7 @@ export const createColumn = (
   field?: DataViewField,
   { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({
-  columnId: uuid(),
+  columnId: uuidv4(),
   dataType: (field?.type as DataType) ?? 'number',
   label: getLabel(agg),
   isBucketed,

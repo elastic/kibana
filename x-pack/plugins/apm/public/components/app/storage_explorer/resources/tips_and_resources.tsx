@@ -134,7 +134,7 @@ export function TipsAndResources() {
       label: i18n.translate(
         'xpack.apm.storageExplorer.resources.sendFeedback',
         {
-          defaultMessage: 'Send feedback',
+          defaultMessage: 'Give feedback',
         }
       ),
       href: getStorageExplorerFeedbackHref(),
@@ -170,7 +170,11 @@ export function TipsAndResources() {
                 title={title}
                 description={description}
                 footer={
-                  <EuiButton href={href} target="_blank">
+                  <EuiButton
+                    data-test-subj="apmTipsAndResourcesLearnMoreButton"
+                    href={href}
+                    target="_blank"
+                  >
                     {i18n.translate(
                       'xpack.apm.storageExplorer.resources.learnMoreButton',
                       {

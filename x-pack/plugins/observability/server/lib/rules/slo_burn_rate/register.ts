@@ -9,12 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { sloFeatureId } from '../../../../common';
+import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { FIRED_ACTION, getRuleExecutor } from './executor';
 
-const windowSchema = schema.object({
-  duration: schema.number(),
+const durationSchema = schema.object({
+  value: schema.number(),
   unit: schema.string(),
 });
 
@@ -24,20 +27,21 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
   return {
     id: SLO_BURN_RATE_RULE_ID,
     name: i18n.translate('xpack.observability.slo.rules.burnRate.name', {
-      defaultMessage: 'SLO Burn Rate',
+      defaultMessage: 'SLO burn rate',
     }),
     validate: {
       params: schema.object({
         sloId: schema.string(),
-        threshold: schema.number(),
-        longWindow: windowSchema,
-        shortWindow: windowSchema,
+        burnRateThreshold: schema.number(),
+        maxBurnRateThreshold: schema.number(),
+        longWindow: durationSchema,
+        shortWindow: durationSchema,
       }),
     },
     defaultActionGroupId: FIRED_ACTION.id,
     actionGroups: [FIRED_ACTION],
-    producer: 'observability',
-    minimumLicenseRequired: 'basic' as LicenseType,
+    producer: sloFeatureId,
+    minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(getRuleExecutor()),
     doesSetRecoveryContext: true,
@@ -45,10 +49,16 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
       context: [
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
-        { name: 'threshold', description: thresholdActionVariableDescription },
+        { name: 'burnRateThreshold', description: thresholdActionVariableDescription },
         { name: 'longWindow', description: windowActionVariableDescription },
         { name: 'shortWindow', description: windowActionVariableDescription },
       ],
+    },
+    alerts: {
+      context: SLO_RULE_REGISTRATION_CONTEXT,
+      mappings: { fieldMap: legacyExperimentalFieldMap },
+      useEcs: true,
+      useLegacyAlerts: true,
     },
   };
 }
@@ -56,7 +66,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
 const thresholdActionVariableDescription = i18n.translate(
   'xpack.observability.slo.alerting.thresholdDescription',
   {
-    defaultMessage: 'The threshold value of the burn rate.',
+    defaultMessage: 'The burn rate threshold value.',
   }
 );
 

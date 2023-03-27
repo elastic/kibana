@@ -54,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/141055
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
@@ -772,7 +771,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should mark non-recurring task as failed if task is still running but maxAttempts has been reached', async () => {
       const task = await scheduleTask({
-        taskType: 'sampleOneTimeTaskTimingOut',
+        taskType: 'sampleOneTimeTaskThrowingError',
         params: {},
       });
 

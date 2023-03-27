@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
@@ -38,7 +36,6 @@ export function handleResponse(response: ElasticsearchResponse) {
       // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
 
       if (!uniqueShards.has(hit._id)) {
-        // @ts-ignore
         shards.push({
           index,
           node,

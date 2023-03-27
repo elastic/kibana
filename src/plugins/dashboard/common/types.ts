@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import {
-  EmbeddableInput,
-  EmbeddableStateWithType,
-  PanelState,
-} from '@kbn/embeddable-plugin/common/types';
-import { Serializable } from '@kbn/utility-types';
-import {
-  PersistableControlGroupInput,
-  RawControlGroupAttributes,
-} from '@kbn/controls-plugin/common';
-import { RefreshInterval } from '@kbn/data-plugin/common';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common/lib/saved_object_embeddable';
+import { EmbeddableInput, EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+
+import { SavedDashboardPanel } from './dashboard_saved_object/types';
+import { DashboardContainerByValueInput, DashboardPanelState } from './dashboard_container/types';
+
+export interface DashboardOptions {
+  hidePanelTitles: boolean;
+  useMargins: boolean;
+  syncColors: boolean;
+  syncTooltips: boolean;
+  syncCursor: boolean;
+}
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -28,53 +29,11 @@ export interface DashboardCapabilities {
 }
 
 /**
- * The attributes of the dashboard saved object. This interface should be the
- * source of truth for the latest dashboard attributes shape after all migrations.
+ * For BWC reasons, dashboard state is stored with panels as an array instead of a map
  */
-export interface DashboardAttributes {
-  controlGroupInput?: RawControlGroupAttributes;
-  refreshInterval?: RefreshInterval;
-  timeRestore: boolean;
-  optionsJSON?: string;
-  useMargins?: boolean;
-  description: string;
-  panelsJSON: string;
-  timeFrom?: string;
-  version: number;
-  timeTo?: string;
-  title: string;
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: string;
-  };
-}
-
-/** --------------------------------------------------------------------
- * Dashboard panel types
- -----------------------------------------------------------------------*/
-
-/**
- * The dashboard panel format expected by the embeddable container.
- */
-export interface DashboardPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
-> extends PanelState<TEmbeddableInput> {
-  readonly gridData: GridData;
-  panelRefName?: string;
-}
-
-/**
- * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
- */
-export interface SavedDashboardPanel {
-  embeddableConfig: { [key: string]: Serializable }; // parsed into the panel's explicitInput
-  id?: string; // the saved object id for by reference panels
-  type: string; // the embeddable type
-  panelRefName?: string;
-  gridData: GridData;
-  panelIndex: string;
-  version: string;
-  title?: string;
-}
+export type SharedDashboardState = Partial<
+  Omit<DashboardContainerByValueInput, 'panels'> & { panels: SavedDashboardPanel[] }
+>;
 
 /**
  * Grid type for React Grid Layout
@@ -87,17 +46,12 @@ export interface GridData {
   i: string;
 }
 
-export interface DashboardPanelMap {
-  [key: string]: DashboardPanelState;
-}
-
-/** --------------------------------------------------------------------
- * Dashboard container types
- -----------------------------------------------------------------------*/
-
 /**
  * Types below this line are copied here because so many important types are tied up in public. These types should be
  * moved from public into common.
+ *
+ * TODO replace this type with a type that uses the real Dashboard Input type.
+ * See https://github.com/elastic/kibana/issues/147488 for more information.
  */
 export interface DashboardContainerStateWithType extends EmbeddableStateWithType {
   panels: {

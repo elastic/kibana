@@ -8,7 +8,9 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { FunctionHelpPopover } from './function_help';
 
 export const AggDescription: FC = memo(({ children }) => {
   const title = i18n.translate(
@@ -19,15 +21,24 @@ export const AggDescription: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
+      title={
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <h3>{title}</h3>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FunctionHelpPopover />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.aggSelect.description"
-          defaultMessage="Analysis functions to be performed e.g. sum, count."
+          defaultMessage="Analysis functions to be performed. For example, sum, count."
         />
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -51,7 +62,7 @@ export const FieldDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -75,7 +86,7 @@ export const ByFieldDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -99,7 +110,7 @@ export const OverFieldDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -123,7 +134,7 @@ export const PartitionFieldDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -147,7 +158,7 @@ export const ExcludeFrequentDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>
@@ -172,7 +183,7 @@ export const DescriptionDescription: FC = memo(({ children }) => {
         />
       }
     >
-      <EuiFormRow label={title} fullWidth={true}>
+      <EuiFormRow fullWidth={true}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

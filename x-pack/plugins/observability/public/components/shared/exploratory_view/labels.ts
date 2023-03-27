@@ -12,6 +12,7 @@ export enum DataTypes {
   MOBILE = 'mobile',
   METRICS = 'infra_metrics',
   LOGS = 'infra_logs',
+  ALERTS = 'alerts',
 }
 
 export const DataTypesLabels: Record<string, string> = {
@@ -40,4 +41,7 @@ export const DataTypesLabels: Record<string, string> = {
       defaultMessage: 'Mobile experience',
     }
   ),
+  [DataTypes.ALERTS]: i18n.translate('xpack.observability.overview.exploratoryView.alertsLabel', {
+    defaultMessage: 'Alerts',
+  }),
 };

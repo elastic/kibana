@@ -7,15 +7,11 @@
 
 import { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
-import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { Popover } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
-import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
 import { CytoscapeContext } from '../cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
@@ -28,44 +24,31 @@ const stories: Meta<Args> = {
   component: Popover,
   decorators: [
     (StoryComponent) => {
-      const coreMock = {
-        http: {
-          get: () => {
-            return {
-              avgCpuUsage: 0.32809666568309237,
-              avgErrorRate: 0.556068173242986,
-              avgMemoryUsage: 0.5504868173242986,
-              transactionStats: {
-                avgRequestsPerMinute: 164.47222031860858,
-                avgTransactionDuration: 61634.38905590272,
+      mockApmApiCallResponse('GET /internal/apm/service-map/dependency', () => {
+        return {
+          currentPeriod: {
+            cpuUsage: { value: 0.32809666568309237 },
+            failedTransactionsRate: { value: 0.556068173242986 },
+            memoryUsage: { value: 0.5504868173242986 },
+            transactionStats: {
+              latency: {
+                value: 61634.38905590272,
               },
-            };
+              throughput: {
+                value: 164.47222031860858,
+              },
+            },
           },
-        },
-        notifications: { toasts: { add: () => {} } },
-        uiSettings: { get: () => ({}) },
-      } as unknown as CoreStart;
-
-      const KibanaReactContext = createKibanaReactContext(coreMock);
-
-      createCallApmApi(coreMock);
+          previousPeriod: {},
+        };
+      });
 
       return (
-        <MemoryRouter
-          initialEntries={[
-            '/service-map?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d',
-          ]}
-        >
-          <KibanaReactContext.Provider>
-            <MockUrlParamsContextProvider>
-              <MockApmPluginContextWrapper>
-                <div style={{ height: 325 }}>
-                  <StoryComponent />
-                </div>
-              </MockApmPluginContextWrapper>
-            </MockUrlParamsContextProvider>
-          </KibanaReactContext.Provider>
-        </MemoryRouter>
+        <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d">
+          <div style={{ height: 325 }}>
+            <StoryComponent />
+          </div>
+        </MockApmPluginStorybook>
       );
     },
     (StoryComponent, { args }) => {

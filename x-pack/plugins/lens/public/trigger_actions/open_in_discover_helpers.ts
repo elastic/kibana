@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
-import { Filter } from '@kbn/es-query';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { DataViewsService } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { Embeddable } from '../embeddable';
 import { DOC_TYPE } from '../../common';
+
+interface DiscoverAppLocatorParams extends SerializableRecord {
+  timeRange?: TimeRange;
+  filters?: Filter[];
+  indexPatternId?: string;
+  query?: Query | AggregateQuery | undefined;
+  columns?: string[];
+}
+
+export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
 interface Context {
   embeddable: IEmbeddable;
@@ -18,7 +29,7 @@ interface Context {
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
   dataViews: Pick<DataViewsService, 'get'>;
-  discover: Pick<DiscoverSetup, 'locator'>;
+  locator?: DiscoverAppLocator;
   timeFieldName?: string;
 }
 
@@ -53,7 +64,7 @@ async function getDiscoverLocationParams({
     // shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
   }
-  const dataView = await dataViews.get(args.indexPatternId);
+  const dataView = await dataViews.get(args.dataViewSpec.id!);
   let filtersToApply = [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
   // if the target data view is time based, attempt to split out a time range from the provided filters
@@ -73,13 +84,7 @@ async function getDiscoverLocationParams({
   };
 }
 
-export async function getHref({
-  embeddable,
-  discover,
-  filters,
-  dataViews,
-  timeFieldName,
-}: Context) {
+export async function getHref({ embeddable, locator, filters, dataViews, timeFieldName }: Context) {
   const params = await getDiscoverLocationParams({
     embeddable,
     filters,
@@ -87,14 +92,14 @@ export async function getHref({
     timeFieldName,
   });
 
-  const discoverUrl = discover.locator?.getRedirectUrl(params);
+  const discoverUrl = locator?.getRedirectUrl(params);
 
   return discoverUrl;
 }
 
 export async function getLocation({
   embeddable,
-  discover,
+  locator,
   filters,
   dataViews,
   timeFieldName,
@@ -106,7 +111,7 @@ export async function getLocation({
     timeFieldName,
   });
 
-  const discoverLocation = discover.locator?.getLocation(params);
+  const discoverLocation = locator?.getLocation(params);
 
   if (!discoverLocation) {
     throw new Error('Discover location not found');
@@ -117,7 +122,7 @@ export async function getLocation({
 
 export async function execute({
   embeddable,
-  discover,
+  locator,
   filters,
   openInSameTab,
   dataViews,
@@ -126,7 +131,7 @@ export async function execute({
 }: Context) {
   const discoverUrl = await getHref({
     embeddable,
-    discover,
+    locator,
     filters,
     dataViews,
     timeFieldName,

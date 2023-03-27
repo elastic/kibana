@@ -11,6 +11,7 @@ import type { SyntheticsAppState } from '../root_reducer';
 const getState = (appState: SyntheticsAppState) => appState.monitorDetails;
 
 export const selectorMonitorDetailsState = createSelector(getState, (state) => state);
+export const selectorError = createSelector(getState, (state) => state.error);
 
 export const selectSelectedLocationId = createSelector(
   getState,

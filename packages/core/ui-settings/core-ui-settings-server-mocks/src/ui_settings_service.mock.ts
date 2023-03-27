@@ -48,6 +48,7 @@ const createPrebootMock = () => {
 const createSetupMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServiceSetup> = {
     register: jest.fn(),
+    registerGlobal: jest.fn(),
   };
 
   return mocked;
@@ -56,6 +57,7 @@ const createSetupMock = () => {
 const createStartMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServiceStart> = {
     asScopedToClient: jest.fn(),
+    globalAsScopedToClient: jest.fn(),
   };
 
   mocked.asScopedToClient.mockReturnValue(createClientMock());

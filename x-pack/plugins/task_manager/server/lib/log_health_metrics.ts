@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
-
 import { isEmpty } from 'lodash';
-import { Logger } from '@kbn/core/server';
+import { Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import { HealthStatus } from '../monitoring';
 import { TaskManagerConfig } from '../config';
 import { MonitoredHealth } from '../routes/health';
@@ -29,7 +27,8 @@ export function logHealthMetrics(
   monitoredHealth: MonitoredHealth,
   logger: Logger,
   config: TaskManagerConfig,
-  shouldRunTasks: boolean
+  shouldRunTasks: boolean,
+  docLinks: DocLinksServiceSetup
 ) {
   let logLevel: LogLevel =
     config.monitored_stats_health_verbose_log.level === 'info' ? LogLevel.Info : LogLevel.Debug;
@@ -54,10 +53,7 @@ export function logHealthMetrics(
   }
 
   const message = `Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`;
-  // TODO: remove when docs support "main"
-  const docsBranch = kibanaPackageJson.branch === 'main' ? 'master' : 'main';
-
-  const docLink = `https://www.elastic.co/guide/en/kibana/${docsBranch}/task-manager-health-monitoring.html`;
+  const docLink = docLinks.links.taskManager.healthMonitoring;
   const detectedProblemMessage = `Task Manager detected a degradation in performance. This is usually temporary, and Kibana can recover automatically. If the problem persists, check the docs for troubleshooting information: ${docLink} .`;
 
   // Drift looks at runtime stats which are not available when task manager is not running tasks

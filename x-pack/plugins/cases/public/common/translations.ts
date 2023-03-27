@@ -21,12 +21,24 @@ export const DELETE_CASE = (quantity: number = 1) =>
     defaultMessage: `Delete {quantity, plural, =1 {case} other {{quantity} cases}}`,
   });
 
+export const COPY_ID_ACTION_LABEL = i18n.translate('xpack.cases.caseView.copyID', {
+  defaultMessage: 'Copy Case ID',
+});
+
+export const COPY_ID_ACTION_SUCCESS = i18n.translate('xpack.cases.caseView.copyIDSuccess', {
+  defaultMessage: 'Copied Case ID to clipboard',
+});
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
 
 export const CREATED_ON = i18n.translate('xpack.cases.caseView.createdOn', {
   defaultMessage: 'Created on',
+});
+
+export const UPDATED_ON = i18n.translate('xpack.cases.caseView.updatedOn', {
+  defaultMessage: 'Updated on',
 });
 
 export const CLOSED_ON = i18n.translate('xpack.cases.caseView.closedOn', {
@@ -70,9 +82,12 @@ export const ARIA_KEYPAD_LEGEND = i18n.translate(
   }
 );
 
-export const COMMENT_REQUIRED = i18n.translate('xpack.cases.caseView.commentFieldRequiredError', {
-  defaultMessage: 'A comment is required.',
-});
+export const EMPTY_COMMENTS_NOT_ALLOWED = i18n.translate(
+  'xpack.cases.caseView.commentFieldRequiredError',
+  {
+    defaultMessage: 'Empty comments are not allowed.',
+  }
+);
 
 export const REQUIRED_FIELD = i18n.translate('xpack.cases.caseView.fieldRequiredError', {
   defaultMessage: 'Required field',
@@ -155,7 +170,7 @@ export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
 });
 
 export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldRequiredError', {
-  defaultMessage: 'A title is required.',
+  defaultMessage: 'A name is required.',
 });
 
 export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
@@ -306,6 +321,13 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
   i18n.translate('xpack.cases.configure.addTagCustomOptionLabel', {
     defaultMessage: 'Add {searchValue} as a tag',
     values: { searchValue },
+  });
+
+export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
+  i18n.translate('xpack.cases.configure.commentVersionConflictWarning', {
+    defaultMessage:
+      'This {markdownId} has been updated by another user. Saving your {markdownId} will overwrite their update.',
+    values: { markdownId },
   });
 
 /**

@@ -13,4 +13,5 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/unified_search',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: ['<rootDir>/src/plugins/unified_search/public/**/*.{ts,tsx}'],
+  setupFiles: ['jest-canvas-mock'],
 };

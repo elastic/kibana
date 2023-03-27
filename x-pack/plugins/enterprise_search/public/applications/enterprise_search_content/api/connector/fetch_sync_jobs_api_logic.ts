@@ -13,15 +13,15 @@ import { HttpLogic } from '../../../shared/http';
 
 export interface FetchSyncJobsArgs {
   connectorId: string;
-  page?: number;
+  from?: number;
   size?: number;
 }
 
 export type FetchSyncJobsResponse = Paginate<ConnectorSyncJob>;
 
-export const fetchSyncJobs = async ({ connectorId, page = 0, size = 10 }: FetchSyncJobsArgs) => {
+export const fetchSyncJobs = async ({ connectorId, from = 0, size = 10 }: FetchSyncJobsArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/sync_jobs`;
-  const query = { page, size };
+  const query = { from, size };
   return await HttpLogic.values.http.get<Paginate<ConnectorSyncJob>>(route, { query });
 };
 

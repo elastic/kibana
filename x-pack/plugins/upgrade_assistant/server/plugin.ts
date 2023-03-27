@@ -29,11 +29,7 @@ import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { createReindexWorker } from './routes/reindex_indices';
 import { registerRoutes } from './routes/register_routes';
-import {
-  telemetrySavedObjectType,
-  reindexOperationSavedObjectType,
-  mlSavedObjectType,
-} from './saved_object_types';
+import { reindexOperationSavedObjectType, mlSavedObjectType } from './saved_object_types';
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
@@ -88,7 +84,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.licensing = licensing;
 
     savedObjects.registerType(reindexOperationSavedObjectType);
-    savedObjects.registerType(telemetrySavedObjectType);
     savedObjects.registerType(mlSavedObjectType);
 
     features.registerElasticsearchFeature({
@@ -106,7 +101,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     // We need to initialize the deprecation logs plugin so that we can
     // navigate from this app to the observability app using a source_id.
-    infra?.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
+    infra?.logViews.defineInternalLogView(DEPRECATION_LOGS_SOURCE_ID, {
       name: 'deprecationLogs',
       description: 'deprecation logs',
       logIndices: {

@@ -10,8 +10,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
 import { legacyType as legacyRuleActionsType } from './lib/detection_engine/rule_actions_legacy';
-import { ruleExecutionType } from './lib/detection_engine/rule_monitoring';
-import { ruleAssetType } from './lib/detection_engine/prebuilt_rules/logic/rule_asset/rule_asset_saved_object_mappings';
+import { prebuiltRuleAssetType } from './lib/detection_engine/prebuilt_rules';
 import { type as signalsMigrationType } from './lib/detection_engine/migrations/saved_objects';
 import {
   exceptionsArtifactType,
@@ -22,8 +21,7 @@ const types = [
   noteType,
   pinnedEventType,
   legacyRuleActionsType,
-  ruleExecutionType,
-  ruleAssetType,
+  prebuiltRuleAssetType,
   timelineType,
   exceptionsArtifactType,
   manifestType,

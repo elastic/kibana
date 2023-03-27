@@ -46,7 +46,7 @@ export const MonitorListContainer = ({
 
   const monitorList = useSelector(monitorManagementListSelector);
 
-  const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
+  const { type: viewType = 'all' } = useParams<{ type: 'all' | 'invalid' }>();
   const { errorSummaries, loading, count } = useInlineErrors({
     onlyInvalidMonitors: viewType === 'invalid',
     sortField: pageState.sortField,

@@ -68,7 +68,7 @@ import {
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
-import { FilterEvent, StartDeps } from '../types';
+import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
 
 declare global {
   interface Window {
@@ -85,19 +85,23 @@ export interface PartitionVisComponentProps {
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
+  interactive: boolean;
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
   services: Pick<StartDeps, 'data' | 'fieldFormats'>;
   syncColors: boolean;
+  columnCellValueActions: ColumnCellValueActions;
 }
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const {
+    columnCellValueActions,
     visData: originalVisData,
     visParams: preVisParams,
     visType,
     services,
     syncColors,
+    interactive,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartTheme = props.chartsThemeService.useChartsTheme();
@@ -290,7 +294,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         bucketColumns,
         visParams,
         visData,
-        props.uiState?.get('vis.colors', {}),
+        { ...props.uiState?.get('vis.colors', {}), ...props.visParams.labels.colorOverrides },
         visData.rows,
         props.palettesRegistry,
         formatters,
@@ -304,11 +308,38 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       visParams,
       visData,
       props.uiState,
+      props.visParams.labels.colorOverrides,
       props.palettesRegistry,
       formatters,
       services.fieldFormats,
       syncColors,
       isDarkMode,
+    ]
+  );
+
+  const legendActions = useMemo(
+    () =>
+      interactive
+        ? getLegendActions(
+            canFilter,
+            getLegendActionEventData(visData),
+            handleLegendAction,
+            columnCellValueActions,
+            visParams,
+            visData,
+            services.data.actions,
+            services.fieldFormats
+          )
+        : undefined,
+    [
+      columnCellValueActions,
+      getLegendActionEventData,
+      handleLegendAction,
+      interactive,
+      services.data.actions,
+      services.fieldFormats,
+      visData,
+      visParams,
     ]
   );
 
@@ -445,15 +476,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                     splitChartFormatter
                   );
                 }}
-                legendAction={getLegendActions(
-                  canFilter,
-                  getLegendActionEventData(visData),
-                  handleLegendAction,
-                  visParams,
-                  visData,
-                  services.data.actions,
-                  services.fieldFormats
-                )}
+                legendAction={legendActions}
                 theme={[
                   // Chart background should be transparent for the usage at Canvas.
                   { background: { color: 'transparent' } },

@@ -7,6 +7,8 @@
 
 import * as React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { getAlertsSingleMetricConfig } from './configurations/alerts_configs/single_metric_config';
+import { getAlertsKPIConfig } from './configurations/alerts_configs/kpi_over_time_config';
 import { DataTypes, DataTypesLabels } from './labels';
 import { getSyntheticsHeatmapConfig } from './configurations/synthetics/heatmap_config';
 import { getSyntheticsSingleMetricConfig } from './configurations/synthetics/single_metric_config';
@@ -52,6 +54,10 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
     id: DataTypes.MOBILE,
     label: DataTypesLabels[DataTypes.MOBILE],
   },
+  {
+    id: DataTypes.ALERTS,
+    label: DataTypesLabels[DataTypes.ALERTS],
+  },
 ];
 
 export const reportTypesList: Array<{
@@ -85,6 +91,7 @@ export const obsvReportConfigMap = {
     getMobileDeviceDistributionConfig,
   ],
   [DataTypes.LOGS]: [getLogsKPIConfig],
+  [DataTypes.ALERTS]: [getAlertsKPIConfig, getAlertsSingleMetricConfig],
 };
 
 export function ObservabilityExploratoryView() {

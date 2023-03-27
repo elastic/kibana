@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
@@ -56,12 +55,33 @@ export const initialState: LensAppState = {
 export const getPreloadedState = ({
   lensServices: { data },
   initialContext,
+  initialStateFromLocator,
   embeddableEditorIncomingState,
   datasourceMap,
   visualizationMap,
 }: LensStoreDeps) => {
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
+  if (initialStateFromLocator) {
+    if ('datasourceStates' in initialStateFromLocator) {
+      Object.keys(datasourceMap).forEach((datasourceId) => {
+        datasourceStates[datasourceId] = {
+          state: initialStateFromLocator.datasourceStates[datasourceId],
+          isLoading: true,
+        };
+      });
+    }
+    return {
+      ...initialState,
+      isLoading: true,
+      ...initialStateFromLocator,
+      activeDatasourceId:
+        ('activeDatasourceId' in initialStateFromLocator &&
+          initialStateFromLocator.activeDatasourceId) ||
+        initialDatasourceId,
+      datasourceStates,
+    };
+  }
   if (initialDatasourceId) {
     Object.keys(datasourceMap).forEach((datasourceId) => {
       datasourceStates[datasourceId] = {
@@ -78,13 +98,20 @@ export const getPreloadedState = ({
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
     query: !initialContext
       ? data.query.queryString.getDefaultQuery()
+      : 'searchQuery' in initialContext && initialContext.searchQuery
+      ? initialContext.searchQuery
       : (data.query.queryString.getQuery() as Query),
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
+      : 'searchFilters' in initialContext && initialContext.searchFilters
+      ? initialContext.searchFilters
       : data.query.filterManager.getFilters(),
     searchSessionId: data.search.session.getSessionId(),
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-    isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),
+    isLinkedToOriginatingApp: Boolean(
+      embeddableEditorIncomingState?.originatingApp ||
+        (initialContext && 'isEmbeddable' in initialContext && initialContext?.isEmbeddable)
+    ),
     activeDatasourceId: initialDatasourceId,
     datasourceStates,
     visualization: {
@@ -97,8 +124,7 @@ export const getPreloadedState = ({
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const onActiveDataChange = createAction<{
-  activeData?: TableInspectorAdapter;
-  requestWarnings?: Array<ReactNode | string>;
+  activeData: TableInspectorAdapter;
 }>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
@@ -258,14 +284,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
     [onActiveDataChange.type]: (
       state,
-      {
-        payload: { activeData, requestWarnings },
-      }: PayloadAction<{ activeData: TableInspectorAdapter; requestWarnings?: string[] }>
+      { payload: { activeData } }: PayloadAction<{ activeData: TableInspectorAdapter }>
     ) => {
       return {
         ...state,
-        ...(activeData ? { activeData } : {}),
-        ...(requestWarnings ? { requestWarnings } : {}),
+        activeData,
       };
     },
     [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {

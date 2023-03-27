@@ -6,10 +6,17 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
-import { find } from 'lodash/fp';
+import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
+import { find, getOr } from 'lodash/fp';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { useLicense } from '../../../common/hooks/use_license';
+import { dataTableSelectors } from '../../../common/store/data_table';
+import type { TableId } from '../../../../common/types';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
@@ -17,18 +24,16 @@ import {
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { TimelineId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
-
-const SuppressedAlertIconWrapper = styled.div`
-  display: inline-flex;
-`;
+import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { VIEW_SELECTION } from '../../../../common/constants';
+import { getAllFieldsByName } from '../../../common/containers/source';
+import { eventRenderedViewColumns, getColumns } from './columns';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -48,7 +53,15 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     [columnId, props.isDetails, rowIndex, scopeId]
   );
 
-  const suppressionCount = find({ field: 'kibana.alert.suppression.docs_count' }, props.data);
+  // We check both ecsData and data for the suppression count because it could be in either one,
+  // depending on where RenderCellValue is being used - when used in cases, data is populated,
+  // whereas in the regular security alerts table it's in ecsData
+  const ecsSuppressionCount = props.ecsData?.kibana?.alert.suppression?.docs_count?.[0];
+  const dataSuppressionCount = find({ field: 'kibana.alert.suppression.docs_count' }, props.data)
+    ?.value?.[0] as number | undefined;
+  const actualSuppressionCount = ecsSuppressionCount
+    ? parseInt(ecsSuppressionCount, 10)
+    : dataSuppressionCount;
 
   const component = (
     <GuidedOnboardingTourStep
@@ -61,78 +74,113 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
   );
 
   return columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
-    suppressionCount?.value &&
-    parseInt(suppressionCount.value[0], 10) > 0 ? (
-    <SuppressedAlertIconWrapper>
-      <EuiToolTip
-        position="top"
-        content={SUPPRESSED_ALERT_TOOLTIP(parseInt(suppressionCount.value[0], 10))}
-      >
-        <EuiIcon type="layers" />
-      </EuiToolTip>
-      &nbsp;
-      {component}
-    </SuppressedAlertIconWrapper>
+    actualSuppressionCount &&
+    actualSuppressionCount > 0 ? (
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="top" content={SUPPRESSED_ALERT_TOOLTIP(actualSuppressionCount)}>
+          <EuiIcon type="layers" />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{component}</EuiFlexItem>
+    </EuiFlexGroup>
   ) : (
     component
   );
 };
 
-export const useRenderCellValue = ({
-  setFlyoutAlert,
+export const getRenderCellValueHook = ({
+  scopeId,
+  tableId,
 }: {
-  setFlyoutAlert?: (data: never) => void;
+  scopeId: SourcererScopeName;
+  tableId: TableId;
 }) => {
-  const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
-  return ({
-    columnId,
-    colIndex,
-    data,
-    ecsData,
-    eventId,
-    globalFilters,
-    header,
-    isDetails = false,
-    isDraggable = false,
-    isExpandable,
-    isExpanded,
-    linkValues,
-    rowIndex,
-    rowRenderers,
-    setCellProps,
-    truncate = true,
-  }: CellValueElementProps) => {
-    const splitColumnId = columnId.split('.');
-    let myHeader = header ?? { id: columnId };
-    if (splitColumnId.length > 1 && browserFields[splitColumnId[0]]) {
-      const attr = (browserFields[splitColumnId[0]].fields ?? {})[columnId] ?? {};
-      myHeader = { ...myHeader, ...attr };
-    } else if (splitColumnId.length === 1) {
-      const attr = (browserFields.base.fields ?? {})[columnId] ?? {};
-      myHeader = { ...myHeader, ...attr };
-    }
+  const useRenderCellValue: GetRenderCellValue = () => {
+    const { browserFields } = useSourcererDataView(scopeId);
+    const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+    const license = useLicense();
 
-    return (
-      <DefaultCellRenderer
-        browserFields={browserFields}
-        columnId={columnId}
-        data={data}
-        ecsData={ecsData}
-        eventId={eventId}
-        globalFilters={globalFilters}
-        header={myHeader}
-        isDetails={isDetails}
-        isDraggable={isDraggable}
-        isExpandable={isExpandable}
-        isExpanded={isExpanded}
-        linkValues={linkValues}
-        rowIndex={rowIndex}
-        colIndex={colIndex}
-        rowRenderers={rowRenderers}
-        setCellProps={setCellProps}
-        scopeId={TimelineId.casePage}
-        truncate={truncate}
-      />
+    const viewMode =
+      useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
+      tableDefaults.viewMode;
+
+    const columnHeaders =
+      viewMode === VIEW_SELECTION.gridView ? getColumns(license) : eventRenderedViewColumns;
+
+    const result = useCallback(
+      ({
+        columnId,
+        colIndex,
+        data,
+        ecsData,
+        eventId,
+        header,
+        isDetails = false,
+        isDraggable = false,
+        isExpandable,
+        isExpanded,
+        rowIndex,
+        rowRenderers,
+        setCellProps,
+        linkValues,
+        truncate = true,
+      }) => {
+        const myHeader = header ?? { id: columnId, ...browserFieldsByName[columnId] };
+        /**
+         * There is difference between how `triggers actions` fetched data v/s
+         * how security solution fetches data via timelineSearchStrategy
+         *
+         * _id and _index fields are array in timelineSearchStrategy  but not in
+         * ruleStrategy
+         *
+         *
+         */
+
+        const finalData = (data as TimelineNonEcsData[]).map((field) => {
+          let localField = field;
+          if (['_id', '_index'].includes(field.field)) {
+            const newValue = field.value ?? '';
+            localField = {
+              field: field.field,
+              value: Array.isArray(newValue) ? newValue : [newValue],
+            };
+          }
+          return localField;
+        });
+
+        const colHeader = columnHeaders.find((col) => col.id === columnId);
+
+        const localLinkValues = getOr([], colHeader?.linkField ?? '', ecsData);
+
+        return (
+          <RenderCellValue
+            browserFields={browserFields}
+            columnId={columnId}
+            data={finalData}
+            ecsData={ecsData}
+            eventId={eventId}
+            header={myHeader}
+            isDetails={isDetails}
+            isDraggable={isDraggable}
+            isExpandable={isExpandable}
+            isExpanded={isExpanded}
+            linkValues={linkValues ?? localLinkValues}
+            rowIndex={rowIndex}
+            colIndex={colIndex}
+            rowRenderers={rowRenderers ?? defaultRowRenderers}
+            setCellProps={setCellProps}
+            scopeId={tableId}
+            truncate={truncate}
+            asPlainText={false}
+          />
+        );
+      },
+      [browserFieldsByName, browserFields, columnHeaders]
     );
+    return result;
   };
+
+  return useRenderCellValue;
 };

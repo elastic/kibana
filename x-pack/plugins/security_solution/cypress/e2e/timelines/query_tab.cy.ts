@@ -22,7 +22,6 @@ import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   addFilter,
-  closeTimeline,
   openTimelineById,
   persistNoteToFirstEvent,
   pinFirstEvent,
@@ -42,6 +41,7 @@ describe('Timeline query tab', () => {
         refreshTimelinesUntilTimeLinePresent(timelineId)
           // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
           // request responses and indeterminism since on clicks to activates URL's.
+          .then(() => cy.wrap(timelineId).as('timelineId'))
           .then(() => cy.wait(1000))
           .then(() =>
             addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
@@ -56,8 +56,9 @@ describe('Timeline query tab', () => {
   });
 
   describe('Query tab', () => {
-    after(() => {
-      closeTimeline();
+    beforeEach(function () {
+      visitWithoutDateRange(TIMELINES_URL);
+      openTimelineById(this.timelineId).then(() => addFilter(getTimeline().filter));
     });
 
     it('should contain the right query', () => {

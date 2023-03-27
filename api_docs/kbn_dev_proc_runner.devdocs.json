@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/dev-proc-runner",
-        "id": "def-server.ProcRunner",
+        "id": "def-common.ProcRunner",
         "type": "Class",
         "tags": [
           "class"
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/dev-proc-runner",
-            "id": "def-server.ProcRunner.Unnamed",
+            "id": "def-common.ProcRunner.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -41,7 +49,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
-                "id": "def-server.ProcRunner.Unnamed.$1",
+                "id": "def-common.ProcRunner.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "log",
@@ -49,9 +57,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.ToolingLog",
+                    "section": "def-common.ToolingLog",
                     "text": "ToolingLog"
                   }
                 ],
@@ -65,7 +73,7 @@
           },
           {
             "parentPluginId": "@kbn/dev-proc-runner",
-            "id": "def-server.ProcRunner.run",
+            "id": "def-common.ProcRunner.run",
             "type": "Function",
             "tags": [],
             "label": "run",
@@ -81,7 +89,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
-                "id": "def-server.ProcRunner.run.$1",
+                "id": "def-common.ProcRunner.run.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -96,7 +104,7 @@
               },
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
-                "id": "def-server.ProcRunner.run.$2",
+                "id": "def-common.ProcRunner.run.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -114,7 +122,7 @@
           },
           {
             "parentPluginId": "@kbn/dev-proc-runner",
-            "id": "def-server.ProcRunner.stop",
+            "id": "def-common.ProcRunner.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -130,7 +138,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
-                "id": "def-server.ProcRunner.stop.$1",
+                "id": "def-common.ProcRunner.stop.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -145,7 +153,7 @@
               },
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
-                "id": "def-server.ProcRunner.stop.$2",
+                "id": "def-common.ProcRunner.stop.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "signal",
@@ -163,7 +171,7 @@
           },
           {
             "parentPluginId": "@kbn/dev-proc-runner",
-            "id": "def-server.ProcRunner.waitForAllToStop",
+            "id": "def-common.ProcRunner.waitForAllToStop",
             "type": "Function",
             "tags": [
               "return"
@@ -183,7 +191,7 @@
           },
           {
             "parentPluginId": "@kbn/dev-proc-runner",
-            "id": "def-server.ProcRunner.teardown",
+            "id": "def-common.ProcRunner.teardown",
             "type": "Function",
             "tags": [
               "return"
@@ -201,7 +209,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
-                "id": "def-server.ProcRunner.teardown.$1",
+                "id": "def-common.ProcRunner.teardown.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "signal",
@@ -224,7 +232,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/dev-proc-runner",
-        "id": "def-server.withProcRunner",
+        "id": "def-common.withProcRunner",
         "type": "Function",
         "tags": [
           "return"
@@ -237,17 +245,17 @@
           "(log: ",
           {
             "pluginId": "@kbn/tooling-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-server.ToolingLog",
+            "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
           ", fn: (procs: ",
           {
             "pluginId": "@kbn/dev-proc-runner",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevProcRunnerPluginApi",
-            "section": "def-server.ProcRunner",
+            "section": "def-common.ProcRunner",
             "text": "ProcRunner"
           },
           ") => Promise<void>) => Promise<void>"
@@ -258,7 +266,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/dev-proc-runner",
-            "id": "def-server.withProcRunner.$1",
+            "id": "def-common.withProcRunner.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -266,9 +274,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               }
             ],
@@ -279,7 +287,7 @@
           },
           {
             "parentPluginId": "@kbn/dev-proc-runner",
-            "id": "def-server.withProcRunner.$2",
+            "id": "def-common.withProcRunner.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -288,9 +296,9 @@
               "(procs: ",
               {
                 "pluginId": "@kbn/dev-proc-runner",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnDevProcRunnerPluginApi",
-                "section": "def-server.ProcRunner",
+                "section": "def-common.ProcRunner",
                 "text": "ProcRunner"
               },
               ") => Promise<void>"
@@ -305,14 +313,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

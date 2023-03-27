@@ -29,12 +29,11 @@ import { IndicatorsFlyoutJson } from './json_tab';
 import { IndicatorsFlyoutTable } from './table_tab';
 import { unwrapValue } from '../../utils';
 import { IndicatorsFlyoutOverview } from './overview_tab';
-
-export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
-export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
-export const TABS_TEST_ID = 'tiIndicatorFlyoutTabs';
-export const MORE_ACTIONS_ID = 'tiIndicatorFlyoutMoreActions';
-
+import {
+  INDICATORS_FLYOUT_TABS_TEST_ID,
+  INDICATORS_FLYOUT_TITLE_TEST_ID,
+  INDICATORS_FLYOUT_SUBTITLE_TEST_ID,
+} from './test_ids';
 enum TAB_IDS {
   overview,
   table,
@@ -55,6 +54,13 @@ export interface IndicatorsFlyoutProps {
    * We should be showing the filter in and out buttons when the flyout is used in the cases view.
    */
   kqlBarIntegration?: boolean;
+  /**
+   * Name of the indicator, used only when the flyout is rendered in the Cases view.
+   * Because the indicator name is a runtime field, when querying for the indicator from within
+   * the Cases view, this logic is not ran. Therefore, passing the name to the flyout is an
+   * easy (hopefully temporary) solution to display it within the flyout.
+   */
+  indicatorName?: string;
 }
 
 /**
@@ -64,6 +70,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   indicator,
   closeFlyout,
   kqlBarIntegration = false,
+  indicatorName,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.overview);
 
@@ -134,7 +141,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
     <EuiFlyout onClose={closeFlyout} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 data-test-subj={TITLE_TEST_ID} id={flyoutTitleId}>
+          <h2 data-test-subj={INDICATORS_FLYOUT_TITLE_TEST_ID} id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelTitleWithOverviewTab"
               defaultMessage="Indicator details"
@@ -143,7 +150,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size={'xs'}>
-          <p data-test-subj={SUBTITLE_TEST_ID}>
+          <p data-test-subj={INDICATORS_FLYOUT_SUBTITLE_TEST_ID}>
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelSubTitle"
               defaultMessage="First seen: "
@@ -152,12 +159,12 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiTabs data-test-subj={TABS_TEST_ID} style={{ marginBottom: '-25px' }}>
+        <EuiTabs data-test-subj={INDICATORS_FLYOUT_TABS_TEST_ID} style={{ marginBottom: '-25px' }}>
           {renderTabs}
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <IndicatorsFlyoutContext.Provider value={{ kqlBarIntegration }}>
+        <IndicatorsFlyoutContext.Provider value={{ kqlBarIntegration, indicatorName }}>
           {selectedTabContent}
         </IndicatorsFlyoutContext.Provider>
       </EuiFlyoutBody>

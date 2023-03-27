@@ -27,11 +27,11 @@ const moduleIds = [
   'sample_data_ecommerce',
   'sample_data_weblogs',
   'security_auth',
+  'security_cloudtrail',
   'security_linux_v3',
   'security_network',
+  'security_packetbeat',
   'security_windows_v3',
-  'siem_cloudtrail',
-  'siem_packetbeat',
   'uptime_heartbeat',
 ];
 

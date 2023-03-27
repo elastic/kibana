@@ -7,13 +7,9 @@
 
 import moment from 'moment';
 import { upperFirst } from 'lodash';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createApmQuery } from './create_apm_query';
-// @ts-ignore
 import { calculateRate } from '../calculate_rate';
-// @ts-ignore
 import { getDiffCalculation } from './_apm_stats';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';

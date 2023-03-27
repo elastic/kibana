@@ -1,7 +1,7 @@
 /*Vex base css start*/
 /*This must be at the start of the style file to enable override css*/
 
-/*!
+/* @notice
 Copyright (c) 2013 HubSpot, Inc.
 Released under the MIT license
 
@@ -177,7 +177,7 @@ https://github.com/HubSpot/vex/blob/master/LICENSE
     top: 0;
     right: 0;
     bottom: 0;
-    left: 0; 
+    left: 0;
 }
 
 .apt-vex.vex.vex-closing .vex-overlay {
@@ -491,7 +491,7 @@ body.apt-vex.vex-open {
     -moz-animation: apt-vex-flyout 0.5s forwards;
     -ms-animation: apt-vex-flyout 0.5s forwards;
     -o-animation: apt-vex-flyout 0.5s forwards;
-    -webkit-backface-visibility: hidden; 
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
 }
 .apt-vex.vex.vex-theme-os .vex-content {
@@ -920,7 +920,7 @@ Setting up this due to APP-22580. putting it as soon as
     overflow-wrap: break-word;
 }
 
-/* 
+/*
     Disable ALL vex transitions
     We can just set to none, because the style changes of the animation will not take place
 */
@@ -1374,7 +1374,7 @@ div.aptr-slideshow-dot {
 }
 
 /* Emojis inserted via froala in either dialogs or guides */
-.apt-vex.vex.vex-theme-os .apt-dialog-popup .fr-emoticon-img, 
+.apt-vex.vex.vex-theme-os .apt-dialog-popup .fr-emoticon-img,
 .apt-vex.vex.vex-theme-os .apt-guide-popup .fr-emoticon-img,
 .apt-badge-tippy .fr-emoticon-img {
     background-repeat: no-repeat !important;
@@ -2258,7 +2258,7 @@ div.apt-survey-dynamic-rating-step div.apt-survey-dynamic-rating-labels-wrapper 
 /* badge */
 .apt-badge:focus,
 
-/* Slider */ 
+/* Slider */
 .aptr-nav-button:focus,
 .aptr-nav-button:focus,
 

@@ -7,6 +7,7 @@
 
 import { handleActions, type Action } from 'redux-actions';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { TestNowResponse } from '../../../../common/types';
 import {
   getMonitorList,
   getMonitorListSuccess,
@@ -17,7 +18,6 @@ import {
 } from '../actions';
 import type { MonitorSummariesResult } from '../../../../common/runtime_types';
 import type { AppState } from '..';
-import type { TestNowResponse } from '../api';
 
 export interface MonitorList {
   loading: boolean;

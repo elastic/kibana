@@ -82,7 +82,15 @@
         "label": "Props",
         "description": [],
         "signature": [
-          "{ meta?: any; } & ",
+          "{ meta?: ",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileImageMetadata",
+            "text": "FileImageMetadata"
+          },
+          " | undefined; } & ",
           "EuiImageProps"
         ],
         "path": "packages/shared-ux/file/image/impl/src/image.tsx",

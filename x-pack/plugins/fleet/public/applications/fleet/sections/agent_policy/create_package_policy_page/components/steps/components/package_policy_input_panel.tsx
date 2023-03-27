@@ -19,7 +19,6 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
 import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -27,6 +26,7 @@ import type {
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
+  RegistryStreamWithDataStream,
 } from '../../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors } from '../../../services';
@@ -74,12 +74,13 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
-  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>;
+  packageInputStreams: RegistryStreamWithDataStream[];
   packagePolicyInput: NewPackagePolicyInput;
   updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
+  isEditPage?: boolean;
 }> = memo(
   ({
     packageInput,
@@ -91,6 +92,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
+    isEditPage = false,
   }) => {
     const defaultDataStreamId = useDataStreamId();
     // Showing streams toggle state
@@ -125,41 +127,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           .filter((stream) => Boolean(stream.packagePolicyInputStream)),
       [packageInputStreams, packagePolicyInput.streams]
     );
-
-    // setting Indexing setting: TSDB to enabled by default, if the data stream's index_mode is set to time_series
-    let isUpdated = false;
-    inputStreams.forEach(({ packagePolicyInputStream }) => {
-      const dataStreamInfo = packageInfo.data_streams?.find(
-        (ds) => ds.dataset === packagePolicyInputStream?.data_stream.dataset
-      );
-
-      if (dataStreamInfo?.elasticsearch?.index_mode === 'time_series') {
-        if (!packagePolicy.package) return;
-        if (!packagePolicy.package?.experimental_data_stream_features)
-          packagePolicy.package!.experimental_data_stream_features = [];
-
-        const dsName = getRegistryDataStreamAssetBaseName(packagePolicyInputStream!.data_stream);
-        const match = packagePolicy.package!.experimental_data_stream_features.find(
-          (feat) => feat.data_stream === dsName
-        );
-        if (match) {
-          if (!match.features.tsdb) {
-            match.features.tsdb = true;
-            isUpdated = true;
-          }
-        } else {
-          packagePolicy.package!.experimental_data_stream_features.push({
-            data_stream: dsName,
-            features: { tsdb: true, synthetic_source: false },
-          });
-          isUpdated = true;
-        }
-      }
-    });
-
-    if (isUpdated) {
-      updatePackagePolicy(packagePolicy);
-    }
 
     return (
       <>
@@ -248,7 +215,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
 
         {/* Header rule break */}
         {isShowingStreams ? <EuiSpacer size="l" /> : null}
-
         {/* Input level policy */}
         {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
           <Fragment>
@@ -259,6 +225,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               updatePackagePolicyInput={updatePackagePolicyInput}
               inputVarsValidationResults={{ vars: inputValidationResults?.vars }}
               forceShowErrors={forceShowErrors}
+              isEditPage={isEditPage}
             />
             {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
           </Fragment>
@@ -308,6 +275,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     inputValidationResults?.streams![packagePolicyInputStream!.data_stream!.dataset]
                   }
                   forceShowErrors={forceShowErrors}
+                  isEditPage={isEditPage}
                 />
                 {index !== inputStreams.length - 1 ? (
                   <>
