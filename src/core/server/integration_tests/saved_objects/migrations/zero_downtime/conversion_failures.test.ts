@@ -77,7 +77,7 @@ describe('ZDT upgrades - encountering conversion failures', () => {
 
       try {
         await runMigrations();
-        expect('should have thrown').toEqual('but did not');
+        fail('migration should have failed');
       } catch (err) {
         const errorMessage = err.message;
         expect(errorMessage).toMatch('6 transformation errors were encountered');

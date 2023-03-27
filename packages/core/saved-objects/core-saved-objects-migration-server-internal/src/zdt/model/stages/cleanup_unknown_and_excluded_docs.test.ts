@@ -49,7 +49,7 @@ describe('Stage: cleanupUnknownAndExcludedDocs', () => {
     });
   });
 
-  it('CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS -> FATAL when successful', () => {
+  it('CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS -> FATAL when unsuccessful', () => {
     const state = createState();
     const res: StateActionResponse<'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS'> = Either.left({
       type: 'unknown_docs_found',
