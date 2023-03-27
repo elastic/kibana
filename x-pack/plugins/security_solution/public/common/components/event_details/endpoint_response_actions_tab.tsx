@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { ActionsLogTable } from '../../../management/components/endpoint_response_actions_list/components/actions_log_table';
 import { useGetEndpointActionList } from '../../../management/hooks';
-import type { AlertRawEventData, ExpandedEventFieldsObject } from './types';
+import type { ExpandedEventFieldsObject, RawEventData } from './types';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
@@ -26,7 +26,7 @@ const TabContentWrapper = styled.div`
 export const useEndpointResponseActionsTab = ({
   rawEventData,
 }: {
-  rawEventData?: AlertRawEventData;
+  rawEventData?: RawEventData;
 }) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 

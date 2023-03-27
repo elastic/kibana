@@ -21,6 +21,7 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { RawEventData } from './types';
 import { useEndpointResponseActionsTab } from './endpoint_response_actions_tab';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
@@ -31,7 +32,6 @@ import {
   getTourAnchor,
   SecurityStepId,
 } from '../guided_onboarding_tour/tour_config';
-import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -136,6 +136,7 @@ const RendererContainer = styled.div`
 const ThreatTacticContainer = styled(EuiFlexGroup)`
   flex-grow: 0;
   flex-wrap: nowrap;
+
   & .euiFlexGroup {
     flex-wrap: nowrap;
   }
@@ -427,12 +428,12 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const osqueryTab = useOsqueryTab({
-    rawEventData: rawEventData as AlertRawEventData,
+    rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
 
   const endpointResponseActionsTab = useEndpointResponseActionsTab({
-    rawEventData: rawEventData as AlertRawEventData,
+    rawEventData: rawEventData as RawEventData,
   });
 
   const tabs = useMemo(() => {

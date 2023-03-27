@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { BrowserField } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
@@ -38,15 +39,9 @@ export interface EventSummaryField {
   overrideField?: string;
 }
 
-export interface AlertRawEventData {
+export interface RawEventData {
+  fields: ParsedTechnicalFields;
   _id: string;
-  fields: {
-    ['agent.id']?: string[];
-    ['kibana.alert.rule.parameters']: RuleParameters;
-    ['kibana.alert.rule.name']: string[];
-  };
-
-  [key: string]: unknown;
 }
 
 export interface ExpandedEventFieldsObject {

@@ -14,18 +14,13 @@ import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_
 import type { SetupPlugins } from '../../../plugin_contract';
 import { osqueryResponseAction } from './osquery_response_action';
 import { endpointResponseAction } from './endpoint_response_action';
+import type { AlertsWithAgentType } from './types';
 
 type Alerts = Array<ParsedTechnicalFields & { agent?: { id: string } }>;
 
 interface ScheduleNotificationActions {
   signals: unknown[];
   responseActions: RuleResponseAction[];
-}
-
-interface AlertsWithAgentType {
-  alerts: Alerts;
-  agentIds: string[];
-  alertIds: string[];
 }
 
 export const scheduleNotificationResponseActions = (
