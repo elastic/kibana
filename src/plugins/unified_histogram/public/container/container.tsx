@@ -117,9 +117,10 @@ export const UnifiedHistogramContainer = forwardRef<
         } = options;
 
         // API helpers are loaded async from Lens
-        services.lens
-          .stateHelperApi()
-          .then(({ suggestions }) => setLensSuggestionsApi(() => suggestions));
+        (async () => {
+          const apiHelper = await services.lens.stateHelperApi();
+          setLensSuggestionsApi(() => apiHelper.suggestions);
+        })();
 
         setLayoutProps({
           services,
