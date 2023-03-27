@@ -24,8 +24,8 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
     return result.saved_objects;
   }
 
-  async get<T = unknown>(type: string, id: string) {
-    const response = await this.savedObjectClient.resolve<T>(type, id);
+  async get<T = unknown>(id: string) {
+    const response = await this.savedObjectClient.resolve<T>('index-pattern', id);
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }

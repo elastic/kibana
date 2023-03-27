@@ -275,7 +275,7 @@ export interface SavedObjectsClientCommon {
    * @param type - type of saved object
    * @param id - id of saved object
    */
-  get: (type: string, id: string) => Promise<SavedObject<DataViewAttributes>>;
+  get: (id: string) => Promise<SavedObject<DataViewAttributes>>;
   /**
    * Update a saved object by id
    * @param type - type of saved object

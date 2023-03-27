@@ -726,7 +726,7 @@ export class DataViewsService {
     id: string,
     displayErrors: boolean = true
   ): Promise<DataView> => {
-    const savedObject = await this.savedObjectsClient.get(DATA_VIEW_SAVED_OBJECT_TYPE, id);
+    const savedObject = await this.savedObjectsClient.get(id);
 
     if (!savedObject.version) {
       throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
