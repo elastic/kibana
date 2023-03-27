@@ -151,6 +151,7 @@ describe('AddFile', () => {
         })
       )
     );
+
     await waitFor(() =>
       expect(successMock).toHaveBeenCalledWith({
         className: 'eui-textBreakWord',

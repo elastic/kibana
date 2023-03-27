@@ -25,11 +25,15 @@ interface CaseViewFilesProps {
   caseData: Case;
 }
 
+export const DEFAULT_CASE_FILES_FILTERING_OPTIONS = {
+  page: 0,
+  perPage: 10,
+};
+
 export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
-  const [filteringOptions, setFilteringOptions] = useState<CaseFilesFilteringOptions>({
-    page: 0,
-    perPage: 10,
-  });
+  const [filteringOptions, setFilteringOptions] = useState<CaseFilesFilteringOptions>(
+    DEFAULT_CASE_FILES_FILTERING_OPTIONS
+  );
   const {
     data: caseFiles,
     isLoading,

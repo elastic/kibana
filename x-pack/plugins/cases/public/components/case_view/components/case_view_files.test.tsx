@@ -6,12 +6,16 @@
  */
 
 import React from 'react';
-import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import type { Case } from '../../../../common';
-import { CaseViewFiles } from './case_view_files';
+import type { AppMockRenderer } from '../../../common/mock';
+
+import { createAppMockRenderer } from '../../../common/mock';
+import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
+import { CaseViewFiles, DEFAULT_CASE_FILES_FILTERING_OPTIONS } from './case_view_files';
 
 jest.mock('../../../containers/use_get_case_files');
 
@@ -24,8 +28,9 @@ const caseData: Case = {
 
 describe('Case View Page files tab', () => {
   let appMockRender: AppMockRenderer;
+
   useGetCaseFilesMock.mockReturnValue({
-    data: {},
+    data: { files: [], total: 11 },
     isLoading: false,
   });
 
@@ -38,15 +43,31 @@ describe('Case View Page files tab', () => {
   });
 
   it('should render the utility bar for the files table', async () => {
-    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
-    expect((await result.findAllByTestId('cases-files-add')).length).toBe(2);
-    expect(await result.findByTestId('cases-files-search')).toBeInTheDocument();
+    expect((await screen.findAllByTestId('cases-files-add')).length).toBe(2);
+    expect(await screen.findByTestId('cases-files-search')).toBeInTheDocument();
   });
 
   it('should render the files table', async () => {
-    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
-    expect(await result.findByTestId('cases-files-table')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+  });
+
+  it('clicking table pagination triggers calls to useGetCaseFiles', async () => {
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+
+    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+
+    userEvent.click(await screen.findByTestId('pagination-button-next'));
+
+    await waitFor(() =>
+      expect(useGetCaseFilesMock).toHaveBeenCalledWith({
+        caseId: basicCase.id,
+        page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page + 1,
+        perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
+      })
+    );
   });
 });

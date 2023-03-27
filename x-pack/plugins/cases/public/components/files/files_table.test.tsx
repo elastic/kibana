@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 
 import { basicFileMock } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
@@ -20,15 +20,16 @@ import {
 import { FilesTable } from './files_table';
 import userEvent from '@testing-library/user-event';
 
-const defaultProps = {
-  caseId: 'foobar',
-  items: [basicFileMock],
-  pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 1 },
-  onChange: jest.fn(),
-  isLoading: false,
-};
-
 describe('FilesTable', () => {
+  const onTableChange = jest.fn();
+  const defaultProps = {
+    caseId: 'foobar',
+    items: [basicFileMock],
+    pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 1 },
+    isLoading: false,
+    onChange: onTableChange,
+  };
+
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -128,5 +129,45 @@ describe('FilesTable', () => {
     });
 
     expect(await screen.findByTestId('cases-files-table-action-download')).toBeInTheDocument();
+  });
+
+  it('go to next page calls onTableChange with correct values', async () => {
+    const mockPagination = { pageIndex: 0, pageSize: 1, totalItemCount: 2 };
+
+    appMockRender.render(
+      <FilesTable
+        {...defaultProps}
+        pagination={mockPagination}
+        items={[{ ...basicFileMock }, { ...basicFileMock }]}
+      />
+    );
+
+    userEvent.click(await screen.findByTestId('pagination-button-next'));
+
+    await waitFor(() =>
+      expect(onTableChange).toHaveBeenCalledWith({
+        page: { index: mockPagination.pageIndex + 1, size: mockPagination.pageSize },
+      })
+    );
+  });
+
+  it('go to previous page calls onTableChange with correct values', async () => {
+    const mockPagination = { pageIndex: 1, pageSize: 1, totalItemCount: 2 };
+
+    appMockRender.render(
+      <FilesTable
+        {...defaultProps}
+        pagination={mockPagination}
+        items={[{ ...basicFileMock }, { ...basicFileMock }]}
+      />
+    );
+
+    userEvent.click(await screen.findByTestId('pagination-button-previous'));
+
+    await waitFor(() =>
+      expect(onTableChange).toHaveBeenCalledWith({
+        page: { index: mockPagination.pageIndex - 1, size: mockPagination.pageSize },
+      })
+    );
   });
 });
