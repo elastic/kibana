@@ -106,13 +106,13 @@ export const useQueryAlerts = <Hit, Aggs>({
         });
 
         if (isSubscribed) {
-          setAlerts((curr) => ({
-            ...curr,
+          setAlerts({
             data: alertResponse,
             response: JSON.stringify(alertResponse, null, 2),
             request: JSON.stringify({ index: [indexName] ?? [''], body: query }, null, 2),
+            setQuery,
             refetch: fetchData,
-          }));
+          });
         }
       } catch (error) {
         if (isSubscribed) {

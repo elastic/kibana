@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
@@ -149,7 +149,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
   const queryGroups = useMemo(() => {
-    console.log('do queryGroups');
     return getAlertsGroupingQuery({
       additionalFilters,
       selectedGroup,
@@ -179,16 +178,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     skip: isNoneGroup([selectedGroup]),
   });
 
-  const hey = useRef(0);
   useEffect(() => {
-    // if (!isNoneGroup([selectedGroup])) {
-    console.log('how many setAlertsQuery', { hey: hey.current, queryGroups, setAlertsQuery });
-    if (hey.current < 4) {
-      setAlertsQuery(queryGroups);
-      hey.current++;
-    } else {
-      debugger;
-    }
+    setAlertsQuery(queryGroups);
   }, [queryGroups, setAlertsQuery]);
 
   const { deleteQuery, setQuery } = useGlobalTime(false);
@@ -219,15 +210,13 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   });
 
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) => {
-      console.log('getTakeActionItems called');
-      return takeActionItems({
+    (groupFilters: Filter[], groupNumber: number) =>
+      takeActionItems({
         query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         tableId,
         groupNumber,
         selectedGroup,
-      });
-    },
+      }),
     [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
 
