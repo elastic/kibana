@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner, EuiLoadingChart } from '@elastic/eui';
-import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 import { PageLoader } from '../common/components/page_loader';
 import { resetMonitorLastRunAction } from '../../state';
+import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 
 export const MonitorPendingWrapper: React.FC = ({ children }) => {
   const dispatch = useDispatch();
   const history = useHistory();
+  const currentLocation = useLocation();
+  const locationRef = useRef(currentLocation);
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const { latestPing, loaded: pingsLoaded } = useMonitorLatestPing();
@@ -27,7 +29,12 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
     () =>
       history.listen((location) => {
         const currentMonitorId = location.pathname.split('/')[2] || '';
-        if (currentMonitorId !== monitorId) {
+        const hasDifferentSearch = locationRef.current.search !== location.search;
+        const hasDifferentId = currentMonitorId !== monitorId;
+        locationRef.current = location;
+        if (hasDifferentSearch || hasDifferentId) {
+          setLoaded(false);
+          setHasPing(false);
           dispatch(resetMonitorLastRunAction());
         }
       }),

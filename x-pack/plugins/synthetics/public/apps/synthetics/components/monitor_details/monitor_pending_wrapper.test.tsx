@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import { Ping } from '../../../../../common/runtime_types';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorPendingWrapper } from './monitor_pending_wrapper';
-import * as latestPing from './hooks/use_monitor_latest_ping';
 
 describe('MonitorPendingWrapper', () => {
   const TestComponent = () => {
@@ -21,15 +19,21 @@ describe('MonitorPendingWrapper', () => {
   });
 
   it('displays loading when initial ping is loading', async () => {
-    jest.spyOn(latestPing, 'useMonitorLatestPing').mockReturnValue({
-      loaded: false,
-      latestPing: undefined,
-      loading: true,
-    });
     const { getByText } = render(
       <MonitorPendingWrapper>
         <TestComponent />
-      </MonitorPendingWrapper>
+      </MonitorPendingWrapper>,
+      {
+        state: {
+          monitorDetails: {
+            lastRun: {
+              loaded: false,
+              loading: true,
+              data: undefined,
+            },
+          },
+        },
+      }
     );
 
     // page is loading
@@ -37,15 +41,21 @@ describe('MonitorPendingWrapper', () => {
   });
 
   it('displays pending when latest ping is unavailable', async () => {
-    jest.spyOn(latestPing, 'useMonitorLatestPing').mockReturnValue({
-      loaded: true,
-      latestPing: undefined,
-      loading: false,
-    });
     const { getByText } = render(
       <MonitorPendingWrapper>
         <TestComponent />
-      </MonitorPendingWrapper>
+      </MonitorPendingWrapper>,
+      {
+        state: {
+          monitorDetails: {
+            lastRun: {
+              loaded: true,
+              loading: false,
+              data: null,
+            },
+          },
+        },
+      }
     );
 
     // page is loaded with pending run
@@ -53,15 +63,21 @@ describe('MonitorPendingWrapper', () => {
   });
 
   it('displays children when latestPing is available', async () => {
-    jest.spyOn(latestPing, 'useMonitorLatestPing').mockReturnValue({
-      loaded: true,
-      latestPing: {} as Ping,
-      loading: false,
-    });
     const { getByText } = render(
       <MonitorPendingWrapper>
         <TestComponent />
-      </MonitorPendingWrapper>
+      </MonitorPendingWrapper>,
+      {
+        state: {
+          monitorDetails: {
+            lastRun: {
+              loaded: true,
+              loading: false,
+              data: {},
+            },
+          },
+        },
+      }
     );
 
     // page is loaded with latest ping defined
