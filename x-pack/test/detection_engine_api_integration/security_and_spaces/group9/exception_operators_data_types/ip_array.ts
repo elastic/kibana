@@ -22,7 +22,7 @@ import {
   deleteSignalsIndex,
   getRuleForSignalTesting,
   getSignalsById,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../../utils';
 
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the ips from the data set when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['ip_as_array']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -210,7 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([]);
@@ -228,7 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -253,7 +253,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -280,7 +280,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([]);
@@ -300,7 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -323,7 +323,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -342,7 +342,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -363,7 +363,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([]);
@@ -381,7 +381,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -404,7 +404,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -424,7 +424,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -453,7 +453,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -480,7 +480,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -509,7 +509,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -547,7 +547,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -578,7 +578,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -603,7 +603,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -626,7 +626,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -658,7 +658,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -700,7 +700,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
@@ -734,7 +734,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
