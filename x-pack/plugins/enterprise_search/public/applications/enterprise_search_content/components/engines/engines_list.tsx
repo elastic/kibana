@@ -83,7 +83,7 @@ export const EnginesList: React.FC = () => {
 
   useEffect(() => {
     // Don't fetch engines if we don't have a valid license
-    if (!isGated!) {
+    if (!isGated) {
       fetchEngines();
     }
   }, [meta.from, meta.size, throttledSearchQuery]);
