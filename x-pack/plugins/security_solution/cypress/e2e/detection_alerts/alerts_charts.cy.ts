@@ -30,7 +30,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();
-    createRule({ ...getNewRule(), rule_id: 'new custom rule' });
+    createRule(getNewRule({ rule_id: 'new custom rule' }));
     visit(ALERTS_URL);
     selectAlertsHistogram();
   });
