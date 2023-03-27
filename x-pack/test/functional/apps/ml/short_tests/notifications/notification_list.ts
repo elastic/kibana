@@ -109,9 +109,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.notifications.table.waitForTableToLoad();
 
       await ml.notifications.table.sortByField('level', 1, 'desc');
+      const rowsDesc = await ml.notifications.table.parseTable();
+      expect(rowsDesc[0].level).to.eql('error');
 
-      const rows = await ml.notifications.table.parseTable();
-      expect(rows[0].level).to.eql('error');
+      await ml.notifications.table.sortByField('level', 1, 'asc');
+      const rowsAsc = await ml.notifications.table.parseTable();
+      expect(rowsAsc[0].level).to.eql('info');
     });
   });
 }
