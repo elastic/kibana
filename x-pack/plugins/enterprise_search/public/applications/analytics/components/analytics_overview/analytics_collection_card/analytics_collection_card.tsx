@@ -26,21 +26,20 @@ import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 import { i18n } from '@kbn/i18n';
 
+import { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
+import { withLensData } from '../../../hoc/with_lens_data';
 import { COLLECTION_VIEW_PATH } from '../../../routes';
 
-import { AnalyticsCollectionCardStyles } from './analytics_collection_card.styles';
-import {
-  withLensData,
-  WithLensDataInputProps,
-  WithLensDataLogicOutputProps,
-} from './with_lens_data';
+import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
-import './analytics_collection_card.styles';
+import { AnalyticsCollectionCardStyles } from './analytics_collection_card.styles';
 
 enum ChartStatus {
   INCREASE = 'increase',
@@ -50,10 +49,10 @@ enum ChartStatus {
 
 const getCardTheme = (euiTheme: EuiThemeComputed) => ({
   [ChartStatus.DECREASE]: {
-    area: '#F5A35C',
+    area: euiThemeVars.euiColorVis7_behindText,
     areaOpacity: 0.2,
     icon: 'sortDown',
-    line: '#DA8B45',
+    line: euiThemeVars.euiColorVis7,
     lineOpacity: 0.5,
     text: '#996130',
   },
@@ -66,19 +65,27 @@ const getCardTheme = (euiTheme: EuiThemeComputed) => ({
     text: euiTheme.colors.darkShade,
   },
   [ChartStatus.INCREASE]: {
-    area: '#6DCCB1',
+    area: euiThemeVars.euiColorVis0_behindText,
     areaOpacity: 0.2,
     icon: 'sortUp',
-    line: '#54b399',
+    line: euiThemeVars.euiColorVis0,
     lineOpacity: 0.5,
     text: '#387765',
   },
 });
 
-interface AnalyticsCollectionCardProps extends WithLensDataLogicOutputProps {
+interface AnalyticsCollectionCardProps {
   collection: AnalyticsCollection;
+  filterBy: FilterBy;
   isCreatedByEngine?: boolean;
   subtitle?: string;
+}
+
+interface AnalyticsCollectionCardLensProps {
+  data: Array<[number, number]>;
+  isLoading: boolean;
+  metric: number | null;
+  secondaryMetric: number | null;
 }
 
 const getChartStatus = (metric: number | null): ChartStatus => {
@@ -87,16 +94,9 @@ const getChartStatus = (metric: number | null): ChartStatus => {
   return ChartStatus.CONSTANT;
 };
 
-export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = ({
-  collection,
-  isLoading,
-  isCreatedByEngine,
-  subtitle,
-  data,
-  metric,
-  secondaryMetric,
-  children,
-}) => {
+export const AnalyticsCollectionCard: React.FC<
+  AnalyticsCollectionCardProps & AnalyticsCollectionCardLensProps
+> = ({ collection, isLoading, isCreatedByEngine, subtitle, data, metric, secondaryMetric }) => {
   const { euiTheme } = useEuiTheme();
   const { history, navigateToUrl } = useValues(KibanaLogic);
   const cardStyles = AnalyticsCollectionCardStyles(euiTheme);
@@ -174,7 +174,7 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
         )
       }
     >
-      {!!data?.length && !isLoading && (
+      {!isLoading && data?.some(([, y]) => y && y !== 0) && (
         <Chart size={['100%', 130]} css={cardStyles.chart}>
           <Settings
             theme={{
@@ -206,10 +206,133 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
           />
         </Chart>
       )}
-      {children}
     </EuiCard>
   );
 };
+
+const LENS_LAYERS = {
+  metrics: {
+    hitsTotal: 'hitsTotal',
+    id: 'metrics',
+    percentage: 'percentage',
+  },
+  trend: {
+    id: 'trend',
+    x: 'timeline',
+    y: 'values',
+  },
+};
+const initialValues = { data: [], isLoading: true, metric: null, secondaryMetric: null };
+
 export const AnalyticsCollectionCardWithLens = withLensData<
-  AnalyticsCollectionCardProps & WithLensDataInputProps
->(AnalyticsCollectionCard);
+  AnalyticsCollectionCardProps,
+  AnalyticsCollectionCardLensProps
+>(AnalyticsCollectionCard, {
+  dataLoadTransform: (isLoading, adapters) =>
+    isLoading || !adapters
+      ? initialValues
+      : {
+          data:
+            (adapters.tables?.tables[LENS_LAYERS.trend.id]?.rows?.map((row) => [
+              row[LENS_LAYERS.trend.x] as number,
+              row[LENS_LAYERS.trend.y] as number,
+            ]) as Array<[number, number]>) || [],
+          isLoading: false,
+          metric:
+            adapters.tables?.tables[LENS_LAYERS.metrics.id]?.rows?.[0]?.[
+              LENS_LAYERS.metrics.hitsTotal
+            ] ?? null,
+          secondaryMetric:
+            adapters.tables?.tables[LENS_LAYERS.metrics.id]?.rows?.[0]?.[
+              LENS_LAYERS.metrics.percentage
+            ] ?? null,
+        },
+  getAttributes: (dataView, formulaApi, { filterBy }) => {
+    let metric = formulaApi.insertOrReplaceFormulaColumn(
+      LENS_LAYERS.metrics.percentage,
+      {
+        formula: `round(((${getFormulaByFilter(filterBy)}/${getFormulaByFilter(
+          filterBy,
+          'previous'
+        )})-1) * 100)`,
+        label: ' ',
+      },
+      {
+        columnOrder: [],
+        columns: {},
+      },
+      dataView
+    )!;
+    metric = formulaApi.insertOrReplaceFormulaColumn(
+      LENS_LAYERS.metrics.hitsTotal,
+      { formula: getFormulaByFilter(filterBy), label: ' ' },
+      metric,
+      dataView
+    )!;
+
+    return {
+      references: [
+        {
+          id: dataView.id!,
+          name: 'indexpattern-datasource-current-indexpattern',
+          type: 'index-pattern',
+        },
+        {
+          id: dataView.id!,
+          name: `indexpattern-datasource-layer-${LENS_LAYERS.trend.id}`,
+          type: 'index-pattern',
+        },
+        {
+          id: dataView.id!,
+          name: `indexpattern-datasource-layer-${LENS_LAYERS.metrics.id}`,
+          type: 'index-pattern',
+        },
+      ],
+      state: {
+        datasourceStates: {
+          formBased: {
+            layers: {
+              [LENS_LAYERS.trend.id]: formulaApi.insertOrReplaceFormulaColumn(
+                LENS_LAYERS.trend.y,
+                {
+                  formula: getFormulaByFilter(filterBy),
+                },
+                {
+                  columnOrder: [],
+                  columns: {
+                    [LENS_LAYERS.trend.x]: {
+                      dataType: 'date',
+                      isBucketed: false,
+                      label: 'Timestamp',
+                      operationType: 'date_histogram',
+                      params: { includeEmptyRows: true, interval: 'auto' },
+                      scale: 'ordinal',
+                      sourceField: dataView?.timeFieldName!,
+                    } as DateHistogramIndexPatternColumn,
+                  },
+                },
+                dataView!
+              )!,
+              [LENS_LAYERS.metrics.id]: metric,
+            },
+          },
+        },
+        filters: [],
+        query: { language: 'kuery', query: '' },
+        visualization: {
+          layerId: [LENS_LAYERS.metrics.id],
+          layerType: 'data',
+          metricAccessor: LENS_LAYERS.metrics.hitsTotal,
+          secondaryMetricAccessor: LENS_LAYERS.metrics.percentage,
+          trendlineLayerId: LENS_LAYERS.trend.id,
+          trendlineMetricAccessor: LENS_LAYERS.trend.y,
+          trendlineTimeAccessor: LENS_LAYERS.trend.x,
+        },
+      },
+      title: '',
+      visualizationType: 'lnsMetric',
+    };
+  },
+  getDataViewQuery: ({ collection }) => collection.events_datastream,
+  initialValues,
+});
