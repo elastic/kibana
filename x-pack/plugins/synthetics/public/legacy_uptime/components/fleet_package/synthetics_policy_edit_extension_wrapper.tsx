@@ -37,7 +37,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
     )?.vars;
 
-    const configId: string = vars?.[ConfigKey.CONFIG_ID].value as DataStream;
+    const configId: string = vars?.[ConfigKey.CONFIG_ID]?.value as DataStream;
 
     const url = useEditMonitorLocator({ configId, locators });
 
