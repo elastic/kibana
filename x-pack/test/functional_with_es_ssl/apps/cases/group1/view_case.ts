@@ -359,6 +359,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
+      it('filters by comment successfully', async () => {
+        const commentBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
+        );
+
+        expect(await commentBadge.getVisibleText()).equal('0');
+
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
+        await testSubjects.click('submit-comment');
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await commentBadge.getVisibleText()).equal('1');
+      });
+
       it('filters by history successfully', async () => {
         const historyBadge = await find.byCssSelector(
           '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
@@ -375,29 +394,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('user-actions-filter-activity-button-history');
 
         expect(await historyBadge.getVisibleText()).equal('3');
-      });
-
-      it('filters by comment successfully', async () => {
-        await header.waitUntilLoadingHasFinished();
-
-        await testSubjects.click('user-actions-filter-activity-button-comments');
-
-        await header.waitUntilLoadingHasFinished();
-
-        const commentArea = await find.byCssSelector(
-          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-        );
-        await commentArea.focus();
-        await commentArea.type('Test comment from automation');
-        await testSubjects.click('submit-comment');
-
-        await header.waitUntilLoadingHasFinished();
-
-        const commentBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
-        );
-
-        expect(await commentBadge.getVisibleText()).equal('1');
       });
 
       it('sorts by newest first successfully', async () => {
@@ -421,10 +417,103 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="user-actions-list"]'
         );
 
-        const actionList = await userActionsLists[1].findAllByClassName('euiComment');
+        const actionList = await userActionsLists[0].findAllByClassName('euiComment');
 
-        expect(await actionList[0].getAttribute('data-test-subj')).contain('comment-create-action');
+        expect(await actionList[0].getAttribute('data-test-subj')).contain('status-update-action');
       });
+
+      it('shows more actions on button click', async () => {
+        await cases.common.selectSeverity(CaseSeverity.LOW);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['open']);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('editable-title-edit-icon');
+        await testSubjects.setValue('editable-title-input-field', 'Edited title');
+        await testSubjects.click('editable-title-submit-btn');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.HIGH);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.CRITICAL);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.LOW);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.HIGH);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.CRITICAL);
+
+        await header.waitUntilLoadingHasFinished();
+
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('New comment');
+        await testSubjects.click('submit-comment');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['open']);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.LOW);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.HIGH);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await cases.common.selectSeverity(CaseSeverity.CRITICAL);
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(testSubjects.existOrFail('show-more-user-actions'));
+
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
+        );
+        const firstActionList = await userActionsLists[0].findAllByClassName('euiComment');
+
+        expect(await firstActionList[0].getAttribute('data-test-subj')).contain('severity-update-action');
+
+        testSubjects.click('show-more-user-actions');
+
+        const lastActionList = await userActionsLists[1].findAllByClassName('euiComment');
+
+        expect(await lastActionList[0].getAttribute('data-test-subj')).contain('create_case-create-action');
+      });
+
     });
 
     describe('Assignees field', () => {
