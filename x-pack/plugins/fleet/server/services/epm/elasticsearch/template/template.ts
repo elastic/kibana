@@ -347,6 +347,9 @@ function _generateMappings(
         if (options?.isIndexModeTimeSeries && 'metric_type' in field) {
           fieldProps.time_series_metric = field.metric_type;
         }
+        if (options?.isIndexModeTimeSeries && field.dimension) {
+          fieldProps.time_series_dimension = field.dimension;
+        }
 
         props[field.name] = fieldProps;
         hasNonDynamicTemplateMappings = true;

@@ -96,8 +96,10 @@ export interface SignificantTermGroupHistogram {
   histogram: SignificantTermHistogramItem[];
 }
 
-interface SignificantTermGroupItem extends FieldValuePair {
-  duplicate?: boolean;
+export interface SignificantTermGroupItem extends FieldValuePair {
+  docCount: number;
+  pValue: number | null;
+  duplicate?: number;
 }
 
 /**
