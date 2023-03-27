@@ -19,7 +19,6 @@ export const getRuleWithWebHookAction = (
   const finalRule = rule != null ? { ...rule, enabled } : getSimpleRule('rule-1', enabled);
   return {
     ...finalRule,
-    throttle: 'rule',
     actions: [
       {
         group: 'default',
@@ -28,6 +27,11 @@ export const getRuleWithWebHookAction = (
           body: '{}',
         },
         action_type_id: '.webhook',
+        frequency: {
+          summary: true,
+          throttle: null,
+          notifyWhen: 'onActionGroupChange',
+        },
       },
     ],
   };

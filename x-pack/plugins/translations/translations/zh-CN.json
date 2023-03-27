@@ -29258,7 +29258,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.thresholdField.thresholdFieldPlaceholderText": "所有结果",
     "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpText": "选择在规则评估为 true 时应执行自动操作的时间。",
     "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpTextWhenQuery": "选择在规则评估为 true 时应执行自动操作的时间。此频率不适用于响应操作。",
-    "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel": "操作频率",
     "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.noReadActionsPrivileges": "无法创建规则操作。您对“操作”插件没有“读”权限。",
     "xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithEnablingTitle": "创建并启用规则",
     "xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithoutEnablingTitle": "创建规则但不启用",

@@ -174,6 +174,11 @@ export default ({ getService }: FtrProviderContext): void => {
               body: '{"test":"a default action"}',
             },
             uuid: rule.actions[0].uuid,
+            frequency: {
+              summary: true,
+              throttle: null,
+              notifyWhen: 'onActionGroupChange',
+            },
           },
         ],
       });
@@ -327,6 +332,11 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           uuid: ruleBody.actions[0].uuid,
+          frequency: {
+            summary: true,
+            throttle: '1h',
+            notifyWhen: 'onThrottleInterval',
+          },
         },
       ]);
     });
@@ -397,6 +407,11 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           uuid: ruleBody.actions[0].uuid,
+          frequency: {
+            summary: true,
+            throttle: '1h',
+            notifyWhen: 'onThrottleInterval',
+          },
         },
       ]);
     });
@@ -488,6 +503,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: rule.actions[0].uuid,
+            frequency: {
+              summary: true,
+              throttle: '1h',
+              notifyWhen: 'onThrottleInterval',
+            },
           },
         ]);
       });
@@ -1118,6 +1138,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: setTagsRule.actions[0].uuid,
+            frequency: {
+              summary: true,
+              throttle: '1h',
+              notifyWhen: 'onThrottleInterval',
+            },
           },
         ]);
       });

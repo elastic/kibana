@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 
+import { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -175,17 +176,27 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getWebHookAction())
           .expect(200);
 
-        const action1 = {
+        const action1: RuleAction = {
           group: 'default',
           id: hookAction1.id,
           action_type_id: hookAction1.actionTypeId,
           params: {},
+          frequency: {
+            summary: true,
+            throttle: null,
+            notifyWhen: 'onActionGroupChange',
+          },
         };
-        const action2 = {
+        const action2: RuleAction = {
           group: 'default',
           id: hookAction2.id,
           action_type_id: hookAction2.actionTypeId,
           params: {},
+          frequency: {
+            summary: true,
+            throttle: '1h',
+            notifyWhen: 'onThrottleInterval',
+          },
         };
 
         const rule1: ReturnType<typeof getSimpleRule> = {
@@ -224,11 +235,16 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getWebHookAction())
           .expect(200);
 
-        const action = {
+        const action: RuleAction = {
           group: 'default',
           id: hookAction.id,
           action_type_id: hookAction.actionTypeId,
           params: {},
+          frequency: {
+            summary: true,
+            throttle: null,
+            notifyWhen: 'onActionGroupChange',
+          },
         };
 
         const rule1: ReturnType<typeof getSimpleRule> = {
@@ -326,6 +342,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
+                },
               },
             ],
             throttle: '1h',
@@ -403,6 +424,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
+                },
               },
               {
                 group: 'default',
@@ -411,6 +437,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
                 },
               },
             ],
@@ -520,6 +551,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
+                },
               },
               {
                 group: 'default',
@@ -528,6 +564,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
                 },
               },
             ],
@@ -545,6 +586,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
+                },
               },
               {
                 group: 'default',
@@ -553,6 +599,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 params: {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
                 },
               },
             ],

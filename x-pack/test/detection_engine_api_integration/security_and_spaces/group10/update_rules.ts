@@ -244,6 +244,11 @@ export default ({ getService }: FtrProviderContext) => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: bodyToCompare.actions![0].uuid,
+            frequency: {
+              summary: true,
+              throttle: '1d',
+              notifyWhen: 'onThrottleInterval',
+            },
           },
         ];
         outputRule.throttle = '1d';
