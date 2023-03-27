@@ -15,6 +15,7 @@ export interface Capabilities {
   canDeleteTransform: boolean;
   canPreviewTransform: boolean;
   canCreateTransform: boolean;
+  canScheduleNowTransform: boolean;
   canStartStopTransform: boolean;
   canCreateTransformAlerts: boolean;
   canUseTransformAlerts: boolean;
@@ -75,6 +76,15 @@ export function createCapabilityFailureMessage(
         'xpack.transform.capability.noPermission.canCreateTransformAlertsTooltip',
         {
           defaultMessage: 'You do not have permission to create transform alert rules.',
+        }
+      );
+      break;
+    case 'canScheduleNowTransform':
+      message = i18n.translate(
+        'xpack.transform.capability.noPermission.scheduleNowTransformTooltip',
+        {
+          defaultMessage:
+            'You do not have permission to schedule transforms to process data instantly.',
         }
       );
       break;

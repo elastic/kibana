@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { WithSource } from './with_source';
+export * from './logs_tab_content';
