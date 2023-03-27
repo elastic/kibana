@@ -486,12 +486,15 @@ export class ExecutionHandler<
 
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
-      const summarizedAlerts = await this.getSummarizedAlerts({
-        action,
-        spaceId: this.taskInstance.params.spaceId,
-        ruleId: this.taskInstance.params.alertId,
-        throttledSummaryActions,
-      });
+      let summarizedAlerts = null;
+
+      if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
+        summarizedAlerts = await this.getSummarizedAlerts({
+          action,
+          spaceId: this.taskInstance.params.spaceId,
+          ruleId: this.taskInstance.params.alertId,
+        });
+      }
 
       if (summarizedAlerts !== null) {
         this.logNumberOfFilteredAlerts({
@@ -545,24 +548,20 @@ export class ExecutionHandler<
     return hasGetSummarizedAlerts;
   }
 
-  private async getSummarizedAlerts({
+  private shouldGetSummarizedAlerts({
     action,
-    ruleId,
-    spaceId,
     throttledSummaryActions,
   }: {
     action: RuleAction;
-    ruleId: string;
-    spaceId: string;
     throttledSummaryActions: ThrottledActions;
-  }): Promise<CombinedSummarizedAlerts | null> {
+  }) {
     if (!this.canFetchSummarizedAlerts(action)) {
-      return null;
+      return false;
     }
 
     // we fetch summarizedAlerts to filter alerts in memory as well
     if (!isSummaryAction(action) && !action.alertsFilter) {
-      return null;
+      return false;
     }
 
     if (
@@ -573,9 +572,21 @@ export class ExecutionHandler<
         logger: this.logger,
       })
     ) {
-      return null;
+      return false;
     }
 
+    return true;
+  }
+
+  private async getSummarizedAlerts({
+    action,
+    ruleId,
+    spaceId,
+  }: {
+    action: RuleAction;
+    ruleId: string;
+    spaceId: string;
+  }): Promise<CombinedSummarizedAlerts | null> {
     let options: GetSummarizedAlertsFnOpts = {
       ruleId,
       spaceId,
