@@ -6,6 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from './app_context';
 import { settingsSetup } from './settings';
@@ -13,6 +14,9 @@ import { settingsSetup } from './settings';
 jest.mock('./app_context');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
 
 describe('settingsSetup', () => {
   afterEach(() => {

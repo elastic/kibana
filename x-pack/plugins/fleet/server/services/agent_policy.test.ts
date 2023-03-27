@@ -9,6 +9,8 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import { PackagePolicyRestrictionRelatedError } from '../errors';
 
 import type {
@@ -73,6 +75,10 @@ jest.mock('./app_context');
 jest.mock('./agent_policies/full_agent_policy');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
   typeof downloadSourceService
