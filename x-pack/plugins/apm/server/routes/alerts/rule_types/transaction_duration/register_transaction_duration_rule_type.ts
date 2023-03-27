@@ -189,7 +189,7 @@ export function registerTransactionDurationRuleType({
                   aggregationType: ruleParams.aggregationType,
                   transactionDurationField: field,
                 }),
-                ...getServiceGroupFieldsAgg({}, ruleParams.groupBy),
+                ...getServiceGroupFieldsAgg({ groupBy: ruleParams.groupBy }),
               },
             },
           },

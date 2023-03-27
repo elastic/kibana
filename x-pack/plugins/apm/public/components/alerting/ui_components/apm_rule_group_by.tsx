@@ -8,6 +8,13 @@
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import {
+  CONTAINER_ID,
+  KUBERNETES_POD_NAME,
+  SERVICE_NODE_NAME,
+  SERVICE_RUNTIME_VERSION,
+  SERVICE_VERSION,
+} from '../../../../common/es_fields/apm';
 
 interface Props {
   options: { groupBy: string[] | string | undefined };
@@ -15,18 +22,12 @@ interface Props {
   errorOptions?: string[];
 }
 
-interface FieldType {
-  name: string;
-  type: string;
-  aggregatable: boolean;
-}
-
-const fields: FieldType[] = [
-  { name: 'service.version', type: 'string', aggregatable: true },
-  { name: 'service.runtime.version', type: 'string', aggregatable: true },
-  { name: 'service.node.name', type: 'string', aggregatable: true },
-  { name: 'kubernetes.pod.name', type: 'string', aggregatable: true },
-  { name: 'container.id', type: 'string', aggregatable: true },
+const fields: string[] = [
+  SERVICE_VERSION,
+  SERVICE_RUNTIME_VERSION,
+  SERVICE_NODE_NAME,
+  KUBERNETES_POD_NAME,
+  CONTAINER_ID,
 ];
 
 export function APMRuleGroupBy({ options, onChange, errorOptions }: Props) {
@@ -64,9 +65,7 @@ export function APMRuleGroupBy({ options, onChange, errorOptions }: Props) {
       fullWidth
       singleSelection={false}
       selectedOptions={selectedOptions}
-      options={fields
-        .filter((f) => f.aggregatable && f.type === 'string')
-        .map((f) => ({ label: f.name }))}
+      options={fields.map((field) => ({ label: field }))}
       onChange={handleChange}
       isClearable={true}
     />

@@ -12,10 +12,15 @@ export interface SourceDoc {
   [key: string]: string | SourceDoc;
 }
 
-export function getServiceGroupFieldsAgg(
-  topHitsOpts: AggregationsTopHitsAggregation = {},
-  groupBy: string[] | string | undefined = []
-) {
+export interface TermsAggFields {
+  topHitsOpts?: AggregationsTopHitsAggregation;
+  groupBy?: string[] | string | undefined;
+}
+
+export function getServiceGroupFieldsAgg({
+  topHitsOpts,
+  groupBy,
+}: TermsAggFields) {
   return {
     source_fields: {
       top_hits: {
