@@ -8,6 +8,7 @@
 
 import { isEqual } from 'lodash';
 import React, { useEffect, useRef } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -193,7 +194,7 @@ export function createSearchBar({
           ...core,
         }}
       >
-        <core.i18n.Context>
+        <I18nProvider>
           <SearchBar
             showAutoRefreshOnly={props.showAutoRefreshOnly}
             showDatePicker={props.showDatePicker}
@@ -233,7 +234,7 @@ export function createSearchBar({
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}
           />
-        </core.i18n.Context>
+        </I18nProvider>
       </KibanaContextProvider>
     );
   };
