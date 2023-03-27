@@ -60,6 +60,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-http-server",
     "@kbn/core-ui-settings-server",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",
