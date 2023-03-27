@@ -67,5 +67,10 @@ export interface IUiSettingsClient {
  * @public
  */
 export interface IUserUiSettingsClient extends IUiSettingsClient {
+  /**
+   * Retrieves the user's settings from the user's profile
+   *
+   * @param request a KibanaRequest
+   */
   getUserProfileSettings: (request: KibanaRequest) => Promise<Record<string, string>>;
 }

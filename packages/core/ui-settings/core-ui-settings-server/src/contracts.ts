@@ -119,5 +119,9 @@ export type UserProfileSettingsClientFactory = () => UserProfileSettingsClientCo
  * Describes the functions that will be provided by a UserProfileSettingsClient
  */
 export interface UserProfileSettingsClientContract {
+  /**
+   * This function returns the user's settings from their User Profile
+   * @param request a Kibana Request
+   */
   get(request: KibanaRequest): Promise<Record<string, string>>;
 }
