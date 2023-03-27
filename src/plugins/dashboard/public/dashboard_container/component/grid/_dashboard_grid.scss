@@ -36,15 +36,19 @@
 }
 
 /**
- * .dshLayout-withoutMargins only affects the panel styles themselves, see ../panel
- */
-
-/**
  * When a single panel is expanded, all the other panels are hidden in the grid.
  */
 .dshDashboardGrid__item--hidden {
   display: none;
 }
+
+/**
+ * turn off panel transforms initially so that the dashboard panels don't swoop in on first load.
+ */
+ .dshLayout--noAnimation .react-grid-item.cssTransforms {
+  transition-property: none !important;
+}
+
 
 /**
  * 1. We need to mark this as important because react grid layout sets the width and height of the panels inline.
@@ -54,6 +58,7 @@
   width: 100% !important; /* 1 */
   top: 0 !important; /* 1 */
   left: 0 !important; /* 1 */
+  transform: translate(0, 0) !important; /* 1 */
   padding: $euiSizeS;
 
   // Altered panel styles can be found in ../panel
@@ -69,10 +74,6 @@
 // REACT-GRID
 
 .react-grid-item {
-  /**
-   * Disable transitions from the library on each grid element.
-   */
-  transition: none;
   /**
     * Copy over and overwrite the fill color with EUI color mixin (for theming)
     */
