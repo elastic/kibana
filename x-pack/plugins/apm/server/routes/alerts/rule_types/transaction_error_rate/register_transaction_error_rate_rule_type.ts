@@ -177,7 +177,7 @@ export function registerTransactionErrorRateRuleType({
                     terms: {
                       field: EVENT_OUTCOME,
                     },
-                    aggs: getServiceGroupFieldsAgg(),
+                    aggs: getServiceGroupFieldsAgg({}),
                   },
                 },
               },

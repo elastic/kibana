@@ -137,7 +137,7 @@ export function registerErrorCountRuleType({
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
-                aggs: getServiceGroupFieldsAgg(),
+                aggs: getServiceGroupFieldsAgg({}),
               },
             },
           },
