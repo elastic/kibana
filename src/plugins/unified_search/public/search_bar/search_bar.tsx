@@ -74,6 +74,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
+  onTimeRangeChange?: (payload: { dateRange: TimeRange }) => void;
   // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
 
@@ -187,8 +188,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       nextState.dateRangeTo = nextDateRange.dateRangeTo;
 
       if (nextDateRange.dateRangeFrom && nextDateRange.dateRangeTo) {
-        nextProps?.onQueryChange?.({
-          query: nextQuery ?? undefined,
+        nextProps?.onTimeRangeChange?.({
           dateRange: {
             from: nextDateRange.dateRangeFrom,
             to: nextDateRange.dateRangeTo,

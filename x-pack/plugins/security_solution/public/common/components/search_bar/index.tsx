@@ -295,7 +295,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, []);
 
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
-    const onQueryChange = useCallback(
+    const onTimeRangeChange = useCallback(
       ({ query, dateRange }) => {
         const isQuickSelection = dateRange.from.includes('now') || dateRange.to.includes('now');
         updateSearch({
@@ -323,7 +323,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           onQuerySubmit={onQuerySubmit}
           onRefresh={onRefresh}
           onSaved={onSaved}
-          onQueryChange={onQueryChange}
+          onTimeRangeChange={onTimeRangeChange}
           onSavedQueryUpdated={onSavedQueryUpdated}
           savedQuery={savedQuery}
           showFilterBar={!hideFilterBar}
