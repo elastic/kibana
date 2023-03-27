@@ -12,6 +12,12 @@ export * from './types';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  projectTier: schema.oneOf(
+    [schema.literal('endpointEssentials'), schema.literal('cloudEssentials')],
+    {
+      defaultValue: 'endpointEssentials',
+    }
+  ),
 });
 
 type ConfigType = TypeOf<typeof configSchema>;

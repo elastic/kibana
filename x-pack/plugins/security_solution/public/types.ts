@@ -136,6 +136,7 @@ export type StartServices = CoreStart &
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
+  upselling: UpsellingService;
 }
 
 export interface PluginStart {

@@ -218,7 +218,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
             subPlugins,
-            coreStart.application.capabilities
+            coreStart.application.capabilities,
+            services
           ),
         });
       },
@@ -254,6 +255,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         );
         return resolverPluginSetup();
       },
+      upselling: this.upsellingService,
     };
   }
 
@@ -267,6 +269,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     licenseService.start(plugins.licensing.license$);
+    this.upsellingService.start(core.application.capabilities);
 
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;

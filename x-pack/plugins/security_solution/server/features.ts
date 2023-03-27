@@ -699,7 +699,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show', 'crud'],
+      ui: ['show', 'crud', 'prebuilt_rules'],
     },
     read: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],

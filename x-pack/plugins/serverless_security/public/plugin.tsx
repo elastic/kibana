@@ -15,6 +15,7 @@ import {
 } from './types';
 import { SecuritySideNavigation } from './components/side_navigation';
 import { getKibanaServicesProvider } from './services';
+import { registerUpsellings } from './components/upselling';
 
 export class ServerlessSecurityPlugin
   implements
@@ -26,9 +27,10 @@ export class ServerlessSecurityPlugin
     >
 {
   public setup(
-    _core: CoreSetup,
-    _setupDeps: ServerlessSecurityPluginSetupDependencies
+    core: CoreSetup,
+    setupDeps: ServerlessSecurityPluginSetupDependencies
   ): ServerlessSecurityPluginSetup {
+    registerUpsellings(setupDeps.securitySolution.upselling);
     return {};
   }
 

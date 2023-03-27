@@ -6,6 +6,7 @@
  */
 
 import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import { ServerlessSecurityConfig } from './config';
 import { capabilitiesSwitcher } from './lib/capabilities';
 
 import {
@@ -24,10 +25,14 @@ export class ServerlessSecurityPlugin
       ServerlessSecurityPluginStartDependencies
     >
 {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    // this.logger = this.initializerContext.logger.get();
+  }
 
   public setup(coreSetup: CoreSetup) {
-    coreSetup.capabilities.registerSwitcher(capabilitiesSwitcher);
+    const config = this.initializerContext.config.get<ServerlessSecurityConfig>();
+
+    coreSetup.capabilities.registerSwitcher(capabilitiesSwitcher(config.projectTier));
     return {};
   }
 

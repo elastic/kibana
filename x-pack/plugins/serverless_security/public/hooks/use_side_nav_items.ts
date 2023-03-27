@@ -68,6 +68,7 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
             id: navLink.id,
             label: navLink.title,
             ...getLinkProps({ deepLinkId: navLink.id }),
+            ...(navLink.unauthorized && { unauthorized: true }),
             ...(navLink.categories?.length && { categories: navLink.categories }),
             ...(navLink.links?.length && {
               items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {

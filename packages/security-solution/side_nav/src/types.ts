@@ -22,6 +22,7 @@ export interface SolutionSideNavItem<T extends string = string> {
   labelSize?: EuiListGroupItemProps['size'];
   appendSeparator?: boolean;
   isBeta?: boolean;
+  unauthorized?: boolean;
   betaOptions?: {
     text: string;
   };

@@ -7,6 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
+import { useUpsellingSection } from '../../../../common/hooks/upselling';
 import { usePrePackagedRulesInstallationStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_installation_status';
 import { usePrePackagedRulesStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_status';
 import { usePrePackagedTimelinesInstallationStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_timelines_installation_status';
@@ -56,11 +57,22 @@ export const LoadPrePackagedRulesButton = ({
   const { data: prePackagedRulesStatus } = usePrePackagedRulesStatus();
   const prePackagedAssetsStatus = usePrePackagedRulesInstallationStatus();
   const prePackagedTimelineStatus = usePrePackagedTimelinesInstallationStatus();
+  const PrePackagedRulesUpsellingComponent = useUpsellingSection('load_prebuilt_rules');
 
   const showInstallButton =
     (prePackagedAssetsStatus === 'ruleNotInstalled' ||
       prePackagedTimelineStatus === 'timelinesNotInstalled') &&
     prePackagedAssetsStatus !== 'someRuleUninstall';
+
+  if (showInstallButton && PrePackagedRulesUpsellingComponent) {
+    return (
+      <PrePackagedRulesUpsellingComponent>
+        <EuiButton color="text" iconType="indexOpen" isDisabled disabled={false}>
+          {getLoadRulesOrTimelinesButtonTitle(prePackagedAssetsStatus, prePackagedTimelineStatus)}
+        </EuiButton>
+      </PrePackagedRulesUpsellingComponent>
+    );
+  }
 
   if (showInstallButton) {
     // Without the outer div EuiStepTour crashes with Uncaught DOMException:

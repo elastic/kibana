@@ -132,6 +132,10 @@ export interface LinkItem {
    * Title of the link
    */
   title: string;
+  /**
+   * Reserved for links management, this property is set automatically
+   * */
+  unauthorized?: boolean;
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;
@@ -150,6 +154,7 @@ export interface NavigationLink {
   image?: string;
   title: string;
   skipUrlState?: boolean;
+  unauthorized?: boolean;
   isUpsell?: boolean;
   isBeta?: boolean;
   betaOptions?: {

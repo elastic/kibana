@@ -9,7 +9,7 @@ import { Switch, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
 import { ENDPOINTS_PATH, SecurityPageName } from '../../../../common/constants';
-import { useLinkExists } from '../../../common/links/links';
+import { useLinkAuthorized } from '../../../common/links/links';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import { HostIsolationExceptionsList } from './view/host_isolation_exceptions_list';
@@ -19,7 +19,7 @@ import { HostIsolationExceptionsList } from './view/host_isolation_exceptions_li
  */
 export const HostIsolationExceptionsContainer = memo(() => {
   // TODO: Probably should not silently redirect here
-  const canAccessHostIsolationExceptionsLink = useLinkExists(
+  const canAccessHostIsolationExceptionsLink = useLinkAuthorized(
     SecurityPageName.hostIsolationExceptions
   );
 

@@ -196,7 +196,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 
-    const { id, href, label, onClick, labelSize, iconType, appendSeparator } = item;
+    const { id, href, label, onClick, labelSize, iconType, appendSeparator, unauthorized } = item;
 
     const onLinkClicked: React.MouseEventHandler = (ev) => {
       tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${id}`);
@@ -221,24 +221,31 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
       onOpenPanelNav(id);
     };
 
+    const selectedColor = useMemo(() => {
+      if (unauthorized) {
+        return 'subdued';
+      }
+      return isSelected ? 'primary' : 'text';
+    }, [isSelected, unauthorized]);
+
     return (
       <>
         <EuiLink
           key={id}
           href={href}
           onClick={onLinkClicked}
-          color={isSelected ? 'primary' : 'text'}
+          color={selectedColor}
           data-test-subj={`solutionSideNavItemLink-${id}`}
         >
           <EuiListGroupItem
             className={itemClassNames}
-            color={isSelected ? 'primary' : 'text'}
+            color={selectedColor}
             label={label}
             size={labelSize ?? 's'}
             {...(iconType && {
               iconType,
               iconProps: {
-                color: isSelected ? 'primary' : 'text',
+                color: selectedColor,
               },
             })}
             {...(hasPanelNav && {
