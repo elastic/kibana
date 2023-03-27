@@ -537,7 +537,7 @@ export class ExecutionHandler<
   private canFetchSummarizedAlerts(action: RuleAction) {
     const hasGetSummarizedAlerts = this.ruleType.getSummarizedAlerts !== undefined;
 
-    if (!hasGetSummarizedAlerts) {
+    if (action.frequency?.summary && !hasGetSummarizedAlerts) {
       this.logger.error(
         `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
       );

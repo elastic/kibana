@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { TypeOf } from '@kbn/config-schema/src/types/object_type';
+import { omit } from 'lodash';
 import { NormalizedAlertAction } from '../../rules_client';
 import { RuleAction } from '../../types';
 import { actionsSchema } from './actions_schema';
@@ -20,7 +21,7 @@ export const rewriteActionsReq = (
       ...(frequency
         ? {
             frequency: {
-              ...frequency,
+              ...omit(frequency, 'notify_when'),
               notifyWhen: frequency.notify_when,
             },
           }

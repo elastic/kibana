@@ -72,7 +72,7 @@ export const rewriteRule = ({
         }
       : {}),
     ...(uuid && { uuid }),
-    ...(alertsFilter && { alertsFilter }),
+    ...(alertsFilter && { alerts_filter: alertsFilter }),
   })),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
