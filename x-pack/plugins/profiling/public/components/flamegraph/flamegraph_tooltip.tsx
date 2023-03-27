@@ -78,7 +78,7 @@ export function FlameGraphTooltip({
       : undefined;
 
   return (
-    <TooltipContainer className="Caue-tooltip">
+    <TooltipContainer>
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>{label}</EuiFlexItem>

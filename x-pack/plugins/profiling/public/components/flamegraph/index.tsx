@@ -96,7 +96,7 @@ export function FlameGraph({
           <EuiFlexGroup direction="row">
             {columnarData.viewModel.label.length > 0 && (
               <EuiFlexItem grow>
-                <Chart key={columnarData.key} className="caue-chart">
+                <Chart key={columnarData.key}>
                   <Settings
                     theme={chartTheme}
                     onElementClick={(elements) => {
