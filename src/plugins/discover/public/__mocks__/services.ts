@@ -164,7 +164,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       EmbeddableComponent: jest.fn(() => null),
       stateHelperApi: jest.fn(() => {
         return {
-          suggestionsApi: jest.fn(),
+          suggestions: jest.fn(),
         };
       }),
     },
