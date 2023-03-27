@@ -31,7 +31,10 @@ import { LicensingLogic } from '../../../../shared/licensing';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
 import { FetchCloudHealthApiLogic } from '../../../api/stats/fetch_cloud_health_api_logic';
-import { LicensingCallout, LICENSING_FEATURE } from '../licensing_callout';
+import {
+  LicensingCallout,
+  LICENSING_FEATURE,
+} from '../../shared/licensing_callout/licensing_callout';
 import { CREATE_ELASTICSEARCH_INDEX_STEP, BUILD_SEARCH_EXPERIENCE_STEP } from '../method_steps';
 import { NewSearchIndexLogic } from '../new_search_index_logic';
 import { NewSearchIndexTemplate } from '../new_search_index_template';

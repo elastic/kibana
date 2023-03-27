@@ -18,7 +18,7 @@ export const fetchEngineFieldCapabilities = async (
   client: IScopedClusterClient,
   engine: EnterpriseSearchEngineDetails
 ): Promise<EnterpriseSearchEngineFieldCapabilities> => {
-  const { created, name, updated } = engine;
+  const { name, updated_at_millis } = engine;
   const fieldCapabilities = await client.asCurrentUser.fieldCaps({
     fields: '*',
     include_unmapped: true,
@@ -26,11 +26,10 @@ export const fetchEngineFieldCapabilities = async (
   });
   const fields = parseFieldsCapabilities(fieldCapabilities);
   return {
-    created,
     field_capabilities: fieldCapabilities,
     fields,
     name,
-    updated,
+    updated_at_millis,
   };
 };
 
