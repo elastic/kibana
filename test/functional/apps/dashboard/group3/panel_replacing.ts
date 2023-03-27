@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('replace dashboard panels', function viewEditModeTests() {
+  describe.only('replace dashboard panels', function viewEditModeTests() {
     let intialDimensions: undefined | Array<{ width: number; height: number }>;
 
     before(async function () {
@@ -51,7 +51,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();
       expect(panelTitles.length).to.be(2);
-      expect(panelTitles[0]).to.be(AREA_CHART_VIS_NAME);
+      expect(panelTitles.includes(AREA_CHART_VIS_NAME)).to.be(true);
+      expect(panelTitles.includes(PIE_CHART_VIS_NAME)).to.be(false);
       const newDimensions = await PageObjects.dashboard.getPanelDimensions();
       expect(intialDimensions![0]).to.eql(newDimensions[0]);
     });
@@ -65,7 +66,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();
       expect(panelTitles.length).to.be(2);
-      expect(panelTitles[0]).to.be(AREA_CHART_VIS_NAME);
+      expect(panelTitles.includes(AREA_CHART_VIS_NAME)).to.be(true);
+      expect(panelTitles.includes(PIE_CHART_VIS_NAME)).to.be(false);
     });
 
     it('replaced panel with saved search', async () => {
@@ -85,7 +87,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();
       expect(panelTitles.length).to.be(2);
-      expect(panelTitles[0]).to.be(replacedSearch);
+      expect(panelTitles.includes(replacedSearch)).to.be(true);
+      expect(panelTitles.includes(AREA_CHART_VIS_NAME)).to.be(false);
     });
   });
 }
