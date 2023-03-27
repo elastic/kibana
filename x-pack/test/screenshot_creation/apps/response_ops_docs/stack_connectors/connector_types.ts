@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
-  const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
+  const screenshotDirectories = ['response_ops_docs', 'stack_connectors'];
   const pageObjects = getPageObjects(['common', 'header']);
   const actions = getService('actions');
   const testSubjects = getService('testSubjects');
