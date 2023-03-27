@@ -17,6 +17,7 @@ import { useDiscoverAction } from '../action_discover';
 import { EditTransformFlyout } from '../edit_transform_flyout';
 import { useEditAction } from '../action_edit';
 import { useResetAction, ResetActionModal } from '../action_reset';
+import { useScheduleNowAction } from '../action_schedule_now';
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
 import { useCreateAlertRuleAction } from '../action_create_alert';
@@ -37,6 +38,7 @@ export const useActions = ({
   const discoverAction = useDiscoverAction(forceDisable);
   const editAction = useEditAction(forceDisable, transformNodes);
   const resetAction = useResetAction(forceDisable);
+  const scheduleNowAction = useScheduleNowAction(forceDisable, transformNodes);
   const startAction = useStartAction(forceDisable, transformNodes);
   const stopAction = useStopAction(forceDisable);
   const createAlertRuleAction = useCreateAlertRuleAction(forceDisable);
@@ -55,6 +57,7 @@ export const useActions = ({
     actions: [
       discoverAction.action,
       createAlertRuleAction.action,
+      scheduleNowAction.action,
       startAction.action,
       stopAction.action,
       editAction.action,
