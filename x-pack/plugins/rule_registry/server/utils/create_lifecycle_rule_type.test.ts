@@ -115,6 +115,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           name: 'name',
           notifyWhen: 'onActionGroupChange',
           producer: 'producer',
+          revision: 0,
           ruleTypeId: 'ruleTypeId',
           ruleTypeName: 'ruleTypeName',
           schedule: {
