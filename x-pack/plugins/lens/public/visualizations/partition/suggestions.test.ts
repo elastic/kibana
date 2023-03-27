@@ -1040,7 +1040,7 @@ describe('suggestions', () => {
         Array [
           Object {
             "hide": false,
-            "previewIcon": "bullseye",
+            "previewIcon": [Function],
             "score": 0.61,
             "state": Object {
               "layers": Array [
@@ -1069,7 +1069,7 @@ describe('suggestions', () => {
               "palette": undefined,
               "shape": "mosaic",
             },
-            "title": "As Mosaic",
+            "title": "Mosaic",
           },
         ]
       `);
@@ -1149,7 +1149,7 @@ describe('suggestions', () => {
         Array [
           Object {
             "hide": false,
-            "previewIcon": "bullseye",
+            "previewIcon": [Function],
             "score": 0.46,
             "state": Object {
               "layers": Array [
@@ -1175,7 +1175,7 @@ describe('suggestions', () => {
               "palette": undefined,
               "shape": "waffle",
             },
-            "title": "As Waffle",
+            "title": "Waffle",
           },
         ]
       `);

@@ -56,7 +56,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
     ),
   };
 
-  describe('alerts', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/140867
+  describe.skip('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
