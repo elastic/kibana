@@ -83,7 +83,7 @@ export const replaceStringWithParams = (
 
     return replaceVarsWithParams(parsedVars, params);
   } catch (e) {
-    logger?.info(`error parsing vars for value ${JSON.stringify(value)}`);
+    logger?.error(`error parsing vars for value ${JSON.stringify(value)}, ${e}`);
   }
 
   return value as string | null;

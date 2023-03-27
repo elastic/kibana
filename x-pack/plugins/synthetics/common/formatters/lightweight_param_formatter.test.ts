@@ -31,7 +31,7 @@ describe('LightweightParamFormatter', () => {
   });
   it('plain string', () => {
     const expected: ParsedVars = [{ content: 'string', type: 'nonvar' }];
-    const formatter = variableParser.parse('string', params);
+    const formatter = variableParser.parse('string');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
@@ -39,7 +39,7 @@ describe('LightweightParamFormatter', () => {
   });
   it('string containing :', () => {
     const expected: ParsedVars = [{ content: 'just:a:string', type: 'nonvar' }];
-    const formatter = variableParser.parse('just:a:string', params);
+    const formatter = variableParser.parse('just:a:string');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
@@ -47,7 +47,7 @@ describe('LightweightParamFormatter', () => {
   });
   it('string containing }', () => {
     const expected: ParsedVars = [{ content: 'abc } def', type: 'nonvar' }];
-    const formatter = variableParser.parse('abc } def', params);
+    const formatter = variableParser.parse('abc } def');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
@@ -55,7 +55,7 @@ describe('LightweightParamFormatter', () => {
   });
   it('string containing regex with $', () => {
     const expected: ParsedVars = [{ content: 'log$,|,l,e,g,$', type: 'nonvar' }];
-    const formatter = variableParser.parse('log$|leg$', params);
+    const formatter = variableParser.parse('log$|leg$');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
@@ -63,7 +63,7 @@ describe('LightweightParamFormatter', () => {
   });
   it('string with escaped var', () => {
     const expected: ParsedVars = [{ content: 'escaped $,${var}', type: 'nonvar' }];
-    const formatter = variableParser.parse('escaped $${var}', params);
+    const formatter = variableParser.parse('escaped $${var}');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
@@ -71,14 +71,14 @@ describe('LightweightParamFormatter', () => {
   });
   it('works with simple variable', () => {
     const expected: ParsedVars = [{ content: { default: null, name: 'reference' }, type: 'var' }];
-    const formatter = variableParser.parse('${reference}', params);
+    const formatter = variableParser.parse('${reference}');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
     expect(result).toEqual('abc');
   });
   it('exp at beginning', () => {
-    const formatter = variableParser.parse('${splice} test', params);
+    const formatter = variableParser.parse('${splice} test');
     expect(formatter).toEqual([
       { content: { default: null, name: 'splice' }, type: 'var' },
       { content: ' test', type: 'nonvar' },
@@ -90,7 +90,7 @@ describe('LightweightParamFormatter', () => {
       { content: { default: null, name: 'this' }, type: 'var' },
     ];
 
-    const formatter = variableParser.parse('test ${this}', params);
+    const formatter = variableParser.parse('test ${this}');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
@@ -100,7 +100,7 @@ describe('LightweightParamFormatter', () => {
   it('exp with default', () => {
     const expected: ParsedVars = [{ content: { default: 'default', name: 'test' }, type: 'var' }];
 
-    const formatter = variableParser.parse('${test:default}', params);
+    const formatter = variableParser.parse('${test:default}');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
@@ -110,7 +110,7 @@ describe('LightweightParamFormatter', () => {
   it('exp with default which has value', () => {
     const expected: ParsedVars = [{ content: { default: 'default', name: 'splice' }, type: 'var' }];
 
-    const formatter = variableParser.parse('${splice:default}', params);
+    const formatter = variableParser.parse('${splice:default}');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
@@ -133,7 +133,7 @@ describe('LightweightParamFormatter', () => {
     ]);
   });
   it('exp with default containing }', () => {
-    const formatter = variableParser.parse('${test:abc$}def}', params);
+    const formatter = variableParser.parse('${test:abc$}def}');
     expect(formatter).toEqual([
       { content: { default: 'abc$', name: 'test' }, type: 'var' },
       { content: 'def}', type: 'nonvar' },
@@ -156,7 +156,7 @@ describe('LightweightParamFormatter', () => {
       { content: { default: 'https://default:1234', name: 'test' }, type: 'var' },
     ];
 
-    const formatter = variableParser.parse('${test:https://default:1234}', params);
+    const formatter = variableParser.parse('${test:https://default:1234}');
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
