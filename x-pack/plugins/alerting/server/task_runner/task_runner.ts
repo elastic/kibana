@@ -260,6 +260,7 @@ export class TaskRunner<
       enabled,
       actions,
       muteAll,
+      revision,
       snoozeSchedule,
     } = rule;
     const {
@@ -391,6 +392,7 @@ export class TaskRunner<
                 throttle,
                 notifyWhen,
                 muteAll,
+                revision,
                 snoozeSchedule,
               },
               logger: this.logger,
