@@ -7,18 +7,15 @@
  */
 
 import _ from 'lodash';
-import sizeMe from 'react-sizeme';
 import classNames from 'classnames';
 import 'react-resizable/css/styles.css';
 import 'react-grid-layout/css/styles.css';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   Responsive,
   Layout,
-  ReactGridLayoutProps,
   ResponsiveProps as ReactGridResponsiveProps,
   WidthProvider,
-  Layouts,
 } from 'react-grid-layout';
 
 import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
@@ -52,21 +49,15 @@ function ResponsiveGrid({
   onLayoutChange,
   children,
   maximizedPanelId,
-  onBreakpointChange,
   useMargins,
 }: {
   isViewMode: boolean;
   layout: Layout[];
   onLayoutChange: ReactGridResponsiveProps['onLayoutChange'];
-  onBreakpointChange: ReactGridResponsiveProps['onBreakpointChange'];
   children: JSX.Element[];
   maximizedPanelId?: string;
   useMargins: boolean;
 }) {
-  // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
-  // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
-  // grid to re-render so it'll show a grid with a width of 0.
-  // lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
   const classes = classNames({
     'dshLayout--viewing': isViewMode,
     'dshLayout--editing': !isViewMode,
@@ -75,22 +66,27 @@ function ResponsiveGrid({
   });
 
   const MARGINS = useMargins ? 8 : 0;
-  console.log('here!!', layout);
+
   return (
     <ResponsiveReactGridLayout
       className={classes}
       isDraggable={!maximizedPanelId}
       isResizable={!maximizedPanelId}
-      breakpoints={{ xs: 752, xxs: 0 }}
-      onBreakpointChange={onBreakpointChange}
-      useCSSTransforms={true}
+      // There is a bug with d3 + firefox + elements using transforms.
+      // See https://github.com/elastic/kibana/issues/16870 for more context.
+      useCSSTransforms={false}
       margin={[MARGINS, MARGINS]}
-      cols={{ xs: DASHBOARD_GRID_COLUMN_COUNT, xxs: isViewMode ? 1 : DASHBOARD_GRID_COLUMN_COUNT }}
       rowHeight={DASHBOARD_GRID_HEIGHT}
       // Pass the named classes of what should get the dragging handle
       draggableHandle={'.embPanel--dragHandle'}
+      breakpoints={isViewMode ? { xs: 752, xxs: 0 } : { xs: 0 }}
+      cols={
+        isViewMode
+          ? { xs: DASHBOARD_GRID_COLUMN_COUNT, xxs: 1 }
+          : { xs: DASHBOARD_GRID_COLUMN_COUNT }
+      }
       layouts={{ xs: layout }}
-      onLayoutChange={onLayoutChange}
+      onLayoutChange={isViewMode ? undefined : onLayoutChange} // we only care about layout changes in edit mode
       onResize={({}, {}, {}, {}, event) => ensureWindowScrollsToBottom(event)}
     >
       {children}
@@ -128,14 +124,11 @@ export const DashboardGrid = () => {
   const useMargins = select((state) => state.explicitInput.useMargins);
   const expandedPanelId = select((state) => state.componentState.expandedPanelId);
 
-  const [currentBreakpoint, setCurrentBreakpoint] = useState('xxs');
-
   const layout = useMemo(
     () =>
       Object.values(panels)
         .map((panel) => panel.gridData)
         .sort((panelA, panelB) => {
-          // return Number(panelA.gridData.i) - Number(panelB.gridData.i);
           if (panelA.y === panelB.y) {
             return panelA.x - panelB.x;
           } else {
@@ -176,41 +169,25 @@ export const DashboardGrid = () => {
     [dashboardContainer, panelsInOrder.length]
   );
 
-  const onBreakpointChange = useCallback(
-    (newBreakpoint: string) => {
-      if (viewMode === ViewMode.EDIT) {
-        console.log('breakpoint edit:', newBreakpoint);
-      } else {
-        console.log('breakpoint view:', newBreakpoint);
-      }
-      setCurrentBreakpoint(newBreakpoint);
-    },
-    [viewMode]
-  );
-
   const onLayoutChange = useCallback(
-    (_newLayout: Layout[], layouts: Layouts) => {
-      console.log('on layout change', viewMode, currentBreakpoint, _newLayout);
-      if (viewMode === ViewMode.EDIT) {
-        // layout can only be changed in edit mode, and `xs` should be the aboslute truth of edit layout
-        const updatedPanels: { [key: string]: DashboardPanelState } = layouts.xs.reduce(
-          (updatedPanelsAcc, panelLayout) => {
-            updatedPanelsAcc[panelLayout.i] = {
-              ...panels[panelLayout.i],
-              gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
-            };
-            return updatedPanelsAcc;
-          },
-          {} as { [key: string]: DashboardPanelState }
-        );
+    (newLayout: Layout[]) => {
+      const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
+        (updatedPanelsAcc, panelLayout) => {
+          updatedPanelsAcc[panelLayout.i] = {
+            ...panels[panelLayout.i],
+            gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+          };
+          return updatedPanelsAcc;
+        },
+        {} as { [key: string]: DashboardPanelState }
+      );
 
-        // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
-        if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
-          dispatch(setPanels(updatedPanels));
-        }
+      // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
+      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+        dispatch(setPanels(updatedPanels));
       }
     },
-    [dispatch, panels, setPanels, viewMode, currentBreakpoint]
+    [dispatch, panels, setPanels]
   );
 
   const dashboardPanels = useMemo(() => {
@@ -231,13 +208,11 @@ export const DashboardGrid = () => {
     return <>{dashboardPanels}</>;
   }
 
-  console.log(viewMode);
   return (
     <ResponsiveGrid
       layout={layout}
       useMargins={useMargins}
       onLayoutChange={onLayoutChange}
-      onBreakpointChange={onBreakpointChange}
       maximizedPanelId={expandedPanelId}
       isViewMode={viewMode === ViewMode.VIEW}
     >
