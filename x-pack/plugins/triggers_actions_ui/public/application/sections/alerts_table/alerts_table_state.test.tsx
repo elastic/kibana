@@ -313,7 +313,7 @@ describe('AlertsTableState', () => {
       useBulkGetCasesMock.mockReturnValue({ data: casesMap, isFetching: true });
 
       render(<AlertsTableWithLocale {...tableProps} />);
-      expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(2);
+      expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(3);
     });
 
     it('should pass the correct case ids to useBulkGetCases', async () => {
