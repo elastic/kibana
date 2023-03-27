@@ -165,7 +165,7 @@ describe.skip('Case View Page activity tab', () => {
     await waitForComponentToUpdate();
   });
 
-  it('should call use get user actions as per top and bottom actions list ', async () => {
+  it('should call use get user actions as per top and bottom actions list', async () => {
     appMockRender = createAppMockRenderer({ license: platinumLicense });
     appMockRender.render(<CaseViewActivity {...caseProps} />);
 
