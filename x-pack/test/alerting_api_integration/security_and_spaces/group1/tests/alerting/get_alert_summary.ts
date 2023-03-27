@@ -78,6 +78,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
               expect(stableBody).to.eql({
                 name: 'abc',
                 tags: ['foo'],
+                revision: 0,
                 rule_type_id: 'test.noop',
                 consumer: 'alertsFixture',
                 status: 'OK',

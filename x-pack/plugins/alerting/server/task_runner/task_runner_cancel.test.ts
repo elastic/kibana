@@ -85,7 +85,6 @@ describe('Task Runner Cancel', () => {
     alertingEventLoggerInitializer = {
       consumer: mockedTaskInstance.params.consumer,
       executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-      revision: 0,
       ruleId: mockedTaskInstance.params.alertId,
       ruleType,
       spaceId: mockedTaskInstance.params.spaceId,

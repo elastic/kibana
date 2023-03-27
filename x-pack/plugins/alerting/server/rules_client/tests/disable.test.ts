@@ -89,6 +89,7 @@ describe('disable()', () => {
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
       enabled: true,
+      revision: 0,
       scheduledTaskId: '1',
       actions: [
         {
@@ -208,6 +209,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
+        revision: 0,
         scheduledTaskId: '1',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
@@ -260,6 +262,7 @@ describe('disable()', () => {
       },
       params: {
         alertId: '1',
+        revision: 0,
       },
       ownerId: null,
     });
@@ -279,6 +282,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
+        revision: 0,
         scheduledTaskId: '1',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
@@ -315,6 +319,7 @@ describe('disable()', () => {
         alert: {
           rule: {
             consumer: 'myApp',
+            revision: 0,
             rule_type_id: '123',
           },
         },
@@ -361,6 +366,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
+        revision: 0,
         scheduledTaskId: '1',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
@@ -407,6 +413,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
+        revision: 0,
         scheduledTaskId: '1',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -499,6 +506,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
+        revision: 0,
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -547,6 +555,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
+        revision: 0,
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
