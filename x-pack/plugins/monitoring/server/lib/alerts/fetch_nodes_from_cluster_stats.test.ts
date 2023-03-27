@@ -257,7 +257,7 @@ describe('fetchNodesFromClusterStats', () => {
     const result = await fetchNodesFromClusterStats(esClient, clusters);
     expect(result).toEqual([
       {
-        clusterUuid: '1CS8DXLbS-e8tCcCL8oXoA',
+        clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
         recentNodes: [
           {
             nodeUuid: 'LjJ9FhDATIq9uh1kAa-XPA',
