@@ -40,8 +40,8 @@ describe('Case View Page files tab', () => {
   it('should render the utility bar for the files table', async () => {
     const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
-    expect(await result.findByTestId('cases-add-file')).toBeInTheDocument();
-    expect(await result.findByTestId('case-detail-search-file')).toBeInTheDocument();
+    expect((await result.findAllByTestId('cases-files-add')).length).toBe(2);
+    expect(await result.findByTestId('cases-files-search')).toBeInTheDocument();
   });
 
   it('should render the files table', async () => {
