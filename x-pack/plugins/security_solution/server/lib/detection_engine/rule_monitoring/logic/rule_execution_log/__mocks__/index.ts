@@ -37,6 +37,7 @@ const ruleExecutionLogForExecutorsMock = {
   ): jest.Mocked<IRuleExecutionLogForExecutors> => ({
     context: {
       executionId: context.executionId ?? 'some execution id',
+      revision: context.revision ?? 0,
       ruleId: context.ruleId ?? 'some rule id',
       ruleUuid: context.ruleUuid ?? 'some rule uuid',
       ruleName: context.ruleName ?? 'Some rule',

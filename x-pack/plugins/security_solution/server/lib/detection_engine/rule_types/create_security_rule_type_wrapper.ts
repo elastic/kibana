@@ -121,6 +121,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ruleResultService,
             context: {
               executionId,
+              revision: rule.revision,
               ruleId: rule.id,
               ruleUuid: params.ruleId,
               ruleName: rule.name,
