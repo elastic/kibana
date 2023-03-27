@@ -35,7 +35,7 @@ const fileMappings: MappingProperty = {
   },
 };
 
-interface FileDocument<M = unknown> {
+export interface FileDocument<M = unknown> {
   file: FileMetadata<M>;
 }
 
@@ -97,7 +97,7 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
             },
           },
         })
-      ).hits.hits?.[0]._source;
+      ).hits.hits?.[0]?._source;
     } else {
       doc = (
         await esClient.get<FileDocument<M>>({
