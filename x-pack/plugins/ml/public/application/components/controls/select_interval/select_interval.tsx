@@ -87,6 +87,7 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
 
   return (
     <EuiSelect
+      data-test-subj="mlAnomalyIntervalControls"
       prepend={i18n.translate('xpack.ml.explorer.intervalLabel', {
         defaultMessage: 'Interval',
       })}
@@ -101,7 +102,6 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
         </EuiToolTip>
       }
       compressed
-      id="selectInterval"
       options={OPTIONS}
       value={interval.val}
       onChange={handleOnChange}
