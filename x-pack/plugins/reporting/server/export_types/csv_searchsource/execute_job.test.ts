@@ -20,7 +20,7 @@ import nodeCrypto from '@elastic/node-crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
 import { ReportingCore } from '../..';
-import { CancellationToken } from '@kbn/reporting-common/index';
+import { CancellationToken } from '@kbn/reporting-common';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
 
