@@ -98,15 +98,12 @@ export const DiscoverMainContent = ({
           responsive={false}
           data-test-subj="dscMainContent"
         >
-          {!isPlainRecord && (
-            <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="none" />
-              <DocumentViewModeToggle
-                viewMode={viewMode}
-                setDiscoverViewMode={setDiscoverViewMode}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiHorizontalRule margin="none" />
+            {!isPlainRecord && (
+              <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
+            )}
+          </EuiFlexItem>
           {dataState.error && (
             <ErrorCallout
               title={i18n.translate('discover.documentsErrorTitle', {

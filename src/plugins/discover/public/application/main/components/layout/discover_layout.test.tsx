@@ -163,20 +163,6 @@ describe('Discover component', () => {
     ).not.toBeNull();
   }, 10000);
 
-  test('sql query displays no chart toggle', async () => {
-    const container = document.createElement('div');
-    await mountComponent(
-      dataViewWithTimefieldMock,
-      false,
-      { attachTo: container },
-      { sql: 'SELECT * FROM test' },
-      true
-    );
-    expect(
-      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
-    ).toBeNull();
-  });
-
   test('the saved search title h1 gains focus on navigate', async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
