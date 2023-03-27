@@ -21,7 +21,7 @@ import React, { Component, ReactElement } from 'react';
 import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { CSV_REPORT_TYPE } from '@kbn/generate-csv/types';
+import { CSV_REPORT_TYPE } from '@kbn/reporting-common';
 import {
   PDF_REPORT_TYPE,
   PDF_REPORT_TYPE_V2,

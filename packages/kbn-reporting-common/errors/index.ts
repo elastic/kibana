@@ -95,7 +95,7 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
   }
 
   public humanFriendlyMessage() {
-    return i18n.translate('xpack.reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
+    return i18n.translate('reportingCommon.pdfWorkerOutOfMemoryErrorMessage', {
       defaultMessage: `Can't generate a PDF due to insufficient memory. Try making a smaller PDF and retrying this report.`,
     });
   }
@@ -108,7 +108,7 @@ export class BrowserCouldNotLaunchError extends ReportingError {
   }
 
   public humanFriendlyMessage() {
-    return i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
+    return i18n.translate('reportingCommon.browserCouldNotLaunchErrorMessage', {
       defaultMessage: `Can't generate screenshots because the browser did not launch. See the server logs for more information.`,
     });
   }
@@ -146,7 +146,7 @@ export class VisualReportingSoftDisabledError extends ReportingError {
   }
 
   humanFriendlyMessage() {
-    return i18n.translate('xpack.reporting.common.cloud.insufficientSystemMemoryError', {
+    return i18n.translate('reportingCommon.cloud.insufficientSystemMemoryError', {
       defaultMessage: `Can't generate this report due to insufficient memory.`,
     });
   }

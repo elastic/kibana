@@ -74,6 +74,7 @@
     "navigation": "src/plugins/navigation",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
+    "reportingCommon": "packages/kbn-reporting-common",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
