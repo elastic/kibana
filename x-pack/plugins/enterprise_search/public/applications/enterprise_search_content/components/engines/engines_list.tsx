@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 import useThrottle from 'react-use/lib/useThrottle';
 
-import { EuiButton, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
@@ -18,7 +18,11 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { docLinks } from '../../../shared/doc_links';
 
+import { KibanaLogic } from '../../../shared/kibana';
+import { LicensingLogic } from '../../../shared/licensing';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
+
+import { LicensingCallout, LICENSING_FEATURE } from '../shared/licensing_callout/licensing_callout';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
@@ -28,7 +32,7 @@ import { EngineListIndicesFlyout } from './engines_list_flyout';
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
 
-const CreateButton: React.FC = () => {
+export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
   const { openEngineCreate } = useActions(EnginesListLogic);
   return (
     <EuiButton
@@ -36,10 +40,11 @@ const CreateButton: React.FC = () => {
       iconType="plusInCircle"
       data-test-subj="enterprise-search-content-engines-creation-button"
       data-telemetry-id="entSearchContent-engines-list-createEngine"
+      disabled={disabled}
       onClick={openEngineCreate}
     >
       {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
-        defaultMessage: 'Create engine',
+        defaultMessage: 'Create Search Application',
       })}
     </EuiButton>
   );
@@ -57,6 +62,11 @@ export const EnginesList: React.FC = () => {
   } = useActions(EnginesListLogic);
 
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
+
+  const { isCloud } = useValues(KibanaLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+
+  const isGated = !isCloud && !hasPlatinumLicense;
 
   const {
     createEngineFlyoutOpen,
@@ -91,14 +101,14 @@ export const EnginesList: React.FC = () => {
       <EnterpriseSearchEnginesPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
-            defaultMessage: 'Engines',
+            defaultMessage: 'Search Applications',
           }),
         ]}
         pageHeader={{
           description: (
             <FormattedMessage
               id="xpack.enterpriseSearch.content.engines.description"
-              defaultMessage="Engines allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search {documentationUrl}"
+              defaultMessage="Search Applications allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search {documentationUrl}"
               values={{
                 documentationUrl: (
                   <EuiLink
@@ -108,7 +118,7 @@ export const EnginesList: React.FC = () => {
                     data-telemetry-id="entSearchContent-engines-documentation-viewDocumentaion"
                   >
                     {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {
-                      defaultMessage: 'explore our Engines documentation',
+                      defaultMessage: 'explore our Search Applications documentation',
                     })}
                   </EuiLink>
                 ),
@@ -116,14 +126,24 @@ export const EnginesList: React.FC = () => {
             />
           ),
           pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
-            defaultMessage: 'Engines',
+            defaultMessage: 'Search Applications',
           }),
-          rightSideItems: isLoading ? [] : !hasNoEngines ? [<CreateButton />] : [],
+          rightSideItems: isLoading
+            ? []
+            : !hasNoEngines
+            ? [<CreateEngineButton disabled={isGated} />]
+            : [],
         }}
         pageViewTelemetry="Engines"
         isLoading={isLoading}
       >
-        {!hasNoEngines ? (
+        {isGated && (
+          <EuiFlexItem>
+            <LicensingCallout feature={LICENSING_FEATURE.SEARCH_APPLICATIONS} />
+          </EuiFlexItem>
+        )}
+
+        {!hasNoEngines && !isGated ? (
           <>
             <div>
               <EuiFieldSearch
@@ -188,7 +208,7 @@ export const EnginesList: React.FC = () => {
           </>
         ) : (
           <EmptyEnginesPrompt>
-            <CreateButton />
+            <CreateEngineButton disabled={isGated} />
           </EmptyEnginesPrompt>
         )}
 
