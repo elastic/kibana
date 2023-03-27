@@ -14,7 +14,6 @@ import {
   generateMlInferencePipelineBody,
   getMlModelTypesForModelConfig,
   parseMlInferenceParametersFromPipeline,
-  SUPPORTED_PYTORCH_TASKS,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { Status } from '../../../../../../../common/types/api';
 import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
