@@ -319,7 +319,7 @@ describe('fetchNodesFromClusterStats', () => {
                 top_hits: {
                   sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
                   _source: {
-                    includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.nodes'],
+                    includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.state.nodes'],
                   },
                   size: 2,
                 },
@@ -343,5 +343,75 @@ describe('fetchNodesFromClusterStats', () => {
     expect(params.index).toBe(
       '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
     );
+  });
+
+  it('ignores buckets with only one document', async () => {
+    const singleHitRes = {
+      aggregations: {
+        clusters: {
+          buckets: [
+            {
+              key: '1CS8DXLbS-e8tCcCL8oXoA',
+              doc_count: 1,
+              top: {
+                hits: {
+                  total: { value: 1, relation: 'eq' },
+                  max_score: null,
+                  hits: [
+                    {
+                      _index: '.ds-.monitoring-es-8-mb-2023.03.27-000001',
+                      _id: 'CUJ6I4cBwUW49K58n-b9',
+                      _score: null,
+                      _source: {
+                        elasticsearch: {
+                          cluster: {
+                            stats: {
+                              state: {
+                                nodes: {
+                                  'LjJ9FhDATIq9uh1kAa-XPA': {
+                                    name: 'instance-0000000000',
+                                    ephemeral_id: '3ryJEBWZS1e3x-_K_Yt-ww',
+                                    transport_address: '127.0.0.1:9300',
+                                    external_id: 'instance-0000000000',
+                                    attributes: {
+                                      logical_availability_zone: 'zone-0',
+                                      'xpack.installed': 'true',
+                                      data: 'hot',
+                                      region: 'unknown-region',
+                                      availability_zone: 'us-central1-a',
+                                    },
+                                    roles: [
+                                      'data_content',
+                                      'data_hot',
+                                      'ingest',
+                                      'master',
+                                      'remote_cluster_client',
+                                      'transform',
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      sort: [1679927450602],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    esClient.search.mockResponse(
+      // @ts-expect-error not full response interface
+      singleHitRes
+    );
+
+    const result = await fetchNodesFromClusterStats(esClient, clusters);
+    expect(result).toEqual([]);
   });
 });
