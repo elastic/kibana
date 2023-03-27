@@ -144,7 +144,6 @@ export async function ensureInstalledPackage(options: {
     return installedPackageResult.package;
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
-  console.log('--@@DO NOT REMOVE ensureInstalledPackage', apiKeyWithCurrentUserPermission);
   const installResult = await installPackage({
     installSource: 'registry',
     savedObjectsClient,
@@ -628,10 +627,6 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
   const apiKeyWithCurrentUserPermission = args.apiKeyWithCurrentUserPermission;
-  console.log(
-    '--@@DO NOT REMOVE installPackage apiKeyWithCurrentUserPermission ',
-    apiKeyWithCurrentUserPermission
-  );
 
   const bundledPackages = await getBundledPackages();
 

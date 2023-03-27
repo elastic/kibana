@@ -14,6 +14,7 @@ import { PluginSetupDependencies, PluginStartDependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License } from './services';
 import { registerTransformHealthRuleType } from './lib/alerting';
+import { setupCapabilities } from './capabilities';
 
 const basicLicense: LicenseType = 'basic';
 
@@ -38,10 +39,11 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   }
 
   setup(
-    { http, getStartServices, elasticsearch }: CoreSetup<PluginStartDependencies>,
+    coreSetup: CoreSetup<PluginStartDependencies>,
     { licensing, features, alerting }: PluginSetupDependencies
   ): {} {
-    const router = http.createRouter();
+    const router = coreSetup.http.createRouter();
+    setupCapabilities(coreSetup);
 
     this.license.setup(
       {
@@ -74,7 +76,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     this.apiRoutes.setup({
       router,
       license: this.license,
-      getStartServices,
+      getStartServices: coreSetup.getStartServices,
     });
 
     if (alerting) {

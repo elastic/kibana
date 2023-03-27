@@ -6,67 +6,33 @@
  */
 
 import React from 'react';
-import type { FunctionComponent, MouseEvent } from 'react';
+import type { FunctionComponent } from 'react';
 
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSplitPanel,
-  EuiSpacer,
-  EuiText,
-  EuiHorizontalRule,
-  EuiNotificationBadge,
-  EuiCallOut,
-  EuiTitle,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AssetTitleMap } from '../../../constants';
-
+import type { PackageInfo } from '../../../../../types';
 import { ElasticsearchAssetType } from '../../../../../types';
+
+import { DeferredTransformAccordion } from './deferred_transforms_accordion';
 
 import type { AssetSavedObject } from './types';
 
 interface Props {
-  type: ElasticsearchAssetType.transform;
+  packageInfo: PackageInfo;
   deferredInstallations: AssetSavedObject[];
 }
 
-export const getDeferredAssetDescription = (assetType: string, assetCount: number) => {
-  switch (assetType) {
-    case ElasticsearchAssetType.transform:
-      return i18n.translate(
-        'xpack.fleet.epm.packageDetails.assets.deferredTransformInstallationsCallout',
-        {
-          defaultMessage:
-            '{assetCount, plural, one {# One transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. Re-authorize from a user with `transform_admin` permission to start operations.',
-          values: { assetCount: assetCount ?? 1 },
-        }
-      );
-    default:
-      return i18n.translate('xpack.fleet.epm.packageDetails.assets.deferredInstallationsCallout', {
-        defaultMessage: 'Asset requires additional permissions.',
-      });
-  }
-};
-
-export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
-  type,
+export const DeferredAssetsSection: FunctionComponent<Props> = ({
   deferredInstallations,
+  packageInfo,
 }) => {
-  const savedObjects = deferredInstallations.map((i) => ({
-    id: i.id,
-    attributes: {
-      title: i.id,
-      description: i._version,
-    },
-  }));
-
+  const deferredTransforms = deferredInstallations.filter(
+    (asset) => asset.type === ElasticsearchAssetType.transform
+  );
   return (
     <>
       <EuiTitle>
@@ -93,90 +59,11 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
       />
       <EuiSpacer size="l" />
 
-      <EuiAccordion
-        initialIsOpen={true}
-        buttonContent={
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="m">
-                <h3>{AssetTitleMap[type]}</h3>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiNotificationBadge color="accent" size="m">
-                <h3>{savedObjects.length}</h3>
-              </EuiNotificationBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        id={type}
-      >
-        <>
-          <EuiSpacer size="m" />
-          <EuiText>
-            <p>{getDeferredAssetDescription(type, deferredInstallations.length)}</p>
-            <EuiButton
-              size={'m'}
-              onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                e.preventDefault();
-              }}
-            >
-              {i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeButton', {
-                defaultMessage: 'Re-authorize all',
-              })}
-            </EuiButton>
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
-          <EuiSplitPanel.Outer hasBorder hasShadow={false}>
-            {savedObjects.map(({ id, attributes: { title, description } }, idx) => {
-              return (
-                <>
-                  <EuiSplitPanel.Inner grow={false} key={idx}>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={8}>
-                        <EuiText size="m">
-                          <p>{title}</p>
-                        </EuiText>
-                        {description && (
-                          <>
-                            <EuiSpacer size="s" />
-                            <EuiText size="s" color="subdued">
-                              <p>{description}</p>
-                            </EuiText>
-                          </>
-                        )}
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiButton
-                          size={'s'}
-                          onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                            e.preventDefault();
-                          }}
-                        >
-                          {i18n.translate(
-                            'xpack.fleet.epm.packageDetails.assets.reauthorizeButton',
-                            {
-                              defaultMessage: 'Re-authorize',
-                            }
-                          )}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiSplitPanel.Inner>
-                  {idx + 1 < savedObjects.length && <EuiHorizontalRule margin="none" />}
-                </>
-              );
-            })}
-          </EuiSplitPanel.Outer>
-        </>
-      </EuiAccordion>
+      <DeferredTransformAccordion
+        packageInfo={packageInfo}
+        type={ElasticsearchAssetType.transform}
+        deferredInstallations={deferredTransforms}
+      />
     </>
   );
 };

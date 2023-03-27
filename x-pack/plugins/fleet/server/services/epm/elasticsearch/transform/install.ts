@@ -589,6 +589,23 @@ const installTransformsAssets = async (
 
       installedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
     }
+
+    // If user does not have sufficient permissions to start the transforms,
+    // we need to mark them as deferred installations without blocking full package installation
+    // so that they can be updated/re-authorized later
+
+    if (installedTransforms.length > 0) {
+      // get and save refs associated with the transforms before installing
+      esReferences = await updateEsAssetReferences(
+        savedObjectsClient,
+        installablePackage.name,
+        esReferences,
+        {
+          assetsToRemove: transformRefs,
+          assetsToAdd: [...transformRefs].map((t) => ({ ...t, deferred: true })),
+        }
+      );
+    }
   }
 
   return { installedTransforms, esReferences };
@@ -778,6 +795,7 @@ async function handleTransformInstall({
   return {
     id: transform.installationName,
     type: ElasticsearchAssetType.transform,
+    deferred: isUnauthorizedAPIKey,
   };
 }
 

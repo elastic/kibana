@@ -20,7 +20,7 @@ interface Authorization {
   capabilities: Capabilities;
 }
 
-const initialCapabilities: Capabilities = {
+export const initialCapabilities: Capabilities = {
   canGetTransform: false,
   canDeleteTransform: false,
   canPreviewTransform: false,

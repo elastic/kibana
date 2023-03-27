@@ -109,9 +109,21 @@ export function calculatePackagePrivilegesFromCapabilities(
     {}
   );
 
+  const transformActions = Object.keys(capabilities.transform).reduce((acc, privilegeName) => {
+    return {
+      ...acc,
+      [privilegeName]: {
+        executePackageAction: capabilities.transform[privilegeName] || false,
+      },
+    };
+  }, {});
+
   return {
     endpoint: {
       actions: endpointActions,
+    },
+    transform: {
+      actions: transformActions,
     },
   };
 }
@@ -173,14 +185,14 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
         `admin`
       ),
     },
-    startOrStopTransform: {
+    canStartStopTransform: {
       executePackageAction: getAuthorizationFromPrivileges(
         kibanaPrivileges,
         `${TRANSFORM_PLUGIN_ID}-`,
-        'all'
+        'admin'
       ),
     },
-    viewTransform: {
+    canViewTransform: {
       executePackageAction: getAuthorizationFromPrivileges(
         kibanaPrivileges,
         `${TRANSFORM_PLUGIN_ID}-`,
