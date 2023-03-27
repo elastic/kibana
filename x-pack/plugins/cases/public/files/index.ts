@@ -21,7 +21,7 @@ const buildFileKind = (owner: Owner): FileKindBrowser => {
 };
 
 export const isRegisteredOwner = (ownerToCheck: string): ownerToCheck is Owner =>
-  ownerToCheck in CASES_FILE_KINDS;
+  Object.hasOwn(CASES_FILE_KINDS, ownerToCheck);
 
 /**
  * The file kind definition for interacting with the file service for the UI

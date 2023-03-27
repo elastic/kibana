@@ -10,7 +10,13 @@ import { screen, within } from '@testing-library/react';
 
 import { basicFileMock } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { constructFileKindIdByOwner } from '../../../common/constants';
+import {
+  createAppMockRenderer,
+  mockedFilesClient,
+  mockedTestProvidersOwner,
+} from '../../common/mock';
 import { FilesTable } from './files_table';
 import userEvent from '@testing-library/user-event';
 
@@ -73,7 +79,7 @@ describe('FilesTable', () => {
       )
     );
 
-    expect(await screen.queryByTestId('case-files-image-preview')).not.toBeInTheDocument();
+    expect(await screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
   });
 
   it('image rows open file preview', async () => {
@@ -84,6 +90,43 @@ describe('FilesTable', () => {
         name: `${basicFileMock.name}.${basicFileMock.extension}`,
       })
     );
-    expect(await screen.findByTestId('case-files-image-preview')).toBeInTheDocument();
+
+    expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
+  });
+
+  it('different mimeTypes are displayed correctly', async () => {
+    const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 7 };
+    appMockRender.render(
+      <FilesTable
+        {...defaultProps}
+        pagination={mockPagination}
+        items={[
+          { ...basicFileMock, mimeType: '' },
+          { ...basicFileMock, mimeType: 'no-slash' },
+          { ...basicFileMock, mimeType: '/slash-in-the-beginning' },
+          { ...basicFileMock, mimeType: undefined },
+          { ...basicFileMock, mimeType: 'application/gzip' },
+          { ...basicFileMock, mimeType: 'text/csv' },
+          { ...basicFileMock, mimeType: 'image/tiff' },
+        ]}
+      />
+    );
+
+    expect((await screen.findAllByText('Unknown')).length).toBe(4);
+    expect(await screen.findByText('Application')).toBeInTheDocument();
+    expect(await screen.findByText('Text')).toBeInTheDocument();
+    expect(await screen.findByText('Image')).toBeInTheDocument();
+  });
+
+  it('download button renders correctly', async () => {
+    appMockRender.render(<FilesTable {...defaultProps} />);
+
+    expect(mockedFilesClient.getDownloadHref).toBeCalledTimes(1);
+    expect(mockedFilesClient.getDownloadHref).toHaveBeenCalledWith({
+      fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+      id: basicFileMock.id,
+    });
+
+    expect(await screen.findByTestId('cases-files-table-action-download')).toBeInTheDocument();
   });
 });

@@ -53,6 +53,13 @@ window.scrollTo = jest.fn();
 
 export const mockedFilesClient = createMockFilesClient() as unknown as ScopedFilesClient<unknown>;
 
+// @ts-ignore
+mockedFilesClient.getFileKind.mockImplementation(() => ({
+  id: 'test',
+  maxSizeBytes: 10000,
+  http: {},
+}));
+
 const mockGetFilesClient = () => mockedFilesClient;
 
 export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
@@ -141,7 +148,7 @@ export const testQueryClient = new QueryClient({
 
 export const createAppMockRenderer = ({
   features,
-  owner = [SECURITY_SOLUTION_OWNER],
+  owner = mockedTestProvidersOwner,
   permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),

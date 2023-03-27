@@ -39,7 +39,6 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
   const { owner } = useCasesContext();
   const { client: filesClient } = useFilesContext();
   const { showDangerToast, showErrorToast, showSuccessToast } = useCasesToast();
-
   const { isLoading, createAttachments } = useCreateAttachments();
   const refreshAttachmentsTable = useRefreshCaseViewPage();
   const [isModalVisible, setIsModalVisible] = useState(false);

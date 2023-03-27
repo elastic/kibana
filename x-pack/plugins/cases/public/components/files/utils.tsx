@@ -7,4 +7,20 @@
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
+import * as i18n from './translations';
+
 export const isImage = (file: FileJSON) => file.mimeType?.startsWith('image/');
+
+export const parseMimeType = (mimeType: string | undefined) => {
+  if (typeof mimeType === 'undefined') {
+    return i18n.UNKNOWN_MIME_TYPE;
+  }
+
+  const result = mimeType.split('/');
+
+  if (result.length <= 1 || result[0] === '') {
+    return i18n.UNKNOWN_MIME_TYPE;
+  }
+
+  return result[0].charAt(0).toUpperCase() + result[0].slice(1);
+};

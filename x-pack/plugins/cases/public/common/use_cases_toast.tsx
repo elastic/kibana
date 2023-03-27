@@ -170,7 +170,7 @@ export const useCasesToast = () => {
       toasts.addSuccess({ title, className: 'eui-textBreakWord' });
     },
     showDangerToast: (title: string) => {
-      toasts.addDanger({ title, className: 'eui-textBreakWord' });
+      toasts.addDanger({ title });
     },
   };
 };

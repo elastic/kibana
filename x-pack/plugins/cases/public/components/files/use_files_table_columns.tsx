@@ -17,7 +17,7 @@ import type { Owner } from '../../../common/constants/types';
 import { constructFileKindIdByOwner } from '../../../common/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
-import { isImage } from './utils';
+import { isImage, parseMimeType } from './utils';
 
 export interface FilesTableColumnsProps {
   showPreview: (file: FileJSON) => void;
@@ -48,7 +48,7 @@ export const useFilesTableColumns = ({
       name: i18n.TYPE,
       'data-test-subj': 'cases-files-table-filetype',
       render: (attachment: FileJSON) => {
-        return <span>{`${attachment.mimeType?.split('/')[0]}` || ''}</span>;
+        return <span>{parseMimeType(attachment.mimeType)}</span>;
       },
     },
     {
