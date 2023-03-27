@@ -81,6 +81,7 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
 
 const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-subj'?: string }>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
+    console.log('outputACtion', action);
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const { canWriteFileOperations, canWriteExecuteOperations } =
@@ -88,6 +89,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
 
     const { command, isCompleted, isExpired, wasSuccessful } = action;
 
+    console.log({ isExpired });
     if (isExpired) {
       return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
     }
@@ -119,6 +121,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
         <EuiFlexGroup direction="column" data-test-subj={getTestId('executeDetails')}>
           {action.agents.map((agentId) => (
             <div key={agentId}>
+              test
               {OUTPUT_MESSAGES.wasSuccessful(command)}
               <EuiFlexItem>
                 <ResponseActionFileDownloadLink

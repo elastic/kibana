@@ -22,6 +22,7 @@ const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
 `;
+
 type RuleParameters = Array<{
   response_actions: Array<{
     action_type_id: RESPONSE_ACTION_TYPES;

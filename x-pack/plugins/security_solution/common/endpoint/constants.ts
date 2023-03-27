@@ -88,6 +88,8 @@ export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
 export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
 export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}`;
 export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}/download`;
+export const AUTOMATED_ACTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/automated_actions`;
+export const AUTOMATED_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/automated_actions_responses`;
 
 export const failedFleetActionErrorCode = '424';
 
@@ -100,3 +102,11 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 };
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
+
+export const OSQUERY_BASE = '.logs-osquery_manager';
+export const OSQUERY_ACTIONS_DS = `${OSQUERY_BASE}.actions`;
+export const OSQUERY_RESULTS_DS = `${OSQUERY_BASE}.results`;
+export const OSQUERY_ACTIONS_INDEX = `${OSQUERY_ACTIONS_DS}-*`;
+export const OSQUERY_ACTION_RESPONSES_DS = `${OSQUERY_BASE}.action.responses`;
+export const OSQUERY_ACTION_RESPONSES_INDEX = `${OSQUERY_ACTION_RESPONSES_DS}-*`;
+export const OSQUERY_LIVE_QUERY_ROUTE = `/api/osquery/live_queries`;

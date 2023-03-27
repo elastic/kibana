@@ -96,6 +96,7 @@ import type {
   FirstLastSeenRequestOptions,
   FirstLastSeenStrategyResponse,
 } from './first_last_seen';
+import type { ResponseActionsQueries } from './response_actions';
 
 export * from './cti';
 export * from './hosts';
@@ -114,7 +115,8 @@ export type FactoryQueryTypes =
   | RiskQueries
   | CtiQueries
   | typeof MatrixHistogramQuery
-  | typeof FirstLastSeenQuery;
+  | typeof FirstLastSeenQuery
+  | ResponseActionsQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -256,6 +258,10 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? RiskScoreRequestOptions
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreRequestOptions
+  : T extends ResponseActionsQueries.actions
+  ? any
+  : T extends ResponseActionsQueries.results
+  ? any
   : never;
 
 export interface CommonFields {

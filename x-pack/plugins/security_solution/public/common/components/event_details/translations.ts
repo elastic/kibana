@@ -66,13 +66,12 @@ export const JSON_VIEW = i18n.translate('xpack.securitySolution.eventDetails.jso
   defaultMessage: 'JSON',
 });
 
-export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.osqueryView', {
-  defaultMessage: 'Osquery Results',
-});
-
-export const ENDPOINT_VIEW = i18n.translate('xpack.securitySolution.eventDetails.endpointView', {
-  defaultMessage: 'Endpoint Results',
-});
+export const ENDPOINT_VIEW = i18n.translate(
+  'xpack.securitySolution.eventDetails.responseActionsView',
+  {
+    defaultMessage: 'Response Actions',
+  }
+);
 
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
   defaultMessage: 'Field',

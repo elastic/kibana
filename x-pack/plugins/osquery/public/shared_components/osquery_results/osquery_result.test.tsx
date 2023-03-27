@@ -14,7 +14,7 @@ import { queryClient } from '../../query_client';
 import { useKibana } from '../../common/lib/kibana';
 import * as useLiveQueryDetails from '../../actions/use_live_query_details';
 import { PERMISSION_DENIED } from '../osquery_action/translations';
-import { OsqueryResult } from './osquery_result';
+import OsqueryResult from './osquery_result';
 import {
   defaultLiveQueryDetails,
   DETAILS_ID,

@@ -38,6 +38,7 @@ import {
   getExternalReferenceAttachmentRegular,
 } from './shared_components';
 import type { ServicesWrapperProps } from './shared_components/services_wrapper';
+import { getLazyOsqueryResult } from './shared_components/lazy_osquery_result';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -123,6 +124,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         ...plugins,
       }),
       OsqueryResults: getLazyOsqueryResults({
+        ...core,
+        ...plugins,
+        storage: this.storage,
+        kibanaVersion: this.kibanaVersion,
+      }),
+      OsqueryResult: getLazyOsqueryResult({
         ...core,
         ...plugins,
         storage: this.storage,

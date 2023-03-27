@@ -21,7 +21,7 @@ interface OsqueryResultProps extends OsqueryActionResultsProps {
   startDate: string;
 }
 
-export const OsqueryResult = React.memo<OsqueryResultProps>(
+const OsqueryResult = React.memo<OsqueryResultProps>(
   ({ actionId, ruleName, startDate, ecsData }) => {
     const [isLive, setIsLive] = useState(false);
     const { data } = useLiveQueryDetails({
@@ -55,3 +55,6 @@ export const OsqueryResult = React.memo<OsqueryResultProps>(
     );
   }
 );
+
+// eslint-disable-next-line import/no-default-export
+export { OsqueryResult as default };

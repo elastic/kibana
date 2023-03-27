@@ -233,6 +233,7 @@ export const ResponseActionsLog = memo<
       [isFlyout, setUrlWithOutputs]
     );
 
+    console.log({ tableItems });
     if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
       return <ActionsLogEmptyState data-test-subj={getTestId('empty-state')} />;
     } else if (isFetching && isFirstAttempt) {

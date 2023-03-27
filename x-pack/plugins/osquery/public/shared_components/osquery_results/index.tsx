@@ -16,7 +16,7 @@ import { queryClient } from '../../query_client';
 import { KibanaThemeProvider } from '../../shared_imports';
 import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultsProps } from './types';
-import { OsqueryResult } from './osquery_result';
+import OsqueryResult from './osquery_result';
 
 const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   ruleName,

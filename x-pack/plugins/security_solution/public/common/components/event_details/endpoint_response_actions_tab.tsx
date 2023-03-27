@@ -7,14 +7,19 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
-import { ActionsLogTable } from '../../../management/components/endpoint_response_actions_list/components/actions_log_table';
-import { useGetEndpointActionList } from '../../../management/hooks';
-import type { AlertRawEventData, ExpandedEventFieldsObject } from './types';
+import { EuiComment, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { map } from 'lodash';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
+import { useKibana } from '../../lib/kibana';
+import {
+  useGetAutomatedActionList,
+  useGetAutomatedActionResponseList,
+} from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
-import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
 
@@ -24,36 +29,36 @@ const TabContentWrapper = styled.div`
 `;
 
 export const useEndpointResponseActionsTab = ({
-  rawEventData,
+  responseActions,
+  ruleName,
+  ecsData,
+  alertIds,
 }: {
-  rawEventData?: AlertRawEventData;
+  ecsData?: Ecs;
+  responseActions?: Array<{
+    action_type_id: RESPONSE_ACTION_TYPES;
+    params: Record<string, unknown>;
+  }>;
+  ruleName?: string[];
+  alertIds?: string[];
 }) => {
+  const {
+    services: { osquery },
+  } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
-  const {
-    data: actionList,
-    isFetching,
-    isFetched,
-  } = useGetEndpointActionList(
-    {
-      alertIds: [rawEventData?._id ?? ''],
-      withRuleActions: true,
-    },
-    { retry: false, enabled: rawEventData && responseActionsEnabled }
-  );
+  const { data: automatedList, isFetched } = useGetAutomatedActionList({
+    alertIds,
+    withRuleActions: true,
+  });
 
-  const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
+  const { OsqueryResult } = osquery;
 
-  if (!rawEventData || !responseActionsEnabled) {
+  const totalItemCount = useMemo(() => automatedList?.items?.length ?? 0, [automatedList]);
+
+  if (!responseActionsEnabled) {
     return;
   }
-
-  const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
-  ) as ExpandedEventFieldsObject;
-
-  const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
   const endpointResponseActions = responseActions?.filter(
     (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.ENDPOINT
@@ -61,6 +66,51 @@ export const useEndpointResponseActionsTab = ({
   if (!endpointResponseActions?.length) {
     return;
   }
+
+  const renderItems = () => {
+    return map(automatedList?.items, (item) => {
+      if (item.input_type === 'osquery') {
+        const actionId = item.action_id;
+        const queryId = item.queries[0].id;
+        const startDate = item['@timestamp'];
+
+        return (
+          <OsqueryResult
+            key={actionId}
+            actionId={actionId}
+            queryId={queryId}
+            startDate={startDate}
+            ruleName={ruleName}
+            ecsData={ecsData}
+          />
+        );
+      }
+      if (item.EndpointActions.input_type === 'endpoint') {
+        console.log({ item });
+        return <EndpointResponseActionResults action={item} ruleName={ruleName?.[0]} />;
+      }
+      // RESPONSES
+      // if (item.action_input_type === 'osquery') {
+      //   const actionId = item.action_id;
+      //   const queryId = item.action_data.id;
+      //   const startDate = item['@timestamp'];
+      //
+      //   return (
+      //     <OsqueryResult
+      //       key={actionId}
+      //       actionId={actionId}
+      //       queryId={queryId}
+      //       startDate={startDate}
+      //       ruleName={ruleName}
+      //       ecsData={ecsData}
+      //     />
+      //   );
+      // }
+      // if (item.action_input_type === 'endpoint') {
+      //   return <div>ENDPOINT ACTION: </div>;
+      // }
+    });
+  };
 
   return {
     id: EventsViewType.endpointView,
@@ -75,21 +125,26 @@ export const useEndpointResponseActionsTab = ({
       <>
         <EuiSpacer size="s" />
         <TabContentWrapper data-test-subj="endpointViewWrapper">
-          {isFetched && totalItemCount ? (
-            <ActionsLogTable
-              data-test-subj="endpoint-actions-results-table"
-              isFlyout={false}
-              onShowActionDetails={() => null}
-              items={actionList?.data || []}
-              loading={isFetching}
-              onChange={() => null}
-              totalItemCount={totalItemCount}
-              queryParams={{ withRuleActions: true }}
-              showHostNames
-            />
-          ) : null}
+          {isFetched && totalItemCount ? renderItems() : null}
         </TabContentWrapper>
       </>
     ),
   };
+};
+
+const EndpointResponseActionResults = ({ action, ruleName }) => {
+  const { action_id: actionId, expiration } = action.EndpointActions;
+  console.log({ action });
+  const response = useGetAutomatedActionResponseList({ actionId, expiration });
+
+  return (
+    <EuiComment
+      username={ruleName}
+      timestamp={<FormattedRelative value={action['@timestamp']} />}
+      event={`executed command ${action.EndpointActions?.data.command}`}
+      data-test-subj={'endpoint-results-comment'}
+    >
+      <ActionsLogExpandedTray action={{ ...action.EndpointActions.data, ...response?.data }} />
+    </EuiComment>
+  );
 };

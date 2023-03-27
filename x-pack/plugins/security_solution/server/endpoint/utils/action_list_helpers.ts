@@ -134,6 +134,8 @@ export const getActions = async ({
     return (e._source as LogsEndpointAction).EndpointActions.action_id;
   });
 
+  console.log({ actionIds });
+
   return { actionIds, actionRequests };
 };
 
@@ -184,5 +186,7 @@ export const getActionResponses = async ({
       meta: true,
     })
     .catch(catchAndWrapError);
+
+  // console.log({ actionResponses });
   return actionResponses;
 };
