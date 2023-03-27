@@ -72,6 +72,8 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return (await this.contentManagemntClient.create<DataViewCreateIn, DataViewCreateOut>({
       contentTypeId: 'index-pattern',
       data: attributes,
+      // this is required, shouldn't be.
+      options: {},
     })) as SavedObject<DataViewAttributes>;
   }
 
