@@ -8,42 +8,65 @@
 import { useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { CaseUserActions } from '../../containers/types';
+import type { CaseUserActions, CaseUserActionsStats } from '../../containers/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
 interface LastPageUserActions {
   userActivityQueryParams: UserActivityParams;
+  userActionsStats: CaseUserActionsStats;
   caseId: string;
   lastPage: number;
+  showBottomList: boolean;
 }
 
 export const useLastPageUserActions = ({
   userActivityQueryParams,
+  userActionsStats,
   caseId,
   lastPage,
+  showBottomList,
 }: LastPageUserActions) => {
   const isFirstRender = useRef(true);
   const activityParams = useRef(userActivityQueryParams);
+  const actionsStats = useRef(userActionsStats);
+  const prevLastPage = useRef(lastPage);
 
-  const skipRefetchBottomActions =
-    userActivityQueryParams.sortOrder === 'desc' &&
-    deepEqual(activityParams.current, userActivityQueryParams) &&
-    !isFirstRender.current; // do not refetch bottom actions when new action added in the top list
+  const isActivityParamsUpdated =
+    !deepEqual(activityParams.current, userActivityQueryParams) && !isFirstRender.current; // refetch bottom actions when query params changed
+
+  const isActionsStatsUpdated =
+    userActivityQueryParams.sortOrder === 'asc' &&
+    !deepEqual(actionsStats.current, userActionsStats) &&
+    !isFirstRender.current; // refetch last page actions only when new action added in the bottom list (i.e. in descending order)
+
+  const lastPageChanged = prevLastPage.current !== lastPage; // when comments are 21st comment added, it should refetch user actions as last page has changed
 
   const { data: lastPageUserActionsData, isLoading: isLoadingLastPageUserActions } =
     useFindCaseUserActions(
       caseId,
       { ...userActivityQueryParams, page: lastPage },
-      isFirstRender.current || !skipRefetchBottomActions
+      showBottomList &&
+        (isFirstRender.current ||
+          isActionsStatsUpdated ||
+          isActivityParamsUpdated ||
+          lastPageChanged)
     );
 
   if (isFirstRender.current) {
     isFirstRender.current = false;
   }
 
-  if (skipRefetchBottomActions) {
+  if (isActivityParamsUpdated) {
     activityParams.current = userActivityQueryParams;
+  }
+
+  if (isActionsStatsUpdated) {
+    actionsStats.current = userActionsStats;
+  }
+
+  if (lastPageChanged) {
+    prevLastPage.current = lastPage;
   }
 
   const lastPageUserActions = useMemo<CaseUserActions[]>(() => {

@@ -55,8 +55,10 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const { isLoadingLastPageUserActions, lastPageUserActions } = useLastPageUserActions({
     userActivityQueryParams,
+    userActionsStats,
     caseId: caseData.id,
     lastPage,
+    showBottomList,
   });
 
   const alertIdsWithoutRuleInfo = useMemo(
@@ -161,6 +163,14 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
                 ${customSize.marginBottomShowMoreSectionSize}
             );
           }
+          .commentList--hasShowMore
+            [class*='euiTimelineItem-']
+            > [class*='euiTimelineItemIcon-']::before {
+            block-size: calc(
+              100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
+                ${customSize.marginBottomShowMoreSectionSize}
+            );
+          }
         `}
       >
         <UserActionsList
@@ -170,7 +180,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           manualAlertsData={manualAlertsData}
           commentRefs={commentRefs}
           handleManageQuote={handleManageQuote}
-          bottomActions={lastPage === 0 ? bottomActions : []}
+          bottomActions={lastPage === 1 ? bottomActions : []}
           isExpandable
         />
         {showLoadMore && hasNextPage && <ShowMoreButton onShowMoreClick={handleShowMore} />}

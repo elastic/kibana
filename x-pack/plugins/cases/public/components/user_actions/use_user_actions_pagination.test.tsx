@@ -104,7 +104,7 @@ describe('useUserActionsPagination', () => {
     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
       basicCase.id,
       userActivityQueryParams,
-      false
+      true
     );
     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
 
@@ -112,7 +112,7 @@ describe('useUserActionsPagination', () => {
       expect(result.current).toEqual(
         expect.objectContaining({
           lastPage: 1,
-          showBottomList: true,
+          showBottomList: false,
           showLoadMore: false,
           isLoadingInfiniteUserActions: false,
           infiniteCaseUserActions: defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
@@ -176,20 +176,232 @@ describe('useUserActionsPagination', () => {
     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
       basicCase.id,
       userActivityQueryParams,
-      false
+      true
     );
 
     await waitFor(() => {
       expect(result.current).toEqual(
         expect.objectContaining({
           lastPage: 1,
-          showBottomList: true,
+          showBottomList: false,
           showLoadMore: false,
           isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
           infiniteCaseUserActions: [],
           hasNextPage: false,
           fetchNextPage: defaultInfiniteUseFindCaseUserActions.fetchNextPage,
         })
+      );
+    });
+  });
+
+  describe('rerenders', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    });
+
+    it('rerenders correctly when user activity params changed', async () => {
+      const { result, waitFor, rerender } = renderHook(
+        (props) => {
+          return useUserActionsPagination(props);
+        },
+        {
+          initialProps: {
+            userActivityQueryParams,
+            userActionsStats,
+            caseId: basicCase.id,
+          },
+        }
+      );
+
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        basicCase.id,
+        userActivityQueryParams,
+        true
+      );
+
+      await waitFor(() => {
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            lastPage: 3,
+            showBottomList: true,
+            showLoadMore: true,
+            isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
+            infiniteCaseUserActions:
+              defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
+            hasNextPage: defaultInfiniteUseFindCaseUserActions.hasNextPage,
+            fetchNextPage: defaultInfiniteUseFindCaseUserActions.fetchNextPage,
+          })
+        );
+      });
+
+      rerender({
+        userActionsStats,
+        caseId: basicCase.id,
+        userActivityQueryParams: { ...userActivityQueryParams, type: 'user' },
+      });
+
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        basicCase.id,
+        { ...userActivityQueryParams, type: 'user' },
+        true
+      );
+    });
+
+    it('rerenders correctly when last page is 1', async () => {
+      const { result, waitFor, rerender } = renderHook(
+        (props) => {
+          return useUserActionsPagination(props);
+        },
+        {
+          initialProps: {
+            userActivityQueryParams,
+            userActionsStats: { total: 9, totalComments: 3, totalOtherActions: 6 },
+            caseId: basicCase.id,
+          },
+        }
+      );
+
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        basicCase.id,
+        userActivityQueryParams,
+        true
+      );
+
+      await waitFor(() => {
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            lastPage: 1,
+            showBottomList: false,
+            showLoadMore: false,
+            isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
+            infiniteCaseUserActions:
+              defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
+            hasNextPage: false,
+            fetchNextPage: defaultInfiniteUseFindCaseUserActions.fetchNextPage,
+          })
+        );
+      });
+
+      rerender({
+        userActionsStats: { total: 10, totalComments: 4, totalOtherActions: 6 },
+        caseId: basicCase.id,
+        userActivityQueryParams,
+      });
+
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        basicCase.id,
+        userActivityQueryParams,
+        true
+      );
+    });
+
+    it('rerenders correctly when action params changed and sort order is descending', async () => {
+      const { result, waitFor, rerender } = renderHook(
+        (props) => {
+          return useUserActionsPagination(props);
+        },
+        {
+          initialProps: {
+            userActivityQueryParams: {
+              ...userActivityQueryParams,
+              sortOrder: 'desc' as UserActivityParams['sortOrder'],
+            },
+            userActionsStats,
+            caseId: basicCase.id,
+          },
+        }
+      );
+
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        basicCase.id,
+        { ...userActivityQueryParams, sortOrder: 'desc' },
+        true
+      );
+
+      await waitFor(() => {
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            lastPage: 3,
+            showBottomList: true,
+            showLoadMore: true,
+            isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
+            infiniteCaseUserActions:
+              defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
+            hasNextPage: defaultInfiniteUseFindCaseUserActions.hasNextPage,
+            fetchNextPage: defaultInfiniteUseFindCaseUserActions.fetchNextPage,
+          })
+        );
+      });
+
+      rerender({
+        userActionsStats: {
+          ...userActionsStats,
+          total: 26,
+          totalComments: 10,
+          totalOtherActions: 16,
+        },
+        caseId: basicCase.id,
+        userActivityQueryParams: { ...userActivityQueryParams, sortOrder: 'desc' },
+      });
+
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        basicCase.id,
+        { ...userActivityQueryParams, sortOrder: 'desc' },
+        true
+      );
+    });
+
+    it('does not rerender when action params changed and sort order is ascending', async () => {
+      const { result, waitFor, rerender } = renderHook(
+        (props) => {
+          return useUserActionsPagination(props);
+        },
+        {
+          initialProps: {
+            userActivityQueryParams,
+            userActionsStats,
+            caseId: basicCase.id,
+          },
+        }
+      );
+
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        basicCase.id,
+        { ...userActivityQueryParams },
+        true
+      );
+
+      await waitFor(() => {
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            lastPage: 3,
+            showBottomList: true,
+            showLoadMore: true,
+            isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
+            infiniteCaseUserActions:
+              defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
+            hasNextPage: defaultInfiniteUseFindCaseUserActions.hasNextPage,
+            fetchNextPage: defaultInfiniteUseFindCaseUserActions.fetchNextPage,
+          })
+        );
+      });
+
+      rerender({
+        userActionsStats: {
+          ...userActionsStats,
+          total: 26,
+          totalComments: 10,
+          totalOtherActions: 16,
+        },
+        caseId: basicCase.id,
+        userActivityQueryParams: { ...userActivityQueryParams },
+      });
+
+      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+        basicCase.id,
+        { ...userActivityQueryParams },
+        false
       );
     });
   });

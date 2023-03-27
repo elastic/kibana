@@ -25,6 +25,7 @@ export const useUserActionsPagination = ({
 }: UserActionsPagination) => {
   const isFirstRender = useRef(true);
   const activityParams = useRef(userActivityQueryParams);
+  const actionsStats = useRef(userActionsStats);
 
   const lastPage = useMemo(() => {
     if (!userActionsStats) {
@@ -44,12 +45,17 @@ export const useUserActionsPagination = ({
     }
   }, [userActionsStats, userActivityQueryParams]);
 
-  const isExpandable = lastPage > 1 && userActivityQueryParams.page < lastPage;
+  const isExpandable = userActivityQueryParams.page <= lastPage;
 
-  const skipRefetchInfiniteActions =
-    userActivityQueryParams.sortOrder === 'asc' &&
-    deepEqual(activityParams.current, userActivityQueryParams) &&
-    !isFirstRender.current; // do not refetch top actions when new action added in the bottom list
+  const isActivityParamsUpdated =
+    !deepEqual(activityParams.current, userActivityQueryParams) && !isFirstRender.current; // refetch top actions when query params changed
+
+  const isActionsStatsUpdated =
+    userActivityQueryParams.sortOrder === 'desc' &&
+    !deepEqual(actionsStats.current, userActionsStats) &&
+    !isFirstRender.current; // refetch top actions only when new action added in the top list (i.e. in descending order)
+
+  // console.log('pagination hook', {isFirstRender: isFirstRender.current, isActionsStatsUpdated, isActivityParamsUpdated, lastPage, isExpandable })
 
   const {
     data: caseInfiniteUserActionsData,
@@ -59,18 +65,23 @@ export const useUserActionsPagination = ({
   } = useInfiniteFindCaseUserActions(
     caseId,
     userActivityQueryParams,
-    isExpandable && (isFirstRender.current || !skipRefetchInfiniteActions)
+    isExpandable &&
+      (isFirstRender.current || isActivityParamsUpdated || isActionsStatsUpdated || lastPage === 1)
   );
 
   if (isFirstRender.current) {
     isFirstRender.current = false;
   }
 
-  if (skipRefetchInfiniteActions) {
+  if (isActivityParamsUpdated) {
     activityParams.current = userActivityQueryParams;
   }
 
-  const showBottomList = lastPage > 0;
+  if (isActionsStatsUpdated) {
+    actionsStats.current = userActionsStats;
+  }
+
+  const showBottomList = lastPage > 1;
 
   const showLoadMore = !isLoadingInfiniteUserActions && userActivityQueryParams.page < lastPage;
 
