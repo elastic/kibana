@@ -160,7 +160,7 @@ describe('Versioned route', () => {
     ).resolves.toEqual({
       options: {},
       payload:
-        'Version expected at [post] [/test/{id}]. Please specify a version using the "TBD" header. Available versions are: "1"',
+        'Version expected at [post] [/test/{id}]. Please specify a version using the "Elastic-Api-Version" header. Available versions are: "1"',
       status: 406,
     });
   });

@@ -28,7 +28,8 @@ import { validate } from './validate';
 
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 
-export const VERSION_HEADER = 'TBD';
+/** @internal */
+export const VERSION_HEADER = 'Elastic-Api-Version';
 
 // This validation is a pass-through so that we can apply our version-specific validation later
 const passThroughValidation = { body: schema.any(), params: schema.any(), query: schema.any() };
