@@ -17,11 +17,11 @@ import {
 export const getUICapabilities = (
   featureCapabilities?: Partial<Record<string, boolean | Record<string, boolean>>>
 ): CasesPermissions => {
-  const create = featureCapabilities?.[CREATE_CASES_CAPABILITY] === true;
-  const read = featureCapabilities?.[READ_CASES_CAPABILITY] === true;
-  const update = featureCapabilities?.[UPDATE_CASES_CAPABILITY] === true;
-  const deletePriv = featureCapabilities?.[DELETE_CASES_CAPABILITY] === true;
-  const push = featureCapabilities?.[PUSH_CASES_CAPABILITY] === true;
+  const create = !!featureCapabilities?.[CREATE_CASES_CAPABILITY];
+  const read = !!featureCapabilities?.[READ_CASES_CAPABILITY];
+  const update = !!featureCapabilities?.[UPDATE_CASES_CAPABILITY];
+  const deletePriv = !!featureCapabilities?.[DELETE_CASES_CAPABILITY];
+  const push = !!featureCapabilities?.[PUSH_CASES_CAPABILITY];
   const all = create && read && update && deletePriv && push;
 
   return {
