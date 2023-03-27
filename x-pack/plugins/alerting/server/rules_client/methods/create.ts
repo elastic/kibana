@@ -92,9 +92,12 @@ export async function create<Params extends RuleTypeParams = never>(
 
   let createdAPIKey = null;
   try {
+    const isApiKey = await context.isAuthenticationTypeApiKey();
+    const name = generateAPIKeyName(ruleType.id, data.name);
+    const span = { name: isApiKey ? 'getAuthenticationApiKey' : 'createAPIKey', type: 'rules' };
     createdAPIKey = data.enabled
-      ? await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
-          context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
+      ? await withSpan(span, () =>
+          isApiKey ? context.getAuthenticationApiKey(name) : context.createAPIKey(name)
         )
       : null;
   } catch (error) {

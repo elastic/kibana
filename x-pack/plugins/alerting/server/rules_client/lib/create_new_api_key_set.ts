@@ -22,9 +22,11 @@ export async function createNewAPIKeySet(
 ): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner'>> {
   let createdAPIKey = null;
   try {
-    createdAPIKey = await context.createAPIKey(
-      generateAPIKeyName(attributes.alertTypeId, attributes.name)
-    );
+    const isApiKey = await context.isAuthenticationTypeApiKey();
+    const name = generateAPIKeyName(attributes.alertTypeId, attributes.name);
+    createdAPIKey = isApiKey
+      ? await context.getAuthenticationApiKey(name)
+      : await context.createAPIKey(name);
   } catch (error) {
     throw Boom.badRequest(`Error creating API key for rule: ${error.message}`);
   }
