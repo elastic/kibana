@@ -44,30 +44,96 @@ describe('getOutdatedDocumentsQuery', () => {
           "should": Array [
             Object {
               "bool": Object {
-                "must": Object {
-                  "term": Object {
-                    "type": "foo",
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "type": "foo",
+                    },
                   },
-                },
-                "must_not": Object {
-                  "term": Object {
-                    "migrationVersion.foo": "10.2.0",
+                  Object {
+                    "bool": Object {
+                      "should": Array [
+                        Object {
+                          "bool": Object {
+                            "must": Object {
+                              "exists": Object {
+                                "field": "migrationVersion",
+                              },
+                            },
+                            "must_not": Object {
+                              "term": Object {
+                                "migrationVersion.foo": "10.2.0",
+                              },
+                            },
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion",
+                                },
+                              },
+                              Object {
+                                "term": Object {
+                                  "typeMigrationVersion": "10.2.0",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
                   },
-                },
+                ],
               },
             },
             Object {
               "bool": Object {
-                "must": Object {
-                  "term": Object {
-                    "type": "bar",
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "type": "bar",
+                    },
                   },
-                },
-                "must_not": Object {
-                  "term": Object {
-                    "migrationVersion.bar": "10.3.0",
+                  Object {
+                    "bool": Object {
+                      "should": Array [
+                        Object {
+                          "bool": Object {
+                            "must": Object {
+                              "exists": Object {
+                                "field": "migrationVersion",
+                              },
+                            },
+                            "must_not": Object {
+                              "term": Object {
+                                "migrationVersion.bar": "10.3.0",
+                              },
+                            },
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion",
+                                },
+                              },
+                              Object {
+                                "term": Object {
+                                  "typeMigrationVersion": "10.3.0",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
                   },
-                },
+                ],
               },
             },
           ],

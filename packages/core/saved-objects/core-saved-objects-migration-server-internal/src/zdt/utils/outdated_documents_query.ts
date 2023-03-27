@@ -30,12 +30,29 @@ export const getOutdatedDocumentsQuery = ({
         const virtualVersion = modelVersionToVirtualVersion(modelVersions[type.name]);
         return {
           bool: {
-            must: { term: { type: type.name } },
-            must_not: {
-              term: {
-                [`migrationVersion.${type.name}`]: virtualVersion,
+            must: [
+              { term: { type: type.name } },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must: { exists: { field: 'migrationVersion' } },
+                        must_not: { term: { [`migrationVersion.${type.name}`]: virtualVersion } },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: [
+                          { exists: { field: 'migrationVersion' } },
+                          { term: { typeMigrationVersion: virtualVersion } },
+                        ],
+                      },
+                    },
+                  ],
+                },
               },
-            },
+            ],
           },
         };
       }),
