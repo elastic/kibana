@@ -65,12 +65,14 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
 
   const updateDashboardSetting = useCallback(
     (newSettings: Partial<DashboardContainerByValueInput>) => {
-      setDashboardSettingsState({
-        ...dashboardSettingsState,
-        ...newSettings,
+      setDashboardSettingsState((prevDashboardSettingsState) => {
+        return {
+          ...prevDashboardSettingsState,
+          ...newSettings,
+        };
       });
     },
-    [dashboardSettingsState]
+    []
   );
 
   const dispatch = useEmbeddableDispatch();
@@ -266,7 +268,14 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
                     }
                   )}
                   checked={dashboardSettingsState.syncCursor}
-                  onChange={(event) => updateDashboardSetting({ syncCursor: event.target.checked })}
+                  onChange={(event) => {
+                    const syncCursor = event.target.checked;
+                    if (!syncCursor && dashboardSettingsState.syncTooltips) {
+                      updateDashboardSetting({ syncCursor, syncTooltips: false });
+                    } else {
+                      updateDashboardSetting({ syncCursor });
+                    }
+                  }}
                   data-test-subj="dashboardSyncCursorCheckbox"
                 />
               </EuiFormRow>
