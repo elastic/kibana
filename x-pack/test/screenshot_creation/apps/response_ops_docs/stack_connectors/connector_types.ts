@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
-  const es = getService('es');
   const testIndex = `test-index`;
   const indexDocument =
     `{\n` +
