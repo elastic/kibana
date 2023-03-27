@@ -16,17 +16,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import moment from 'moment';
-import { encode } from '@kbn/rison';
-import copy from 'copy-to-clipboard';
-import { useKibana } from '../../../../common/lib/kibana';
-import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
 import {
@@ -39,8 +32,7 @@ import { EventDetails } from '../../../../common/components/event_details/event_
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { ALERTS_PATH, SecurityPageName, APP_ID } from '../../../../../common/constants';
-import { inputsSelectors } from '../../../../common/store';
+import { SecurityPageName } from '../../../../../common/constants';
 import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
 
 export type HandleOnEventClosed = () => void;
