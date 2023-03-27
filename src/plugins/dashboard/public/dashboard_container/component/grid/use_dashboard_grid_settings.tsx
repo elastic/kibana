@@ -8,6 +8,7 @@
 
 import { useMemo } from 'react';
 
+import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
@@ -15,6 +16,7 @@ import { useDashboardContainerContext } from '../../dashboard_container_context'
 
 export const useDashboardGridSettings = () => {
   const { useEmbeddableSelector: select } = useDashboardContainerContext();
+  const { euiTheme } = useEuiTheme();
 
   const panels = select((state) => state.explicitInput.panels);
   const viewMode = select((state) => state.explicitInput.viewMode);
@@ -34,8 +36,8 @@ export const useDashboardGridSettings = () => {
   }, [panels]);
 
   const breakpoints = useMemo(
-    () => ({ lg: 752, ...(viewMode === ViewMode.VIEW ? { sm: 0 } : {}) }),
-    [viewMode]
+    () => ({ lg: euiTheme.breakpoint.m, ...(viewMode === ViewMode.VIEW ? { sm: 0 } : {}) }),
+    [viewMode, euiTheme.breakpoint.m]
   );
 
   const columns = useMemo(
