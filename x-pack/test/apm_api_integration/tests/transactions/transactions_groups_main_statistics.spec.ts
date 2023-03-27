@@ -269,7 +269,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('should have the correct value for transactionOverflowCount', function () {
-          expect(response.body.transactionOverflowCount).to.be(232);
+          expect(response.body.transactionOverflowCount).to.be(928);
         });
       });
     }
