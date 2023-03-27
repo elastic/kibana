@@ -11,6 +11,7 @@ import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/c
 import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
+import { CancellationToken } from '@kbn/reporting-common';
 import type {
   FieldFormat,
   FieldFormatConfig,
@@ -18,7 +19,6 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import type { CancellationToken } from '@kbn/reporting-common';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
