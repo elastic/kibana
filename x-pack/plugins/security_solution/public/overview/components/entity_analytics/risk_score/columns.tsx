@@ -9,7 +9,6 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { get } from 'lodash/fp';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
@@ -29,7 +28,6 @@ import {
   SecurityCellActionsTrigger,
   SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
-import { useKibana } from '../../../../common/lib/kibana';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
@@ -37,11 +35,11 @@ const StyledCellActions = styled(SecurityCellActions)`
   padding-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-type OpenEntityInTimeline = (entityName: string, oldestAlertTimestamp?: string) => void;
+type OpenEntityOnAlertsPage = (entityName: string) => void;
 
 export const getRiskScoreColumns = (
   riskEntity: RiskScoreEntity,
-  openEntityInTimeline: OpenEntityInTimeline
+  openEntityOnAlertsPage: OpenEntityOnAlertsPage
 ): HostRiskScoreColumns => [
   {
     field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
@@ -138,45 +136,17 @@ export const getRiskScoreColumns = (
     truncateText: false,
     mobileOptions: { show: true },
     render: (alertCount: number, risk) => (
-      <AlertsCountColumn
-        alertCount={alertCount}
-        risk={risk}
-        openEntityInTimeline={openEntityInTimeline}
-        riskEntity={riskEntity}
-      />
+      <EuiLink
+        data-test-subj="risk-score-alerts"
+        disabled={alertCount === 0}
+        onClick={() =>
+          openEntityOnAlertsPage(
+            riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
+          )
+        }
+      >
+        <FormattedCount count={alertCount} />
+      </EuiLink>
     ),
   },
 ];
-
-interface AlertsCountColumnParams {
-  riskEntity: RiskScoreEntity;
-  openEntityInTimeline: OpenEntityInTimeline;
-  alertCount: number;
-  risk: HostRiskScore & UserRiskScore;
-}
-
-const AlertsCountColumn = ({
-  riskEntity,
-  openEntityInTimeline,
-  alertCount,
-  risk,
-}: AlertsCountColumnParams) => {
-  const { telemetry } = useKibana().services;
-
-  return (
-    <EuiLink
-      data-test-subj="risk-score-alerts"
-      disabled={alertCount === 0}
-      onClick={() => {
-        telemetry.reportEntityAlertsClicked({ entity: 'host' });
-
-        openEntityInTimeline(
-          get('host.name', risk) ?? get('user.name', risk),
-          risk.oldestAlertTimestamp
-        );
-      }}
-    >
-      <FormattedCount count={alertCount} />
-    </EuiLink>
-  );
-};

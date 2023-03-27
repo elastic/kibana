@@ -49,7 +49,6 @@ export const slo: SavedObjectsType = {
       },
       settings: {
         properties: {
-          timestampField: { type: 'keyword' },
           syncDelay: { type: 'keyword' },
           frequency: { type: 'keyword' },
         },

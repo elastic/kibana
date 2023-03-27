@@ -110,7 +110,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "inventory-view": "6d47ef0b38166ecbd1c2fc7394599a4500db1ae4",
         "kql-telemetry": "23ed96ff02cd69cbfaa22f313cae3a54c434db51",
         "legacy-url-alias": "9b8cca3fbb2da46fd12823d3cd38fdf1c9f24bc8",
-        "lens": "42793535312de4e3e3df16a69cb85f5df3b14f72",
+        "lens": "2f6a8231591e3d62a83506b19e165774d74588ea",
         "lens-ui-telemetry": "d6c4e330d170eefc6214dbf77a53de913fa3eebc",
         "map": "7902b2e2a550e0b73fd5aa6c4e2ba3a4e6558877",
         "metrics-explorer-view": "713dbf1ab5e067791d19170f715eb82cf07ebbcc",
@@ -134,8 +134,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline": "e9d6b3a9fd7af6dc502293c21cbdb309409f3996",
         "siem-ui-timeline-note": "13c9d4c142f96624a93a623c6d7cba7e1ae9b5a6",
         "siem-ui-timeline-pinned-event": "96a43d59b9e2fc11f12255a0cb47ef0a3d83af4c",
-        "slo": "06733daaa5fbe331fdf3b515171978aff483ccf2",
-        "space": "9542afcd6fd71558623c09151e453c5e84b4e5e1",
+        "slo": "af2a119f3bceee5f12dc02d7eb4f54040bae4557",
+        "space": "7fc578a1f9f7708cb07479f03953d664ad9f1dae",
         "spaces-usage-stats": "084bd0f080f94fb5735d7f3cf12f13ec92f36bad",
         "synthetics-monitor": "96cc312bfa597022f83dfb3b5d1501e27a73e8d5",
         "synthetics-param": "9776c9b571d35f0d0397e8915e035ea1dc026db7",
@@ -150,7 +150,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "uptime-synthetics-api-key": "599319bedbfa287e8761e1ba49d536417a33fa13",
         "url": "2422b3cbe0af71f7a9c2e228e19a972e759c56d4",
         "usage-counters": "f478b2668be350f5bdc08d9e1cf6fbce0e079f61",
-        "visualization": "3aff13fbc2223de74167be6a78537812c8b9d236",
+        "visualization": "55530e57ffe86bfd7c2a2b50461398c1f7a99e95",
         "workplace_search_telemetry": "10e278fe9ae1396bfc36ae574bc387d7e696d43f",
       }
     `);
