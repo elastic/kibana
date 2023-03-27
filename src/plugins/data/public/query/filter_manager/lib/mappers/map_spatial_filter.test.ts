@@ -51,7 +51,7 @@ describe('mapFilter', () => {
       query: {},
     } as Filter;
     const before: any = {
-      meta: { type: FILTERS.SPATIAL_FILTER, },
+      meta: { type: FILTERS.SPATIAL_FILTER },
       query: {},
     };
     const after = mapFilter(before as Filter);
