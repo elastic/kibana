@@ -33,6 +33,8 @@ import { appContextService } from './app_context';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 import { getFullAgentPolicy } from './agent_policies';
+import * as outputsHelpers from './agent_policies/outputs_helpers';
+import { auditLoggingService } from './audit_logging';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
@@ -72,13 +74,17 @@ jest.mock('./agent_policy_update');
 jest.mock('./agents');
 jest.mock('./package_policy');
 jest.mock('./app_context');
+jest.mock('./audit_logging');
 jest.mock('./agent_policies/full_agent_policy');
+jest.mock('./agent_policies/outputs_helpers');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
+const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockOutputsHelpers = outputsHelpers as jest.Mocked<typeof outputsHelpers>;
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
   typeof downloadSourceService
@@ -88,12 +94,6 @@ const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof pa
 const mockedGetFullAgentPolicy = getFullAgentPolicy as jest.Mock<
   ReturnType<typeof getFullAgentPolicy>
 >;
-
-function getAgentPolicyUpdateMock() {
-  return agentPolicyUpdateEventHandler as unknown as jest.Mock<
-    typeof agentPolicyUpdateEventHandler
-  >;
-}
 
 function getAgentPolicyCreateMock() {
   const soClient = savedObjectsClientMock.create();
@@ -109,8 +109,8 @@ function getAgentPolicyCreateMock() {
 }
 
 describe('agent policy', () => {
-  beforeEach(() => {
-    getAgentPolicyUpdateMock().mockClear();
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('create', () => {
@@ -146,6 +146,148 @@ describe('agent policy', () => {
 
       const [, attributes] = soClient.create.mock.calls[0];
       expect(attributes).toHaveProperty('is_managed', true);
+    });
+
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        per_page: 0,
+        page: 1,
+      });
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-agent-policy',
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {},
+        references: [],
+      });
+
+      mockOutputsHelpers.validateOutputForPolicy.mockResolvedValueOnce(undefined);
+
+      await agentPolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'test',
+          namespace: 'default',
+        },
+        { id: 'test-agent-policy' }
+      );
+
+      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'create',
+        id: 'test-agent-policy',
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+
+  // TODO: Add more test coverage to `get` service method
+  describe('get', () => {
+    it('should call audit logger', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.get.mockResolvedValueOnce({
+        id: 'test-agent-policy',
+        attributes: {},
+        references: [],
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      await agentPolicyService.get(soClient, 'test-agent-policy', false);
+
+      expect(mockAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+        action: 'get',
+        id: 'test-agent-policy',
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+
+  describe('getByIDs', () => {
+    it('should call audit logger', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'test-agent-policy-1',
+            attributes: {},
+            references: [],
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          },
+          {
+            id: 'test-agent-policy-2',
+            attributes: {},
+            references: [],
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
+      });
+
+      await agentPolicyService.getByIDs(soClient, ['test-agent-policy-1', 'test-agent-policy-2']);
+
+      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+        action: 'get',
+        id: 'test-agent-policy-1',
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+        action: 'get',
+        id: 'test-agent-policy-2',
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+
+  describe('list', () => {
+    it('should call audit logger', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: [
+          {
+            id: 'test-agent-policy-1',
+            attributes: {},
+            references: [],
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            score: 0,
+          },
+          {
+            id: 'test-agent-policy-2',
+            attributes: {},
+            references: [],
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            score: 0,
+          },
+        ],
+        per_page: 0,
+        page: 1,
+      });
+
+      await agentPolicyService.list(soClient, {
+        page: 1,
+        perPage: 10,
+        kuery: '',
+      });
+
+      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+        action: 'find',
+        id: 'test-agent-policy-1',
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+        action: 'find',
+        id: 'test-agent-policy-2',
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
     });
   });
 
@@ -192,6 +334,16 @@ describe('agent policy', () => {
           ).message
         );
       }
+    });
+
+    it('should call audit logger', async () => {
+      await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'delete',
+        id: 'mocked',
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
     });
   });
 
@@ -411,6 +563,30 @@ describe('agent policy', () => {
       // soClient.update is called with updated values
       calledWith = soClient.update.mock.calls[1];
       expect(calledWith[2]).toHaveProperty('is_managed', true);
+    });
+
+    it('should call audit logger', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        references: [],
+        id: 'test-agent-policy',
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      await agentPolicyService.update(soClient, esClient, 'test-agent-policy', {
+        name: 'Test Agent Policy',
+        namespace: 'default',
+        is_managed: false,
+      });
+
+      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'update',
+        id: 'test-agent-policy',
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
     });
   });
 
