@@ -23,7 +23,7 @@ import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
-type ServiceInstanceContainerMetadataDetails =
+export type ServiceInstanceContainerMetadataDetails =
   | {
       kubernetes: Kubernetes;
     }

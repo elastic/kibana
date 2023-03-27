@@ -168,7 +168,7 @@ export class TaskPool {
         // we asssume the underlying task has been deleted while it was running
         // so we will log this as a debug, rather than a warn
         const errorLogLine = `Task ${taskRunner.toString()} failed in attempt to run: ${
-          err.message
+          err.message || err.error.message
         }`;
         if (isTaskSavedObjectNotFoundError(err, taskRunner.id)) {
           this.logger.debug(errorLogLine);

@@ -144,7 +144,12 @@ export const MetricItemIcon = ({
             <EuiCallOut title={ping?.error?.message} color="danger" iconType="warning" />
           </div>
           <EuiPopoverFooter>
-            <EuiButton fullWidth size="s" href={errorLink}>
+            <EuiButton
+              data-test-subj="syntheticsMetricItemIconButton"
+              fullWidth
+              size="s"
+              href={errorLink}
+            >
               {ERROR_DETAILS}
             </EuiButton>
           </EuiPopoverFooter>

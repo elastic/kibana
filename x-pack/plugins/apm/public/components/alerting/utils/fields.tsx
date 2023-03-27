@@ -156,6 +156,7 @@ export function IsAboveField({
       })}
     >
       <EuiFieldNumber
+        data-test-subj="apmIsAboveFieldFieldNumber"
         min={0}
         value={value ?? 0}
         onChange={(e) => onChange(parseInt(e.target.value, 10))}
