@@ -23,7 +23,6 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
-import { KibanaRequest } from '@kbn/core-http-server';
 
 const overrides = {
   overrideBaz: 'baz',
@@ -315,11 +314,10 @@ describe('uiSettings', () => {
         const start = await service.start();
 
         const userProfileSettingsClientMock = {
-          // @ts-ignore
-          get(request: KibanaRequest): Promise<Record<string, string>> {
-            return Promise.resolve({} as Record<string, string>);
-          },
+          get: jest.fn(),
         };
+
+        userProfileSettingsClientMock.get.mockResolvedValue({});
 
         start.userAsScopedToClient(savedObjectsClient);
         expect(MockUiSettingsUserClientConstructor).toBeCalledWith(
