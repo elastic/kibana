@@ -122,7 +122,7 @@ export class IndexInfo {
    *
    */
   public getPatternForReading(namespace?: string): string {
-    return `${joinWithDash(this.baseName, namespace)}*`;
+    return `${joinWithDash(this.baseName, namespace ?? '*')}`;
   }
 
   /**
