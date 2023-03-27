@@ -9,10 +9,14 @@ import { schema } from '@kbn/config-schema';
 
 import type { HasPrivilegesResponse } from './types';
 
-const anyBoolean = schema.boolean();
-const anyBooleanArray = schema.arrayOf(anyBoolean);
-const anyString = schema.string();
-const anyObject = schema.object({}, { unknowns: 'allow' });
+const baseResponseSchema = schema.object({
+  username: schema.string(),
+  has_all_requested: schema.boolean(),
+  application: schema.object({}, { unknowns: 'allow' }),
+  cluster: schema.object({}, { unknowns: 'allow' }),
+  index: schema.object({}, { unknowns: 'allow' }),
+});
+const boolArraySchema = schema.arrayOf(schema.boolean());
 
 /**
  * Validates an Elasticsearch "Has privileges" response against the expected application, actions, and resources.
@@ -25,9 +29,9 @@ export function validateEsPrivilegeResponse(
   actions: string[],
   resources: string[]
 ) {
-  const validationSchema = buildValidationSchema(application, actions, resources);
   try {
-    validationSchema.validate(response);
+    baseResponseSchema.validate(response);
+    validateResponse(response, application, actions, resources);
   } catch (e) {
     throw new Error(`Invalid response received from Elasticsearch has_privilege endpoint. ${e}`);
   }
@@ -35,6 +39,46 @@ export function validateEsPrivilegeResponse(
   return response;
 }
 
+const validateResponse = (
+  response: HasPrivilegesResponse,
+  applicationName: string,
+  actionNames: string[],
+  resourceNames: string[]
+): void => {
+  const actualApplicationNames = Object.keys(response.application);
+  if (actualApplicationNames.length !== 1) {
+    throw new Error(`Expected one application but received ${actualApplicationNames.length}`);
+  }
+  if (actualApplicationNames[0] !== applicationName) {
+    throw new Error(
+      `Expected application to be ${applicationName} but received ${actualApplicationNames[0]}`
+    );
+  }
+
+  const actualApplication = response.application[applicationName];
+  const actualResourceNames = Object.keys(actualApplication).sort();
+  if (
+    resourceNames.length !== actualResourceNames.length ||
+    ![...resourceNames].sort().every((x, i) => x === actualResourceNames[i])
+  ) {
+    throw new Error('Payload did not match expected resources');
+  }
+
+  const sortedActionNames = [...actionNames].sort();
+  Object.values(actualApplication).forEach((actualResource) => {
+    const actualActionNames = Object.keys(actualResource).sort();
+    if (
+      actionNames.length !== actualActionNames.length ||
+      !sortedActionNames.every((x, i) => x === actualActionNames[i])
+    ) {
+      throw new Error('Payload did not match expected actions');
+    }
+
+    boolArraySchema.validate(Object.values(actualResource), {}, `application.${applicationName}`);
+  });
+};
+
+/*
 function buildValidationSchema(application: string, actions: string[], resources: string[]) {
   const actionsValidationSchema = schema.object(
     {},
@@ -84,3 +128,4 @@ function buildValidationSchema(application: string, actions: string[], resources
     index: anyObject,
   });
 }
+*/
