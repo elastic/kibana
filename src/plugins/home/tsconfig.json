@@ -30,6 +30,9 @@
     "@kbn/ebt-tools",
     "@kbn/core-analytics-server",
     "@kbn/storybook",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-elasticsearch-server",
   ],
   "exclude": [
     "target/**/*",
