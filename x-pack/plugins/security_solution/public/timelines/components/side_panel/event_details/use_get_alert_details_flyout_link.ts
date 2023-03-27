@@ -29,11 +29,15 @@ export const useGetAlertDetailsFlyoutLink = ({ timestamp }: { timestamp?: string
   const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
   const fromTime = timestamp ?? globalTimerange.from;
+
+  // Add 1 millisecond to the alert timestamp as the alert table is non-inclusive of the end time
+  // So we have to extend slightly beyond the range of the timestamp of the given alert
   const toTime = moment(timestamp ?? globalTimerange.to).add('1', 'millisecond');
 
   const copyAlertDetailsLink = useCallback(() => {
     const searchDetails = new URLSearchParams(search);
     const flyoutString = searchDetails?.get(URL_PARAM_KEY.flyout) ?? '';
+    const sourcererString = searchDetails?.get(URL_PARAM_KEY.sourcerer) ?? '';
     const timerange = encode({
       global: {
         [URL_PARAM_KEY.timerange]: {
@@ -49,7 +53,7 @@ export const useGetAlertDetailsFlyoutLink = ({ timestamp }: { timestamp?: string
       },
     });
     const url = getAppUrl({
-      path: `${ALERTS_PATH}?${URL_PARAM_KEY.timerange}=${timerange}&${URL_PARAM_KEY.flyout}=${flyoutString}`,
+      path: `${ALERTS_PATH}?${URL_PARAM_KEY.timerange}=${timerange}&${URL_PARAM_KEY.flyout}=${flyoutString}&${URL_PARAM_KEY.sourcerer}=${sourcererString}`,
     });
     copy(`${window.location.origin}${url}`);
 
