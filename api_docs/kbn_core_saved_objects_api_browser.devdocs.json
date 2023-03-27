@@ -62,7 +62,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -343,7 +343,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -423,7 +423,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -484,7 +484,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -701,7 +701,7 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -766,7 +766,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -871,7 +871,7 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -935,7 +935,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -1277,18 +1277,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/containers/dashboards/utils.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
           },
           {
             "plugin": "synthetics",
@@ -1557,10 +1545,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
               },
               {
                 "plugin": "synthetics",
@@ -2208,10 +2192,6 @@
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
               },
               {
-                "plugin": "savedObjects",
-                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-              },
-              {
                 "plugin": "presentationUtil",
                 "path": "src/plugins/presentation_util/public/services/dashboards/dashboards_service.ts"
               },
@@ -2246,14 +2226,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
-              },
-              {
-                "plugin": "savedObjectsFinder",
-                "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
               },
               {
                 "plugin": "maps",
@@ -2537,10 +2509,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/state/private_locations/api.ts"
               },
               {
@@ -2755,7 +2723,7 @@
             ],
             "label": "resolve",
             "description": [
-              "\nResolves a single object\n"
+              "\nResolves a single object.\n\nAfter 8.0.0, saved objects are provided a unique ID _across_ spaces.\nA subset of existing saved objects may have IDs regenerated while upgrading to 8+.\n`.resolve` provides a way for clients with legacy IDs to still retrieve the correct\nsaved object.\n\nAn example of a client with a \"legacy ID\" is a bookmarked dashboard in a\nnon-default space.\n"
             ],
             "signature": [
               "<T = unknown>(type: string, id: string) => Promise<",
@@ -2951,7 +2919,7 @@
             ],
             "label": "bulkResolve",
             "description": [
-              "\nResolves an array of objects by id, using any legacy URL aliases if they exist\n"
+              "\nResolves an array of objects by id.\n\nSee documentation for `.resolve`.\n"
             ],
             "signature": [
               "<T = unknown>(objects: ",
@@ -3032,7 +3000,6 @@
             "id": "def-common.SavedObjectsClientContract.update",
             "type": "Function",
             "tags": [
-              "prop",
               "prop",
               "deprecated"
             ],
@@ -3325,7 +3292,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -3438,10 +3405,12 @@
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SavedObjectsCreateOptions.migrationVersion",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrationVersion",
             "description": [
-              "{@inheritDoc SavedObjectsMigrationVersion}"
+              "\n{@inheritDoc SavedObjectsMigrationVersion}"
             ],
             "signature": [
               {
@@ -3454,8 +3423,18 @@
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/create.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -3465,6 +3444,22 @@
             "label": "coreMigrationVersion",
             "description": [
               "A semver value that is used when upgrading objects between Kibana versions."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SavedObjectsCreateOptions.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
+            "description": [
+              "A semver value that is used when migrating documents between Kibana versions."
             ],
             "signature": [
               "string | undefined"
@@ -3523,7 +3518,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           }
         ],
@@ -3639,7 +3634,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -3752,7 +3747,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -3893,7 +3888,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -3917,50 +3912,6 @@
             "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-          },
-          {
             "plugin": "embeddable",
             "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
           },
@@ -4001,18 +3952,6 @@
             "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/find_dashboard_saved_objects.ts"
           },
@@ -4037,42 +3976,6 @@
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
           },
           {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
             "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
           },
@@ -4087,50 +3990,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
           },
           {
             "plugin": "maps",
@@ -4151,14 +4010,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
           },
           {
             "plugin": "infra",
@@ -4412,10 +4263,12 @@
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SimpleSavedObject.migrationVersion",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrationVersion",
             "description": [
-              "Migration version of the saved object"
+              "\nMigration version of the saved object"
             ],
             "signature": [
               {
@@ -4428,8 +4281,26 @@
               " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
@@ -4437,6 +4308,22 @@
             "type": "string",
             "tags": [],
             "label": "coreMigrationVersion",
+            "description": [
+              "Core migration version of the saved object"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SimpleSavedObject.typeMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "typeMigrationVersion",
             "description": [
               "Core migration version of the saved object"
             ],
@@ -4758,9 +4645,9 @@
           "\nBrowser options for finding saved objects\n"
         ],
         "signature": [
-          "{ type: string | string[]; filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
+          "{ type: string | string[]; page?: number | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
@@ -4792,7 +4679,7 @@
             "section": "def-common.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
-          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/apis/find.ts",
         "deprecated": true,
@@ -4811,7 +4698,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {

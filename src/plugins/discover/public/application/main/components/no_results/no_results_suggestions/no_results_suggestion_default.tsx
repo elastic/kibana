@@ -8,15 +8,36 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiCode } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-export function NoResultsSuggestionDefault() {
+export interface NoResultsSuggestionDefaultProps {
+  dataView: DataView;
+}
+
+export const NoResultsSuggestionDefault: React.FC<NoResultsSuggestionDefaultProps> = ({
+  dataView,
+}) => {
+  const dataViewName = dataView?.getName();
+  const dataViewPattern = dataView?.getIndexPattern();
+
   return (
     <EuiText data-test-subj="discoverNoResultsCheckIndices">
-      <FormattedMessage
-        id="discover.noResults.noDocumentsOrCheckPermissionsDescription"
-        defaultMessage="Make sure you have permission to view the indices and that they contain documents."
-      />
+      {dataViewName && dataViewPattern ? (
+        <FormattedMessage
+          id="discover.noResults.noDocumentsOrCheckIndicesAndPermissionsDescription"
+          defaultMessage="Make sure that the data view {dataViewName} with index pattern {dataViewPattern} has matching indices and documents and that you have permission to view them."
+          values={{
+            dataViewName: <strong>{dataViewName}</strong>,
+            dataViewPattern: <EuiCode>{dataViewPattern}</EuiCode>,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="discover.noResults.noDocumentsOrCheckPermissionsDescription"
+          defaultMessage="Make sure that you have permission to view the indices and that they contain documents."
+        />
+      )}
     </EuiText>
   );
-}
+};

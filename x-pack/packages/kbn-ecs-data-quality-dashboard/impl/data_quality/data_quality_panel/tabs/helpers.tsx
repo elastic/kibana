@@ -40,8 +40,8 @@ export const getMissingTimestampComment = (): string =>
   getMarkdownComment({
     suggestedAction: `${i18n.MISSING_TIMESTAMP_CALLOUT}
 
-${i18n.DETECTION_ENGINE_RULES_WONT_WORK}
-${i18n.PAGES_WONT_DISPLAY_EVENTS}
+${i18n.DETECTION_ENGINE_RULES_MAY_NOT_MATCH}
+${i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}
 `,
     title: i18n.MISSING_TIMESTAMP_CALLOUT_TITLE,
   });

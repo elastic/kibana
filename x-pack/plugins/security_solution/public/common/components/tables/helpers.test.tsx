@@ -31,6 +31,7 @@ describe('Table Helpers', () => {
         values: undefined,
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
+        aggregatable: false,
       });
 
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -43,6 +44,7 @@ describe('Table Helpers', () => {
         values: [''],
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
+        aggregatable: false,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
 
@@ -54,6 +56,7 @@ describe('Table Helpers', () => {
         values: null,
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
+        aggregatable: false,
         displayCount: 0,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -66,6 +69,7 @@ describe('Table Helpers', () => {
         values: ['item1'],
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
+        aggregatable: false,
         render: renderer,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -78,6 +82,7 @@ describe('Table Helpers', () => {
         values: [],
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
+        aggregatable: false,
       });
       const { container } = render(<TestProviders>{rowItems}</TestProviders>);
       expect(container.textContent).toBe(getEmptyValue());
@@ -88,6 +93,7 @@ describe('Table Helpers', () => {
         values: items,
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
+        aggregatable: false,
         displayCount: 2,
       });
       const { queryAllByTestId, queryByTestId } = render(<TestProviders>{rowItems}</TestProviders>);

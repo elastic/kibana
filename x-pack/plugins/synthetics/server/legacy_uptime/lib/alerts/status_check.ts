@@ -20,6 +20,7 @@ import {
   StatusCheckFilters,
   Ping,
   GetMonitorAvailabilityParams,
+  OverviewPing,
 } from '../../../../common/runtime_types';
 import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import {
@@ -27,6 +28,7 @@ import {
   getViewInAppUrl,
   setRecoveredAlertsContext,
   getAlertDetailsUrl,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
 import {
   commonMonitorStateI18,
@@ -233,7 +235,7 @@ export const getStatusMessage = (
   return statusMessage + availabilityMessage;
 };
 
-export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
+export const getInstanceId = (monitorInfo: Ping | OverviewPing, monIdByLoc: string) => {
   const normalizeText = (txt: string) => {
     // replace url and name special characters with -
     return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
@@ -532,4 +534,5 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     return { state: updateState(state, downMonitorsByLocation.length > 0) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

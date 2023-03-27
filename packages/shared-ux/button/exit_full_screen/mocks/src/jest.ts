@@ -10,6 +10,7 @@ import {
   ExitFullScreenButtonKibanaDependencies,
   ExitFullScreenButtonServices,
 } from '@kbn/shared-ux-button-exit-full-screen-types';
+import { of } from 'rxjs';
 
 /**
  * Return a Jest mock of the services for the `ExitFullScreenButton` component.
@@ -17,6 +18,7 @@ import {
 export const getServicesMock = (): ExitFullScreenButtonServices => {
   return {
     setIsFullscreen: jest.fn(),
+    customBranding$: of({}),
   };
 };
 
@@ -28,6 +30,9 @@ export const getKibanaDependenciesMock = (): ExitFullScreenButtonKibanaDependenc
     coreStart: {
       chrome: {
         setIsVisible: jest.fn(),
+      },
+      customBranding: {
+        customBranding$: of({}),
       },
     },
   };

@@ -536,6 +536,7 @@ describe('ReferenceLines', () => {
                 lineStyle: 'solid',
                 fill,
                 value,
+                forAccessor: '',
               }),
             ]}
           />
@@ -576,6 +577,7 @@ describe('ReferenceLines', () => {
                 lineStyle: 'solid',
                 fill,
                 value,
+                forAccessor: '',
               }),
             ]}
           />
@@ -617,12 +619,14 @@ describe('ReferenceLines', () => {
                 lineStyle: 'solid',
                 fill,
                 value,
+                forAccessor: '',
               }),
               createReferenceLine(layerPrefix, 10, {
                 position,
                 lineStyle: 'solid',
                 fill,
                 value,
+                forAccessor: '',
               }),
             ]}
           />
@@ -667,12 +671,14 @@ describe('ReferenceLines', () => {
                 lineStyle: 'solid',
                 fill,
                 value,
+                forAccessor: '',
               }),
               createReferenceLine(layerPrefix, 10, {
                 position: 'bottom',
                 lineStyle: 'solid',
                 fill,
                 value,
+                forAccessor: '',
               }),
             ]}
           />
@@ -720,12 +726,14 @@ describe('ReferenceLines', () => {
                 lineStyle: 'solid',
                 fill: 'above',
                 value: value1,
+                forAccessor: '',
               }),
               createReferenceLine(layerPrefix, 10, {
                 position,
                 lineStyle: 'solid',
                 fill: 'below',
                 value: value2,
+                forAccessor: '',
               }),
             ]}
           />

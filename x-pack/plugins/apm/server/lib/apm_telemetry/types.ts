@@ -42,6 +42,7 @@ export interface APMPerService {
   agent: {
     name: string;
     version: string;
+    activation_method: string;
   };
   service: {
     language: {
@@ -137,6 +138,7 @@ export interface APMUsage {
     {
       agent: {
         version: string[];
+        activation_method: string[];
       };
       service: {
         framework: {

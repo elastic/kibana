@@ -1,5 +1,5 @@
 {
-  "name": "aad-fixtures",
+  "name": "@kbn/aad-fixtures-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

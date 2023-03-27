@@ -42,6 +42,7 @@ import {
   FLEET_APM_PACKAGE,
   outputType,
   PACKAGES_SAVED_OBJECT_TYPE,
+  DATASET_VAR_NAME,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -70,6 +71,7 @@ import {
   PackagePolicyNotFoundError,
   HostedAgentPolicyRestrictionRelatedError,
   FleetUnauthorizedError,
+  PackagePolicyNameExistsError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -165,17 +167,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // trailing whitespace causes issues creating API keys
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
-      const existingPoliciesWithName = await this.list(soClient, {
-        perPage: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${enrichedPackagePolicy.name}"`,
-      });
-
-      // Check that the name does not exist already
-      if (existingPoliciesWithName.items.length > 0) {
-        throw new FleetError(
-          `An integration policy with the name ${enrichedPackagePolicy.name} already exists. Please rename it or choose a different name.`
-        );
-      }
+      await requireUniqueName(soClient, enrichedPackagePolicy);
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
@@ -513,8 +505,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean },
-    currentVersion?: string
+    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
     let enrichedPackagePolicy: UpdatePackagePolicy;
 
@@ -548,17 +539,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy.name !== oldPackagePolicy.name &&
       !options?.skipUniqueNameVerification
     ) {
-      // Check that the name does not exist already but exclude the current package policy
-      const existingPoliciesWithName = await this.list(soClient, {
-        perPage: SO_SEARCH_LIMIT,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
-      });
-      const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
-      if (filtered.length > 0) {
-        throw new FleetError(
-          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
-        );
-      }
+      await requireUniqueName(soClient, enrichedPackagePolicy, id);
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -567,8 +548,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
+    let pkgInfo;
     if (packagePolicy.package?.name) {
-      const pkgInfo = await getPackageInfo({
+      pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
@@ -609,6 +591,34 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
 
+    // if we have moved to an input package we need to create the index templates
+    // for the package policy as input packages create index templates per package policy
+    if (
+      pkgInfo &&
+      pkgInfo.type === 'input' &&
+      oldPackagePolicy.package &&
+      oldPackagePolicy.package?.version !== pkgInfo.version
+    ) {
+      if (oldPackagePolicy.package) {
+        const oldPackage = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: oldPackagePolicy.package?.name,
+          pkgVersion: oldPackagePolicy.package?.version,
+          prerelease: true,
+        });
+
+        if (oldPackage.type === 'integration') {
+          await installAssetsForInputPackagePolicy({
+            logger: appContextService.getLogger(),
+            soClient,
+            esClient,
+            pkgInfo,
+            packagePolicy: newPolicy,
+            force: true,
+          });
+        }
+      }
+    }
     // Bump revision of associated agent policy
     const bumpPromise = agentPolicyService.bumpRevision(
       soClient,
@@ -1076,14 +1086,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ...options,
     };
 
-    await this.update(
-      soClient,
-      esClient,
-      id,
-      updatePackagePolicy,
-      updateOptions,
-      packagePolicy.package!.version
-    );
+    await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
 
     // Persist any experimental feature opt-ins that come through the upgrade process to the Installation SO
     await updateDatastreamExperimentalFeatures(
@@ -2126,10 +2129,17 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
           );
           if (
             oldStream &&
-            oldStream?.vars?.['data_stream.dataset'] &&
-            oldStream?.vars['data_stream.dataset']?.value !==
-              stream?.vars?.['data_stream.dataset']?.value
+            oldStream?.vars?.[DATASET_VAR_NAME] &&
+            oldStream?.vars[DATASET_VAR_NAME]?.value !== stream?.vars?.[DATASET_VAR_NAME]?.value
           ) {
+            // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
+            appContextService
+              .getLogger()
+              .debug(
+                `Rejecting package policy update due to dataset change, old val '${
+                  oldStream?.vars[DATASET_VAR_NAME]?.value
+                }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
+              );
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
                 defaultMessage:
@@ -2221,4 +2231,26 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   }
 
   return result;
+}
+
+async function requireUniqueName(
+  soClient: SavedObjectsClientContract,
+  packagePolicy: UpdatePackagePolicy | NewPackagePolicy,
+  id?: string
+) {
+  const existingPoliciesWithName = await packagePolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
+  });
+
+  const policiesToCheck = id
+    ? // Check that the name does not exist already but exclude the current package policy
+      (existingPoliciesWithName?.items || []).filter((p) => p.id !== id)
+    : existingPoliciesWithName?.items;
+
+  if (policiesToCheck.length > 0) {
+    throw new PackagePolicyNameExistsError(
+      `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
+    );
+  }
 }

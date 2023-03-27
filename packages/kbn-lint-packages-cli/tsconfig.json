@@ -24,5 +24,8 @@
     "@kbn/repo-file-maps",
     "@kbn/json-ast",
     "@kbn/set-map",
+    "@kbn/std",
+    "@kbn/repo-path",
+    "@kbn/picomatcher",
   ]
 }

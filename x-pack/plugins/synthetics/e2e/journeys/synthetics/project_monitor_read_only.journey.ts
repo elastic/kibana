@@ -11,12 +11,13 @@ import { cleanTestMonitors, enableMonitorManagedViaApi } from './services/add_mo
 import { getMonitor } from './services/get_monitor';
 import { addTestMonitorProject } from './services/add_monitor_project';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
+import { SyntheticsMonitor } from '../../../common/runtime_types';
 
 journey('Project Monitor Read-only', async ({ page, params }) => {
   recordVideo(page);
 
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
-  let originalMonitorConfiguration: Record<string, unknown> | undefined;
+  let originalMonitorConfiguration: SyntheticsMonitor | null;
 
   let monitorId: string;
   const monitorName = 'test-project-monitor';
@@ -70,6 +71,7 @@ journey('Project Monitor Read-only', async ({ page, params }) => {
 
   step('monitor can be enabled or disabled', async () => {
     await page.click('[data-test-subj="syntheticsEnableSwitch"]');
+    await page.click('[data-test-subj="syntheticsAlertStatusSwitch"]');
 
     await syntheticsApp.confirmAndSave(true);
     const newConfiguration = await getMonitor(params.kibanaUrl, monitorId);
@@ -81,6 +83,11 @@ journey('Project Monitor Read-only', async ({ page, params }) => {
       ...originalMonitorConfiguration,
       hash: '',
       revision: 3,
+      alert: {
+        status: {
+          enabled: !(originalMonitorConfiguration?.alert?.status?.enabled as boolean),
+        },
+      },
       enabled: !originalMonitorConfiguration?.enabled,
     });
   });

@@ -10,6 +10,9 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
+import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
@@ -481,3 +484,61 @@ export const addRuleExceptions = async ({
       signal,
     }
   );
+
+export interface InstallFleetPackageProps {
+  packageName: string;
+  packageVersion: string;
+  prerelease?: boolean;
+  force?: boolean;
+}
+
+/**
+ * Install a Fleet package from the registry
+ *
+ * @param packageName Name of the package to install
+ * @param packageVersion Version of the package to install
+ * @param prerelease Whether to install a prerelease version of the package
+ * @param force Whether to force install the package. If false, the package will only be installed if it is not already installed
+ *
+ * @returns The response from the Fleet API
+ */
+export const installFleetPackage = ({
+  packageName,
+  packageVersion,
+  prerelease = false,
+  force = true,
+}: InstallFleetPackageProps): Promise<InstallPackageResponse> => {
+  return KibanaServices.get().http.post<InstallPackageResponse>(
+    epmRouteService.getInstallPath(packageName, packageVersion),
+    {
+      query: { prerelease },
+      body: JSON.stringify({ force }),
+    }
+  );
+};
+
+export interface BulkInstallFleetPackagesProps {
+  packages: string[];
+  prerelease?: boolean;
+}
+
+/**
+ * Install multiple Fleet packages from the registry
+ *
+ * @param packages Array of package names to install
+ * @param prerelease Whether to install prerelease versions of the packages
+ *
+ * @returns The response from the Fleet API
+ */
+export const bulkInstallFleetPackages = ({
+  packages,
+  prerelease = false,
+}: BulkInstallFleetPackagesProps): Promise<BulkInstallPackagesResponse> => {
+  return KibanaServices.get().http.post<BulkInstallPackagesResponse>(
+    epmRouteService.getBulkInstallPath(),
+    {
+      query: { prerelease },
+      body: JSON.stringify({ packages }),
+    }
+  );
+};

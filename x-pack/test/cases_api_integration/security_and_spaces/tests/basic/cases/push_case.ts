@@ -18,9 +18,9 @@ import {
   createConfiguration,
   createCase,
   pushCase,
-} from '../../../../common/lib/utils';
-
-import { getServiceNowConnector, createConnector } from '../../../../common/lib/connectors';
+  createConnector,
+  getServiceNowConnector,
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

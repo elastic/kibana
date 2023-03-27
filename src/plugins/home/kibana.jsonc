@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/home-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "home",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "dataViews",
+      "share",
+      "urlForwarding"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "customIntegrations",
+      "cloud",
+      "guidedOnboarding"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

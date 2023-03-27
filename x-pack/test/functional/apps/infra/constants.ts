@@ -40,3 +40,7 @@ export const ML_JOB_IDS = [
   'kibana-metrics-ui-default-default-k8s_network_in',
   'kibana-metrics-ui-default-default-k8s_memory_usage',
 ];
+
+export const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
+
+export const HOSTS_VIEW_PATH = 'metrics/hosts';

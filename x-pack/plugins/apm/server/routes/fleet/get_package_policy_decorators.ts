@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { cloneDeep, get, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep, get } from 'lodash';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/es_fields/apm';

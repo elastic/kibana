@@ -59,6 +59,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await syntheticsApp.navigateToSettings(false);
     await page.click('text=Private Locations');
   });
+
   step('Click button:has-text("Create location")', async () => {
     await page.click('button:has-text("Create location")');
     await page.click('[aria-label="Location name"]');
@@ -73,8 +74,10 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.press('[aria-label="Tags"]', 'Enter');
     await page.click('button:has-text("Save")');
   });
+
   let locationId: string;
-  step('Click text=AlertingPrivate LocationsData Retention', async () => {
+
+  step('Private location settings is working as expected', async () => {
     await page.click('text=Private Locations');
     await page.click('h1:has-text("Settings")');
 
@@ -92,9 +95,31 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     });
   });
 
-  step('Click text=1', async () => {
-    await page.click('text=1');
-    await page.click('text=Test private');
+  step('Integration cannot be edited in Fleet', async () => {
+    await page.goto(`${params.kibanaUrl}/app/integrations/detail/synthetics/policies`);
+    await page.waitForSelector('h1:has-text("Elastic Synthetics")');
+
+    await page.click('text="test-monitor-Test private-default"');
+    await page.waitForSelector('h1:has-text("Edit Elastic Synthetics integration")');
+    await page.waitForSelector('text="This package policy is managed by the Synthetics app."');
+  });
+
+  step('Integration edit button leads to correct Synthetics edit page', async () => {
+    await page.click('text="Edit in Synthetics"');
+
+    await page.waitForSelector('h1:has-text("Edit Monitor")');
+    await page.waitForSelector('h2:has-text("Monitor details")');
+    expect(await page.inputValue('[data-test-subj="syntheticsMonitorConfigName"]')).toBe(
+      'test-monitor'
+    );
+  });
+
+  step('Private location cannot be deleted when a monitor is assigned to it', async () => {
+    await page.click('[data-test-subj="settings-page-link"]');
+    await page.click('h1:has-text("Settings")');
+    await page.click('text=Private Locations');
+    await page.waitForSelector('td:has-text("Monitors"):has-text("1")');
+    await page.waitForSelector('td:has-text("Location nam"):has-text("Test private")');
     await page.click('.euiTableCellContent__hoverItem .euiToolTipAnchor');
     await page.click('button:has-text("Tags")');
     await page.click('[aria-label="Tags"] >> text=Area51');
@@ -123,5 +148,21 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('[aria-label="Delete location"]');
     await page.click('button:has-text("Delete location")');
     await page.click('text=Create your first private location');
+  });
+
+  step('login with non super user', async () => {
+    await page.click('[data-test-subj="userMenuAvatar"]');
+    await page.click('text="Log out"');
+    await syntheticsApp.loginToKibana('viewer', 'changeme');
+  });
+
+  step('viewer user cannot add locations', async () => {
+    await syntheticsApp.navigateToSettings(false);
+    await page.click('text=Private Locations');
+    await page.waitForSelector(
+      `text="You're missing some Kibana privileges to manage private locations"`
+    );
+    const createLocationBtn = await page.getByRole('button', { name: 'Create location' });
+    expect(await createLocationBtn.getAttribute('disabled')).toEqual('');
   });
 });

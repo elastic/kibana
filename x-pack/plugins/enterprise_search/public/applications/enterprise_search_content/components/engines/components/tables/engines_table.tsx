@@ -76,11 +76,11 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       width: '30%',
     },
     {
-      field: 'updated',
+      field: 'updated_at_millis',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.lastUpdated', {
         defaultMessage: 'Last updated',
       }),
-      dataType: 'string',
+      dataType: 'number',
       render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
     },
     {
@@ -100,10 +100,8 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
         >
           <FormattedMessage
             id="xpack.enterpriseSearch.content.enginesList.table.column.view.indices"
-            defaultMessage="{indicesLength} indices"
-            values={{
-              indicesLength: indices.length,
-            }}
+            defaultMessage="{indicesCount, number} {indicesCount, plural, one {index} other {indices}}"
+            values={{ indicesCount: indices.length }}
           />
         </EuiButtonEmpty>
       ),

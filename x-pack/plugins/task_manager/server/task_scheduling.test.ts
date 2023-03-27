@@ -27,6 +27,10 @@ jest.mock('uuid', () => ({
   v4: () => 'v4uuid',
 }));
 
+jest.mock('./constants', () => ({
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
+}));
+
 jest.mock('elastic-apm-node', () => ({
   currentTraceparent: 'parent',
   currentTransaction: {

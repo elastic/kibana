@@ -47,6 +47,10 @@ export class TimePickerPageObject extends FtrService {
     await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
   }
 
+  async waitForNoDataPopover() {
+    await this.testSubjects.find('noDataPopoverDismissButton');
+  }
+
   async ensureHiddenNoDataPopover() {
     const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton', {
       timeout: 100,

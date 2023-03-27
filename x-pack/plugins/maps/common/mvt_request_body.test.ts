@@ -93,6 +93,7 @@ describe('getAggsTileRequest', () => {
       query: {},
     };
     const { path } = getAggsTileRequest({
+      buffer: 5,
       encodedRequestBody: encodeMvtResponseBody(searchRequest),
       geometryFieldName: 'my location',
       gridPrecision: 8,
@@ -115,6 +116,7 @@ describe('getHitsTileRequest', () => {
       query: {},
     };
     const { path } = getHitsTileRequest({
+      buffer: 5,
       encodedRequestBody: encodeMvtResponseBody(searchRequest),
       geometryFieldName: 'my location',
       hasLabels: true,
@@ -135,6 +137,7 @@ describe('getHitsTileRequest', () => {
         sort: ['timestamp'],
       };
       const { body } = getHitsTileRequest({
+        buffer: 5,
         encodedRequestBody: encodeMvtResponseBody(searchRequest),
         geometryFieldName: 'my location',
         hasLabels: true,
@@ -153,6 +156,7 @@ describe('getHitsTileRequest', () => {
         query: {},
       };
       const { body } = getHitsTileRequest({
+        buffer: 5,
         encodedRequestBody: encodeMvtResponseBody(searchRequest),
         geometryFieldName: 'my location',
         hasLabels: true,

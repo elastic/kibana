@@ -76,7 +76,8 @@ describe('JourneyScreenshotPreview', () => {
     );
 
     const img = getByAltText('First step');
-    const euiPopoverMessage = 'You are in a dialog. To close this dialog, hit escape.'; // Helps to detect if popover is open
+    const euiPopoverMessage =
+      'You are in a dialog. Press Escape, or tap/click outside the dialog to close.'; // Helps to detect if popover is open
     expect(queryByText(euiPopoverMessage)).toBeNull();
     fireEvent.mouseEnter(img);
     await waitFor(() => getByText(euiPopoverMessage));

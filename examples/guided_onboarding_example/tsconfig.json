@@ -16,6 +16,7 @@
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/guided-onboarding",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

@@ -10,4 +10,5 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 
 export interface DashboardCustomBrandingService {
   hasCustomBranding$: CustomBrandingStart['hasCustomBranding$'];
+  customBranding$: CustomBrandingStart['customBranding$'];
 }

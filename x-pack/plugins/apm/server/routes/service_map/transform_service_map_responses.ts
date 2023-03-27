@@ -22,7 +22,10 @@ import {
 } from '../../../common/service_map';
 import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 import { ServiceAnomaliesResponse } from './get_service_anomalies';
-import { groupResourceNodes } from './group_resource_nodes';
+import {
+  groupResourceNodes,
+  GroupResourceNodesResponse,
+} from './group_resource_nodes';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -71,7 +74,13 @@ export type ServiceMapResponse = ConnectionsResponse & {
   anomalies: ServiceAnomaliesResponse;
 };
 
-export function transformServiceMapResponses(response: ServiceMapResponse) {
+export type TransformServiceMapResponse = GroupResourceNodesResponse;
+
+export function transformServiceMapResponses({
+  response,
+}: {
+  response: ServiceMapResponse;
+}): TransformServiceMapResponse {
   const { discoveredServices, services, connections, anomalies } = response;
 
   const allNodes = getAllNodes(services, connections);

@@ -154,9 +154,10 @@ export const prepareExceptionItemsForBulkClose = (
       return {
         ...item,
         entries: newEntries,
+        comments: [], // Strips out unneeded comments attribute for bulk close as they are not needed and are throwing type errors
       };
     } else {
-      return item;
+      return { ...item, comments: [] };
     }
   });
 };
@@ -185,12 +186,13 @@ export const enrichNewExceptionItemsWithComments = (
  */
 export const enrichNewExceptionItemsWithExpireTime = (
   exceptionItems: ExceptionsBuilderReturnExceptionItem[],
-  expireTime: Moment
+  expireTime: Moment | undefined
 ): ExceptionsBuilderReturnExceptionItem[] => {
+  const expireTimeDateString = expireTime !== undefined ? expireTime.toISOString() : undefined;
   return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
     return {
       ...item,
-      expire_time: expireTime.toISOString(),
+      expire_time: expireTimeDateString,
     };
   });
 };

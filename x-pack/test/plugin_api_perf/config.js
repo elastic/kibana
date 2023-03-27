@@ -6,17 +6,11 @@
  */
 
 import path from 'path';
-import fs from 'fs';
+import { findTestPluginPaths } from '@kbn/test';
 import { services } from './services';
 
 export default async function ({ readConfigFile }) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
-
-  // Find all folders in ./plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter((file) =>
-    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
-  );
 
   return {
     testFiles: [require.resolve('./test_suites/task_manager')],
@@ -39,9 +33,7 @@ export default async function ({ readConfigFile }) {
           'plugins',
           'sample_task_plugin'
         )}`,
-        ...plugins.map(
-          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
-        ),
+        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],
     },
   };

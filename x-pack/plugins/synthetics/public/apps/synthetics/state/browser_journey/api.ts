@@ -72,14 +72,26 @@ export async function fetchLastSuccessfulCheck({
 }
 
 export async function getJourneyScreenshot(
-  imgSrc: string
+  imgSrc: string,
+  shouldBackoff = true,
+  maxRetry = 15,
+  initialBackoff = 100
 ): Promise<ScreenshotImageBlob | ScreenshotRefImageData | null> {
   try {
-    const imgRequest = new Request(imgSrc);
+    let retryCount = 0;
 
-    const response = await fetch(imgRequest);
+    let response: Response | null = null;
+    let backoff = initialBackoff;
+    while (response?.status !== 200) {
+      const imgRequest = new Request(imgSrc);
 
-    if (response.status !== 200) {
+      response = await fetch(imgRequest);
+      if (!shouldBackoff || retryCount >= maxRetry || response.status !== 404) break;
+      await new Promise((r) => setTimeout(r, (backoff *= 2)));
+      retryCount++;
+    }
+
+    if (response?.status !== 200) {
       return null;
     }
 

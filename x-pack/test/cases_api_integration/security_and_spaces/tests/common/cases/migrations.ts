@@ -15,7 +15,7 @@ import {
   getCase,
   getCaseSavedObjectsFromES,
   resolveCase,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export

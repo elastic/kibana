@@ -46,7 +46,7 @@ describe('updateAndPickupMappings', () => {
     expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
   });
 
-  it('updates the _mapping properties but not the _meta information', async () => {
+  it('calls the indices.putMapping with the mapping properties as well as the _meta information', async () => {
     const task = updateAndPickupMappings({
       client,
       index: 'new_index',
@@ -80,6 +80,13 @@ describe('updateAndPickupMappings', () => {
         'apm-indices': {
           type: 'object',
           dynamic: false,
+        },
+      },
+      _meta: {
+        migrationMappingPropertyHashes: {
+          references: '7997cf5a56cc02bdc9c93361bde732b0',
+          'epm-packages': '860e23f4404fa1c33f430e6dad5d8fa2',
+          'cases-connector-mappings': '17d2e9e0e170a21a471285a5d845353c',
         },
       },
     });

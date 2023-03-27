@@ -42,6 +42,7 @@ export const IndicesStats: React.FC = () => {
               paddingSize="l"
             >
               <EuiStat
+                titleSize="m"
                 description={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndices.jobStats.connectedMethods',
                   {
@@ -60,6 +61,7 @@ export const IndicesStats: React.FC = () => {
               paddingSize="l"
             >
               <EuiStat
+                titleSize="m"
                 description={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndices.jobStats.incompleteMethods',
                   {
@@ -78,6 +80,7 @@ export const IndicesStats: React.FC = () => {
           <EuiFlexItem>
             <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
               <EuiStat
+                titleSize="m"
                 description={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndices.jobStats.runningSyncs',
                   {
@@ -92,6 +95,7 @@ export const IndicesStats: React.FC = () => {
           <EuiFlexItem>
             <EuiPanel color={data?.idle ? 'warning' : 'subdued'} hasShadow={false} paddingSize="l">
               <EuiStat
+                titleSize="m"
                 description={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndices.jobStats.longRunningSyncs',
                   {
@@ -110,6 +114,7 @@ export const IndicesStats: React.FC = () => {
               paddingSize="l"
             >
               <EuiStat
+                titleSize="m"
                 description={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndices.jobStats.orphanedSyncs',
                   {
@@ -124,6 +129,7 @@ export const IndicesStats: React.FC = () => {
           <EuiFlexItem>
             <EuiPanel color={data?.errors ? 'danger' : 'subdued'} hasShadow={false} paddingSize="l">
               <EuiStat
+                titleSize="m"
                 description={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndices.jobStats.errorSyncs',
                   {

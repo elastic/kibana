@@ -8,6 +8,7 @@
 
 import supertest from 'supertest';
 import moment from 'moment';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { configServiceMock } from '@kbn/config-mocks';
@@ -17,10 +18,7 @@ import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg = require('../../../../../package.json');
-
-const actualVersion = pkg.version;
+const actualVersion = kibanaPackageJson.version;
 const versionHeader = 'kbn-version';
 const xsrfHeader = 'kbn-xsrf';
 const nameHeader = 'kbn-name';

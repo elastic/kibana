@@ -34,6 +34,7 @@ class DocLinks {
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
   public appSearchWebCrawlerReference: string;
+  public behavioralAnalytics: string;
   public behavioralAnalyticsEvents: string;
   public bulkApi: string;
   public clientsGoIndex: string;
@@ -62,6 +63,7 @@ class DocLinks {
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
   public connectorsWorkplaceSearch: string;
+  public crawlerExtractionRules: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
   public deployTrainedModels: string;
@@ -150,6 +152,7 @@ class DocLinks {
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
     this.appSearchWebCrawlerReference = '';
+    this.behavioralAnalytics = '';
     this.behavioralAnalyticsEvents = '';
     this.bulkApi = '';
     this.clientsGoIndex = '';
@@ -178,6 +181,7 @@ class DocLinks {
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
     this.connectorsWorkplaceSearch = '';
+    this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
     this.deployTrainedModels = '';
@@ -268,6 +272,7 @@ class DocLinks {
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
+    this.behavioralAnalytics = docLinks.links.enterpriseSearch.behavioralAnalytics;
     this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behavioralAnalyticsEvents;
     this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
@@ -295,6 +300,7 @@ class DocLinks {
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
+    this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.deployTrainedModels = docLinks.links.enterpriseSearch.deployTrainedModels;

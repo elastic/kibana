@@ -191,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -207,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -230,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -246,7 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -273,7 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody())
             .expect(200);
@@ -290,7 +290,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.t2_analyst, 'changeme')
+            .auth(ROLE.artifact_read_role, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody())
             .expect(403, {
@@ -305,7 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.t2_analyst, 'changeme')
+            .auth(ROLE.artifact_read_role, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody())
             .expect(200);

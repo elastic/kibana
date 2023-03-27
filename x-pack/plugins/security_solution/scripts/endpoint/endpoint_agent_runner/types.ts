@@ -12,7 +12,7 @@ export interface StartRuntimeServicesOptions {
   elasticUrl: string;
   username: string;
   password: string;
-  version: string;
-  policy: string;
+  version?: string;
+  policy?: string;
   log?: ToolingLog;
 }

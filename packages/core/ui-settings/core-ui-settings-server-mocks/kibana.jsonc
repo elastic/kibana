@@ -2,5 +2,5 @@
   "type": "shared-common",
   "id": "@kbn/core-ui-settings-server-mocks",
   "devOnly": true,
-  "owner": "@elastic/kibana-core"
+  "owner": "@elastic/appex-sharedux"
 }

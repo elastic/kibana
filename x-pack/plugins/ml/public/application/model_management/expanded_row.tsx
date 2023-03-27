@@ -313,23 +313,25 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               <div data-test-subj={'mlTrainedModelStatsContent'}>
                 <EuiSpacer size={'s'} />
 
+                {!!modelItems?.length ? (
+                  <>
+                    <EuiPanel>
+                      <EuiTitle size={'xs'}>
+                        <h5>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
+                            defaultMessage="Deployment stats"
+                          />
+                        </h5>
+                      </EuiTitle>
+                      <EuiSpacer size={'m'} />
+                      <AllocatedModels models={modelItems} hideColumns={['model_id']} />
+                    </EuiPanel>
+                    <EuiSpacer size={'s'} />
+                  </>
+                ) : null}
+
                 <EuiFlexGrid columns={2} gutterSize={'m'}>
-                  {!!modelItems?.length ? (
-                    <EuiFlexItem grow={2}>
-                      <EuiPanel>
-                        <EuiTitle size={'xs'}>
-                          <h5>
-                            <FormattedMessage
-                              id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
-                              defaultMessage="Deployment stats"
-                            />
-                          </h5>
-                        </EuiTitle>
-                        <EuiSpacer size={'m'} />
-                        <AllocatedModels models={modelItems} hideColumns={['model_id']} />
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  ) : null}
                   {stats.inference_stats ? (
                     <EuiFlexItem>
                       <EuiPanel>

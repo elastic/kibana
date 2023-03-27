@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { ViewSelection } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
 import type { CombineQueries } from '../../lib/kuery';
 import { buildTimeRangeFilter, combineQueries } from '../../lib/kuery';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
-import type { ViewSelection } from './summary_view_select';
 
 export const getCombinedFilterQuery = ({
   from,

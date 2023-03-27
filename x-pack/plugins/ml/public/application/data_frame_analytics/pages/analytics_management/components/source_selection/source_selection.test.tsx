@@ -14,8 +14,8 @@ import { getDataViewAndSavedSearch, DataViewAndSavedSearch } from '../../../../.
 
 import { SourceSelection } from './source_selection';
 
-jest.mock('@kbn/saved-objects-plugin/public', () => {
-  const SavedObjectFinderUi = ({
+jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
+  const SavedObjectFinder = ({
     onChoose,
   }: {
     onChoose: (id: string, type: string, fullName: string, savedObject: object) => void;
@@ -63,7 +63,7 @@ jest.mock('@kbn/saved-objects-plugin/public', () => {
   };
 
   return {
-    SavedObjectFinderUi,
+    SavedObjectFinder,
   };
 });
 
@@ -71,8 +71,9 @@ const mockNavigateToPath = jest.fn();
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
     services: {
-      savedObjects: {},
       uiSettings: {},
+      http: {},
+      savedObjectsManagement: {},
     },
   }),
   useNavigateToPath: () => mockNavigateToPath,

@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
@@ -28,6 +27,7 @@ import { CspLoadingState } from './csp_loading_state';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
+import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
@@ -75,19 +75,14 @@ export const CspNoDataPage = ({
   actionDescription,
   testId,
 }: CspNoDataPageProps) => {
-  const { euiTheme } = useEuiTheme();
   return (
     <NoDataPage
       data-test-subj={testId}
       css={css`
-        div:nth-child(3) {
+        > :nth-child(3) {
           display: block;
           margin: auto;
           width: 450px;
-          button {
-            margin: 0 auto;
-            margin-top: ${euiTheme.size.base};
-          }
         }
       `}
       pageTitle={pageTitle}
@@ -124,7 +119,7 @@ const packageNotInstalledRenderer = ({
           <h2>
             <FormattedMessage
               id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
-              defaultMessage="Detect security misconfigurations in your cloud resources!"
+              defaultMessage="Detect security misconfigurations in your cloud infrastructure!"
             />
           </h2>
         }
@@ -134,11 +129,10 @@ const packageNotInstalledRenderer = ({
           <p>
             <FormattedMessage
               id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
-              defaultMessage="Add the Cloud and or Kubernetes Security Posture Management (K/CSPM) integration to begin. {learnMore}."
+              defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible S3 buckets, with our Cloud and Kubernetes Security Posture Management solutions. {learnMore}"
               values={{
                 learnMore: (
-                  // TODO: CIS AWS - replace link with general doc for both integartions
-                  <EuiLink href="https://ela.st/getting-started-with-kspm">
+                  <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
                     <FormattedMessage
                       id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
                       defaultMessage="Learn more about Cloud Security Posture"
@@ -187,7 +181,7 @@ const defaultErrorRenderer = (error: unknown) => (
   <FullSizeCenteredPage>
     <EuiEmptyPrompt
       color="danger"
-      iconType="alert"
+      iconType="warning"
       data-test-subj={ERROR_STATE_TEST_SUBJECT}
       title={
         <h2>
@@ -281,7 +275,12 @@ export const CloudPosturePage = <TData, TError>({
       return defaultLoadingRenderer();
     }
 
-    if (getSetupStatus.data.status === 'not-installed') {
+    /* Checks if its a completely new user which means no integration has been installed and no latest findings default index has been found */
+    if (
+      getSetupStatus.data?.kspm?.status === 'not-installed' &&
+      getSetupStatus.data?.cspm?.status === 'not-installed' &&
+      getSetupStatus.data?.indicesDetails[0].status === 'empty'
+    ) {
       return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
     }
 

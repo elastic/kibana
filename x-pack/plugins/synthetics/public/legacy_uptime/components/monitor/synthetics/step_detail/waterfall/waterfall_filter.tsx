@@ -129,6 +129,7 @@ export const WaterfallFilter = ({
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem>
         <EuiFieldSearch
+          data-test-subj="syntheticsWaterfallFilterFieldSearch"
           fullWidth
           aria-label={FILTER_REQUESTS_LABEL}
           placeholder={FILTER_REQUESTS_LABEL}

@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { AppState } from '../services/discover_app_state_container';
+import { DiscoverAppState, AppStateUrl } from '../services/discover_app_state_container';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
-import { AppStateUrl } from '../services/discover_state';
 
 /**
  * Takes care of the given url state, migrates legacy props and cleans up empty props
  * @param appStateFromUrl
  */
-export function cleanupUrlState(appStateFromUrl: AppStateUrl): AppState {
+export function cleanupUrlState(appStateFromUrl: AppStateUrl): DiscoverAppState {
   if (
     appStateFromUrl &&
     appStateFromUrl.query &&
@@ -47,5 +46,5 @@ export function cleanupUrlState(appStateFromUrl: AppStateUrl): AppState {
     delete appStateFromUrl.rowsPerPage;
   }
 
-  return appStateFromUrl as AppState;
+  return appStateFromUrl as DiscoverAppState;
 }

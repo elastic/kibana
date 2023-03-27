@@ -11,12 +11,12 @@ import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import getPort from 'get-port';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
   getWebhookServer,
-} from '../../../../../common/plugins/actions_simulators/server/plugin';
+} from '@kbn/actions-simulators-plugin/server/plugin';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const defaultValues: Record<string, any> = {
   headers: null,

@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Router, useParams } from 'react-router-dom';
+import { Router, useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   Breadcrumb,

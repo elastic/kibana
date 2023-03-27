@@ -78,6 +78,10 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
             id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',
             defaultMessage: 'Select a value',
           })}
+          aria-label={intl.formatMessage({
+            id: 'unifiedSearch.filter.filterEditor.valueSelectPlaceholder',
+            defaultMessage: 'Select a value',
+          })}
           options={options}
           getLabel={(option) => option}
           selectedOptions={value ? [valueAsStr] : []}

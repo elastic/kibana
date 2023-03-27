@@ -95,6 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
                     snoozeSchedule: [],
                     updatedAt: response.body.rules[0].updatedAt,
                     createdAt: response.body.rules[0].createdAt,
+                    revision: 0,
                     scheduledTaskId: response.body.rules[0].scheduledTaskId,
                     executionStatus: {
                       lastDuration: 0,

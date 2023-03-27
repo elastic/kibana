@@ -7,16 +7,9 @@
 
 import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { Indicator } from '../../../../../../../common/types/indicator';
 import { BUTTON_TEST_ID } from './test_ids';
-
-const BUTTON_LABEL: string = i18n.translate(
-  'xpack.threatIntelligence.indicator.table.viewDetailsButton',
-  {
-    defaultMessage: 'View details',
-  }
-);
+import { BUTTON_LABEL } from './translations';
 
 export interface OpenIndicatorFlyoutButtonProps {
   /**

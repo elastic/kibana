@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { defaultCore, WrappedHelper } from '../../../../../apps/synthetics/utils/testing';
-import { useLocationsAPI } from './use_locations_api';
+import { usePrivateLocationsAPI } from './use_locations_api';
 
-describe('useLocationsAPI', () => {
+describe('usePrivateLocationsAPI', () => {
   it('returns expected results', () => {
-    const { result } = renderHook(() => useLocationsAPI({ isOpen: false }), {
+    const { result } = renderHook(() => usePrivateLocationsAPI({ isOpen: false }), {
       wrapper: WrappedHelper,
     });
 
@@ -38,9 +38,12 @@ describe('useLocationsAPI', () => {
     },
   });
   it('returns expected results after data', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI({ isOpen: true }), {
-      wrapper: WrappedHelper,
-    });
+    const { result, waitForNextUpdate } = renderHook(
+      () => usePrivateLocationsAPI({ isOpen: true }),
+      {
+        wrapper: WrappedHelper,
+      }
+    );
 
     expect(result.current).toEqual(
       expect.objectContaining({
@@ -65,9 +68,12 @@ describe('useLocationsAPI', () => {
   });
 
   it('adds location on submit', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI({ isOpen: true }), {
-      wrapper: WrappedHelper,
-    });
+    const { result, waitForNextUpdate } = renderHook(
+      () => usePrivateLocationsAPI({ isOpen: true }),
+      {
+        wrapper: WrappedHelper,
+      }
+    );
 
     await waitForNextUpdate();
 
@@ -121,9 +127,12 @@ describe('useLocationsAPI', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI({ isOpen: true }), {
-      wrapper: WrappedHelper,
-    });
+    const { result, waitForNextUpdate } = renderHook(
+      () => usePrivateLocationsAPI({ isOpen: true }),
+      {
+        wrapper: WrappedHelper,
+      }
+    );
 
     await waitForNextUpdate();
 

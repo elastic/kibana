@@ -37,7 +37,7 @@ export const getNormalizeHTTPFields = ({
   const defaultFields = DEFAULT_FIELDS[DataStream.HTTP];
   const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
-  const commonFields = getNormalizeCommonFields({
+  const { errors: commonErrors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
@@ -45,6 +45,9 @@ export const getNormalizeHTTPFields = ({
     namespace,
     version,
   });
+
+  // Add common erros to errors arary
+  errors.push(...commonErrors);
 
   /* Check if monitor has multiple urls */
   const urls = getOptionalListField(monitor.urls);

@@ -47,12 +47,12 @@ const panelStyle = {
   maxWidth: 500,
 };
 
-export const EmptyTable: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
+export const EmptyTable: React.FC = () => {
   const { http } = useKibana<CoreStart>().services;
 
   return (
     <EuiPanel color="subdued" data-test-subj="tGridEmptyState">
-      <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
+      <EuiFlexGroup alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={true} style={panelStyle}>
             <EuiFlexGroup>

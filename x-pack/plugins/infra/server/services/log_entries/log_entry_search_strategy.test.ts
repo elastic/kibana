@@ -56,7 +56,10 @@ describe('LogEntry search strategy', () => {
     const response = await lastValueFrom(
       logEntrySearchStrategy.search(
         {
-          params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
+          params: {
+            logView: { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+            logEntryId: 'LOG_ENTRY_ID',
+          },
         },
         {},
         mockDependencies
@@ -141,7 +144,10 @@ describe('LogEntry search strategy', () => {
       logEntrySearchStrategy.search(
         {
           id: requestId,
-          params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
+          params: {
+            logView: { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+            logEntryId: 'LOG_ENTRY_ID',
+          },
         },
         {},
         mockDependencies
@@ -193,7 +199,10 @@ describe('LogEntry search strategy', () => {
     const response = logEntrySearchStrategy.search(
       {
         id: logEntrySearchRequestStateRT.encode({ esRequestId: 'UNKNOWN_ID' }),
-        params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
+        params: {
+          logView: { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+          logEntryId: 'LOG_ENTRY_ID',
+        },
       },
       {},
       mockDependencies

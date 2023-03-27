@@ -77,7 +77,7 @@ const BodyComponent: React.FC<Props> = ({
   } = useResultsRollup({ ilmPhases, patterns });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup data-test-subj="body" direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DataQualitySummary
           addSuccessToast={addSuccessToast}

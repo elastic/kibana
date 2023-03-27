@@ -10,6 +10,7 @@ import { KibanaRequest, SavedObjectReference } from '@kbn/core/server';
 export enum ActionExecutionSourceType {
   SAVED_OBJECT = 'SAVED_OBJECT',
   HTTP_REQUEST = 'HTTP_REQUEST',
+  NOTIFICATION = 'NOTIFICATION',
 }
 
 export interface ActionExecutionSource<T> {
@@ -19,10 +20,23 @@ export interface ActionExecutionSource<T> {
 export type HttpRequestExecutionSource = ActionExecutionSource<KibanaRequest>;
 export type SavedObjectExecutionSource = ActionExecutionSource<Omit<SavedObjectReference, 'name'>>;
 
+export interface NotificationSource {
+  requesterId: string;
+  connectorId: string;
+}
+export type NotificationExecutionSource = ActionExecutionSource<NotificationSource>;
+
 export function asHttpRequestExecutionSource(source: KibanaRequest): HttpRequestExecutionSource {
   return {
     type: ActionExecutionSourceType.HTTP_REQUEST,
     source,
+  };
+}
+
+export function asEmptySource(type: ActionExecutionSourceType): ActionExecutionSource<{}> {
+  return {
+    type,
+    source: {},
   };
 }
 
@@ -31,6 +45,15 @@ export function asSavedObjectExecutionSource(
 ): SavedObjectExecutionSource {
   return {
     type: ActionExecutionSourceType.SAVED_OBJECT,
+    source,
+  };
+}
+
+export function asNotificationExecutionSource(
+  source: NotificationSource
+): NotificationExecutionSource {
+  return {
+    type: ActionExecutionSourceType.NOTIFICATION,
     source,
   };
 }
@@ -45,4 +68,10 @@ export function isSavedObjectExecutionSource(
   executionSource?: ActionExecutionSource<unknown>
 ): executionSource is SavedObjectExecutionSource {
   return executionSource?.type === ActionExecutionSourceType.SAVED_OBJECT;
+}
+
+export function isNotificationExecutionSource(
+  executionSource?: ActionExecutionSource<unknown>
+): executionSource is NotificationExecutionSource {
+  return executionSource?.type === ActionExecutionSourceType.NOTIFICATION;
 }

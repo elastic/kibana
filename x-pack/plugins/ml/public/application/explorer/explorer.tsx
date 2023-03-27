@@ -498,7 +498,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                 defaultMessage: 'An error occurred loading annotations:',
               })}
               color="danger"
-              iconType="alert"
+              iconType="warning"
             >
               <p>{annotationsError}</p>
             </EuiCallOut>

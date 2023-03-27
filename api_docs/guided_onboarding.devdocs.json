@@ -1191,7 +1191,7 @@
         "label": "GuidesConfig",
         "description": [],
         "signature": [
-          "{ kubernetes: ",
+          "{ siem: ",
           {
             "pluginId": "@kbn/guided-onboarding",
             "scope": "common",
@@ -1199,7 +1199,7 @@
             "section": "def-common.GuideConfig",
             "text": "GuideConfig"
           },
-          "; siem: ",
+          "; kubernetes: ",
           {
             "pluginId": "@kbn/guided-onboarding",
             "scope": "common",

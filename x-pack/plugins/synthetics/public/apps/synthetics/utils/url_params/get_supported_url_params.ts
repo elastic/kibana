@@ -16,8 +16,8 @@ import { parseAbsoluteDate } from './parse_absolute_date';
 export interface SyntheticsUrlParams {
   absoluteDateRangeStart: number;
   absoluteDateRangeEnd: number;
-  autorefreshInterval: number;
-  autorefreshIsPaused: boolean;
+  refreshInterval: number;
+  refreshPaused: boolean;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination?: string;
@@ -38,17 +38,11 @@ export interface SyntheticsUrlParams {
   groupOrderBy?: MonitorOverviewState['groupBy']['order'];
 }
 
-const {
-  ABSOLUTE_DATE_RANGE_START,
-  ABSOLUTE_DATE_RANGE_END,
-  AUTOREFRESH_INTERVAL,
-  AUTOREFRESH_IS_PAUSED,
-  SEARCH,
-  FILTERS,
-  STATUS_FILTER,
-} = CLIENT_DEFAULTS;
+const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
+  CLIENT_DEFAULTS;
 
-const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
+const { DATE_RANGE_START, DATE_RANGE_END, AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } =
+  CLIENT_DEFAULTS_SYNTHETICS;
 
 /**
  * Gets the current URL values for the application. If no item is present
@@ -80,8 +74,8 @@ export const getSupportedUrlParams = (params: {
   });
 
   const {
-    autorefreshInterval,
-    autorefreshIsPaused,
+    refreshInterval,
+    refreshPaused,
     dateRangeStart,
     dateRangeEnd,
     filters,
@@ -114,8 +108,8 @@ export const getSupportedUrlParams = (params: {
       ABSOLUTE_DATE_RANGE_END,
       { roundUp: true }
     ),
-    autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
-    autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
+    refreshInterval: parseUrlInt(refreshInterval, AUTOREFRESH_INTERVAL_SECONDS),
+    refreshPaused: parseIsPaused(refreshPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
     filters: filters || FILTERS,
@@ -124,11 +118,22 @@ export const getSupportedUrlParams = (params: {
     statusFilter: statusFilter || STATUS_FILTER,
     focusConnectorField: !!focusConnectorField,
     query: query || '',
-    tags: tags ? JSON.parse(tags) : [],
-    monitorTypes: monitorTypes ? JSON.parse(monitorTypes) : [],
-    locations: locations ? JSON.parse(locations) : [],
-    projects: projects ? JSON.parse(projects) : [],
-    schedules: schedules ? JSON.parse(schedules) : [],
+    tags: parseFilters(tags),
+    monitorTypes: parseFilters(monitorTypes),
+    locations: parseFilters(locations),
+    projects: parseFilters(projects),
+    schedules: parseFilters(schedules),
     locationId: locationId || undefined,
   };
+};
+
+const parseFilters = (filters?: string) => {
+  if (!filters) {
+    return [];
+  }
+  try {
+    return JSON.parse(filters);
+  } catch (e) {
+    return [filters];
+  }
 };

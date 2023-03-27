@@ -23,7 +23,7 @@ import {
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   finalizeSignalsMigration,
   getEqlRuleForSignalTesting,
@@ -34,7 +34,7 @@ import {
   getThresholdRuleForSignalTesting,
   startSignalsMigration,
   waitFor,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('allows querying of legacy enriched signals by threat.indicator', async () => {
@@ -186,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
           '.siem-signals-*',
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -219,13 +219,13 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: QueryRuleCreateProps = getRuleForSignalTesting([`.siem-signals-*`]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -385,7 +385,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -552,7 +552,7 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
@@ -560,7 +560,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.siem-signals-*`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -573,7 +573,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -593,13 +593,13 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting(['.siem-signals-*']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -612,7 +612,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -632,7 +632,7 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
@@ -648,7 +648,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -669,7 +669,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);

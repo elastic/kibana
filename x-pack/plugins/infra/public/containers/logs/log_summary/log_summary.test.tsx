@@ -62,7 +62,7 @@ describe('useLogSummary hook', () => {
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        sourceId: 'INITIAL_SOURCE_ID',
+        logView: { logViewId: 'INITIAL_SOURCE_ID', type: 'log-view-reference' },
       }),
       expect.anything()
     );
@@ -74,7 +74,7 @@ describe('useLogSummary hook', () => {
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        sourceId: 'CHANGED_SOURCE_ID',
+        logView: { logViewId: 'CHANGED_SOURCE_ID', type: 'log-view-reference' },
       }),
       expect.anything()
     );

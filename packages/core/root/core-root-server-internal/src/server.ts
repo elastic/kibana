@@ -7,57 +7,32 @@
  */
 
 import apm from 'elastic-apm-node';
-import { config as pathConfig } from '@kbn/utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { Logger, LoggerFactory } from '@kbn/logging';
+import type { NodeRoles } from '@kbn/core-node-server';
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
-import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { DocLinksService } from '@kbn/core-doc-links-server-internal';
-import {
-  LoggingService,
-  ILoggingSystem,
-  config as loggingConfig,
-} from '@kbn/core-logging-server-internal';
-import {
-  coreDeprecationProvider,
-  ensureValidConfiguration,
-} from '@kbn/core-config-server-internal';
-import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
+import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-internal';
+import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
+import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
-import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
-import {
-  ExecutionContextService,
-  executionContextConfig,
-} from '@kbn/core-execution-context-server-internal';
+import { EnvironmentService } from '@kbn/core-environment-server-internal';
+import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import {
-  HttpService,
-  config as httpConfig,
-  cspConfig,
-  externalUrlConfig,
-} from '@kbn/core-http-server-internal';
-import {
-  ElasticsearchService,
-  config as elasticsearchConfig,
-} from '@kbn/core-elasticsearch-server-internal';
-import { MetricsService, opsConfig } from '@kbn/core-metrics-server-internal';
+import { HttpService } from '@kbn/core-http-server-internal';
+import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
+import { MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import {
-  savedObjectsConfig,
-  savedObjectsMigrationConfig,
-} from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
-import { I18nService, config as i18nConfig } from '@kbn/core-i18n-server-internal';
-import {
-  DeprecationsService,
-  config as deprecationConfig,
-} from '@kbn/core-deprecations-server-internal';
+import { I18nService } from '@kbn/core-i18n-server-internal';
+import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
-import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
-import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
+import { StatusService } from '@kbn/core-status-server-internal';
+import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import {
   CoreRouteHandlerContext,
@@ -75,16 +50,12 @@ import type {
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
-import {
-  DiscoveredPlugins,
-  PluginsService,
-  config as pluginsConfig,
-} from '@kbn/core-plugins-server-internal';
+import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
-import { elasticApmConfig } from './root/elastic_config';
+import { registerServiceConfig } from './register_service_config';
+import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 const coreId = Symbol('core');
-const rootConfigPath = '';
 const KIBANA_STARTED_EVENT = 'kibana_started';
 
 /** @internal */
@@ -135,6 +106,7 @@ export class Server {
   private coreStart?: InternalCoreStart;
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
+  private nodeRoles?: NodeRoles;
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
 
@@ -190,6 +162,8 @@ export class Server {
 
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
+
+    this.nodeRoles = nodePreboot.roles;
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
@@ -396,6 +370,17 @@ export class Server {
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
     soStartSpan?.end();
+
+    if (this.nodeRoles?.migrator === true) {
+      startTransaction?.end();
+      this.log.info('Detected migrator node role; shutting down Kibana...');
+      throw new CriticalError(
+        'Migrations completed, shutting down Kibana',
+        MIGRATION_EXCEPTION_CODE,
+        0
+      );
+    }
+
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const customBrandingStart = this.customBranding.start();
@@ -465,34 +450,7 @@ export class Server {
   }
 
   public setupCoreConfig() {
-    const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
-      cspConfig,
-      deprecationConfig,
-      elasticsearchConfig,
-      elasticApmConfig,
-      executionContextConfig,
-      externalUrlConfig,
-      httpConfig,
-      i18nConfig,
-      loggingConfig,
-      nodeConfig,
-      opsConfig,
-      pathConfig,
-      pidConfig,
-      pluginsConfig,
-      savedObjectsConfig,
-      savedObjectsMigrationConfig,
-      statusConfig,
-      uiSettingsConfig,
-    ];
-
-    this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
-    for (const descriptor of configDescriptors) {
-      if (descriptor.deprecations) {
-        this.configService.addDeprecationProvider(descriptor.path, descriptor.deprecations);
-      }
-      this.configService.setSchema(descriptor.path, descriptor.schema);
-    }
+    registerServiceConfig(this.configService);
   }
 
   /**

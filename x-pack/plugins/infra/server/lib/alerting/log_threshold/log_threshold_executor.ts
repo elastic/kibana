@@ -188,7 +188,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
 
       const { indices, timestampField, runtimeMappings } = await logViews
         .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
-        .getResolvedLogView(validatedParams.logView.logViewId);
+        .getResolvedLogView(validatedParams.logView);
 
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(

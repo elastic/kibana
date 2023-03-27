@@ -1,0 +1,317 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScreenReaderRouteAnnouncements renders 1`] = `
+<ScreenReaderRouteAnnouncements
+  appId$={
+    BehaviorSubject {
+      "_value": "test",
+      "closed": false,
+      "currentObservers": null,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
+              "closed": false,
+              "initialTeardown": [Function],
+            },
+          ],
+          "_parentage": null,
+          "closed": false,
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
+              "next": [Function],
+            },
+          },
+          "initialTeardown": undefined,
+          "isStopped": false,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  breadcrumbs$={
+    BehaviorSubject {
+      "_value": Array [
+        Object {
+          "text": "Visualize",
+        },
+      ],
+      "closed": false,
+      "currentObservers": null,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
+              "closed": false,
+              "initialTeardown": [Function],
+            },
+          ],
+          "_parentage": null,
+          "closed": false,
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
+              "next": [Function],
+            },
+          },
+          "initialTeardown": undefined,
+          "isStopped": false,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  customBranding$={
+    BehaviorSubject {
+      "_value": Object {},
+      "closed": false,
+      "currentObservers": null,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
+              "closed": false,
+              "initialTeardown": [Function],
+            },
+          ],
+          "_parentage": null,
+          "closed": false,
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
+              "next": [Function],
+            },
+          },
+          "initialTeardown": undefined,
+          "isStopped": false,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <EuiScreenReaderLive
+    focusRegionOnTextChange={true}
+  >
+    <EuiScreenReaderOnly>
+      <div
+        css="unknown styles"
+        key="null"
+        tabIndex={-1}
+      >
+        <Insertion
+          cache={
+            Object {
+              "insert": [Function],
+              "inserted": Object {
+                "hus3oj-euiScreenReaderOnly": true,
+              },
+              "key": "css",
+              "nonce": undefined,
+              "registered": Object {},
+              "sheet": StyleSheet {
+                "_alreadyInsertedOrderInsensitiveRule": true,
+                "_insertTag": [Function],
+                "before": null,
+                "container": <head>
+                  <style
+                    data-emotion="css"
+                    data-s=""
+                  >
+                    
+                    .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
+                  </style>
+                  <style
+                    data-styled="active"
+                    data-styled-version="5.1.0"
+                  />
+                </head>,
+                "ctr": 1,
+                "insertionPoint": undefined,
+                "isSpeedy": false,
+                "key": "css",
+                "nonce": undefined,
+                "prepend": undefined,
+                "tags": Array [
+                  <style
+                    data-emotion="css"
+                    data-s=""
+                  >
+                    
+                    .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
+                  </style>,
+                ],
+              },
+            }
+          }
+          isStringTag={true}
+          serialized={
+            Object {
+              "map": undefined,
+              "name": "hus3oj-euiScreenReaderOnly",
+              "next": undefined,
+              "styles": ";
+  // Take the element out of the layout
+  position: absolute;
+  // Keep it vertically inline
+  inset-block-start: auto;
+  // Chrome requires a left value, and Selenium (used by Kibana's FTR) requires an off-screen position for its .getVisibleText() to not register SR-only text
+  inset-inline-start: -10000px;
+  // The element must have a size (for some screen readers)
+  
+    inline-size: 1px;
+    block-size: 1px;
+  
+  // But reduce the visible size to nothing
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  // And ensure no overflows occur
+  overflow: hidden;
+  // Chrome requires the negative margin to not cause overflows of parent containers
+  margin: -1px;
+;label:euiScreenReaderOnly;;;;",
+              "toString": [Function],
+            }
+          }
+        />
+        <div
+          className="emotion-euiScreenReaderOnly"
+          tabIndex={-1}
+        >
+          <div
+            aria-atomic="true"
+            aria-hidden="true"
+            aria-live="off"
+            role="status"
+          />
+          <div
+            aria-atomic="true"
+            aria-live="off"
+            role="status"
+          >
+            Visualize - Elastic
+          </div>
+        </div>
+      </div>
+    </EuiScreenReaderOnly>
+  </EuiScreenReaderLive>
+</ScreenReaderRouteAnnouncements>
+`;

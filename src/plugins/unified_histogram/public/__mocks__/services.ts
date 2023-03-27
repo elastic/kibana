@@ -8,8 +8,10 @@
 
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { UnifiedHistogramServices } from '../types';
+import { allSuggestionsMock } from './suggestions';
 
 const dataPlugin = dataPluginMock.createStartContract();
 dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
@@ -28,11 +30,20 @@ export const unifiedHistogramServicesMock = {
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
   },
-  lens: { EmbeddableComponent: jest.fn(() => null), navigateToPrefilledEditor: jest.fn() },
+  lens: {
+    EmbeddableComponent: jest.fn(() => null),
+    navigateToPrefilledEditor: jest.fn(),
+    stateHelperApi: jest.fn(() => {
+      return {
+        suggestions: jest.fn(() => allSuggestionsMock),
+      };
+    }),
+  },
   storage: {
     get: jest.fn(),
     set: jest.fn(),
     remove: jest.fn(),
     clear: jest.fn(),
   },
+  expressions: expressionsPluginMock.createStartContract(),
 } as unknown as UnifiedHistogramServices;

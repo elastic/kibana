@@ -6,7 +6,6 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { useEsSearch } from '@kbn/observability-plugin/public';
 import { formatBytes } from './use_object_metrics';
 import { formatMillisecond } from '../step_metrics/step_metrics';
 import {
@@ -20,6 +19,7 @@ import {
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { median } from './use_network_timings_prev';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';
@@ -41,7 +41,7 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
   const checkGroupId = step?.monitor.check_group ?? urlParams.checkGroupId;
   const stepIndex = step?.synthetics.step?.index ?? urlParams.stepIndex;
 
-  const { data, loading } = useEsSearch(
+  const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
@@ -112,10 +112,10 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
         },
       },
     },
-    [monitorId, checkGroupId, stepIndex],
-    { name: 'previousStepMetrics' }
+    [],
+    { name: `previousStepMetrics/${monitorId}/${checkGroupId}/${stepIndex}` }
   );
-  const { data: transferData } = useEsSearch(
+  const { data: transferData } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
@@ -174,9 +174,9 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
         },
       },
     },
-    [monitorId, checkGroupId, stepIndex],
+    [],
     {
-      name: 'previousStepMetricsFromNetworkInfos',
+      name: `previousStepMetricsFromNetworkInfos/${monitorId}/${checkGroupId}/${stepIndex}`,
     }
   );
 
@@ -210,7 +210,7 @@ export const useStepPrevMetrics = (step?: JourneyStep) => {
   const medianStepDuration = median(stepDuration);
 
   return {
-    loading,
+    loading: loading && !metrics,
     metrics: [
       {
         label: STEP_DURATION_LABEL,

@@ -124,6 +124,7 @@ describe('fetchSearchSourceQuery', () => {
               Object {
                 "range": Object {
                   "time": Object {
+                    "format": "strict_date_optional_time",
                     "gt": "2020-02-09T23:12:41.941Z",
                   },
                 },

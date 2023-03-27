@@ -67,7 +67,7 @@ If that isn't the case, please file an issue, it could be a bug with the system.
 We are [aware of some performance issues](https://github.com/elastic/elastic-docs/issues/274) with deeply nested, or large APIs.
 
 In the short term, the best thing you can do is avoid deeply nested API items. Use interfaces rather than inlined objects. Also consider
-adding `serviceFolders` in your kibana.json. This will automatically split your docs up based on which APIs are defined within the service folders.
+adding `serviceFolders` in your kibana.jsonc. This will automatically split your docs up based on which APIs are defined within the service folders.
 They will get built into a doc with an id of
 `kib${PluginName}${ServiceName}PluginApi`. The data plugin does this, so you
  can [check that out as an example](https://github.com/elastic/kibana/blob/main/src/plugins/data/kibana.json#L13).
