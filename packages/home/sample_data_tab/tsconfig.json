@@ -17,6 +17,9 @@
     "@kbn/i18n",
     "@kbn/home-sample-data-card",
     "@kbn/home-sample-data-types",
+    "@kbn/react-field",
+    "@kbn/i18n-react",
+    "@kbn/core-http-browser",
   ],
   "exclude": [
     "target/**/*",
