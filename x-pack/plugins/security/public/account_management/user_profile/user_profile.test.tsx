@@ -280,5 +280,31 @@ describe('useUserProfileForm', () => {
 
       expect(testWrapper.exists('[data-test-subj="darkModeButton"]')).toBeFalsy();
     });
+
+    it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {
+      const data: UserProfileData = {};
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
+        1,
+        { title: 'Profile updated' },
+        {}
+      );
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ title: 'Profile updated' }),
+        expect.objectContaining({ toastLifeTimeMs: 300000 })
+      );
+    });
   });
 });
