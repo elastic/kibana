@@ -33,6 +33,7 @@
     "@kbn/i18n-react",
     "@kbn/ace",
     "@kbn/shared-ux-router",
+    "@kbn/license-management-plugin",
   ],
   "exclude": [
     "target/**/*",
