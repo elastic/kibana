@@ -96,6 +96,7 @@ export const DiscoverMainContent = ({
           direction="column"
           gutterSize="none"
           responsive={false}
+          data-test-subj="dscMainContent"
         >
           {!isPlainRecord && (
             <EuiFlexItem grow={false}>

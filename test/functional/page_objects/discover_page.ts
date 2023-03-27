@@ -864,4 +864,28 @@ export class DiscoverPageObject extends FtrService {
     await this.fieldEditor.save();
     await this.header.waitUntilLoadingHasFinished();
   }
+
+  /**
+   * Drags field to add as a column
+   *
+   * @param fieldName  - the desired field for the dimension
+   * */
+  public async dragFieldToTable(fieldName: string) {
+    await this.waitUntilSidebarHasLoaded();
+
+    const from = `dscFieldListPanelField-${fieldName}`;
+    await this.find.existsByCssSelector(from);
+    await this.browser.html5DragAndDrop(
+      this.testSubjects.getCssSelector(from),
+      this.testSubjects.getCssSelector('dscMainContent')
+    );
+    await this.retry.try(async () => {
+      const exists = await this.find.existsByCssSelector('.domDragDrop-isActiveGroup');
+      if (exists) {
+        throw new Error('UI still in drag/drop mode');
+      }
+    });
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+  }
 }
