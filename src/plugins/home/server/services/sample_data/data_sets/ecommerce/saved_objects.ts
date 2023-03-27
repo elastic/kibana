@@ -25,11 +25,9 @@ export const getSavedObjects = (): SavedObject[] => [
       name: 'Kibana Sample Data eCommerce',
       typeMeta: '{}',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-    migrationVersion: {
-      'index-pattern': '7.11.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.11.0',
     references: [],
     type: 'index-pattern',
     updated_at: '2021-08-05T12:23:57.577Z',
@@ -49,11 +47,9 @@ export const getSavedObjects = (): SavedObject[] => [
       visState:
         '{"title":"[eCommerce] Sold Products per Day","type":"metrics","aggs":[],"params":{"time_range_mode":"entire_time_range","id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"gauge","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#68BC00","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count"},{"id":"fd1e1b90-e4e3-11eb-8234-cb7bfd534fce","type":"math","variables":[{"id":"00374270-e4e4-11eb-8234-cb7bfd534fce","name":"c","field":"61ca57f2-469d-11e7-af02-69e470af7417"}],"script":"params.c / (params._interval / 1000 / 60 / 60 / 24)"}],"separate_axis":0,"axis_position":"right","formatter":"0.0","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Trxns / day","split_color_mode":"gradient","value_template":""}],"time_field":"order_date","interval":"1d","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"gauge_color_rules":[{"value":150,"id":"6da070c0-b891-11e8-b645-195edeb9de84","gauge":"rgba(104,188,0,1)","operator":"gte"},{"value":150,"id":"9b0cdbc0-b891-11e8-b645-195edeb9de84","gauge":"rgba(244,78,59,1)","operator":"lt"}],"gauge_width":"15","gauge_inner_width":"10","gauge_style":"half","filter":"","gauge_max":"300","use_kibana_indexes":true,"hide_last_value_indicator":true,"tooltip_mode":"show_all","drop_last_bucket":0,"isModelInvalid":false,"index_pattern_ref_name":"metrics_0_index_pattern"}}',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'b80e6540-b891-11e8-a6d9-e546fe2bba5f',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -87,11 +83,9 @@ export const getSavedObjects = (): SavedObject[] => [
       }),
       version: 1,
     },
-    coreMigrationVersion: '8.0.0',
     id: '3ba638e0-b894-11e8-a6d9-e546fe2bba5f',
-    migrationVersion: {
-      search: '7.9.3',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.9.3',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -108,8 +102,8 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2021-10-28T15:07:24.077Z',
     version: '1',
-    coreMigrationVersion: '8.0.0',
-    migrationVersion: { visualization: '8.0.0' },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '8.0.0',
     attributes: {
       title: i18n.translate('home.sampleData.ecommerceSpec.salesCountMapTitle', {
         defaultMessage: '[eCommerce] Sales Count Map',
@@ -144,11 +138,9 @@ export const getSavedObjects = (): SavedObject[] => [
       visState:
         '{"title":"[eCommerce] Markdown","type":"markdown","params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"## Sample eCommerce Data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html)."},"aggs":[]}',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'c00d1f90-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [],
     type: 'visualization',
     updated_at: '2021-08-05T12:43:35.817Z',
@@ -325,9 +317,7 @@ export const getSavedObjects = (): SavedObject[] => [
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
       },
     ],
-    migrationVersion: {
-      dashboard: '8.7.0',
-    },
-    coreMigrationVersion: '8.0.0',
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '8.7.0',
   },
 ];
