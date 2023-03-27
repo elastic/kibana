@@ -17,6 +17,8 @@ import {
   EuiIconTip,
   Query,
 } from '@elastic/eui';
+import type { HostNodeRow } from '../../../../../hosts/hooks/use_hosts_table';
+import type { InfraWaffleMapNode } from '../../../../../../../lib/lib';
 import { getFieldByType } from '../../../../../../../../common/inventory_models';
 import {
   useProcessList,
@@ -29,7 +31,11 @@ import { SummaryTable } from './summary_table';
 import { ProcessesTable } from './processes_table';
 import { parseSearchString } from './parse_search_string';
 
-const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
+interface ProcessesProps extends Omit<TabProps, 'node' | 'onClose' | 'options'> {
+  node: InfraWaffleMapNode | HostNodeRow;
+}
+
+const TabComponent = ({ currentTime, node, nodeType }: ProcessesProps) => {
   const [searchBarState, setSearchBarState] = useState<Query>(Query.MATCH_ALL);
   const [searchFilter, setSearchFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortBy>({
@@ -162,10 +168,11 @@ const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
   );
 };
 
-export const ProcessesTab = {
+export const ProcessesTab = (testId: string) => ({
   id: 'processes',
   name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
     defaultMessage: 'Processes',
   }),
   content: TabComponent,
-};
+  'data-test-subj': testId,
+});

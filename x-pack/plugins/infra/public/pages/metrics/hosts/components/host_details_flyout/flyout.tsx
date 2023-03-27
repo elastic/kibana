@@ -8,16 +8,19 @@
 import React, { useMemo, useState } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetadataTab } from './metadata/metadata';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import { ProcessesTab } from '../../../inventory_view/components/node_details/tabs/processes';
 
 interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
 }
 
-const flyoutTabs = [MetadataTab];
+const flyoutTabs = [MetadataTab, ProcessesTab('hostsView-flyout-tabs-processes')];
+const NODE_TYPE = 'host' as InventoryItemType;
 
 export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
@@ -32,7 +35,14 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
       const TabContent = m.content;
       return {
         ...m,
-        content: <TabContent node={node} currentTimeRange={currentTimeRange} />,
+        content: (
+          <TabContent
+            node={node}
+            currentTimeRange={currentTimeRange}
+            currentTime={currentTimeRange.to}
+            nodeType={NODE_TYPE}
+          />
+        ),
       };
     });
   }, [getDateRangeAsTimestamp, node]);
@@ -48,7 +58,12 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
         <EuiSpacer size="s" />
         <EuiTabs style={{ marginBottom: '-25px' }} size="s">
           {tabs.map((tab, i) => (
-            <EuiTab key={tab.id} isSelected={i === selectedTab} onClick={() => setSelectedTab(i)}>
+            <EuiTab
+              key={tab.id}
+              isSelected={i === selectedTab}
+              onClick={() => setSelectedTab(i)}
+              data-test-subj={tab['data-test-subj']}
+            >
               {tab.name}
             </EuiTab>
           ))}

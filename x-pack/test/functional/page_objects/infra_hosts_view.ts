@@ -28,6 +28,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('euiFlyoutCloseButton');
     },
 
+    async clickProcessesFlyoutTab() {
+      return await testSubjects.click('hostsView-flyout-tabs-processes');
+    },
+
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
       const containerText = await container.getVisibleText();
@@ -101,6 +105,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     // Flyout Tabs
     getMetadataTab() {
       return testSubjects.find('hostsView-flyout-tabs-metadata');
+    },
+
+    async getProcessesTabContentTitle(index: number) {
+      const processesListElements = await testSubjects.findAll('processes_summary_table_item');
+      return await processesListElements[index].findByCssSelector('dt');
     },
 
     async getMetadataTabName() {

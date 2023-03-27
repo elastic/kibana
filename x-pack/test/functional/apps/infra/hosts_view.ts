@@ -175,6 +175,45 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(hosts.length).to.equal(6);
       });
 
+      describe('should open single host flyout', async () => {
+        it('should render metadata tab', async () => {
+          await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+          const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
+          expect(metadataTab).to.contain('Metadata');
+          await pageObjects.infraHostsView.clickCloseFlyoutButton();
+        });
+      });
+
+      describe('should render processes tab', async () => {
+        const processTitles = [
+          'Total processes',
+          'Running',
+          'Sleeping',
+          'Dead',
+          'Stopped',
+          'Idle',
+          'Zombie',
+          'Unknown',
+        ];
+        before(async () => {
+          await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+        });
+
+        after(async () => {
+          await pageObjects.infraHostsView.clickCloseFlyoutButton();
+        });
+
+        processTitles.forEach((value, index) => {
+          it(`Render title: ${value}`, async () => {
+            await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+            const processesTitleValue =
+              await pageObjects.infraHostsView.getProcessesTabContentTitle(index);
+            const processValue = await processesTitleValue.getVisibleText();
+            expect(processValue).to.eql(value);
+          });
+        });
+      });
+
       describe('KPI tiles', () => {
         it('should render 5 metrics trend tiles', async () => {
           const hosts = await pageObjects.infraHostsView.getAllMetricsTrendTiles();

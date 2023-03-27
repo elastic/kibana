@@ -19,22 +19,21 @@ import { getAllFields } from './utils';
 import type { HostNodeRow } from '../../../hooks/use_hosts_table';
 import type { MetricsTimeInput } from '../../../../metric_detail/hooks/use_metrics_time';
 
-const NODE_TYPE = 'host' as InventoryItemType;
-
 export interface TabProps {
   currentTimeRange: MetricsTimeInput;
   node: HostNodeRow;
+  nodeType: InventoryItemType;
 }
 
-export const Metadata = ({ node, currentTimeRange }: TabProps) => {
+export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
   const nodeId = node.name;
-  const inventoryModel = findInventoryModel(NODE_TYPE);
+  const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const {
     loading: metadataLoading,
     error,
     metadata,
-  } = useMetadata(nodeId, NODE_TYPE, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
+  } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
