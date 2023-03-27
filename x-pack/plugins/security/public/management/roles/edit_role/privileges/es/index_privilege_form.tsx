@@ -128,6 +128,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
               {...this.props.validator.validateIndexPrivilege(this.props.indexPrivilege)}
             >
               <EuiComboBox
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRole.indexPrivilegeForm.indicesAriaLabel',
+                  { defaultMessage: 'Indices' }
+                )}
                 data-test-subj={`indicesInput${this.props.formIndex}`}
                 options={this.props.indexPatterns.map(toOption)}
                 selectedOptions={this.props.indexPrivilege.names.map(toOption)}
@@ -148,6 +152,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
               fullWidth={true}
             >
               <EuiComboBox
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRole.indexPrivilegeForm.privilegesAriaLabel',
+                  { defaultMessage: 'Index privileges' }
+                )}
                 data-test-subj={`privilegesInput${this.props.formIndex}`}
                 options={this.props.availableIndexPrivileges.map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
@@ -243,6 +251,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   >
                     <Fragment>
                       <EuiComboBox
+                        aria-label={i18n.translate(
+                          'xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsAriaLabel',
+                          { defaultMessage: 'Granted fields' }
+                        )}
                         data-test-subj={`fieldInput${this.props.formIndex}`}
                         options={this.state.flsOptions.map(toOption)}
                         selectedOptions={grant.map(toOption)}
@@ -268,6 +280,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   >
                     <Fragment>
                       <EuiComboBox
+                        aria-label={i18n.translate(
+                          'xpack.security.management.editRole.indexPrivilegeForm.deniedFieldsAriaLabel',
+                          { defaultMessage: 'Denied fields' }
+                        )}
                         data-test-subj={`deniedFieldInput${this.props.formIndex}`}
                         options={this.state.flsOptions.map(toOption)}
                         selectedOptions={except.map(toOption)}
