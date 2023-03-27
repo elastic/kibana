@@ -53,21 +53,21 @@ export function VerticalLines({
       }}
     >
       <g transform={`translate(0 ${margins.top})`}>
-        {tickPositions.map((x) => (
+        {tickPositions.map((position) => (
           <line
-            key={`tick-${x}`}
-            x1={x}
-            x2={x}
+            key={`tick-${position}`}
+            x1={position}
+            x2={position}
             y1={0}
             y2={height}
             stroke={theme.eui.euiColorLightestShade}
           />
         ))}
-        {markPositions.map((x) => (
+        {markPositions.map((position) => (
           <line
-            key={`mark-${x}`}
-            x1={x}
-            x2={x}
+            key={`mark-${position}`}
+            x1={position}
+            x2={position}
             y1={0}
             y2={height}
             stroke={theme.eui.euiColorMediumShade}

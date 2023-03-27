@@ -47,12 +47,14 @@ export function TimelineAxis({
   const theme = useTheme();
   const { margins, tickValues, width, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
-  const xTicks = getXAxisTickValues(tickValues, topTraceDuration).reduce<
-    Array<{ x: number; label: string }>
-  >((ticks, tick) => {
-    const x = xScale(tick);
-    return Number.isFinite(x)
-      ? [...ticks, { x, label: tickFormatter(tick).formatted }]
+
+  const tickPositionsAndLabels = getXAxisTickValues(
+    tickValues,
+    topTraceDuration
+  ).reduce<Array<{ position: number; label: string }>>((ticks, tick) => {
+    const position = xScale(tick);
+    return Number.isFinite(position)
+      ? [...ticks, { position, label: tickFormatter(tick).formatted }]
       : ticks;
   }, []);
   const topTraceDurationPosition =
@@ -75,10 +77,10 @@ export function TimelineAxis({
         height={margins.top}
       >
         <g transform={`translate(0 ${margins.top - 20})`}>
-          {xTicks.map(({ x, label }) => (
+          {tickPositionsAndLabels.map(({ position, label }) => (
             <text
-              key={`tick-${x}`}
-              x={x}
+              key={`tick-${position}`}
+              x={position}
               y={0}
               textAnchor="middle"
               fill={theme.eui.euiColorDarkShade}
