@@ -7,7 +7,6 @@
  */
 
 import { mapFilter } from './map_filter';
-import { FILTERS } from '@kbn/es-query';
 import type { Filter, PhraseFilter } from '@kbn/es-query';
 import { getDisplayValueFromFilter } from '../../..';
 
