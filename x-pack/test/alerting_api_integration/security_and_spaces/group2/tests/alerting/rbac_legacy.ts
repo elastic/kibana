@@ -56,8 +56,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     ),
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/140867
-  describe.skip('alerts', () => {
+  describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
@@ -103,21 +102,27 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // these cases were invalid pre 7.10.0 and remain invalid post 7.10.0
               break;
             case 'space_1_all at space1':
-            case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
               await resetTaskStatus(migratedAlertId);
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
+              await rescheduleTask(migratedAlertId);
 
-              await ensureAlertIsRunning();
-
+              await alertUtils.disable(migratedAlertId);
               await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
 
               // update alert as user with privileges - so it is no longer a legacy alert
-              const updatedKeyResponse = await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
-              expect(updatedKeyResponse.statusCode).to.eql(204);
-
+              await retry.try(async () => {
+                const updatedKeyResponse = await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
+                expect(updatedKeyResponse.statusCode).to.eql(204);
+              });
+              // As we update the task multiple times in this test case, we might be updating the one already picked up by the task manager.
+              // To avoid 409 conflict error, we disable the rule above before updating and wait for 3 seconds
+              // after updating it to be sure that one task manager cycle is done. So we are not updating a task that is in progress.
+              await new Promise((resolve) => setTimeout(resolve, 3000));
+              await alertUtils.enable(migratedAlertId);
               await ensureAlertIsRunning();
               break;
             case 'global_read at space1':
@@ -125,6 +130,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
+              await rescheduleTask(migratedAlertId);
 
               await ensureAlertIsRunning();
 
@@ -148,9 +154,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
+              await rescheduleTask(migratedAlertId);
 
               await ensureAlertIsRunning();
-
               await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
 
               // attempt to update alert as user with no Actions privileges - as it is no longer a legacy alert
@@ -202,7 +208,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
             expect(swapResponse.body.attributes.meta.versionApiKeyLastmodified).to.eql(
               'pre-7.10.0'
             );
+          }
 
+          async function rescheduleTask(alertId: string) {
             // Get scheduled task id
             const getResponse = await supertestWithoutAuth
               .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${alertId}`)
@@ -267,16 +275,20 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
           async function updateAlertSoThatItIsNoLongerLegacy(alertId: string) {
             // update the alert as super user (to avoid privilege limitations) so that it is no longer a legacy alert
-            await alertUtils.updateAlwaysFiringAction({
-              alertId,
-              actionId: MIGRATED_ACTION_ID,
-              user: Superuser,
-              reference,
-              overwrites: {
-                name: 'Updated Alert',
-                schedule: { interval: '2s' },
-                throttle: '2s',
-              },
+            await retry.try(async () => {
+              const response = await alertUtils.updateAlwaysFiringAction({
+                alertId,
+                actionId: MIGRATED_ACTION_ID,
+                user: Superuser,
+                reference,
+                overwrites: {
+                  name: 'Updated Alert',
+                  schedule: { interval: '2s' },
+                  throttle: '2s',
+                },
+              });
+
+              expect(response.statusCode).to.eql(200);
             });
           }
         });
