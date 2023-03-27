@@ -94,6 +94,7 @@ export function TimelineAxis({
               key="topTrace"
               x={topTraceDurationPosition}
               y={0}
+              fill={theme.eui.euiTextColor}
               textAnchor="middle"
             >
               {tickFormatter(topTraceDuration).formatted}
