@@ -9,7 +9,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiLoadingChart } from '@elastic/eui';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 import { PageLoader } from '../common/components/page_loader';
 import { resetMonitorLastRunAction } from '../../state';
@@ -60,7 +60,11 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
   }
 
   return !hasPing ? (
-    <PageLoader title={<h3>{MONITOR_PENDING_HEADING}</h3>} body={MONITOR_PENDING_CONTENT} />
+    <PageLoader
+      icon={<EuiLoadingChart size="xl" mono />}
+      title={<h3>{MONITOR_PENDING_HEADING}</h3>}
+      body={MONITOR_PENDING_CONTENT}
+    />
   ) : (
     <>{children}</>
   );
