@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiTableActionsColumnType } from '@elastic/eui';
 
+import { ReauthorizeActionModal, useReauthorizeAction } from '../action_reauthorize';
 import { TransformListRow } from '../../../../common';
 
 import { useCloneAction } from '../action_clone';
@@ -17,6 +18,7 @@ import { useDiscoverAction } from '../action_discover';
 import { EditTransformFlyout } from '../edit_transform_flyout';
 import { useEditAction } from '../action_edit';
 import { useResetAction, ResetActionModal } from '../action_reset';
+import { useScheduleNowAction, ScheduleNowActionModal } from '../action_schedule_now';
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
 import { useCreateAlertRuleAction } from '../action_create_alert';
@@ -36,6 +38,7 @@ export const useActions = ({
   const deleteAction = useDeleteAction(forceDisable);
   const discoverAction = useDiscoverAction(forceDisable);
   const editAction = useEditAction(forceDisable, transformNodes);
+  const reauthorizeAction = useReauthorizeAction(forceDisable, transformNodes);
   const resetAction = useResetAction(forceDisable);
   const startAction = useStartAction(forceDisable, transformNodes);
   const stopAction = useStopAction(forceDisable);
@@ -47,7 +50,7 @@ export const useActions = ({
         {resetAction.isModalVisible && <ResetActionModal {...resetAction} />}
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
         {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
-
+        {reauthorizeAction.isModalVisible && <ReauthorizeActionModal {...reauthorizeAction} />}
         {editAction.config && editAction.isFlyoutVisible && (
           <EditTransformFlyout
             closeFlyout={editAction.closeFlyout}
