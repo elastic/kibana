@@ -22,6 +22,7 @@ import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/sea
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 import { dataTableActions } from '../../../store/data_table';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { TableId } from '../../../../../common/types';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -103,6 +104,7 @@ const RowActionComponent = ({
           params: {
             id: eventId,
             indexName,
+            scopeId: TableId.alertsOnAlertsPage,
           },
         },
       });

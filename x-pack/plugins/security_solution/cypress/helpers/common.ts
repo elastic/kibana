@@ -13,6 +13,13 @@ export const getDataTestSubjectSelector = (dataTestSubjectValue: string) =>
   `[data-test-subj="${dataTestSubjectValue}"]`;
 
 /**
+ * Helper function to generate selector by data-test-subj that start width the value
+ * @param dataTestSubjectValue the partial value passed to the data-test-subj property of the DOM element
+ */
+export const getDataTestSubjectSelectorStartWith = (dataTestSubjectValue: string) =>
+  `[data-test-subj^="${dataTestSubjectValue}"]`;
+
+/**
  * Helper function to generate selector by class
  * @param className the value passed to class property of the DOM element
  */
