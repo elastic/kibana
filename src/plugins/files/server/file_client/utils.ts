@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { FileMetadata } from '../../common';
 
 export function createDefaultFileAttributes(): Pick<
@@ -19,3 +21,31 @@ export function createDefaultFileAttributes(): Pick<
     Updated: dateString,
   };
 }
+
+export const fetchDoc = async <TDocument = unknown>(
+  esClient: ElasticsearchClient,
+  index: string,
+  docId: string,
+  indexIsAlias: boolean = false
+): Promise<GetResponse<TDocument> | undefined> => {
+  if (indexIsAlias) {
+    const fileDocSearchResult = await esClient.search<TDocument>({
+      index,
+      body: {
+        size: 1,
+        query: {
+          term: {
+            _id: docId,
+          },
+        },
+      },
+    });
+
+    return fileDocSearchResult.hits.hits[0] as GetResponse<TDocument>;
+  }
+
+  return esClient.get<TDocument>({
+    index,
+    id: docId,
+  });
+};

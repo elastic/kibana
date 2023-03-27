@@ -12,6 +12,11 @@ import * as hasDataHook from '../../../../hooks/use_has_data';
 import { render, data as dataMock } from '../../../../utils/test_helper';
 import { UXSection } from '.';
 import { response } from './mock_data/ux.mock';
+import {
+  LEGEND_GOOD_LABEL,
+  LEGEND_NEEDS_IMPROVEMENT_LABEL,
+  LEGEND_POOR_LABEL,
+} from '../../../shared/core_web_vitals/translations';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -46,7 +51,9 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, getAllByText } = render(<UXSection bucketSize={bucketSize} />);
+    const { getByText, getByTestId, getAllByTestId } = render(
+      <UXSection bucketSize={bucketSize} />
+    );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getByText('Show dashboard')).toBeInTheDocument();
@@ -57,20 +64,20 @@ describe('UXSection', () => {
     expect(getByText('0.010')).toBeInTheDocument();
 
     // LCP Rank Values
-    expect(getByText('Good (65%)')).toBeInTheDocument();
-    expect(getByText('Needs improvement (19%)')).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_GOOD_LABEL}-65`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_NEEDS_IMPROVEMENT_LABEL}-19`)).toBeInTheDocument();
 
     // LCP and FID both have same poor value
-    expect(getAllByText('Poor (16%)')).toHaveLength(2);
+    expect(getAllByTestId(`${LEGEND_POOR_LABEL}-16`)).toHaveLength(2);
 
     // FID Rank Values
-    expect(getByText('Good (73%)')).toBeInTheDocument();
-    expect(getByText('Needs improvement (11%)')).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_GOOD_LABEL}-73`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_NEEDS_IMPROVEMENT_LABEL}-11`)).toBeInTheDocument();
 
     // CLS Rank Values
-    expect(getByText('Good (86%)')).toBeInTheDocument();
-    expect(getByText('Needs improvement (8%)')).toBeInTheDocument();
-    expect(getByText('Poor (6%)')).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_GOOD_LABEL}-86`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_NEEDS_IMPROVEMENT_LABEL}-8`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_POOR_LABEL}-6`)).toBeInTheDocument();
   });
   it('shows loading state', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({

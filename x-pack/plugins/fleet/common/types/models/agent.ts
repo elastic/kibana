@@ -44,7 +44,9 @@ export type AgentActionType =
   | 'CANCEL'
   | 'FORCE_UNENROLL'
   | 'UPDATE_TAGS'
-  | 'REQUEST_DIAGNOSTICS';
+  | 'REQUEST_DIAGNOSTICS'
+  | 'POLICY_CHANGE'
+  | 'INPUT_ACTION';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
@@ -152,7 +154,7 @@ export interface ActionStatus {
   nbAgentsFailed: number;
   version?: string;
   startTime?: string;
-  type?: string;
+  type: AgentActionType;
   // how many agents were actioned by the user
   nbAgentsActioned: number;
   status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS' | 'ROLLOUT_PASSED';
@@ -163,6 +165,8 @@ export interface ActionStatus {
   creationTime: string;
   hasRolloutPeriod?: boolean;
   latestErrors?: ActionErrorResult[];
+  revision?: number;
+  policyId?: string;
 }
 
 export interface AgentDiagnostics {
