@@ -465,41 +465,6 @@ describe('engines routes', () => {
         headers: { 'content-type': 'application/json' },
       });
     });
-    it('returns 404 when fetch engine is undefined', async () => {
-      (mockClient.asCurrentUser.transport.request as jest.Mock).mockResolvedValueOnce(undefined);
-      await mockRouter.callRoute({
-        params: { engine_name: 'unit-test' },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        body: {
-          attributes: {
-            error_code: 'engine_not_found',
-          },
-          message: 'Could not find engine',
-        },
-        statusCode: 404,
-      });
-    });
-    it('returns 404 when fetch engine is returns 404', async () => {
-      (mockClient.asCurrentUser.transport.request as jest.Mock).mockResolvedValueOnce({
-        responseStatus: 404,
-        responseStatusText: 'NOT_FOUND',
-      });
-      await mockRouter.callRoute({
-        params: { engine_name: 'unit-test' },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        body: {
-          attributes: {
-            error_code: 'engine_not_found',
-          },
-          message: 'Could not find engine',
-        },
-        statusCode: 404,
-      });
-    });
     it('returns 404 when fetch engine throws a not found exception', async () => {
       (mockClient.asCurrentUser.transport.request as jest.Mock).mockRejectedValueOnce({
         meta: {
@@ -527,7 +492,7 @@ describe('engines routes', () => {
       });
     });
     it('returns error when fetch engine returns an error', async () => {
-      (mockClient.asCurrentUser.transport.request as jest.Mock).mockResolvedValueOnce({
+      (mockClient.asCurrentUser.transport.request as jest.Mock).mockRejectedValueOnce({
         responseStatus: 500,
         responseStatusText: 'INTERNAL_SERVER_ERROR',
       });

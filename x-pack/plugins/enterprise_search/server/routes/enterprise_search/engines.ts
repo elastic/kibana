@@ -178,23 +178,6 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
           path: `/_application/search_application/${engineName}`,
         });
 
-        if (!engine || (isResponseError(engine) && engine.responseStatus === 404)) {
-          return createError({
-            errorCode: ErrorCode.ENGINE_NOT_FOUND,
-            message: 'Could not find engine',
-            response,
-            statusCode: 404,
-          });
-        }
-        if (isResponseError(engine)) {
-          return createError({
-            errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
-            message: 'Error fetching engine',
-            response,
-            statusCode: engine.responseStatus,
-          });
-        }
-
         const data = await fetchEngineFieldCapabilities(client, engine);
         return response.ok({
           body: data,
@@ -207,6 +190,14 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
             message: 'Could not find engine',
             response,
             statusCode: 404,
+          });
+        }
+        if (isResponseError(e)) {
+          return createError({
+            errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+            message: 'Error fetching engine',
+            response,
+            statusCode: e.responseStatus,
           });
         }
         throw e;
