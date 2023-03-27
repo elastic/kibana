@@ -33,15 +33,19 @@ export const maintenanceWindowMappings: SavedObjectsTypeMappingDefinition = {
     },
     rRule: rRuleMappingsField,
     createdBy: {
+      index: false,
       type: 'keyword',
     },
     updatedBy: {
+      index: false,
       type: 'keyword',
     },
     createdAt: {
+      index: false,
       type: 'date',
     },
     updatedAt: {
+      index: false,
       type: 'date',
     },
   },

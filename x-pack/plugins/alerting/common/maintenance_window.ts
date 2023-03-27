@@ -40,7 +40,7 @@ export type MaintenanceWindowSOAttributes = MaintenanceWindowSOProperties &
   MaintenanceWindowModificationMetadata;
 
 export type MaintenanceWindow = MaintenanceWindowSOAttributes & {
-  status: MaintenanceWindowStatus | null;
+  status: MaintenanceWindowStatus;
   startDate: string | null;
   endDate: string | null;
   id: string;
