@@ -163,16 +163,8 @@ const histogramSchema = s.object({
 
 const dateHistogramSchema = s.object({
   field: s.maybe(s.string()),
-  interval: s.maybe(s.oneOf([
-    s.string(),
-    s.literal(0),
-    s.literal(-1),
-  ])),
-  fixed_interval: s.maybe(s.oneOf([
-    s.string(),
-    s.literal(0),
-    s.literal(-1),
-  ])),
+  interval: s.maybe(s.oneOf([s.string(), s.literal(0), s.literal(-1)])),
+  fixed_interval: s.maybe(s.oneOf([s.string(), s.literal(0), s.literal(-1)])),
   min_doc_count: s.maybe(s.number({ min: 0 })),
   extended_bounds: s.maybe(
     s.object({
