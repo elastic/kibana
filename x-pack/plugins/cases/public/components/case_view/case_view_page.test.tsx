@@ -485,8 +485,9 @@ describe('CaseViewPage', () => {
     it('renders tabs correctly', async () => {
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
-        expect(result.getByTestId('case-view-tab-title-alerts')).toBeTruthy();
         expect(result.getByTestId('case-view-tab-title-activity')).toBeTruthy();
+        expect(result.getByTestId('case-view-tab-title-alerts')).toBeTruthy();
+        expect(result.getByTestId('case-view-tab-title-files')).toBeTruthy();
       });
     });
 

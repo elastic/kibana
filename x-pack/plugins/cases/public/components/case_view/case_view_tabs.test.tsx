@@ -62,6 +62,7 @@ describe('CaseViewTabs', () => {
 
     expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
     expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-tab-title-files')).toBeInTheDocument();
   });
 
   it('renders the activity tab by default', async () => {
@@ -77,6 +78,15 @@ describe('CaseViewTabs', () => {
     appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />);
 
     expect(await screen.findByTestId('case-view-tab-title-alerts')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
+
+  it('shows the files tab as active', async () => {
+    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />);
+
+    expect(await screen.findByTestId('case-view-tab-title-files')).toHaveAttribute(
       'aria-selected',
       'true'
     );
@@ -106,6 +116,20 @@ describe('CaseViewTabs', () => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
         detailName: caseData.id,
         tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+      });
+    });
+  });
+
+  it('navigates to the files tab when the files tab is clicked', async () => {
+    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+    appMockRenderer.render(<CaseViewTabs {...caseProps} />);
+
+    userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
+
+    await waitFor(() => {
+      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+        detailName: caseData.id,
+        tabId: CASE_VIEW_PAGE_TABS.FILES,
       });
     });
   });

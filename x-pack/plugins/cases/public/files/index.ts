@@ -20,10 +20,13 @@ const buildFileKind = (owner: Owner): FileKindBrowser => {
   };
 };
 
+export const isRegisteredOwner = (ownerToCheck: string): ownerToCheck is Owner =>
+  Object.hasOwn(CASES_FILE_KINDS, ownerToCheck);
+
 /**
  * The file kind definition for interacting with the file service for the UI
  */
-const CASES_FILE_KINDS: Record<Owner, FileKindBrowser> = {
+export const CASES_FILE_KINDS: Record<Owner, FileKindBrowser> = {
   [APP_ID]: buildFileKind(APP_ID),
   [SECURITY_SOLUTION_OWNER]: buildFileKind(SECURITY_SOLUTION_OWNER),
   [OBSERVABILITY_OWNER]: buildFileKind(OBSERVABILITY_OWNER),

@@ -19,7 +19,7 @@ import { context } from './context';
 /**
  * An object representing an uploaded file
  */
-interface UploadedFile<Meta = unknown> {
+export interface UploadedFile<Meta = unknown> {
   /**
    * The ID that was generated for the uploaded file
    */

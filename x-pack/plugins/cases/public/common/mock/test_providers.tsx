@@ -9,22 +9,29 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { euiDarkVars } from '@kbn/ui-theme';
-import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender } from '@testing-library/react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
+
+import { euiDarkVars } from '@kbn/ui-theme';
+import { I18nProvider } from '@kbn/i18n-react';
+import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+import { render as reactRender } from '@testing-library/react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { FilesContext } from '@kbn/shared-ux-file-context';
+
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
-import { CasesProvider } from '../../components/cases_context';
-import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../types';
 import type { ReleasePhase } from '../../components/types';
+
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { CasesProvider } from '../../components/cases_context';
+import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { allCasesPermissions } from './permissions';
@@ -37,21 +44,36 @@ interface TestProviderProps {
   releasePhase?: ReleasePhase;
   externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
+  getFilesClient?: (scope: string) => ScopedFilesClient;
   license?: ILicense;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 window.scrollTo = jest.fn();
 
+export const mockedFilesClient = createMockFilesClient() as unknown as ScopedFilesClient<unknown>;
+
+// @ts-ignore
+mockedFilesClient.getFileKind.mockImplementation(() => ({
+  id: 'test',
+  maxSizeBytes: 10000,
+  http: {},
+}));
+
+const mockGetFilesClient = () => mockedFilesClient;
+
+export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
+
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
-  owner = [SECURITY_SOLUTION_OWNER],
+  owner = mockedTestProvidersOwner,
   permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
+  getFilesClient = mockGetFilesClient,
   license,
 }) => {
   const queryClient = new QueryClient({
@@ -82,9 +104,10 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
                   features,
                   owner,
                   permissions,
+                  getFilesClient,
                 }}
               >
-                {children}
+                <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
               </CasesProvider>
             </MemoryRouter>
           </QueryClientProvider>
@@ -125,11 +148,12 @@ export const testQueryClient = new QueryClient({
 
 export const createAppMockRenderer = ({
   features,
-  owner = [SECURITY_SOLUTION_OWNER],
+  owner = mockedTestProvidersOwner,
   permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
+  getFilesClient = mockGetFilesClient,
   license,
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
   const services = createStartServicesMock({ license });
@@ -161,6 +185,7 @@ export const createAppMockRenderer = ({
                   owner,
                   permissions,
                   releasePhase,
+                  getFilesClient,
                 }}
               >
                 {children}
