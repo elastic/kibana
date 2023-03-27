@@ -48,7 +48,7 @@ describe('MonitorPendingWrapper', () => {
       </MonitorPendingWrapper>
     );
 
-    // page is loading
+    // page is loaded with pending run
     expect(getByText(/Initial test run pending/)).toBeInTheDocument();
   });
 
@@ -64,7 +64,7 @@ describe('MonitorPendingWrapper', () => {
       </MonitorPendingWrapper>
     );
 
-    // page is loading
+    // page is loaded with latest ping defined
     expect(getByText(/test/)).toBeInTheDocument();
   });
 });
