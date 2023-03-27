@@ -95,6 +95,7 @@ import {
   errorResult,
 } from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
+import { maintenanceWindowFeature } from './maintenance_window_feature';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -233,6 +234,8 @@ export class AlertingPlugin {
     });
 
     plugins.features.registerKibanaFeature(rulesSettingsFeature);
+
+    plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
@@ -492,10 +495,6 @@ export class AlertingPlugin {
 
     const getRulesSettingsClientWithRequest = (request: KibanaRequest) => {
       return rulesSettingsClientFactory!.create(request);
-    };
-
-    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
-      return maintenanceWindowClientFactory!.create(request);
     };
 
     taskRunnerFactory.initialize({

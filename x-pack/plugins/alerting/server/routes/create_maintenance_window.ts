@@ -15,7 +15,7 @@ import {
   rewriteMaintenanceWindowRes,
 } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { MaintenanceWindowProperties } from '../../common';
+import { MaintenanceWindowSOProperties, MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../common';
 
 const bodySchema = schema.object({
   title: schema.string(),
@@ -24,7 +24,7 @@ const bodySchema = schema.object({
 });
 
 type MaintenanceWindowCreateBody = Omit<
-  MaintenanceWindowProperties,
+  MaintenanceWindowSOProperties,
   'events' | 'expirationDate' | 'enabled' | 'archived'
 >;
 
@@ -45,6 +45,9 @@ export const createMaintenanceWindowRoute = (
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window`,
       validate: {
         body: bodySchema,
+      },
+      options: {
+        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
       },
     },
     router.handleLegacyErrors(

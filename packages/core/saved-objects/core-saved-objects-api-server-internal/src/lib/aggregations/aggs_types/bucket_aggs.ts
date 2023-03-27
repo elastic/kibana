@@ -25,12 +25,12 @@ import { sortOrderSchema } from './common_schemas';
  * - filter
  * - filters
  * - composite
+ * - date_histogram
  *
  * Not implemented:
  * - adjacency_matrix
  * - auto_date_histogram
  * - children
- * - date_histogram
  * - diversified_sampler
  * - geo_distance
  * - geohash_grid
@@ -161,6 +161,33 @@ const histogramSchema = s.object({
   ),
 });
 
+const dateHistogramSchema = s.object({
+  field: s.maybe(s.string()),
+  interval: s.maybe(s.oneOf([
+    s.string(),
+    s.literal(0),
+    s.literal(-1),
+  ])),
+  fixed_interval: s.maybe(s.oneOf([
+    s.string(),
+    s.literal(0),
+    s.literal(-1),
+  ])),
+  min_doc_count: s.maybe(s.number({ min: 0 })),
+  extended_bounds: s.maybe(
+    s.object({
+      min: s.oneOf([s.string(), s.number()]),
+      max: s.oneOf([s.string(), s.number()]),
+    })
+  ),
+  hard_bounds: s.maybe(
+    s.object({
+      min: s.oneOf([s.string(), s.number()]),
+      max: s.oneOf([s.string(), s.number()]),
+    })
+  ),
+});
+
 const compositeSchema = s.object({
   size: s.maybe(s.number()),
   after: s.maybe(s.recordOf(s.string(), s.nullable(s.oneOf([s.string(), s.number()])))),
@@ -183,6 +210,7 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
     filters: s.recordOf(s.string(), s.oneOf([termSchema, boolSchema])),
   }),
   histogram: histogramSchema,
+  date_histogram: dateHistogramSchema,
   nested: s.object({
     path: s.string(),
   }),

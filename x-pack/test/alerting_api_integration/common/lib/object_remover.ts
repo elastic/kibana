@@ -12,6 +12,7 @@ interface ObjectToRemove {
   id: string;
   type: string;
   plugin: string;
+  isInternal?: boolean;
 }
 
 export class ObjectRemover {
@@ -26,16 +27,19 @@ export class ObjectRemover {
     spaceId: ObjectToRemove['spaceId'],
     id: ObjectToRemove['id'],
     type: ObjectToRemove['type'],
-    plugin: ObjectToRemove['plugin']
+    plugin: ObjectToRemove['plugin'],
+    isInternal?: ObjectToRemove['isInternal']
   ) {
-    this.objectsToRemove.push({ spaceId, id, type, plugin });
+    this.objectsToRemove.push({ spaceId, id, type, plugin, isInternal });
   }
 
   async removeAll() {
     await Promise.all(
-      this.objectsToRemove.map(({ spaceId, id, type, plugin }) => {
+      this.objectsToRemove.map(({ spaceId, id, type, plugin, isInternal }) => {
         return this.supertest
-          .delete(`${getUrlPrefix(spaceId)}/api/${plugin}/${type}/${id}`)
+          .delete(
+            `${getUrlPrefix(spaceId)}/${isInternal ? 'internal' : 'api'}/${plugin}/${type}/${id}`
+          )
           .set('kbn-xsrf', 'foo')
           .expect(204);
       })

@@ -15,7 +15,7 @@ import {
   rewritePartialMaintenanceBodyRes,
 } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { MaintenanceWindowProperties } from '../../common';
+import { MaintenanceWindowSOProperties, MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -29,7 +29,7 @@ const bodySchema = schema.object({
 });
 
 type MaintenanceWindowUpdateBody = Omit<
-  MaintenanceWindowProperties,
+  MaintenanceWindowSOProperties,
   'events' | 'expirationDate' | 'archived'
 >;
 
@@ -51,6 +51,9 @@ export const updateMaintenanceWindowRoute = (
       validate: {
         body: bodySchema,
         params: paramSchema,
+      },
+      options: {
+        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
       },
     },
     router.handleLegacyErrors(

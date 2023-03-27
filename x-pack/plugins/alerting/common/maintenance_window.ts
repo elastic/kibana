@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { RRuleParams } from './rrule_type';
+
+export enum MaintenanceWindowStatus {
+  Running = 'running',
+  Upcoming = 'upcoming',
+  Finished = 'finished',
+  Archived = 'archived',
+}
 
 export interface MaintenanceWindowModificationMetadata {
   createdBy: string | null;
@@ -14,14 +22,13 @@ export interface MaintenanceWindowModificationMetadata {
   updatedAt: string;
 }
 
-interface DateRange {
+export interface DateRange {
   gte: string;
   lte: string;
 }
 
-export interface MaintenanceWindowProperties {
+export interface MaintenanceWindowSOProperties {
   title: string;
-  archived: boolean;
   enabled: boolean;
   duration: number;
   expirationDate: string;
@@ -29,11 +36,25 @@ export interface MaintenanceWindowProperties {
   rRule: RRuleParams;
 }
 
-export type MaintenanceWindowSavedObject = MaintenanceWindowProperties &
+export type MaintenanceWindowSOAttributes = MaintenanceWindowSOProperties &
   MaintenanceWindowModificationMetadata;
 
-export type MaintenanceWindow = MaintenanceWindowSavedObject & {
+export type MaintenanceWindow = MaintenanceWindowSOAttributes & {
+  status: MaintenanceWindowStatus | null;
+  startDate: string | null;
+  endDate: string | null;
   id: string;
 };
 
+export interface MaintenanceWindowClientContext {
+  getModificationMetadata: () => Promise<MaintenanceWindowModificationMetadata>;
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+}
+
 export const MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE = 'maintenance-window';
+export const MAINTENANCE_WINDOW_FEATURE_ID = 'maintenanceWindow';
+export const MAINTENANCE_WINDOW_API_PRIVILEGES = {
+  READ_MAINTENANCE_WINDOW: 'read-maintenance-window',
+  WRITE_MAINTENANCE_WINDOW: 'write-maintenance-window',
+};

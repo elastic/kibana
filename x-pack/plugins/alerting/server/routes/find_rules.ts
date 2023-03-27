@@ -147,6 +147,12 @@ const buildFindRulesRoute = ({
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+          const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
+
+          await maintenanceWindowClient.active({
+            start: '2023-04-05T02:00:00.000Z',
+            interval: '1h',
+          });
 
           trackLegacyTerminology(
             [req.body.search, req.body.search_fields, req.body.sort_field].filter(

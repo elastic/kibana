@@ -15,6 +15,8 @@ export const rewriteMaintenanceWindowRes: RewriteResponseCase<MaintenanceWindow>
   updatedBy,
   createdAt,
   updatedAt,
+  startDate,
+  endDate,
   ...rest
 }) => ({
   ...rest,
@@ -24,6 +26,8 @@ export const rewriteMaintenanceWindowRes: RewriteResponseCase<MaintenanceWindow>
   updated_by: updatedBy,
   created_at: createdAt,
   updated_at: updatedAt,
+  start_date: startDate,
+  end_date: endDate,
 });
 
 export const rewritePartialMaintenanceBodyRes: RewriteResponseCase<Partial<MaintenanceWindow>> = ({
@@ -33,6 +37,8 @@ export const rewritePartialMaintenanceBodyRes: RewriteResponseCase<Partial<Maint
   updatedBy,
   createdAt,
   updatedAt,
+  startDate,
+  endDate,
   ...rest
 }) => ({
   ...rest,
@@ -42,4 +48,6 @@ export const rewritePartialMaintenanceBodyRes: RewriteResponseCase<Partial<Maint
   updated_by: updatedBy,
   created_at: createdAt,
   updated_at: updatedAt,
+  start_date: startDate,
+  end_date: endDate,
 });

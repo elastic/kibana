@@ -21,9 +21,6 @@ export const maintenanceWindowMappings: SavedObjectsTypeMappingDefinition = {
     enabled: {
       type: 'boolean',
     },
-    archived: {
-      type: 'boolean',
-    },
     duration: {
       type: 'long',
     },
