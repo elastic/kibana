@@ -100,6 +100,7 @@ describe('RuleDataClient', () => {
 
       expect(scopedClusterClient.search).toHaveBeenCalledWith({
         body: query,
+        "ignore_unavailable": true,
         index: `.alerts-observability.apm.alerts*`,
       });
     });
@@ -121,6 +122,7 @@ describe('RuleDataClient', () => {
 
       expect(scopedClusterClient.search).toHaveBeenCalledWith({
         body: query,
+        "ignore_unavailable": true,
         index: `.alerts-observability.apm.alerts-test`,
       });
     });
