@@ -5,35 +5,29 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 
 import { appContextService } from './app_context';
+import { getRequestStore } from './request_store';
 
 class AuditLoggingService {
-  private auditLogger?: AuditLogger;
-
-  public start(request: KibanaRequest) {
-    const securitySetup = appContextService.getSecuritySetup();
-
-    this.auditLogger = securitySetup.audit.asScoped(request);
-  }
-
   /**
    * Write a custom audit log record. If a current request is available, the log will include
    * user/session data. If not, an unscoped audit logger will be used.
    */
   public writeCustomAuditLog(...args: Parameters<AuditLogger['log']>) {
-    // If a caller attempts to write an audit log without calling `start` first
-    // and providing a request, we'll log the provided data to the unscoped logger
-    if (!this.auditLogger) {
-      const securitySetup = appContextService.getSecuritySetup();
-      securitySetup.audit.withoutRequest.log(...args);
+    const securitySetup = appContextService.getSecuritySetup();
+    let auditLogger: AuditLogger | undefined;
 
-      return;
+    const request = getRequestStore().getStore();
+
+    if (request) {
+      auditLogger = securitySetup.audit.asScoped(request);
+    } else {
+      auditLogger = securitySetup.audit.withoutRequest;
     }
 
-    this.auditLogger.log(...args);
+    auditLogger.log(...args);
   }
 
   /**
