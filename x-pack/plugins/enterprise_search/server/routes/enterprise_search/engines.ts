@@ -8,8 +8,7 @@ import { SearchResponse, AcknowledgedResponseBase } from '@elastic/elasticsearch
 import { schema } from '@kbn/config-schema';
 
 import {
-  EnterpriseSearchEngineDetails,
-  EnterpriseSearchEngineDetailsResponse,
+  EnterpriseSearchEngine,
   EnterpriseSearchEnginesResponse,
   EnterpriseSearchEngineUpsertResponse,
 } from '../../../common/types/engines';
@@ -61,17 +60,13 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
+      const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngine>({
         method: 'GET',
         path: `/_application/search_application/${request.params.engine_name}`,
       });
       const indicesStats = await fetchIndicesStats(client, engine.indices);
-      const hydratedEngineResponse: EnterpriseSearchEngineDetailsResponse = {
-        ...engine,
-        indices: indicesStats,
-      };
 
-      return response.ok({ body: hydratedEngineResponse });
+      return response.ok({ body: { ...engine, indices: indicesStats } });
     })
   );
 
@@ -179,7 +174,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
       const engineName = decodeURIComponent(request.params.engine_name);
       const { client } = (await context.core).elasticsearch;
 
-      const engine = await fetchEnterpriseSearch<EnterpriseSearchEngineDetailsResponse>(
+      const engine = await fetchEnterpriseSearch<EnterpriseSearchEngine>(
         config,
         request,
         `/api/engines/${engineName}`

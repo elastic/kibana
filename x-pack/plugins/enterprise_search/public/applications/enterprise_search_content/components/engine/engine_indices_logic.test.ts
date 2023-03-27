@@ -7,7 +7,10 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { EnterpriseSearchEngineDetailsResponse } from '../../../../../common/types/engines';
+import {
+  EnterpriseSearchEngine,
+  EnterpriseSearchEngineIndex,
+} from '../../../../../common/types/engines';
 import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
 
 import { EngineIndicesLogic, EngineIndicesLogicValues } from './engine_indices_logic';
@@ -19,7 +22,7 @@ const DEFAULT_VALUES: EngineIndicesLogicValues = {
   isLoadingEngine: true,
 };
 
-const mockEngineData: EnterpriseSearchEngineDetailsResponse = {
+const mockEngineData: EnterpriseSearchEngine = {
   indices: [
     {
       count: 10,
@@ -31,7 +34,7 @@ const mockEngineData: EnterpriseSearchEngineDetailsResponse = {
       health: 'yellow',
       name: 'search-002',
     },
-  ],
+  ] as EnterpriseSearchEngineIndex[],
   name: DEFAULT_VALUES.engineName,
   updated_at_millis: 1679501369566,
 };
@@ -73,7 +76,9 @@ describe('EngineViewLogic', () => {
 
         EngineIndicesLogic.actions.engineUpdated({
           ...mockEngineData,
-          indices: mockEngineData.indices.map((index) => index.name),
+          indices: mockEngineData.indices.map(
+            (index) => index.name
+          ) as unknown as EnterpriseSearchEngineIndex[],
         });
 
         expect(EngineIndicesLogic.actions.fetchEngine).toHaveBeenCalledTimes(1);

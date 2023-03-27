@@ -9,14 +9,14 @@ import { FieldCapsResponse, FieldCapsFieldCapability } from '@elastic/elasticsea
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import {
-  EnterpriseSearchEngineDetailsResponse,
+  EnterpriseSearchEngine,
   EnterpriseSearchEngineFieldCapabilities,
   SchemaField,
 } from '../../../common/types/engines';
 
 export const fetchEngineFieldCapabilities = async (
   client: IScopedClusterClient,
-  engine: EnterpriseSearchEngineDetailsResponse
+  engine: EnterpriseSearchEngine
 ): Promise<EnterpriseSearchEngineFieldCapabilities> => {
   const { name, updated_at_millis } = engine;
   const fieldCapabilities = await client.asCurrentUser.fieldCaps({

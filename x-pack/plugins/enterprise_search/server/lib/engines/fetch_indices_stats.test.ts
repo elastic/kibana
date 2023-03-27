@@ -6,6 +6,8 @@
  */
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { EnterpriseSearchEngineIndex } from '../../../common/types/engines';
+
 import { fetchIndicesStats } from './fetch_indices_stats';
 
 describe('fetchIndicesStats lib function', () => {
@@ -17,7 +19,11 @@ describe('fetchIndicesStats lib function', () => {
     },
     asInternalUser: {},
   };
-  const indicesNames = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
+  const indicesNames = [
+    'test-index-name-1',
+    'test-index-name-2',
+    'test-index-name-3',
+  ] as unknown as EnterpriseSearchEngineIndex[];
   const indicesStats = {
     indices: {
       'test-index-name-1': {
@@ -88,7 +94,7 @@ describe('fetchIndicesStats lib function', () => {
     ).resolves.toEqual(fetchIndicesStatsResponse);
 
     expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-      index: indicesNames,
+      index: indicesNames.join(),
       metric: ['docs'],
     });
   });

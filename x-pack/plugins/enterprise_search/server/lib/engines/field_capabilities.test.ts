@@ -8,7 +8,7 @@
 import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { EnterpriseSearchEngineDetailsResponse, SchemaField } from '../../../common/types/engines';
+import { EnterpriseSearchEngine, SchemaField } from '../../../common/types/engines';
 
 import { fetchEngineFieldCapabilities, parseFieldsCapabilities } from './field_capabilities';
 
@@ -19,7 +19,7 @@ describe('engines field_capabilities', () => {
     },
     asInternalUser: {},
   };
-  const mockEngine: EnterpriseSearchEngineDetailsResponse = {
+  const mockEngine: EnterpriseSearchEngine = {
     indices: [],
     name: 'unit-test-engine',
     updated_at_millis: 2202018295,
