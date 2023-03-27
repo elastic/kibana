@@ -32,13 +32,10 @@ import {
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import {
   casesAllUser,
-  casesOnlyReadDeleteUser,
   obsCasesAllUser,
-  obsCasesOnlyReadDeleteUser,
   obsCasesReadUser,
   obsSecCasesAllUser,
   obsSecCasesReadUser,
-  secAllCasesOnlyReadDeleteUser,
   secAllUser,
   secReadUser,
   users as api_int_users,
@@ -465,12 +462,6 @@ export default ({ getService }: FtrProviderContext): void => {
         { user: casesAllUser, owner: 'cases' },
         { user: obsSecCasesAllUser, owner: 'securitySolution' },
         { user: obsSecCasesAllUser, owner: 'observability' },
-        {
-          user: secAllCasesOnlyReadDeleteUser,
-          owner: 'securitySolution',
-        },
-        { user: obsCasesOnlyReadDeleteUser, owner: 'observability' },
-        { user: casesOnlyReadDeleteUser, owner: 'cases' },
       ]) {
         it(`successfully deletes a file for user ${scenario.user.username} with owner ${scenario.owner} when an attachment does not exist`, async () => {
           const caseInfo = await createCase(

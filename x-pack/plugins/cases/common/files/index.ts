@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { isEmpty } from 'lodash';
 import { OWNERS } from '../constants';
 import type { HttpApiTagOperation, Owner } from '../constants/types';
 
@@ -29,7 +30,7 @@ export const constructFileKindIdByOwner = (owner: Owner) => `${owner}${FILE_KIND
 export const constructOwnerFromFileKind = (fileKind: string): Owner | undefined => {
   const splitString = fileKind.split(FILE_KIND_DELIMITER);
 
-  if (splitString.length === 2 && isValidOwner(splitString[0])) {
+  if (splitString.length === 2 && isEmpty(splitString[1]) && isValidOwner(splitString[0])) {
     return splitString[0];
   }
 };

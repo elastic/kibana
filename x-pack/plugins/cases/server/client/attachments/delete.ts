@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import { partition } from 'lodash';
 import type { File, FileJSON } from '@kbn/files-plugin/common';
+import type { FileServiceStart } from '@kbn/files-plugin/server';
 import { Actions, ActionTypes } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
@@ -74,10 +75,6 @@ export async function deleteAll(
   }
 }
 
-type FileWithRequiredCaseMetadata = Omit<File<CaseFileMetadata>, 'data'> & {
-  data: Omit<FileJSON<CaseFileMetadata>, 'meta'> & { meta: CaseFileMetadata };
-};
-
 export const deleteFileAttachments = async (
   { caseId, fileIds }: DeleteFileArgs,
   clientArgs: CasesClientArgs
@@ -91,50 +88,11 @@ export const deleteFileAttachments = async (
   } = clientArgs;
 
   try {
-    // it's possible that we're trying to delete a file when an attachment wasn't created (for example if the create
-    // attachment request failed)
-    const files = await pMap(
-      fileIds,
-      async (fileId: string) => fileService.getById({ id: fileId }),
-      {
-        concurrency: MAX_CONCURRENT_SEARCHES,
-      }
-    );
-
-    const [validFiles, invalidFiles] = partition(files, (file) => {
-      return CaseFileMetadataRt.is(file.data.meta) && file.data.meta.caseId === caseId;
-    }) as [FileWithRequiredCaseMetadata[], File[]];
-
-    if (invalidFiles.length > 0) {
-      const invalidIds = invalidFiles.map((fileInfo) => fileInfo.id);
-
-      // I'm intentionally being vague here because it's possible an unauthorized user could attempt to delete files
-      throw Boom.badRequest(`Failed to delete files because filed ids were invalid: ${invalidIds}`);
-    }
-
-    if (validFiles.length <= 0) {
-      throw Boom.badRequest('Failed to find files to delete');
-    }
+    const fileEntities = await getFileEntities(caseId, fileIds, fileService);
 
     // It's possible for this to return an empty array if there was an error creating file attachments in which case the
     // file would be present but the case attachment would not
     const fileAttachments = await attachmentService.getter.getFileAttachments({ caseId, fileIds });
-
-    const fileEntities: OwnerEntity[] = [];
-
-    // It's possible that the owner array could have invalid information in it so we'll use the file kind for determining if the user
-    // has the correct authorization for deleting these files
-    for (const fileInfo of validFiles) {
-      const ownerFromFileKind = constructOwnerFromFileKind(fileInfo.data.fileKind);
-
-      if (ownerFromFileKind == null) {
-        throw Boom.badRequest(
-          `File id ${fileInfo.id} has invalid file kind ${fileInfo.data.fileKind}`
-        );
-      }
-
-      fileEntities.push({ id: fileInfo.id, owner: ownerFromFileKind });
-    }
 
     await authorization.ensureAuthorized({
       entities: [
@@ -173,6 +131,71 @@ export const deleteFileAttachments = async (
       logger,
     });
   }
+};
+
+const getFileEntities = async (
+  caseId: DeleteFileArgs['caseId'],
+  fileIds: DeleteFileArgs['fileIds'],
+  fileService: FileServiceStart
+) => {
+  const files = await getFiles(caseId, fileIds, fileService);
+
+  const fileEntities = createFileEntities(files);
+
+  return fileEntities;
+};
+
+type FileWithRequiredCaseMetadata = Omit<File<CaseFileMetadata>, 'data'> & {
+  data: Omit<FileJSON<CaseFileMetadata>, 'meta'> & { meta: CaseFileMetadata };
+};
+
+const getFiles = async (
+  caseId: DeleteFileArgs['caseId'],
+  fileIds: DeleteFileArgs['fileIds'],
+  fileService: FileServiceStart
+) => {
+  // it's possible that we're trying to delete a file when an attachment wasn't created (for example if the create
+  // attachment request failed)
+  const files = await pMap(fileIds, async (fileId: string) => fileService.getById({ id: fileId }), {
+    concurrency: MAX_CONCURRENT_SEARCHES,
+  });
+
+  const [validFiles, invalidFiles] = partition(files, (file) => {
+    return CaseFileMetadataRt.is(file.data.meta) && file.data.meta.caseId === caseId;
+  }) as [FileWithRequiredCaseMetadata[], File[]];
+
+  if (invalidFiles.length > 0) {
+    const invalidIds = invalidFiles.map((fileInfo) => fileInfo.id);
+
+    // I'm intentionally being vague here because it's possible an unauthorized user could attempt to delete files
+    throw Boom.badRequest(`Failed to delete files because filed ids were invalid: ${invalidIds}`);
+  }
+
+  if (validFiles.length <= 0) {
+    throw Boom.badRequest('Failed to find files to delete');
+  }
+
+  return validFiles;
+};
+
+const createFileEntities = (files: FileWithRequiredCaseMetadata[]) => {
+  const fileEntities: OwnerEntity[] = [];
+
+  // It's possible that the owner array could have invalid information in it so we'll use the file kind for determining if the user
+  // has the correct authorization for deleting these files
+  for (const fileInfo of files) {
+    const ownerFromFileKind = constructOwnerFromFileKind(fileInfo.data.fileKind);
+
+    if (ownerFromFileKind == null) {
+      throw Boom.badRequest(
+        `File id ${fileInfo.id} has invalid file kind ${fileInfo.data.fileKind}`
+      );
+    }
+
+    fileEntities.push({ id: fileInfo.id, owner: ownerFromFileKind });
+  }
+
+  return fileEntities;
 };
 
 /**

@@ -42,6 +42,26 @@ export const downloadFile = async ({
   return result;
 };
 
+export const deleteFileForFileKind = async ({
+  supertest,
+  fileKind,
+  id,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  fileKind: string;
+  id: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}) => {
+  await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${fileApiRoutes.getDeleteRoute(fileKind, id)}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+};
+
 export interface FileDescriptor {
   id: string;
 }

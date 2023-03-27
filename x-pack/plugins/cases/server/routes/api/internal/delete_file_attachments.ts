@@ -38,7 +38,7 @@ export const deleteFileAttachments = createCasesRoute({
       return response.noContent();
     } catch (error) {
       throw createCaseError({
-        message: `Failed to delete comment in route case id: ${request.params.case_id} file ids: ${request.query.ids}: ${error}`,
+        message: `Failed to delete files in route case id: ${request.params.case_id} file ids: ${request.query.ids}: ${error}`,
         error,
       });
     }

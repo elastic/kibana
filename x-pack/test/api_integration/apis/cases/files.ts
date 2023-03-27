@@ -11,13 +11,13 @@ import { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import { User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createFile,
-  deleteFiles,
   uploadFile,
   downloadFile,
   createAndUploadFile,
   listFiles,
   getFileById,
   deleteAllFilesForKind,
+  deleteFileForFileKind,
 } from '../../../cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -59,10 +59,11 @@ export default ({ getService }: FtrProviderContext): void => {
       };
 
       const deleteFileFailure = async (scenario: TestScenario) => {
-        await deleteFiles({
+        await deleteFileForFileKind({
           supertest: supertestWithoutAuth,
           auth: { user: scenario.user, space: null },
-          files: ['abc'],
+          fileKind: scenario.fileKind,
+          id: 'abc',
           expectedHttpCode: 404,
         });
       };
