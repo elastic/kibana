@@ -244,7 +244,7 @@ export class MapApp extends React.Component<Props, State> {
     } else {
       indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
     }
-    
+
     if (!this._isMounted) {
       return;
     }

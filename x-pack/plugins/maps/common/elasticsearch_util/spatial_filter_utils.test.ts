@@ -662,26 +662,34 @@ describe('extractFeaturesFromFilters', () => {
   });
 
   it('should ignore malformed spatial filers', () => {
-    expect(extractFeaturesFromFilters([{
-      meta: {
-        type: 'spatial_filter',
-      },
-      query: {
-        bool: {
-          must: [],
+    expect(
+      extractFeaturesFromFilters([
+        {
+          meta: {
+            type: 'spatial_filter',
+          },
+          query: {
+            bool: {
+              must: [],
+            },
+          },
         },
-      },
-    }])).toEqual([]);
-    expect(extractFeaturesFromFilters([{
-      meta: {
-        type: 'spatial_filter',
-      },
-      query: {
-        bool: {
-          should: [],
+      ])
+    ).toEqual([]);
+    expect(
+      extractFeaturesFromFilters([
+        {
+          meta: {
+            type: 'spatial_filter',
+          },
+          query: {
+            bool: {
+              should: [],
+            },
+          },
         },
-      },
-    }])).toEqual([]);
+      ])
+    ).toEqual([]);
   });
 
   it('should convert single field geo_distance filter to feature', () => {

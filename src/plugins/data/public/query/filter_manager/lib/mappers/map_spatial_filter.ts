@@ -10,9 +10,7 @@ import { Filter, FILTERS } from '@kbn/es-query';
 
 // Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
 export const mapSpatialFilter = (filter: Filter) => {
-  if (
-    filter.meta?.type === FILTERS.SPATIAL_FILTER
-  ) {
+  if (filter.meta?.type === FILTERS.SPATIAL_FILTER) {
     return {
       type: filter.meta.type,
       // spatial filters support multiple fields across multiple data views
