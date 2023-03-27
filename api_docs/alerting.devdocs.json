@@ -2821,7 +2821,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", options?: ",
+              ", options?: Omit<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2829,7 +2829,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              " | undefined) => Promise<",
+              ", \"allowNoIndex\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
