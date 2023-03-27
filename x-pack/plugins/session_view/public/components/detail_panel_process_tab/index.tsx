@@ -111,7 +111,9 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
       args,
       executable,
       pid,
+      userId,
       userName,
+      groupId,
       groupName,
       entryMetaSourceIp,
     } = leader;
@@ -228,6 +230,17 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
         ),
       },
       {
+        title: <DetailPanelListItem>user.id</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.user.id: "${userId}"`}
+            tooltipContent={userId}
+          >
+            {userId}
+          </DetailPanelCopy>
+        ),
+      },
+      {
         title: <DetailPanelListItem>user.name</DetailPanelListItem>,
         description: (
           <DetailPanelCopy
@@ -235,6 +248,17 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
             tooltipContent={userName}
           >
             {userName}
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>group.id</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.group.id: "${groupId}"`}
+            tooltipContent={groupId}
+          >
+            {groupId}
           </DetailPanelCopy>
         ),
       },
@@ -296,7 +320,9 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
     pid,
     workingDirectory,
     interactive,
+    userId,
     userName,
+    groupId,
     groupName,
     args,
   } = processDetail;
@@ -417,6 +443,28 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
             ),
           },
           {
+            title: <DetailPanelListItem>user.id</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.user.id: "${userId}"`}
+                tooltipContent={userId}
+              >
+                {userId}
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>user.id</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.user.id: "${userId}"`}
+                tooltipContent={userId}
+              >
+                {userId}
+              </DetailPanelCopy>
+            ),
+          },
+          {
             title: <DetailPanelListItem>user.name</DetailPanelListItem>,
             description: (
               <DetailPanelCopy
@@ -424,6 +472,17 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
                 tooltipContent={userName}
               >
                 {userName}
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>group.id</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.group.id: "${groupId}"`}
+                tooltipContent={groupId}
+              >
+                {groupId}
               </DetailPanelCopy>
             ),
           },

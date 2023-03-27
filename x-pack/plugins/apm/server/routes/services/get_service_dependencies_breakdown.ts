@@ -12,6 +12,11 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
+export type ServiceDependenciesBreakdownResponse = Array<{
+  title: string;
+  data: Array<{ x: number; y: number }>;
+}>;
+
 export async function getServiceDependenciesBreakdown({
   apmEventClient,
   start,
@@ -26,7 +31,7 @@ export async function getServiceDependenciesBreakdown({
   serviceName: string;
   environment: string;
   kuery: string;
-}) {
+}): Promise<ServiceDependenciesBreakdownResponse> {
   const items = await getConnectionStats({
     apmEventClient,
     start,

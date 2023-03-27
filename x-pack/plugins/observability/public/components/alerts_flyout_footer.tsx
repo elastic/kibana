@@ -9,7 +9,8 @@ import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/
 import { useKibana } from '../utils/kibana_react';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { isAlertDetailsEnabledPerApp } from '../utils/is_alert_details_enabled';
-import { translations, paths } from '../config';
+import { translations } from '../config/translations';
+import { paths } from '../config/paths';
 import type { TopAlert } from '../typings/alerts';
 
 interface FlyoutProps {

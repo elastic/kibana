@@ -7,6 +7,18 @@
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { Coordinate } from '../../../typings/timeseries';
+
+export interface FailedTransactionRateResponse {
+  currentPeriod: {
+    timeseries: Coordinate[];
+    average: number | null;
+  };
+  previousPeriod: {
+    timeseries: Coordinate[];
+    average: number | null;
+  };
+}
 
 export async function getFailedTransactionRatePeriods({
   environment,
@@ -30,7 +42,7 @@ export async function getFailedTransactionRatePeriods({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<FailedTransactionRateResponse> {
   const commonProps = {
     environment,
     kuery,

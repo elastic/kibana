@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { RouteComponentProps, Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -24,8 +26,6 @@ import {
   DEFAULT_METRICS_EXPLORER_VIEW_STATE,
 } from './metrics_explorer/hooks/use_metrics_explorer_options';
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
-import { WithSource } from '../../containers/with_source';
-import { SourceProvider } from '../../containers/metrics_source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { MetricDetail } from './metric_detail';
@@ -35,14 +35,13 @@ import { SourceLoadingPage } from '../../components/source_loading_page';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
-
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { SavedViewProvider } from '../../containers/saved_view/saved_view';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
+import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/metrics_source';
 import { NotFoundPage } from '../404';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
@@ -52,12 +51,15 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
+  const queryClient = new QueryClient();
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
   });
 
   const kibana = useKibana();
+
+  const { source, createDerivedIndexPattern } = useSourceContext();
 
   useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
 
@@ -68,11 +70,12 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
   return (
     <EuiErrorBoundary>
-      <SourceProvider sourceId="default">
-        <AlertPrefillProvider>
-          <WaffleOptionsProvider>
-            <WaffleTimeProvider>
-              <WaffleFiltersProvider>
+      <AlertPrefillProvider>
+        <WaffleOptionsProvider>
+          <WaffleTimeProvider>
+            <WaffleFiltersProvider>
+              <QueryClientProvider client={queryClient}>
+                <ReactQueryDevtools initialIsOpen={false} />
                 <InfraMLCapabilitiesProvider>
                   <HelpCenterContent
                     feedbackLink="https://discuss.elastic.co/c/metrics"
@@ -80,7 +83,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       defaultMessage: 'Metrics',
                     })}
                   />
-
                   {setHeaderActionMenu && theme$ && (
                     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
                       <EuiHeaderLinks gutterSize="xs">
@@ -101,37 +103,30 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                   )}
                   <Switch>
                     <Route path={'/inventory'} component={SnapshotPage} />
-                    <Route
-                      path={'/explorer'}
-                      render={(props) => (
-                        <WithSource>
-                          {({ configuration, createDerivedIndexPattern }) => (
-                            <MetricsExplorerOptionsContainer>
-                              <WithMetricsExplorerOptionsUrlState />
-                              {configuration ? (
-                                <PageContent
-                                  configuration={configuration}
-                                  createDerivedIndexPattern={createDerivedIndexPattern}
-                                />
-                              ) : (
-                                <SourceLoadingPage />
-                              )}
-                            </MetricsExplorerOptionsContainer>
-                          )}
-                        </WithSource>
-                      )}
-                    />
+                    <Route path={'/explorer'}>
+                      <MetricsExplorerOptionsContainer>
+                        <WithMetricsExplorerOptionsUrlState />
+                        {source?.configuration ? (
+                          <PageContent
+                            configuration={source.configuration}
+                            createDerivedIndexPattern={createDerivedIndexPattern}
+                          />
+                        ) : (
+                          <SourceLoadingPage />
+                        )}
+                      </MetricsExplorerOptionsContainer>
+                    </Route>
                     <Route path="/detail/:type/:node" component={MetricDetail} />
                     <Route path={'/hosts'} component={HostsLandingPage} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
                     <Route render={() => <NotFoundPage title="Infrastructure" />} />
                   </Switch>
                 </InfraMLCapabilitiesProvider>
-              </WaffleFiltersProvider>
-            </WaffleTimeProvider>
-          </WaffleOptionsProvider>
-        </AlertPrefillProvider>
-      </SourceProvider>
+              </QueryClientProvider>
+            </WaffleFiltersProvider>
+          </WaffleTimeProvider>
+        </WaffleOptionsProvider>
+      </AlertPrefillProvider>
     </EuiErrorBoundary>
   );
 };

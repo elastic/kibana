@@ -81,7 +81,13 @@ export function TransactionDetailLink({
     return (
       <TruncateWithTooltip
         text={transactionName}
-        content={<EuiLink href={href} {...rest} />}
+        content={
+          <EuiLink
+            data-test-subj="apmTransactionDetailLinkLink"
+            href={href}
+            {...rest}
+          />
+        }
       />
     );
   }

@@ -34,7 +34,7 @@ export class ContentManagementExamplesPlugin
     contentManagement.registry.register({
       id: 'todos',
       version: {
-        latest: 'v1',
+        latest: 1,
       },
     });
 

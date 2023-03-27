@@ -35,7 +35,7 @@ const FOO_CONTENT_ID = 'foo';
 describe('RPC -> bulkGet()', () => {
   describe('Input/Output validation', () => {
     const ids = ['123', '456'];
-    const validInput = { contentTypeId: 'foo', ids, version: 'v1' };
+    const validInput = { contentTypeId: 'foo', ids, version: 1 };
 
     /**
      * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
@@ -50,11 +50,10 @@ describe('RPC -> bulkGet()', () => {
         },
         {
           input: omit(validInput, 'version'),
-          expectedError: '[version]: expected value of type [string] but got [undefined]',
+          expectedError: '[version]: expected value of type [number] but got [undefined]',
         },
         {
-          input: { ...validInput, version: '1' }, // invalid version format
-          expectedError: '[version]: must follow the pattern [v${number}]',
+          input: { ...validInput, version: '1' }, // string number is OK
         },
         {
           input: omit(validInput, 'ids'),
@@ -96,7 +95,7 @@ describe('RPC -> bulkGet()', () => {
         {
           contentTypeId: 'foo',
           ids: ['123'],
-          version: 'v1',
+          version: 1,
           options: { any: 'object' },
         },
         inputSchema
@@ -107,7 +106,7 @@ describe('RPC -> bulkGet()', () => {
       error = validate(
         {
           contentTypeId: 'foo',
-          version: 'v1',
+          version: 1,
           ids: ['123'],
           options: 123, // Not an object
         },
@@ -157,7 +156,7 @@ describe('RPC -> bulkGet()', () => {
         id: FOO_CONTENT_ID,
         storage,
         version: {
-          latest: 'v2',
+          latest: 2,
         },
       });
 
@@ -179,7 +178,7 @@ describe('RPC -> bulkGet()', () => {
 
       const result = await fn(ctx, {
         contentTypeId: FOO_CONTENT_ID,
-        version: 'v1',
+        version: 1,
         ids: ['123', '456'],
       });
 
@@ -192,8 +191,8 @@ describe('RPC -> bulkGet()', () => {
         {
           requestHandlerContext: ctx.requestHandlerContext,
           version: {
-            request: 'v1',
-            latest: 'v2', // from the registry
+            request: 1,
+            latest: 2, // from the registry
           },
           utils: {
             getTransforms: expect.any(Function),
@@ -218,16 +217,16 @@ describe('RPC -> bulkGet()', () => {
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             ids: ['123', '456'],
-            version: 'v7',
+            version: 7,
           })
-        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
       });
     });
 
     describe('object versioning', () => {
       test('should expose a  utility to transform and validate services objects', () => {
         const { ctx, storage } = setup();
-        fn(ctx, { contentTypeId: FOO_CONTENT_ID, ids: ['1234'], version: 'v1' });
+        fn(ctx, { contentTypeId: FOO_CONTENT_ID, ids: ['1234'], version: 1 });
         const [[storageContext]] = storage.bulkGet.mock.calls;
 
         // getTransforms() utils should be available from context
