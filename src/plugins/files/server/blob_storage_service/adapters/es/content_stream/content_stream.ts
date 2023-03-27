@@ -101,7 +101,7 @@ export class ContentStream extends Duplex {
       },
     });
 
-    const docIndex = chunkDocMeta.hits.hits[0]._index;
+    const docIndex = chunkDocMeta.hits.hits?.[0]?._index;
 
     if (!docIndex) {
       throw new Error(
