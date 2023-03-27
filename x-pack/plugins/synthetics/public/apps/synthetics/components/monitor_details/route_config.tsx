@@ -18,6 +18,7 @@ import { MonitorDetailsLastRun } from './monitor_details_last_run';
 import { MonitorDetailsStatus } from './monitor_details_status';
 import { MonitorDetailsLocation } from './monitor_details_location';
 import { MonitorErrors } from './monitor_errors/monitor_errors';
+import { MonitorErrorsIcon } from './monitor_errors/errors_icon';
 import { MonitorHistory } from './monitor_history/monitor_history';
 import { MonitorSummary } from './monitor_summary/monitor_summary';
 import { EditMonitorLink } from './monitor_summary/edit_monitor_link';
@@ -143,7 +144,7 @@ const getMonitorSummaryHeader = (
         label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
           defaultMessage: 'Errors',
         }),
-        prepend: <EuiIcon type="alert" color="danger" />,
+        prepend: <MonitorErrorsIcon />,
         isSelected: selectedTab === 'errors',
         href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
         'data-test-subj': 'syntheticsMonitorErrorsTab',

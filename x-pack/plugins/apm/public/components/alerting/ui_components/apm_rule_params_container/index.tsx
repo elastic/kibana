@@ -99,7 +99,7 @@ function MinimumWindowSizeWarning({
         minimumWindowSize.value
       } ${getTimeUnitLabel(minimumWindowSize.unit)}`}
       color="warning"
-      iconType="alert"
+      iconType="warning"
     >
       <p>{description}</p>
     </EuiCallOut>

@@ -13,6 +13,7 @@ import NewVisModal from './new_vis_modal';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -77,6 +78,7 @@ describe('NewVisModal', () => {
     },
   };
   const http = httpServiceMock.createStartContract({ basePath: '' });
+  const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
 
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
@@ -101,6 +103,7 @@ describe('NewVisModal', () => {
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
         http={http}
+        savedObjectsManagement={savedObjectsManagement}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
@@ -118,6 +121,7 @@ describe('NewVisModal', () => {
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
         http={http}
+        savedObjectsManagement={savedObjectsManagement}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(true);
@@ -134,6 +138,7 @@ describe('NewVisModal', () => {
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
         http={http}
+        savedObjectsManagement={savedObjectsManagement}
       />
     );
     expect(wrapper.find('[data-test-subj="visType-vis2"]').exists()).toBe(true);
@@ -151,6 +156,7 @@ describe('NewVisModal', () => {
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           http={http}
+          savedObjectsManagement={savedObjectsManagement}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -170,6 +176,7 @@ describe('NewVisModal', () => {
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           http={http}
+          savedObjectsManagement={savedObjectsManagement}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -196,6 +203,7 @@ describe('NewVisModal', () => {
           docLinks={docLinks as DocLinksStart}
           stateTransfer={stateTransfer}
           http={http}
+          savedObjectsManagement={savedObjectsManagement}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -221,6 +229,7 @@ describe('NewVisModal', () => {
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           http={http}
+          savedObjectsManagement={savedObjectsManagement}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -242,6 +251,7 @@ describe('NewVisModal', () => {
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           http={http}
+          savedObjectsManagement={savedObjectsManagement}
         />
       );
       const aggBasedGroupCard = wrapper

@@ -10,7 +10,7 @@ import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
 import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
@@ -33,8 +33,8 @@ export interface DocumentStatsSearchStrategyParams {
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
-  selectedChangePoint?: ChangePoint;
-  includeSelectedChangePoint?: boolean;
+  selectedSignificantTerm?: SignificantTerm;
+  includeSelectedSignificantTerm?: boolean;
   selectedGroup?: GroupTableItem | null;
 }
 
@@ -48,8 +48,8 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     searchQuery,
     intervalMs,
     fieldsToFetch,
-    selectedChangePoint,
-    includeSelectedChangePoint,
+    selectedSignificantTerm,
+    includeSelectedSignificantTerm,
     selectedGroup,
   } = params;
 
@@ -59,8 +59,8 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     earliestMs,
     latestMs,
     searchQuery,
-    selectedChangePoint,
-    includeSelectedChangePoint,
+    selectedSignificantTerm,
+    includeSelectedSignificantTerm,
     selectedGroup
   );
 

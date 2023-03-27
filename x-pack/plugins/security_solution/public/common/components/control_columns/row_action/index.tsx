@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
+import { RightPanelKey } from '../../../../flyout/right';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -96,7 +97,15 @@ const RowActionComponent = ({
     };
 
     if (isSecurityFlyoutEnabled) {
-      openFlyout({});
+      openFlyout({
+        right: {
+          id: RightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+          },
+        },
+      });
     } else {
       dispatch(
         dataTableActions.toggleDetailPanel({

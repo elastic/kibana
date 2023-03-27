@@ -76,20 +76,17 @@ describe('EngineOverviewLogic', () => {
             count: 10,
             health: 'green',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 10,
             health: 'green',
             name: 'index-002',
-            source: 'api',
           },
         ];
         const engineData = {
-          created: '2023-02-07T19:16:43Z',
           indices,
           name: 'foo-engine',
-          updated: '2023-02-07T19:16:43Z',
+          updated_at_millis: 2202018295,
         } as EngineOverviewValues['engineData'];
         expect(selectIndices(engineData)).toBe(indices);
       });
@@ -101,11 +98,11 @@ describe('EngineOverviewLogic', () => {
       it('returns the number of indices', () => {
         const noIndices: EnterpriseSearchEngineIndex[] = [];
         const oneIndex = [
-          { count: 23, health: 'unknown', name: 'index-001', source: 'api' },
+          { count: 23, health: 'unknown', name: 'index-001' },
         ] as EnterpriseSearchEngineIndex[];
         const twoIndices = [
-          { count: 23, health: 'unknown', name: 'index-001', source: 'api' },
-          { count: 92, health: 'unknown', name: 'index-002', source: 'api' },
+          { count: 23, health: 'unknown', name: 'index-001' },
+          { count: 92, health: 'unknown', name: 'index-002' },
         ] as EnterpriseSearchEngineIndex[];
 
         expect(selectIndicesCount(noIndices)).toBe(0);
@@ -130,19 +127,16 @@ describe('EngineOverviewLogic', () => {
             count: 12,
             health: 'unknown',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 34,
             health: 'unknown',
             name: 'index-002',
-            source: 'crawler',
           },
           {
             count: 56,
             health: 'unknown',
             name: 'index-003',
-            source: 'api',
           },
         ] as EnterpriseSearchEngineIndex[];
         it('returns true', () => {
@@ -156,19 +150,16 @@ describe('EngineOverviewLogic', () => {
             count: 12,
             health: 'unknown',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 34,
             health: 'yellow',
             name: 'index-002',
-            source: 'crawler',
           },
           {
             count: 56,
             health: 'green',
             name: 'index-003',
-            source: 'api',
           },
         ] as EnterpriseSearchEngineIndex[];
         it('returns true', () => {
@@ -182,19 +173,16 @@ describe('EngineOverviewLogic', () => {
             count: 12,
             health: 'unknown',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 34,
             health: 'yellow',
             name: 'index-002',
-            source: 'crawler',
           },
           {
             count: 56,
             health: 'unknown',
             name: 'index-003',
-            source: 'api',
           },
         ] as EnterpriseSearchEngineIndex[];
         it('returns true', () => {
@@ -208,19 +196,16 @@ describe('EngineOverviewLogic', () => {
             count: 12,
             health: 'green',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 34,
             health: 'yellow',
             name: 'index-002',
-            source: 'crawler',
           },
           {
             count: 56,
             health: 'green',
             name: 'index-003',
-            source: 'api',
           },
         ] as EnterpriseSearchEngineIndex[];
         it('returns false', () => {
@@ -245,7 +230,6 @@ describe('EngineOverviewLogic', () => {
               count: 23,
               health: 'green',
               name: 'index-001',
-              source: 'crawler',
             },
           ] as EnterpriseSearchEngineIndex[])
         ).toBe(23);
@@ -258,13 +242,11 @@ describe('EngineOverviewLogic', () => {
               count: 23,
               health: 'green',
               name: 'index-001',
-              source: 'crawler',
             },
             {
               count: 45,
               health: 'green',
               name: 'index-002',
-              source: 'crawler',
             },
           ] as EnterpriseSearchEngineIndex[])
         ).toBe(68);
@@ -277,19 +259,16 @@ describe('EngineOverviewLogic', () => {
               count: 23,
               health: 'green',
               name: 'index-001',
-              source: 'crawler',
             },
             {
               count: null,
               health: 'unknown',
               name: 'index-002',
-              source: 'crawler',
             },
             {
               count: 45,
               health: 'green',
               name: 'index-002',
-              source: 'crawler',
             },
           ] as EnterpriseSearchEngineIndex[])
         ).toBe(68);
@@ -333,7 +312,7 @@ describe('EngineOverviewLogic', () => {
             indices: ['index-001', 'index-002'],
           },
           name: 'engine-001',
-          updated: '2023-02-07T19:16:43Z',
+          updated_at_millis: 2202018295,
         };
         expect(selectFieldsCount(fieldCapabilities)).toBe(3);
       });
@@ -411,7 +390,7 @@ describe('EngineOverviewLogic', () => {
             indices: ['index-001', 'index-002'],
           },
           name: 'foo-engine',
-          updated: '2023-02-07T19:16:43Z',
+          updated_at_millis: 2202018295,
         };
         expect(selectFieldsCount(fieldCapabilities)).toBe(3);
       });

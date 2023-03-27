@@ -345,7 +345,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             to,
             mode: 'absolute',
           }}
-          chainingSystem="NONE"
+          chainingSystem={'HIERARCHICAL'}
           onInit={setDetectionPageFilterHandler}
         />
       ),

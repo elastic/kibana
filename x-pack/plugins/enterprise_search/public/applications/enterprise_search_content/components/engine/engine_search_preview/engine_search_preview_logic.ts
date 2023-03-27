@@ -100,7 +100,8 @@ export const EngineSearchPreviewLogic = kea<
                 aggregatable && !isMeta
             )
           )
-          .map(([field]) => field);
+          .map(([field]) => field)
+          .sort();
       },
     ],
   }),

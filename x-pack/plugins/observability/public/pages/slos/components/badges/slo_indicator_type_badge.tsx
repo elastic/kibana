@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { assertNever } from '@kbn/std';
 import { euiLightVars } from '@kbn/ui-theme';
+
+import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 export interface Props {
   slo: SLOWithSummaryResponse;
 }
@@ -19,27 +19,8 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
   return (
     <div>
       <EuiBadge color={euiLightVars.euiColorDisabled}>
-        {toIndicatorLabel(slo.indicator.type)}
+        {toIndicatorTypeLabel(slo.indicator.type)}
       </EuiBadge>
     </div>
   );
-}
-
-function toIndicatorLabel(indicatorType: SLOWithSummaryResponse['indicator']['type']) {
-  switch (indicatorType) {
-    case 'sli.kql.custom':
-      return i18n.translate('xpack.observability.slo.slo.indicator.customKql', {
-        defaultMessage: 'KQL',
-      });
-    case 'sli.apm.transactionDuration':
-      return i18n.translate('xpack.observability.slo.slo.indicator.apmLatency', {
-        defaultMessage: 'Latency',
-      });
-    case 'sli.apm.transactionErrorRate':
-      return i18n.translate('xpack.observability.slo.slo.indicator.apmAvailability', {
-        defaultMessage: 'Availability',
-      });
-    default:
-      assertNever(indicatorType);
-  }
 }
