@@ -7,31 +7,43 @@
 
 import expect from '@kbn/expect';
 import { CaseResponse } from '@kbn/cases-plugin/common';
+import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
+import { Owner } from '@kbn/cases-plugin/common/constants/types';
 import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   bulkCreateAttachments,
+  bulkGetAttachments,
   createAndUploadFile,
   createCase,
   createFile,
   deleteAllCaseItems,
   deleteAllFiles,
   deleteFileAttachments,
+  getComment,
   listFiles,
 } from '../../../../common/lib/api';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 import {
   globalRead,
   noKibanaPrivileges,
-  obsOnly,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
-  secOnlyReadDelete,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
+import {
+  casesAllUser,
+  casesOnlyReadDeleteUser,
+  obsCasesAllUser,
+  obsCasesOnlyReadDeleteUser,
+  obsCasesReadUser,
+  obsSecCasesAllUser,
+  obsSecCasesReadUser,
+  secAllCasesOnlyReadDeleteUser,
+  secAllUser,
+  secReadUser,
+  users as api_int_users,
+} from '../../../../../api_integration/apis/cases/common/users';
+import { roles as api_int_roles } from '../../../../../api_integration/apis/cases/common/roles';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -39,6 +51,16 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('delete_file_attachments', () => {
+    // we need api_int_users and roles because they have authorization for the actual plugins (not the fixtures). This
+    // is needed because the fixture plugins are not registered as file kinds
+    before(async () => {
+      await createUsersAndRoles(getService, api_int_users, api_int_roles);
+    });
+
+    after(async () => {
+      await deleteUsersAndRoles(getService, api_int_users, api_int_roles);
+    });
+
     describe('failures', () => {
       let postedCase: CaseResponse;
 
@@ -258,13 +280,175 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    /**
-     * For these tests the fixture plugins don't have a registered file kind so they relying on the actual owner
-     * that corresponds to them (i.e. securitySolutionFixture -> securitySolution). Or in some cases it doesn't matter
-     * and they just default to securitySolution since the requests for creating/uploading the file are done using supertest
-     * as the super user. The calls that matter are when creating the file attachment comments and the deletion call. Those
-     * users/owners need to match (or not if it's testing for a 403)
-     */
+    describe('deletes files when there are case attachments', () => {
+      afterEach(async () => {
+        await deleteAllFiles({
+          supertest,
+        });
+        await deleteAllCaseItems(es);
+      });
+
+      it('deletes a single file', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'securitySolution' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        const { create } = await createAndUploadFile({
+          supertest,
+          createFileParams: {
+            name: 'testfile',
+            kind: SECURITY_SOLUTION_FILE_KIND,
+            mimeType: 'text/plain',
+            meta: {
+              caseId: postedCase.id,
+              owner: [postedCase.owner],
+            },
+          },
+          data: 'abc',
+        });
+
+        const filesBeforeDelete = await listFiles({
+          supertest,
+          params: {
+            kind: SECURITY_SOLUTION_FILE_KIND,
+          },
+        });
+
+        expect(filesBeforeDelete.total).to.be(1);
+
+        const caseWithAttachments = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            getFilesAttachmentReq({
+              externalReferenceId: create.file.id,
+              owner: 'securitySolution',
+            }),
+          ],
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await deleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: [create.file.id],
+        });
+
+        const filesAfterDelete = await listFiles({
+          supertest,
+          params: {
+            kind: SECURITY_SOLUTION_FILE_KIND,
+          },
+        });
+
+        expect(filesAfterDelete.total).to.be(0);
+
+        await getComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: caseWithAttachments.comments![0].id,
+          expectedHttpCode: 404,
+        });
+      });
+
+      it('deletes multiple files', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'securitySolution' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        const [fileInfo1, fileInfo2] = await Promise.all([
+          createAndUploadFile({
+            supertest,
+            createFileParams: {
+              name: 'file1',
+              kind: SECURITY_SOLUTION_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseId: postedCase.id,
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: 'space1' },
+          }),
+          createAndUploadFile({
+            supertest,
+            createFileParams: {
+              name: 'file2',
+              kind: SECURITY_SOLUTION_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseId: postedCase.id,
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: 'space1' },
+          }),
+        ]);
+
+        const filesBeforeDelete = await listFiles({
+          supertest,
+          params: {
+            kind: SECURITY_SOLUTION_FILE_KIND,
+          },
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        expect(filesBeforeDelete.total).to.be(2);
+
+        const caseWithAttachments = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            getFilesAttachmentReq({
+              externalReferenceId: fileInfo1.create.file.id,
+              owner: 'securitySolution',
+            }),
+            getFilesAttachmentReq({
+              externalReferenceId: fileInfo2.create.file.id,
+              owner: 'securitySolution',
+            }),
+          ],
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await deleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: [fileInfo1.create.file.id, fileInfo2.create.file.id],
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        const filesAfterDelete = await listFiles({
+          supertest,
+          params: {
+            kind: SECURITY_SOLUTION_FILE_KIND,
+          },
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        expect(filesAfterDelete.total).to.be(0);
+
+        const bulkGetAttachmentsResponse = await bulkGetAttachments({
+          supertest,
+          attachmentIds: [caseWithAttachments.comments![0].id, caseWithAttachments.comments![1].id],
+          caseId: postedCase.id,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        expect(bulkGetAttachmentsResponse.attachments.length).to.be(0);
+        expect(bulkGetAttachmentsResponse.errors[0].status).to.be(404);
+        expect(bulkGetAttachmentsResponse.errors[1].status).to.be(404);
+      });
+    });
+
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -276,11 +460,17 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       for (const scenario of [
-        { user: obsOnly, owner: 'observabilityFixture' },
-        { user: secOnly, owner: 'securitySolutionFixture' },
-        { user: secOnlyReadDelete, owner: 'securitySolutionFixture' },
-        { user: obsSec, owner: 'securitySolutionFixture' },
-        { user: obsSec, owner: 'observabilityFixture' },
+        { user: obsCasesAllUser, owner: 'observability' },
+        { user: secAllUser, owner: 'securitySolution' },
+        { user: casesAllUser, owner: 'cases' },
+        { user: obsSecCasesAllUser, owner: 'securitySolution' },
+        { user: obsSecCasesAllUser, owner: 'observability' },
+        {
+          user: secAllCasesOnlyReadDeleteUser,
+          owner: 'securitySolution',
+        },
+        { user: obsCasesOnlyReadDeleteUser, owner: 'observability' },
+        { user: casesOnlyReadDeleteUser, owner: 'cases' },
       ]) {
         it(`successfully deletes a file for user ${scenario.user.username} with owner ${scenario.owner} when an attachment does not exist`, async () => {
           const caseInfo = await createCase(
@@ -292,7 +482,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             params: {
               name: 'testfile',
-              kind: SECURITY_SOLUTION_FILE_KIND,
+              kind: constructFileKindIdByOwner(scenario.owner as Owner),
               mimeType: 'text/plain',
               meta: {
                 caseId: caseInfo.id,
@@ -322,7 +512,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             params: {
               name: 'testfile',
-              kind: SECURITY_SOLUTION_FILE_KIND,
+              kind: constructFileKindIdByOwner(scenario.owner as Owner),
               mimeType: 'text/plain',
               meta: {
                 caseId: caseInfo.id,
@@ -354,14 +544,33 @@ export default ({ getService }: FtrProviderContext): void => {
       }
 
       for (const scenario of [
-        { user: obsOnly, owner: 'securitySolutionFixture' },
-        { user: globalRead, owner: 'securitySolutionFixture' },
-        { user: secOnlyRead, owner: 'securitySolutionFixture' },
-        { user: obsOnlyRead, owner: 'securitySolutionFixture' },
-        { user: obsSecRead, owner: 'securitySolutionFixture' },
-        { user: noKibanaPrivileges, owner: 'securitySolutionFixture' },
-        { user: secOnly, owner: 'observabilityFixture' },
+        {
+          user: obsCasesAllUser,
+          owner: 'securitySolution',
+        },
+        {
+          user: globalRead,
+          owner: 'securitySolution',
+        },
+        {
+          user: secReadUser,
+          owner: 'securitySolution',
+        },
+        {
+          user: obsCasesReadUser,
+          owner: 'securitySolution',
+        },
+        {
+          user: obsSecCasesReadUser,
+          owner: 'securitySolution',
+        },
+        {
+          user: noKibanaPrivileges,
+          owner: 'securitySolution',
+        },
+        { user: secAllUser, owner: 'observability' },
       ]) {
+        // these tests should fail when checking if the user is authorized to delete a file with the file kind
         it(`returns a 403 for user ${scenario.user.username} when attempting to delete a file with owner ${scenario.owner} that does not have an attachment`, async () => {
           const postedSecCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
             user: superUser,
@@ -372,7 +581,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             params: {
               name: 'testfile',
-              kind: SECURITY_SOLUTION_FILE_KIND,
+              kind: constructFileKindIdByOwner(scenario.owner as Owner),
               mimeType: 'text/plain',
               meta: {
                 caseId: postedSecCase.id,
@@ -394,41 +603,43 @@ export default ({ getService }: FtrProviderContext): void => {
 
       for (const scenario of [
         {
-          user: obsOnly,
-          fileOwner: 'observabilityFixture',
-          attachmentOwner: 'securitySolutionFixture',
+          user: obsCasesAllUser,
+          fileOwner: 'observability',
+          attachmentOwner: 'securitySolution',
         },
         {
           user: globalRead,
-          fileOwner: 'securitySolutionFixture',
-          attachmentOwner: 'securitySolutionFixture',
+          fileOwner: 'securitySolution',
+          attachmentOwner: 'securitySolution',
         },
         {
-          user: secOnlyRead,
-          fileOwner: 'securitySolutionFixture',
-          attachmentOwner: 'securitySolutionFixture',
+          user: secReadUser,
+          fileOwner: 'securitySolution',
+          attachmentOwner: 'securitySolution',
         },
         {
-          user: obsOnlyRead,
-          fileOwner: 'observabilityFixture',
-          attachmentOwner: 'securitySolutionFixture',
+          user: obsCasesReadUser,
+          fileOwner: 'observability',
+          attachmentOwner: 'securitySolution',
         },
         {
-          user: obsSecRead,
-          fileOwner: 'observabilityFixture',
-          attachmentOwner: 'securitySolutionFixture',
+          user: obsSecCasesReadUser,
+          fileOwner: 'observability',
+          attachmentOwner: 'securitySolution',
         },
         {
           user: noKibanaPrivileges,
-          fileOwner: 'securitySolutionFixture',
-          attachmentOwner: 'securitySolutionFixture',
+          fileOwner: 'securitySolution',
+          attachmentOwner: 'securitySolution',
         },
         {
-          user: secOnly,
-          fileOwner: 'securitySolutionFixture',
-          attachmentOwner: 'observabilityFixture',
+          user: secAllUser,
+          fileOwner: 'securitySolution',
+          attachmentOwner: 'observability',
         },
       ]) {
+        // these tests should fail when checking the user is authorized for the attachment's owner so the user will have
+        // access to delete the file saved object but not the attachment
         it(`returns a 403 for user ${scenario.user.username} when attempting to delete a file when the attachment has owner ${scenario.attachmentOwner}`, async () => {
           const caseInfo = await createCase(
             supertestWithoutAuth,
@@ -444,7 +655,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             params: {
               name: 'testfile',
-              kind: SECURITY_SOLUTION_FILE_KIND,
+              kind: constructFileKindIdByOwner(scenario.fileOwner as Owner),
               mimeType: 'text/plain',
               meta: {
                 caseId: caseInfo.id,

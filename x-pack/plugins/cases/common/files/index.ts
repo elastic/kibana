@@ -6,6 +6,8 @@
  */
 
 import * as rt from 'io-ts';
+import { OWNERS } from '../constants';
+import type { HttpApiTagOperation, Owner } from '../constants/types';
 
 export const CaseFileMetadataRt = rt.type({
   // TODO: do we want this as an array?
@@ -15,3 +17,25 @@ export const CaseFileMetadataRt = rt.type({
 });
 
 export type CaseFileMetadata = rt.TypeOf<typeof CaseFileMetadataRt>;
+
+export const constructFilesHttpOperationTag = (owner: Owner, operation: HttpApiTagOperation) => {
+  return `${owner}FilesCases${operation}`;
+};
+
+const FILE_KIND_DELIMITER = 'FilesCases';
+
+export const constructFileKindIdByOwner = (owner: Owner) => `${owner}${FILE_KIND_DELIMITER}`;
+
+export const constructOwnerFromFileKind = (fileKind: string): Owner | undefined => {
+  const splitString = fileKind.split(FILE_KIND_DELIMITER);
+
+  if (splitString.length === 2 && isValidOwner(splitString[0])) {
+    return splitString[0];
+  }
+};
+
+const isValidOwner = (ownerToValidate: string): ownerToValidate is Owner => {
+  const foundOwner = OWNERS.find((validOwner) => validOwner === ownerToValidate);
+
+  return foundOwner !== undefined;
+};

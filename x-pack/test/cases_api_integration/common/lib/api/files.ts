@@ -8,7 +8,8 @@
 import type SuperTest from 'supertest';
 import { apiRoutes as fileApiRoutes } from '@kbn/files-plugin/public/files_client/files_client';
 import { BaseFilesClient } from '@kbn/shared-ux-file-types';
-import { constructFileKindIdByOwner, OWNERS } from '@kbn/cases-plugin/common/constants';
+import { OWNERS } from '@kbn/cases-plugin/common/constants';
+import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from './helpers';

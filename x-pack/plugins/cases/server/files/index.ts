@@ -9,8 +9,6 @@ import type { FileJSON, FileKind } from '@kbn/files-plugin/common';
 import type { FilesSetup } from '@kbn/files-plugin/server';
 import {
   APP_ID,
-  constructFileKindIdByOwner,
-  constructFilesHttpOperationTag,
   MAX_FILE_SIZE,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
@@ -18,6 +16,7 @@ import {
 import type { Owner } from '../../common/constants/types';
 import { HttpApiTagOperation } from '../../common/constants/types';
 import { ALLOWED_MIME_TYPES, IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
+import { constructFileKindIdByOwner, constructFilesHttpOperationTag } from '../../common/files';
 
 const buildFileKind = (owner: Owner): FileKind => {
   return {

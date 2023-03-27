@@ -18,7 +18,7 @@ import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs, DeleteFileArgs } from './types';
 import type { CaseFileMetadata } from '../../../common/files';
-import { CaseFileMetadataRt } from '../../../common/files';
+import { constructOwnerFromFileKind, CaseFileMetadataRt } from '../../../common/files';
 
 /**
  * Delete all comments for a case.
@@ -113,7 +113,7 @@ export const deleteFileAttachments = async (
     }
 
     if (validFiles.length <= 0) {
-      throw Boom.badRequest(`Failed to find files to delete`);
+      throw Boom.badRequest('Failed to find files to delete');
     }
 
     // It's possible for this to return an empty array if there was an error creating file attachments in which case the
@@ -121,8 +121,19 @@ export const deleteFileAttachments = async (
     const fileAttachments = await attachmentService.getter.getFileAttachments({ caseId, fileIds });
 
     const fileEntities: OwnerEntity[] = [];
+
+    // It's possible that the owner array could have invalid information in it so we'll use the file kind for determining if the user
+    // has the correct authorization for deleting these files
     for (const fileInfo of validFiles) {
-      fileEntities.push(...fileInfo.data.meta.owner.map((owner) => ({ id: fileInfo.id, owner })));
+      const ownerFromFileKind = constructOwnerFromFileKind(fileInfo.data.fileKind);
+
+      if (ownerFromFileKind == null) {
+        throw Boom.badRequest(
+          `File id ${fileInfo.id} has invalid file kind ${fileInfo.data.fileKind}`
+        );
+      }
+
+      fileEntities.push({ id: fileInfo.id, owner: ownerFromFileKind });
     }
 
     await authorization.ensureAuthorized({
