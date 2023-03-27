@@ -55,7 +55,7 @@ export const AXE_OPTIONS = {
       enabled: false, // disabled because it's too flaky
     },
     'nested-interactive': {
-      enabled: false, // disabled because we have too many failures on interactive controls
+      enabled: false, // tracker here - https://github.com/elastic/kibana/issues/152494 disabled because we have too many failures on interactive controls
     },
   },
 };
