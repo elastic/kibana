@@ -104,7 +104,7 @@ describe('RuleDataClient', () => {
       });
     });
 
-    test('getReader searchs an index pattern without a wildcard', async () => {
+    test('getReader searchs an index pattern without a wildcard when the namespace is provided', async () => {
       const ruleDataClient = new RuleDataClient(
         getRuleDataClientOptions({
           waitUntilReadyForReading: new Promise((resolve) =>
@@ -114,7 +114,7 @@ describe('RuleDataClient', () => {
       );
 
       const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
-      const reader = ruleDataClient.getReader({ namespace: 'test', wildcard: false });
+      const reader = ruleDataClient.getReader({ namespace: 'test' });
       await reader.search({
         body: query,
       });

@@ -54,10 +54,8 @@ export const querySignalsRoute = (
 
       try {
         const spaceId = (await context.securitySolution).getSpaceId();
-        // wildcard set to false to avoid alerts from other spaces:
-        // https://github.com/elastic/security-team/issues/6231
         const result = await ruleDataClient
-          ?.getReader({ namespace: spaceId, wildcard: false })
+          ?.getReader({ namespace: spaceId })
           .search({
             body: {
               query,

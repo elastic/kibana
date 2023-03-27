@@ -57,7 +57,7 @@ describe('query for signal', () => {
       expect(response.status).toEqual(200);
       expect(ruleDataClient.getReader).toHaveBeenCalledWith(
         expect.objectContaining({
-          wildcard: false,
+          namespace: 'default',
         })
       );
     });

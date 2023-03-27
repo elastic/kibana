@@ -115,14 +115,9 @@ export class IndexInfo {
    *   - e.g. if baseName='.alerts-observability', include '.alerts-observability.apm'
    *
    * @example '.alerts-security.alerts-default*', '.alerts-security.alerts*'
-   *
-   * Warning: Reading alerts from this pattern has a side affect that some of them
-   * might come from other spaces with the same prefix.
-   * @example '.alerts-security.alerts-test' and '.alerts-security.alerts-test-2'
-   *
    */
   public getPatternForReading(namespace?: string): string {
-    return `${joinWithDash(this.baseName, namespace ?? '*')}`;
+    return namespace ?`${joinWithDash(this.baseName, namespace)}`: `${this.baseName}*`;
   }
 
   /**
