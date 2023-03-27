@@ -48,17 +48,7 @@ describe('mapFilter', () => {
       meta: {
         type: FILTERS.SPATIAL_FILTER,
       } as FilterMeta,
-      query: {
-        bool: {
-          should: [
-            {
-              geo_polygon: {
-                geoCoordinates: { points: [] },
-              },
-            },
-          ],
-        },
-      },
+      query: {},
     } as Filter;
     const before: any = {
       meta: { type: FILTERS.SPATIAL_FILTER, },
