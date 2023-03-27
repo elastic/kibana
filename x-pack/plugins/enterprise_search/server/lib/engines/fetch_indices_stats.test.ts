@@ -17,17 +17,62 @@ describe('fetchIndicesStats lib function', () => {
     },
     asInternalUser: {},
   };
-  const indicesNames = ['index-name-1', 'index-name-2'];
-  const indicesWithStatsResponse = [
+  const indicesNames = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
+  const indicesStats = {
+    indices: {
+      'test-index-name-1': {
+        health: 'GREEN',
+        primaries: { docs: [{}] },
+        status: 'open',
+        total: {
+          docs: {
+            count: 200,
+            deleted: 0,
+          },
+        },
+        uuid: 'YOLLiZ_mSRiDYDk0DJ-p8B',
+      },
+      'test-index-name-2': {
+        health: 'YELLOW',
+        primaries: { docs: [{}] },
+        status: 'closed',
+        total: {
+          docs: {
+            count: 0,
+            deleted: 0,
+          },
+        },
+        uuid: 'QOLLiZ_mGRiDYD30D2-p8B',
+      },
+      'test-index-name-3': {
+        health: 'RED',
+        primaries: { docs: [{}] },
+        status: 'open',
+        total: {
+          docs: {
+            count: 150,
+            deleted: 0,
+          },
+        },
+        uuid: 'QYLLiZ_fGRiDYD3082-e7',
+      },
+    },
+  };
+  const fetchIndicesStatsResponse = [
     {
-      name: 'index-name-1',
-      count: 10,
+      count: 200,
       health: 'GREEN',
+      name: 'test-index-name-1',
     },
     {
-      name: 'index-name-2',
       count: 0,
-      health: 'unknown',
+      health: 'YELLOW',
+      name: 'test-index-name-2',
+    },
+    {
+      count: 150,
+      health: 'RED',
+      name: 'test-index-name-3',
     },
   ];
 
@@ -36,13 +81,11 @@ describe('fetchIndicesStats lib function', () => {
   });
 
   it('should return hydrated indices', async () => {
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() => indicesWithStatsResponse);
+    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indicesStats);
 
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indicesNames)
-    ).resolves.toEqual({
-      indicesWithStatsResponse,
-    });
+    ).resolves.toEqual(fetchIndicesStatsResponse);
 
     expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
       index: indicesNames,

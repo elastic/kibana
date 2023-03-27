@@ -14,9 +14,12 @@ jest.mock('../../utils/fetch_enterprise_search', () => ({
 jest.mock('../../lib/engines/field_capabilities', () => ({
   fetchEngineFieldCapabilities: jest.fn(),
 }));
-
+jest.mock('../../lib/engines/fetch_indices_stats', () => ({
+  fetchIndicesStats: jest.fn(),
+}));
 import { RequestHandlerContext } from '@kbn/core/server';
 
+import { fetchIndicesStats } from '../../lib/engines/fetch_indices_stats';
 import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
 import { fetchEnterpriseSearch } from '../../utils/fetch_enterprise_search';
 
@@ -120,6 +123,22 @@ describe('engines routes', () => {
         method: 'GET',
         path: '/_application/search_application/engine-name',
       });
+      const mock = jest.fn();
+
+      const fetchIndicesStatsResponse = [
+        { count: 5, health: 'green', name: 'test-index-name-1' },
+        { count: 10, health: 'yellow', name: 'test-index-name-2' },
+        { count: 0, health: 'red', name: 'test-index-name-3' },
+      ];
+      const engineResult = {
+        indices: mock(['test-index-name-1', 'test-index-name-2', 'test-index-name-3']),
+        name: 'test-engine-1',
+        updated_at_millis: 1679847286355,
+      };
+
+      (fetchIndicesStats as jest.Mock).mockResolvedValueOnce(fetchIndicesStatsResponse);
+      expect(fetchIndicesStats).toHaveBeenCalledWith(mockClient, engineResult.indices);
+
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {},
       });
@@ -171,20 +190,20 @@ describe('engines routes', () => {
       }));
 
       await mockRouter.callRoute({
+        body: {
+          indices: ['test-indices-1'],
+        },
         params: {
           engine_name: 'engine-name',
         },
         query: { create: true },
-        body: {
-          indices: ['test-indices-1'],
-        },
       });
       expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-        method: 'PUT',
-        path: '/_application/search_application/engine-name',
         body: {
           indices: ['test-indices-1'],
         },
+        method: 'PUT',
+        path: '/_application/search_application/engine-name',
         querystring: { create: true },
       });
       const mock = jest.fn();
@@ -202,19 +221,19 @@ describe('engines routes', () => {
       }));
 
       await mockRouter.callRoute({
+        body: {
+          indices: ['test-indices-1'],
+        },
         params: {
           engine_name: 'engine-name',
         },
-        body: {
-          indices: ['test-indices-1'],
-        },
       });
       expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-        method: 'PUT',
-        path: '/_application/search_application/engine-name',
         body: {
           indices: ['test-indices-1'],
         },
+        method: 'PUT',
+        path: '/_application/search_application/engine-name',
         querystring: {},
       });
       const mock = jest.fn();
@@ -229,10 +248,10 @@ describe('engines routes', () => {
 
     it('validates correctly with engine_name', () => {
       const request = {
-        params: { engine_name: 'some-engine' },
         body: {
           indices: ['search-unit-test'],
         },
+        params: { engine_name: 'some-engine' },
       };
 
       mockRouter.shouldValidate(request);
@@ -246,10 +265,10 @@ describe('engines routes', () => {
 
     it('fails validation without indices', () => {
       const request = {
-        params: { engine_name: 'some-engine' },
         body: {
           name: 'some-engine',
         },
+        params: { engine_name: 'some-engine' },
       };
 
       mockRouter.shouldThrow(request);
@@ -354,9 +373,9 @@ describe('engines routes', () => {
         },
       });
       expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        body: {},
         method: 'POST',
         path: '/engine-name/_search',
-        body: {},
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
@@ -368,8 +387,8 @@ describe('engines routes', () => {
     it('validates correctly with engine_name and pagination', () => {
       const request = {
         body: {
-          query: 'test-query',
           fields: ['test-field-1', 'test-field-2'],
+          query: 'test-query',
         },
         params: {
           engine_name: 'some-engine',
@@ -393,12 +412,12 @@ describe('engines routes', () => {
 
     it('validation with query and without fields', () => {
       const request = {
+        body: {
+          fields: [],
+          query: 'sample-query',
+        },
         params: {
           engine_name: 'my-test-engine',
-        },
-        body: {
-          query: 'sample-query',
-          fields: [],
         },
       };
       mockRouter.shouldValidate(request);

@@ -14,12 +14,13 @@ export const fetchIndicesStats = async (client: IScopedClusterClient, indicesNam
     index: indicesNames,
     metric: ['docs'],
   });
+
   const indicesWithStats = indicesNames.map((indexName: string) => {
-    const indiceStats = indicesStats[indexName];
+    const indexStats = indicesStats[indexName];
     const hydratedIndex: EnterpriseSearchEngineIndex = {
+      count: indexStats?.total?.docs?.count ?? 0,
+      health: indexStats?.health ?? 'unknown',
       name: indexName,
-      health: indiceStats?.health ?? 'unknown',
-      count: indiceStats?.total?.docs?.count ?? 0,
     };
     return hydratedIndex;
   });
