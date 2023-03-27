@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe.only('replace dashboard panels', function viewEditModeTests() {
+  describe('replace dashboard panels', function viewEditModeTests() {
     let intialDimensions: undefined | Array<{ width: number; height: number }>;
 
     before(async function () {
