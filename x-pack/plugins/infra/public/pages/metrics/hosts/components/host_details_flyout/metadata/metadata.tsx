@@ -26,7 +26,7 @@ export interface TabProps {
   node: HostNodeRow;
 }
 
-const Metadata = ({ node, currentTimeRange }: TabProps) => {
+export const Metadata = ({ node, currentTimeRange }: TabProps) => {
   const nodeId = node.name;
   const inventoryModel = findInventoryModel(NODE_TYPE);
   const { sourceId } = useSourceContext();
@@ -50,6 +50,7 @@ const Metadata = ({ node, currentTimeRange }: TabProps) => {
         })}
         color="danger"
         iconType="error"
+        data-test-subj="infraMetadataErrorCallout"
       >
         <FormattedMessage
           id="xpack.infra.hostsViewPage.hostDetail.metadata.errorMessage"
@@ -57,7 +58,7 @@ const Metadata = ({ node, currentTimeRange }: TabProps) => {
           values={{
             reload: (
               <EuiLink
-                data-test-subj="infraMetadataThisLinkCanHelpLink"
+                data-test-subj="infraMetadataReloadPageLink"
                 onClick={() => window.location.reload()}
               >
                 {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorAction', {
@@ -75,6 +76,7 @@ const Metadata = ({ node, currentTimeRange }: TabProps) => {
     <Table rows={fields} />
   ) : (
     <EuiCallOut
+      data-test-subj="infraMetadataNoData"
       title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
         defaultMessage: 'Sorry, there is no metadata related to this host.',
       })}
@@ -96,7 +98,7 @@ const LoadingPlaceholder = () => {
         justifyContent: 'center',
       }}
     >
-      <EuiLoadingChart size="xl" />
+      <EuiLoadingChart data-test-subj="infraHostMetadataLoading" size="xl" />
     </div>
   );
 };
@@ -107,4 +109,5 @@ export const MetadataTab = {
     defaultMessage: 'Metadata',
   }),
   content: Metadata,
+  'data-test-subj': 'hostsView-flyout-tabs-metadata',
 };

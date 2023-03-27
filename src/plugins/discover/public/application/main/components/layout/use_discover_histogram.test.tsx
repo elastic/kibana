@@ -7,6 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
@@ -38,11 +39,11 @@ import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_message
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 
 const mockData = dataPluginMock.createStartContract();
-const mockQueryState = {
+let mockQueryState = {
   query: {
     query: 'query',
     language: 'kuery',
-  },
+  } as Query | AggregateQuery,
   filters: [],
   time: {
     from: 'now-15m',
@@ -112,6 +113,11 @@ describe('useDiscoverHistogram', () => {
       foundDocuments: true,
     }) as DataMain$,
     savedSearchFetch$ = new Subject() as DataFetch$,
+    documents$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewWithTimefieldMock)),
+    }) as DataDocuments$,
+    isPlainRecord = false,
   }: {
     stateContainer?: DiscoverStateContainer;
     searchSessionId?: string;
@@ -119,12 +125,9 @@ describe('useDiscoverHistogram', () => {
     totalHits$?: DataTotalHits$;
     main$?: DataMain$;
     savedSearchFetch$?: DataFetch$;
+    documents$?: DataDocuments$;
+    isPlainRecord?: boolean;
   } = {}) => {
-    const documents$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewWithTimefieldMock)),
-    }) as DataDocuments$;
-
     const availableFields$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
@@ -144,6 +147,7 @@ describe('useDiscoverHistogram', () => {
       dataView: dataViewWithTimefieldMock,
       inspectorAdapters,
       searchSessionId,
+      isPlainRecord,
     };
 
     const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
@@ -186,6 +190,7 @@ describe('useDiscoverHistogram', () => {
         'timeRange',
         'chartHidden',
         'timeInterval',
+        'columns',
         'breakdownField',
         'searchSessionId',
         'totalHitsStatus',
@@ -196,6 +201,9 @@ describe('useDiscoverHistogram', () => {
   });
 
   describe('state', () => {
+    beforeEach(() => {
+      mockCheckHitCount.mockClear();
+    });
     it('should subscribe to state changes', async () => {
       const { hook } = await renderUseDiscoverHistogram();
       const api = createMockUnifiedHistogramApi({ initialized: true });
@@ -203,7 +211,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
-      expect(api.state$.subscribe).toHaveBeenCalledTimes(2);
+      expect(api.state$.subscribe).toHaveBeenCalledTimes(4);
     });
 
     it('should sync Unified Histogram state with the state container', async () => {
@@ -217,6 +225,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: 'test',
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       api.state$ = new BehaviorSubject({ ...state, lensRequestAdapter });
@@ -241,6 +250,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       api.state$ = new BehaviorSubject(state);
@@ -303,6 +313,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       let params: Partial<UnifiedHistogramState> = {};
@@ -347,7 +358,6 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should update total hits when the total hits state changes', async () => {
-      mockCheckHitCount.mockClear();
       const totalHits$ = new BehaviorSubject({
         fetchStatus: FetchStatus.LOADING,
         result: undefined,
@@ -366,6 +376,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       api.state$ = new BehaviorSubject({
@@ -384,7 +395,19 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should not update total hits when the total hits state changes to an error', async () => {
-      mockCheckHitCount.mockClear();
+      mockQueryState = {
+        query: {
+          query: 'query',
+          language: 'kuery',
+        } as Query | AggregateQuery,
+        filters: [],
+        time: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      };
+
+      mockData.query.getState = () => mockQueryState;
       const totalHits$ = new BehaviorSubject({
         fetchStatus: FetchStatus.UNINITIALIZED,
         result: undefined,
@@ -399,6 +422,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       api.state$ = new BehaviorSubject({
