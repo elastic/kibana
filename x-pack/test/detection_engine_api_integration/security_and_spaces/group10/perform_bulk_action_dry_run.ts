@@ -17,8 +17,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleMlRule,
   getSimpleRule,
   installMockPrebuiltRules,
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

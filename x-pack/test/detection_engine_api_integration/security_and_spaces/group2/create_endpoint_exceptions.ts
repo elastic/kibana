@@ -19,8 +19,8 @@ import {
   createRule,
   createRuleWithExceptionEntries,
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getRuleForSignalTesting,
   getSignalsById,
   waitForRuleSuccess,
@@ -72,6 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('Rule exception operators for endpoints', () => {
     before(async () => {
@@ -94,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
       await deleteAllExceptions(supertest, log);
       await deleteListsIndex(supertest, log);

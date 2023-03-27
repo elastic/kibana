@@ -13,8 +13,8 @@ import {
   binaryToString,
   createRule,
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -24,6 +24,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('export_rules', () => {
     describe('exporting rules', () => {
@@ -32,7 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 

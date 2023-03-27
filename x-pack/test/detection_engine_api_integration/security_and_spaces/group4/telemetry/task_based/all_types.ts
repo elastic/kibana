@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSecurityTelemetryStats,
   removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
@@ -21,6 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
   const retry = getService('retry');
 
   describe('All task telemetry types generically', async () => {
@@ -37,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
       await deleteAllExceptions(supertest, log);
     });

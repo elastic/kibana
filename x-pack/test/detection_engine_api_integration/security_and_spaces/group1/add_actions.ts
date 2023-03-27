@@ -11,8 +11,8 @@ import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   removeServerGeneratedProperties,
   getWebHookAction,
   getRuleWithWebHookAction,
@@ -26,6 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('add_actions', () => {
     describe('adding actions', () => {
@@ -42,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 

@@ -12,8 +12,8 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
@@ -33,6 +33,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('update_rules', () => {
     describe('update rules', () => {
@@ -41,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 

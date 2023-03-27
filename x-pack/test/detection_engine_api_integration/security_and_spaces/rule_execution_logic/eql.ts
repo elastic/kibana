@@ -27,9 +27,9 @@ import {
   ALERT_GROUP_ID,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import {
+  clearSignalsIndex,
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
   getEqlRuleForSignalTesting,
   getOpenSignals,
   getPreviewAlerts,
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

@@ -17,8 +17,8 @@ import {
   binaryToString,
   createRule,
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
@@ -32,17 +32,19 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('import_export_rules_flow', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
+
       await createUserAndRole(getService, ROLES.soc_manager);
     });
 
     afterEach(async () => {
       await deleteUserAndRole(getService, ROLES.soc_manager);
       await deleteAllExceptions(supertest, log);
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

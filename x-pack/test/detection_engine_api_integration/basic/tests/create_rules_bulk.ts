@@ -11,8 +11,8 @@ import { DETECTION_ENGINE_RULES_BULK_CREATE } from '@kbn/security-solution-plugi
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -24,6 +24,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -42,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 

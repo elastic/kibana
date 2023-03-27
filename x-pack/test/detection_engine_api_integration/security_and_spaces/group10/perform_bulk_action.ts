@@ -23,8 +23,8 @@ import {
   createLegacyRuleAction,
   createRule,
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getLegacyActionSO,
   getSimpleMlRule,
   getSimpleRule,
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

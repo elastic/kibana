@@ -26,8 +26,8 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -79,7 +79,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
         await deleteAllRules(supertest, log);
         await deleteAllExceptions(supertest, log);
       });
@@ -522,7 +521,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await clearSignalsIndex(supertest, es, log);
           await deleteAllRules(supertest, log);
           await deleteAllExceptions(supertest, log);
         });

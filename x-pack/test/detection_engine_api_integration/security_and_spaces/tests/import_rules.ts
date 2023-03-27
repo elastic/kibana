@@ -18,9 +18,9 @@ import {
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
+  clearSignalsIndex,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
@@ -96,6 +96,7 @@ const getImportRuleBuffer = (connectorId: string) => {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -114,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
       it('should successfully import rules without actions when user has no actions privileges', async () => {
@@ -239,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 

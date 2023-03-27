@@ -11,9 +11,9 @@ import { TIMELINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/common/c
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
   deleteAllTimelines,
-  deleteSignalsIndex,
   waitFor,
 } from '../../utils';
 
@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
         await deleteAllTimelines(es);
       });

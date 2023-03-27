@@ -18,8 +18,8 @@ import { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engin
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  clearSignalsIndex,
   deleteMigrations,
-  deleteSignalsIndex,
   getIndexNameFromLoad,
   waitForIndexToPopulate,
 } from '../../utils';
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
     });
 
     it('returns the information necessary to finalize the migration', async () => {

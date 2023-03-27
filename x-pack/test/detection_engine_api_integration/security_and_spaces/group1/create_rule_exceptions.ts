@@ -21,7 +21,7 @@ import {
   createRule,
   getSimpleRule,
   createSignalsIndex,
-  deleteSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
   createExceptionList,
 } from '../../utils';
@@ -48,6 +48,7 @@ const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('create_rule_exception_route', () => {
     before(async () => {
@@ -56,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await deleteAllExceptions(supertest, log);
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

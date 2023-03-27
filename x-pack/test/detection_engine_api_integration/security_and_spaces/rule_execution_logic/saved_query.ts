@@ -17,9 +17,9 @@ import {
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import {
+  clearSignalsIndex,
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
   getOpenSignals,
   getRuleForSignalTesting,
 } from '../../utils';
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

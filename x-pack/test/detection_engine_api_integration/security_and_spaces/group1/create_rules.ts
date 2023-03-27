@@ -15,8 +15,8 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -41,6 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('create_rules', () => {
     describe('creating rules', () => {
@@ -57,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 
@@ -491,6 +492,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('missing timestamps', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
+
         // to edit these files run the following script
         // cd $HOME/kibana/x-pack && nvm use && node ../scripts/es_archiver edit security_solution/timestamp_override
         await esArchiver.load(
@@ -498,7 +500,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override'

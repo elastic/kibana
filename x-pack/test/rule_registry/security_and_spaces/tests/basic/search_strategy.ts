@@ -11,13 +11,13 @@ import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/sea
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  deleteSignalsIndex,
   createSignalsIndex,
   deleteAllRules,
   getRuleForSignalTesting,
   createRule,
   waitForSignalsToBePresent,
   waitForRuleSuccess,
+  clearSignalsIndex,
 } from '../../../../detection_engine_api_integration/utils';
 import {
   obsOnlySpacesAllEsRead,
@@ -39,6 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const secureBsearch = getService('secureBsearch');
   const log = getService('log');
+  const es = getService('es');
   const kbnClient = getService('kibanaServer');
 
   const SPACE1 = 'space1';
@@ -127,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');

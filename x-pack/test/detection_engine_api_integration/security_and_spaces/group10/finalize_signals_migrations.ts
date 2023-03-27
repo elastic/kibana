@@ -16,8 +16,8 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  clearSignalsIndex,
   deleteMigrations,
-  deleteSignalsIndex,
   getIndexNameFromLoad,
   waitFor,
 } from '../../utils';
@@ -47,6 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
@@ -89,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
     });
 
     it('replaces the original index alias with the migrated one', async () => {

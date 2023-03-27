@@ -38,9 +38,9 @@ import {
   previewRule,
   getOpenSignals,
   getPreviewAlerts,
-  deleteSignalsIndex,
   deleteAllRules,
   createRule,
+  clearSignalsIndex,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
@@ -146,14 +146,14 @@ export default ({ getService }: FtrProviderContext) => {
    */
   describe('Threat match type rules', () => {
     before(async () => {
-      // await deleteSignalsIndex(supertest, log);
+      // await clearSignalsIndex(supertest, es, log);
       // await deleteAllAlerts(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

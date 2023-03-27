@@ -17,7 +17,7 @@ import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_e
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  clearSignalsIndex,
   setSignalStatus,
   getQuerySignalIds,
   deleteAllRules,
@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('open_close_signals', () => {
     describe('tests with auditbeat data', () => {
@@ -50,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 

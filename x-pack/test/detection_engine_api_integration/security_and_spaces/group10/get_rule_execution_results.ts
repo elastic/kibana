@@ -17,9 +17,9 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
   deleteAllEventLogExecutionEvents,
-  deleteSignalsIndex,
   getRuleForSignalTesting,
   indexEventLogExecutionEvents,
   waitForEventLogExecuteComplete,
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
     });
 
     beforeEach(async () => {

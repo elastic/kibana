@@ -25,7 +25,7 @@ import {
   createRule,
   getSimpleRule,
   createSignalsIndex,
-  deleteSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
   createExceptionList,
 } from '../../utils';
@@ -35,6 +35,7 @@ import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('find_rule_exception_references', () => {
     before(async () => {
@@ -42,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

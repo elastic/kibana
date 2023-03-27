@@ -18,11 +18,11 @@ import {
 import {
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
   getOpenSignals,
   getPreviewAlerts,
   previewRule,
   performSearchQuery,
+  clearSignalsIndex,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
-      await deleteSignalsIndex(supertest, log);
+      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

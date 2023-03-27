@@ -23,8 +23,8 @@ import {
 import {
   createRule,
   createSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   finalizeSignalsMigration,
   getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
@@ -45,6 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('Alerts Compatibility', function () {
     describe('CTI', () => {
@@ -69,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 
@@ -218,7 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 
@@ -551,7 +552,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 
@@ -592,7 +593,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 
@@ -631,7 +632,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteSignalsIndex(supertest, log);
+        await clearSignalsIndex(supertest, es, log);
         await deleteAllRules(supertest, log);
       });
 

@@ -40,7 +40,7 @@ import {
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  clearSignalsIndex,
   deleteAllRules,
   getRuleForSignalTesting,
   waitForRuleSuccess,
@@ -794,7 +794,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await clearSignalsIndex(supertest, es, log);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
