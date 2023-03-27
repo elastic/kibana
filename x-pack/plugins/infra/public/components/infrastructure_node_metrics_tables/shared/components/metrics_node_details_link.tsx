@@ -37,5 +37,9 @@ export const MetricsNodeDetailsLink = ({
     })
   );
 
-  return <EuiLink href={linkProps.href}>{label}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="infraMetricsNodeDetailsLinkLink" href={linkProps.href}>
+      {label}
+    </EuiLink>
+  );
 };

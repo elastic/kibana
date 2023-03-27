@@ -151,7 +151,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [expect.objectContaining({ migrationVersion: {} })],
+      [expect.objectContaining({ typeMigrationVersion: '' })],
       expect.any(Object) // options
     );
   });

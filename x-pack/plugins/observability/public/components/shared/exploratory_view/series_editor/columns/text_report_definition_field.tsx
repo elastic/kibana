@@ -26,6 +26,7 @@ export function TextReportDefinitionField({ series, field, seriesConfig, onChang
   return (
     <EuiFormRow label={label}>
       <EuiFieldText
+        data-test-subj="o11yTextReportDefinitionFieldFieldText"
         placeholder={i18n.translate('xpack.observability.textDefinitionField.placeholder.search', {
           defaultMessage: 'Search {label}',
           values: { label },

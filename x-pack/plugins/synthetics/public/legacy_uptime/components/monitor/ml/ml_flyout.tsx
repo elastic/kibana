@@ -60,7 +60,9 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
               defaultMessage="Once a job is created, you can manage it and see more details in the {mlJobsPageLink}."
               values={{
                 mlJobsPageLink: (
-                  <EuiLink href={basePath + '/app/ml'}>{labels.ML_MANAGEMENT_PAGE}</EuiLink>
+                  <EuiLink data-test-subj="syntheticsMLFlyoutViewLink" href={basePath + '/app/ml'}>
+                    {labels.ML_MANAGEMENT_PAGE}
+                  </EuiLink>
                 ),
               }}
             />
@@ -88,7 +90,11 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()} disabled={isCreatingJob || isLoadingMLJob}>
+            <EuiButtonEmpty
+              data-test-subj="syntheticsMLFlyoutViewButton"
+              onClick={() => onClose()}
+              disabled={isCreatingJob || isLoadingMLJob}
+            >
               {labels.CANCEL_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
