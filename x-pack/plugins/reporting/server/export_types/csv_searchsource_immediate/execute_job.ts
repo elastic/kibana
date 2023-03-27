@@ -7,9 +7,9 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import { Writable } from 'stream';
-import { CancellationToken } from '@kbn/reporting-common';
-import { CsvGenerator } from '@kbn/generate-csv';
-import type { TaskRunResult, JobParamsDownloadCSV } from '@kbn/generate-csv';
+import { CancellationToken } from '@kbn/reporting-common/index';
+import { CsvGenerator } from '@kbn/generate-csv/src/index';
+import type { TaskRunResult, JobParamsDownloadCSV } from '@kbn/generate-csv/types/index';
 import { getFieldFormats } from '../../services';
 import { ReportingRequestHandlerContext, RunTaskFnFactory } from '../../types';
 
