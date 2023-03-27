@@ -17,11 +17,10 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useGetEndpointPendingActionsSummary } from '../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { isPolicyOutOfDate } from '../../utils';
 import type { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
-import { nonExistingPolicies, uiQueryParams, autoRefreshInterval } from '../../store/selectors';
+import { nonExistingPolicies, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -60,15 +59,6 @@ export const EndpointDetailsContent = memo(
     policyInfo?: HostInfo['policy_info'];
     hostStatus: HostStatus;
   }) => {
-    const refetchInterval = useEndpointSelector(autoRefreshInterval);
-    const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary(
-      [details.agent.id],
-      {
-        queryKey: ['endpoint-agent-status', details.agent.id],
-        refetchInterval,
-      }
-    );
-
     const queryParams = useEndpointSelector(uiQueryParams);
     const missingPolicies = useEndpointSelector(nonExistingPolicies);
 
@@ -107,13 +97,7 @@ export const EndpointDetailsContent = memo(
               />
             </ColumnTitle>
           ),
-          description: (
-            <EndpointAgentStatus
-              hostStatus={hostStatus}
-              endpointMetadata={details}
-              endpointPendingActions={endpointPendingActions}
-            />
-          ),
+          description: <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={details} />,
         },
         {
           title: (
@@ -228,14 +212,7 @@ export const EndpointDetailsContent = memo(
           ),
         },
       ];
-    }, [
-      details,
-      hostStatus,
-      policyStatusClickHandler,
-      policyInfo,
-      missingPolicies,
-      endpointPendingActions,
-    ]);
+    }, [details, hostStatus, policyStatusClickHandler, policyInfo, missingPolicies]);
 
     return (
       <EndpointDetailsContentStyled>

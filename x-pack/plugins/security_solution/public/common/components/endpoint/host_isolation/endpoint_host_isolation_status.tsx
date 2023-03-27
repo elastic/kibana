@@ -8,24 +8,27 @@
 import React, { memo, useMemo, useRef, useEffect } from 'react';
 import { EuiBadge, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useGetEndpointPendingActionsSummary } from '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { AgentPendingActionStatusBadge } from '../agent_pending_action_status_badge';
 
 export interface EndpointHostIsolationStatusProps {
   isIsolated: boolean;
-  pendingActions: {
-    /** the count of pending isolate actions */
-    pendingIsolate?: number;
-    /** the count of pending unisolate actions */
-    pendingUnIsolate?: number;
-    pendingKillProcess?: number;
-    pendingSuspendProcess?: number;
-    pendingRunningProcesses?: number;
-    pendingGetFile?: number;
-    pendingExecute?: number;
-  };
+  endpointId?: string;
   'data-test-subj'?: string;
+}
+
+export interface PendingActions {
+  /** the count of pending isolate actions */
+  pendingIsolate: number;
+  /** the count of pending unisolate actions */
+  pendingUnIsolate: number;
+  pendingKillProcess: number;
+  pendingSuspendProcess: number;
+  pendingRunningProcesses: number;
+  pendingGetFile: number;
+  pendingExecute: number;
 }
 
 /**
@@ -34,21 +37,40 @@ export interface EndpointHostIsolationStatusProps {
  * (`null` is returned)
  */
 export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps>(
-  ({ isIsolated, pendingActions, 'data-test-subj': dataTestSubj }) => {
+  ({ endpointId, isIsolated, 'data-test-subj': dataTestSubj }) => {
+    const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary(
+      endpointId ? [endpointId] : [],
+      {
+        select: (pending): PendingActions => {
+          const pendingActions = pending.data[0].pending_actions ?? {};
+
+          return {
+            pendingIsolate: pendingActions?.isolate ?? 0,
+            pendingUnIsolate: pendingActions?.unisolate ?? 0,
+            pendingKillProcess: pendingActions?.['kill-process'] ?? 0,
+            pendingSuspendProcess: pendingActions?.['suspend-process'] ?? 0,
+            pendingRunningProcesses: pendingActions?.['running-processes'] ?? 0,
+            pendingGetFile: pendingActions?.['get-file'] ?? 0,
+            pendingExecute: pendingActions?.execute ?? 0,
+          };
+        },
+      }
+    );
+
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPendingStatusDisabled = useIsExperimentalFeatureEnabled(
       'disableIsolationUIPendingStatuses'
     );
 
     const {
-      pendingIsolate = 0,
-      pendingUnIsolate = 0,
-      pendingKillProcess = 0,
-      pendingSuspendProcess = 0,
-      pendingRunningProcesses = 0,
-      pendingGetFile = 0,
-      pendingExecute = 0,
-    } = pendingActions;
+      pendingIsolate,
+      pendingUnIsolate,
+      pendingKillProcess,
+      pendingSuspendProcess,
+      pendingRunningProcesses,
+      pendingGetFile,
+      pendingExecute,
+    } = endpointPendingActions;
 
     const wasReleasing = useRef<boolean>(false);
     const wasIsolating = useRef<boolean>(false);
@@ -75,14 +97,14 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
 
     const hasMultipleActionTypesPending = useMemo<boolean>(() => {
       return (
-        Object.values(pendingActions).reduce((countOfTypes, pendingActionCount) => {
+        Object.values(endpointPendingActions).reduce((countOfTypes, pendingActionCount) => {
           if (pendingActionCount > 0) {
             return countOfTypes + 1;
           }
           return countOfTypes;
         }, 0) > 1
       );
-    }, [pendingActions]);
+    }, [endpointPendingActions]);
 
     useEffect(() => {
       wasReleasing.current = pendingIsolate === 0 && pendingUnIsolate > 0;
@@ -133,7 +155,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
         return (
           <AgentPendingActionStatusBadge
             data-test-subj={dataTestSubj}
-            pendingActions={pendingActions}
+            pendingActions={endpointPendingActions}
           />
         );
       }
@@ -167,7 +189,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       dataTestSubj,
       getTestId,
       isIsolated,
-      pendingActions,
+      endpointPendingActions,
     ]);
   }
 );

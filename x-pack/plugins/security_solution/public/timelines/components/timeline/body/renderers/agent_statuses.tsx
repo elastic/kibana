@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
+import { useGetEndpointDetails } from '../../../../../management/hooks';
 import { EndpointHostIsolationStatus } from '../../../../../common/components/endpoint/host_isolation';
-import { useHostIsolationStatus } from '../../../../../detections/containers/detection_engine/alerts/use_host_isolation_status';
 import { AgentStatus } from '../../../../../common/components/endpoint/agent_status';
 import { EMPTY_STATUS } from './translations';
 
@@ -30,13 +31,13 @@ export const AgentStatuses = React.memo(
     isDraggable: boolean;
     value: string;
   }) => {
-    const { isIsolated, agentStatus, pendingIsolation, pendingUnisolation } =
-      useHostIsolationStatus({ agentId: value });
+    const { data: hostDetails } = useGetEndpointDetails(value);
+
     return (
       <EuiFlexGroup gutterSize="none">
-        {agentStatus !== undefined ? (
+        {hostDetails?.agentStatus !== undefined ? (
           <EuiFlexItem grow={false}>
-            <AgentStatus hostStatus={agentStatus} />
+            <AgentStatus hostStatus={hostDetails?.agentStatus} />
           </EuiFlexItem>
         ) : (
           <EuiText>
@@ -45,11 +46,10 @@ export const AgentStatuses = React.memo(
         )}
         <EuiFlexItem grow={false}>
           <EndpointHostIsolationStatus
-            isIsolated={isIsolated}
-            pendingActions={{
-              pendingIsolate: pendingIsolation,
-              pendingUnIsolate: pendingUnisolation,
-            }}
+            endpointId={value}
+            isIsolated={
+              hostDetails?.metadata ? isEndpointHostIsolated(hostDetails?.metadata) : false
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>

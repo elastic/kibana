@@ -69,7 +69,6 @@ import { BackToExternalAppButton } from '../../../components/back_to_external_ap
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
 
@@ -170,13 +169,6 @@ export const EndpointList = () => {
       ],
     };
   }, [getAppUrl, routeState?.backLink]);
-
-  const agentIds = useMemo(() => listData.map((item) => item.metadata.agent.id), [listData]);
-  const { data: endpointsPendingActions } = useGetEndpointPendingActionsSummary(agentIds, {
-    queryKey: ['endpoint-agents-statuses', ...agentIds],
-    enabled: !!agentIds.length,
-    refetchInterval: autoRefreshInterval,
-  });
 
   const backToPolicyList = (
     <BackToExternalAppButton {...backLinkOptions} data-test-subj="endpointListBackLink" />
@@ -376,15 +368,9 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
           defaultMessage: 'Agent status',
         }),
-        render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
-          return (
-            <EndpointAgentStatus
-              hostStatus={hostStatus}
-              endpointMetadata={endpointInfo.metadata}
-              endpointPendingActions={endpointsPendingActions}
-            />
-          );
-        },
+        render: (hostStatus: HostInfo['host_status'], endpointInfo) => (
+          <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={endpointInfo.metadata} />
+        ),
       },
       {
         field: 'metadata.Endpoint.policy.applied',
@@ -548,15 +534,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [
-    queryParams,
-    search,
-    getAppUrl,
-    canReadPolicyManagement,
-    backToEndpointList,
-    PAD_LEFT,
-    endpointsPendingActions,
-  ]);
+  }, [queryParams, search, getAppUrl, canReadPolicyManagement, backToEndpointList, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist) {

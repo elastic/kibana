@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { HostStatus } from '../../../../common/endpoint/types';
 import { AgentStatus } from '../../../common/components/endpoint/agent_status';
-import type { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
 import { EndpointHostIsolationStatus } from '../../../common/components/endpoint/host_isolation';
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
@@ -20,9 +19,9 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   }
 `;
 
-export interface EndpointAgentAndIsolationStatusProps
-  extends Pick<EndpointHostIsolationStatusProps, 'pendingActions'> {
+export interface EndpointAgentAndIsolationStatusProps {
   status: HostStatus;
+  endpointId: string;
   /**
    * If defined with a boolean, then the isolation status will be shown along with the agent status.
    * The `pendingIsolate` and `pendingUnIsolate` props will only be used when this prop is set to a
@@ -33,7 +32,7 @@ export interface EndpointAgentAndIsolationStatusProps
 }
 
 export const EndpointAgentAndIsolationStatus = memo<EndpointAgentAndIsolationStatusProps>(
-  ({ status, isIsolated, pendingActions, 'data-test-subj': dataTestSubj }) => {
+  ({ endpointId, status, isIsolated, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     return (
       <EuiFlexGroupStyled
@@ -48,9 +47,9 @@ export const EndpointAgentAndIsolationStatus = memo<EndpointAgentAndIsolationSta
         {isIsolated !== undefined && (
           <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
             <EndpointHostIsolationStatus
+              endpointId={endpointId}
               data-test-subj={getTestId('isolationStatus')}
               isIsolated={isIsolated}
-              pendingActions={pendingActions}
             />
           </EuiFlexItem>
         )}

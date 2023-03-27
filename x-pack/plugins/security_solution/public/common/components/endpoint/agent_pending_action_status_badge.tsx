@@ -7,10 +7,10 @@
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EndpointHostIsolationStatusProps } from './host_isolation';
+import type { PendingActions } from './host_isolation';
 
 export const AgentPendingActionStatusBadge = memo<
-  { 'data-test-subj'?: string } & Pick<EndpointHostIsolationStatusProps, 'pendingActions'>
+  { 'data-test-subj'?: string } & { pendingActions: PendingActions }
 >(({ 'data-test-subj': dataTestSubj, pendingActions }) => {
   return (
     <EuiBadge color="hollow" data-test-subj={dataTestSubj}>

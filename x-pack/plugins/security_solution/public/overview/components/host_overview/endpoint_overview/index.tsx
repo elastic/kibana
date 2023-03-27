@@ -9,7 +9,6 @@ import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import { useGetEndpointPendingActionsSummary } from '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -26,19 +25,6 @@ interface Props {
 }
 
 export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
-  const fleetAgentId = useMemo(() => data?.fleetAgentId?.toString(), [data]);
-  const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary(
-    [fleetAgentId ?? ''],
-    {
-      queryKey: ['endpoint-agent-status', data?.fleetAgentId],
-      enabled: !!fleetAgentId,
-    }
-  );
-  const pendingActions = useMemo(() => {
-    if (endpointPendingActions != null) {
-      return endpointPendingActions.data[0].pending_actions;
-    }
-  }, [endpointPendingActions]);
   const getDefaultRenderer = useCallback(
     (fieldName: string, fieldData: EndpointFields, attrName: string) => (
       <DefaultFieldRenderer
@@ -95,16 +81,8 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
               <>
                 <AgentStatus hostStatus={data.elasticAgentStatus} />
                 <EndpointHostIsolationStatus
+                  endpointId={data?.fleetAgentId}
                   isIsolated={Boolean(data.isolation)}
-                  pendingActions={{
-                    pendingIsolate: pendingActions?.isolate ?? 0,
-                    pendingUnIsolate: pendingActions?.unisolate ?? 0,
-                    pendingKillProcess: pendingActions?.['kill-process'] ?? 0,
-                    pendingSuspendProcess: pendingActions?.['suspend-process'] ?? 0,
-                    pendingRunningProcesses: pendingActions?.['running-processes'] ?? 0,
-                    pendingGetFile: pendingActions?.['get-file'] ?? 0,
-                    pendingExecute: pendingActions?.execute ?? 0,
-                  }}
                 />
               </>
             ) : (
@@ -113,7 +91,7 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
         },
       ],
     ],
-    [data, getDefaultRenderer, pendingActions]
+    [data, getDefaultRenderer]
   );
 
   return (

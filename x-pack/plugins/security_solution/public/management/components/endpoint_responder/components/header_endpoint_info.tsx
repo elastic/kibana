@@ -16,26 +16,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import { usePendingActionsStatuses } from '../../endpoint_list/hooks/use_pending_actions_statuses';
 import { EndpointAgentAndIsolationStatus } from '../../endpoint_agent_and_isolation_status';
-import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
-import { DEFAULT_ENDPOINT_REFRESH_INTERVAL } from '../lib/constants';
 
 interface HeaderEndpointInfoProps {
   endpointId: string;
 }
 
 export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId }) => {
-  const { data: endpointDetails, isFetching } = useGetEndpointDetails(endpointId, {
-    refetchInterval: DEFAULT_ENDPOINT_REFRESH_INTERVAL,
-  });
-  const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary([endpointId], {
-    refetchInterval: DEFAULT_ENDPOINT_REFRESH_INTERVAL,
-  });
+  const { data: endpointDetails, isFetching } = useGetEndpointDetails(endpointId);
 
-  const pendingActionRequests = usePendingActionsStatuses(endpointPendingActions, endpointId);
-
-  if (isFetching && endpointPendingActions === undefined) {
+  if (isFetching) {
     return <EuiSkeletonText lines={2} />;
   }
 
@@ -59,9 +49,9 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EndpointAgentAndIsolationStatus
+              endpointId={endpointId}
               status={endpointDetails.host_status}
               isIsolated={endpointDetails.metadata.Endpoint.state?.isolation}
-              {...pendingActionRequests}
               data-test-subj="responderHeaderEndpointAgentIsolationStatus"
             />
           </EuiFlexItem>

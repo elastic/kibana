@@ -6,25 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import type { PendingActions } from '../../../../common/components/endpoint/host_isolation';
 import type { ImmutableObject, PendingActionsResponse } from '../../../../../common/endpoint/types';
 
-interface PendingActions {
-  pendingActions: Pick<
-    Required<EndpointHostIsolationStatusProps['pendingActions']>,
-    | 'pendingIsolate'
-    | 'pendingUnIsolate'
-    | 'pendingKillProcess'
-    | 'pendingSuspendProcess'
-    | 'pendingRunningProcesses'
-    | 'pendingGetFile'
-    | 'pendingExecute'
-  >;
-}
 export const usePendingActionsStatuses = (
   pendingActions?: PendingActionsResponse | ImmutableObject<PendingActionsResponse>,
   agentId?: string
-): PendingActions => {
+): { pendingActions: PendingActions } => {
   const pendingActionRequests = useMemo(() => {
     const pending = pendingActions?.data?.filter((action) => action.agent_id === agentId)[0]
       ?.pending_actions;
