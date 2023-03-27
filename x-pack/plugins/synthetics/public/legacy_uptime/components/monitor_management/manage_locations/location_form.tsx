@@ -44,6 +44,7 @@ export const LocationForm = ({
           error={errors?.label?.message}
         >
           <EuiFieldText
+            data-test-subj="syntheticsLocationFormFieldText"
             fullWidth
             aria-label={LOCATION_NAME_LABEL}
             {...register('label', {
@@ -72,6 +73,7 @@ export const LocationForm = ({
                   code: <EuiCode>elastic-agent-complete</EuiCode>,
                   link: (
                     <EuiLink
+                      data-test-subj="syntheticsLocationFormReadTheDocsLink"
                       target="_blank"
                       href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
                       external

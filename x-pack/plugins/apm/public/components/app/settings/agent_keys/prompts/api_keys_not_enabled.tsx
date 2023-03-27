@@ -36,6 +36,7 @@ export function ApiKeysNotEnabled() {
             values={{
               link: (
                 <EuiLink
+                  data-test-subj="apmApiKeysNotEnabledDocsLink"
                   href={docLinks?.links.security.apiKeyServiceSettings}
                   target="_blank"
                 >

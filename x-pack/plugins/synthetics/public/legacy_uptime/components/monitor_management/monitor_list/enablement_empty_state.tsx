@@ -88,6 +88,7 @@ export const EnablementEmptyState = ({ focusButton }: { focusButton: boolean }) 
               <h3>{LEARN_MORE_LABEL}</h3>
             </EuiTitle>
             <EuiLink
+              data-test-subj="syntheticsEnablementEmptyStateLink"
               href="https://docs.google.com/document/d/1hkzFibu9LggPWXQqfbAd0mMlV75wCME7_BebXlEH-oI"
               target="_blank"
             >
@@ -110,6 +111,7 @@ export const EnablementEmptyState = ({ focusButton }: { focusButton: boolean }) 
                 values={{
                   link: (
                     <EuiLink
+                      data-test-subj="syntheticsEnablementEmptyStateLink"
                       href="https://www.elastic.co/agreements/beta-release-terms"
                       target="_blank"
                     >

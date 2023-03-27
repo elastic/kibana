@@ -24,6 +24,7 @@
     "@kbn/cloud-chat-plugin",
     "@kbn/infra-plugin",
     "@kbn/features-plugin",
+    "@kbn/lens-plugin",
     "@kbn/licensing-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
@@ -50,5 +51,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
+    "@kbn/es-query",
   ]
 }

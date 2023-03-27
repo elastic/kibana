@@ -1123,18 +1123,35 @@ paths:
                             - ROLLOUT_PASSED
                         nbAgentsActioned:
                           type: number
+                          description: number of agents actioned
                         nbAgentsActionCreated:
                           type: number
+                          description: number of agents included in action from kibana
                         nbAgentsAck:
                           type: number
+                          description: number of agents that acknowledged the action
                         nbAgentsFailed:
                           type: number
+                          description: number of agents that failed to execute the action
                         version:
                           type: string
+                          description: agent version number (UPGRADE action)
                         startTime:
                           type: string
+                          description: start time of action (scheduled actions)
                         type:
                           type: string
+                          enum:
+                            - POLICY_REASSIGN
+                            - UPGRADE
+                            - UNENROLL
+                            - FORCE_UNENROLL
+                            - UPDATE_TAGS
+                            - CANCEL
+                            - REQUEST_DIAGNOSTICS
+                            - SETTINGS
+                            - POLICY_CHANGE
+                            - INPUT_ACTION
                         expiration:
                           type: string
                         completionTime:
@@ -1143,8 +1160,16 @@ paths:
                           type: string
                         newPolicyId:
                           type: string
+                          description: new policy id (POLICY_REASSIGN action)
+                        policyId:
+                          type: string
+                          description: policy id (POLICY_CHANGE action)
+                        revision:
+                          type: string
+                          description: new policy revision (POLICY_CHANGE action)
                         creationTime:
                           type: string
+                          description: creation time of action
                         latestErrors:
                           type: array
                           description: >-
@@ -1168,6 +1193,7 @@ paths:
                         - nbAgentsFailed
                         - status
                         - creationTime
+                        - type
                 required:
                   - items
         '400':
@@ -2380,6 +2406,8 @@ paths:
                   - item
         '400':
           $ref: '#/components/responses/error'
+        '409':
+          $ref: '#/components/responses/error'
       requestBody:
         description: >-
           You should use inputs as an object and not use the deprecated inputs
@@ -2510,6 +2538,8 @@ paths:
                     - id
                     - success
         '400':
+          $ref: '#/components/responses/error'
+        '409':
           $ref: '#/components/responses/error'
   /package_policies/upgrade/dryrun:
     post:

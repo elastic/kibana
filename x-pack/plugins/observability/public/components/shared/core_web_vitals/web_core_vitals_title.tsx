@@ -76,7 +76,12 @@ export function WebCoreVitalsTitle({
                     id="xpack.observability.ux.dashboard.webCoreVitals.help"
                     defaultMessage="Learn more about"
                   />{' '}
-                  <EuiLink href="https://web.dev/vitals/" external target="_blank">
+                  <EuiLink
+                    data-test-subj="o11yWebCoreVitalsTitleLink"
+                    href="https://web.dev/vitals/"
+                    external
+                    target="_blank"
+                  >
                     {CORE_WEB_VITALS}
                   </EuiLink>
                 </EuiText>
@@ -120,6 +125,7 @@ export function WebCoreVitalsTitle({
                       defaultMessage="Learn more about"
                     />{' '}
                     <EuiLink
+                      data-test-subj="o11yWebCoreVitalsTitleLink"
                       href="https://github.com/GoogleChrome/web-vitals#browser-support"
                       external
                       target="_blank"
