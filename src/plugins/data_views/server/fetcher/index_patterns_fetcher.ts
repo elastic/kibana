@@ -64,18 +64,13 @@ export class IndexPatternsFetcher {
     fields?: string[];
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, indexFilter } = options;
-    const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
     const allowNoIndices = fieldCapsOptions
       ? fieldCapsOptions.allow_no_indices
       : this.allowNoIndices;
-    let patternListActive: string[] = patternList;
-    // if only one pattern, don't bother with validation. We let getFieldCapabilities fail if the single pattern is bad regardless
-    if (patternList.length > 1 && !allowNoIndices) {
-      patternListActive = await this.validatePatternListActive(patternList);
-    }
+
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
-      indices: patternListActive,
+      indices: pattern,
       metaFields,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndices,
@@ -84,6 +79,7 @@ export class IndexPatternsFetcher {
       indexFilter,
       fields: options.fields || ['*'],
     });
+
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const capabilityCheck = getCapabilitiesForRollupIndices(
@@ -113,36 +109,5 @@ export class IndexPatternsFetcher {
       };
     }
     return fieldCapsResponse;
-  }
-
-  /**
-   *  Returns an index pattern list of only those index pattern strings in the given list that return indices
-   *
-   *  @param patternList string[]
-   *  @return {Promise<string[]>}
-   */
-  async validatePatternListActive(patternList: string[]) {
-    const result = await Promise.all(
-      patternList
-        .map(async (index) => {
-          // perserve negated patterns
-          if (index.startsWith('-') || index.includes(':-')) {
-            return true;
-          }
-          const searchResponse = await this.elasticsearchClient.fieldCaps({
-            index,
-            fields: '_id',
-            ignore_unavailable: true,
-            allow_no_indices: false,
-          });
-          return searchResponse.indices.length > 0;
-        })
-        .map((p) => p.catch(() => false))
-    );
-    return result.reduce(
-      (acc: string[], isValid, patternListIndex) =>
-        isValid ? [...acc, patternList[patternListIndex]] : acc,
-      []
-    );
   }
 }
