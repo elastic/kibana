@@ -30,7 +30,13 @@ export function SloEditFormDescriptionSection() {
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      style={{ maxWidth }}
+      data-test-subj="sloEditFormDescriptionSection"
+    >
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem>
           <EuiFormLabel>

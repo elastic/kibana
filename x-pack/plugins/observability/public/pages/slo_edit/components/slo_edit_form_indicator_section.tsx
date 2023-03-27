@@ -33,7 +33,13 @@ export function SloEditFormIndicatorSection() {
   };
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      style={{ maxWidth }}
+      data-test-subj="sloEditFormIndicatorSection"
+    >
       <EuiFormLabel>
         {i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
           defaultMessage: 'Choose the SLI type',

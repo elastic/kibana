@@ -30,7 +30,13 @@ export function SloEditFormObjectiveSection() {
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      style={{ maxWidth }}
+      data-test-subj="sloEditFormObjectiveSection"
+    >
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormLabel>

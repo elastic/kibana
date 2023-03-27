@@ -134,8 +134,8 @@ export function SloEditForm({ slo }: Props) {
   };
 
   return (
-    <FormProvider {...methods} data-test-subj="sloForm">
-      <EuiFlexGroup direction="column" gutterSize="s">
+    <FormProvider {...methods}>
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="sloForm">
         <EuiSteps
           steps={[
             {
