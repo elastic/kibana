@@ -483,10 +483,10 @@ describe('healthRoute', () => {
       level: ServiceStatusLevels.degraded,
       summary: 'Task Manager is unhealthy',
     });
-    const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls as string[][];
+    const warnCalls = (logger as jest.Mocked<Logger>).warn.mock.calls as string[][];
     const warnMessage =
       /^setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana/;
-    const found = debugCalls
+    const found = warnCalls
       .map((arr) => arr[0])
       .find((message) => message.match(warnMessage) != null);
     expect(found).toMatch(warnMessage);

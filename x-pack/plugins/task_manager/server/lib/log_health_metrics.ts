@@ -40,7 +40,7 @@ export function logHealthMetrics(
       capacity_estimation: undefined,
     },
   };
-  const statusWithoutCapacity = calculateHealthStatus(
+  const { status: statusWithoutCapacity } = calculateHealthStatus(
     healthWithoutCapacity,
     config,
     shouldRunTasks,
