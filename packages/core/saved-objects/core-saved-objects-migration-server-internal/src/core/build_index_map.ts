@@ -41,6 +41,7 @@ export function createIndexMap({ kibanaIndexName, registry, indexMap }: CreateIn
         `convertToAliasScript has been defined more than once for index pattern "${indexPattern}"`
       );
     } else if (script) {
+      // CHECKPOINT here we assign the 'convertToAliasScript' to 'script' for '.kibana_task_manager'
       map[indexPattern].script = script;
     }
   });

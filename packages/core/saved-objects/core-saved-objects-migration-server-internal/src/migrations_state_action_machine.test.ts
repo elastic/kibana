@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -39,7 +38,7 @@ describe('migrationsStateActionMachine', () => {
     kibanaVersion: '7.11.0',
     waitForMigrationCompletion: false,
     mustRelocateDocuments: true,
-    typeIndexMap: {
+    indexTypesMap: {
       '.kibana': ['typeA', 'typeB', 'typeC'],
       '.kibana_task_manager': ['task'],
       '.kibana_cases': ['typeD', 'typeE'],
@@ -272,10 +271,7 @@ describe('migrationsStateActionMachine', () => {
     `);
   });
   describe('cleanup', () => {
-    beforeEach(() => {
-      cleanupMock.mockClear();
-    });
-    it('calls cleanup function when an action throws', async () => {
+    it('calls abort function when an action throws', async () => {
       await expect(
         migrationStateActionMachine({
           initialState: { ...initialState, reason: 'the fatal reason' } as State,
@@ -288,9 +284,9 @@ describe('migrationsStateActionMachine', () => {
         })
       ).rejects.toThrow();
 
-      expect(cleanupMock).toHaveBeenCalledTimes(1);
+      expect(abort).toHaveBeenCalledTimes(1);
     });
-    it('calls cleanup function when reaching the FATAL state', async () => {
+    it('calls abort function when reaching the FATAL state', async () => {
       await expect(
         migrationStateActionMachine({
           initialState: { ...initialState, reason: 'the fatal reason' } as State,
@@ -301,7 +297,7 @@ describe('migrationsStateActionMachine', () => {
         })
       ).rejects.toThrow();
 
-      expect(cleanupMock).toHaveBeenCalledTimes(1);
+      expect(abort).toHaveBeenCalledTimes(1);
     });
   });
 });

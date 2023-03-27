@@ -938,7 +938,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         const batches = createBatches({
           documents,
           maxBatchSizeBytes: stateP.maxBatchSizeBytes,
-          typeIndexMap: stateP.typeIndexMap,
+          indexTypesMap: stateP.indexTypesMap,
           kibanaVersion: stateP.kibanaVersion,
         });
         if (Either.isRight(batches)) {

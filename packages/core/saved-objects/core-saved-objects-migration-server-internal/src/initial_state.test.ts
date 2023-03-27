@@ -31,7 +31,7 @@ const createInitialStateCommonParams = {
   kibanaVersion: '8.1.0',
   waitForMigrationCompletion: false,
   mustRelocateDocuments: true,
-  typeIndexMap: {
+  indexTypesMap: {
     '.kibana': ['typeA', 'typeB', 'typeC'],
     '.kibana_task_manager': ['task'],
     '.kibana_cases': ['typeD', 'typeE'],
@@ -239,7 +239,7 @@ describe('createInitialState', () => {
             },
           },
         },
-        "typeIndexMap": Object {
+        "indexTypesMap": Object {
           ".kibana": Array [
             "typeA",
             "typeB",

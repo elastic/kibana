@@ -20,7 +20,7 @@ import type { TransformErrorObjects } from './core';
 import type { MigrationLog, Progress } from './types';
 import type { BulkOperation } from './model/create_batches';
 import type { Aliases } from './model/helpers';
-import type { TypeIndexMap } from './kibana_migrator_constants';
+import type { IndexTypesMap } from './kibana_migrator_constants';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
@@ -169,7 +169,7 @@ export interface BaseState extends ControlState {
    *  ...
    * }
    */
-  readonly typeIndexMap: TypeIndexMap;
+  readonly indexTypesMap: IndexTypesMap;
 }
 
 export interface InitState extends BaseState {

@@ -207,7 +207,7 @@ export const nextActionMap = (
         _meta: {
           ..._meta,
           // we store the type index map into the index mapping._meta
-          typeIndexMap: state.typeIndexMap,
+          indexTypesMap: state.indexTypesMap,
         },
       };
 

@@ -113,7 +113,7 @@ export async function migrationStateActionMachine({
       try {
         await abort(finalState);
       } catch (e) {
-        logger.warn('Failed to cleanup after migrations:', e.message);
+        logger.warn('Failed to correctly abort migrations:', e.message);
       }
       return Promise.reject(
         new Error(

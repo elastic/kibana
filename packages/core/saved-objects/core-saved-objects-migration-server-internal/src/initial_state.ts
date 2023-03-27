@@ -18,13 +18,13 @@ import type {
 import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
 import { getTempIndexName } from './model/helpers';
-import type { TypeIndexMap } from './kibana_migrator_constants';
+import type { IndexTypesMap } from './kibana_migrator_constants';
 
 export interface CreateInitialStateParams {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
-  typeIndexMap: TypeIndexMap;
+  indexTypesMap: IndexTypesMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   migrationVersionPerType: SavedObjectsMigrationVersion;
@@ -42,7 +42,7 @@ export const createInitialState = ({
   kibanaVersion,
   waitForMigrationCompletion,
   mustRelocateDocuments,
-  typeIndexMap,
+  indexTypesMap,
   targetMappings,
   preMigrationScript,
   migrationVersionPerType,
@@ -107,7 +107,7 @@ export const createInitialState = ({
     controlState: 'INIT',
     waitForMigrationCompletion,
     mustRelocateDocuments,
-    typeIndexMap,
+    indexTypesMap,
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,

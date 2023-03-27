@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type TypeIndexMap = Record<string, string[]>;
+export type IndexTypesMap = Record<string, string[]>;
 
 export enum TypeStatus {
   Added = 'added',
@@ -27,7 +27,7 @@ export const MAIN_SAVED_OBJECT_INDEX = '.kibana';
 // see https://github.com/elastic/kibana/issues/147344
 export const ALLOWED_CONVERT_VERSION = '8.0.0';
 
-export const DEFAULT_TYPE_INDEX_MAP: TypeIndexMap = {
+export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {
   '.kibana_task_manager': ['task'],
   '.kibana': [
     'core-usage-stats',

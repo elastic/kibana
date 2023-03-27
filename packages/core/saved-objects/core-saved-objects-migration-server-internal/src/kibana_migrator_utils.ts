@@ -7,13 +7,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { IndexMap } from './core';
 import {
-  type TypeIndexMap,
+  type IndexTypesMap,
   TypeStatus,
-  TypeStatusDetails,
-  MAIN_SAVED_OBJECT_INDEX,
+  type TypeStatusDetails,
 } from './kibana_migrator_constants';
 
 // even though this utility class is present in @kbn/kibana-utils-plugin, we can't easily import it from Core
@@ -39,39 +38,30 @@ export function createMultiPromiseDefer(indices: string[]): Record<string, Defer
   }, {});
 }
 
-export async function checkTypeIndexDistribution(
-  client: ElasticsearchClient,
-  desiredIndexMap: TypeIndexMap,
-  defaultIndexTypeMap: TypeIndexMap
-): Promise<Record<string, TypeStatusDetails>> {
-  const mapping = await client.indices.getMapping({
-    index: MAIN_SAVED_OBJECT_INDEX,
-  });
-  const meta = Object.values(mapping)?.[0].mappings._meta;
-  const currentIndexMap: TypeIndexMap = meta?.typeIndexMap ?? defaultIndexTypeMap;
-
-  return calculateTypeStatuses(currentIndexMap, desiredIndexMap);
-}
-
 export async function getIndicesInvoledInRelocation({
   client,
-  typeIndexMap,
-  defaultIndexTypeMap,
+  mainIndex,
+  indexTypesMap,
+  defaultIndexTypesMap,
   logger,
 }: {
   client: ElasticsearchClient;
-  typeIndexMap: TypeIndexMap;
-  defaultIndexTypeMap: TypeIndexMap;
+  mainIndex: string;
+  indexTypesMap: IndexTypesMap;
+  defaultIndexTypesMap: IndexTypesMap;
   logger: Logger;
 }): Promise<string[]> {
   const indicesWithMovingTypesSet = new Set<string>();
 
   try {
-    const typeIndexDistribution = await checkTypeIndexDistribution(
-      client,
-      typeIndexMap,
-      defaultIndexTypeMap
-    );
+    // obtain the current type index map from the
+    const mapping = await client.indices.getMapping({
+      index: mainIndex,
+    });
+    const meta = Object.values(mapping)?.[0]?.mappings._meta;
+    const currentIndexMap: IndexTypesMap = meta?.indexTypesMap ?? defaultIndexTypesMap;
+
+    const typeIndexDistribution = calculateTypeStatuses(currentIndexMap, indexTypesMap);
 
     const relocated = Object.entries(typeIndexDistribution).filter(
       ([, { status }]) => status === TypeStatus.Moved
@@ -83,10 +73,8 @@ export async function getIndicesInvoledInRelocation({
 
     return Array.from(indicesWithMovingTypesSet);
   } catch (error) {
-    if (error.body?.status === 404) {
-      logger.debug(
-        `The ${MAIN_SAVED_OBJECT_INDEX} index does NOT exist. Assuming this is a fresh deployment`
-      );
+    if (error.meta?.statusCode === 404) {
+      logger.debug(`The ${mainIndex} index does NOT exist. Assuming this is a fresh deployment`);
       return [];
     } else {
       logger.fatal('Cannot query the meta information of the main saved object index');
@@ -95,20 +83,20 @@ export async function getIndicesInvoledInRelocation({
   }
 }
 
-export function indexMapToTypeIndexMap(indexMap: IndexMap): TypeIndexMap {
-  return Object.entries(indexMap).reduce<TypeIndexMap>((acc, [indexAlias, { typeMappings }]) => {
+export function indexMapToIndexTypesMap(indexMap: IndexMap): IndexTypesMap {
+  return Object.entries(indexMap).reduce<IndexTypesMap>((acc, [indexAlias, { typeMappings }]) => {
     acc[indexAlias] = Object.keys(typeMappings);
     return acc;
   }, {});
 }
 
-function calculateTypeStatuses(
-  currentIndexMap: TypeIndexMap,
-  desiredIndexMap: TypeIndexMap
+export function calculateTypeStatuses(
+  currentIndexTypesMap: IndexTypesMap,
+  desiredIndexTypesMap: IndexTypesMap
 ): Record<string, TypeStatusDetails> {
   const statuses: Record<string, TypeStatusDetails> = {};
 
-  Object.entries(currentIndexMap).forEach(([currentIndex, types]) => {
+  Object.entries(currentIndexTypesMap).forEach(([currentIndex, types]) => {
     types.forEach((type) => {
       statuses[type] = {
         currentIndex,
@@ -117,7 +105,7 @@ function calculateTypeStatuses(
     });
   });
 
-  Object.entries(desiredIndexMap).forEach(([targetIndex, types]) => {
+  Object.entries(desiredIndexTypesMap).forEach(([targetIndex, types]) => {
     types.forEach((type) => {
       if (!statuses[type]) {
         statuses[type] = {

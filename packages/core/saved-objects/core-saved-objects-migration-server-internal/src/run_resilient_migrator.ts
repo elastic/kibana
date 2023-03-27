@@ -24,7 +24,7 @@ import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import type { State } from './state';
-import type { TypeIndexMap } from './kibana_migrator_constants';
+import type { IndexTypesMap } from './kibana_migrator_constants';
 
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we
@@ -50,7 +50,7 @@ export async function runResilientMigrator({
   kibanaVersion,
   waitForMigrationCompletion,
   mustRelocateDocuments,
-  typeIndexMap,
+  indexTypesMap,
   targetMappings,
   logger,
   preMigrationScript,
@@ -67,7 +67,7 @@ export async function runResilientMigrator({
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
-  typeIndexMap: TypeIndexMap;
+  indexTypesMap: IndexTypesMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   readyToReindex: Defer<any>;
@@ -84,7 +84,7 @@ export async function runResilientMigrator({
     kibanaVersion,
     waitForMigrationCompletion,
     mustRelocateDocuments,
-    typeIndexMap,
+    indexTypesMap,
     targetMappings,
     preMigrationScript,
     migrationVersionPerType,

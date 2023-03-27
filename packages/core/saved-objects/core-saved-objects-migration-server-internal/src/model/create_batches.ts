@@ -15,7 +15,7 @@ import {
   getTempIndexName,
 } from './helpers';
 import type { TransformErrorObjects } from '../core';
-import { TypeIndexMap } from '../kibana_migrator_constants';
+import { IndexTypesMap } from '../kibana_migrator_constants';
 
 export type BulkIndexOperationTuple = [BulkOperationContainer, SavedObjectsRawDocSource];
 export type BulkOperation = BulkIndexOperationTuple | BulkOperationContainer;
@@ -26,7 +26,7 @@ export interface CreateBatchesParams {
   transformErrors?: TransformErrorObjects[];
   maxBatchSizeBytes: number;
   kibanaVersion: string;
-  typeIndexMap?: TypeIndexMap;
+  indexTypesMap?: IndexTypesMap;
 }
 
 export interface DocumentExceedsBatchSize {
@@ -46,7 +46,7 @@ export function createBatches({
   transformErrors = [],
   maxBatchSizeBytes,
   kibanaVersion,
-  typeIndexMap,
+  indexTypesMap,
 }: CreateBatchesParams): Either.Either<DocumentExceedsBatchSize, BulkOperation[][]> {
   /* To build up the NDJSON request body we construct an array of objects like:
    * [
@@ -77,7 +77,7 @@ export function createBatches({
   // 'cases': '.kibana_cases_8.8.0_reindex_temp'
   // 'task': '.kibana_task_manager_8.8.0_reindex_temp'
   // ...
-  const tempTypeIndexMap: Record<string, string> = Object.entries(typeIndexMap || {}).reduce<
+  const typeIndexMap: Record<string, string> = Object.entries(indexTypesMap || {}).reduce<
     Record<string, string>
   >((acc, [indexAlias, types]) => {
     const tempIndex = getTempIndexName(indexAlias, kibanaVersion);
@@ -115,7 +115,7 @@ export function createBatches({
 
   // create index (update) operations for all transformed documents
   for (const document of documents) {
-    const bulkIndexOperationBody = createBulkIndexOperationTuple(document, tempTypeIndexMap);
+    const bulkIndexOperationBody = createBulkIndexOperationTuple(document, typeIndexMap);
     // take into account that this tuple's surrounding brackets `[]` won't be present in the NDJSON
     const docSizeBytes =
       Buffer.byteLength(JSON.stringify(bulkIndexOperationBody), 'utf8') - BRACKETS_BYTES;
