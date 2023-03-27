@@ -28,6 +28,9 @@
     "@kbn/utility-types-jest",
     "@kbn/safer-lodash-set",
     "@kbn/core-http-server",
+    "@kbn/content-management-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-common",
   ],
   "exclude": [
     "target/**/*",

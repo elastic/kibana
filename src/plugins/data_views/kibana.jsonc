@@ -9,7 +9,8 @@
     "browser": true,
     "requiredPlugins": [
       "fieldFormats",
-      "expressions"
+      "expressions",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "usageCollection"

@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsCreateOptions,
-  SavedObjectsUpdateOptions,
-  SimpleSavedObject,
-} from '@kbn/core/public';
-import { omit } from 'lodash';
+import { SavedObjectsCreateOptions, SavedObjectsUpdateOptions } from '@kbn/core/public';
+
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
@@ -21,35 +17,49 @@ import {
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';
 
-type SOClient = Pick<
-  SavedObjectsClientContract,
-  'find' | 'resolve' | 'update' | 'create' | 'delete'
->;
-
-const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
-  ({
-    version: simpleSavedObject._version,
-    ...omit(simpleSavedObject, '_version'),
-  } as SavedObject<T>);
+import type {
+  DataViewGetIn,
+  DataViewGetOut,
+  DataViewCreateIn,
+  DataViewCreateOut,
+  DataViewUpdateIn,
+  DataViewUpdateOut,
+  DataViewDeleteIn,
+  DataViewDeleteOut,
+  DataViewSearchIn,
+  DataViewSearchOut,
+  // DataViewSearchQuery,
+} from '../common/content_management';
 
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
-  private savedObjectClient: SOClient;
+  private contentManagemntClient: ContentClient;
 
-  constructor(savedObjectClient: SOClient) {
-    this.savedObjectClient = savedObjectClient;
+  constructor(contentManagemntClient: ContentClient) {
+    this.contentManagemntClient = contentManagemntClient;
   }
 
-  async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
-    const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
-    return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
+  async find(options: SavedObjectsClientCommonFindArgs) {
+    console.log('******* find', options);
+    const results = await this.contentManagemntClient.search<DataViewSearchIn, DataViewSearchOut>({
+      contentTypeId: 'index-pattern',
+      // query: options.search,
+      // ...options,
+    });
+    console.log('******* find results', results);
+
+    return results.savedObjects;
   }
 
-  async get<T = unknown>(type: string, id: string) {
-    const response = await this.savedObjectClient.resolve<T>(type, id);
+  async get(id: string) {
+    const response = await this.contentManagemntClient.get<DataViewGetIn, DataViewGetOut>({
+      contentTypeId: 'index-pattern',
+      id,
+    });
+
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
-    return simpleSavedObjectToSavedObject<T>(response.saved_object);
+    return response.savedObject;
   }
 
   async update(
@@ -58,16 +68,27 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     attributes: DataViewAttributes,
     options: SavedObjectsUpdateOptions<unknown>
   ) {
-    const response = await this.savedObjectClient.update(type, id, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+    const response = await this.contentManagemntClient.update<DataViewUpdateIn, DataViewUpdateOut>({
+      contentTypeId: 'index-pattern',
+      id,
+      data: attributes,
+      options,
+    });
+    return response as SavedObject<DataViewAttributes>;
   }
 
   async create(type: string, attributes: DataViewAttributes, options?: SavedObjectsCreateOptions) {
-    const response = await this.savedObjectClient.create(type, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+    return (await this.contentManagemntClient.create<DataViewCreateIn, DataViewCreateOut>({
+      contentTypeId: 'index-pattern',
+      data: attributes,
+      options,
+    })) as SavedObject<DataViewAttributes>;
   }
 
   delete(type: string, id: string) {
-    return this.savedObjectClient.delete(type, id, { force: true });
+    return this.contentManagemntClient.delete<DataViewDeleteIn, DataViewDeleteOut>({
+      contentTypeId: 'index-pattern',
+      id,
+    });
   }
 }

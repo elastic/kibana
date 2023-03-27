@@ -175,7 +175,7 @@ export interface DataViewsServicePublicMethods {
    * Delete data view
    * @param indexPatternId - Id of the data view to delete.
    */
-  delete: (indexPatternId: string) => Promise<{}>;
+  delete: (indexPatternId: string) => Promise<unknown>; // todo
   /**
    * Takes field array and field attributes and returns field map by name.
    * @param fields - Array of fieldspecs
@@ -349,7 +349,7 @@ export class DataViewsService {
    * Refresh cache of index pattern ids and titles.
    */
   private async refreshSavedObjectsCache() {
-    const so = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
+    const so = await this.savedObjectsClient.find({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
@@ -392,7 +392,7 @@ export class DataViewsService {
    * @returns DataView[]
    */
   find = async (search: string, size: number = 10): Promise<DataView[]> => {
-    const savedObjects = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
+    const savedObjects = await this.savedObjectsClient.find({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title'],
       search,
@@ -726,10 +726,7 @@ export class DataViewsService {
     id: string,
     displayErrors: boolean = true
   ): Promise<DataView> => {
-    const savedObject = await this.savedObjectsClient.get<DataViewAttributes>(
-      DATA_VIEW_SAVED_OBJECT_TYPE,
-      id
-    );
+    const savedObject = await this.savedObjectsClient.get(DATA_VIEW_SAVED_OBJECT_TYPE, id);
 
     if (!savedObject.version) {
       throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');

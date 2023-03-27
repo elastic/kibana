@@ -267,13 +267,15 @@ export interface SavedObjectsClientCommon {
    * Search for saved objects
    * @param options - options for search
    */
-  find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
+  find: (
+    options: SavedObjectsClientCommonFindArgs
+  ) => Promise<Array<SavedObject<DataViewAttributes>>>;
   /**
    * Get a single saved object by id
    * @param type - type of saved object
    * @param id - id of saved object
    */
-  get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
+  get: (type: string, id: string) => Promise<SavedObject<DataViewAttributes>>;
   /**
    * Update a saved object by id
    * @param type - type of saved object
@@ -303,7 +305,7 @@ export interface SavedObjectsClientCommon {
    * @param type - type of saved object
    * @param id - id of saved object
    */
-  delete: (type: string, id: string) => Promise<{}>;
+  delete: (type: string, id: string) => Promise<unknown>; // todo remove unknown
 }
 
 export interface GetFieldsOptions {
