@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.notifications.assertNotificationErrorsCount(0);
     });
 
-    it('support custom sorting for notifications level', async () => {
+    it('supports custom sorting for notifications level', async () => {
       await ml.navigation.navigateToNotifications();
       await ml.notifications.table.waitForTableToLoad();
 
