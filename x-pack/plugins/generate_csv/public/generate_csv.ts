@@ -6,8 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
