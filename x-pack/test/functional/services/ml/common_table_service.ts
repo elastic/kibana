@@ -121,8 +121,8 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       for (const header of headers) {
         const ariaSort = await header.getAttribute('aria-sort');
         if (ariaSort !== 'none') {
-          // TODO Add support for column names with _
-          const columnName = (await header.getAttribute('data-test-subj')).split('_')[1];
+          const columnNameFragments = (await header.getAttribute('data-test-subj')).split('_');
+          const columnName = columnNameFragments.slice(1, columnNameFragments.length - 1).join('_');
           return { columnName, direction: ariaSort.replace('ending', '') };
         }
       }
