@@ -13,18 +13,25 @@ import { i18n } from '@kbn/i18n';
 
 import { AddAnalyticsCollectionModal } from './add_analytics_collection_modal';
 
-export const AddAnalyticsCollection: React.FC = () => {
+interface AddAnalyticsCollectionProps {
+  render?: (onClick: () => void) => React.ReactNode;
+}
+export const AddAnalyticsCollection: React.FC<AddAnalyticsCollectionProps> = ({ render }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
 
   return (
     <>
-      <EuiButton fill iconType="plusInCircle" onClick={showModal}>
-        {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
-          defaultMessage: 'Create collection',
-        })}
-      </EuiButton>
+      {render ? (
+        render(showModal)
+      ) : (
+        <EuiButton fill iconType="plusInCircle" onClick={showModal}>
+          {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
+            defaultMessage: 'Create collection',
+          })}
+        </EuiButton>
+      )}
       {isModalVisible && <AddAnalyticsCollectionModal onClose={closeModal} />}
     </>
   );

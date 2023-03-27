@@ -9,6 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { sloFeatureId } from '../../../../common';
+import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { FIRED_ACTION, getRuleExecutor } from './executor';
@@ -37,7 +40,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
     },
     defaultActionGroupId: FIRED_ACTION.id,
     actionGroups: [FIRED_ACTION],
-    producer: 'slo',
+    producer: sloFeatureId,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(getRuleExecutor()),
@@ -50,6 +53,12 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
         { name: 'longWindow', description: windowActionVariableDescription },
         { name: 'shortWindow', description: windowActionVariableDescription },
       ],
+    },
+    alerts: {
+      context: SLO_RULE_REGISTRATION_CONTEXT,
+      mappings: { fieldMap: legacyExperimentalFieldMap },
+      useEcs: true,
+      useLegacyAlerts: true,
     },
   };
 }

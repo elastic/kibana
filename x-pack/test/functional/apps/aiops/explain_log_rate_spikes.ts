@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash';
+
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -148,14 +150,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       const analysisGroupsTable =
         await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
 
-      expect(analysisGroupsTable).to.be.eql(testData.expected.analysisGroupsTable);
+      expect(orderBy(analysisGroupsTable, 'group')).to.be.eql(
+        orderBy(testData.expected.analysisGroupsTable, 'group')
+      );
 
       await ml.testExecution.logTestStep('expand table row');
       await aiops.explainLogRateSpikesAnalysisGroupsTable.assertExpandRowButtonExists();
       await aiops.explainLogRateSpikesAnalysisGroupsTable.expandRow();
 
       const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
-      expect(analysisTable).to.be.eql(testData.expected.analysisTable);
+      expect(orderBy(analysisTable, ['fieldName', 'fieldValue'])).to.be.eql(
+        orderBy(testData.expected.analysisTable, ['fieldName', 'fieldValue'])
+      );
     });
   }
 

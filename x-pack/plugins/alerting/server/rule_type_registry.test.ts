@@ -472,13 +472,13 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         alerts: {
           context: 'test',
-          fieldMap: { field: { type: 'keyword', required: false } },
+          mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
         },
       });
 
       expect(alertsService.register).toHaveBeenCalledWith({
         context: 'test',
-        fieldMap: { field: { type: 'keyword', required: false } },
+        mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
       });
     });
 

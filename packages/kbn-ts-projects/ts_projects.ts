@@ -10,7 +10,7 @@ import { TsProject } from './ts_project';
 
 export const TS_PROJECTS = TsProject.loadAll({
   /** Array of repo-relative paths to projects which should be ignored and not treated as a TS project in the repo */
-  ignore: ['x-pack/plugins/apm/scripts/optimize_tsconfig/tsconfig.json', '**/__fixtures__/**/*'],
+  ignore: ['**/__fixtures__/**/*'],
 
   /** Array of repo-relative paths to projects which should have their type-check disabled */
   disableTypeCheck: [

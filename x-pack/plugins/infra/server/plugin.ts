@@ -32,6 +32,10 @@ import { InfraKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
 import { registerRuleTypes } from './lib/alerting';
+import {
+  LOGS_RULES_ALERT_CONTEXT,
+  METRICS_RULES_ALERT_CONTEXT,
+} from './lib/alerting/register_rule_types';
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
@@ -116,12 +120,12 @@ export class InfraServerPlugin
 
     this.logsRules = new RulesService(
       LOGS_FEATURE_ID,
-      'observability.logs',
+      LOGS_RULES_ALERT_CONTEXT,
       this.logger.get('logsRules')
     );
     this.metricsRules = new RulesService(
       METRICS_FEATURE_ID,
-      'observability.metrics',
+      METRICS_RULES_ALERT_CONTEXT,
       this.logger.get('metricsRules')
     );
 

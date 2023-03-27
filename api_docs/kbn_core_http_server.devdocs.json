@@ -1057,6 +1057,16 @@
         "description": [
           "\nHTTP response parameters"
         ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.HttpResponseOptions",
+            "text": "HttpResponseOptions"
+          },
+          "<T>"
+        ],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1064,16 +1074,14 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.HttpResponseOptions.body",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "body",
             "description": [
               "HTTP message to send to the client"
             ],
             "signature": [
-              "string | Record<string, any> | Buffer | ",
-              "Stream",
-              " | undefined"
+              "T | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
@@ -2682,7 +2690,8 @@
                 "docId": "kibKbnCoreHttpServerPluginApi",
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
-              }
+              },
+              "<any>"
             ],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
@@ -5006,6 +5015,20 @@
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaRouteOptions.access",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "signature": [
+              "\"internal\" | \"public\""
+            ],
+            "path": "packages/core/http/core-http-server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5031,7 +5054,17 @@
               "\nThe request has succeeded.\nStatus code: `200`."
             ],
             "signature": [
-              "(options?: ",
+              "<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined = any>(options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -5039,7 +5072,7 @@
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
               },
-              " | undefined) => ",
+              "<T> | undefined) => ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -5047,7 +5080,7 @@
                 "section": "def-common.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>"
+              "<T>"
             ],
             "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
             "deprecated": false,
@@ -5070,7 +5103,7 @@
                     "section": "def-common.HttpResponseOptions",
                     "text": "HttpResponseOptions"
                   },
-                  " | undefined"
+                  "<T> | undefined"
                 ],
                 "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
                 "deprecated": false,
@@ -5090,7 +5123,17 @@
               "\nThe request has been accepted for processing.\nStatus code: `202`."
             ],
             "signature": [
-              "(options?: ",
+              "<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined = any>(options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -5098,7 +5141,7 @@
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
               },
-              " | undefined) => ",
+              "<T> | undefined) => ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -5106,7 +5149,7 @@
                 "section": "def-common.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>"
+              "<T>"
             ],
             "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
             "deprecated": false,
@@ -5129,7 +5172,7 @@
                     "section": "def-common.HttpResponseOptions",
                     "text": "HttpResponseOptions"
                   },
-                  " | undefined"
+                  "<T> | undefined"
                 ],
                 "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
                 "deprecated": false,
@@ -5157,7 +5200,7 @@
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
               },
-              " | undefined) => ",
+              "<any> | undefined) => ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -5188,7 +5231,7 @@
                     "section": "def-common.HttpResponseOptions",
                     "text": "HttpResponseOptions"
                   },
-                  " | undefined"
+                  "<any> | undefined"
                 ],
                 "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
                 "deprecated": false,
@@ -6070,6 +6113,22 @@
             ],
             "signature": [
               "(Method extends \"get\" ? never : boolean) | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteConfigOptions.access",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "access",
+            "description": [
+              "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nIf not declared, infers access from route path:\n- access =`internal` for '/internal' route path prefix\n- access = `public` for everything else"
+            ],
+            "signature": [
+              "\"internal\" | \"public\" | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -8513,7 +8572,7 @@
             "section": "def-common.HttpResponseOptions",
             "text": "HttpResponseOptions"
           },
-          " & { headers: { location: string; }; }"
+          "<any> & { headers: { location: string; }; }"
         ],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,

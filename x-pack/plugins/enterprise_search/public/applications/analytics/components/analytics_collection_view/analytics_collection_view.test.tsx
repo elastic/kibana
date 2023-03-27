@@ -24,8 +24,6 @@ import { AnalyticsCollectionView } from './analytics_collection_view';
 
 const mockValues = {
   analyticsCollection: {
-    event_retention_day_length: 180,
-    id: '1',
     name: 'Analytics Collection 1',
   } as AnalyticsCollection,
   dataViewId: '1234-1234-1234',

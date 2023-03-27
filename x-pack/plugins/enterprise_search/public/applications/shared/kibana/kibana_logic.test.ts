@@ -19,7 +19,7 @@ describe('KibanaLogic', () => {
 
   describe('mounts', () => {
     it('sets values from props', () => {
-      mountKibanaLogic(mockKibanaValues);
+      mountKibanaLogic(mockKibanaValues as any);
 
       expect(KibanaLogic.values).toEqual({
         ...mockKibanaValues,
@@ -41,7 +41,7 @@ describe('KibanaLogic', () => {
   });
 
   describe('navigateToUrl()', () => {
-    beforeEach(() => mountKibanaLogic(mockKibanaValues));
+    beforeEach(() => mountKibanaLogic(mockKibanaValues as any));
 
     it('runs paths through createHref before calling navigateToUrl', () => {
       KibanaLogic.values.navigateToUrl('/test');

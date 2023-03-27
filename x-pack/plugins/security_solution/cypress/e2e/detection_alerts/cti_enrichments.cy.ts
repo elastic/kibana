@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getNewThreatIndicatorRule } from '../../objects/rule';
+import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -22,7 +22,7 @@ import {
 import { TIMELINE_FIELD } from '../../screens/rule_details';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { expandFirstAlert, setEnrichmentDates, viewThreatIntelTab } from '../../tasks/alerts';
-import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -34,7 +34,7 @@ describe('CTI Enrichment', () => {
     esArchiverLoad('threat_indicator');
     esArchiverLoad('suspicious_source_event');
     login();
-    createCustomIndicatorRule(getNewThreatIndicatorRule());
+    createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true });
   });
 
   after(() => {
@@ -49,11 +49,12 @@ describe('CTI Enrichment', () => {
 
   it('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
-      'threat.enrichments.matched.atomic': getNewThreatIndicatorRule().atomic,
-      'threat.enrichments.matched.type': getNewThreatIndicatorRule().matchedType,
-      'threat.enrichments.matched.field': getNewThreatIndicatorRule().indicatorMappingField,
-      'threat.enrichments.matched.id': getNewThreatIndicatorRule().matchedId,
-      'threat.enrichments.matched.index': getNewThreatIndicatorRule().matchedIndex,
+      'threat.enrichments.matched.atomic': indicatorRuleMatchingDoc.atomic,
+      'threat.enrichments.matched.type': indicatorRuleMatchingDoc.matchedType,
+      'threat.enrichments.matched.field':
+        getNewThreatIndicatorRule().threat_mapping[0].entries[0].field,
+      'threat.enrichments.matched.id': indicatorRuleMatchingDoc.matchedId,
+      'threat.enrichments.matched.index': indicatorRuleMatchingDoc.matchedIndex,
     };
     const fields = Object.keys(expectedFields) as Array<keyof typeof expectedFields>;
 

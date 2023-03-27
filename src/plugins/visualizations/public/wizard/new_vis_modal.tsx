@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { ApplicationStart, IUiSettingsClient, DocLinksStart, HttpStart } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';
@@ -36,6 +37,7 @@ interface TypeSelectionProps {
   originatingApp?: string;
   showAggsSelection?: boolean;
   selectedVisType?: BaseVisType;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 interface TypeSelectionState {
@@ -93,6 +95,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             visType={this.state.visType}
             uiSettings={this.props.uiSettings}
             http={this.props.http}
+            savedObjectsManagement={this.props.savedObjectsManagement}
             goBack={() => this.setState({ showSearchVisModal: false })}
           />
         </EuiModal>

@@ -255,9 +255,45 @@ export const USER_TOOLTIP = i18n.translate(
     defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
   }
 );
+
 export const INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionResponse.investigateInTimeline',
   {
     defaultMessage: 'Investigate in Timeline',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_SEVERITY = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsSeverity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_STATUS = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsStatus',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_RULENAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsRuleName',
+  {
+    defaultMessage: 'Rule name',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_HOSTNAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsHostName',
+  {
+    defaultMessage: 'Host name',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_USERNAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsUserName',
+  {
+    defaultMessage: 'Username',
   }
 );

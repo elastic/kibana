@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Filter } from '@kbn/es-query';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { ALERT_STATUS_ALL } from './constants';
 
@@ -15,6 +16,6 @@ export type AlertStatus =
 
 export interface AlertStatusFilter {
   status: AlertStatus;
-  query: string;
+  query?: Filter['query'];
   label: string;
 }

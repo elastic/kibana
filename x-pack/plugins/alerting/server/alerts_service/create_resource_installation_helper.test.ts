@@ -7,7 +7,14 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { IRuleTypeAlerts } from '../types';
-import { createResourceInstallationHelper } from './create_resource_installation_helper';
+import {
+  createResourceInstallationHelper,
+  errorResult,
+  InitializationPromise,
+  ResourceInstallationHelper,
+  successResult,
+} from './create_resource_installation_helper';
+import { retryUntil } from './test_utils';
 
 const logger: ReturnType<typeof loggingSystemMock['createLogger']> =
   loggingSystemMock.createLogger();
@@ -16,13 +23,29 @@ const initFn = async (context: IRuleTypeAlerts, timeoutMs?: number) => {
   logger.info(context.context);
 };
 
-const initFnWithDelay = async (context: IRuleTypeAlerts, timeoutMs?: number) => {
-  logger.info(context.context);
-  await new Promise((r) => setTimeout(r, 50));
+const initFnWithError = async (context: IRuleTypeAlerts, timeoutMs?: number) => {
+  throw new Error('no go');
 };
 
-const initFnWithError = async (context: IRuleTypeAlerts, timeoutMs?: number) => {
-  throw new Error('fail');
+const getCommonInitPromise = async (
+  resolution: boolean,
+  timeoutMs: number = 1
+): Promise<InitializationPromise> => {
+  if (timeoutMs < 0) {
+    throw new Error('fail');
+  }
+  // delay resolution of promise by timeout value
+  await new Promise((r) => setTimeout(r, timeoutMs));
+  logger.info(`commonInitPromise resolved`);
+  return Promise.resolve(resolution ? successResult() : errorResult(`error initializing`));
+};
+
+const getContextInitialized = async (
+  helper: ResourceInstallationHelper,
+  context: string = 'test1'
+) => {
+  const { result } = await helper.getInitializedContext(context);
+  return result;
 };
 
 describe('createResourceInstallationHelper', () => {
@@ -30,108 +53,117 @@ describe('createResourceInstallationHelper', () => {
     jest.clearAllMocks();
   });
 
-  test(`should not call init function if readyToInitialize is false`, () => {
-    const helper = createResourceInstallationHelper(initFn);
-
-    // Add two contexts that need to be initialized but don't call helper.setReadyToInitialize()
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
-    helper.add({ context: 'test2', fieldMap: { field: { type: 'keyword', required: false } } });
-
-    expect(logger.info).not.toHaveBeenCalled();
-    const initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(0);
-  });
-
-  test(`should call init function if readyToInitialize is set to true`, async () => {
-    const helper = createResourceInstallationHelper(initFn);
-
-    // Add two contexts that need to be initialized and then call helper.setReadyToInitialize()
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
-    helper.add({ context: 'test2', fieldMap: { field: { type: 'keyword', required: false } } });
-
-    helper.setReadyToInitialize();
-
-    // for the setImmediate
-    await new Promise((r) => setTimeout(r, 10));
-
-    expect(logger.info).toHaveBeenCalledTimes(2);
-    const initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(2);
-
-    expect(await initializedContexts.get('test1')).toEqual(true);
-    expect(await initializedContexts.get('test2')).toEqual(true);
-  });
-
-  test(`should install resources for contexts added after readyToInitialize is called`, async () => {
-    const helper = createResourceInstallationHelper(initFnWithDelay);
+  test(`should wait for commonInitFunction to resolve before calling initFns for registered contexts`, async () => {
+    const helper = createResourceInstallationHelper(
+      logger,
+      getCommonInitPromise(true, 100),
+      initFn
+    );
 
     // Add two contexts that need to be initialized
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
-    helper.add({ context: 'test2', fieldMap: { field: { type: 'keyword', required: false } } });
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+    helper.add({
+      context: 'test2',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
 
-    // Start processing the queued contexts
-    helper.setReadyToInitialize();
+    await retryUntil('init fns run', async () => logger.info.mock.calls.length === 3);
 
-    // for the setImmediate
-    await new Promise((r) => setTimeout(r, 10));
-
-    // Add another context to process
-    helper.add({ context: 'test3', fieldMap: { field: { type: 'keyword', required: false } } });
-
-    // 3 contexts with delay will take 150
-    await new Promise((r) => setTimeout(r, 10));
-
-    expect(logger.info).toHaveBeenCalledTimes(3);
-    const initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(3);
-
-    expect(await initializedContexts.get('test1')).toEqual(true);
-    expect(await initializedContexts.get('test2')).toEqual(true);
-    expect(await initializedContexts.get('test3')).toEqual(true);
+    expect(logger.info).toHaveBeenNthCalledWith(1, `commonInitPromise resolved`);
+    expect(logger.info).toHaveBeenNthCalledWith(2, 'test1');
+    expect(logger.info).toHaveBeenNthCalledWith(3, 'test2');
+    expect(await helper.getInitializedContext('test1')).toEqual({ result: true });
+    expect(await helper.getInitializedContext('test2')).toEqual({ result: true });
   });
 
-  test(`should install resources for contexts added after initial processing loop has run`, async () => {
-    const helper = createResourceInstallationHelper(initFn);
+  test(`should return false if context is unrecognized`, async () => {
+    const helper = createResourceInstallationHelper(
+      logger,
+      getCommonInitPromise(true, 100),
+      initFn
+    );
 
-    // No contexts queued so this should finish quickly
-    helper.setReadyToInitialize();
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
 
-    // for the setImmediate
-    await new Promise((r) => setTimeout(r, 10));
+    await retryUntil('init fns run', async () => logger.info.mock.calls.length === 2);
 
-    expect(logger.info).not.toHaveBeenCalled();
-    let initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(0);
-
-    // Add a context to process
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
-
-    // for the setImmediate
-    await new Promise((r) => setTimeout(r, 10));
-
-    expect(logger.info).toHaveBeenCalledTimes(1);
-    initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(1);
-
-    expect(await initializedContexts.get('test1')).toEqual(true);
+    expect(await helper.getInitializedContext('test1')).toEqual({ result: true });
+    expect(await helper.getInitializedContext('test2')).toEqual({
+      result: false,
+      error: `Unrecognized context test2`,
+    });
   });
 
-  test(`should gracefully handle errors during initialization and set initialized flag to false`, async () => {
-    const helper = createResourceInstallationHelper(initFnWithError);
+  test(`should log and return false if common init function returns false`, async () => {
+    const helper = createResourceInstallationHelper(
+      logger,
+      getCommonInitPromise(false, 100),
+      initFn
+    );
 
-    helper.setReadyToInitialize();
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
 
-    // for the setImmediate
-    await new Promise((r) => setTimeout(r, 10));
+    await retryUntil('common init fns run', async () => logger.info.mock.calls.length === 1);
 
-    // Add a context to process
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Common resources were not initialized, cannot initialize context for test1`
+    );
+    expect(await helper.getInitializedContext('test1')).toEqual({
+      result: false,
+      error: `error initializing`,
+    });
+  });
 
-    // for the setImmediate
-    await new Promise((r) => setTimeout(r, 10));
+  test(`should log and return false if common init function throws error`, async () => {
+    const helper = createResourceInstallationHelper(logger, getCommonInitPromise(true, -1), initFn);
 
-    const initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(1);
-    expect(await initializedContexts.get('test1')).toEqual(false);
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+
+    await retryUntil(
+      'common init fns run',
+      async () => (await getContextInitialized(helper)) === false
+    );
+
+    expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - fail`);
+    expect(await helper.getInitializedContext('test1')).toEqual({
+      result: false,
+      error: `fail`,
+    });
+  });
+
+  test(`should log and return false if context init function throws error`, async () => {
+    const helper = createResourceInstallationHelper(
+      logger,
+      getCommonInitPromise(true, 100),
+      initFnWithError
+    );
+
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+
+    await retryUntil(
+      'context init fns run',
+      async () => (await getContextInitialized(helper)) === false
+    );
+
+    expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - no go`);
+    expect(await helper.getInitializedContext('test1')).toEqual({
+      result: false,
+      error: `no go`,
+    });
   });
 });
