@@ -52,13 +52,14 @@ export const getDataViewStateFromIndexFields = memoizeOne(
     return fields.reduce<DataViewInfo>(
       (acc, field) => {
         // mutate browserFields
-        if (acc.browserFields[field.category] == null) {
-          (acc.browserFields as DangerCastForMutation)[field.category] = {};
+        const category = field.name.split('.')[0];
+        if (acc.browserFields[category] == null) {
+          (acc.browserFields as DangerCastForMutation)[category] = {};
         }
-        if (acc.browserFields[field.category].fields == null) {
-          acc.browserFields[field.category].fields = {};
+        if (acc.browserFields[category].fields == null) {
+          acc.browserFields[category].fields = {};
         }
-        acc.browserFields[field.category].fields[field.name] = field as unknown as BrowserField;
+        acc.browserFields[category].fields[field.name] = field as unknown as BrowserField;
 
         // mutate indexFields
         acc.indexFields.push(

@@ -57,6 +57,9 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
   runtimeMappings: MappingRuntimeFields;
 }
 
+/**
+ * @deprecated use fields list on dataview / "indexPattern"
+ */
 export interface BrowserField {
   aggregatable: boolean;
   category: string;
@@ -74,6 +77,9 @@ export interface BrowserField {
   runtimeField?: RuntimeField;
 }
 
+/**
+ * @deprecated use fields list on dataview / "indexPattern"
+ */
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 export const EMPTY_BROWSER_FIELDS = {};
