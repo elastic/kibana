@@ -15,7 +15,7 @@ export const PageLoader = ({
   icon,
 }: {
   title: React.ReactElement;
-  body: React.ReactElement;
+  body?: React.ReactElement;
   icon: React.ReactElement;
 }) => {
   return (
@@ -25,7 +25,7 @@ export const PageLoader = ({
         <EuiSpacer size="m" />
         <EuiTitle size="m">{title}</EuiTitle>
         <EuiSpacer size="m" />
-        <EuiText color="subdued">{body}</EuiText>
+        {body && <EuiText color="subdued">{body}</EuiText>}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
