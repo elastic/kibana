@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { WithSource } from './with_source';
+require('../../../../../../src/setup_node_env');
+module.exports = require('./schema_worker');
