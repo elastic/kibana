@@ -24,15 +24,54 @@ import type { FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
 import { TooltipWrapper } from '../../shared_components';
 
-const samplingValue = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
+const samplingValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
+interface SamplingSliderProps {
+  values: number[];
+  currentValue: number | undefined;
+  disabled: boolean;
+  disabledReason: string;
+  onChange: (value: number) => void;
+  'data-test-subj'?: string;
+}
+/**
+ * Stub for a shared component
+ */
+function SamplingSlider({
+  values,
+  currentValue,
+  disabled,
+  disabledReason,
+  onChange,
+  'data-test-subj': dataTestSubj,
+}: SamplingSliderProps) {
+  const samplingIndex = values.findIndex((v) => v === currentValue);
+  const currentSamplingIndex = samplingIndex > -1 ? samplingIndex : values.length - 1;
+  return (
+    <TooltipWrapper tooltipContent={disabledReason} condition={disabled}>
+      <EuiRange
+        data-test-subj={dataTestSubj}
+        value={currentSamplingIndex}
+        disabled={disabled}
+        onChange={(e) => {
+          onChange(values[Number(e.currentTarget.value)]);
+        }}
+        showInput={false}
+        showRange={false}
+        showTicks
+        step={1}
+        min={0}
+        max={values.length - 1}
+        ticks={values.map((v, i) => ({ label: `${v * 100}%`, value: i }))}
+      />
+    </TooltipWrapper>
+  );
+}
 
 export function LayerSettingsPanel({
   state,
   setState,
   layerId,
 }: DatasourceLayerSettingsProps<FormBasedPrivateState>) {
-  const samplingIndex = samplingValue.findIndex((v) => v === state.layers[layerId].sampling);
-  const currentSamplingIndex = samplingIndex > -1 ? samplingIndex : samplingValue.length - 1;
   const isSamplingValueDisabled = !isSamplingValueEnabled(state.layers[layerId]);
   return (
     <EuiFormRow
@@ -67,7 +106,7 @@ export function LayerSettingsPanel({
       label={
         <>
           {i18n.translate('xpack.lens.xyChart.randomSampling.label', {
-            defaultMessage: 'Random sampling',
+            defaultMessage: 'Sampling',
           })}{' '}
           <EuiBetaBadge
             css={css`
@@ -92,41 +131,30 @@ export function LayerSettingsPanel({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <TooltipWrapper
-            tooltipContent={i18n.translate(
+          <SamplingSlider
+            disabled={isSamplingValueDisabled}
+            disabledReason={i18n.translate(
               'xpack.lens.indexPattern.randomSampling.disabledMessage',
               {
                 defaultMessage:
                   'In order to select a reduced sampling percentage, you must remove any maximum or minimum functions applied on this layer.',
               }
             )}
-            condition={isSamplingValueDisabled}
-          >
-            <EuiRange
-              data-test-subj="lns-indexPattern-random-sampling"
-              value={currentSamplingIndex}
-              disabled={isSamplingValueDisabled}
-              onChange={(e) => {
-                setState({
-                  ...state,
-                  layers: {
-                    ...state.layers,
-                    [layerId]: {
-                      ...state.layers[layerId],
-                      sampling: samplingValue[Number(e.currentTarget.value)],
-                    },
+            values={samplingValues}
+            currentValue={state.layers[layerId].sampling}
+            onChange={(newSamplingValue) => {
+              setState({
+                ...state,
+                layers: {
+                  ...state.layers,
+                  [layerId]: {
+                    ...state.layers[layerId],
+                    sampling: newSamplingValue,
                   },
-                });
-              }}
-              showInput={false}
-              showRange={false}
-              showTicks
-              step={1}
-              min={0}
-              max={samplingValue.length - 1}
-              ticks={samplingValue.map((v, i) => ({ label: `${v * 100}%`, value: i }))}
-            />
-          </TooltipWrapper>
+                },
+              });
+            }}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">
