@@ -1,0 +1,37 @@
+{
+  "type": "plugin",
+  "id": "@kbn/generate-csv",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "generateCsv",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "generateCsv"
+    ],
+    "requiredPlugins": [
+     "data",
+     "discover",
+     "fieldFormats",
+     "esUiShared",
+     "home",
+     "management",
+     "licensing",
+     "uiActions",
+     "taskManager",
+     "embeddable",
+     "screenshotting",
+     "screenshotMode",
+     "share",
+     "features",
+    ],
+    "optionalPlugins": [
+  
+    ],
+    "requiredBundles": [
+    ],
+    "extraPublicDirs": [
+    ]
+  }
+}

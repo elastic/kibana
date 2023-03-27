@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
-import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as esErrors } from '@elastic/elasticsearch';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
@@ -18,15 +20,17 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import type { CancellationToken } from '@kbn/reporting-common/cancellation_token';
-import { CsvConfig, JobParams as JobParamsCSV } from '@kbn/generate-csv/types';
-import { CONTENT_TYPE_CSV } from '../../../../common/constants';
-import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
-import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import type { TaskRunResult } from '../../../lib/tasks';
+import {
+  AuthenticationExpiredError,
+  ReportingError,
+  byteSizeValueToNumber,
+  TaskRunResult,
+  CancellationToken,
+} from '@kbn/reporting-common';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { i18nTexts } from './i18n_texts';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
+import { CONTENT_TYPE_CSV, CsvConfig, JobParams } from '../types';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -45,7 +49,7 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: Omit<JobParamsCSV, 'version'>,
+    private job: Omit<JobParams, 'version'>,
     private config: CsvConfig,
     private clients: Clients,
     private dependencies: Dependencies,
@@ -65,6 +69,10 @@ export class CsvGenerator {
           index: indexPatternTitle,
           keep_alive: duration,
           ignore_unavailable: true,
+          // TODO: currently this doesn't do anything as es has a bug that throttled indices are always included when using PIT api
+          // if es fixes the issue, everything should work as expected. Just needs to be tested and this comment removed
+          // if es decides to not fix, then we can close the issue and remove the `ignore_throttled` code from here
+          // https://github.com/elastic/kibana/issues/152884
           // @ts-expect-error ignore_throttled is not in the type definition, but it is accepted by es
           ignore_throttled: settings.includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
         },
@@ -90,7 +98,7 @@ export class CsvGenerator {
   private async doSearch(
     searchSource: ISearchSource,
     settings: CsvExportSettings,
-    searchAfter?: estypes.SortResults
+    searchAfter?: SortResults
   ) {
     const { scroll: scrollSettings } = settings;
     searchSource.setField('size', scrollSettings.size);
@@ -321,7 +329,7 @@ export class CsvGenerator {
     let currentRecord = -1;
     let totalRecords: number | undefined;
     let totalRelation = 'eq';
-    let searchAfter: estypes.SortResults | undefined;
+    let searchAfter: SortResults | undefined;
 
     let pitId = await this.openPointInTime(indexPatternTitle, settings);
 
@@ -389,7 +397,7 @@ export class CsvGenerator {
 
         // Update last sort results for next query. PIT is used, so the sort results
         // automatically include _shard_doc as a tiebreaker
-        searchAfter = hits.hits[hits.hits.length - 1]?.sort as estypes.SortResults | undefined;
+        searchAfter = hits.hits[hits.hits.length - 1]?.sort as SortResults | undefined;
         this.logger.debug(`Received search_after: [${searchAfter}]`);
 
         // check for shard failures, log them and add a warning if found

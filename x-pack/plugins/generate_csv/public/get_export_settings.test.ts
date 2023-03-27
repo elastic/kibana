@@ -8,20 +8,26 @@
 import {
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-} from '../../../../common/constants';
-import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from '@kbn/generate-csv/types';
+} from '@kbn/reporting-common';
+import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR, CsvConfig } from '../types';
 import { IUiSettingsClient } from '@kbn/core/server';
 import {
   loggingSystemMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { getExportSettings } from './get_export_settings';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
-  const config = createMockConfig(createMockConfigSchema({})).get('csv');
+  const config: CsvConfig = {
+    checkForFormulas: true,
+    // x-pack/plugins/reporting/server/config/schema.ts set escapeFormulaValues: schema.boolean({defaultValue: false})
+    escapeFormulaValues: false,
+    maxSizeBytes: 180000,
+    scroll: { size: 500, duration: '30s' },
+    useByteOrderMarkEncoding: false,
+  };
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
@@ -48,11 +54,11 @@ describe('getExportSettings', () => {
     expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchInlineSnapshot(`
       Object {
         "bom": "",
-        "checkForFormulas": undefined,
-        "escapeFormulaValues": undefined,
+        "checkForFormulas": true,
+        "escapeFormulaValues": false,
         "escapeValue": [Function],
         "includeFrozen": false,
-        "maxSizeBytes": undefined,
+        "maxSizeBytes": 180000,
         "scroll": Object {
           "duration": "30s",
           "size": 500,

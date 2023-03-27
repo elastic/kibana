@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-// Export Type Definitions
-export const PDF_REPORT_TYPE = 'printablePdf';
-export const PDF_REPORT_TYPE_V2 = 'printablePdfV2';
-
-export const PNG_REPORT_TYPE = 'PNG';
-export const PNG_REPORT_TYPE_V2 = 'pngV2';
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/generate_csv'],
+};

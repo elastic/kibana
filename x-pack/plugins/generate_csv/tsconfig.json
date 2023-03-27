@@ -1,0 +1,24 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "public/**/*",
+    "types/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/screenshotting-plugin",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/expressions-plugin",
+    "@kbn/reporting-common",
+  ], 
+  "exclude": [
+    "target/**/*",
+  ]
+}

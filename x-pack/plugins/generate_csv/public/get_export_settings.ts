@@ -9,15 +9,15 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
 import {
+  UI_SETTINGS_DATEFORMAT_TZ,
+  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
+} from '@kbn/reporting-common';
+import {
+  CsvConfig,
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
-} from '@kbn/generate-csv/types';
-import {
-  UI_SETTINGS_DATEFORMAT_TZ,
-  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-} from '../../../../common/constants';
-import { ReportingConfigType } from '../../../config';
+} from '../types';
 
 export interface CsvExportSettings {
   timezone: string;
@@ -36,7 +36,7 @@ export interface CsvExportSettings {
 
 export const getExportSettings = async (
   client: IUiSettingsClient,
-  config: ReportingConfigType['csv'],
+  config: CsvConfig,
   timezone: string | undefined,
   logger: Logger
 ): Promise<CsvExportSettings> => {
@@ -62,7 +62,7 @@ export const getExportSettings = async (
     client.get(UI_SETTINGS_CSV_QUOTE_VALUES),
   ]);
 
-  const escapeFormulaValues = config.escapeFormulaValues;
+  const { escapeFormulaValues } = config;
   const escapeValue = createEscapeValue(quoteValues, escapeFormulaValues);
   const bom = config.useByteOrderMarkEncoding ? CSV_BOM_CHARS : '';
 

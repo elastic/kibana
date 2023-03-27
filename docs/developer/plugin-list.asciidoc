@@ -543,6 +543,10 @@ activities.
 |Fleet needs to have Elasticsearch API keys enabled.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/generate_csv/README.md[generateCsv]
+|undefined
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[globalSearch]
 |The GlobalSearch plugin provides an easy way to search for various objects, such as applications
 or dashboards from the Kibana instance, from both server and client-side plugins

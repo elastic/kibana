@@ -379,6 +379,7 @@ packages/kbn-ftr-common-functional-services @elastic/kibana-operations
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 packages/kbn-generate @elastic/kibana-operations
+x-pack/plugins/generate_csv @elastic/appex-sharedux
 packages/kbn-get-repo-files @elastic/kibana-operations
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search @elastic/appex-sharedux
@@ -498,6 +499,7 @@ packages/kbn-repo-packages @elastic/kibana-operations
 packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
+packages/kbn-reporting-common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution

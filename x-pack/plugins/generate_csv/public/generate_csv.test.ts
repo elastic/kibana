@@ -14,7 +14,7 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
@@ -29,16 +29,11 @@ import {
   JobParams,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
-} from '@kbn/generate-csv/types';
+} from '../types';
 
-const mockJob: JobParams = {
-  searchSource: {
-    query: { query: '', language: 'kuery' },
-    index: '5193f870-d861-11e9-a311-0fa548c5f953',
-    filter: [],
-  } as unknown as SerializedSearchSourceFields,
-  browserTimezone: 'UTC',
-};
+const createMockJob = (baseObj: any = {}): JobParams => ({
+  ...baseObj,
+});
 
 let mockEsClient: IScopedClusterClient;
 let mockDataClient: IScopedSearchClient;
@@ -84,6 +79,11 @@ const mockFieldFormatsRegistry = {
     .fn()
     .mockImplementation(() => ({ id: 'string', convert: jest.fn().mockImplementation(identity) })),
 } as unknown as FieldFormatsRegistry;
+
+// const getMockConfig = (properties: DeepPartial<CsvConfig>) => {
+//   const config = createMockConfig(properties);
+//   return config.get('csv');
+// };
 
 beforeEach(async () => {
   content = '';
@@ -138,7 +138,7 @@ beforeEach(async () => {
 
 it('formats an empty search result to CSV content', async () => {
   const generateCsv = new CsvGenerator(
-    mockJob,
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -173,7 +173,7 @@ it('formats a search result to CSV content', async () => {
     })
   );
   const generateCsv = new CsvGenerator(
-    mockJob,
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -212,7 +212,7 @@ it('calculates the bytes of the content', async () => {
   );
 
   const generateCsv = new CsvGenerator(
-    mockJob,
+    createMockJob({ columns: ['message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -260,7 +260,7 @@ it('warns if max size was reached', async () => {
   );
 
   const generateCsv = new CsvGenerator(
-    mockJob,
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -319,7 +319,7 @@ it('uses the pit ID to page all the data', async () => {
     );
 
   const generateCsv = new CsvGenerator(
-    mockJob,
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -389,11 +389,7 @@ it('keeps order of the columns during the scroll', async () => {
     );
 
   const generateCsv = new CsvGenerator(
-    {
-      ...mockJob,
-      searchSource: {},
-      columns: [],
-    },
+    createMockJob({ searchSource: {}, columns: [] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -431,11 +427,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      {
-        ...mockJob,
-        searchSource: {},
-        columns: ['_id', 'sku'],
-      },
+      createMockJob({ searchSource: {}, columns: ['_id', 'sku'] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -473,8 +465,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      {
-        ...mockJob,
+      createMockJob({
         searchSource: {
           query: { query: '', language: 'kuery' },
           sort: [{ '@date': 'desc' }],
@@ -483,7 +474,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
           filter: [],
         },
         columns: ['_id', '_index', 'date', 'message'],
-      },
+      }),
       mockConfig,
       {
         es: mockEsClient,
@@ -529,8 +520,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      {
-        ...mockJob,
+      createMockJob({
         searchSource: {
           query: { query: '', language: 'kuery' },
           sort: [{ '@date': 'desc' }],
@@ -538,7 +528,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
           fields: ['*'],
           filter: [],
         },
-      },
+      }),
       mockConfig,
       {
         es: mockEsClient,
@@ -580,11 +570,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      {
-        ...mockJob,
-        searchSource: {},
-        columns: ['product', 'category'],
-      },
+      createMockJob({ searchSource: {}, columns: ['product', 'category'] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -622,11 +608,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      {
-        ...mockJob,
-        searchSource: {},
-        columns: ['_id', '_index', 'product', 'category'],
-      },
+      createMockJob({ searchSource: {}, columns: ['_id', '_index', 'product', 'category'] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -664,7 +646,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      { ...mockJob, searchSource: {}, columns: [] },
+      createMockJob({ searchSource: {}, columns: [] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -704,7 +686,7 @@ describe('formulas', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      { ...mockJob, columns: ['date', 'ip', 'message'] },
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -742,7 +724,7 @@ describe('formulas', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      { ...mockJob, columns: ['date', 'ip', TEST_FORMULA] },
+      createMockJob({ columns: ['date', 'ip', TEST_FORMULA] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -787,7 +769,7 @@ describe('formulas', () => {
     );
 
     const generateCsv = new CsvGenerator(
-      { ...mockJob, columns: ['date', 'ip', 'message'] },
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
       {
         es: mockEsClient,
@@ -820,7 +802,7 @@ it('can override ignoring frozen indices', async () => {
   });
 
   const generateCsv = new CsvGenerator(
-    { searchSource: {} },
+    createMockJob({}),
     mockConfig,
     { es: mockEsClient, data: mockDataClient, uiSettings: uiSettingsClient },
     { searchSourceStart: mockSearchSourceService, fieldFormatsRegistry: mockFieldFormatsRegistry },
@@ -871,7 +853,7 @@ it('adds a warning if export was unable to close the PIT', async () => {
   );
 
   const generateCsv = new CsvGenerator(
-    { ...mockJob, columns: ['date', 'ip', 'message'] },
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -915,7 +897,7 @@ it('will return partial data if the scroll or search fails', async () => {
     });
   });
   const generateCsv = new CsvGenerator(
-    { ...mockJob, columns: ['date', 'ip', 'message'] },
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -964,7 +946,7 @@ it('handles unknown errors', async () => {
     throw new Error('An unknown error');
   });
   const generateCsv = new CsvGenerator(
-    { ...mockJob, columns: ['date', 'ip', 'message'] },
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
     mockConfig,
     {
       es: mockEsClient,
@@ -1023,7 +1005,7 @@ describe('error codes', () => {
       });
 
     const generateCsv = new CsvGenerator(
-      { ...mockJob, columns: ['date', 'ip', 'message'] },
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
       {
         es: mockEsClient,

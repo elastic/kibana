@@ -18,9 +18,9 @@ import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
+import { CancellationToken } from '@kbn/reporting-common/cancellation_token';
 import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
-import { CancellationToken } from '../../../common/cancellation_token';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';

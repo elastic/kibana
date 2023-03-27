@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import { Writable } from 'stream';
-import { CancellationToken } from '../../../common/cancellation_token';
+import { CancellationToken } from '@kbn/reporting-common/cancellation_token';
 import { TaskRunResult } from '../../lib/tasks';
 import { getFieldFormats } from '../../services';
 import { ReportingRequestHandlerContext, RunTaskFnFactory } from '../../types';

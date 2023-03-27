@@ -29,7 +29,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
-import type { CancellationToken } from '../common/cancellation_token';
+import type { CancellationToken } from '@kbn/reporting-common/cancellation_token';
 import type { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
