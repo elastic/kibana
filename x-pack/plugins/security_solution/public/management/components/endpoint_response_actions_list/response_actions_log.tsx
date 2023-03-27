@@ -72,7 +72,7 @@ export const ResponseActionsLog = memo<
       statuses: [],
       userIds: [],
       withOutputs: [],
-      withRuleActions: false,
+      withRuleActions: true,
     });
 
     // update query state from URL params
