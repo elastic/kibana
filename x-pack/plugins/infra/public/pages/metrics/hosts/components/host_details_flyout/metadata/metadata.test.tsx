@@ -10,7 +10,9 @@ import { Metadata, TabProps } from './metadata';
 
 import { useMetadata } from '../../../../metric_detail/hooks/use_metadata';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
-import { createAppMockRenderer } from '../../../../../../test_utils/app_mock_renderer';
+import { render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 jest.mock('../../../../../../containers/metrics_source');
 jest.mock('../../../../metric_detail/hooks/use_metadata');
@@ -68,9 +70,15 @@ const metadataProps: TabProps = {
   },
 };
 
-describe('Metadata', () => {
-  const appMockRender = createAppMockRenderer();
+const renderHostMetadata = () =>
+  render(
+    <I18nProvider>
+      <Metadata {...metadataProps} />
+    </I18nProvider>,
+    { wrapper: EuiThemeProvider }
+  );
 
+describe('Single Host Metadata (Hosts View)', () => {
   const mockUseMetadata = (props: any = {}) => {
     const data = {
       ...props.data,
@@ -92,21 +100,21 @@ describe('Metadata', () => {
 
   it('should show an error if fetching the metadata returns error', async () => {
     mockUseMetadata({ error: 'Internal server error' });
-    const result = appMockRender.render(<Metadata {...metadataProps} />);
+    const result = renderHostMetadata();
 
     expect(result.queryByTestId('infraMetadataErrorCallout')).toBeInTheDocument();
   });
 
-  it('should show an no data message if fetching the metadata returns error', async () => {
+  it('should show an no data message if fetching the metadata returns an empty array', async () => {
     mockUseMetadata({ metadata: [] });
-    const result = appMockRender.render(<Metadata {...metadataProps} />);
+    const result = renderHostMetadata();
 
     expect(result.queryByTestId('infraMetadataNoData')).toBeInTheDocument();
   });
 
   it('should return spinner if loading', async () => {
     mockUseMetadata({ loading: true });
-    const result = appMockRender.render(<Metadata {...metadataProps} />);
+    const result = renderHostMetadata();
 
     expect(result.queryByTestId('infraHostMetadataLoading')).toBeInTheDocument();
   });
