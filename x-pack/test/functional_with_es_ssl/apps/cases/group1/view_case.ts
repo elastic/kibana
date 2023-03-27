@@ -427,7 +427,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['open']);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
 
         await header.waitUntilLoadingHasFinished();
 
@@ -478,7 +478,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['open']);
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
 
         await header.waitUntilLoadingHasFinished();
 
@@ -505,15 +505,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         const firstActionList = await userActionsLists[0].findAllByClassName('euiComment');
 
-        expect(await firstActionList[0].getAttribute('data-test-subj')).contain('severity-update-action');
+        expect(await firstActionList[0].getAttribute('data-test-subj')).contain(
+          'severity-update-action'
+        );
 
         testSubjects.click('show-more-user-actions');
 
         const lastActionList = await userActionsLists[1].findAllByClassName('euiComment');
 
-        expect(await lastActionList[0].getAttribute('data-test-subj')).contain('create_case-create-action');
+        expect(await lastActionList[0].getAttribute('data-test-subj')).contain(
+          'create_case-create-action'
+        );
       });
-
     });
 
     describe('Assignees field', () => {
