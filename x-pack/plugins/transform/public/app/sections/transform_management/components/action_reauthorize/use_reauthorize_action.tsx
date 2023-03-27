@@ -7,20 +7,22 @@
 
 import React, { useContext, useMemo, useState } from 'react';
 
-import { ReauthorizeActionName, reauthorizeActionNameText } from './reauthorize_action_name';
-import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import { needsReauthorization } from '../../../../common/reauthorization_utils';
+import { useReauthorizeTransforms } from '../../../../hooks/use_reauthorize_transform';
+import {
+  isReauthorizeActionDisabled,
+  ReauthorizeActionName,
+  reauthorizeActionNameText,
+} from './reauthorize_action_name';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
-import { useStartTransforms } from '../../../../hooks';
 import { AuthorizationContext } from '../../../../lib/authorization';
-
-import { isStartActionDisabled } from '../action_start';
 
 export type ResetAction = ReturnType<typeof useReauthorizeAction>;
 export const useReauthorizeAction = (forceDisable: boolean, transformNodes: number) => {
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
 
-  const startTransforms = useStartTransforms();
+  const reauthorizeTransforms = useReauthorizeTransforms();
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [items, setItems] = useState<TransformListRow[]>([]);
@@ -29,7 +31,7 @@ export const useReauthorizeAction = (forceDisable: boolean, transformNodes: numb
 
   const startAndCloseModal = () => {
     setModalVisible(false);
-    startTransforms(items.map((i) => ({ id: i.id })));
+    reauthorizeTransforms(items.map((i) => ({ id: i.id })));
   };
 
   const openModal = (newItems: TransformListRow[]) => {
@@ -48,15 +50,15 @@ export const useReauthorizeAction = (forceDisable: boolean, transformNodes: numb
           transformNodes={transformNodes}
         />
       ),
-      available: (item: TransformListRow) => item.stats.state === TRANSFORM_STATE.STOPPED,
+      available: (item: TransformListRow) => needsReauthorization(item),
       enabled: (item: TransformListRow) =>
-        !isStartActionDisabled([item], canStartStopTransform, transformNodes),
+        !isReauthorizeActionDisabled([item], canStartStopTransform, transformNodes),
       description: reauthorizeActionNameText,
       icon: 'alert',
       type: 'icon',
       color: 'warning',
       onClick: (item: TransformListRow) => openModal([item]),
-      'data-test-subj': 'transformActionStart',
+      'data-test-subj': 'transformActionReauthorize',
     }),
     [canStartStopTransform, forceDisable, transformNodes]
   );

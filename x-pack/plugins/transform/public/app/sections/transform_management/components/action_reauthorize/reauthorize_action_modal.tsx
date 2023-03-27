@@ -44,7 +44,7 @@ export const ReauthorizeActionModal: FC<StartAction> = ({
       <p>
         {i18n.translate('xpack.transform.transformList.startModalBody', {
           defaultMessage:
-            'Re-authorize will update the permissions to the current user and start the transform. If excessive load is experienced, stop the transform.',
+            'Re-authorize will update the permissions to the current user and start the transform. Starting a transform increases search and indexing load in your cluster. If excessive load is experienced, stop the transform.',
         })}
       </p>
     </EuiConfirmModal>

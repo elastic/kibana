@@ -14,7 +14,7 @@ import {
   AuthorizationContext,
   createCapabilityFailureMessage,
 } from '../../../../lib/authorization';
-import { isCompletedBatchTransform, TransformListRow } from '../../../../common';
+import { TransformListRow } from '../../../../common';
 
 export const reauthorizeActionNameText = i18n.translate(
   'xpack.transform.transformList.reauthorizeActionNameText',
@@ -28,22 +28,7 @@ export const isReauthorizeActionDisabled = (
   canStartStopTransform: boolean,
   transformNodes: number
 ) => {
-  // Disable start for batch transforms which have completed.
-  const transformNeedsReauthorization = items.some((i: TransformListRow) =>
-    isCompletedBatchTransform(i)
-  );
-  // Disable start action if one of the transforms is already started or trying to restart will throw error
-  const startedTransform = items.some(
-    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STARTED
-  );
-
-  return (
-    !canStartStopTransform ||
-    transformNeedsReauthorization ||
-    startedTransform ||
-    items.length === 0 ||
-    transformNodes === 0
-  );
+  return !canStartStopTransform || items.length === 0 || transformNodes === 0;
 };
 
 export interface ReauthorizeActionNameProps {

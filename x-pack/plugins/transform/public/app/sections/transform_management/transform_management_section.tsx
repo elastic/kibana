@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,6 +23,8 @@ import {
   EuiCallOut,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { needsReauthorization } from '../../common/reauthorization_utils';
 import {
   APP_GET_TRANSFORM_CLUSTER_PRIVILEGES,
   TRANSFORM_STATE,
@@ -104,6 +106,22 @@ export const TransformManagement: FC = () => {
     </EuiButtonEmpty>
   );
 
+  const unauthorizedTransformsWarning = useMemo(() => {
+    const unauthorizedCnt = transforms.filter((t) => needsReauthorization(t)).length;
+    return unauthorizedCnt > 0 ? (
+      <>
+        <EuiCallOut
+          color="warning"
+          title={i18n.translate('xpack.transform.transformList.unauthorizedTransformsCallout', {
+            defaultMessage:
+              'At least one transform was created with insufficient permissions. Re-authorize from a user with transforms_admin privilege to start and run the transform.',
+          })}
+        />
+        <EuiSpacer size="s" />
+      </>
+    ) : null;
+  }, [transforms]);
+
   return (
     <>
       <EuiPageHeader
@@ -131,6 +149,8 @@ export const TransformManagement: FC = () => {
         {!isInitialized && <EuiLoadingContent lines={2} />}
         {isInitialized && (
           <>
+            {unauthorizedTransformsWarning}
+
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />
             {typeof errorMessage !== 'undefined' && (

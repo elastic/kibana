@@ -28,7 +28,7 @@ export const useReauthorizeTransforms = () => {
   const api = useApi();
 
   return async (transformsInfo: StartTransformsRequestSchema) => {
-    const results = await api.startTransforms(transformsInfo);
+    const results = await api.reauthorizeTransforms(transformsInfo);
 
     if (!isStartTransformsResponseSchema(results)) {
       toastNotifications.addDanger({

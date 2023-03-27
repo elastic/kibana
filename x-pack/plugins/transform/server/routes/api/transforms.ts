@@ -16,6 +16,15 @@ import {
 } from '@kbn/core/server';
 
 import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import {
+  ReauthorizeTransformsRequestSchema,
+  ReauthorizeTransformsResponseSchema,
+} from '../../../common/api_schemas/reauthorize_transforms';
+import {
+  postTransformsUpdateRequestSchema,
+  PostTransformsUpdateRequestSchema,
+} from '../../../common/api_schemas/update_transforms';
 import { TRANSFORM_STATE } from '../../../common/constants';
 import {
   transformIdParamSchema,
@@ -42,10 +51,6 @@ import {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
-import {
-  postTransformsUpdateRequestSchema,
-  PostTransformsUpdateRequestSchema,
-} from '../../../common/api_schemas/update_transforms';
 import {
   postTransformsPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
@@ -251,39 +256,52 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   );
 
   /**
-   * @apiGroup Transforms
+   * @apiGroup Reauthorize transforms with API key generated from currently logged in suer
    *
-   * @api {post} /api/transform/transforms/:transformId/_update Post transform update
-   * @apiName PostTransformUpdate
-   * @apiDescription Updates a transform
+   * @api {post} /api/transform/reauthorize_transforms Post delete transforms
+   * @apiName DeleteTransforms
+   * @apiDescription Deletes transforms
    *
-   * @apiSchema (params) transformIdParamSchema
-   * @apiSchema (body) postTransformsUpdateRequestSchema
+   * @apiSchema (body) deleteTransformsRequestSchema
    */
-  router.post<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
+  router.post<undefined, undefined, StartTransformsRequestSchema>(
     {
-      path: addBasePath('transforms/{transformId}/_update'),
+      path: addBasePath('reauthorize_transforms'),
       validate: {
-        params: transformIdParamSchema,
-        body: postTransformsUpdateRequestSchema,
+        body: startTransformsRequestSchema,
       },
     },
-    license.guardApiRoute<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
+    license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
       async (ctx, req, res) => {
-        const { transformId } = req.params;
-
         try {
-          const esClient = (await ctx.core).elasticsearch.client;
-          const body = await esClient.asCurrentUser.transform.updateTransform({
-            // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
-            body: req.body,
-            transform_id: transformId,
+          const transformsInfo = req.body;
+
+          const [{ elasticsearch }, { security }] = await getStartServices();
+          const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+
+          const apiKeyWithCurrentUserPermission = security.authc.apiKeys.grantAsInternalUser(req, {
+            name: `auto-generated-transform-api-key`,
+            role_descriptors: {},
           });
-          return res.ok({
-            body,
-          });
+          const secondaryAuth =
+            apiKeyWithCurrentUserPermission?.api_key !== undefined
+              ? {
+                  headers: {
+                    'es-secondary-authorization': `ApiKey ${apiKeyWithCurrentUserPermission?.encoded}`,
+                  },
+                }
+              : undefined;
+
+          const authorizedTransforms = await reauthorizeAndStartTransforms(
+            transformsInfo,
+            esClient,
+            {
+              ...(secondaryAuth ? secondaryAuth : {}),
+            }
+          );
+          return res.ok({ body: authorizedTransforms });
         } catch (e) {
-          return res.customError(wrapError(e));
+          return res.customError(wrapError(wrapEsError(e)));
         }
       }
     )
@@ -437,6 +455,45 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       },
     },
     license.guardApiRoute<undefined, undefined, StopTransformsRequestSchema>(stopTransformsHandler)
+  );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/transforms/:transformId/_update Post transform update
+   * @apiName PostTransformUpdate
+   * @apiDescription Updates a transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   * @apiSchema (body) postTransformsUpdateRequestSchema
+   */
+  router.post<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
+    {
+      path: addBasePath('transforms/{transformId}/_update'),
+      validate: {
+        params: transformIdParamSchema,
+        body: postTransformsUpdateRequestSchema,
+      },
+    },
+    license.guardApiRoute<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
+      async (ctx, req, res) => {
+        const { transformId } = req.params;
+
+        try {
+          const esClient = (await ctx.core).elasticsearch.client;
+          const body = await esClient.asCurrentUser.transform.updateTransform({
+            // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+            body: req.body,
+            transform_id: transformId,
+          });
+          return res.ok({
+            body,
+          });
+        } catch (e) {
+          return res.customError(wrapError(e));
+        }
+      }
+    )
   );
 
   /**
@@ -785,4 +842,53 @@ async function stopTransforms(
     }
   }
   return results;
+}
+
+async function reauthorizeAndStartTransforms(
+  transformsInfo: ReauthorizeTransformsRequestSchema,
+  esClient: ElasticsearchClient,
+  options?: TransportRequestOptions
+): Promise<ReauthorizeTransformsResponseSchema> {
+  try {
+    const result: ReauthorizeTransformsResponseSchema = {};
+    const authorizeTransformsPromises = transformsInfo.map((t) =>
+      esClient.transform.updateTransform(
+        {
+          // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+          body: {},
+          transform_id: t.id,
+        },
+        options ?? {}
+      )
+    );
+    const authorizedTransforms = await Promise.all(authorizeTransformsPromises).then((results) =>
+      results.flat()
+    );
+
+    authorizedTransforms.forEach((t) => (result[t.id] = { success: true }));
+    console.log('authorizedTransforms', JSON.stringify(authorizedTransforms));
+    console.log('result', JSON.stringify(result));
+
+    // authorizedTransforms [{"id":"logs-host_risk_score.latest_transform-default-0.2.0","authorization":{"roles":["superuser"]},"version":"8.8.0","create_time":1679942122456,"source":{"index":[".alerts-security.host-risk-score.latest"],"query":{"match_all":{}}},"dest":{"index":".alerts-security.host-risk-score-latest-0.3.0"},"frequency":"1h","sync":{"time":{"field":"ingest_timestamp","delay":"1s"}},"latest":{"unique_key":["host.name"],"sort":"@timestamp"},"settings":{},"_meta":{"fleet_transform_version":"0.2.0","order":2,"managed_by":"fleet","managed":true,"package":{"name":"host_risk_score"}}}]
+    // startedTransforms [{"id":"logs-host_risk_score.latest_transform-default-0.2.0","authorization":{"roles":["superuser"]},"version":"8.8.0","create_time":1679942122456,"source":{"index":[".alerts-security.host-risk-score.latest"],"query":{"match_all":{}}},"dest":{"index":".alerts-security.host-risk-score-latest-0.3.0"},"frequency":"1h","sync":{"time":{"field":"ingest_timestamp","delay":"1s"}},"latest":{"unique_key":["host.name"],"sort":"@timestamp"},"settings":{},"_meta":{"fleet_transform_version":"0.2.0","order":2,"managed_by":"fleet","managed":true,"package":{"name":"host_risk_score"}}}]
+
+    const startTransforms = transformsInfo.map((t) =>
+      esClient.transform.startTransform(
+        {
+          // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+          body: {},
+          transform_id: t.id,
+        },
+        { ignore: [409] }
+      )
+    );
+    const startedTransforms = await Promise.all(authorizeTransformsPromises).then((results) =>
+      results.flat()
+    );
+    // authorizedTransforms.forEach((t) => (result[t.id] = { success: true }));
+
+    console.log('startedTransforms', JSON.stringify(startedTransforms));
+
+    return result;
+  } catch (e) {}
 }

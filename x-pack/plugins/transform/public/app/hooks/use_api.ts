@@ -162,6 +162,18 @@ export const useApi = () => {
           return e;
         }
       },
+      async reauthorizeTransforms(
+        reqBody: StartTransformsRequestSchema
+      ): Promise<StartTransformsResponseSchema | IHttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}reauthorize_transforms`, {
+            body: JSON.stringify(reqBody),
+          });
+        } catch (e) {
+          return e;
+        }
+      },
+
       async resetTransforms(
         reqBody: ResetTransformsRequestSchema
       ): Promise<ResetTransformsResponseSchema | IHttpFetchError> {

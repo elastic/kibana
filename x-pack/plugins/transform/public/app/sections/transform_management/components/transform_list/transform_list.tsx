@@ -24,6 +24,7 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 
+import { ReauthorizeActionModal, useReauthorizeAction } from '../action_reauthorize';
 import type { TransformId } from '../../../../../../common/types/transform';
 
 import {
@@ -98,6 +99,7 @@ export const TransformList: FC<TransformListProps> = ({
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const bulkStartAction = useStartAction(false, transformNodes);
   const bulkDeleteAction = useDeleteAction(false);
+  const bulkReauthorizeAction = useReauthorizeAction(false);
   const bulkResetAction = useResetAction(false);
   const bulkStopAction = useStopAction(false);
 
@@ -184,6 +186,22 @@ export const TransformList: FC<TransformListProps> = ({
         <StopActionName items={transformSelection} />
       </EuiButtonEmpty>
     </div>,
+    // <div key="reauthorizeAction" className="transform__BulkActionItem">
+    //   <EuiButtonEmpty
+    //     onClick={() => {
+    //       bulkReauthorizeAction.openModal(transformSelection);
+    //     }}
+    //   >
+    //     <ReauthorizeActionName
+    //       // disabled={isReauthorizeActionDisabled(
+    //       //   transformSelection,
+    //       //   capabilities.canStartStopTransform,
+    //       //   transformNodes
+    //       // )}
+    //       isBulkAction={true}
+    //     />
+    //   </EuiButtonEmpty>
+    // </div>,
     <div key="resetAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
         onClick={() => {
@@ -284,6 +302,9 @@ export const TransformList: FC<TransformListProps> = ({
       {/* Bulk Action Modals */}
       {bulkStartAction.isModalVisible && <StartActionModal {...bulkStartAction} />}
       {bulkDeleteAction.isModalVisible && <DeleteActionModal {...bulkDeleteAction} />}
+      {bulkReauthorizeAction.isModalVisible && (
+        <ReauthorizeActionModal {...bulkReauthorizeAction} />
+      )}
       {bulkResetAction.isModalVisible && <ResetActionModal {...bulkResetAction} />}
       {bulkStopAction.isModalVisible && <StopActionModal {...bulkStopAction} />}
 

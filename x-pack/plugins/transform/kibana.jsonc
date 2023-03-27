@@ -23,7 +23,7 @@
       "triggersActionsUi",
       "fieldFormats",
       "unifiedSearch",
-      "charts"
+      "charts",
     ],
     "optionalPlugins": [
       "security",
