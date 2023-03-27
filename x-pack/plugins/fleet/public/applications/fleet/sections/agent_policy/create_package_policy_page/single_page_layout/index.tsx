@@ -381,7 +381,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
-
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -396,7 +395,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
           <PostInstallAddAgentModal
             packageInfo={packageInfo}
-            agentPolicy={agentPolicy}
             onConfirm={() => navigateAddAgent(savedPackagePolicy)}
             onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
           />
