@@ -81,15 +81,19 @@ export const EnginesList: React.FC = () => {
 
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
-  // Don't fetch engines if we don't have a valid license
   useEffect(() => {
-    !isGated && fetchEngines();
+    // Don't fetch engines if we don't have a valid license
+    if (!isGated!) {
+      fetchEngines();
+    }
   }, [meta.from, meta.size, throttledSearchQuery]);
 
   useEffect(() => {
     // We don't want to trigger loading for each search query change, so we need this
     // flag to set if the call to backend is first request.
-    !isGated && setIsFirstRequest();
+    if (!isGated) {
+      setIsFirstRequest();
+    }
   }, []);
 
   return (
