@@ -208,8 +208,12 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   let createdAPIKey = null;
   try {
+    const isApiKey = await context.isAuthenticationTypeApiKey();
+    const name = generateAPIKeyName(ruleType.id, data.name);
     createdAPIKey = attributes.enabled
-      ? await context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
+      ? isApiKey
+        ? await context.getAuthenticationApiKey(name)
+        : await context.createAPIKey(name)
       : null;
   } catch (error) {
     throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);

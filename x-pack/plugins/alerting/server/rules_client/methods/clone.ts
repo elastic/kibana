@@ -97,8 +97,12 @@ export async function clone<Params extends RuleTypeParams = never>(
   const legacyId = Semver.lt(context.kibanaVersion, '8.0.0') ? id : null;
   let createdAPIKey = null;
   try {
+    const isApiKey = await context.isAuthenticationTypeApiKey();
+    const name = generateAPIKeyName(ruleType.id, ruleName);
     createdAPIKey = ruleSavedObject.attributes.enabled
-      ? await context.createAPIKey(generateAPIKeyName(ruleType.id, ruleName))
+      ? isApiKey
+        ? await context.getAuthenticationApiKey(name)
+        : await context.createAPIKey(name)
       : null;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);

@@ -729,8 +729,12 @@ async function prepareApiKeys(
 
   let createdAPIKey: CreateAPIKeyResult | null = null;
   try {
+    const isApiKey = await context.isAuthenticationTypeApiKey();
+    const name = generateAPIKeyName(ruleType.id, attributes.name);
     createdAPIKey = shouldUpdateApiKey
-      ? await context.createAPIKey(generateAPIKeyName(ruleType.id, attributes.name))
+      ? isApiKey
+        ? await context.getAuthenticationApiKey(name)
+        : await context.createAPIKey(name)
       : null;
   } catch (error) {
     throw Error(`Error updating rule: could not create API key - ${error.message}`);

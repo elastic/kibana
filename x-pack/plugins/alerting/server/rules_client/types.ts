@@ -68,6 +68,8 @@ export interface RulesClientContext {
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
+  readonly isAuthenticationTypeApiKey: () => Promise<boolean>;
+  readonly getAuthenticationApiKey: (name: string) => Promise<CreateAPIKeyResult>;
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
