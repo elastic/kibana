@@ -85,7 +85,6 @@ export const useUserActionsPagination = ({
 
   const infiniteCaseUserActions = useMemo<CaseUserActions[]>(() => {
     if (
-      !caseInfiniteUserActionsData ||
       !caseInfiniteUserActionsData?.pages?.length ||
       isLoadingInfiniteUserActions
     ) {
