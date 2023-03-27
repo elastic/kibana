@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('add a visualization', async () => {
       await testSubjects.setValue('savedObjectFinderSearchInput', '[Flights]');
-      await testSubjects.click('savedObjectTitle[Flights]-Delay-Buckets');
+      await testSubjects.click('savedObjectTitle[Flights]-Departures-Count-Map');
       await a11y.testAppSnapshot();
     });
 
@@ -87,7 +87,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Add one more saved object to cancel it', async () => {
       await testSubjects.setValue('savedObjectFinderSearchInput', '[Flights]');
-      await testSubjects.click('savedObjectTitle[Flights]-Destination-Weather');
+      await testSubjects.click(
+        'savedObjectTitle[Flights]-Airport-Connections-(Hover-Over-Airport)'
+      );
       await a11y.testAppSnapshot();
     });
 
