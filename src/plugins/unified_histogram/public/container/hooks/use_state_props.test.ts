@@ -8,11 +8,13 @@
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { Suggestion } from '@kbn/lens-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-test-renderer';
 import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { currentSuggestionMock } from '../../__mocks__/suggestions';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import {
   createStateService,
@@ -36,6 +38,8 @@ describe('useStateProps', () => {
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
+    columns: [],
+    currentSuggestion: undefined,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -50,6 +54,7 @@ describe('useStateProps', () => {
     jest.spyOn(stateService, 'setRequestParams');
     jest.spyOn(stateService, 'setLensRequestAdapter');
     jest.spyOn(stateService, 'setTotalHits');
+    jest.spyOn(stateService, 'setCurrentSuggestion');
     return stateService;
   };
 
@@ -76,9 +81,11 @@ describe('useStateProps', () => {
           "status": "uninitialized",
           "total": undefined,
         },
+        "isPlainRecord": false,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
+        "onSuggestionChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -104,11 +111,19 @@ describe('useStateProps', () => {
     expect(result.current).toMatchInlineSnapshot(`
       Object {
         "breakdown": undefined,
-        "chart": undefined,
-        "hits": undefined,
+        "chart": Object {
+          "hidden": false,
+          "timeInterval": "auto",
+        },
+        "hits": Object {
+          "status": "uninitialized",
+          "total": undefined,
+        },
+        "isPlainRecord": true,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
+        "onSuggestionChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -124,6 +139,20 @@ describe('useStateProps', () => {
         },
       }
     `);
+  });
+
+  it('should return the correct props when a text based language is used', () => {
+    const stateService = getStateService({
+      initialState: {
+        ...initialState,
+        query: { sql: 'SELECT * FROM index' },
+        currentSuggestion: currentSuggestionMock,
+      },
+    });
+    const { result } = renderHook(() => useStateProps(stateService));
+    expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
+    expect(result.current.breakdown).toBe(undefined);
+    expect(result.current.isPlainRecord).toBe(true);
   });
 
   it('should return the correct props when a rollup data view is used', () => {
@@ -145,9 +174,11 @@ describe('useStateProps', () => {
           "status": "uninitialized",
           "total": undefined,
         },
+        "isPlainRecord": false,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
+        "onSuggestionChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -178,9 +209,11 @@ describe('useStateProps', () => {
           "status": "uninitialized",
           "total": undefined,
         },
+        "isPlainRecord": false,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
+        "onSuggestionChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -208,6 +241,7 @@ describe('useStateProps', () => {
       onChartHiddenChange,
       onChartLoad,
       onBreakdownFieldChange,
+      onSuggestionChange,
     } = result.current;
     act(() => {
       onTopPanelHeightChange(200);
@@ -237,6 +271,11 @@ describe('useStateProps', () => {
       onBreakdownFieldChange({ name: 'field' } as DataViewField);
     });
     expect(stateService.setBreakdownField).toHaveBeenLastCalledWith('field');
+
+    act(() => {
+      onSuggestionChange({ title: 'Stacked Bar' } as Suggestion);
+    });
+    expect(stateService.setCurrentSuggestion).toHaveBeenLastCalledWith({ title: 'Stacked Bar' });
   });
 
   it('should clear lensRequestAdapter when chart is hidden', () => {
