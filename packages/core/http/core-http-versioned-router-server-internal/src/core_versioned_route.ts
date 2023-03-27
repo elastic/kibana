@@ -140,7 +140,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       try {
         validate(
           req,
-          { body: responseValidation.body, unsafe: { body: validation.response.unsafe } },
+          { body: responseValidation.body, unsafe: { body: validation.response.unsafe?.body } },
           handler.options.version
         );
       } catch (e) {
