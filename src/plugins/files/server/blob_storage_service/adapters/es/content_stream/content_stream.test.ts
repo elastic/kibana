@@ -37,7 +37,9 @@ describe('ContentStream', () => {
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
     logger = loggingSystemMock.createLogger();
-    client.get.mockResponse(toReadable(set({}, '_source.data', Buffer.from('some content'))));
+    client.get.mockResponse(
+      toReadable(set({ found: true }, '_source.data', Buffer.from('some content')))
+    );
   });
 
   describe('read', () => {
@@ -81,7 +83,7 @@ describe('ContentStream', () => {
 
     it('should decode base64 encoded content', async () => {
       client.get.mockResponseOnce(
-        toReadable(set({}, '_source.data', Buffer.from('encoded content')))
+        toReadable(set({ found: true }, '_source.data', Buffer.from('encoded content')))
       );
       const data = await new Promise((resolve) => stream.once('data', resolve));
 
@@ -90,9 +92,9 @@ describe('ContentStream', () => {
 
     it('should compound content from multiple chunks', async () => {
       const [one, two, three] = ['12', '34', '56'].map(Buffer.from);
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', three)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', one)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', two)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', three)));
 
       stream = getContentStream({
         params: { size: 6 },
@@ -118,9 +120,9 @@ describe('ContentStream', () => {
 
     it('should stop reading on empty chunk', async () => {
       const [one, two, three] = ['12', '34', ''].map(Buffer.from);
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', three)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', one)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', two)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', three)));
       stream = getContentStream({ params: { size: 12 } });
       let data = '';
       for await (const chunk of stream) {
@@ -133,9 +135,9 @@ describe('ContentStream', () => {
 
     it('should read while chunks are present when there is no size', async () => {
       const [one, two] = ['12', '34'].map(Buffer.from);
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
-      client.get.mockResponseOnce(toReadable({}));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', one)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', two)));
+      client.get.mockResponseOnce(toReadable({ found: true }));
       stream = getContentStream({ params: { size: undefined } });
       let data = '';
       for await (const chunk of stream) {
@@ -148,10 +150,10 @@ describe('ContentStream', () => {
 
     it('should decode every chunk separately', async () => {
       const [one, two, three, four] = ['12', '34', '56', ''].map(Buffer.from);
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', three)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', four)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', one)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', two)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', three)));
+      client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', four)));
       stream = getContentStream({ params: { size: 12 } });
       let data = '';
       for await (const chunk of stream) {

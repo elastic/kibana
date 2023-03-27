@@ -313,6 +313,8 @@ export interface ActionDetails<
   TOutputContent extends object = object,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
+  /** The action id passed only if returnActionIdCommands contains the command */
+  action?: string;
   /** The action id */
   id: string;
   /**
