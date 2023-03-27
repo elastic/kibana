@@ -16,7 +16,7 @@ export interface WorkerData {
   fieldFormat: string;
 }
 
-const { numberOfDocuments, fieldFormat } = workerData as WorkerData;
+const { fieldFormat } = workerData as WorkerData;
 const logger = createLogger(LogLevel.info);
 
 function getRandomInt(min: number, max: number) {

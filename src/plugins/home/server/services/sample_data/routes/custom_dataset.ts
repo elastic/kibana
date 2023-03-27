@@ -35,7 +35,6 @@ export function createCustomDatasetRoute(router: IRouter, logger: Logger, core: 
     },
     async (context, req, res) => {
       const { nrOfDocuments, fieldFormat } = req.body;
-      console.log(fieldFormat);
       const esClient = (await core.getStartServices())[0].elasticsearch.client;
       const workerData: WorkerData = {
         numberOfDocuments: nrOfDocuments,
