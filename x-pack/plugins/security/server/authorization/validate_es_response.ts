@@ -16,7 +16,6 @@ const baseResponseSchema = schema.object({
   cluster: schema.object({}, { unknowns: 'allow' }),
   index: schema.object({}, { unknowns: 'allow' }),
 });
-const boolArraySchema = schema.arrayOf(schema.boolean());
 
 /**
  * Validates an Elasticsearch "Has privileges" response against the expected application, actions, and resources.
@@ -74,6 +73,10 @@ const validateResponse = (
       throw new Error('Payload did not match expected actions');
     }
 
-    boolArraySchema.validate(Object.values(actualResource), {}, `application.${applicationName}`);
+    Object.values(actualResource).forEach((actualActionValue) => {
+      if (typeof actualActionValue !== 'boolean') {
+        throw new Error('Payload did not match expected action values');
+      }
+    });
   });
 };
