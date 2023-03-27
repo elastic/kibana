@@ -41,7 +41,7 @@ const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
 );
 
 const GroupPanelComponent = <T,>({
-  customAccordionButtonClassName = 'groupingAccordionForm__button',
+  customAccordionButtonClassName,
   customAccordionClassName = 'groupingAccordionForm',
   extraAction,
   forceState,
@@ -78,6 +78,7 @@ const GroupPanelComponent = <T,>({
           {groupPanelRenderer ?? <DefaultGroupPanelRenderer title={groupFieldValue} />}
         </div>
       }
+      buttonElement="div"
       className={groupingLevel > 0 ? 'groupingAccordionFormLevel' : customAccordionClassName}
       data-test-subj="grouping-accordion"
       extraAction={extraAction}

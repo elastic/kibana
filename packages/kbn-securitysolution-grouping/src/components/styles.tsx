@@ -59,9 +59,6 @@ export const groupingContainerCss = css`
     border-radius: 6px;
     min-width: 1090px;
   }
-  .groupingAccordionForm__button {
-    text-decoration: none !important;
-  }
   .groupingPanelRenderer {
     display: table;
     table-layout: fixed;
@@ -93,9 +90,6 @@ export const groupingContainerCssLevel = css`
     border-bottom: none;
     border-radius: 0;
     min-width: 1090px;
-  }
-  .groupingAccordionForm__button {
-    text-decoration: none !important;
   }
   .groupingPanelRenderer {
     display: table;

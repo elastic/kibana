@@ -35,7 +35,7 @@ interface Grouping<T> {
  */
 type StaticGroupingProps<T> = Pick<
   GroupingProps<T>,
-  'groupPanelRenderer' | 'groupStatsRenderer' | 'onGroupToggle' | 'renderChildComponent' | 'unit'
+  'groupPanelRenderer' | 'groupStatsRenderer' | 'onGroupToggle' | 'unit'
 >;
 
 /** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`
@@ -43,7 +43,13 @@ type StaticGroupingProps<T> = Pick<
  */
 export type DynamicGroupingProps<T> = Pick<
   GroupingProps<T>,
-  'data' | 'groupingLevel' | 'inspectButton' | 'isLoading' | 'selectedGroup' | 'takeActionItems'
+  | 'data'
+  | 'groupingLevel'
+  | 'inspectButton'
+  | 'isLoading'
+  | 'renderChildComponent'
+  | 'selectedGroup'
+  | 'takeActionItems'
 >;
 
 /** Interface for configuring grouping package where T is the consumer `GroupingAggregation`
@@ -113,7 +119,7 @@ export const useGrouping = <T,>({
      */
     (props: DynamicGroupingProps<T>): React.ReactElement =>
       isNoneGroup([props.selectedGroup]) ? (
-        componentProps.renderChildComponent([])
+        props.renderChildComponent([])
       ) : (
         <GroupingComponent
           {...componentProps}

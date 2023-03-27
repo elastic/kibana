@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
@@ -91,44 +91,59 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
 
   // const { pageSize, pageIndex } = useGroupPaging({ selectedGroup, groupingId: tableId });
 
+  const q = useMemo(() => {
+    console.log('q');
+    return {
+      config: getEsQueryConfig(uiSettings),
+      dataProviders: [],
+      indexPattern,
+      browserFields,
+      kqlQuery: globalQuery,
+      kqlMode: globalQuery.language,
+      filters: [
+        ...(defaultFilters ?? []),
+        ...globalFilters,
+        ...(parentGroupingFilter ?? []),
+        ...buildTimeRangeFilter(from, to),
+      ],
+    };
+  }, [
+    browserFields,
+    defaultFilters,
+    from,
+    globalFilters,
+    globalQuery,
+    indexPattern,
+    parentGroupingFilter,
+    to,
+    uiSettings,
+  ]);
+
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && indexPattern != null) {
+      console.log('getGlobalQuery');
+      if (q.browserFields != null && q.indexPattern != null) {
         return combineQueries({
-          config: getEsQueryConfig(uiSettings),
-          dataProviders: [],
-          indexPattern,
-          browserFields,
-          filters: [
-            ...(defaultFilters ?? []),
-            ...globalFilters,
-            ...customFilters,
-            ...(parentGroupingFilter ?? []),
-            ...buildTimeRangeFilter(from, to),
-          ],
-          kqlQuery: globalQuery,
-          kqlMode: globalQuery.language,
+          ...q,
+          filters: [...q.filters, ...customFilters],
         });
       }
       return null;
     },
-    [
-      browserFields,
-      indexPattern,
-      uiSettings,
-      defaultFilters,
-      globalFilters,
-      parentGroupingFilter,
-      from,
-      to,
-      globalQuery,
-    ]
+    [q]
   );
 
+  const globQ = useCallback(() => {
+    console.log('globQ');
+    return {
+      filterQuery: getGlobalQuery([])?.filterQuery,
+      kqlError: getGlobalQuery([])?.kqlError,
+    };
+  }, [getGlobalQuery]);
+
   useInvalidFilterQuery({
+    ...globQ,
     id: tableId,
-    filterQuery: getGlobalQuery([])?.filterQuery,
-    kqlError: getGlobalQuery([])?.kqlError,
     query: globalQuery,
     startDate: from,
     endDate: to,
@@ -148,23 +163,21 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
-  const queryGroups = useMemo(
-    () =>
-      getAlertsGroupingQuery({
-        additionalFilters,
-        selectedGroup,
-        from,
-        runtimeMappings,
-        to,
-        pageSize: pagination.pagingSettings[selectedGroup]
-          ? pagination.pagingSettings[selectedGroup].itemsPerPage
-          : 25,
-        pageIndex: pagination.pagingSettings[selectedGroup]
-          ? pagination.pagingSettings[selectedGroup].activePage
-          : 0,
-      }),
-    [additionalFilters, selectedGroup, from, runtimeMappings, to, pagination.pagingSettings]
-  );
+  const queryGroups = useMemo(() => {
+    return getAlertsGroupingQuery({
+      additionalFilters,
+      selectedGroup,
+      from,
+      runtimeMappings,
+      to,
+      pageSize: pagination.pagingSettings[selectedGroup]
+        ? pagination.pagingSettings[selectedGroup].itemsPerPage
+        : 25,
+      pageIndex: pagination.pagingSettings[selectedGroup]
+        ? pagination.pagingSettings[selectedGroup].activePage
+        : 0,
+    });
+  }, [additionalFilters, selectedGroup, from, runtimeMappings, to, pagination.pagingSettings]);
 
   const {
     data: alertsGroupsData,
@@ -180,11 +193,15 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     skip: isNoneGroup([selectedGroup]),
   });
 
+  const hey = useRef(0);
   useEffect(() => {
-    if (!isNoneGroup([selectedGroup])) {
+    // if (!isNoneGroup([selectedGroup])) {
+    console.log('how many setAlertsQuery', { hey: hey.current, queryGroups, setAlertsQuery });
+    if (hey.current < 4) {
       setAlertsQuery(queryGroups);
+      hey.current++;
     }
-  }, [queryGroups, selectedGroup, setAlertsQuery]);
+  }, [queryGroups, setAlertsQuery]);
 
   const { deleteQuery, setQuery } = useGlobalTime(false);
   // create a unique, but stable (across re-renders) query id
@@ -214,32 +231,33 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   });
 
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) =>
-      takeActionItems({
+    (groupFilters: Filter[], groupNumber: number) => {
+      console.log('getTakeActionItems called');
+      return takeActionItems({
         query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         tableId,
         groupNumber,
         selectedGroup,
-      }),
+      });
+    },
     [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
 
   const groupedAlerts = useMemo(
     () =>
-      isNoneGroup([selectedGroup])
-        ? renderChildComponent([])
-        : getGrouping({
-            data: alertsGroupsData?.aggregations,
-            groupingLevel,
-            inspectButton: inspect,
-            isLoading: loading || isLoadingGroups,
-            selectedGroup,
-            takeActionItems: getTakeActionItems,
-          }),
+      getGrouping({
+        data: alertsGroupsData?.aggregations,
+        groupingLevel,
+        inspectButton: inspect,
+        isLoading: loading || isLoadingGroups,
+        renderChildComponent,
+        selectedGroup,
+        takeActionItems: () => [], // getTakeActionItems,
+      }),
     [
       alertsGroupsData?.aggregations,
       getGrouping,
-      getTakeActionItems,
+      // getTakeActionItems,
       groupingLevel,
       inspect,
       isLoadingGroups,

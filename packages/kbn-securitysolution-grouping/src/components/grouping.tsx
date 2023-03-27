@@ -93,6 +93,7 @@ const GroupingComponent = <T,>({
       data?.groupByFields?.buckets?.map((groupBucket, groupNumber) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group-${groupNumber}-${group}`;
+        console.log('groupPanels renders!', { data: data?.groupByFields?.buckets, isLoading });
 
         return (
           <span key={groupKey}>
@@ -143,18 +144,18 @@ const GroupingComponent = <T,>({
         );
       }),
     [
-      data?.groupByFields?.buckets,
-      groupPanelRenderer,
-      groupStatsRenderer,
-      groupingId,
-      isLoading,
-      onGroupToggle,
-      renderChildComponent,
-      selectedGroup,
-      takeActionItems,
-      tracker,
-      trigger,
-      groupingLevel,
+      // data?.groupByFields?.buckets,
+      // groupPanelRenderer,
+      // groupStatsRenderer,
+      // groupingId,
+      // groupingLevel,
+      // isLoading,
+      // onGroupToggle,
+      // renderChildComponent,
+      // selectedGroup,
+      // takeActionItems,
+      // tracker,
+      // trigger,
     ]
   );
   const groupPageSize = pagination.pagingSettings[selectedGroup].itemsPerPage ?? 25;
@@ -205,7 +206,7 @@ const GroupingComponent = <T,>({
         )}
         {groupCount > 0 ? (
           <>
-            {groupPanels}
+            {/* {groupPanels}*/}
             {groupingLevel > 0 && pageCount === 1 ? null : (
               <>
                 <EuiSpacer size="m" />

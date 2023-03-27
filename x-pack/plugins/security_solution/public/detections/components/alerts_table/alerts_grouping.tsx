@@ -18,7 +18,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
-import { updateGroupSelector } from '../../../common/store/grouping/actions';
+import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
 
@@ -39,7 +39,6 @@ export interface AlertsTableComponentProps {
 }
 
 export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
-  return null;
   const dispatch = useDispatch();
 
   const { indexPattern, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
@@ -68,7 +67,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       groupPanelRenderer: renderGroupPanel,
       groupStatsRenderer: getStats,
       onGroupToggle,
-      renderChildComponent: props.renderChildComponent,
       unit: defaultUnit,
     },
     defaultGroupingOptions: getDefaultGroupingOptions(props.tableId),
@@ -81,42 +79,66 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const resetPagination = pagination.reset;
 
   useEffect(() => {
-    console.log('useEffect 1');
+    console.log('useEffect 1', groupSelector);
     dispatch(updateGroupSelector({ groupSelector }));
   }, [dispatch, groupSelector]);
 
   useEffect(() => {
-    // console.log('useEffect 2');
-    // dispatch(
-    //   updateSelectedGroup({
-    //     selectedGroups,
-    //   })
-    // );
+    console.log('useEffect 2', selectedGroups);
+    dispatch(
+      updateSelectedGroup({
+        selectedGroups,
+      })
+    );
     // resetPagination();
   }, [dispatch, resetPagination, selectedGroups]);
 
   const getLevel = useCallback(
-    (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => (
-      <GroupedSubLevel
-        // all GroupedAlertsTableComponent are passed to GroupedSubLevel, renderChildComponent is overwritten below
-        {...props}
-        getGrouping={getGrouping}
-        groupingLevel={level}
-        pagination={pagination}
-        parentGroupingFilter={parentGroupingFilter}
-        renderChildComponent={
-          level < selectedGroups.length - 1
-            ? (groupingFilters: Filter[]) =>
-                getLevel(level + 1, selectedGroups[level + 1], [
-                  ...groupingFilters,
-                  ...(parentGroupingFilter ?? []),
-                ])
-            : (groupingFilters: Filter[]) =>
-                props.renderChildComponent([...groupingFilters, ...(parentGroupingFilter ?? [])])
-        }
-        selectedGroup={selectedGroup}
-      />
-    ),
+    (
+      level: number,
+      selectedGroup: string,
+      parentGroupingFilter?: Filter[],
+      isRecursive = false
+    ) => {
+      console.log({
+        level,
+        selectedGroup,
+        selectedGroups,
+        isRecursive,
+        condition: level < selectedGroups.length - 1,
+      });
+      let rcc;
+      if (level < selectedGroups.length - 1) {
+        console.log('rcc a!!');
+        rcc = (groupingFilters: Filter[]) => {
+          console.log('opiton a!!');
+          return getLevel(
+            level + 1,
+            selectedGroups[level + 1],
+            [...groupingFilters, ...(parentGroupingFilter ?? [])],
+            true
+          );
+        };
+      } else {
+        console.log('rcc b!!');
+        rcc = (groupingFilters: Filter[]) => {
+          console.log('opiton b!!');
+          return props.renderChildComponent([...groupingFilters, ...(parentGroupingFilter ?? [])]);
+        };
+      }
+      return (
+        <GroupedSubLevel
+          // all GroupedAlertsTableComponent are passed to GroupedSubLevel, renderChildComponent is overwritten below
+          {...props}
+          getGrouping={getGrouping}
+          groupingLevel={level}
+          pagination={pagination}
+          parentGroupingFilter={parentGroupingFilter}
+          renderChildComponent={rcc}
+          selectedGroup={selectedGroup}
+        />
+      );
+    },
     [getGrouping, pagination, props, selectedGroups]
   );
 
