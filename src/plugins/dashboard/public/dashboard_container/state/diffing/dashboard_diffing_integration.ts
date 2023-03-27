@@ -42,6 +42,7 @@ const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
   'executionContext',
   'searchSessionId',
   'timeslice',
+  'id',
 
   'timeRange', // Current behaviour expects time range not to be backed up. Revisit this?
   'refreshInterval',
