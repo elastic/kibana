@@ -5,13 +5,7 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFilterGroup,
-  EuiSuperUpdateButton,
-  EuiFilterButton,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFilterGroup, EuiSuperUpdateButton } from '@elastic/eui';
 import type {
   DurationRange,
   OnRefreshChangeProps,
@@ -24,7 +18,6 @@ import {
 import { ActionsLogFilter } from './actions_log_filter';
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { FILTER_NAMES } from '../translations';
 
 export const ActionsLogFilters = memo(
   ({
@@ -40,8 +33,7 @@ export const ActionsLogFilters = memo(
     onRefreshChange,
     onTimeChange,
     showHostsFilter,
-    displayAutomatedResponses,
-    toggleDisplayAutomatedResponses,
+    renderAutomatedResponsesButton,
     'data-test-subj': dataTestSubj,
   }: {
     dateRangePickerState: DateRangePickerValues;
@@ -56,8 +48,7 @@ export const ActionsLogFilters = memo(
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
     showHostsFilter: boolean;
-    displayAutomatedResponses: boolean;
-    toggleDisplayAutomatedResponses: (newState: boolean) => void;
+    renderAutomatedResponsesButton: JSX.Element;
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -84,27 +75,17 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
-          <EuiFilterButton
-            hasActiveFilters={displayAutomatedResponses}
-            onClick={() => {
-              toggleDisplayAutomatedResponses(!displayAutomatedResponses);
-            }}
-            data-test-subj={getTestId('automated-responses-filter')}
-          >
-            {FILTER_NAMES.automated}
-          </EuiFilterButton>
+          {renderAutomatedResponsesButton}
         </>
       );
     }, [
       dataTestSubj,
-      displayAutomatedResponses,
-      getTestId,
       isFlyout,
       onChangeCommandsFilter,
       onChangeHostsFilter,
       onChangeStatusesFilter,
       showHostsFilter,
-      toggleDisplayAutomatedResponses,
+      renderAutomatedResponsesButton,
     ]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);

@@ -28,6 +28,7 @@ import { useUrlPagination } from '../../hooks/use_url_pagination';
 import { ManagementPageLoader } from '../management_page_loader';
 import { ActionsLogEmptyState } from './components/actions_log_empty_state';
 import { ActionsLogTable } from './components/actions_log_table';
+import { ActionsLogWithRuleToggle } from './components/actions_log_with_rule_toggle';
 
 export const ResponseActionsLog = memo<
   Pick<EndpointActionListRequestQuery, 'agentIds'> & {
@@ -53,6 +54,7 @@ export const ResponseActionsLog = memo<
       startDate: startDateFromUrl,
       endDate: endDateFromUrl,
       users: usersFromUrl,
+      withRuleActions: withRuleActionsFromUrl,
       withOutputs: withOutputsFromUrl,
       setUrlWithOutputs,
     } = useActionHistoryUrlParams();
@@ -70,7 +72,7 @@ export const ResponseActionsLog = memo<
       statuses: [],
       userIds: [],
       withOutputs: [],
-      withRuleActions: true,
+      withRuleActions: false,
     });
 
     // update query state from URL params
@@ -87,6 +89,7 @@ export const ResponseActionsLog = memo<
             : prevState.statuses,
           userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
           withOutputs: withOutputsFromUrl?.length ? withOutputsFromUrl : prevState.withOutputs,
+          withRuleActions: !!withRuleActionsFromUrl,
         }));
       }
     }, [
@@ -97,6 +100,7 @@ export const ResponseActionsLog = memo<
       setQueryParams,
       usersFromUrl,
       withOutputsFromUrl,
+      withRuleActionsFromUrl,
     ]);
 
     // date range picker state and handlers
@@ -188,13 +192,6 @@ export const ResponseActionsLog = memo<
       [setQueryParams]
     );
 
-    const onChangeDisplayAutomatedResponses = useCallback(
-      (withRuleActions: boolean) => {
-        setQueryParams((prevState) => ({ ...prevState, withRuleActions }));
-      },
-      [setQueryParams]
-    );
-
     // handle onChange
     const handleTableOnChange = useCallback(
       ({ page: _page }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => {
@@ -233,6 +230,11 @@ export const ResponseActionsLog = memo<
       [isFlyout, setUrlWithOutputs]
     );
 
+    const renderAutomatedResponsesButton = useMemo(
+      () => <ActionsLogWithRuleToggle getTestId={getTestId} isFlyout={isFlyout} />,
+      [getTestId, isFlyout]
+    );
+
     if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
       return <ActionsLogEmptyState data-test-subj={getTestId('empty-state')} />;
     } else if (isFetching && isFirstAttempt) {
@@ -253,8 +255,7 @@ export const ResponseActionsLog = memo<
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
           showHostsFilter={showHostNames}
-          displayAutomatedResponses={queryParams.withRuleActions}
-          toggleDisplayAutomatedResponses={onChangeDisplayAutomatedResponses}
+          renderAutomatedResponsesButton={renderAutomatedResponsesButton}
           data-test-subj={dataTestSubj}
         />
         {isFetched && !totalItemCount ? (

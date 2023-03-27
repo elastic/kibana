@@ -23,6 +23,7 @@ interface UrlParamsActionsLogFilters {
   endDate: string;
   users: string;
   withOutputs: string;
+  withRuleActions: boolean;
 }
 
 interface ActionsLogFiltersFromUrlParams {
@@ -32,18 +33,27 @@ interface ActionsLogFiltersFromUrlParams {
   statuses?: ResponseActionStatus[];
   startDate?: string;
   endDate?: string;
+  withRuleActions?: boolean;
   setUrlActionsFilters: (commands: UrlParamsActionsLogFilters['commands']) => void;
   setUrlDateRangeFilters: ({ startDate, endDate }: { startDate: string; endDate: string }) => void;
   setUrlHostsFilters: (agentIds: UrlParamsActionsLogFilters['hosts']) => void;
   setUrlStatusesFilters: (statuses: UrlParamsActionsLogFilters['statuses']) => void;
   setUrlUsersFilters: (users: UrlParamsActionsLogFilters['users']) => void;
   setUrlWithOutputs: (outputs: UrlParamsActionsLogFilters['withOutputs']) => void;
+  setUrlWithRuleActions: (outputs: UrlParamsActionsLogFilters['withRuleActions']) => void;
   users?: string[];
 }
 
 type FiltersFromUrl = Pick<
   ActionsLogFiltersFromUrlParams,
-  'commands' | 'hosts' | 'withOutputs' | 'statuses' | 'users' | 'startDate' | 'endDate'
+  | 'commands'
+  | 'hosts'
+  | 'withOutputs'
+  | 'statuses'
+  | 'users'
+  | 'startDate'
+  | 'endDate'
+  | 'withRuleActions'
 >;
 
 export const actionsLogFiltersFromUrlParams = (
@@ -57,6 +67,7 @@ export const actionsLogFiltersFromUrlParams = (
     endDate: 'now',
     users: [],
     withOutputs: [],
+    withRuleActions: undefined,
   };
 
   const urlCommands = urlParams.commands
@@ -100,6 +111,7 @@ export const actionsLogFiltersFromUrlParams = (
   actionsLogFilters.endDate = urlParams.endDate ? String(urlParams.endDate) : undefined;
   actionsLogFilters.users = urlUsers.length ? urlUsers : undefined;
   actionsLogFilters.withOutputs = urlWithOutputs.length ? urlWithOutputs : undefined;
+  actionsLogFilters.withRuleActions = urlParams.withRuleActions ? true : undefined;
 
   return actionsLogFilters;
 };
@@ -195,6 +207,19 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     [history, location, toUrlParams, urlParams]
   );
 
+  const setUrlWithRuleActions = useCallback(
+    (rule: boolean) => {
+      history.push({
+        ...location,
+        search: toUrlParams({
+          ...urlParams,
+          withRuleActions: rule ? 'true' : undefined,
+        }),
+      });
+    },
+    [history, location, toUrlParams, urlParams]
+  );
+
   useEffect(() => {
     setActionsLogFilters((prevState) => {
       return {
@@ -212,5 +237,6 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     setUrlWithOutputs,
     setUrlStatusesFilters,
     setUrlUsersFilters,
+    setUrlWithRuleActions,
   };
 };

@@ -164,6 +164,12 @@ export const UX_MESSAGES = Object.freeze({
         records: totalItemCount,
       },
     }),
+  triggeredByRule: i18n.translate(
+    'xpack.securitySolution.responseActionsList.list.rule.triggeredByRule',
+    {
+      defaultMessage: 'Triggered by rule',
+    }
+  ),
 });
 
 export const FILTER_NAMES = Object.freeze({

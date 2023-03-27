@@ -60,6 +60,7 @@ export const getActionListByStatus = async ({
   statuses,
   userIds,
   unExpiredOnly = false,
+  withRuleActions,
   withOutputs,
 }: OptionalFilterParams & {
   statuses: ResponseActionStatus[];
@@ -82,6 +83,7 @@ export const getActionListByStatus = async ({
     startDate,
     userIds,
     unExpiredOnly,
+    withRuleActions,
     withOutputs,
   });
 

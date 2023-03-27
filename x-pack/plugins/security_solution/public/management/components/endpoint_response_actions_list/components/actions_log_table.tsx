@@ -108,7 +108,10 @@ const getResponseActionListTableColumns = ({
         if (createdBy === 'unknown' && ruleId) {
           return (
             <StyledFacetButton>
-              <EuiToolTip content={ruleName ?? 'rule'} anchorClassName="eui-textTruncate">
+              <EuiToolTip
+                content={ruleName ?? UX_MESSAGES.triggeredByRule}
+                anchorClassName="eui-textTruncate"
+              >
                 <SecuritySolutionLinkAnchor
                   data-test-subj="ruleName"
                   deepLinkId={SecurityPageName.rules}
@@ -119,7 +122,7 @@ const getResponseActionListTableColumns = ({
                     className="eui-textTruncate eui-fullWidth"
                     data-test-subj={getTestId('column-user-name')}
                   >
-                    {ruleName ?? 'rule'}
+                    {ruleName ?? UX_MESSAGES.triggeredByRule}
                   </EuiText>
                 </SecuritySolutionLinkAnchor>
               </EuiToolTip>
