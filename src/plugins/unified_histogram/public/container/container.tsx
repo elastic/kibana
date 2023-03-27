@@ -116,10 +116,10 @@ export const UnifiedHistogramContainer = forwardRef<
           getRelativeTimeRange,
         } = options;
 
-        (async () => {
-          const apiHelper = await services.lens.stateHelperApi();
-          setLensSuggestionsApi(() => apiHelper.suggestions);
-        })();
+        // API helpers are loaded async from Lens
+        services.lens
+          .stateHelperApi()
+          .then(({ suggestions }) => setLensSuggestionsApi(() => suggestions));
 
         setLayoutProps({
           services,
