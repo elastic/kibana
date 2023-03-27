@@ -25,11 +25,9 @@ export const getSavedObjects = (): SavedObject[] => [
       name: 'Kibana Sample Data eCommerce',
       typeMeta: '{}',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-    migrationVersion: {
-      'index-pattern': '7.11.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.11.0',
     references: [],
     type: 'index-pattern',
     updated_at: '2021-08-05T12:23:57.577Z',
@@ -49,11 +47,9 @@ export const getSavedObjects = (): SavedObject[] => [
       visState:
         '{"title":"[eCommerce] Promotion Tracking","type":"metrics","aggs":[],"params":{"time_range_mode":"entire_time_range","id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"ea20ae70-b88d-11e8-a451-f37365e9f268","color":"rgba(211,96,134,1)","split_mode":"everything","metrics":[{"id":"ea20ae71-b88d-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":"2","point_size":"5","fill":"0","stacked":"none","filter":{"query":"products.product_name:*trouser*","language":"lucene"},"label":"Revenue Trousers","value_template":"${{value}}","split_color_mode":"gradient"},{"id":"062d77b0-b88e-11e8-a451-f37365e9f268","color":"rgba(84,179,153,1)","split_mode":"everything","metrics":[{"id":"062d77b1-b88e-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":"2","point_size":"05","fill":"0","stacked":"none","filter":{"query":"products.product_name:*watch*","language":"lucene"},"label":"Revenue Watches","value_template":"${{value}}","split_color_mode":"gradient"},{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(96,146,192,1)","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":"2","point_size":"5","fill":"0","stacked":"none","filter":{"query":"products.product_name:*bag*","language":"lucene"},"label":"Revenue Bags","value_template":"${{value}}","split_color_mode":"gradient"},{"id":"faa2c170-b88d-11e8-a451-f37365e9f268","color":"rgba(202,142,174,1)","split_mode":"everything","metrics":[{"id":"faa2c171-b88d-11e8-a451-f37365e9f268","type":"sum","field":"taxful_total_price"}],"separate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":"2","point_size":"5","fill":"0","stacked":"none","filter":{"query":"products.product_name:*cocktail dress*","language":"lucene"},"label":"Revenue Cocktail Dresses","value_template":"${{value}}","split_color_mode":"gradient"}],"time_field":"order_date","interval":"12h","use_kibana_indexes":true,"axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"legend_position":"bottom","annotations":[{"fields":"taxful_total_price","template":"Ring the bell! ${{taxful_total_price}}","query_string":{"query":"taxful_total_price:>250","language":"lucene"},"id":"c8c30be0-b88f-11e8-a451-f37365e9f268","color":"rgba(25,77,51,1)","time_field":"order_date","icon":"fa-bell","ignore_global_filters":1,"ignore_panel_filters":1,"index_pattern_ref_name":"metrics_1_index_pattern"}],"tooltip_mode":"show_all","drop_last_bucket":0,"isModelInvalid":false,"index_pattern_ref_name":"metrics_0_index_pattern"}}',
     },
-    coreMigrationVersion: '8.0.0',
     id: '45e07720-b890-11e8-a6d9-e546fe2bba5f',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -84,11 +80,9 @@ export const getSavedObjects = (): SavedObject[] => [
       visState:
         '{"title":"[eCommerce] Sold Products per Day","type":"metrics","aggs":[],"params":{"time_range_mode":"entire_time_range","id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"gauge","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"#68BC00","split_mode":"everything","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"count"},{"id":"fd1e1b90-e4e3-11eb-8234-cb7bfd534fce","type":"math","variables":[{"id":"00374270-e4e4-11eb-8234-cb7bfd534fce","name":"c","field":"61ca57f2-469d-11e7-af02-69e470af7417"}],"script":"params.c / (params._interval / 1000 / 60 / 60 / 24)"}],"separate_axis":0,"axis_position":"right","formatter":"0.0","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Trxns / day","split_color_mode":"gradient","value_template":""}],"time_field":"order_date","interval":"1d","axis_position":"left","axis_formatter":"number","axis_scale":"normal","show_legend":1,"show_grid":1,"gauge_color_rules":[{"value":150,"id":"6da070c0-b891-11e8-b645-195edeb9de84","gauge":"rgba(104,188,0,1)","operator":"gte"},{"value":150,"id":"9b0cdbc0-b891-11e8-b645-195edeb9de84","gauge":"rgba(244,78,59,1)","operator":"lt"}],"gauge_width":"15","gauge_inner_width":"10","gauge_style":"half","filter":"","gauge_max":"300","use_kibana_indexes":true,"hide_last_value_indicator":true,"tooltip_mode":"show_all","drop_last_bucket":0,"isModelInvalid":false,"index_pattern_ref_name":"metrics_0_index_pattern"}}',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'b80e6540-b891-11e8-a6d9-e546fe2bba5f',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -122,11 +116,9 @@ export const getSavedObjects = (): SavedObject[] => [
       }),
       version: 1,
     },
-    coreMigrationVersion: '8.0.0',
     id: '3ba638e0-b894-11e8-a6d9-e546fe2bba5f',
-    migrationVersion: {
-      search: '7.9.3',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.9.3',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -143,8 +135,8 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2021-10-28T15:07:24.077Z',
     version: '1',
-    coreMigrationVersion: '8.0.0',
-    migrationVersion: { visualization: '8.0.0' },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '8.0.0',
     attributes: {
       title: i18n.translate('home.sampleData.ecommerceSpec.salesCountMapTitle', {
         defaultMessage: '[eCommerce] Sales Count Map',
@@ -179,11 +171,9 @@ export const getSavedObjects = (): SavedObject[] => [
       visState:
         '{"title":"[eCommerce] Markdown","type":"markdown","params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"## Sample eCommerce Data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html)."},"aggs":[]}',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'c00d1f90-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [],
     type: 'visualization',
     updated_at: '2021-08-05T12:43:35.817Z',
@@ -328,11 +318,9 @@ export const getSavedObjects = (): SavedObject[] => [
       title: '% of target revenue ($10k)',
       visualizationType: 'lnsXY',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'c762b7a0-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -386,11 +374,9 @@ export const getSavedObjects = (): SavedObject[] => [
       title: 'Sum of revenue',
       visualizationType: 'lnsMetric',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'ce02e260-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -444,11 +430,9 @@ export const getSavedObjects = (): SavedObject[] => [
       title: 'Median spending',
       visualizationType: 'lnsMetric',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'd5f90030-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -600,11 +584,9 @@ export const getSavedObjects = (): SavedObject[] => [
       title: 'Transactions per day',
       visualizationType: 'lnsXY',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'dde978b0-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -666,11 +648,9 @@ export const getSavedObjects = (): SavedObject[] => [
       title: 'Avg. items sold',
       visualizationType: 'lnsMetric',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'e3902840-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -793,11 +773,9 @@ export const getSavedObjects = (): SavedObject[] => [
       title: 'Breakdown by category',
       visualizationType: 'lnsXY',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'eddf7850-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -993,11 +971,9 @@ export const getSavedObjects = (): SavedObject[] => [
       title: 'Daily comparison',
       visualizationType: 'lnsDatatable',
     },
-    coreMigrationVersion: '8.0.0',
     id: 'ff6a21b0-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -1109,11 +1085,9 @@ export const getSavedObjects = (): SavedObject[] => [
       title: 'Top products this week',
       visualizationType: 'lnsXY',
     },
-    coreMigrationVersion: '8.0.0',
     id: '03071e90-f5eb-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -1225,11 +1199,9 @@ export const getSavedObjects = (): SavedObject[] => [
       title: 'Top products last week',
       visualizationType: 'lnsXY',
     },
-    coreMigrationVersion: '8.0.0',
     id: '06379e00-f5eb-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     references: [
       {
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -1370,9 +1342,7 @@ export const getSavedObjects = (): SavedObject[] => [
         id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
       },
     ],
-    migrationVersion: {
-      dashboard: '8.5.0',
-    },
-    coreMigrationVersion: '8.6.0',
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '8.5.0',
   },
 ];
