@@ -54,7 +54,7 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
       <PageLoader
         icon={<EuiLoadingSpinner size="xxl" />}
         title={<h3>{LOADING_TITLE}</h3>}
-        body={LOADING_DESCRIPTION}
+        body={<p>{LOADING_DESCRIPTION}</p>}
       />
     );
   }
@@ -63,7 +63,7 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
     <PageLoader
       icon={<EuiLoadingChart size="xl" mono />}
       title={<h3>{MONITOR_PENDING_HEADING}</h3>}
-      body={MONITOR_PENDING_CONTENT}
+      body={<p>{MONITOR_PENDING_CONTENT}</p>}
     />
   ) : (
     <>{children}</>
