@@ -207,77 +207,77 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     revision: {
       type: 'long',
     },
-    // NO NEED TO BE INDEXED
-    // snoozeSchedule: {
-    //   type: 'nested',
-    //   properties: {
-    //     id: {
-    //       type: 'keyword',
-    //     },
-    //     duration: {
-    //       type: 'long',
-    //     },
-    //     skipRecurrences: {
-    //       type: 'date',
-    //       format: 'strict_date_time',
-    //     },
-    //     rRule: {
-    //       type: 'nested',
-    //       properties: {
-    //         freq: {
-    //           type: 'keyword',
-    //         },
-    //         dtstart: {
-    //           type: 'date',
-    //           format: 'strict_date_time',
-    //         },
-    //         tzid: {
-    //           type: 'keyword',
-    //         },
-    //         until: {
-    //           type: 'date',
-    //           format: 'strict_date_time',
-    //         },
-    //         count: {
-    //           type: 'long',
-    //         },
-    //         interval: {
-    //           type: 'long',
-    //         },
-    //         wkst: {
-    //           type: 'keyword',
-    //         },
-    //         byweekday: {
-    //           type: 'keyword',
-    //         },
-    //         bymonth: {
-    //           type: 'short',
-    //         },
-    //         bysetpos: {
-    //           type: 'long',
-    //         },
-    //         bymonthday: {
-    //           type: 'short',
-    //         },
-    //         byyearday: {
-    //           type: 'short',
-    //         },
-    //         byweekno: {
-    //           type: 'short',
-    //         },
-    //         byhour: {
-    //           type: 'long',
-    //         },
-    //         byminute: {
-    //           type: 'long',
-    //         },
-    //         bysecond: {
-    //           type: 'long',
-    //         },
-    //       },
-    //     },
-    //   },
-    // },
+    snoozeSchedule: {
+      type: 'nested',
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+        duration: {
+          type: 'long',
+        },
+        skipRecurrences: {
+          type: 'date',
+          format: 'strict_date_time',
+        },
+        // NO NEED TO BE INDEXED
+        // rRule: {
+        //   type: 'nested',
+        //   properties: {
+        //     freq: {
+        //       type: 'keyword',
+        //     },
+        //     dtstart: {
+        //       type: 'date',
+        //       format: 'strict_date_time',
+        //     },
+        //     tzid: {
+        //       type: 'keyword',
+        //     },
+        //     until: {
+        //       type: 'date',
+        //       format: 'strict_date_time',
+        //     },
+        //     count: {
+        //       type: 'long',
+        //     },
+        //     interval: {
+        //       type: 'long',
+        //     },
+        //     wkst: {
+        //       type: 'keyword',
+        //     },
+        //     byweekday: {
+        //       type: 'keyword',
+        //     },
+        //     bymonth: {
+        //       type: 'short',
+        //     },
+        //     bysetpos: {
+        //       type: 'long',
+        //     },
+        //     bymonthday: {
+        //       type: 'short',
+        //     },
+        //     byyearday: {
+        //       type: 'short',
+        //     },
+        //     byweekno: {
+        //       type: 'short',
+        //     },
+        //     byhour: {
+        //       type: 'long',
+        //     },
+        //     byminute: {
+        //       type: 'long',
+        //     },
+        //     bysecond: {
+        //       type: 'long',
+        //     },
+        //   },
+        // },
+      },
+    },
     // NO NEED TO BE INDEXED
     // nextRun: {
     //   type: 'date',
@@ -297,34 +297,35 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         lastDuration: {
           type: 'long',
         },
-        // NO NEED TO BE INDEXED
-        // error: {
-        //   properties: {
-        //     reason: {
-        //       type: 'keyword',
-        //     },
-        //     message: {
-        //       type: 'keyword',
-        //     },
-        //   },
-        // },
-        // warning: {
-        //   properties: {
-        //     reason: {
-        //       type: 'keyword',
-        //     },
-        //     message: {
-        //       type: 'keyword',
-        //     },
-        //   },
-        // },
+        error: {
+          properties: {
+            reason: {
+              type: 'keyword',
+            },
+            // NO NEED TO BE INDEXED
+            // message: {
+            //   type: 'keyword',
+            // },
+          },
+        },
+        warning: {
+          properties: {
+            reason: {
+              type: 'keyword',
+            },
+            // NO NEED TO BE INDEXED
+            // message: {
+            //   type: 'keyword',
+            // },
+          },
+        },
       },
     },
     lastRun: {
       properties: {
-        // outcome: {
-        //   type: 'keyword',
-        // },
+        outcome: {
+          type: 'keyword',
+        },
         outcomeOrder: {
           type: 'float',
         },
