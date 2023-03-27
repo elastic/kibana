@@ -14,7 +14,7 @@ import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/d
 import {
   getRuleForSignalTesting,
   createRule,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
   getSignalsByIds,
   getQuerySignalIds,
@@ -29,7 +29,7 @@ export const createSecuritySolutionAlerts = async (
 ): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
   const rule = getRuleForSignalTesting(['auditbeat-*']);
   const { id } = await createRule(supertest, log, rule);
-  await waitForRuleSuccessOrStatus(supertest, log, id);
+  await waitForRuleSuccess({ supertest, log, id });
   await waitForSignalsToBePresent(supertest, log, 1, [id]);
   const signals = await getSignalsByIds(supertest, log, [id]);
 
