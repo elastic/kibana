@@ -9,6 +9,7 @@ import { isEmpty, isEqual } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   DEFAULT_ALERTS_ILM_POLICY,
@@ -64,11 +65,14 @@ interface IAlertsService {
 
   /**
    * Returns promise that resolves when the resources for the given
-   * context are installed. These include the context specific component template,
+   * context in the given namespace are installed. These include the context specific component template,
    * the index template for the default namespace and the concrete write index
    * for the default namespace.
    */
-  getContextInitializationPromise(context: string): Promise<InitializationPromise>;
+  getContextInitializationPromise(
+    context: string,
+    namespace: string
+  ): Promise<InitializationPromise>;
 }
 
 export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
@@ -102,14 +106,36 @@ export class AlertsService implements IAlertsService {
 
   public async getContextInitializationPromise(
     context: string,
-    timeoutMs?: number
+    namespace: string
   ): Promise<InitializationPromise> {
-    if (!this.registeredContexts.has(context)) {
+    const registeredOpts = this.registeredContexts.has(context)
+      ? this.registeredContexts.get(context)
+      : null;
+
+    if (!registeredOpts) {
       const errMsg = `Error getting initialized status for context ${context} - context has not been registered.`;
       this.options.logger.error(errMsg);
-      return Promise.resolve(errorResult(errMsg));
+      return errorResult(errMsg);
     }
-    return this.resourceInitializationHelper.getInitializedContext(context, timeoutMs);
+
+    const result = await this.resourceInitializationHelper.getInitializedContext(
+      context,
+      registeredOpts.isSpaceAware ? namespace : DEFAULT_NAMESPACE_STRING
+    );
+
+    // If the context is unrecognized and namespace is not the default, we
+    // need to kick off resource installation and return the promise
+    if (
+      result.error &&
+      result.error.includes(`Unrecognized context`) &&
+      namespace !== DEFAULT_NAMESPACE_STRING
+    ) {
+      this.resourceInitializationHelper.add(registeredOpts, namespace);
+
+      return this.resourceInitializationHelper.getInitializedContext(context, namespace);
+    }
+
+    return result;
   }
 
   public register(opts: IRuleTypeAlerts, timeoutMs?: number) {
@@ -126,7 +152,9 @@ export class AlertsService implements IAlertsService {
 
     this.options.logger.info(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, opts);
-    this.resourceInitializationHelper.add(opts, timeoutMs);
+
+    // When a context is registered, we install resources in the default namespace by default
+    this.resourceInitializationHelper.add(opts, DEFAULT_NAMESPACE_STRING, timeoutMs);
   }
 
   /**
@@ -204,11 +232,16 @@ export class AlertsService implements IAlertsService {
 
   private async initializeContext(
     { context, mappings, useEcs, useLegacyAlerts, secondaryAlias }: IRuleTypeAlerts,
+    namespace: string = DEFAULT_NAMESPACE_STRING,
     timeoutMs?: number
   ) {
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const indexTemplateAndPattern = getIndexTemplateAndPattern({ context, secondaryAlias });
+    const indexTemplateAndPattern = getIndexTemplateAndPattern({
+      context,
+      namespace,
+      secondaryAlias,
+    });
 
     let initFns: Array<() => Promise<void>> = [];
 
@@ -258,13 +291,14 @@ export class AlertsService implements IAlertsService {
         await createOrUpdateIndexTemplate({
           logger: this.options.logger,
           esClient,
-          template: getIndexTemplate(
-            this.options.kibanaVersion,
-            DEFAULT_ALERTS_ILM_POLICY_NAME,
-            indexTemplateAndPattern,
+          template: getIndexTemplate({
             componentTemplateRefs,
-            TOTAL_FIELDS_LIMIT
-          ),
+            ilmPolicyName: DEFAULT_ALERTS_ILM_POLICY_NAME,
+            indexPatterns: indexTemplateAndPattern,
+            kibanaVersion: this.options.kibanaVersion,
+            namespace,
+            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          }),
         }),
       async () =>
         await createConcreteWriteIndex({

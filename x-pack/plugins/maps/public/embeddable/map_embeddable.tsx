@@ -12,6 +12,14 @@ import { Provider } from 'react-redux';
 import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter as filterOperator,
+  map,
+  skip,
+  startWith,
+} from 'rxjs/operators';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { type Filter } from '@kbn/es-query';
@@ -68,6 +76,7 @@ import {
   getFullPath,
   MAP_SAVED_OBJECT_TYPE,
   RawValue,
+  RENDER_TIMEOUT,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
@@ -127,9 +136,8 @@ export class MapEmbeddable
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
   private _controlledBy: string;
-  private _onInitialRenderComplete?: () => void = undefined;
-  private _hasInitialRenderCompleteFired = false;
   private _isSharable = true;
+  private readonly _onRenderComplete$;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -147,6 +155,24 @@ export class MapEmbeddable
     this._initializeSaveMap();
     this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
     this._controlledBy = getControlledBy(this.id);
+
+    this._onRenderComplete$ = this.getOutput$().pipe(
+      // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial value.
+      startWith(this.getOutput()),
+      distinctUntilChanged((a, b) => a.loading === b.loading),
+      skip(1),
+      debounceTime(RENDER_TIMEOUT),
+      filterOperator((output) => !output.loading),
+      map(() => {
+        // Observable notifies subscriber when rendering is complete
+        // Return void to not expose internal implemenation details of observabale
+        return;
+      })
+    );
+  }
+
+  public getOnRenderComplete$() {
+    return this._onRenderComplete$;
   }
 
   public reportsEmbeddableLoad() {
@@ -235,7 +261,6 @@ export class MapEmbeddable
     const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
-      ...this.getOutput(),
       defaultTitle: savedMapTitle,
       defaultDescription: savedMapDescription,
       title,
@@ -303,10 +328,6 @@ export class MapEmbeddable
   setEventHandlers = (eventHandlers: EventHandlers) => {
     this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
-
-  public setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void {
-    this._onInitialRenderComplete = onInitialRenderComplete;
-  }
 
   /*
    * Set to false to exclude sharing attributes 'data-*'.
@@ -528,7 +549,6 @@ export class MapEmbeddable
     this._savedMap.getStore().dispatch<any>(replaceLayerList(layerList));
     this._getIndexPatterns().then((indexPatterns) => {
       this.updateOutput({
-        ...this.getOutput(),
         indexPatterns,
       });
     });
@@ -693,15 +713,6 @@ export class MapEmbeddable
       return;
     }
 
-    if (
-      this._onInitialRenderComplete &&
-      !this._hasInitialRenderCompleteFired &&
-      areLayersLoaded(this._savedMap.getStore().getState())
-    ) {
-      this._hasInitialRenderCompleteFired = true;
-      this._onInitialRenderComplete();
-    }
-
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());
     if (this._getIsFilterByMapExtent() && !_.isEqual(this._prevMapExtent, mapExtent)) {
       this._setMapExtentFilter();
@@ -749,38 +760,35 @@ export class MapEmbeddable
       });
     }
 
-    if (areLayersLoaded(this._savedMap.getStore().getState())) {
-      const layers = getLayerList(this._savedMap.getStore().getState());
-      const isLoading =
-        layers.length === 0 ||
-        layers.some((layer) => {
-          return layer.isLayerLoading();
-        });
-      const firstLayerWithError = layers.find((layer) => {
-        return layer.hasErrors();
+    const layers = getLayerList(this._savedMap.getStore().getState());
+    const isLoading =
+      !areLayersLoaded(this._savedMap.getStore().getState()) ||
+      layers.some((layer) => {
+        return layer.isLayerLoading();
       });
-      const output = this.getOutput();
-      if (
-        output.loading !== isLoading ||
-        firstLayerWithError?.getErrors() !== output.error?.message
-      ) {
-        /**
-         * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
-         * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
-         * For more details please contact the maps team.
-         */
-        this.updateOutput({
-          ...output,
-          loading: isLoading,
-          rendered: !isLoading && firstLayerWithError === undefined,
-          error: firstLayerWithError
-            ? {
-                name: 'EmbeddableError',
-                message: firstLayerWithError.getErrors(),
-              }
-            : undefined,
-        });
-      }
+    const firstLayerWithError = layers.find((layer) => {
+      return layer.hasErrors();
+    });
+    const output = this.getOutput();
+    if (
+      output.loading !== isLoading ||
+      firstLayerWithError?.getErrors() !== output.error?.message
+    ) {
+      /**
+       * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
+       * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
+       * For more details please contact the maps team.
+       */
+      this.updateOutput({
+        loading: isLoading,
+        rendered: !isLoading && firstLayerWithError === undefined,
+        error: firstLayerWithError
+          ? {
+              name: 'EmbeddableError',
+              message: firstLayerWithError.getErrors(),
+            }
+          : undefined,
+      });
     }
   }
 }

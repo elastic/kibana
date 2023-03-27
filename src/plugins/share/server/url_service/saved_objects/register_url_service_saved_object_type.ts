@@ -37,6 +37,7 @@ export const registerUrlServiceSavedObjectType = (
       },
     },
     mappings: {
+      dynamic: false,
       properties: {
         slug: {
           type: 'text',
