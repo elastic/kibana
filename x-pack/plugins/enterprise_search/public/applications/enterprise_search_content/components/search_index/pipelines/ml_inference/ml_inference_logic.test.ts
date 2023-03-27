@@ -6,7 +6,7 @@
  */
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
-import { nerModel } from '../../../../__mocks__/ml_models.mock';
+import { nerModel, textExpansionModel } from '../../../../__mocks__/ml_models.mock';
 
 import { HttpResponse } from '@kbn/core/public';
 
@@ -49,6 +49,7 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   isConfigureStepValid: false,
   isLoading: true,
   isPipelineDataValid: false,
+  isTextExpansionModelSelected: false,
   mappingData: undefined,
   mappingStatus: 0,
   mlInferencePipeline: undefined,
@@ -419,6 +420,81 @@ describe('MlInferenceLogic', () => {
           modelId: mockModelConfiguration.configuration.modelID,
           pipelineName: mockModelConfiguration.configuration.pipelineName,
           sourceField: mockModelConfiguration.configuration.sourceField,
+        });
+      });
+
+      it('calls makeCreatePipelineRequest with passed pipelineDefinition when text_expansion model is selected', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          addInferencePipelineModal: {
+            ...mockModelConfiguration,
+          }
+        });
+        jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
+
+        MLModelsApiLogic.actions.apiSuccess([textExpansionModel]);
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          destinationField: 'my-dest-field',
+          modelID: textExpansionModel.model_id,
+          pipelineName: mockModelConfiguration.configuration.pipelineName,
+          sourceField: 'my-field',
+        });
+        MLInferenceLogic.actions.createPipeline();
+
+        expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
+          indexName: mockModelConfiguration.indexName,
+          pipelineName: mockModelConfiguration.configuration.pipelineName,
+          pipelineDefinition: {
+            description: '',
+            processors: [
+              {
+                remove: {
+                  field: 'ml.inference.my-dest-field',
+                  ignore_missing: true,
+                },
+              },
+              {
+                inference: {
+                  field_map: {
+                    'my-field': 'text_field'
+                  },
+                  model_id: 'text-expansion-mocked-model',
+                  on_failure: [
+                    {
+                      append: {
+                        field: '_source._ingest.inference_errors',
+                        value: [
+                          {
+                            message: "Processor 'inference' in pipeline 'mock-pipeline-name' failed with message '{{ _ingest.on_failure_message }}'",
+                            pipeline: 'mock-pipeline-name',
+                            timestamp: '{{{ _ingest.timestamp }}}',
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  target_field: 'ml.inference.my-dest-field',
+                }
+              },
+              {
+                append: {
+                  field: '_source._ingest.processors',
+                  value: [
+                    {
+                      model_version: "1",
+                      pipeline: 'mock-pipeline-name',
+                      processed_timestamp: '{{{ _ingest.timestamp }}}',
+                      types: [
+                        'pytorch',
+                        'text_expansion',
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+            version: 1
+          },
         });
       });
     });
