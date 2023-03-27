@@ -179,7 +179,7 @@ export class PaginationBuilder {
   ): PaginationFields {
     const sort: SortFields = [
       { '@timestamp': timeSort },
-      { [tiebreaker]: { order: 'asc', unmapped_type: 'long' } },
+      { [tiebreaker]: { order: 'asc', unmapped_type: 'keyword' } },
     ];
     let searchAfter: SearchAfterFields | undefined;
     if (this.timestamp && this.eventID) {

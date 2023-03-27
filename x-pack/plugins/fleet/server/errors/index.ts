@@ -50,6 +50,7 @@ export class ConcurrentInstallOperationError extends FleetError {}
 export class AgentReassignmentError extends FleetError {}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
+export class PackagePolicyNameExistsError extends FleetError {}
 export class PackagePolicyNotFoundError extends FleetError {}
 export class BundledPackageNotFoundError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
