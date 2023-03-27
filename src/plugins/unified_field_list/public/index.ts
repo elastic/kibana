@@ -17,6 +17,7 @@ export { FieldList, type FieldListProps } from './components/field_list';
 export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list_grouped';
 export { FieldListFilters, type FieldListFiltersProps } from './components/field_list_filters';
 export { FieldIcon, type FieldIconProps, getFieldIconProps } from './components/field_icon';
+export { FieldItemButton, type FieldItemButtonProps } from './components/field_item_button';
 export type {
   FieldTopValuesBucketProps,
   FieldTopValuesBucketParams,
@@ -92,7 +93,6 @@ export {
   type QuerySubscriberParams,
 } from './hooks/use_query_subscriber';
 
-export { wrapFieldNameOnDot } from './utils/wrap_field_name_on_dot';
 export {
   getFieldTypeName,
   getFieldTypeDescription,

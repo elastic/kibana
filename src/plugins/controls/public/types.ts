@@ -7,6 +7,7 @@
  */
 
 import { ReactNode } from 'react';
+
 import { Filter } from '@kbn/es-query';
 import {
   EmbeddableFactory,
@@ -15,9 +16,11 @@ import {
   EmbeddableStart,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import { ControlInput } from '../common/types';
 import { ControlsServiceType } from './services/controls/types';
 
@@ -86,10 +89,11 @@ export interface ControlsPluginSetupDeps {
   embeddable: EmbeddableSetup;
 }
 export interface ControlsPluginStartDeps {
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 // re-export from common

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
 import type {
@@ -108,19 +107,14 @@ export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchSta
 
 /**
  * Method to create an error handler that will forward the received error
- * to the specified subjects. It will ignore AbortErrors and will use the data
- * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
+ * to the specified subjects. It will ignore AbortErrors.
  */
-export const sendErrorTo = (
-  data: DataPublicPluginStart,
-  ...errorSubjects: Array<DataMain$ | DataDocuments$>
-) => {
+export const sendErrorTo = (...errorSubjects: Array<DataMain$ | DataDocuments$>) => {
   return (error: Error) => {
     if (error instanceof Error && error.name === 'AbortError') {
       return;
     }
 
-    data.search.showError(error);
     errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
   };
 };

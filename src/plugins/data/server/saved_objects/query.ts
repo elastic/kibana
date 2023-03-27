@@ -33,7 +33,10 @@ export const querySavedObjectType: SavedObjectsType = {
       title: { type: 'text' },
       description: { type: 'text' },
       query: {
-        properties: { language: { type: 'keyword' }, query: { type: 'keyword', index: false } },
+        dynamic: false,
+        properties: {
+          language: { type: 'keyword' },
+        },
       },
       filters: {
         dynamic: false,
