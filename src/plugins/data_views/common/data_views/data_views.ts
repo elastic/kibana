@@ -31,7 +31,7 @@ import {
   DataViewFieldMap,
   TypeMeta,
 } from '../types';
-// todo remove
+
 import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByName } from '../utils';

@@ -88,7 +88,7 @@ export interface DataViewDeleteOut {
 
 // ----------- SEARCH --------------
 
-export interface MapSearchQuery {
+export interface DataViewSearchQuery {
   search?: string;
   fields?: string[];
   searchFields?: string[];
@@ -99,9 +99,9 @@ export interface MapSearchQuery {
   hasNoReference?: Reference | Reference[];
 }
 
-export type MapSearchIn = SearchIn<typeof DataViewContentType, MapSearchQuery>;
+export type DataViewSearchIn = SearchIn<typeof DataViewContentType, DataViewSearchQuery>;
 
-export interface MapSearchOut {
+export interface DataViewSearchOut {
   /** current page in results*/
   page: number;
   /** number of results per page */

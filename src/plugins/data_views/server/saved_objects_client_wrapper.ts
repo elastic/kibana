@@ -31,13 +31,18 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
     }
     return response.saved_object;
   }
-  async update(type: string, id: string, attributes: DataViewAttributes, options: {}) {
-    return (await this.savedObjectClient.update(type, id, attributes, options)) as SavedObject;
+  async update(id: string, attributes: DataViewAttributes, options: {}) {
+    return (await this.savedObjectClient.update(
+      'index-pattern',
+      id,
+      attributes,
+      options
+    )) as SavedObject;
   }
-  async create(type: string, attributes: DataViewAttributes, options: {}) {
-    return await this.savedObjectClient.create(type, attributes, options);
+  async create(attributes: DataViewAttributes, options: {}) {
+    return await this.savedObjectClient.create('index-pattern', attributes, options);
   }
-  delete(type: string, id: string) {
-    return this.savedObjectClient.delete(type, id, { force: true });
+  async delete(id: string) {
+    await this.savedObjectClient.delete('index-pattern', id, { force: true });
   }
 }
