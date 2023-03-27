@@ -163,14 +163,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
                 ${customSize.marginBottomShowMoreSectionSize}
             );
           }
-          .commentList--hasShowMore
-            [class*='euiTimelineItem-']
-            > [class*='euiTimelineItemIcon-']::before {
-            block-size: calc(
-              100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
-                ${customSize.marginBottomShowMoreSectionSize}
-            );
-          }
         `}
       >
         <UserActionsList
