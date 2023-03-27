@@ -185,6 +185,16 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     if (nextDateRange) {
       nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
       nextState.dateRangeTo = nextDateRange.dateRangeTo;
+
+      if (nextDateRange.dateRangeFrom && nextDateRange.dateRangeTo) {
+        nextProps?.onQueryChange?.({
+          query: nextQuery ?? undefined,
+          dateRange: {
+            from: nextDateRange.dateRangeFrom,
+            to: nextDateRange.dateRangeTo,
+          },
+        });
+      }
     }
     return nextState;
   }
