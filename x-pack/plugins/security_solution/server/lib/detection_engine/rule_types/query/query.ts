@@ -13,7 +13,6 @@ import type {
 
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { EndpointAppContext } from '../../../../endpoint/types';
 import { getFilter } from '../utils/get_filter';
 import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
 import { groupAndBulkCreate } from './alert_suppression/group_and_bulk_create';
@@ -23,9 +22,7 @@ import type { UnifiedQueryRuleParams } from '../../rule_schema';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { scheduleNotificationResponseActions } from '../../rule_response_actions/schedule_notification_response_actions';
-import type { SetupPlugins } from '../../../../plugin_contract';
-import type { RunOpts } from '../types';
+import type { CreateQueryRuleAdditionalOptions, RunOpts } from '../types';
 
 export const queryExecutor = async ({
   runOpts,
@@ -35,8 +32,7 @@ export const queryExecutor = async ({
   version,
   spaceId,
   bucketHistory,
-  osqueryCreateAction,
-  endpointAppContext,
+  scheduleNotificationResponseActionsService,
   licensing,
 }: {
   runOpts: RunOpts<UnifiedQueryRuleParams>;
@@ -46,8 +42,7 @@ export const queryExecutor = async ({
   version: string;
   spaceId: string;
   bucketHistory?: BucketHistory[];
-  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
-  endpointAppContext?: EndpointAppContext;
+  scheduleNotificationResponseActionsService?: CreateQueryRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
   licensing: LicensingPluginSetup;
 }) => {
   const completeRule = runOpts.completeRule;
@@ -103,15 +98,13 @@ export const queryExecutor = async ({
 
     if (hasPlatinumLicense) {
       if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
-        scheduleNotificationResponseActions(
-          {
+        if (scheduleNotificationResponseActionsService) {
+          scheduleNotificationResponseActionsService({
             signals: result.createdSignals,
             responseActions: completeRule.ruleParams.responseActions,
-          },
-          osqueryCreateAction,
-          endpointAppContext,
-          hasEnterpriseLicense
-        );
+            hasEnterpriseLicense,
+          });
+        }
       }
     }
 

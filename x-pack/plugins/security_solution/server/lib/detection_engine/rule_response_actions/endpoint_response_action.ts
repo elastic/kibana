@@ -6,17 +6,17 @@
  */
 
 import { each } from 'lodash';
-import type { EndpointAppContext } from '../../../endpoint/types';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { RuleResponseEndpointAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { AlertsWithAgentType } from './types';
 
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
-  endpointAppContext: EndpointAppContext,
+  endpointAppContextService: EndpointAppContextService,
   { alertIds, agentIds, ruleId, ruleName }: AlertsWithAgentType
 ) =>
   each(agentIds, (agent) =>
-    endpointAppContext.service.getActionCreateService().createAction({
+    endpointAppContextService.getActionCreateService().createAction({
       endpoint_ids: [agent],
       alert_ids: alertIds,
       comment: responseAction.params.comment,
