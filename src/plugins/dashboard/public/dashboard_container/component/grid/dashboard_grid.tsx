@@ -11,8 +11,15 @@ import sizeMe from 'react-sizeme';
 import classNames from 'classnames';
 import 'react-resizable/css/styles.css';
 import 'react-grid-layout/css/styles.css';
-import React, { useCallback, useMemo, useRef } from 'react';
-import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  Responsive,
+  Layout,
+  ReactGridLayoutProps,
+  ResponsiveProps as ReactGridResponsiveProps,
+  WidthProvider,
+  Layouts,
+} from 'react-grid-layout';
 
 import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 
@@ -23,7 +30,7 @@ import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
 import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';
 
-let lastValidGridSize = 0;
+const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 /**
  * This is a fix for a bug that stopped the browser window from automatically scrolling down when panels were made
@@ -40,18 +47,18 @@ function ensureWindowScrollsToBottom(event: { clientY: number; pageY: number }) 
 }
 
 function ResponsiveGrid({
-  size,
   isViewMode,
   layout,
   onLayoutChange,
   children,
   maximizedPanelId,
+  onBreakpointChange,
   useMargins,
 }: {
-  size: { width: number };
   isViewMode: boolean;
   layout: Layout[];
-  onLayoutChange: ReactGridLayoutProps['onLayoutChange'];
+  onLayoutChange: ReactGridResponsiveProps['onLayoutChange'];
+  onBreakpointChange: ReactGridResponsiveProps['onBreakpointChange'];
   children: JSX.Element[];
   maximizedPanelId?: string;
   useMargins: boolean;
@@ -59,7 +66,7 @@ function ResponsiveGrid({
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
   // grid to re-render so it'll show a grid with a width of 0.
-  lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
+  // lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
   const classes = classNames({
     'dshLayout--viewing': isViewMode,
     'dshLayout--editing': !isViewMode,
@@ -68,37 +75,27 @@ function ResponsiveGrid({
   });
 
   const MARGINS = useMargins ? 8 : 0;
-
+  console.log('here!!', layout);
   return (
-    <ReactGridLayout
-      width={lastValidGridSize}
+    <ResponsiveReactGridLayout
       className={classes}
       isDraggable={!maximizedPanelId}
       isResizable={!maximizedPanelId}
-      // There is a bug with d3 + firefox + elements using transforms.
-      // See https://github.com/elastic/kibana/issues/16870 for more context.
-      useCSSTransforms={false}
+      breakpoints={{ xs: 752, xxs: 0 }}
+      onBreakpointChange={onBreakpointChange}
+      useCSSTransforms={true}
       margin={[MARGINS, MARGINS]}
-      cols={DASHBOARD_GRID_COLUMN_COUNT}
+      cols={{ xs: DASHBOARD_GRID_COLUMN_COUNT, xxs: isViewMode ? 1 : DASHBOARD_GRID_COLUMN_COUNT }}
       rowHeight={DASHBOARD_GRID_HEIGHT}
       // Pass the named classes of what should get the dragging handle
       draggableHandle={'.embPanel--dragHandle'}
-      layout={layout}
+      layouts={{ xs: layout }}
       onLayoutChange={onLayoutChange}
       onResize={({}, {}, {}, {}, event) => ensureWindowScrollsToBottom(event)}
     >
       {children}
-    </ReactGridLayout>
+    </ResponsiveReactGridLayout>
   );
-}
-
-// Using sizeMe sets up the grid to be re-rendered automatically not only when the window size changes, but also
-// when the container size changes, so it works for Full Screen mode switches.
-const config = { monitorWidth: true };
-const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
-
-interface PanelLayout extends Layout {
-  i: string;
 }
 
 type DashboardRenderPerformanceTracker = DashboardRenderPerformanceStats & {
@@ -131,7 +128,22 @@ export const DashboardGrid = () => {
   const useMargins = select((state) => state.explicitInput.useMargins);
   const expandedPanelId = select((state) => state.componentState.expandedPanelId);
 
-  const layout = useMemo(() => Object.values(panels).map((panel) => panel.gridData), [panels]);
+  const [currentBreakpoint, setCurrentBreakpoint] = useState('xxs');
+
+  const layout = useMemo(
+    () =>
+      Object.values(panels)
+        .map((panel) => panel.gridData)
+        .sort((panelA, panelB) => {
+          // return Number(panelA.gridData.i) - Number(panelB.gridData.i);
+          if (panelA.y === panelB.y) {
+            return panelA.x - panelB.x;
+          } else {
+            return panelA.y - panelB.y;
+          }
+        }),
+    [panels]
+  );
   const panelsInOrder = useMemo(
     () => Object.keys(panels).map((key: string) => panels[key]),
     [panels]
@@ -164,36 +176,44 @@ export const DashboardGrid = () => {
     [dashboardContainer, panelsInOrder.length]
   );
 
-  const onLayoutChange = useCallback(
-    (newLayout: PanelLayout[]) => {
-      const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
-        (updatedPanelsAcc, panelLayout) => {
-          updatedPanelsAcc[panelLayout.i] = {
-            ...panels[panelLayout.i],
-            gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
-          };
-          return updatedPanelsAcc;
-        },
-        {} as { [key: string]: DashboardPanelState }
-      );
+  const onBreakpointChange = useCallback(
+    (newBreakpoint: string) => {
+      if (viewMode === ViewMode.EDIT) {
+        console.log('breakpoint edit:', newBreakpoint);
+      } else {
+        console.log('breakpoint view:', newBreakpoint);
+      }
+      setCurrentBreakpoint(newBreakpoint);
+    },
+    [viewMode]
+  );
 
-      // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
-      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
-        dispatch(setPanels(updatedPanels));
+  const onLayoutChange = useCallback(
+    (_newLayout: Layout[], layouts: Layouts) => {
+      console.log('on layout change', viewMode, currentBreakpoint, _newLayout);
+      if (viewMode === ViewMode.EDIT) {
+        // layout can only be changed in edit mode, and `xs` should be the aboslute truth of edit layout
+        const updatedPanels: { [key: string]: DashboardPanelState } = layouts.xs.reduce(
+          (updatedPanelsAcc, panelLayout) => {
+            updatedPanelsAcc[panelLayout.i] = {
+              ...panels[panelLayout.i],
+              gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+            };
+            return updatedPanelsAcc;
+          },
+          {} as { [key: string]: DashboardPanelState }
+        );
+
+        // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
+        if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+          dispatch(setPanels(updatedPanels));
+        }
       }
     },
-    [dispatch, panels, setPanels]
+    [dispatch, panels, setPanels, viewMode, currentBreakpoint]
   );
 
   const dashboardPanels = useMemo(() => {
-    panelsInOrder.sort((panelA, panelB) => {
-      if (panelA.gridData.y === panelB.gridData.y) {
-        return panelA.gridData.x - panelB.gridData.x;
-      } else {
-        return panelA.gridData.y - panelB.gridData.y;
-      }
-    });
-
     return panelsInOrder.map(({ explicitInput, type }, index) => (
       <DashboardGridItem
         key={explicitInput.id}
@@ -211,15 +231,17 @@ export const DashboardGrid = () => {
     return <>{dashboardPanels}</>;
   }
 
+  console.log(viewMode);
   return (
-    <ResponsiveSizedGrid
+    <ResponsiveGrid
       layout={layout}
       useMargins={useMargins}
       onLayoutChange={onLayoutChange}
+      onBreakpointChange={onBreakpointChange}
       maximizedPanelId={expandedPanelId}
       isViewMode={viewMode === ViewMode.VIEW}
     >
       {dashboardPanels}
-    </ResponsiveSizedGrid>
+    </ResponsiveGrid>
   );
 };

@@ -115,19 +115,19 @@
 
 // When in view-mode only, and on tiny mobile screens, just stack each of the grid-items
 
-@include euiBreakpoint('xs', 's') {
-  .dshLayout--viewing {
-    .react-grid-item {
-      position: static !important;
-      width: calc(100% - #{$euiSize}) !important;
-      margin: $euiSizeS;
-    }
+// @include euiBreakpoint('xs', 's') {
+//   .dshLayout--viewing {
+//     .react-grid-item {
+//       position: static !important;
+//       width: calc(100% - #{$euiSize}) !important;
+//       margin: $euiSizeS;
+//     }
 
-    &.dshLayout-withoutMargins {
-      .react-grid-item {
-        width: 100% !important;
-        margin: 0;
-      }
-    }
-  }
-}
+//     &.dshLayout-withoutMargins {
+//       .react-grid-item {
+//         width: 100% !important;
+//         margin: 0;
+//       }
+//     }
+//   }
+// }
