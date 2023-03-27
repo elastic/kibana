@@ -89,6 +89,7 @@ describe('alertSummaryFromEventLog', () => {
         "lastRun": undefined,
         "muteAll": true,
         "name": "rule-name-2",
+        "revision": 0,
         "ruleTypeId": "456",
         "status": "OK",
         "statusEndDate": "2020-06-18T03:00:00.000Z",
