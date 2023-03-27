@@ -44,17 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await rules.api.deleteRule(ruleId);
     });
 
-    it('connectors list screenshot', async () => {
-      await pageObjects.common.navigateToApp('connectors');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      await commonScreenshots.takeScreenshot(
-        'connector-listing',
-        screenshotDirectories,
-        1400,
-        1024
-      );
-    });
-
     it('rules list screenshot', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();

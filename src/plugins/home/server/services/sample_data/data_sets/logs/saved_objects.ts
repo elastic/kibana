@@ -16,8 +16,8 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2021-10-28T15:07:36.622Z',
     version: '1',
-    coreMigrationVersion: '8.0.0',
-    migrationVersion: { visualization: '8.0.0' },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '8.0.0',
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.visitorsMapTitle', {
         defaultMessage: '[Logs] Visitors Map',
@@ -45,9 +45,8 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2021-07-21T21:33:42.541Z',
     version: '1',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.heatmapTitle', {
         defaultMessage: '[Logs] Unique Destination Heatmap',
@@ -68,7 +67,6 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
     version: '1',
-    migrationVersion: {},
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle', {
         defaultMessage: '[Logs] Machine OS and Destination Sankey Chart',
@@ -89,9 +87,8 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'lens',
     updated_at: '2021-07-21T22:14:59.793Z',
     version: '1',
-    migrationVersion: {
-      lens: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.bytesDistributionTitle', {
         defaultMessage: '[Logs] Bytes distribution',
@@ -274,7 +271,6 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'index-pattern',
     updated_at: '2018-08-29T13:22:17.617Z',
     version: '1',
-    migrationVersion: {},
     attributes: {
       title: 'kibana_sample_data_logs',
       name: 'Kibana Sample Data Logs',
@@ -401,19 +397,16 @@ export const getSavedObjects = (): SavedObject[] => [
         id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
     ],
-    migrationVersion: {
-      dashboard: '8.7.0',
-    },
-    coreMigrationVersion: '8.0.0',
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '8.7.0',
   },
   {
     id: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389',
     type: 'search',
     updated_at: '2021-07-21T22:37:09.415Z',
     version: '1',
-    migrationVersion: {
-      search: '7.9.3',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.9.3',
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.discoverTitle', {
         defaultMessage: '[Logs] Visits',
