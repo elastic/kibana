@@ -5926,11 +5926,23 @@
               "((props: { prevState: T; target: ",
               "DragDropOperation",
               "; source: ",
-              "DragDropIdentifier",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DragDropIdentifier",
+                "text": "DragDropIdentifier"
+              },
               "; frame: ",
               "FramePublicAPI",
               "; dropType: ",
-              "DropType",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DropType",
+                "text": "DropType"
+              },
               "; group?: ",
               "VisualizationDimensionGroupConfig",
               " | undefined; }) => T) | undefined"
@@ -6053,7 +6065,13 @@
               "((dropProps: ",
               "GetDropPropsArgs",
               "<unknown>) => { dropTypes: ",
-              "DropType",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DropType",
+                "text": "DropType"
+              },
               "[]; nextLabel?: string | undefined; } | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
