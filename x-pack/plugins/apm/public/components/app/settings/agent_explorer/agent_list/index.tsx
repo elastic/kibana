@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { AgentIcon } from '../../../../shared/agent_icon';
@@ -26,6 +25,7 @@ import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../agent_explorer_docs_link';
 import { AgentInstances } from '../agent_instances';
+import { AgentLatestVersion } from '../agent_latest_version';
 
 export type AgentExplorerItem = ValuesType<
   APIReturnType<'GET /internal/apm/get_agents_per_service'>['items']
@@ -33,9 +33,11 @@ export type AgentExplorerItem = ValuesType<
 
 export function getAgentsColumns({
   selectedAgent,
+  latestVersionsTimedOut,
   onAgentSelected,
 }: {
   selectedAgent?: AgentExplorerItem;
+  latestVersionsTimedOut?: boolean;
   onAgentSelected: (agent: AgentExplorerItem) => void;
 }): Array<ITableColumn<AgentExplorerItem>> {
   return [
@@ -162,8 +164,7 @@ export function getAgentsColumns({
           content={i18n.translate(
             'xpack.apm.agentExplorerTable.agentLatestVersionColumnTooltip',
             {
-              defaultMessage:
-                'The latest released version of the agent. Needs public access to internet otherwise N/A will be listed for every agent.',
+              defaultMessage: 'The latest released version of the agent.',
             }
           )}
         >
@@ -185,8 +186,13 @@ export function getAgentsColumns({
       width: '10%',
       align: 'center',
       truncateText: true,
-      render: (_, { latestVersion }) =>
-        latestVersion ? <>{latestVersion}</> : <>{NOT_AVAILABLE_LABEL}</>,
+      render: (_, { agentName, latestVersion }) => (
+        <AgentLatestVersion
+          agentName={agentName as AgentName}
+          latestVersion={latestVersion}
+          timedOut={latestVersionsTimedOut}
+        />
+      ),
     },
     {
       field: AgentExplorerFieldName.AgentDocsPageUrl,
@@ -212,9 +218,15 @@ interface Props {
   items: AgentExplorerItem[];
   noItemsMessage: React.ReactNode;
   isLoading: boolean;
+  latestVersionsTimedOut?: boolean;
 }
 
-export function AgentList({ items, noItemsMessage, isLoading }: Props) {
+export function AgentList({
+  items,
+  noItemsMessage,
+  isLoading,
+  latestVersionsTimedOut,
+}: Props) {
   const [selectedAgent, setSelectedAgent] = useState<AgentExplorerItem>();
 
   const onAgentSelected = (agent: AgentExplorerItem) => {
@@ -226,8 +238,13 @@ export function AgentList({ items, noItemsMessage, isLoading }: Props) {
   };
 
   const agentColumns = useMemo(
-    () => getAgentsColumns({ selectedAgent, onAgentSelected }),
-    [selectedAgent]
+    () =>
+      getAgentsColumns({
+        selectedAgent,
+        latestVersionsTimedOut,
+        onAgentSelected,
+      }),
+    [selectedAgent, latestVersionsTimedOut]
   );
 
   return (

@@ -20,6 +20,11 @@ export interface OtelAgentLatestVersion {
   auto_latest_version?: string;
 }
 
+interface AgentLatestVersionsResponse {
+  data: AgentLatestVersions;
+  timedOut?: boolean;
+}
+
 type AgentLatestVersions = Record<
   AgentName,
   ElasticAgentLatestVersion | OtelAgentLatestVersion
@@ -27,18 +32,22 @@ type AgentLatestVersions = Record<
 
 export const fetchAgentsLatestVersion = async (
   logger: Logger
-): Promise<AgentLatestVersions> => {
+): Promise<AgentLatestVersionsResponse> => {
   try {
-    const response = await fetchWithTimeout(bucketUrl);
+    const response = await fetchWithTimeout(bucketUrl, { timeout: 1 });
+    const data = await response.json();
 
-    return await response.json();
+    return { data };
   } catch (error) {
-    const message =
-      error.name === 'AbortError'
-        ? 'Failed to retrieve Agents latest versions due to timeout'
-        : `Failed to retrieve Agents latest versions, received error: ${error}`;
+    const timedOut = error.name === 'AbortError';
+    const message = timedOut
+      ? 'Failed to retrieve Agents latest versions due to timeout'
+      : `Failed to retrieve Agents latest versions, received error: ${error}`;
     logger.warn(message);
 
-    return {} as AgentLatestVersions;
+    return {
+      data: {} as AgentLatestVersions,
+      timedOut,
+    };
   }
 };

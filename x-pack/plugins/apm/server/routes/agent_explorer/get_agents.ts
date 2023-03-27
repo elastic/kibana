@@ -47,6 +47,7 @@ export interface AgentExplorerAgentsResponse {
     instances: number;
     latestVersion?: string;
   }>;
+  latestVersionTimedOut?: boolean;
 }
 
 export async function getAgents({
@@ -84,6 +85,8 @@ export async function getAgents({
     fetchAgentsLatestVersion(logger),
   ]);
 
+  const { data: latestVersionsData, timedOut } = latestVersions;
+
   return {
     items: items.map((item) => {
       const { agentTelemetryAutoVersion, ...rest } = item;
@@ -97,7 +100,7 @@ export async function getAgents({
           agentDocsPageUrl,
           latestVersion: getOtelLatestAgentVersion(
             agentTelemetryAutoVersion,
-            latestVersions[
+            latestVersionsData[
               item.agentName as AgentName
             ] as OtelAgentLatestVersion
           ),
@@ -108,11 +111,12 @@ export async function getAgents({
         ...rest,
         agentDocsPageUrl,
         latestVersion: (
-          latestVersions[
+          latestVersionsData[
             item.agentName as AgentName
           ] as ElasticAgentLatestVersion
         )?.latest_version,
       };
     }),
+    latestVersionTimedOut: timedOut,
   };
 }
