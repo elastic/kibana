@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(res.cspm.status).to.be('not-deployed');
       expect(res.kspm.status).to.be('not-installed');
-      expect(res.vuln_mgmt.status).to.be("not-installed");
+      expect(res.vuln_mgmt.status).to.be('not-installed');
       expect(res.cspm.healthyAgents).to.be(0);
       expect(res.cspm.installedPackagePolicies).to.be(1);
     });

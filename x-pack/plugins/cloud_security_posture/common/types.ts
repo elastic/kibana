@@ -85,7 +85,7 @@ export interface BaseCspSetupStatus {
   latestPackageVersion: string;
   cspm: BaseCspSetupBothPolicy;
   kspm: BaseCspSetupBothPolicy;
-  vuln_mgmt?: BaseCspSetupBothPolicy; // Todo: remove this when vuln_mgmt is ready
+  vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
 }
 
