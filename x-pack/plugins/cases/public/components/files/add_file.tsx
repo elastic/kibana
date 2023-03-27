@@ -36,7 +36,7 @@ interface AddFileProps {
 }
 
 const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
-  const { owner } = useCasesContext();
+  const { owner, permissions } = useCasesContext();
   const { client: filesClient } = useFilesContext();
   const { showDangerToast, showErrorToast, showSuccessToast } = useCasesToast();
   const { isLoading, createAttachments } = useCreateAttachments();
@@ -122,7 +122,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
       <EuiButton
         data-test-subj="cases-files-add"
         iconType="plusInCircle"
-        isDisabled={isLoading}
+        isDisabled={isLoading || !permissions.create}
         isLoading={isLoading}
         onClick={showModal}
       >

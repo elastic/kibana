@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 
@@ -43,24 +42,5 @@ describe('FilePreview', () => {
     );
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
-  });
-
-  // I cannot get this test to work
-  it.skip('clicking outside Image triggers closePreview', () => {
-    const mockClosePreview = jest.fn();
-
-    appMockRender.render(
-      <>
-        <div data-test-subj="outsideClickDummy" />
-        <FilePreview
-          closePreview={mockClosePreview}
-          selectedFile={basicFileMock}
-          getDownloadHref={jest.fn()}
-        />
-      </>
-    );
-
-    userEvent.click(screen.getByTestId('outsideClickDummy'));
-    expect(mockClosePreview).toBeCalled();
   });
 });

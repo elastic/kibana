@@ -16,6 +16,7 @@ import type { AppMockRenderer } from '../../common/mock';
 
 import { constructFileKindIdByOwner } from '../../../common/constants';
 import {
+  buildCasesPermissions,
   createAppMockRenderer,
   mockedTestProvidersOwner,
   mockedFilesClient,
@@ -105,6 +106,16 @@ describe('AddFile', () => {
     appMockRender.render(<AddFile caseId={'foobar'} />);
 
     expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
+  });
+
+  it('add button disable if user has no creat permission', async () => {
+    appMockRender = createAppMockRenderer({
+      permissions: buildCasesPermissions({ create: false }),
+    });
+
+    appMockRender.render(<AddFile caseId={'foobar'} />);
+
+    expect(await screen.findByTestId('cases-files-add')).toBeDisabled();
   });
 
   it('clicking button renders modal', async () => {
