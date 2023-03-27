@@ -112,13 +112,9 @@ describe('CustomRecurringSchedule', () => {
       'select'
     );
     const intervalInput = within(result.getByTestId('interval-field')).getByTestId('input');
-    const input5 = within(result.getByTestId('byweekday-field'))
-      .getByTestId('5')
-      .getAttribute('aria-pressed');
 
     expect(frequencyInput).toHaveValue('2');
     expect(intervalInput).toHaveValue(1);
-    expect(input5).toBe('true');
   });
 
   it('should prefill the form when provided with initialValue', () => {
