@@ -11,8 +11,6 @@ import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { SyntheticsPolicyEditExtensionWrapper } from './synthetics_policy_edit_extension_wrapper';
-import { DataStream } from './types';
-import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -340,11 +338,6 @@ const defaultCurrentPolicy: any = {
   created_at: '',
   created_by: '',
 };
-
-const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
-const defaultICMPConfig = defaultConfig[DataStream.ICMP];
-const defaultTCPConfig = defaultConfig[DataStream.TCP];
-const defaultBrowserConfig = defaultConfig[DataStream.BROWSER];
 
 describe('<SyntheticsPolicyEditExtension />', () => {
   const onChange = jest.fn();
