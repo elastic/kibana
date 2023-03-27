@@ -75,8 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
             `${bodyToCompare.actions?.[0].id}`,
             `${bodyToCompare.actions?.[0].uuid}`
           ),
-          revision: 1, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
-          version: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
+          revision: 1, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
         };
         expect(bodyToCompare).to.eql(expected);
       });
@@ -91,8 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(ruleAfterActionRemoved);
         const expected = {
           ...getSimpleRuleOutput(),
-          revision: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
-          version: 3, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
+          revision: 2, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
         };
         expect(bodyToCompare).to.eql(expected);
       });
