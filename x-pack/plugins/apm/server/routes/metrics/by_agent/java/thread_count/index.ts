@@ -9,6 +9,7 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_JAVA_THREAD_COUNT,
+  METRIC_OTEL_JVM_PROCESS_THREADS_COUNT,
   AGENT_NAME,
 } from '../../../../../../common/es_fields/apm';
 import { ChartBase } from '../../../types';
@@ -51,6 +52,7 @@ export async function getThreadCountChart({
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -60,7 +62,12 @@ export async function getThreadCountChart({
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
+  const threadCountField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_THREADS_COUNT
+    : METRIC_JAVA_THREAD_COUNT;
+
   return fetchAndTransformMetrics({
     environment,
     kuery,
@@ -72,8 +79,8 @@ export async function getThreadCountChart({
     end,
     chartBase,
     aggs: {
-      threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
-      threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } },
+      threadCount: { avg: { field: threadCountField } },
+      threadCountMax: { max: { field: threadCountField } },
     },
     additionalFilters: [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }],
     operationName: 'get_thread_count_charts',

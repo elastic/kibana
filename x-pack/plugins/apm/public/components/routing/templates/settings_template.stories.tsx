@@ -10,6 +10,7 @@ import type { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy';
 import { SettingsTemplate } from './settings_template';
 
 type Args = ComponentProps<typeof SettingsTemplate>;
@@ -29,6 +30,10 @@ const stories: Meta<Args> = {
   component: SettingsTemplate,
   decorators: [
     (StoryComponent) => {
+      mockApmApiCallResponse('GET /internal/apm/has_data', (params) => ({
+        hasData: true,
+      }));
+
       return (
         <MockApmPluginStorybook
           apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}

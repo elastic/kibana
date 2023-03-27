@@ -57,9 +57,9 @@ function useServicesMainStatisticsFetcher() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const dataSourceOptions = usePreferredDataSourceAndBucketSize({
-    rangeFrom,
-    rangeTo,
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
     kuery,
     type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
@@ -67,7 +67,7 @@ function useServicesMainStatisticsFetcher() {
 
   const mainStatisticsFetch = useProgressiveFetcher(
     (callApmApi) => {
-      if (start && end && dataSourceOptions) {
+      if (preferred) {
         return callApmApi('GET /internal/apm/services', {
           params: {
             query: {
@@ -76,8 +76,8 @@ function useServicesMainStatisticsFetcher() {
               start,
               end,
               serviceGroup,
-              documentType: dataSourceOptions.source.documentType,
-              rollupInterval: dataSourceOptions.source.rollupInterval,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
             },
           },
         }).then((mainStatisticsData) => {
@@ -95,8 +95,7 @@ function useServicesMainStatisticsFetcher() {
       start,
       end,
       serviceGroup,
-      dataSourceOptions?.source.documentType,
-      dataSourceOptions?.source.rollupInterval,
+      preferred,
       // not used, but needed to update the requestId to call the details statistics API when table is options are updated
       page,
       pageSize,
@@ -141,8 +140,8 @@ function useServicesDetailedStatisticsFetcher({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const dataSourceOptions = usePreferredDataSourceAndBucketSize({
-    rangeFrom,
-    rangeTo,
+    start,
+    end,
     kuery,
     type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
