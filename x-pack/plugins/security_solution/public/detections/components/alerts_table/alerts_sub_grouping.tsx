@@ -91,59 +91,44 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
 
   // const { pageSize, pageIndex } = useGroupPaging({ selectedGroup, groupingId: tableId });
 
-  const q = useMemo(() => {
-    console.log('q');
-    return {
-      config: getEsQueryConfig(uiSettings),
-      dataProviders: [],
-      indexPattern,
-      browserFields,
-      kqlQuery: globalQuery,
-      kqlMode: globalQuery.language,
-      filters: [
-        ...(defaultFilters ?? []),
-        ...globalFilters,
-        ...(parentGroupingFilter ?? []),
-        ...buildTimeRangeFilter(from, to),
-      ],
-    };
-  }, [
-    browserFields,
-    defaultFilters,
-    from,
-    globalFilters,
-    globalQuery,
-    indexPattern,
-    parentGroupingFilter,
-    to,
-    uiSettings,
-  ]);
-
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      console.log('getGlobalQuery');
-      if (q.browserFields != null && q.indexPattern != null) {
+      if (browserFields != null && indexPattern != null) {
         return combineQueries({
-          ...q,
-          filters: [...q.filters, ...customFilters],
+          config: getEsQueryConfig(uiSettings),
+          dataProviders: [],
+          indexPattern,
+          browserFields,
+          filters: [
+            ...(defaultFilters ?? []),
+            ...globalFilters,
+            ...customFilters,
+            ...(parentGroupingFilter ?? []),
+            ...buildTimeRangeFilter(from, to),
+          ],
+          kqlQuery: globalQuery,
+          kqlMode: globalQuery.language,
         });
       }
       return null;
     },
-    [q]
+    [
+      browserFields,
+      indexPattern,
+      uiSettings,
+      defaultFilters,
+      globalFilters,
+      parentGroupingFilter,
+      from,
+      to,
+      globalQuery,
+    ]
   );
 
-  const globQ = useCallback(() => {
-    console.log('globQ');
-    return {
-      filterQuery: getGlobalQuery([])?.filterQuery,
-      kqlError: getGlobalQuery([])?.kqlError,
-    };
-  }, [getGlobalQuery]);
-
   useInvalidFilterQuery({
-    ...globQ,
     id: tableId,
+    filterQuery: getGlobalQuery([])?.filterQuery,
+    kqlError: getGlobalQuery([])?.kqlError,
     query: globalQuery,
     startDate: from,
     endDate: to,
@@ -164,6 +149,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
   const queryGroups = useMemo(() => {
+    console.log('do queryGroups');
     return getAlertsGroupingQuery({
       additionalFilters,
       selectedGroup,
@@ -200,6 +186,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     if (hey.current < 4) {
       setAlertsQuery(queryGroups);
       hey.current++;
+    } else {
+      debugger;
     }
   }, [queryGroups, setAlertsQuery]);
 
@@ -252,12 +240,12 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         isLoading: loading || isLoadingGroups,
         renderChildComponent,
         selectedGroup,
-        takeActionItems: () => [], // getTakeActionItems,
+        takeActionItems: getTakeActionItems,
       }),
     [
       alertsGroupsData?.aggregations,
       getGrouping,
-      // getTakeActionItems,
+      getTakeActionItems,
       groupingLevel,
       inspect,
       isLoadingGroups,

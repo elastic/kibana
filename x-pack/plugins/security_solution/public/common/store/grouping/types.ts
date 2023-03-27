@@ -7,7 +7,6 @@
 
 export interface GroupModel {
   groupSelector: React.ReactElement | null;
-  selectedGroups: string[];
 }
 
 export interface GroupState {

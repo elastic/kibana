@@ -7,10 +7,13 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import { useGrouping } from '@kbn/securitysolution-grouping';
+import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEmpty } from 'lodash/fp';
+import { updateGroupSelector } from '../../../common/store/grouping/actions';
+import { groupSelectors } from '../../../common/store/grouping';
+import type { State } from '../../../common/store';
 import type { TableIdLiteral } from '../../../../common/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
@@ -18,7 +21,6 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
-import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
 
@@ -76,22 +78,18 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     onGroupChange,
     tracker: track,
   });
-  const resetPagination = pagination.reset;
+
+  const getGroupSelector = groupSelectors.getGroupSelector();
+
+  const groupSelectorState = useSelector((state: State) => getGroupSelector(state));
 
   useEffect(() => {
-    console.log('useEffect 1', groupSelector);
-    dispatch(updateGroupSelector({ groupSelector }));
-  }, [dispatch, groupSelector]);
-
-  useEffect(() => {
-    console.log('useEffect 2', selectedGroups);
-    dispatch(
-      updateSelectedGroup({
-        selectedGroups,
-      })
-    );
-    // resetPagination();
-  }, [dispatch, resetPagination, selectedGroups]);
+    if (isNoneGroup(selectedGroups) && groupSelectorState == null) {
+      dispatch(updateGroupSelector({ groupSelector }));
+    } else if (groupSelectorState !== null) {
+      dispatch(updateGroupSelector({ groupSelector: null }));
+    }
+  }, [dispatch, groupSelector, groupSelectorState, selectedGroups]);
 
   const getLevel = useCallback(
     (
@@ -100,18 +98,9 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       parentGroupingFilter?: Filter[],
       isRecursive = false
     ) => {
-      console.log({
-        level,
-        selectedGroup,
-        selectedGroups,
-        isRecursive,
-        condition: level < selectedGroups.length - 1,
-      });
       let rcc;
       if (level < selectedGroups.length - 1) {
-        console.log('rcc a!!');
         rcc = (groupingFilters: Filter[]) => {
-          console.log('opiton a!!');
           return getLevel(
             level + 1,
             selectedGroups[level + 1],
@@ -120,9 +109,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           );
         };
       } else {
-        console.log('rcc b!!');
         rcc = (groupingFilters: Filter[]) => {
-          console.log('opiton b!!');
           return props.renderChildComponent([...groupingFilters, ...(parentGroupingFilter ?? [])]);
         };
       }

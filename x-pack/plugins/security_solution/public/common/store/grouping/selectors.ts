@@ -11,7 +11,3 @@ import type { GroupState } from './types';
 const groupSelector = (state: GroupState) => state.groups.groupSelector;
 
 export const getGroupSelector = () => createSelector(groupSelector, (selector) => selector);
-
-export const selectedGroups = (state: GroupState) => state.groups.selectedGroups;
-
-export const getSelectedGroups = () => createSelector(selectedGroups, (groups) => groups);
