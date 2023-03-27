@@ -9,6 +9,7 @@ import React from 'react';
 import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { Comparator } from '../../../../common/alerting/metrics';
 
 export interface ChartProps {
@@ -45,7 +46,6 @@ export const Threshold = ({
         minWidth: '100%',
       }}
       hasShadow={false}
-      element="div"
       data-test-subj={`threshold-${threshold}-${value}`}
     >
       <Chart>
@@ -58,7 +58,10 @@ export const Threshold = ({
                 title,
                 extra: (
                   <span>
-                    Alert when {comparator} {threshold}%
+                    {i18n.translate('xpack.infra.alerting.thresholdExtraTitle', {
+                      values: { comparator, threshold: valueFormatter(threshold) },
+                      defaultMessage: `Alert when {comparator} {threshold}`,
+                    })}
                   </span>
                 ),
                 color,
