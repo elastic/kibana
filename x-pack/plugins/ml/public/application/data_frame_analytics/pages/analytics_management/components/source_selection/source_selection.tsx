@@ -16,7 +16,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 
 import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
@@ -27,7 +27,7 @@ const fixedPageSize: number = 20;
 
 export const SourceSelection: FC = () => {
   const {
-    services: { http, uiSettings },
+    services: { http, uiSettings, savedObjectsManagement },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
 
@@ -117,7 +117,7 @@ export const SourceSelection: FC = () => {
               <EuiSpacer size="m" />
             </>
           )}
-          <SavedObjectFinderUi
+          <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={onSearchSelected}
             showFilter
@@ -151,8 +151,11 @@ export const SourceSelection: FC = () => {
               },
             ]}
             fixedPageSize={fixedPageSize}
-            uiSettings={uiSettings}
-            http={http}
+            services={{
+              uiSettings,
+              http,
+              savedObjectsManagement,
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>

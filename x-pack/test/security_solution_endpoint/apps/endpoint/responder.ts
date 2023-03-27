@@ -7,9 +7,9 @@
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../security_solution_ftr/page_objects/helpers/super_date_picker';
-import { IndexedEndpointRuleAlerts } from '../../../security_solution_ftr/services/detections';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects([

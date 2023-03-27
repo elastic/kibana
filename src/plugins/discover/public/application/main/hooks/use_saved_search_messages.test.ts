@@ -18,7 +18,6 @@ import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { DataMainMsg, RecordRawType } from '../services/discover_data_state_container';
 import { filter } from 'rxjs/operators';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 describe('test useSavedSearch message generators', () => {
   test('sendCompleteMsg', (done) => {
@@ -101,15 +100,13 @@ describe('test useSavedSearch message generators', () => {
 
   test('sendErrorTo', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });
-    const data = dataPluginMock.createStartContract();
     const error = new Error('Pls help!');
     main$.subscribe((value) => {
-      expect(data.search.showError).toBeCalledWith(error);
       expect(value.fetchStatus).toBe(FetchStatus.ERROR);
       expect(value.error).toBe(error);
       done();
     });
-    sendErrorTo(data, main$)(error);
+    sendErrorTo(main$)(error);
   });
 
   test('checkHitCount with hits', (done) => {

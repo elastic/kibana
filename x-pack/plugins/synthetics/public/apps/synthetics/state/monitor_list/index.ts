@@ -118,8 +118,8 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
         delete state.monitorUpsertStatuses[action.payload];
       }
     })
-    .addCase(cleanMonitorListState, () => {
-      return initialState;
+    .addCase(cleanMonitorListState, (state) => {
+      return { ...initialState, pageState: state.pageState };
     });
 });
 

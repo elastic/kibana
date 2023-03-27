@@ -54,8 +54,16 @@
   width: 100% !important; /* 1 */
   top: 0 !important; /* 1 */
   left: 0 !important; /* 1 */
+  padding: $euiSizeS;
 
   // Altered panel styles can be found in ../panel
+}
+
+// Remove padding in fullscreen mode
+.kbnAppWrapper--hiddenChrome {
+  .dshDashboardGrid__item--expanded {
+    padding: 0;
+  }
 }
 
 // REACT-GRID

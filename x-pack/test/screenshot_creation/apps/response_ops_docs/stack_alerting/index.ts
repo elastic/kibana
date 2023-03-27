@@ -29,7 +29,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./list_view'));
-    loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./index_threshold_rule'));
+    loadTestFile(require.resolve('./tracking_containment_rule'));
   });
 }

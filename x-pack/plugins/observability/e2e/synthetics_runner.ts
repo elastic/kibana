@@ -31,6 +31,8 @@ export class SyntheticsRunner {
 
   public params: ArgParams;
 
+  private loadTestFilesCallback?: (reload?: boolean) => Promise<void>;
+
   constructor(getService: any, params: ArgParams) {
     this.getService = getService;
     this.kibanaUrl = this.getKibanaUrl();
@@ -49,9 +51,10 @@ export class SyntheticsRunner {
     });
   }
 
-  async loadTestFiles(callback: () => Promise<void>) {
+  async loadTestFiles(callback: (reload?: boolean) => Promise<void>, reload = false) {
     console.log('Loading test files');
-    await callback();
+    await callback(reload);
+    this.loadTestFilesCallback = callback;
     this.testFilesLoaded = true;
     console.log('Successfully loaded test files');
   }
@@ -103,25 +106,34 @@ export class SyntheticsRunner {
       throw new Error('Test files not loaded');
     }
     const { headless, match, pauseOnError } = this.params;
-    const results = await syntheticsRun({
-      params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
-      playwrightOptions: {
-        headless,
-        chromiumSandbox: false,
-        timeout: 60 * 1000,
-        viewport: {
-          height: 900,
-          width: 1600,
+    const noOfRuns = process.env.NO_OF_RUNS ? Number(process.env.NO_OF_RUNS) : 1;
+    console.log(`Running ${noOfRuns} times`);
+    let results: PromiseType<ReturnType<typeof syntheticsRun>> = {};
+    for (let i = 0; i < noOfRuns; i++) {
+      results = await syntheticsRun({
+        params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
+        playwrightOptions: {
+          headless,
+          chromiumSandbox: false,
+          timeout: 60 * 1000,
+          viewport: {
+            height: 900,
+            width: 1600,
+          },
+          recordVideo: {
+            dir: '.journeys/videos',
+          },
         },
-        recordVideo: {
-          dir: '.journeys/videos',
-        },
-      },
-      match: match === 'undefined' ? '' : match,
-      pauseOnError,
-      screenshots: 'only-on-failure',
-      reporter: TestReporter,
-    });
+        match: match === 'undefined' ? '' : match,
+        pauseOnError,
+        screenshots: 'only-on-failure',
+        reporter: TestReporter,
+      });
+      if (noOfRuns > 1) {
+        // need to reload again since runner resets the journeys
+        await this.loadTestFiles(this.loadTestFilesCallback!, true);
+      }
+    }
 
     await this.assertResults(results);
   }

@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const toasts = getService('toasts');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
@@ -74,9 +73,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'whitespace but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
-        const { message } = await toasts.getErrorToast();
+        expect(await PageObjects.discover.mainErrorVisible()).to.be(true);
+        const message = await PageObjects.discover.getDiscoverErrorMessage();
         expect(message).to.contain(expectedError);
-        await toasts.dismissToast();
       });
 
       it('shows top-level object keys', async function () {

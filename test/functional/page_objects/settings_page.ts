@@ -713,6 +713,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
+    const startingCount = parseInt(await this.getFieldsTabCount(), 10);
     await this.clickAddField();
     await this.setFieldName(name);
     await this.setFieldType(type);
@@ -722,6 +723,9 @@ export class SettingsPageObject extends FtrService {
 
     if (doSaveField) {
       await this.clickSaveField();
+      await this.retry.try(async () => {
+        expect(parseInt(await this.getFieldsTabCount(), 10)).to.be(startingCount + 1);
+      });
     }
   }
 
@@ -791,6 +795,7 @@ export class SettingsPageObject extends FtrService {
   async clickSaveField() {
     this.log.debug('click Save');
     await this.testSubjects.click('fieldSaveButton');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async setFieldName(name: string) {

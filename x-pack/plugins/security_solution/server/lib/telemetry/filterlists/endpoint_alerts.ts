@@ -15,6 +15,7 @@ const baseAllowlistFields: AllowlistFields = {
   executable: true,
   code_signature: true,
   command_line: true,
+  env_vars: true,
   hash: true,
   pid: true,
   pe: true,

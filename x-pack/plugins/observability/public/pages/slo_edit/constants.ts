@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { BudgetingMethod, CreateSLOInput } from '@kbn/slo-schema';
+import {
+  BUDGETING_METHOD_OCCURRENCES,
+  BUDGETING_METHOD_TIMESLICES,
+  INDICATOR_APM_AVAILABILITY,
+  INDICATOR_APM_LATENCY,
+  INDICATOR_CUSTOM_KQL,
+} from '../../utils/slo/labels';
 
 export const SLI_OPTIONS: Array<{
   value: CreateSLOInput['indicator']['type'];
@@ -14,36 +21,26 @@ export const SLI_OPTIONS: Array<{
 }> = [
   {
     value: 'sli.kql.custom',
-    text: i18n.translate('xpack.observability.slo.sliTypes.kqlCustomIndicator', {
-      defaultMessage: 'KQL custom',
-    }),
+    text: INDICATOR_CUSTOM_KQL,
   },
   {
     value: 'sli.apm.transactionDuration',
-    text: i18n.translate('xpack.observability.slo.sliTypes.apmLatencyIndicator', {
-      defaultMessage: 'APM latency',
-    }),
+    text: INDICATOR_APM_LATENCY,
   },
   {
     value: 'sli.apm.transactionErrorRate',
-    text: i18n.translate('xpack.observability.slo.sliTypes.apmAvailabilityIndicator', {
-      defaultMessage: 'APM availability',
-    }),
+    text: INDICATOR_APM_AVAILABILITY,
   },
 ];
 
 export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: string }> = [
   {
     value: 'occurrences',
-    text: i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.occurrences', {
-      defaultMessage: 'Occurrences',
-    }),
+    text: BUDGETING_METHOD_OCCURRENCES,
   },
   {
     value: 'timeslices',
-    text: i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.timeslices', {
-      defaultMessage: 'Timeslices',
-    }),
+    text: BUDGETING_METHOD_TIMESLICES,
   },
 ];
 
@@ -72,6 +69,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
       TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
     isRolling: true,
   },
+  tags: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
   objective: {
     target: 99.5,

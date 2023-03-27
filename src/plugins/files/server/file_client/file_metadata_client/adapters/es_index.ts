@@ -12,6 +12,7 @@ import { Logger } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { MappingProperty, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { fetchDoc } from '../../utils';
 import type { FilesMetrics, FileMetadata, Pagination } from '../../../../common';
 import type { FindFileArgs } from '../../../file_service';
 import type {
@@ -43,7 +44,8 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   constructor(
     private readonly index: string,
     private readonly esClient: ElasticsearchClient,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly indexIsAlias: boolean = false
   ) {}
 
   private createIfNotExists = once(async () => {
@@ -80,10 +82,8 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   }
 
   async get({ id }: GetArg): Promise<FileDescriptor<M>> {
-    const { _source: doc } = await this.esClient.get<FileDocument<M>>({
-      index: this.index,
-      id,
-    });
+    const { _source: doc } =
+      (await fetchDoc<FileDocument<M>>(this.esClient, this.index, id, this.indexIsAlias)) ?? {};
 
     if (!doc) {
       this.logger.error(`File with id "${id}" not found`);

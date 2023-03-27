@@ -33,7 +33,12 @@ export function FlyoutFooter({
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+          <EuiButtonEmpty
+            data-test-subj="apmCustomLinkFlyoutFooterCloseButton"
+            iconType="cross"
+            onClick={onClose}
+            flush="left"
+          >
             {i18n.translate('xpack.apm.settings.customLink.flyout.close', {
               defaultMessage: 'Close',
             })}
@@ -44,6 +49,7 @@ export function FlyoutFooter({
             <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />
           )}
           <EuiButton
+            data-test-subj="apmCustomLinkFlyoutFooterSaveButton"
             form="customLink_form"
             fill
             type="submit"
