@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsCreateOptions, SavedObjectsUpdateOptions } from '@kbn/core/public';
-
 import { ContentClient } from '@kbn/content-management-plugin/public';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
@@ -59,31 +57,26 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return response.savedObject;
   }
 
-  async update(
-    type: string,
-    id: string,
-    attributes: DataViewAttributes,
-    options: SavedObjectsUpdateOptions<unknown>
-  ) {
+  // SO update method took a `version` value via the options object.
+  // This was used to make sure the update was based on the most recent version of the object.
+  async update(id: string, attributes: DataViewAttributes) {
     const response = await this.contentManagemntClient.update<DataViewUpdateIn, DataViewUpdateOut>({
       contentTypeId: 'index-pattern',
       id,
       data: attributes,
-      options,
     });
     return response as SavedObject<DataViewAttributes>;
   }
 
-  async create(type: string, attributes: DataViewAttributes, options?: SavedObjectsCreateOptions) {
+  async create(attributes: DataViewAttributes) {
     return (await this.contentManagemntClient.create<DataViewCreateIn, DataViewCreateOut>({
       contentTypeId: 'index-pattern',
       data: attributes,
-      options,
     })) as SavedObject<DataViewAttributes>;
   }
 
-  delete(type: string, id: string) {
-    return this.contentManagemntClient.delete<DataViewDeleteIn, DataViewDeleteOut>({
+  async delete(id: string) {
+    await this.contentManagemntClient.delete<DataViewDeleteIn, DataViewDeleteOut>({
       contentTypeId: 'index-pattern',
       id,
     });

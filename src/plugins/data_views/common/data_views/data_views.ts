@@ -31,6 +31,7 @@ import {
   DataViewFieldMap,
   TypeMeta,
 } from '../types';
+// todo remove
 import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByName } from '../utils';
@@ -175,7 +176,7 @@ export interface DataViewsServicePublicMethods {
    * Delete data view
    * @param indexPatternId - Id of the data view to delete.
    */
-  delete: (indexPatternId: string) => Promise<unknown>; // todo
+  delete: (indexPatternId: string) => Promise<void>;
   /**
    * Takes field array and field attributes and returns field map by name.
    * @param fields - Array of fieldspecs
@@ -1003,13 +1004,9 @@ export class DataViewsService {
     }
 
     const body = dataView.getAsSavedObjectBody();
-    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
-      DATA_VIEW_SAVED_OBJECT_TYPE,
-      body,
-      {
-        id: dataView.id,
-      }
-    )) as SavedObject<DataViewAttributes>;
+    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
+      id: dataView.id,
+    })) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);
     if (this.savedObjectsCache) {
@@ -1051,7 +1048,7 @@ export class DataViewsService {
     });
 
     return this.savedObjectsClient
-      .update(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id, body, {
+      .update(indexPattern.id, body, {
         version: indexPattern.version,
       })
       .then((response) => {
@@ -1132,7 +1129,7 @@ export class DataViewsService {
       throw new DataViewInsufficientAccessError(indexPatternId);
     }
     this.dataViewCache.clear(indexPatternId);
-    return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);
+    return this.savedObjectsClient.delete(indexPatternId);
   }
 
   /**
