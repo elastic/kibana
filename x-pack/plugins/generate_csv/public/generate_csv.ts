@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
@@ -96,7 +97,7 @@ export class CsvGenerator {
   private async doSearch(
     searchSource: ISearchSource,
     settings: CsvExportSettings,
-    searchAfter?: estypes.SortResults
+    searchAfter?: SortResults
   ) {
     const { scroll: scrollSettings } = settings;
     searchSource.setField('size', scrollSettings.size);
@@ -327,7 +328,7 @@ export class CsvGenerator {
     let currentRecord = -1;
     let totalRecords: number | undefined;
     let totalRelation = 'eq';
-    let searchAfter: estypes.SortResults | undefined;
+    let searchAfter: SortResults | undefined;
 
     let pitId = await this.openPointInTime(indexPatternTitle, settings);
 
@@ -395,7 +396,7 @@ export class CsvGenerator {
 
         // Update last sort results for next query. PIT is used, so the sort results
         // automatically include _shard_doc as a tiebreaker
-        searchAfter = hits.hits[hits.hits.length - 1]?.sort as estypes.SortResults | undefined;
+        searchAfter = hits.hits[hits.hits.length - 1]?.sort as SortResults | undefined;
         this.logger.debug(`Received search_after: [${searchAfter}]`);
 
         // check for shard failures, log them and add a warning if found
