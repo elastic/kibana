@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '@timestamp, extension'
         );
 
-        await PageObjects.discover.dragFieldToTable('@message');
+        await PageObjects.discover.dragFieldWithKeyboardToTable('@message');
 
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
           '@timestamp, extension, @message'

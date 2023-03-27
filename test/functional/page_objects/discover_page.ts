@@ -865,10 +865,21 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  private async waitForDropToFinish() {
+    await this.retry.try(async () => {
+      const exists = await this.find.existsByCssSelector('.domDragDrop-isActiveGroup');
+      if (exists) {
+        throw new Error('UI still in drag/drop mode');
+      }
+    });
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+  }
+
   /**
    * Drags field to add as a column
    *
-   * @param fieldName  - the desired field for the dimension
+   * @param fieldName
    * */
   public async dragFieldToTable(fieldName: string) {
     await this.waitUntilSidebarHasLoaded();
@@ -879,13 +890,25 @@ export class DiscoverPageObject extends FtrService {
       this.testSubjects.getCssSelector(from),
       this.testSubjects.getCssSelector('dscMainContent')
     );
+    await this.waitForDropToFinish();
+  }
+
+  /**
+   * Drags field with keyboard actions to add as a column
+   *
+   * @param fieldName
+   * */
+  public async dragFieldWithKeyboardToTable(fieldName: string) {
+    const field = await this.find.byCssSelector(
+      `[data-test-subj="domDragDrop_draggable-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+    );
+    await field.focus();
     await this.retry.try(async () => {
-      const exists = await this.find.existsByCssSelector('.domDragDrop-isActiveGroup');
-      if (exists) {
-        throw new Error('UI still in drag/drop mode');
-      }
+      await this.browser.pressKeys(this.browser.keys.ENTER);
+      await this.testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
     });
-    await this.header.waitUntilLoadingHasFinished();
-    await this.waitUntilSearchingHasFinished();
+    await this.browser.pressKeys(this.browser.keys.RIGHT);
+    await this.browser.pressKeys(this.browser.keys.ENTER);
+    await this.waitForDropToFinish();
   }
 }
