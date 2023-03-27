@@ -133,9 +133,7 @@ export const getSeriesValueColumnIndex = (value: string, visData: Datatable): nu
 
 export const getAccessor = (buckets: Dimensions['buckets'], index: number) => {
   const accessorForDimensionBuckets = buckets?.find((b) => {
-    if (typeof b !== 'string') {
-      return b.accessor === index;
-    }
+    return typeof b !== 'string' && b.accessor === index;
   });
   return accessorForDimensionBuckets || buckets?.[index];
 };
