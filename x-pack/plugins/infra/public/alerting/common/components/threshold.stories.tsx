@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { ComponentMeta } from '@storybook/react';
 import React from 'react';
+import { ComponentMeta } from '@storybook/react';
 import { LIGHT_THEME } from '@elastic/charts';
-import { EuiPanel } from '@elastic/eui';
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { Comparator } from '../../../../common/alerting/metrics';
 import { Props, Threshold as Component } from './threshold';
@@ -18,19 +17,14 @@ export default {
   title: 'infra/alerting/Threshold',
   decorators: [
     (Story) => (
-      <EuiPanel
-        paddingSize="none"
+      <div
         style={{
           height: '160px',
-          overflow: 'hidden',
-          position: 'relative',
-          minWidth: '200px',
+          width: '240px',
         }}
-        hasShadow={false}
-        element="div"
       >
         {Story()}
-      </EuiPanel>
+      </div>
     ),
   ],
 } as ComponentMeta<typeof Component>;
@@ -40,7 +34,7 @@ const defaultProps: Props = {
   title: 'Threshold breached',
   threshold: 90,
   value: 93,
-  valueFormatter: (d) => `${d} %`,
+  valueFormatter: (d) => `${d}%`,
   comparator: Comparator.GT,
 };
 

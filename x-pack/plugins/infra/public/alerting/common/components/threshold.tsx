@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Chart, Metric, Settings } from '@elastic/charts';
-import { EuiIcon, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { Comparator } from '../../../../common/alerting/metrics';
 
@@ -36,29 +36,42 @@ export const Threshold = ({
   const color = useEuiBackgroundColor('danger');
 
   return (
-    <Chart>
-      <Settings theme={theme} baseTheme={baseTheme} />
-      <Metric
-        id="1"
-        data={[
-          [
-            {
-              title,
-              extra: (
-                <span>
-                  Alert when {comparator} {threshold}%
-                </span>
-              ),
-              color,
-              value,
-              valueFormatter,
-              icon: ({ width, height, color: iconColor }) => (
-                <EuiIcon width={width} height={height} color={iconColor} type="alert" />
-              ),
-            },
-          ],
-        ]}
-      />
-    </Chart>
+    <EuiPanel
+      paddingSize="none"
+      style={{
+        height: '100%',
+        overflow: 'hidden',
+        position: 'relative',
+        minWidth: '100%',
+      }}
+      hasShadow={false}
+      element="div"
+      data-test-subj={`threshold-${threshold}-${value}`}
+    >
+      <Chart>
+        <Settings theme={theme} baseTheme={baseTheme} />
+        <Metric
+          id="1"
+          data={[
+            [
+              {
+                title,
+                extra: (
+                  <span>
+                    Alert when {comparator} {threshold}%
+                  </span>
+                ),
+                color,
+                value,
+                valueFormatter,
+                icon: ({ width, height, color: iconColor }) => (
+                  <EuiIcon width={width} height={height} color={iconColor} type="alert" />
+                ),
+              },
+            ],
+          ]}
+        />
+      </Chart>
+    </EuiPanel>
   );
 };
