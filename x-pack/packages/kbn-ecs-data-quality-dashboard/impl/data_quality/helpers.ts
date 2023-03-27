@@ -71,8 +71,8 @@ const getNextPathWithoutProperties = ({
     return key;
   }
 
-  if (shouldReadKeys(value) && key === 'properties') {
-    return `${pathWithoutProperties}`; // TODO: wrap required?
+  if (shouldReadKeys(value) && (key === 'properties' || key === 'fields')) {
+    return `${pathWithoutProperties}`;
   } else {
     return `${pathWithoutProperties}.${key}`;
   }
@@ -115,6 +115,51 @@ export function getFieldTypes(mappingsProperties: Record<string, unknown>): Fiel
   return result;
 }
 
+/**
+ * Per https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html#_core_datatypes
+ *
+ * ```
+ * Field types are grouped by _family_. Types in the same family have exactly
+ * the same search behavior but may have different space usage or
+ * performance characteristics.
+ *
+ * Currently, there are two type families, `keyword` and `text`. Other type
+ * families have only a single field type. For example, the `boolean` type
+ * family consists of one field type: `boolean`.
+ * ```
+ */
+export const fieldTypeFamilies: Record<string, Set<string>> = {
+  keyword: new Set(['keyword', 'constant_keyword', 'wildcard']),
+  text: new Set(['text', 'match_only_text']),
+};
+
+export const getIsInSameFamily = ({
+  ecsExpectedType,
+  type,
+}: {
+  ecsExpectedType: string | undefined;
+  type: string;
+}): boolean => {
+  if (ecsExpectedType != null) {
+    const allFamilies = Object.values(fieldTypeFamilies);
+
+    return allFamilies.reduce<boolean>(
+      (acc, family) => (acc !== true ? family.has(ecsExpectedType) && family.has(type) : acc),
+      false
+    );
+  } else {
+    return false;
+  }
+};
+
+export const isMappingCompatible = ({
+  ecsExpectedType,
+  type,
+}: {
+  ecsExpectedType: string | undefined;
+  type: string;
+}): boolean => type === ecsExpectedType;
+
 export const getEnrichedFieldMetadata = ({
   ecsMetadata,
   fieldMetadata,
@@ -128,13 +173,19 @@ export const getEnrichedFieldMetadata = ({
   const indexInvalidValues = unallowedValues[field] ?? [];
 
   if (has(fieldMetadata.field, ecsMetadata)) {
+    const ecsExpectedType = ecsMetadata[field].type;
+    const isEcsCompliant =
+      isMappingCompatible({ ecsExpectedType, type }) && indexInvalidValues.length === 0;
+    const isInSameFamily = getIsInSameFamily({ ecsExpectedType, type });
+
     return {
       ...ecsMetadata[field],
       indexFieldName: field,
       indexFieldType: type,
       indexInvalidValues,
       hasEcsMetadata: true,
-      isEcsCompliant: type === ecsMetadata[field].type && indexInvalidValues.length === 0,
+      isEcsCompliant,
+      isInSameFamily,
     };
   } else {
     return {
@@ -143,6 +194,7 @@ export const getEnrichedFieldMetadata = ({
       indexInvalidValues,
       hasEcsMetadata: false,
       isEcsCompliant: false,
+      isInSameFamily: false, // custom fields are never in the same family
     };
   }
 };
@@ -154,6 +206,7 @@ export const getMissingTimestampFieldMetadata = (): EnrichedFieldMetadata => ({
   indexFieldType: '-',
   indexInvalidValues: [],
   isEcsCompliant: false,
+  isInSameFamily: false, // `date` is not a member of any families
   type: 'date',
 });
 
@@ -200,7 +253,7 @@ export const getDocsCount = ({
 }: {
   indexName: string;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-}): number => (stats && stats[indexName]?.total?.docs?.count) ?? 0;
+}): number => (stats && stats[indexName]?.primaries?.docs?.count) ?? 0;
 
 export const getTotalDocsCount = ({
   indexNames,

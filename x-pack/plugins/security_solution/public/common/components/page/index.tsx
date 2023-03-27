@@ -74,7 +74,9 @@ export const TIMELINE_OVERRIDES_CSS_STYLESHEET = () => css`
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
-export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
+export const AppGlobalStyle = createGlobalStyle<{
+  theme: { eui: { euiColorPrimary: string; euiColorLightShade: string; euiSizeS: string } };
+}>`
 
   ${TIMELINE_OVERRIDES_CSS_STYLESHEET}
 
@@ -103,10 +105,15 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
     .euiPopoverFooter {
       border: 0;
-      margin-top: 0 !important;
+      margin-top: 0;
       .euiFlexGroup {
         flex-direction: column;
       }
+    }
+
+    .euiText + .euiPopoverFooter { 
+      border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade}; 
+      margin-top: ${({ theme }) => theme.eui.euiSizeS};
     }
   }
 

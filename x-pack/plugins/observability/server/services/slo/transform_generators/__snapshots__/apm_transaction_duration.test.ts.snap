@@ -1,12 +1,130 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`APM Transaction Duration Transform Generator adds the custom kql filter to the query 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.name": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "service.environment": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.name": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.type": "irrelevant",
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "my.field": "value",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "foo": Object {
+                              "gte": "12",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "bar": Object {
+                              "lte": "100",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
 exports[`APM Transaction Duration Transform Generator does not include the query filter when params are '*' 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
       Object {
-        "match": Object {
-          "transaction.root": true,
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
         },
       },
       Object {
@@ -26,6 +144,7 @@ Object {
   "_meta": Object {
     "version": 1,
   },
+  "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
     "index": "slo-observability.sli-v1",
     "pipeline": "slo-observability.sli.monthly",
@@ -94,8 +213,20 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "match": Object {
-              "transaction.root": true,
+            "terms": Object {
+              "processor.event": Array [
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
             },
           },
           Object {
@@ -158,6 +289,7 @@ Object {
   "_meta": Object {
     "version": 1,
   },
+  "description": "Rolled-up SLI data for SLO: irrelevant",
   "dest": Object {
     "index": "slo-observability.sli-v1",
     "pipeline": "slo-observability.sli.monthly",
@@ -217,8 +349,20 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "match": Object {
-              "transaction.root": true,
+            "terms": Object {
+              "processor.event": Array [
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
             },
           },
           Object {

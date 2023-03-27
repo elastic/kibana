@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
   createRuleWithAuth,
@@ -43,11 +43,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     describe('should set status to partial failure when user has no access', () => {

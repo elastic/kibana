@@ -8,6 +8,11 @@ import React from 'react';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import type { AlertsTypeData, AlertType } from './types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -16,7 +21,9 @@ import { ALERT_TYPE_COLOR, ALERT_TYPE_LABEL } from './helpers';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import * as i18n from './translations';
 
-export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTypeData>> => [
+export const getAlertsTypeTableColumns = (
+  isAlertTypeEnabled: boolean
+): Array<EuiBasicTableColumn<AlertsTypeData>> => [
   {
     field: 'rule',
     name: ALERTS_HEADERS_RULE_NAME,
@@ -37,22 +44,39 @@ export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTyp
       </EuiText>
     ),
   },
-  {
-    field: 'type',
-    name: i18n.ALERTS_TYPE_COLUMN_TITLE,
-    'data-test-subj': 'detectionsTable-type',
-    truncateText: true,
-    render: (type: string) => {
-      return (
-        <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
-          <EuiText grow={false} size="xs">
-            {ALERT_TYPE_LABEL[type as AlertType]}
-          </EuiText>
-        </EuiHealth>
-      );
-    },
-    width: '30%',
-  },
+  ...(isAlertTypeEnabled
+    ? [
+        {
+          field: 'type',
+          name: i18n.ALERTS_TYPE_COLUMN_TITLE,
+          'data-test-subj': 'detectionsTable-type',
+          truncateText: true,
+          render: (type: string) => {
+            return (
+              <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
+                <EuiText grow={false} size="xs">
+                  <SecurityCellActions
+                    mode={CellActionsMode.HOVER}
+                    visibleCellActions={4}
+                    showActionTooltips
+                    triggerId={SecurityCellActionsTrigger.DEFAULT}
+                    field={{
+                      name: 'event.type',
+                      value: 'denied',
+                      type: 'keyword',
+                    }}
+                    metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
+                  >
+                    {ALERT_TYPE_LABEL[type as AlertType]}
+                  </SecurityCellActions>
+                </EuiText>
+              </EuiHealth>
+            );
+          },
+          width: '30%',
+        },
+      ]
+    : []),
   {
     field: 'value',
     name: COUNT_TABLE_TITLE,

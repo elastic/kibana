@@ -239,8 +239,10 @@ export function initializeVisualization({
 }) {
   if (visualizationState?.activeId) {
     return (
-      visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
+      visualizationMap[visualizationState.activeId]?.initialize(
+        () => '',
         visualizationState.state,
+        undefined,
         references,
         initialContext
       ) ?? visualizationState.state
@@ -401,7 +403,7 @@ export async function persistedStateToExpression(
 }
 
 export function getMissingIndexPattern(
-  currentDatasource: Datasource | null,
+  currentDatasource: Datasource | null | undefined,
   currentDatasourceState: { state: unknown } | null,
   indexPatterns: IndexPatternMap
 ) {

@@ -102,8 +102,9 @@ export const StdErrorLogs = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink>
+              <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
                 <EuiButtonEmpty
+                  data-test-subj="syntheticsStdErrorLogsButton"
                   href={discoverLink}
                   iconType="discoverApp"
                   isDisabled={!discoverLink}
@@ -113,9 +114,11 @@ export const StdErrorLogs = ({
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
-            <p>{summaryMessage}</p>
-          </EuiCallOut>
+          {summaryMessage && (
+            <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
+              <p>{summaryMessage}</p>
+            </EuiCallOut>
+          )}
         </>
       )}
 

@@ -15,13 +15,20 @@ import {
 import { Logger } from '@kbn/logging';
 import { MigrationLogger } from '../core/migration_logger';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
-import type { Transform, TransformFn } from './types';
+import { type Transform, type TransformFn, TransformType } from './types';
+
+const TRANSFORM_PRIORITY = [
+  TransformType.Core,
+  TransformType.Reference,
+  TransformType.Convert,
+  TransformType.Migrate,
+];
 
 /**
  * If a specific transform function fails, this tacks on a bit of information
  * about the document and transform that caused the failure.
  */
-export function wrapWithTry(
+export function convertMigrationFunction(
   version: string,
   type: SavedObjectsType,
   migrationFn: SavedObjectMigrationFn,
@@ -53,26 +60,37 @@ export function wrapWithTry(
 }
 
 /**
- * Transforms are sorted in ascending order by version. One version may contain multiple transforms; 'reference' transforms always run
- * first, 'convert' transforms always run second, and 'migrate' transforms always run last. This is because:
+ * Transforms are sorted in ascending order by version depending on their type:
+ *  - `core` transforms always run first no matter version;
+ *  - `reference` transforms have priority in case of the same version;
+ *  - `convert` transforms run after in case of the same version;
+ *  - 'migrate' transforms always run last.
+ * This is because:
  *  1. 'convert' transforms get rid of the `namespace` field, which must be present for 'reference' transforms to function correctly.
- *  2. 'migrate' transforms are defined by the consumer, and may change the object type or migrationVersion which resets the migration loop
- *     and could cause any remaining transforms for this version to be skipped.
+ *  2. 'migrate' transforms are defined by the consumer, and may change the object type or `migrationVersion` which resets the migration loop
+ *     and could cause any remaining transforms for this version to be skipped.One version may contain multiple transforms.
  */
 export function transformComparator(a: Transform, b: Transform) {
-  const semver = Semver.compare(a.version, b.version);
-  if (semver !== 0) {
-    return semver;
-  } else if (a.transformType !== b.transformType) {
-    if (a.transformType === 'migrate') {
-      return 1;
-    } else if (b.transformType === 'migrate') {
-      return -1;
-    } else if (a.transformType === 'convert') {
-      return 1;
-    } else if (b.transformType === 'convert') {
-      return -1;
-    }
+  const aPriority = TRANSFORM_PRIORITY.indexOf(a.transformType);
+  const bPriority = TRANSFORM_PRIORITY.indexOf(b.transformType);
+
+  if (
+    aPriority !== bPriority &&
+    (a.transformType === TransformType.Core || b.transformType === TransformType.Core)
+  ) {
+    return aPriority - bPriority;
   }
-  return 0;
+
+  return Semver.compare(a.version, b.version) || aPriority - bPriority;
+}
+
+export function maxVersion(a?: string, b?: string) {
+  if (!a) {
+    return b;
+  }
+  if (!b) {
+    return a;
+  }
+
+  return Semver.gt(a, b) ? a : b;
 }

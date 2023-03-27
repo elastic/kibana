@@ -355,6 +355,7 @@ export interface DocLinks {
     createAlerts: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
+    syntheticsMigrateFromIntegration: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;
@@ -382,6 +383,7 @@ export interface DocLinks {
     healthMonitoring: string;
   }>;
   readonly maps: Readonly<{
+    connectToEms: string;
     guide: string;
     importGeospatialPrivileges: string;
     gdalTutorial: string;

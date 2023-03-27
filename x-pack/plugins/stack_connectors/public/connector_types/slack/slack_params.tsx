@@ -18,6 +18,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
   errors,
   messageVariables,
   defaultMessage,
+  useDefaultMessage,
 }) => {
   const { message } = actionParams;
   const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
@@ -25,6 +26,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
   >([false, defaultMessage]);
   useEffect(() => {
     if (
+      useDefaultMessage ||
       !actionParams?.message ||
       (isUsingDefault &&
         actionParams?.message === defaultMessageUsed &&

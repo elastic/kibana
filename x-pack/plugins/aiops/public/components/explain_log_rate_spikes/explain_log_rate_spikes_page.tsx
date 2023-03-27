@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import type { WindowParameters } from '@kbn/aiops-utils';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
@@ -38,9 +38,12 @@ import { PageHeader } from '../page_header';
 import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 
-function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
-  if (changePoint) {
-    return `${changePoint?.fieldName}:${changePoint?.fieldValue}`;
+function getDocumentCountStatsSplitLabel(
+  significantTerm?: SignificantTerm,
+  group?: GroupTableItem
+) {
+  if (significantTerm) {
+    return `${significantTerm?.fieldName}:${significantTerm?.fieldValue}`;
   } else if (group) {
     return i18n.translate('xpack.aiops.spikeAnalysisPage.documentCountStatsSplitGroupLabel', {
       defaultMessage: 'Selected group',
@@ -53,11 +56,11 @@ export const ExplainLogRateSpikesPage: FC = () => {
   const { dataView, savedSearch } = useDataSource();
 
   const {
-    currentSelectedChangePoint,
+    currentSelectedSignificantTerm,
     currentSelectedGroup,
-    setPinnedChangePoint,
+    setPinnedSignificantTerm,
     setPinnedGroup,
-    setSelectedChangePoint,
+    setSelectedSignificantTerm,
     setSelectedGroup,
   } = useSpikeAnalysisTableRowContext();
 
@@ -111,7 +114,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
     { selectedDataView: dataView, selectedSavedSearch },
     aiopsListState,
     setGlobalState,
-    currentSelectedChangePoint,
+    currentSelectedSignificantTerm,
     currentSelectedGroup
   );
 
@@ -161,9 +164,9 @@ export const ExplainLogRateSpikesPage: FC = () => {
 
   function clearSelection() {
     setWindowParameters(undefined);
-    setPinnedChangePoint(null);
+    setPinnedSignificantTerm(null);
     setPinnedGroup(null);
-    setSelectedChangePoint(null);
+    setSelectedSignificantTerm(null);
     setSelectedGroup(null);
   }
 
@@ -191,7 +194,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
                   documentCountStats={documentCountStats}
                   documentCountStatsSplit={documentCountStatsCompare}
                   documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
-                    currentSelectedChangePoint,
+                    currentSelectedSignificantTerm,
                     currentSelectedGroup
                   )}
                   totalCount={totalCount}

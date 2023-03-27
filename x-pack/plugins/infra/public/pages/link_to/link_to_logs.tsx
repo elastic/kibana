@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+import { match as RouteMatch, Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';

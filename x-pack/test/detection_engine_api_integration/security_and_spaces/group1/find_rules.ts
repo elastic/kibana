@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getComplexRule,
   getComplexRuleOutput,
@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should return an empty find body correctly if no rules are loaded', async () => {
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [action],
+        actions: [{ ...action, uuid: body.data[0].actions[0].uuid }],
         throttle: 'rule',
       };
 
@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [action],
+        actions: [{ ...action, uuid: body.data[0].actions[0].uuid }],
         throttle: '1h', // <-- throttle makes this a scheduled action
       };
 

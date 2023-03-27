@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Query, TimeRange } from '@kbn/es-query';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
@@ -32,16 +33,20 @@ export function AlertsSearchBar({
   const { value: dataView, loading, error } = useAlertDataView(featureIds);
 
   const onQuerySubmit = useCallback(
-    (payload) => {
-      const { dateRange, query: nextQuery } = payload;
+    ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
       onQueryChange({
         dateRange,
-        query: typeof nextQuery?.query === 'string' ? nextQuery.query : '',
+        query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
       });
       setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
     },
     [onQueryChange, setQueryLanguage]
   );
+  const onRefresh = ({ dateRange }: { dateRange: TimeRange }) => {
+    onQueryChange({
+      dateRange,
+    });
+  };
 
   return (
     <SearchBar
@@ -54,6 +59,7 @@ export function AlertsSearchBar({
       displayStyle="inPage"
       showFilterBar={false}
       onQuerySubmit={onQuerySubmit}
+      onRefresh={onRefresh}
     />
   );
 }

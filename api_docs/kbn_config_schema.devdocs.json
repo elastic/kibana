@@ -981,7 +981,8 @@
               "\nInternal \"schema\" backed by Joi."
             ],
             "signature": [
-              "AnySchema"
+              "AnySchema",
+              "<any>"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
             "deprecated": false,
@@ -1009,7 +1010,8 @@
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "AnySchema"
+                  "AnySchema",
+                  "<any>"
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,

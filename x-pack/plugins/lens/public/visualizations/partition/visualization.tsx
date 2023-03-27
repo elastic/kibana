@@ -29,7 +29,7 @@ import type {
 } from '../../types';
 import {
   getColumnToLabelMap,
-  getSortedGroups,
+  getSortedAccessorsForGroup,
   toExpression,
   toPreviewExpression,
 } from './to_expression';
@@ -91,12 +91,13 @@ export const getDefaultColorForMultiMetricDimension = ({
   datasource: DatasourcePublicAPI | undefined;
 }) => {
   const columnToLabelMap = datasource ? getColumnToLabelMap(layer.metrics, datasource) : {};
+  const sortedMetrics = getSortedAccessorsForGroup(datasource, layer, 'metrics');
 
   return paletteService.get('default').getCategoricalColor([
     {
       name: columnToLabelMap[columnId],
-      rankAtDepth: layer.metrics.indexOf(columnId),
-      totalSeriesAtDepth: layer.metrics.length,
+      rankAtDepth: sortedMetrics.indexOf(columnId),
+      totalSeriesAtDepth: sortedMetrics.length,
     },
   ]) as string;
 };
@@ -167,7 +168,7 @@ export const getPieVisualization = ({
     const datasource = frame.datasourceLayers[layer.layerId];
 
     const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
-      const originalOrder = getSortedGroups(datasource, layer);
+      const originalOrder = getSortedAccessorsForGroup(datasource, layer, 'primaryGroups');
       // When we add a column it could be empty, and therefore have no order
       const accessors = originalOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
@@ -273,7 +274,11 @@ export const getPieVisualization = ({
     };
 
     const getSecondaryGroupConfig = (): VisualizationDimensionGroupConfig | undefined => {
-      const originalSecondaryOrder = getSortedGroups(datasource, layer, 'secondaryGroups');
+      const originalSecondaryOrder = getSortedAccessorsForGroup(
+        datasource,
+        layer,
+        'secondaryGroups'
+      );
       const accessors = originalSecondaryOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
         triggerIconType: isCollapsed(accessor, layer) ? 'aggregate' : undefined,
@@ -317,7 +322,11 @@ export const getPieVisualization = ({
     const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => {
       const hasSliceBy = layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0);
 
-      const accessors: AccessorConfig[] = layer.metrics.map<AccessorConfig>((columnId, index) => ({
+      const accessors: AccessorConfig[] = getSortedAccessorsForGroup(
+        datasource,
+        layer,
+        'metrics'
+      ).map<AccessorConfig>((columnId) => ({
         columnId,
         ...(layer.allowMultipleMetrics
           ? hasSliceBy
@@ -371,7 +380,7 @@ export const getPieVisualization = ({
     };
   },
 
-  setDimension({ prevState, layerId, columnId, groupId }) {
+  setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
     return {
       ...prevState,
       layers: prevState.layers.map((l) => {
@@ -393,7 +402,8 @@ export const getPieVisualization = ({
             ],
           };
         }
-        return { ...l, metrics: [...l.metrics.filter((metric) => metric !== columnId), columnId] };
+        const metrics = [...l.metrics.filter((metric) => metric !== columnId), columnId];
+        return { ...l, metrics };
       }),
     };
   },

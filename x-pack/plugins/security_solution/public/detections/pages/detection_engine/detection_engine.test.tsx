@@ -113,6 +113,13 @@ jest.mock('../../../common/lib/kibana', () => {
           get: jest.fn(),
           set: jest.fn(),
         },
+        triggersActionsUi: {
+          alertsTableConfigurationRegistry: {},
+          getAlertsStateTable: () => <></>,
+        },
+        sessionView: {
+          getSessionView: jest.fn().mockReturnValue(<div />),
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({
@@ -120,6 +127,17 @@ jest.mock('../../../common/lib/kibana', () => {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
       remove: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../timelines/components/side_panel/hooks/use_detail_panel', () => {
+  return {
+    useDetailPanel: () => ({
+      openEventDetailsPanel: jest.fn(),
+      handleOnDetailsPanelClosed: () => {},
+      DetailsPanel: () => <div />,
+      shouldShowDetailsPanel: false,
     }),
   };
 });

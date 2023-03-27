@@ -261,7 +261,7 @@ const Details: FC<{
         )}
         {isInterimResult === true && (
           <>
-            <EuiIcon type="alert" />
+            <EuiIcon type="warning" />
             <span className="interim-result">
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.interimResultLabel"

@@ -91,6 +91,7 @@ describe('get_export_by_object_ids', () => {
           references: ['http://example.com', 'https://example.com'],
           related_integrations: [],
           required_fields: [],
+          revision: 0,
           setup: '',
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
@@ -297,6 +298,7 @@ describe('get_export_by_object_ids', () => {
         throttle: 'rule',
         note: '# Investigative notes',
         version: 1,
+        revision: 0,
         exceptions_list: getListArrayMock(),
       });
       expect(detailsJson).toEqual({
@@ -399,6 +401,7 @@ describe('get_export_by_object_ids', () => {
             throttle: 'no_actions',
             note: '# Investigative notes',
             version: 1,
+            revision: 0,
             exceptions_list: getListArrayMock(),
             execution_summary: undefined,
             outcome: undefined,

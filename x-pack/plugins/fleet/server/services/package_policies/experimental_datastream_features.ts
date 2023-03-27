@@ -159,9 +159,17 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         },
       };
 
+      const hasExperimentalDataStreamIndexingFeatures =
+        featureMapEntry.features.synthetic_source ||
+        featureMapEntry.features.doc_value_only_numeric ||
+        featureMapEntry.features.doc_value_only_other;
+
       await esClient.cluster.putComponentTemplate({
         name: componentTemplateName,
         body,
+        _meta: {
+          has_experimental_data_stream_indexing_features: hasExperimentalDataStreamIndexingFeatures,
+        },
       });
     }
 
@@ -188,6 +196,9 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         name: featureMapEntry.data_stream,
         // @ts-expect-error
         body: indexTemplateBody,
+        _meta: {
+          has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,
+        },
       });
     }
 

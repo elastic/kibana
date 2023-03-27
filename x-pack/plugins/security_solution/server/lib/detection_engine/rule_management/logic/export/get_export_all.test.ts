@@ -93,6 +93,7 @@ describe('getExportAll', () => {
       references: ['http://example.com', 'https://example.com'],
       related_integrations: [],
       required_fields: [],
+      revision: 0,
       setup: '',
       timeline_id: 'some-timeline-id',
       timeline_title: 'some-timeline-title',
@@ -287,6 +288,7 @@ describe('getExportAll', () => {
       throttle: 'rule',
       note: '# Investigative notes',
       version: 1,
+      revision: 0,
       exceptions_list: getListArrayMock(),
     });
     expect(detailsJson).toEqual({

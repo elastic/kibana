@@ -39,7 +39,7 @@ export const useLogSummaryHighlights = (
 
         return await fetchLogSummaryHighlights(
           {
-            sourceId,
+            logView: { type: 'log-view-reference', logViewId: sourceId },
             startTimestamp,
             endTimestamp,
             bucketSize,

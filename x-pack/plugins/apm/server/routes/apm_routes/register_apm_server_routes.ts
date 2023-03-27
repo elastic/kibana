@@ -19,6 +19,7 @@ import {
 } from '@kbn/server-route-repository';
 import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import apm from 'elastic-apm-node';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
@@ -180,6 +181,9 @@ export function registerRoutes({
           if (Boom.isBoom(error)) {
             opts.statusCode = error.output.statusCode;
           }
+
+          // capture error with APM node agent
+          apm.captureError(error);
 
           return response.custom(opts);
         } finally {

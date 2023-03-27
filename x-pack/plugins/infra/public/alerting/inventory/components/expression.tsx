@@ -54,9 +54,11 @@ import {
   SnapshotMetricTypeRT,
 } from '../../../../common/inventory_models/types';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import {
+  DerivedIndexPattern,
+  useSourceContext,
+  withSourceProvider,
+} from '../../../containers/metrics_source';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
@@ -104,13 +106,9 @@ export const defaultExpression = {
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { http, notifications } = useKibanaContextForPlugin().services;
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
-    sourceId: 'default',
-    fetch: http.fetch,
-    toastWarning: notifications.toasts.addWarning,
-  });
+  const { source, createDerivedIndexPattern } = useSourceContext();
+
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
@@ -328,6 +326,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
       <div>
         <EuiButtonEmpty
+          data-test-subj="infraExpressionsAddConditionButton"
           color={'primary'}
           iconSide={'left'}
           flush={'left'}
@@ -384,6 +383,7 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         )) || (
           <EuiFieldSearch
+            data-test-subj="infraExpressionsFieldSearch"
             onChange={handleFieldSearchChange}
             value={ruleParams.filterQueryText}
             fullWidth
@@ -398,7 +398,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Expressions;
+export default withSourceProvider<Props>(Expressions)('default');
 
 interface ExpressionRowProps {
   nodeType: InventoryItemType;
@@ -637,7 +637,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType={'crossInACircleFilled'}
+                  iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
               </StyledExpressionRow>
@@ -649,6 +649,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               <EuiSpacer size={'xs'} />
               <StyledExpressionRow>
                 <EuiButtonEmpty
+                  data-test-subj="infraExpressionRowAddWarningThresholdButton"
                   color={'primary'}
                   flush={'left'}
                   size="xs"

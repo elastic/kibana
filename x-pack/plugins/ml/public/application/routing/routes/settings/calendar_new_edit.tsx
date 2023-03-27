@@ -16,11 +16,10 @@ import {
   checkGetJobsCapabilitiesResolver,
   checkPermission,
 } from '../../../capabilities/check_capabilities';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { NewCalendar } from '../../../settings/calendars';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { getMlNodeCount } from '../../../ml_nodes_check';
 
 enum MODE {
   NEW,
@@ -81,9 +80,6 @@ const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
     calendarId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
   const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
   const { context } = useResolver(
     undefined,
@@ -95,7 +91,7 @@ const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
       checkFullLicense,
       checkGetJobsCapabilities: () =>
         checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-      checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
+      getMlNodeCount,
     }
   );
 

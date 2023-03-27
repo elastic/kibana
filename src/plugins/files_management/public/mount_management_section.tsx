@@ -8,7 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route } from 'react-router-dom';
+import { Router } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';

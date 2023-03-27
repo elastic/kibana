@@ -38,7 +38,7 @@ import { pkgToPkgKey } from '../registry';
 import { unpackBufferEntries } from '.';
 
 const readFileAsync = promisify(readFile);
-const MANIFEST_NAME = 'manifest.yml';
+export const MANIFEST_NAME = 'manifest.yml';
 
 const DEFAULT_RELEASE_VALUE = 'ga';
 

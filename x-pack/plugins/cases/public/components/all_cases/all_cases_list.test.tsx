@@ -81,7 +81,8 @@ const mockKibana = () => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
-describe('AllCasesListGeneric', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/150923
+describe.skip('AllCasesListGeneric', () => {
   const refetchCases = jest.fn();
   const onRowClick = jest.fn();
   const updateCaseProperty = jest.fn();

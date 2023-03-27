@@ -7,6 +7,7 @@
 
 import {
   copyToClipboard,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiEmptyPrompt,
@@ -22,7 +23,6 @@ import { EMPTY_STAT } from '../../../helpers';
 import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
 import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
 import { getAllCustomMarkdownComments, showCustomCallout } from './helpers';
-import { CopyToClipboardButton } from '../styles';
 import * as i18n from '../../index_properties/translations';
 import { COPIED_RESULTS_TOAST_TITLE } from '../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
@@ -82,9 +82,9 @@ const CustomTabComponent: React.FC<Props> = ({
           <CustomCallout enrichedFieldMetadata={partitionedFieldMetadata.custom}>
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <CopyToClipboardButton aria-label={i18n.COPY_TO_CLIPBOARD} onClick={onCopy}>
+                <EuiButtonEmpty aria-label={i18n.COPY_TO_CLIPBOARD} flush="both" onClick={onCopy}>
                   {i18n.COPY_TO_CLIPBOARD}
-                </CopyToClipboardButton>
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </CustomCallout>

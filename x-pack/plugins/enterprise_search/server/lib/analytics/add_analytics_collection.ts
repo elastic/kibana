@@ -7,50 +7,28 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 
-import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
-
-import { AnalyticsCollectionDocument, AnalyticsCollection } from '../../../common/types/analytics';
+import { AnalyticsCollection } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
-import { fetchAnalyticsCollectionById } from './fetch_analytics_collection';
-import { setupAnalyticsCollectionIndex } from './setup_indices';
+import { isResourceAlreadyExistsException } from '../../utils/identify_exceptions';
 
-interface AddAnalyticsCollectionRequestBody {
+import { fetchAnalyticsCollections } from './fetch_analytics_collection';
+
+interface CollectionsPutResponse {
+  acknowledged: boolean;
   name: string;
 }
 
 const createAnalyticsCollection = async (
   client: IScopedClusterClient,
-  document: AnalyticsCollectionDocument,
-  id: string
-): Promise<AnalyticsCollection> => {
-  const analyticsCollection = await fetchAnalyticsCollectionById(client, id);
-
-  if (analyticsCollection) {
-    throw new Error(ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS);
-  }
-
-  const result = await client.asCurrentUser.index({
-    document,
-    id,
-    index: ANALYTICS_COLLECTIONS_INDEX,
+  name: string
+): Promise<CollectionsPutResponse> => {
+  const response = await client.asCurrentUser.transport.request<CollectionsPutResponse>({
+    method: 'PUT',
+    path: `/_application/analytics/${name}`,
   });
 
-  await client.asCurrentUser.indices.refresh({ index: ANALYTICS_COLLECTIONS_INDEX });
-
-  return {
-    id: result._id,
-    ...document,
-  };
-};
-
-const getDataViewName = (collectionId: string): string => {
-  return `elastic_analytics.events-${collectionId}`;
-};
-
-const getDataStreamName = (collectionId: string): string => {
-  return `logs-${getDataViewName(collectionId)}`;
+  return response;
 };
 
 const createDataView = async (
@@ -60,9 +38,9 @@ const createDataView = async (
   return dataViewsService.createAndSave(
     {
       allowNoIndex: true,
-      title: getDataStreamName(analyticsCollection.id),
-      name: getDataViewName(analyticsCollection.id),
+      name: `behavioral_analytics.events-${analyticsCollection.name}`,
       timeFieldName: '@timestamp',
+      title: analyticsCollection.events_datastream,
     },
     true
   );
@@ -71,28 +49,18 @@ const createDataView = async (
 export const addAnalyticsCollection = async (
   client: IScopedClusterClient,
   dataViewsService: DataViewsService,
-  { name: collectionName }: AddAnalyticsCollectionRequestBody
+  name: string
 ): Promise<AnalyticsCollection> => {
-  const id = toAlphanumeric(collectionName);
-  const eventsDataStreamName = getDataStreamName(id);
-
-  const document: AnalyticsCollectionDocument = {
-    event_retention_day_length: 180,
-    events_datastream: eventsDataStreamName,
-    name: collectionName,
-  };
-
-  const analyticsCollectionIndexExists = await client.asCurrentUser.indices.exists({
-    index: ANALYTICS_COLLECTIONS_INDEX,
-  });
-
-  if (!analyticsCollectionIndexExists) {
-    await setupAnalyticsCollectionIndex(client.asCurrentUser);
+  try {
+    await createAnalyticsCollection(client, name);
+  } catch (error) {
+    if (isResourceAlreadyExistsException(error)) {
+      throw new Error(ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS);
+    }
   }
+  const analyticsCollections = await fetchAnalyticsCollections(client, name);
 
-  const analyticsCollection = await createAnalyticsCollection(client, document, id);
-
+  const analyticsCollection = analyticsCollections[0];
   await createDataView(dataViewsService, analyticsCollection);
-
   return analyticsCollection;
 };

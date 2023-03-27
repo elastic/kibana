@@ -14,14 +14,14 @@ export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
   path: API_URLS.SERVICE_LOCATIONS,
   validate: {},
   handler: async ({ server, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { publicLocations, privateLocations, throttling } = await getAllLocations(
+    const { throttling, allLocations } = await getAllLocations({
       server,
       syntheticsMonitorClient,
-      savedObjectsClient
-    );
+      savedObjectsClient,
+    });
 
     return {
-      locations: [...publicLocations, ...privateLocations],
+      locations: allLocations,
       throttling,
     };
   },

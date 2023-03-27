@@ -24,7 +24,11 @@
       "triggersActionsUi",
       "management",
       "security",
-      "notifications"
+      "notifications",
+      "ruleRegistry",
+      "files",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
     ],
     "optionalPlugins": [
       "home",
@@ -32,9 +36,7 @@
       "usageCollection",
       "spaces"
     ],
-    "requiredBundles": [
-      "savedObjects"
-    ],
+    "requiredBundles": [],
     "extraPublicDirs": [
       "common"
     ]

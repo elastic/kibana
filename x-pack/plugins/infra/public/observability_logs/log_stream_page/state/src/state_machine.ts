@@ -5,25 +5,36 @@
  * 2.0.
  */
 
+import { RefreshInterval } from '@kbn/data-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { actions, ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
+import { datemathToEpochMillis } from '../../../../utils/datemath';
+import { createLogStreamPositionStateMachine } from '../../../log_stream_position_state/src/state_machine';
 import {
   createLogStreamQueryStateMachine,
+  DEFAULT_REFRESH_INTERVAL,
+  DEFAULT_TIMERANGE,
   LogStreamQueryStateMachineDependencies,
 } from '../../../log_stream_query_state';
 import type { LogViewNotificationChannel } from '../../../log_view_state';
 import { OmitDeprecatedState } from '../../../xstate_helpers';
-import { waitForInitialParameters } from './initial_parameters_service';
+import {
+  waitForInitialQueryParameters,
+  waitForInitialPositionParameters,
+} from './initial_parameters_service';
 import type {
   LogStreamPageContext,
   LogStreamPageContextWithLogView,
   LogStreamPageContextWithLogViewError,
+  LogStreamPageContextWithPositions,
   LogStreamPageContextWithQuery,
+  LogStreamPageContextWithTime,
   LogStreamPageEvent,
   LogStreamPageTypestate,
 } from './types';
 
 export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPageContext = {}) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEAMgHkAggBEAkgDkA4gH1BsgGpiAogHUZGACpCASpuUiA2gAYAuolAAHVLEatU9CyAAeiALQAmAJzUPHgGwArIEALAAcHmHhXsEhADQgAJ6IAQDM1IHGYQDs2ZnZxl5e-l6pAL5lCWiYuAQkZGAUVHRMLGwc3BD8wuLScgKKKuoAYkJifAYm5kgg1rb2jjOuCJ4hAIzUqZklHgX+xqlrkQnJCKlB1P4loYH+qV7hHoEVVejYeESk5FiUNAzMdnaXF4glEklk8hkSjUGgAqgBheHKAyTMxOOaAhxOZbZNbZajGXLBVIkrJrYInRBHYzUEIeVIhVJhNZZLws7IhF4garvOpfRo-Zr-NrsYFdUG9CEDKFDOGI5EiSZraZWGyYxagHEhEIEwkeI7Zc7GO6UhCZHzZML7MKBDwhQp0zmVblvWqfBpNGhofAQZhQPjoBSMMAAd26YL6kOhIzGEyMaJmGIW2JS4VpJTCWXp5K82Q8pvN1Et1tt9oedq5PLd9W+v2o3t99H9geDYYl4P6gxhGARSJR8ZVszVyaWiEZPnt-m8Ry8xjta38pqN1FK+uy+w8xhCgS8lddHxrArrDb9AagQdD4clnZl3d7CqVg6TjCxo4QISumy2MWNMWiAVNO58WMFkImMOc50CMI9xqA9+U9etUB9U8W1DYZ8EYZAQR6Dso1lLRdH0Ad0WHF8NRcdxvF8AJYgiKIwhiUIC1SDwMgNcC8g5O1nmdKs4I9QUaAAC3wWAzwvEMxHoX0AGM4BaAFWFFToeB0ZQkTEBQDBkSQxE0MQhD4GRiF0IQAFllH0HQMCmEj5jIlMEBnfxqAiYojjWVJCjnJcwnSIIrSuNZZ2CGJyl4-c+QEusRLE1DJOkxg5NgBSRQ6XgFEMsQRBkABFWFlB0ABNGR4QACSEaRUSfUjX01Kl-DyWk1giW0p3tElTTxfFwhCPYQIXXE1idV5YKi2tmli8TWyk2T5OFQFlN4SRMr4bK8oK4rSoqqriMTWryOWBdGtckCQMCEknn8MIl21FcWLxVJDUzfwWv8GDeXdCbhNE6bQ1mpL5MUoEVNW9b8sKkrysqqRqrs9VHMGwJmtagI7QOVICznFd1yebdMgutY1gqZ16FQCA4CcPjxqPKh4ZHeqVkiHwtl-XZjQOTzTTcNk2NtQ4-A5q0PureDBNSxb0ogemHLfOkurpahyXArIbTZIItxF-jvsQ5Cmz+kMZbqiiEF2DJQiuK0bVyH94iSRAmTCTZ3ICPMtj8HjRs+w8EJPfX4vQzDICNw7EGR5k7S8NJGrZNXAJ3IsnvtImt28aCIrGr7aZ+uLzxmxLkpDxHNxpC7dn2K404pe331YrwokNQ1GIF7ItZphCpvigHkolpSpaLt8jjTMv12NKd6+r04nlYgbDjxO0-KnNus4736u4LoG0rFAfGc8qIi0Cck1cCQ1K4LJ4iznS1zjzG0WOXn3xcIRhYFsf28-+jf4H2+zjaOw4XKbijt4YIWRbjZHjhaJ6T1cSwIxiTMoQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEAMgHkAggBEAkgDkA4gH1BsgGpiAogHUZGACpCASpuUiA2gAYAuolAAHVLEatU9CyAAeiALQAmAJzUPHgGwArIEALAAcHmHhXsEhADQgAJ6IAQDM1IHGYQDs2ZnZxl5e-l6pAL5lCWiYuAQkZGAUVHRMLGwc3BD8wuLScgKKKuoAYkJifAYm5kgg1rb2jjOuCJ4hAIzUqZklHgX+xqlrkQnJCKlB1P4loYH+qV7hHoEVVejYeESk5FiUNAzMdnaXF4glEklk8hkSjUGgAqgBheHKAyTMxOOaAhxOZbZNbZajGXLBVIkrJrYInRBHYzUEIeVIhVJhNZZLws7IhF4garvOpfRo-Zr-NrsYFdUG9CEDKFDOGI5EiSZraZWGyYxagHEhEIEwkeI7Zc7GO6UhCZHzZML7MKBDwhQp0zmVblvWqfBpNGhofAQZhQPjoBSMMAAd26YL6kOhIzGEyMaJmGIW2JS4VpJTCWXp5K82Q8pvN1Et1tt9oedq5PLd9W+v2o3t99H9geDYYl4P6gxhGARSJR8ZVszVyaWiEZPnt-m8Ry8xjta38pqN1FK+uy+w8xhCgS8lddHxrArrDb9AagQdD4clnZl3d7CqVg6TjCxo4QISumy2MWNMWiAVNO58WMFkImMOc50CMI9xqA9+U9etUB9U8W1DYZ8EYZAQR6Dso1lLRdH0Ad0WHF8NRcdxvF8AJYgiKIwhiUIC1SDwMgNcC8g5O1nmdKs4I9QUaAAC3wWAzwvEMxHoX0AGM4GoAFWFFTg-QARVoMAcESHgdGUJExAUAwZEkMRNDEIQ+BkVTYWUHQAE0ZGIXQhAAWWUfQdAwKYSPmMinFOKcNgKXYwnOPMbRYhJlhCYoYN5d1a2aESxNQyTpMYOTYAUkUOjUjStJ4BQLLEEQrJs+yZHhAAJIRpFRJ9SNfTUx2KAtDSLOdLTCyJAhYuLq3gwTqGS8TWyk2T5MUoEVKbdTNO0yQir4EqytshzqtqqR6p89UU3fVqkkQS1WNKXEoP8cLeo8fr+MS4TRNG0Nxoyyacq4PL5p4My3Mqmq6uIxNGvI6KDtOW1Ag6kLuoi67eP3PkBLrEbUuezLssBZS-WIIHYB0vTlAMoyTLMizHIEDBTLEAQJEc5y3I8ryE1VXymoo-bF0OhAGI2EDbVCi6er6uHYIRu7hoelH0rRqbMabbGWfoXHiHJynqYwX7Nu2wGFb2mKOdOIofEKBksgFmGbtFo8kol88xql16MY6XglpW6y1o1-7vO13a3wXPJaTWCJbSne0SQLOcV3XJ5t0yXq1jWC2Eqt+6Uttp77aymWna6b7lA9raAeZn3moQBdCV8b99hiQ0rnzTntx1XMpxuWPDgT4X4sPBDkbTtKJszt7Oh4ZWKbMtX861ouRxLsv8XpHcq8CGup0A+OCVCVJskY4w49h14RaT7ubYk1GHaU7OeAAKVhFziBkTQBHv3Qts0MnR6piQvanvzff2OfK8KEvc4K967Gkjs3GOO826Jy7kNHuJ8M7o3PmKPGys9AygpgAIQmG-VWEhGYNR1r-cu89iiAOXnXU4WwwjgOjsEKB8cYGDSRsfO2-ckHTV4LCYgIghD6HvmIH6OhNZfyHEQmef8K4L3IcAyhR01g+DWCxTIkDd5MMRtbVOCD2FZxQdw3h-DdLDF0hgKqxkJAeSWqI58rNlizykWQ6usilwsloS3Bh7d96d2YZox6fcXoD0digpyW0ZDKAkKVTBsJhjDFsjIXSQhqqTzEcXNm9jSGLwoaaAIJ0o7uLju3Z09BUAQDgE4PiltPQ7WnmzTwDFNjbC8LsY0BwlGmjcCxAk9IOSZgXDuUotx1Fi2FEEzo1Sf4lzpKaNYdJqDknAlkG0bIghbiGcnRCyEmx+PGbYlI+JYhXCtDaXIP54icyZDQ+4-gjgCy2H4HiXiBoaK9EhRszZe7oUwpAHZwNEAQ2ZHaJpdwLpsiWYBHcRZN72njlubw0EO5PLFvAthASfl7TcOEaZEcQhR3WDaGKXVPEugPrAlhWiUXS0Hh9LSaK3zGEAvqSGXUzZXTWUfcl6cdFUrljjWlJd6WcwiKxTcUMWVC0ebddZyLOUBI4cpb53sal2KZDqPI5IllANrgWJ4TL+aXXFcS7xzzqCEEYLAWwWzJb9z5Wkw4-hfCFD8NvG0F1wUWk3pvXEXqDjlAqGUIAA */
   createMachine<LogStreamPageContext, LogStreamPageEvent, LogStreamPageTypestate>(
     {
       context: initialContext,
@@ -83,31 +94,65 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
           },
         },
         hasLogViewIndices: {
-          initial: 'uninitialized',
+          initial: 'initializingQuery',
 
           states: {
-            uninitialized: {
+            initializingQuery: {
+              meta: {
+                _DX_warning_:
+                  "The Query machine must be invoked and complete initialisation before the Position machine is invoked. This is due to legacy URL dependencies on the 'logPosition' key, we need to read the key before it is reset by the Position machine.",
+              },
+
               invoke: {
-                src: 'waitForInitialParameters',
-                id: 'waitForInitialParameters',
+                src: 'waitForInitialQueryParameters',
+                id: 'waitForInitialQueryParameters',
               },
 
               on: {
-                RECEIVED_INITIAL_PARAMETERS: {
-                  target: 'initialized',
-                  actions: 'storeQuery',
+                RECEIVED_INITIAL_QUERY_PARAMETERS: {
+                  target: 'initializingPositions',
+                  actions: ['storeQuery', 'storeTime', 'forwardToLogPosition'],
                 },
 
                 VALID_QUERY_CHANGED: {
-                  target: 'uninitialized',
+                  target: 'initializingQuery',
                   internal: true,
-                  actions: 'forwardToInitialParameters',
+                  actions: 'forwardToInitialQueryParameters',
                 },
 
                 INVALID_QUERY_CHANGED: {
-                  target: 'uninitialized',
+                  target: 'initializingQuery',
                   internal: true,
-                  actions: 'forwardToInitialParameters',
+                  actions: 'forwardToInitialQueryParameters',
+                },
+                TIME_CHANGED: {
+                  target: 'initializingQuery',
+                  internal: true,
+                  actions: 'forwardToInitialQueryParameters',
+                },
+              },
+            },
+            initializingPositions: {
+              meta: {
+                _DX_warning_:
+                  "The Position machine must be invoked after the Query machine has been invoked and completed initialisation. This is due to the Query machine having some legacy URL dependencies on the 'logPosition' key, we don't want the Position machine to reset the URL parameters before the Query machine has had a chance to read them.",
+              },
+              invoke: [
+                {
+                  src: 'waitForInitialPositionParameters',
+                  id: 'waitForInitialPositionParameters',
+                },
+              ],
+              on: {
+                RECEIVED_INITIAL_POSITION_PARAMETERS: {
+                  target: 'initialized',
+                  actions: ['storePositions'],
+                },
+
+                POSITIONS_CHANGED: {
+                  target: 'initializingPositions',
+                  internal: true,
+                  actions: 'forwardToInitialPositionParameters',
                 },
               },
             },
@@ -118,21 +163,65 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                   internal: true,
                   actions: 'storeQuery',
                 },
+                TIME_CHANGED: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['storeTime', 'forwardToLogPosition'],
+                },
+                POSITIONS_CHANGED: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['storePositions'],
+                },
+                JUMP_TO_TARGET_POSITION: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogPosition'],
+                },
+                REPORT_VISIBLE_POSITIONS: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogPosition'],
+                },
+                UPDATE_TIME_RANGE: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogStreamQuery'],
+                },
+                UPDATE_REFRESH_INTERVAL: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogStreamQuery'],
+                },
+                PAGE_END_BUFFER_REACHED: {
+                  target: 'initialized',
+                  internal: true,
+                  actions: ['forwardToLogStreamQuery'],
+                },
               },
             },
           },
 
-          invoke: {
-            src: 'logStreamQuery',
-            id: 'logStreamQuery',
-          },
+          invoke: [
+            {
+              src: 'logStreamQuery',
+              id: 'logStreamQuery',
+            },
+            {
+              src: 'logStreamPosition',
+              id: 'logStreamPosition',
+            },
+          ],
         },
         missingLogViewIndices: {},
       },
     },
     {
       actions: {
-        forwardToInitialParameters: actions.forwardTo('waitForInitialParameters'),
+        forwardToInitialQueryParameters: actions.forwardTo('waitForInitialQueryParameters'),
+        forwardToInitialPositionParameters: actions.forwardTo('waitForInitialPositionParameters'),
+        forwardToLogPosition: actions.forwardTo('logStreamPosition'),
+        forwardToLogStreamQuery: actions.forwardTo('logStreamQuery'),
         storeLogViewError: actions.assign((_context, event) =>
           event.type === 'LOADING_LOG_VIEW_FAILED'
             ? ({ logViewError: event.error } as LogStreamPageContextWithLogViewError)
@@ -147,7 +236,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
             : {}
         ),
         storeQuery: actions.assign((_context, event) =>
-          event.type === 'RECEIVED_INITIAL_PARAMETERS'
+          event.type === 'RECEIVED_INITIAL_QUERY_PARAMETERS'
             ? ({
                 parsedQuery: event.validatedQuery,
               } as LogStreamPageContextWithQuery)
@@ -157,6 +246,26 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
               } as LogStreamPageContextWithQuery)
             : {}
         ),
+        storeTime: actions.assign((_context, event) => {
+          return 'timeRange' in event && 'refreshInterval' in event && 'timestamps' in event
+            ? ({
+                timeRange: event.timeRange,
+                refreshInterval: event.refreshInterval,
+                timestamps: event.timestamps,
+              } as LogStreamPageContextWithTime)
+            : {};
+        }),
+        storePositions: actions.assign((_context, event) => {
+          return 'targetPosition' in event &&
+            'visiblePositions' in event &&
+            'latestPosition' in event
+            ? ({
+                targetPosition: event.targetPosition,
+                visiblePositions: event.visiblePositions,
+                latestPosition: event.latestPosition,
+              } as LogStreamPageContextWithPositions)
+            : {};
+        }),
       },
       guards: {
         hasLogViewIndices: (_context, event) =>
@@ -169,6 +278,7 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
 export type LogStreamPageStateMachine = ReturnType<typeof createPureLogStreamPageStateMachine>;
 export type LogStreamPageActorRef = OmitDeprecatedState<ActorRefFrom<LogStreamPageStateMachine>>;
 export type LogStreamPageState = EmittedFrom<LogStreamPageActorRef>;
+export type LogStreamPageSend = LogStreamPageActorRef['send'];
 
 export type LogStreamPageStateMachineDependencies = {
   logViewStateNotifications: LogViewNotificationChannel;
@@ -181,6 +291,7 @@ export const createLogStreamPageStateMachine = ({
   toastsService,
   filterManagerService,
   urlStateStorage,
+  timeFilterService,
 }: LogStreamPageStateMachineDependencies) =>
   createPureLogStreamPageStateMachine().withConfig({
     services: {
@@ -190,9 +301,23 @@ export const createLogStreamPageStateMachine = ({
           throw new Error('Failed to spawn log stream query service: no LogView in context');
         }
 
+        const nowTimestamp = Date.now();
+        const initialTimeRangeExpression: TimeRange = DEFAULT_TIMERANGE;
+        const initialRefreshInterval: RefreshInterval = DEFAULT_REFRESH_INTERVAL;
+
         return createLogStreamQueryStateMachine(
           {
             dataViews: [context.resolvedLogView.dataViewReference],
+            timeRange: {
+              ...initialTimeRangeExpression,
+              lastChangedCompletely: nowTimestamp,
+            },
+            timestamps: {
+              startTimestamp: datemathToEpochMillis(initialTimeRangeExpression.from, 'down') ?? 0,
+              endTimestamp: datemathToEpochMillis(initialTimeRangeExpression.to, 'up') ?? 0,
+              lastChangedTimestamp: nowTimestamp,
+            },
+            refreshInterval: initialRefreshInterval,
           },
           {
             kibanaQuerySettings,
@@ -200,9 +325,30 @@ export const createLogStreamPageStateMachine = ({
             toastsService,
             filterManagerService,
             urlStateStorage,
+            timeFilterService,
           }
         );
       },
-      waitForInitialParameters: waitForInitialParameters(),
+      logStreamPosition: (context) => {
+        return createLogStreamPositionStateMachine(
+          {
+            targetPosition: null,
+            latestPosition: null,
+            visiblePositions: {
+              endKey: null,
+              middleKey: null,
+              startKey: null,
+              pagesBeforeStart: Infinity,
+              pagesAfterEnd: Infinity,
+            },
+          },
+          {
+            urlStateStorage,
+            toastsService,
+          }
+        );
+      },
+      waitForInitialQueryParameters: waitForInitialQueryParameters(),
+      waitForInitialPositionParameters: waitForInitialPositionParameters(),
     },
   });

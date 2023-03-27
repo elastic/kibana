@@ -68,6 +68,11 @@ export const getCreateVisualizationButtonTitle = () =>
     defaultMessage: 'Create visualization',
   });
 
+export const getQuickCreateButtonGroupLegend = () =>
+  i18n.translate('dashboard.solutionToolbar.quickCreateButtonGroupLegend', {
+    defaultMessage: 'Shortcuts to popular visualization types',
+  });
+
 export const getNewDashboardTitle = () =>
   i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
     defaultMessage: 'New Dashboard',
@@ -344,6 +349,11 @@ export const getControlButtonTitle = () =>
 export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
     defaultMessage: 'Add control',
+  });
+
+export const getEditControlGroupButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.editControlGroupButtonTitle', {
+    defaultMessage: 'Settings',
   });
 
 export const getOnlyOneTimeSliderControlMsg = () =>

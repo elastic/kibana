@@ -697,7 +697,7 @@ export const App = (props: {
                       </EuiButton>
                     </EuiFlexItem>
                     {hasParsingErrorDebounced && currentSO.current !== currentValid && (
-                      <EuiCallOut title="Error" color="danger" iconType="alert">
+                      <EuiCallOut title="Error" color="danger" iconType="warning">
                         <p>Check the spec</p>
                       </EuiCallOut>
                     )}

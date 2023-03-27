@@ -30,7 +30,7 @@ import { KibanaLogic } from '../kibana';
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { productAccess } = useValues(KibanaLogic);
+  const { productAccess, productFeatures } = useValues(KibanaLogic);
 
   const enginesSectionEnabled = productAccess.hasSearchEnginesAccess;
 
@@ -59,17 +59,21 @@ export const useEnterpriseSearchNav = () => {
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
           }),
         },
-        {
-          id: 'settings',
-          name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
-            defaultMessage: 'Settings',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
-            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
-          }),
-        },
+        ...(productFeatures.hasDefaultIngestPipeline
+          ? [
+              {
+                id: 'settings',
+                name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
+                  defaultMessage: 'Settings',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  shouldShowActiveForSubroutes: true,
+                  to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
+                }),
+              },
+            ]
+          : []),
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
         defaultMessage: 'Content',
@@ -179,6 +183,16 @@ export const useEnterpriseSearchNav = () => {
               to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
             }),
           },
+          {
+            id: 'searchExperiences',
+            name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+              defaultMessage: 'Search Experiences',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              to: SEARCH_EXPERIENCES_PLUGIN.URL,
+            }),
+          },
         ],
         name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
           defaultMessage: 'Search',
@@ -281,17 +295,16 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
                 to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
               }),
             },
-            // Hidden until Preview page is available
-            // {
-            //   id: 'enterpriseSearchEnginePreview',
-            //   name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
-            //     defaultMessage: 'Preview',
-            //   }),
-            //   ...generateNavLink({
-            //     shouldNotCreateHref: true,
-            //     to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
-            //   }),
-            // },
+            {
+              id: 'enterpriseSearchEnginePreview',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
+                defaultMessage: 'Preview',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
+              }),
+            },
             {
               id: 'enterpriseSearchEngineAPI',
               name: i18n.translate('xpack.enterpriseSearch.nav.engine.apiTitle', {

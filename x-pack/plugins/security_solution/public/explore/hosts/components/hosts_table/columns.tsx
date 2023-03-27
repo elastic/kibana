@@ -7,16 +7,21 @@
 
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
 import { RiskScore } from '../../../components/risk_score/severity/common';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
@@ -32,19 +37,20 @@ export const getHostsColumns = (
       render: (hostName) => {
         if (hostName != null && hostName.length > 0) {
           return (
-            <CellActions
+            <SecurityCellActions
               mode={CellActionsMode.HOVER}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
               field={{
                 name: 'host.name',
                 value: hostName[0],
                 type: 'keyword',
+                aggregatable: true,
               }}
             >
               <HostDetailsLink hostName={hostName[0]} />
-            </CellActions>
+            </SecurityCellActions>
           );
         }
         return getEmptyTagValue();
@@ -89,11 +95,11 @@ export const getHostsColumns = (
       render: (hostOsName) => {
         if (hostOsName != null) {
           return (
-            <CellActions
+            <SecurityCellActions
               mode={CellActionsMode.HOVER}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
               field={{
                 name: 'host.os.name',
                 value: hostOsName[0],
@@ -101,7 +107,7 @@ export const getHostsColumns = (
               }}
             >
               {hostOsName}
-            </CellActions>
+            </SecurityCellActions>
           );
         }
         return getEmptyTagValue();
@@ -116,11 +122,11 @@ export const getHostsColumns = (
       render: (hostOsVersion) => {
         if (hostOsVersion != null) {
           return (
-            <CellActions
+            <SecurityCellActions
               mode={CellActionsMode.HOVER}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
               field={{
                 name: 'host.os.version',
                 value: hostOsVersion[0],
@@ -128,7 +134,7 @@ export const getHostsColumns = (
               }}
             >
               {hostOsVersion}
-            </CellActions>
+            </SecurityCellActions>
           );
         }
         return getEmptyTagValue();
@@ -142,7 +148,8 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
           <>
-            {i18n.HOST_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+            {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
+            <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),

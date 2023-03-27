@@ -33,6 +33,7 @@ export const MonitorCompleteSparklines = (props: Props) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id="monitorCompleteSparklines"
       reportType="kpi-over-time"
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}

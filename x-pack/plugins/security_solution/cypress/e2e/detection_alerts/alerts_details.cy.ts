@@ -15,7 +15,7 @@ import {
 
 import { expandFirstAlert } from '../../tasks/alerts';
 import { openJsonView, openTable } from '../../tasks/alerts_details';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -24,20 +24,14 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import { getUnmappedRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { pageSelector } from '../../screens/alerts_detection_rules';
+import { tablePageSelector } from '../../screens/table_pagination';
 
-describe('Alert details with unmapped fields', () => {
+describe('Alert details with unmapped fields', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
     login();
-    createCustomRuleEnabled(getUnmappedRule());
-    visitWithoutDateRange(ALERTS_URL);
-    waitForAlertsToPopulate();
-    expandFirstAlert();
-  });
-
-  beforeEach(() => {
+    createRule(getUnmappedRule());
     visitWithoutDateRange(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlert();
@@ -47,7 +41,7 @@ describe('Alert details with unmapped fields', () => {
     esArchiverUnload('unmapped_fields');
   });
 
-  it('Displays the unmapped field on the JSON view', () => {
+  it('should display the unmapped field on the JSON view', () => {
     const expectedUnmappedValue = 'This is the unmapped field';
 
     openJsonView();
@@ -58,14 +52,14 @@ describe('Alert details with unmapped fields', () => {
     });
   });
 
-  it('Displays the unmapped field on the table', () => {
+  it('should displays the unmapped field on the table', () => {
     const expectedUnmappedField = {
       field: 'unmapped',
       text: 'This is the unmapped field',
     };
 
     openTable();
-    cy.get(ALERT_FLYOUT).find(pageSelector(4)).click({ force: true });
+    cy.get(ALERT_FLYOUT).find(tablePageSelector(6)).click({ force: true });
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
       .last()
@@ -76,7 +70,7 @@ describe('Alert details with unmapped fields', () => {
   });
 
   // This test makes sure that the table does not overflow horizontally
-  it('Table does not scroll horizontally', () => {
+  it('table should not scroll horizontally', () => {
     openTable();
 
     cy.get(ALERT_FLYOUT)

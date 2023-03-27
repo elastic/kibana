@@ -16,6 +16,9 @@
     "@kbn/i18n",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-custom-branding-common",
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-ui-settings-common",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",

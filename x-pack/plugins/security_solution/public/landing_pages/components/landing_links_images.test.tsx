@@ -12,6 +12,7 @@ import { SecurityPageName } from '../../app/types';
 import type { NavLinkItem } from '../../common/components/navigation/types';
 import { TestProviders } from '../../common/mock';
 import { LandingLinksImages, LandingImageCards } from './landing_links_images';
+import * as telemetry from '../../common/lib/telemetry';
 
 const DEFAULT_NAV_ITEM: NavLinkItem = {
   id: SecurityPageName.overview,
@@ -34,11 +35,15 @@ jest.mock('../../common/lib/kibana/kibana_react', () => {
       services: {
         application: {
           getUrlForApp: jest.fn(),
+          navigateToApp: jest.fn(),
+          navigateToUrl: jest.fn(),
         },
       },
     }),
   };
 });
+
+const spyTrack = jest.spyOn(telemetry, 'track');
 
 describe('LandingLinksImages', () => {
   it('renders', () => {
@@ -111,6 +116,24 @@ describe('LandingImageCards', () => {
     );
 
     expect(getByTestId('LandingImageCard-image')).toHaveAttribute('src', image);
+  });
+
+  it('sends telemetry', () => {
+    const image = 'test_image.jpeg';
+    const title = 'TEST LABEL';
+
+    const { getByText } = render(
+      <TestProviders>
+        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, image, title }]} />
+      </TestProviders>
+    );
+
+    getByText(title).click();
+
+    expect(spyTrack).toHaveBeenCalledWith(
+      telemetry.METRIC_TYPE.CLICK,
+      `${telemetry.TELEMETRY_EVENT.LANDING_CARD}${DEFAULT_NAV_ITEM.id}`
+    );
   });
 
   it('renders beta tag when isBeta is true', () => {

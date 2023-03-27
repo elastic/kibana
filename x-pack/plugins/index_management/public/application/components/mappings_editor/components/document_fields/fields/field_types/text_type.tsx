@@ -211,7 +211,7 @@ export const TextType = React.memo(({ field, kibanaVersion }: Props) => {
                           defaultMessage: 'Positions not enabled.',
                         })}
                         color="danger"
-                        iconType="alert"
+                        iconType="warning"
                       >
                         <p>
                           {i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorMessage', {

@@ -6,7 +6,9 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
+import { Redirect, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import styled from 'styled-components';
 import {
   EuiBadge,

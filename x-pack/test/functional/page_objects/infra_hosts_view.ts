@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertStatus, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
@@ -53,6 +54,15 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.find('hostsView-metricChart');
     },
 
+    getMetricsTab() {
+      return testSubjects.find('hostsView-tabs-metrics');
+    },
+
+    async visitMetricsTab() {
+      const metricsTab = await this.getMetricsTab();
+      metricsTab.click();
+    },
+
     async getAllMetricsTrendTiles() {
       const container = await this.getMetricsTrendContainer();
       return container.findAllByCssSelector('[data-test-subj*="hostsView-metricsTrend-"]');
@@ -72,12 +82,38 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async getOpenInLensOption() {
       const metricCharts = await this.getAllMetricsCharts();
-      const chart = metricCharts[0];
+      const chart = metricCharts.at(-1)!;
       await chart.moveMouseTo();
       const button = await testSubjects.findDescendant('embeddablePanelToggleMenuIcon', chart);
       await button.click();
       await testSubjects.existOrFail('embeddablePanelContextMenuOpen');
       return testSubjects.existOrFail('embeddablePanelAction-openInLens');
+    },
+
+    // Alerts Tab
+    getAlertsTab() {
+      return testSubjects.find('hostsView-tabs-alerts');
+    },
+
+    getAlertsTabCountBadge() {
+      return testSubjects.find('hostsView-tabs-alerts-count');
+    },
+
+    async visitAlertTab() {
+      const alertsTab = await this.getAlertsTab();
+      alertsTab.click();
+    },
+
+    setAlertStatusFilter(alertStatus?: AlertStatus) {
+      const buttons = {
+        [ALERT_STATUS_ACTIVE]: 'hostsView-alert-status-filter-active-button',
+        [ALERT_STATUS_RECOVERED]: 'hostsView-alert-status-filter-recovered-button',
+        all: 'hostsView-alert-status-filter-show-all-button',
+      };
+
+      const buttonSubject = alertStatus ? buttons[alertStatus] : buttons.all;
+
+      return testSubjects.click(buttonSubject);
     },
   };
 }

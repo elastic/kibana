@@ -176,6 +176,7 @@ export class RenderingService {
         customBranding: {
           logo: branding?.logo,
           customizedLogo: branding?.customizedLogo,
+          pageTitle: branding?.pageTitle,
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,

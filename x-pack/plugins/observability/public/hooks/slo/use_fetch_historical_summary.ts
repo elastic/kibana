@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import { useQuery } from '@tanstack/react-query';
 import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 
-import { useDataFetcher } from '../use_data_fetcher';
-
-const EMPTY_RESPONSE: FetchHistoricalSummaryResponse = {};
+import { useKibana } from '../../utils/kibana_react';
 
 export interface UseFetchHistoricalSummaryResponse {
-  data: FetchHistoricalSummaryResponse;
-  loading: boolean;
-  error: boolean;
+  sloHistoricalSummaryResponse: FetchHistoricalSummaryResponse | undefined;
+  isInitialLoading: boolean;
+  isRefetching: boolean;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
 }
 
 export interface Params {
@@ -26,46 +26,34 @@ export interface Params {
 export function useFetchHistoricalSummary({
   sloIds = [],
 }: Params): UseFetchHistoricalSummaryResponse {
-  const [historicalSummary, setHistoricalSummary] = useState(EMPTY_RESPONSE);
+  const { http } = useKibana().services;
 
-  const params: Params = useMemo(() => ({ sloIds }), [sloIds]);
-  const shouldExecuteApiCall = useCallback(
-    (apiCallParams: Params) => apiCallParams.sloIds.length > 0,
-    []
-  );
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+    queryKey: ['fetchHistoricalSummary', sloIds],
+    queryFn: async ({ signal }) => {
+      try {
+        const response = await http.post<FetchHistoricalSummaryResponse>(
+          '/internal/observability/slos/_historical_summary',
+          {
+            body: JSON.stringify({ sloIds }),
+            signal,
+          }
+        );
 
-  const { data, loading, error } = useDataFetcher<Params, FetchHistoricalSummaryResponse>({
-    paramsForApiCall: params,
-    initialDataState: historicalSummary,
-    executeApiCall: fetchHistoricalSummary,
-    shouldExecuteApiCall,
+        return response;
+      } catch (error) {
+        // ignore error
+      }
+    },
+    refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    setHistoricalSummary(data);
-  }, [data]);
-
-  return { data: historicalSummary, loading, error };
+  return {
+    sloHistoricalSummaryResponse: data,
+    isLoading,
+    isRefetching,
+    isInitialLoading,
+    isSuccess,
+    isError,
+  };
 }
-
-const fetchHistoricalSummary = async (
-  params: Params,
-  abortController: AbortController,
-  http: HttpSetup
-): Promise<FetchHistoricalSummaryResponse> => {
-  try {
-    const response = await http.post<FetchHistoricalSummaryResponse>(
-      '/internal/observability/slos/_historical_summary',
-      {
-        body: JSON.stringify({ sloIds: params.sloIds }),
-        signal: abortController.signal,
-      }
-    );
-
-    return response;
-  } catch (error) {
-    // ignore error for retrieving slos
-  }
-
-  return EMPTY_RESPONSE;
-};

@@ -123,6 +123,7 @@ export const removeException = () => {
 
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
+    cy.log('Wating for the rule to be executed');
     cy.get(REFRESH_BUTTON).click({ force: true });
     return cy
       .get(RULE_STATUS)

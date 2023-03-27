@@ -9,18 +9,15 @@ import React from 'react';
 import classNames from 'classnames';
 import type { EuiCommentProps } from '@elastic/eui';
 import styled from 'styled-components';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiButtonIcon } from '@elastic/eui';
 
 import type { UserActionBuilder, UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
-import { UserActionContentToolbar } from './content_toolbar';
 import { UserActionTimestamp } from './timestamp';
 import { UserActionMarkdown } from './markdown_form';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import * as i18n from './translations';
-import { HoverableAvatarResolver } from '../user_profiles/hoverable_avatar_resolver';
 import { HoverableUsernameResolver } from '../user_profiles/hoverable_username_resolver';
-import { DescriptionPropertyActions } from './property_actions/description_property_actions';
 
 const DESCRIPTION_ID = 'description';
 
@@ -30,13 +27,12 @@ type GetDescriptionUserActionArgs = Pick<
   UserActionBuilderArgs,
   | 'caseData'
   | 'commentRefs'
+  | 'userProfiles'
   | 'manageMarkdownEditIds'
   | 'handleManageMarkdownEditId'
-  | 'handleManageQuote'
-  | 'userProfiles'
   | 'appId'
 > &
-  Pick<UserActionTreeProps, 'onUpdateField' | 'isLoadingDescription'>;
+  Pick<UserActionTreeProps, 'onUpdateField'> & { isLoadingDescription: boolean };
 
 const MyEuiCommentFooter = styled(EuiText)`
   ${({ theme }) => `
@@ -53,14 +49,13 @@ const hasDraftComment = (appId = '', caseId: string, commentId: string): boolean
 
 export const getDescriptionUserAction = ({
   appId,
-  userProfiles,
   caseData,
   commentRefs,
   manageMarkdownEditIds,
   isLoadingDescription,
+  userProfiles,
   onUpdateField,
   handleManageMarkdownEditId,
-  handleManageQuote,
 }: GetDescriptionUserActionArgs): EuiCommentProps => {
   const isEditable = manageMarkdownEditIds.includes(DESCRIPTION_ID);
   return {
@@ -95,22 +90,19 @@ export const getDescriptionUserAction = ({
         )}
       </>
     ),
-    timelineAvatar: (
-      <HoverableAvatarResolver user={caseData.createdBy} userProfiles={userProfiles} />
-    ),
+    timelineAvatar: null,
     className: classNames({
       isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
       draftFooter:
         !isEditable && !isLoadingDescription && hasDraftComment(appId, caseData.id, DESCRIPTION_ID),
     }),
     actions: (
-      <UserActionContentToolbar id={DESCRIPTION_ID}>
-        <DescriptionPropertyActions
-          isLoading={isLoadingDescription}
-          onEdit={() => handleManageMarkdownEditId(DESCRIPTION_ID)}
-          onQuote={() => handleManageQuote(caseData.description)}
-        />
-      </UserActionContentToolbar>
+      <EuiButtonIcon
+        aria-label={i18n.EDIT_DESCRIPTION}
+        iconType="pencil"
+        onClick={() => handleManageMarkdownEditId(DESCRIPTION_ID)}
+        data-test-subj="editable-description-edit-icon"
+      />
     ),
   };
 };

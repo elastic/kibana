@@ -165,6 +165,7 @@ export const ParamsList = () => {
 
     return (
       <EuiButton
+        data-test-subj="syntheticsRenderToolsLeftParamsButton"
         color="danger"
         onClick={() => {
           setDeleteParam(selectedItems);
@@ -221,6 +222,7 @@ export const ParamsList = () => {
           values={{
             learnMore: (
               <EuiLink
+                data-test-subj="syntheticsParamsListLink"
                 href="https://www.elastic.co/guide/en/observability/master/synthetics-params-secrets.html"
                 target="_blank"
               >

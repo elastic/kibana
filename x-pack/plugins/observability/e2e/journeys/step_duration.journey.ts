@@ -51,15 +51,11 @@ journey('Exploratory view', async ({ page, params }) => {
     await loginToKibana({
       page,
       user: { username: 'elastic', password: 'changeme' },
-      dismissTour: false,
     });
   });
 
   step('Open exploratory view with monitor duration', async () => {
-    await Promise.all([
-      page.waitForNavigation(TIMEOUT_60_SEC),
-      page.click('text=Explore data', TIMEOUT_60_SEC),
-    ]);
+    await page.waitForNavigation(TIMEOUT_60_SEC);
 
     await waitForLoadingToFinish({ page });
     await page.click('text=browser', TIMEOUT_60_SEC);
@@ -67,7 +63,7 @@ journey('Exploratory view', async ({ page, params }) => {
     await page.click('[aria-label="Remove report metric"]');
     await page.click('button:has-text("Select report metric")');
     await page.click('button:has-text("Step duration")');
-    await page.click('text=Select an option: Monitor type, is selectedMonitor type >> button');
+    await page.click('button[data-test-subj="seriesBreakdown"]:has-text("Monitor type")');
     await page.click('button[role="option"]:has-text("Step name")');
     await page.click('.euiComboBox__inputWrap');
     await page.click(

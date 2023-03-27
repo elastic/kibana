@@ -12,6 +12,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { BindLogic } from 'kea';
 
+import { PageIntroduction } from '../../page_introduction/page_introduction';
 import { ReorderableTable } from '../reorderable_table';
 
 jest.mock('./get_updated_columns', () => ({
@@ -86,18 +87,19 @@ describe('InlineEditableTable', () => {
   it('renders a ReorderableTable', () => {
     const wrapper = shallow(<InlineEditableTableContents {...requiredParams} items={items} />);
     const reorderableTable = wrapper.find(ReorderableTable);
+    const addButton = shallow(
+      <div>{wrapper.find(PageIntroduction).prop('actions')}</div>
+    ).children();
     expect(reorderableTable.exists()).toBe(true);
     expect(reorderableTable.prop('items')).toEqual(items);
-    expect(
-      wrapper.find('[data-test-subj="inlineEditableTableActionButton"]').children().text()
-    ).toEqual('New row');
+    expect(addButton.children().text()).toEqual('New row');
   });
 
   it('renders a title if one is provided', () => {
     const wrapper = shallow(
       <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
     );
-    expect(wrapper.find('[data-test-subj="inlineEditableTableTitle"]').exists()).toBe(true);
+    expect(wrapper.find(PageIntroduction).prop('title')).toEqual(requiredParams.title);
   });
 
   it('does not render a title if none is provided', () => {
@@ -114,7 +116,7 @@ describe('InlineEditableTable', () => {
     const wrapper = shallow(
       <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
     );
-    expect(wrapper.find('[data-test-subj="inlineEditableTableDescription"]').exists()).toBe(true);
+    expect(wrapper.find(PageIntroduction).prop('description')).toEqual(<p>Some Description</p>);
   });
 
   it('renders no description if none is provided', () => {
@@ -141,9 +143,10 @@ describe('InlineEditableTable', () => {
     const wrapper = shallow(
       <InlineEditableTableContents {...requiredParams} addButtonText="Add a new row custom text" />
     );
-    expect(
-      wrapper.find('[data-test-subj="inlineEditableTableActionButton"]').children().text()
-    ).toEqual('Add a new row custom text');
+    const addButton = shallow(
+      <div>{wrapper.find(PageIntroduction).prop('actions')}</div>
+    ).children();
+    expect(addButton.children().text()).toEqual('Add a new row custom text');
   });
 
   describe('when a user is editing an unsaved item', () => {

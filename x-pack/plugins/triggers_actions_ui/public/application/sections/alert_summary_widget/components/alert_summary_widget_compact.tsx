@@ -12,25 +12,25 @@ import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme'
 import { AlertStatus } from '@kbn/rule-data-utils';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
-import { Alert, ChartThemes } from '../types';
+import { Alert, ChartProps } from '../types';
 
-export interface AlertsSummaryWidgetCompactProps {
+export interface AlertSummaryWidgetCompactProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
-  chartThemes: ChartThemes;
+  chartProps: ChartProps;
   recoveredAlertCount: number;
   timeRangeTitle?: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
 }
 
-export const AlertsSummaryWidgetCompact = ({
+export const AlertSummaryWidgetCompact = ({
   activeAlertCount,
   activeAlerts,
-  chartThemes: { theme, baseTheme },
+  chartProps: { theme, baseTheme },
   recoveredAlertCount,
   timeRangeTitle,
   onClick,
-}: AlertsSummaryWidgetCompactProps) => {
+}: AlertSummaryWidgetCompactProps) => {
   const chartTheme = [
     theme,
     EUI_SPARKLINE_THEME_PARTIAL,
