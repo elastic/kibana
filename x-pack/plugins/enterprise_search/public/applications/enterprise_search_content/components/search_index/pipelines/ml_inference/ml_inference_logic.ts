@@ -59,6 +59,7 @@ import { isConnectorIndex } from '../../../../utils/indices';
 import {
   getMLType,
   isSupportedMLModel,
+  sortModels,
   sortSourceFields,
 } from '../../../shared/ml_inference/utils';
 
@@ -408,9 +409,7 @@ export const MLInferenceLogic = kea<
       () => [selectors.mlModelsData],
       (mlModelsData: MLInferenceProcessorsValues['mlModelsData']) => {
         return (mlModelsData?.filter(isSupportedMLModel) ?? [])
-          .sort((m1, m2) => m1.inference_config.text_expansion ? -1 :
-              m2.inference_config.text_expansion ? 1 :
-              m1.model_id.localeCompare(m2.model_id));
+          .sort(sortModels);
       },
     ],
     existingInferencePipelines: [

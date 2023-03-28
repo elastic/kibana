@@ -83,3 +83,11 @@ export const getMLType = (modelTypes: string[]): string => {
 export const getModelDisplayTitle = (type: string): string | undefined => NLP_DISPLAY_TITLES[type];
 
 export const isTextExpansionModel = (model: TrainedModel) => model.inference_config.text_expansion;
+
+/**
+ * Sort function for displaying a list of models. Promotes text_expansion models and sorts the rest by model ID.
+ */
+export const sortModels = (m1: TrainedModel, m2: TrainedModel) => 
+  isTextExpansionModel(m1) ? -1 :
+  isTextExpansionModel(m2) ? 1 :
+  m1.model_id.localeCompare(m2.model_id);
