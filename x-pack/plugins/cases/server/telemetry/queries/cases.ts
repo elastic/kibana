@@ -5,28 +5,33 @@
  * 2.0.
  */
 
+import type { ISavedObjectsRepository, SavedObjectsFindResponse } from '@kbn/core/server';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { fromKueryExpression } from '@kbn/es-query';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  OWNERS,
 } from '../../../common/constants';
 import { ESCaseStatus } from '../../services/cases/types';
 import type { ESCaseAttributes } from '../../services/cases/types';
-import { OWNERS } from '../constants';
 import type {
   CollectTelemetryDataParams,
-  Buckets,
   CasesTelemetry,
-  Cardinality,
   ReferencesAggregation,
   LatestDates,
   CaseAggregationResult,
+  AttachmentAggregationResult,
+  FileAttachmentAggregationResult,
 } from '../types';
 import {
   findValueInBuckets,
   getAggregationsBuckets,
+  getAttachmentsFrameworkStats,
   getCountsAggregationQuery,
   getCountsFromBuckets,
+  getMaxBucketOnCaseAggregationQuery,
   getOnlyAlertsCommentsFilter,
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
@@ -52,9 +57,9 @@ export const getLatestCasesDates = async ({
   ]);
 
   return {
-    createdAt: savedObjects?.[0].saved_objects?.[0].attributes?.created_at ?? null,
-    updatedAt: savedObjects?.[1].saved_objects?.[0].attributes?.updated_at ?? null,
-    closedAt: savedObjects?.[2].saved_objects?.[0].attributes?.closed_at ?? null,
+    createdAt: savedObjects?.[0]?.saved_objects?.[0]?.attributes?.created_at ?? '',
+    updatedAt: savedObjects?.[1]?.saved_objects?.[0]?.attributes?.updated_at ?? '',
+    closedAt: savedObjects?.[2]?.saved_objects?.[0]?.attributes?.closed_at ?? '',
   };
 };
 
@@ -62,7 +67,84 @@ export const getCasesTelemetryData = async ({
   savedObjectsClient,
   logger,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['cases']> => {
-  const byOwnerAggregationQuery = OWNERS.reduce(
+  try {
+    const [casesRes, commentsRes, totalAlertsRes, totalConnectorsRes, latestDates, filesRes] =
+      await Promise.all([
+        getCasesSavedObjectTelemetry(savedObjectsClient),
+        getCommentsSavedObjectTelemetry(savedObjectsClient),
+        getAlertsTelemetry(savedObjectsClient),
+        getConnectorsTelemetry(savedObjectsClient),
+        getLatestCasesDates({ savedObjectsClient, logger }),
+        getFilesTelemetry(savedObjectsClient),
+      ]);
+
+    const aggregationsBuckets = getAggregationsBuckets({
+      aggs: casesRes.aggregations,
+      keys: ['counts', 'syncAlerts', 'status', 'users', 'totalAssignees'],
+    });
+
+    const allAttachmentFrameworkStats = getAttachmentsFrameworkStats({
+      attachmentAggregations: commentsRes.aggregations,
+      totalCasesForOwner: casesRes.total,
+      filesAggregations: filesRes.aggregations,
+    });
+
+    return {
+      all: {
+        total: casesRes.total,
+        ...getCountsFromBuckets(aggregationsBuckets.counts),
+        status: {
+          open: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.OPEN),
+          inProgress: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.IN_PROGRESS),
+          closed: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.CLOSED),
+        },
+        syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
+        syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
+        totalUsers: casesRes.aggregations?.users?.value ?? 0,
+        totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
+        totalTags: casesRes.aggregations?.tags?.value ?? 0,
+        totalWithAlerts:
+          totalAlertsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
+        totalWithConnectors:
+          totalConnectorsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
+        latestDates,
+        assignees: {
+          total: casesRes.aggregations?.totalAssignees.value ?? 0,
+          totalWithZero: casesRes.aggregations?.assigneeFilters.buckets.zero.doc_count ?? 0,
+          totalWithAtLeastOne:
+            casesRes.aggregations?.assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
+        },
+        ...allAttachmentFrameworkStats,
+      },
+      sec: getSolutionValues({
+        caseAggregations: casesRes.aggregations,
+        attachmentAggregations: commentsRes.aggregations,
+        filesAggregations: filesRes.aggregations,
+        owner: 'securitySolution',
+      }),
+      obs: getSolutionValues({
+        caseAggregations: casesRes.aggregations,
+        attachmentAggregations: commentsRes.aggregations,
+        filesAggregations: filesRes.aggregations,
+        owner: 'observability',
+      }),
+      main: getSolutionValues({
+        caseAggregations: casesRes.aggregations,
+        attachmentAggregations: commentsRes.aggregations,
+        filesAggregations: filesRes.aggregations,
+        owner: 'cases',
+      }),
+    };
+  } catch (error) {
+    logger.error(`Cases telemetry failed with error: ${error}`);
+    throw error;
+  }
+};
+
+const getCasesSavedObjectTelemetry = async (
+  savedObjectsClient: ISavedObjectsRepository
+): Promise<SavedObjectsFindResponse<unknown, CaseAggregationResult>> => {
+  const caseByOwnerAggregationQuery = OWNERS.reduce(
     (aggQuery, owner) => ({
       ...aggQuery,
       [owner]: {
@@ -80,12 +162,12 @@ export const getCasesTelemetryData = async ({
     {}
   );
 
-  const casesRes = await savedObjectsClient.find<unknown, CaseAggregationResult>({
+  return savedObjectsClient.find<unknown, CaseAggregationResult>({
     page: 0,
     perPage: 0,
     type: CASE_SAVED_OBJECT,
     aggs: {
-      ...byOwnerAggregationQuery,
+      ...caseByOwnerAggregationQuery,
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
       ...getAssigneesAggregations(),
       totalsByOwner: {
@@ -111,90 +193,6 @@ export const getCasesTelemetryData = async ({
       },
     },
   });
-
-  const commentsRes = await savedObjectsClient.find<
-    unknown,
-    Record<typeof OWNERS[number], { counts: Buckets }> & {
-      participants: Cardinality;
-    } & ReferencesAggregation
-  >({
-    page: 0,
-    perPage: 0,
-    type: CASE_COMMENT_SAVED_OBJECT,
-    aggs: {
-      participants: {
-        cardinality: {
-          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_by.username`,
-        },
-      },
-    },
-  });
-
-  const totalAlertsRes = await savedObjectsClient.find<unknown, ReferencesAggregation>({
-    page: 0,
-    perPage: 0,
-    type: CASE_COMMENT_SAVED_OBJECT,
-    filter: getOnlyAlertsCommentsFilter(),
-    aggs: {
-      ...getReferencesAggregationQuery({
-        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
-        referenceType: 'cases',
-        agg: 'cardinality',
-      }),
-    },
-  });
-
-  const totalConnectorsRes = await savedObjectsClient.find<unknown, ReferencesAggregation>({
-    page: 0,
-    perPage: 0,
-    type: CASE_USER_ACTION_SAVED_OBJECT,
-    filter: getOnlyConnectorsFilter(),
-    aggs: {
-      ...getReferencesAggregationQuery({
-        savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
-        referenceType: 'cases',
-        agg: 'cardinality',
-      }),
-    },
-  });
-
-  const latestDates = await getLatestCasesDates({ savedObjectsClient, logger });
-
-  const aggregationsBuckets = getAggregationsBuckets({
-    aggs: casesRes.aggregations,
-    keys: ['counts', 'syncAlerts', 'status', 'users', 'totalAssignees'],
-  });
-
-  return {
-    all: {
-      total: casesRes.total,
-      ...getCountsFromBuckets(aggregationsBuckets.counts),
-      status: {
-        open: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.OPEN),
-        inProgress: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.IN_PROGRESS),
-        closed: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.CLOSED),
-      },
-      syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
-      syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
-      totalUsers: casesRes.aggregations?.users?.value ?? 0,
-      totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
-      totalTags: casesRes.aggregations?.tags?.value ?? 0,
-      totalWithAlerts:
-        totalAlertsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
-      totalWithConnectors:
-        totalConnectorsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
-      latestDates,
-      assignees: {
-        total: casesRes.aggregations?.totalAssignees.value ?? 0,
-        totalWithZero: casesRes.aggregations?.assigneeFilters.buckets.zero.doc_count ?? 0,
-        totalWithAtLeastOne:
-          casesRes.aggregations?.assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
-      },
-    },
-    sec: getSolutionValues(casesRes.aggregations, 'securitySolution'),
-    obs: getSolutionValues(casesRes.aggregations, 'observability'),
-    main: getSolutionValues(casesRes.aggregations, 'cases'),
-  };
 };
 
 const getAssigneesAggregations = () => ({
@@ -228,3 +226,133 @@ const getAssigneesAggregations = () => ({
     },
   },
 });
+
+const getCommentsSavedObjectTelemetry = async (
+  savedObjectsClient: ISavedObjectsRepository
+): Promise<SavedObjectsFindResponse<unknown, AttachmentAggregationResult>> => {
+  const attachmentRegistries = () => ({
+    externalReferenceTypes: {
+      terms: {
+        field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId`,
+      },
+      aggs: {
+        ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
+      },
+    },
+    persistableReferenceTypes: {
+      terms: {
+        field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.persistableStateAttachmentTypeId`,
+      },
+      aggs: {
+        ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
+      },
+    },
+  });
+
+  const attachmentsByOwnerAggregationQuery = OWNERS.reduce(
+    (aggQuery, owner) => ({
+      ...aggQuery,
+      [owner]: {
+        filter: {
+          term: {
+            [`${CASE_COMMENT_SAVED_OBJECT}.attributes.owner`]: owner,
+          },
+        },
+        aggs: {
+          ...attachmentRegistries(),
+        },
+      },
+    }),
+    {}
+  );
+
+  return savedObjectsClient.find<unknown, AttachmentAggregationResult>({
+    page: 0,
+    perPage: 0,
+    type: CASE_COMMENT_SAVED_OBJECT,
+    aggs: {
+      ...attachmentsByOwnerAggregationQuery,
+      ...attachmentRegistries(),
+      participants: {
+        cardinality: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_by.username`,
+        },
+      },
+    },
+  });
+};
+
+const getFilesTelemetry = async (
+  savedObjectsClient: ISavedObjectsRepository
+): Promise<SavedObjectsFindResponse<unknown, FileAttachmentAggregationResult>> => {
+  const averageSize = () => ({
+    averageSize: {
+      avg: {
+        field: `${FILE_SO_TYPE}.attributes.size`,
+      },
+    },
+  });
+
+  const filesByOwnerAggregationQuery = OWNERS.reduce(
+    (aggQuery, owner) => ({
+      ...aggQuery,
+      [owner]: {
+        filter: {
+          term: {
+            [`${FILE_SO_TYPE}.attributes.Meta.owner`]: owner,
+          },
+        },
+        aggs: {
+          ...averageSize(),
+        },
+      },
+    }),
+    {}
+  );
+
+  const filterCaseIdExists = fromKueryExpression(`${FILE_SO_TYPE}.attributes.Meta.caseId: *`);
+
+  return savedObjectsClient.find<unknown, FileAttachmentAggregationResult>({
+    page: 0,
+    perPage: 0,
+    type: FILE_SO_TYPE,
+    filter: filterCaseIdExists,
+    aggs: { ...filesByOwnerAggregationQuery, ...averageSize() },
+  });
+};
+
+const getAlertsTelemetry = async (
+  savedObjectsClient: ISavedObjectsRepository
+): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
+  return savedObjectsClient.find<unknown, ReferencesAggregation>({
+    page: 0,
+    perPage: 0,
+    type: CASE_COMMENT_SAVED_OBJECT,
+    filter: getOnlyAlertsCommentsFilter(),
+    aggs: {
+      ...getReferencesAggregationQuery({
+        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+        referenceType: 'cases',
+        agg: 'cardinality',
+      }),
+    },
+  });
+};
+
+const getConnectorsTelemetry = async (
+  savedObjectsClient: ISavedObjectsRepository
+): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
+  return savedObjectsClient.find<unknown, ReferencesAggregation>({
+    page: 0,
+    perPage: 0,
+    type: CASE_USER_ACTION_SAVED_OBJECT,
+    filter: getOnlyConnectorsFilter(),
+    aggs: {
+      ...getReferencesAggregationQuery({
+        savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+        referenceType: 'cases',
+        agg: 'cardinality',
+      }),
+    },
+  });
+};
