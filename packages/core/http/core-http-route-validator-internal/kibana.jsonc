@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-http-route-validator-internal",
+  "owner": "@elastic/kibana-core"
+}
