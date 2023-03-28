@@ -13,7 +13,7 @@ import type {
   UsageCollectionSetup,
 } from '@kbn/usage-collection-plugin/server';
 
-import type { PluginsSetup } from '../plugin';
+import type { PluginsSetup, PluginsStart } from '../plugin';
 import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 
 interface SpacesAggregationResponse {
@@ -38,7 +38,7 @@ interface SpacesAggregationResponse {
 async function getSpacesUsage(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
-  features: PluginsSetup['features'],
+  features: PluginsStart['features'],
   spacesAvailable: boolean
 ) {
   if (!spacesAvailable) {
@@ -150,7 +150,7 @@ export interface UsageData extends UsageStats {
 
 interface CollectorDeps {
   kibanaIndex: string;
-  features: PluginsSetup['features'];
+  getFeatureStartContract: () => PluginsStart['features'];
   licensing: PluginsSetup['licensing'];
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
 }
@@ -425,7 +425,8 @@ export function getSpacesUsageCollector(
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
-      const { licensing, kibanaIndex, features, usageStatsServicePromise } = deps;
+      const { licensing, kibanaIndex, getFeatureStartContract, usageStatsServicePromise } = deps;
+      const features = getFeatureStartContract();
       const license = await firstValueFrom(licensing.license$);
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 

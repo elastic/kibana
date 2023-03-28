@@ -103,6 +103,8 @@ export class SpacesPlugin
 
   private defaultSpaceService?: DefaultSpaceService;
 
+  private featuresPluginStart?: FeaturesPluginStart;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
     this.log = initializerContext.logger.get();
@@ -122,6 +124,13 @@ export class SpacesPlugin
         throw new Error('spaces service has not been initialized!');
       }
       return this.spacesServiceStart;
+    };
+
+    const getFeatureStartContract = () => {
+      if (!this.featuresPluginStart) {
+        throw new Error('features contract accessed before #start');
+      }
+      return this.featuresPluginStart;
     };
 
     const usageStatsServicePromise = new UsageStatsService(this.log).setup({
@@ -167,7 +176,7 @@ export class SpacesPlugin
       http: core.http,
       log: this.log,
       getSpacesService,
-      features: plugins.features,
+      getFeatureStartContract,
     });
 
     setupCapabilities(core, getSpacesService, this.log);
@@ -175,7 +184,7 @@ export class SpacesPlugin
     if (plugins.usageCollection) {
       registerSpacesUsageCollector(plugins.usageCollection, {
         kibanaIndex: core.savedObjects.getKibanaIndex(),
-        features: plugins.features,
+        getFeatureStartContract,
         licensing: plugins.licensing,
         usageStatsServicePromise,
       });
@@ -193,8 +202,9 @@ export class SpacesPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { features }: PluginsStart) {
     const spacesClientStart = this.spacesClientService.start(core);
+    this.featuresPluginStart = features;
 
     this.spacesServiceStart = this.spacesService.start({
       basePath: core.http.basePath,

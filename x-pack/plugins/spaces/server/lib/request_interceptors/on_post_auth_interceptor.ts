@@ -6,24 +6,24 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { PluginStartContract as FeaturesStartContract } from '@kbn/features-plugin/server';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath } from '../../../common';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
-import type { PluginsSetup } from '../../plugin';
 import type { SpacesServiceStart } from '../../spaces_service/spaces_service';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 
 export interface OnPostAuthInterceptorDeps {
   http: CoreSetup['http'];
-  features: PluginsSetup['features'];
+  getFeatureStartContract: () => FeaturesStartContract;
   getSpacesService: () => SpacesServiceStart;
   log: Logger;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor({
-  features,
+  getFeatureStartContract,
   getSpacesService,
   log,
   http,
@@ -33,6 +33,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
     const path = request.url.pathname;
 
+    const features = getFeatureStartContract();
     const spacesService = getSpacesService();
 
     const spaceId = spacesService.getSpaceId(request);
