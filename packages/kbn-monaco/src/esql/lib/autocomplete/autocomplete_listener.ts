@@ -48,6 +48,7 @@ import {
   LimitCommandContext,
   ValueExpressionContext,
   ProjectCommandContext,
+  DissectCommandContext,
 } from '../../antlr/esql_parser';
 
 export class AutocompleteListener implements ESQLParserListener {
@@ -163,6 +164,14 @@ export class AutocompleteListener implements ESQLParserListener {
       if (qn.text.slice(-1) !== ',') {
         this.suggestions = this.getEndCommandSuggestions();
       }
+    }
+  }
+
+  exitDissectCommand?(ctx: DissectCommandContext) {
+    const qn = ctx.qualifiedNames();
+    const pattern = ctx.string();
+    if (qn && qn.text && pattern && pattern.text && pattern.text !== '<missing STRING>') {
+      this.suggestions = this.getEndCommandSuggestions();
     }
   }
 

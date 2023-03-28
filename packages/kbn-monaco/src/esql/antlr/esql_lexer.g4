@@ -7,6 +7,7 @@
 
 lexer grammar esql_lexer;
 
+DISSECT : 'dissect' -> pushMode(EXPRESSION);
 EVAL : 'eval' -> pushMode(EXPRESSION);
 EXPLAIN : 'explain' -> pushMode(EXPRESSION);
 FROM : 'from' -> pushMode(SOURCE_IDENTIFIERS);

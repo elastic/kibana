@@ -44,6 +44,9 @@ import { LimitCommandContext } from "./esql_parser";
 import { SortCommandContext } from "./esql_parser";
 import { OrderExpressionContext } from "./esql_parser";
 import { ProjectCommandContext } from "./esql_parser";
+import { DissectCommandContext } from "./esql_parser";
+import { CommandOptionsContext } from "./esql_parser";
+import { CommandOptionContext } from "./esql_parser";
 import { BooleanValueContext } from "./esql_parser";
 import { NumberContext } from "./esql_parser";
 import { StringContext } from "./esql_parser";
@@ -512,6 +515,39 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitProjectCommand?: (ctx: ProjectCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.dissectCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterDissectCommand?: (ctx: DissectCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.dissectCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitDissectCommand?: (ctx: DissectCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.commandOptions`.
+	 * @param ctx the parse tree
+	 */
+	enterCommandOptions?: (ctx: CommandOptionsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.commandOptions`.
+	 * @param ctx the parse tree
+	 */
+	exitCommandOptions?: (ctx: CommandOptionsContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.commandOption`.
+	 * @param ctx the parse tree
+	 */
+	enterCommandOption?: (ctx: CommandOptionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.commandOption`.
+	 * @param ctx the parse tree
+	 */
+	exitCommandOption?: (ctx: CommandOptionContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.booleanValue`.

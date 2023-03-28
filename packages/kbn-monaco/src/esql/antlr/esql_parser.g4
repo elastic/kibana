@@ -29,6 +29,7 @@ processingCommand
     : evalCommand
     | limitCommand
     | projectCommand
+    | dissectCommand
     | sortCommand
     | statsCommand
     | whereCommand
@@ -166,6 +167,18 @@ orderExpression
 
 projectCommand
     :  PROJECT qualifiedNames
+    ;
+
+dissectCommand
+    : DISSECT qualifiedNames string commandOptions?
+    ;
+
+commandOptions
+    : commandOption (COMMA commandOption)*
+    ;
+
+commandOption
+    : identifier ASSIGN constant
     ;
 
 booleanValue

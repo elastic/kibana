@@ -111,4 +111,20 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     },
     sortText: 'B',
   },
+  {
+    label: 'dissect',
+    insertText: 'dissect',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.dissectDoc', {
+      defaultMessage:
+        'Extracts multiple string values from a single string input, based on a pattern',
+    }),
+    documentation: {
+      value: buildDocumentation(
+        'dissect <inputExpression> <pattern-string> (append_separator=<string>)?',
+        ['… | dissect a "%{b} %{c}";']
+      ),
+    },
+    sortText: 'B',
+  },
 ];
