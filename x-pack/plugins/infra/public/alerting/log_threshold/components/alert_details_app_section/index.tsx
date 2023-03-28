@@ -33,19 +33,19 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
 
   return (
     // Create a chart per-criteria
-    <>
-      {rule.params.criteria.map((criteria) => {
-        return (
-          <CriterionPreview
-            ruleParams={rule.params}
-            sourceId={rule.params.logView.logViewId}
-            chartCriterion={criteria as PartialCriterion}
-            showThreshold={true}
-            executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
-          />
-        );
-      })}
-    </>
+    rule.params.criteria.map((criteria) => {
+      const chartCriterion = criteria as PartialCriterion;
+      return (
+        <CriterionPreview
+          key={chartCriterion.field}
+          ruleParams={rule.params}
+          sourceId={rule.params.logView.logViewId}
+          chartCriterion={chartCriterion}
+          showThreshold={true}
+          executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
+        />
+      );
+    })
   );
 };
 // eslint-disable-next-line import/no-default-export
