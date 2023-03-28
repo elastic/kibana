@@ -30,7 +30,7 @@ import type {
   RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { FORMATS_UI_SETTINGS, type SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
@@ -48,47 +48,28 @@ import { getCurrencyCode } from './currency_codes';
 import { getDataBoundsForPalette } from '../utils';
 
 export const defaultColor = euiThemeVars.euiColorLightestShade;
-const getBytesUnit = (value: number) => {
-  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];
-  const abs = Math.abs(value);
 
-  const base = 1024;
-  let unit = units[0];
-  let matched = abs < base;
-  let power;
-
-  if (!matched) {
-    for (power = 1; power < units.length; power++) {
-      const [min, max] = [Math.pow(base, power), Math.pow(base, power + 1)];
-      if (abs >= min && abs < max) {
-        unit = units[power];
-        matched = true;
-        value = value / min;
-        break;
-      }
-    }
+function getFormatId(serializedFieldFormat: SerializedFieldFormat | undefined): string | undefined {
+  if (serializedFieldFormat?.id === 'suffix') {
+    return `${serializedFieldFormat.params?.id || ''}`;
   }
-
-  if (!matched) {
-    value = value / Math.pow(base, units.length - 1);
-    unit = units[units.length - 1];
+  if (/bitd/.test(`${serializedFieldFormat?.params?.pattern || ''}`)) {
+    return 'bit';
   }
-
-  return { value, unit };
-};
+  return serializedFieldFormat?.id;
+}
 
 const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId =
-    (serializedFieldFormat?.id === 'suffix'
-      ? serializedFieldFormat.params?.id
-      : serializedFieldFormat?.id) ?? 'number';
+  const formatId = getFormatId(serializedFieldFormat) || 'number';
 
   if (
-    !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
+    !['number', 'currency', 'percent', 'bytes', 'bit', 'duration', 'string', 'null'].includes(
+      formatId
+    )
   ) {
     throw new Error(
       i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
@@ -150,10 +131,9 @@ const getMetricFormatter = (
     intlOptions.style = 'percent';
   }
 
-  return formatId === 'bytes'
+  return ['bit', 'bytes'].includes(formatId)
     ? (rawValue: number) => {
-        const { value, unit } = getBytesUnit(rawValue);
-        return new Intl.NumberFormat(locale, { ...intlOptions, style: 'unit', unit }).format(value);
+        return numeral(rawValue).format(`0,0[.]00 ${formatId === 'bytes' ? 'b' : 'bitd'}`);
       }
     : new Intl.NumberFormat(locale, intlOptions).format;
 };
