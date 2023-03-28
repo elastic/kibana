@@ -347,7 +347,7 @@ describe('KibanaMigrator', () => {
                 }),
               }),
               // this migrator is NOT involved in any relocation,
-              // thus, it must not synchronise with other migrators
+              // thus, it must not synchronize with other migrators
               mustRelocateDocuments: false,
               readyToReindex: undefined,
               doneReindexing: undefined,

@@ -216,7 +216,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else if (
         // if we must relocate documents to this migrator's index, but the index does NOT yet exist:
-        // this migrator must create a temporary index and synchronise with other migrators
+        // this migrator must create a temporary index and synchronize with other migrators
         // this is a similar flow to the reindex one, but this migrator will not reindexing anything
         stateP.mustRelocateDocuments
       ) {
@@ -434,7 +434,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (stateP.mustRelocateDocuments) {
         // if this migrator's index must dispatch documents to other indices,
         // or it must receive documents from other indices
-        // we must reindex and synchronise with other migrators
+        // we must reindex and synchronize with other migrators
         return {
           ...stateP,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -798,6 +798,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'FATAL',
         reason: 'An error occurred whilst waiting for other migrators to get to this step.',
+        throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
       };
     } else {
       return throwBadResponse(stateP, res as never);
@@ -911,6 +912,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'FATAL',
         reason: 'An error occurred whilst waiting for other migrators to get to this step.',
+        throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
       };
     } else {
       return throwBadResponse(stateP, res as never);

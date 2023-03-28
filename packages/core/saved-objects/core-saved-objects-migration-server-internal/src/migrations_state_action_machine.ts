@@ -15,6 +15,7 @@ import {
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import { logActionResponse, logStateTransition } from './common/utils/logs';
 import { type Model, type Next, stateActionMachine } from './state_action_machine';
 import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
@@ -41,7 +42,7 @@ export async function migrationStateActionMachine({
   next: Next<State>;
   model: Model<State>;
   abort: (state?: State) => Promise<void>;
-}) {
+}): Promise<MigrationResult> {
   const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
   // configured by users to include several `.`'s we can't use a logger tag to
@@ -115,12 +116,18 @@ export async function migrationStateActionMachine({
       } catch (e) {
         logger.warn('Failed to correctly abort migrations:', e.message);
       }
-      return Promise.reject(
-        new Error(
-          `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index: ` +
-            finalState.reason
-        )
-      );
+
+      const errorMessage =
+        `Unable to complete saved object migrations for the [${initialState.indexPrefix}] index: ` +
+        finalState.reason;
+
+      if (finalState.throwDelayMillis) {
+        return new Promise((_, reject) =>
+          setTimeout(() => reject(errorMessage), finalState.throwDelayMillis)
+        );
+      }
+
+      return Promise.reject(new Error(errorMessage));
     } else {
       throw new Error('Invalid terminating control state');
     }

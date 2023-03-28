@@ -191,6 +191,20 @@ describe('createInitialState', () => {
           },
         },
         "indexPrefix": ".kibana_task_manager",
+        "indexTypesMap": Object {
+          ".kibana": Array [
+            "typeA",
+            "typeB",
+            "typeC",
+          ],
+          ".kibana_cases": Array [
+            "typeD",
+            "typeE",
+          ],
+          ".kibana_task_manager": Array [
+            "task",
+          ],
+        },
         "kibanaVersion": "8.1.0",
         "knownTypes": Array [],
         "legacyIndex": ".kibana_task_manager",
@@ -238,20 +252,6 @@ describe('createInitialState', () => {
               "type": "keyword",
             },
           },
-        },
-        "indexTypesMap": Object {
-          ".kibana": Array [
-            "typeA",
-            "typeB",
-            "typeC",
-          ],
-          ".kibana_cases": Array [
-            "typeD",
-            "typeE",
-          ],
-          ".kibana_task_manager": Array [
-            "task",
-          ],
         },
         "versionAlias": ".kibana_task_manager_8.1.0",
         "versionIndex": ".kibana_task_manager_8.1.0_001",

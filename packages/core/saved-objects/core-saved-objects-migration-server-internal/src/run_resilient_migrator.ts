@@ -101,9 +101,13 @@ export async function runResilientMigrator({
     next: next(migrationClient, transformRawDocs, readyToReindex, doneReindexing),
     model,
     abort: async (state?: State) => {
-      [readyToReindex, doneReindexing].forEach((synchronizationDefer) =>
-        synchronizationDefer.reject('Cancelling synchronization with other migrators')
-      );
+      setTimeout(() => {
+        [readyToReindex, doneReindexing]
+          .filter(Boolean)
+          .forEach((synchronizationDefer) =>
+            synchronizationDefer.reject('Cancelling synchronization with other migrators')
+          );
+      }, 10000);
       await cleanup(client, state);
     },
   });

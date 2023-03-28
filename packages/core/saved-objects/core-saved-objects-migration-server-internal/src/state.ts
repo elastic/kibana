@@ -249,6 +249,8 @@ export interface FatalState extends BaseState {
   readonly controlState: 'FATAL';
   /** The reason the migration was terminated */
   readonly reason: string;
+  /** The delay in milliseconds before throwing the FATAL exception */
+  readonly throwDelayMillis?: number;
 }
 
 export interface WaitForYellowSourceState extends SourceExistsState {
