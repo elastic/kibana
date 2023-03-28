@@ -101,13 +101,8 @@ export async function runResilientMigrator({
     next: next(migrationClient, transformRawDocs, readyToReindex, doneReindexing),
     model,
     abort: async (state?: State) => {
-      setTimeout(() => {
-        [readyToReindex, doneReindexing]
-          .filter(Boolean)
-          .forEach((synchronizationDefer) =>
-            synchronizationDefer.reject('Cancelling synchronization with other migrators')
-          );
-      }, 10000);
+      // At this point, we could reject this migrator's defers and unblock other migrators
+      // but we are going to throw and shutdown Kibana anyway, so there's no real point in it
       await cleanup(client, state);
     },
   });
