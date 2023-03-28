@@ -15,8 +15,20 @@ import { CoreVersionedRouter } from '.';
 
 describe('Versioned route', () => {
   let router: IRouter;
+  let responseFactory: ReturnType<typeof httpServerMock.createResponseFactory>;
   const handlerFn: RequestHandler = async (ctx, req, res) => res.ok({ body: { foo: 1 } });
   beforeEach(() => {
+    responseFactory = httpServerMock.createResponseFactory();
+    responseFactory.custom.mockImplementation(({ body, statusCode }) => ({
+      options: {},
+      status: statusCode,
+      payload: body,
+    }));
+    responseFactory.ok.mockImplementation(({ body } = {}) => ({
+      options: {},
+      status: 200,
+      payload: body,
+    }));
     router = httpServiceMock.createRouter();
   });
 
@@ -134,7 +146,7 @@ describe('Versioned route', () => {
         params: { foo: 1 },
         query: { foo: 1 },
       }),
-      httpServerMock.createResponseFactory()
+      responseFactory
     );
 
     expect(kibanaResponse.status).toBe(200);
@@ -156,7 +168,7 @@ describe('Versioned route', () => {
         httpServerMock.createKibanaRequest({
           headers: { [ELASTIC_HTTP_VERSION_HEADER]: '999' },
         }),
-        httpServerMock.createResponseFactory()
+        responseFactory
       )
     ).resolves.toEqual({
       options: {},
@@ -180,7 +192,7 @@ describe('Versioned route', () => {
         httpServerMock.createKibanaRequest({
           headers: {},
         }),
-        httpServerMock.createResponseFactory()
+        responseFactory
       )
     ).resolves.toEqual({
       options: {},
@@ -208,7 +220,7 @@ describe('Versioned route', () => {
           headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
           body: {},
         }),
-        httpServerMock.createResponseFactory()
+        responseFactory
       )
     ).resolves.toEqual({
       options: {},
