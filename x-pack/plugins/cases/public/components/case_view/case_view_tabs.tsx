@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiBetaBadge, EuiNotificationBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
@@ -14,6 +14,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translations';
 import { ACTIVITY_TAB, ALERTS_TAB, FILES_TAB } from './translations';
 import type { Case } from '../../../common';
+import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 
 const ExperimentalBadge = styled(EuiBetaBadge)`
   margin-left: 5px;
@@ -27,6 +28,7 @@ export interface CaseViewTabsProps {
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
   const { features } = useCasesContext();
   const { navigateToCaseView } = useCaseViewNavigation();
+  const { data: fileStatsData, isLoading } = useGetCaseFileStats({ caseId: caseData.id });
 
   const tabs = useMemo(
     () => [
@@ -58,10 +60,22 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         : []),
       {
         id: CASE_VIEW_PAGE_TABS.FILES,
-        name: FILES_TAB,
+        name: (
+          <>
+            {FILES_TAB}
+            {!isLoading && fileStatsData && (
+              <>
+                {' '}
+                <EuiNotificationBadge data-test-subj="case-view-files-stats-badge">
+                  {fileStatsData.total}
+                </EuiNotificationBadge>
+              </>
+            )}
+          </>
+        ),
       },
     ],
-    [features.alerts.enabled, features.alerts.isExperimental]
+    [features.alerts.enabled, features.alerts.isExperimental, fileStatsData, isLoading]
   );
 
   const renderTabs = useCallback(() => {

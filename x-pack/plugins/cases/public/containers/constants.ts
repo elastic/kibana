@@ -25,6 +25,7 @@ export const casesQueriesKeys = {
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
   caseFiles: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), 'attachments', params] as const,
+  caseFileStats: (id: string) => [...casesQueriesKeys.case(id), 'stats'] as const,
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
