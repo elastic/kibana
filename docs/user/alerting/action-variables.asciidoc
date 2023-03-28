@@ -53,7 +53,6 @@ An array of objects for all alerts. The following object properties are examples
 `kibana.alert.reason`:: The reason of the alert (generated with the rule conditions). preview:[]
 `kibana.alert.start`:: Datetime stamp of alert start. preview:[]
 `kibana.alert.status`:: Alert status (for example, active or OK). preview:[]
-`kibana.alert.uuid`:: The UUID of the alert.  The UUID value will remain unchanged while the alert is active, during subsequent runs.  preview:[]
 //# end::alerts-data[]
 =====
 
@@ -101,6 +100,7 @@ If the rule's action frequency is not a summary of alerts, it passes the followi
 `alert.actionSubgroup`:: The action subgroup of the alert that scheduled the action.
 `alert.flapping`:: A flag on the alert that indicates whether the alert status is changing repeatedly.
 `alert.id`:: The ID of the alert that scheduled the action.
+`alert.uuid`:: The UUID of the alert.  The UUID value will remain unchanged while the alert is active, during subsequent runs.  preview:[]
 
 [float]
 [[defining-rules-actions-variable-context]]
