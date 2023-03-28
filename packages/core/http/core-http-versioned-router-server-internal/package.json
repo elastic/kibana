@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/core-version-http-server",
+  "name": "@kbn/core-http-versioned-router-server-internal",
   "private": true,
   "version": "1.0.0",
   "author": "Kibana Core",
