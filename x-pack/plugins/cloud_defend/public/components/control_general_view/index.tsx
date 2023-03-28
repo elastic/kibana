@@ -33,12 +33,13 @@ import { ControlGeneralViewResponse } from '../control_general_view_response';
 interface AddSelectorButtonProps {
   type: 'Selector' | 'Response';
   onSelectType(type: SelectorType): void;
+  selectors: Selector[];
 }
 
 /**
  * dual purpose button for adding selectors and responses by type
  */
-const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
+const AddButton = ({ type, onSelectType, selectors }: AddSelectorButtonProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -58,6 +59,24 @@ const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
     onSelectType('process');
   }, [onSelectType]);
 
+  const selectorCounts = useMemo(() => {
+    return selectors.reduce(
+      (cur, next) => {
+        if (next.type === 'file') {
+          cur.file++;
+        } else {
+          cur.process++;
+        }
+
+        return cur;
+      },
+      {
+        file: 0,
+        process: 0,
+      }
+    );
+  }, [selectors]);
+
   const isSelector = type === 'Selector';
 
   const items = [
@@ -65,6 +84,7 @@ const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
       key={`addFile${type}`}
       icon="document"
       onClick={addFile}
+      disabled={type === 'Response' && selectorCounts.file === 0}
       data-test-subj={`cloud-defend-btnAddFile${type}`}
     >
       {isSelector ? i18n.fileSelector : i18n.fileResponse}
@@ -73,6 +93,7 @@ const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
       key={`addProcess${type}`}
       icon="gear"
       onClick={addProcess}
+      disabled={type === 'Response' && selectorCounts.process === 0}
       data-test-subj={`cloud-defend-btnAddProcess${type}`}
     >
       {isSelector ? i18n.processSelector : i18n.processResponse}
@@ -322,7 +343,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         );
       })}
 
-      <AddButton type="Selector" onSelectType={onAddSelector} />
+      <AddButton type="Selector" onSelectType={onAddSelector} selectors={selectors} />
 
       <EuiSpacer size="m" />
 
@@ -350,7 +371,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
           </EuiFlexItem>
         );
       })}
-      <AddButton type="Response" onSelectType={onAddResponse} />
+      <AddButton type="Response" onSelectType={onAddResponse} selectors={selectors} />
       <EuiSpacer size="m" />
     </EuiFlexGroup>
   );

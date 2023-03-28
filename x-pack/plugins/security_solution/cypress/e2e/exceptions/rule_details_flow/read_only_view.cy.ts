@@ -35,20 +35,21 @@ describe('Exceptions viewer read only', () => {
     esArchiverResetKibana();
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
-      createRule({
-        ...getNewRule(),
-        query: 'agent.name:*',
-        index: ['exceptions*'],
-        exceptions_list: [
-          {
-            id: response.body.id,
-            list_id: exceptionList.list_id,
-            type: exceptionList.type,
-            namespace_type: exceptionList.namespace_type,
-          },
-        ],
-        rule_id: '2',
-      });
+      createRule(
+        getNewRule({
+          query: 'agent.name:*',
+          index: ['exceptions*'],
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: exceptionList.list_id,
+              type: exceptionList.type,
+              namespace_type: exceptionList.namespace_type,
+            },
+          ],
+          rule_id: '2',
+        })
+      );
     });
 
     login(ROLES.reader);

@@ -52,5 +52,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
     "@kbn/es-query",
+    "@kbn/datemath",
+    "@kbn/expressions-plugin",
   ]
 }
