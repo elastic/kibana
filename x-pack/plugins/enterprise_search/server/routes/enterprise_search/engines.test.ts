@@ -7,10 +7,6 @@
 
 import { mockDependencies, MockRouter } from '../../__mocks__';
 
-jest.mock('../../utils/fetch_enterprise_search', () => ({
-  ...jest.requireActual('../../utils/fetch_enterprise_search'),
-  fetchEnterpriseSearch: jest.fn(),
-}));
 jest.mock('../../lib/engines/field_capabilities', () => ({
   fetchEngineFieldCapabilities: jest.fn(),
 }));
@@ -21,7 +17,6 @@ import { RequestHandlerContext } from '@kbn/core/server';
 
 import { fetchIndicesStats } from '../../lib/engines/fetch_indices_stats';
 import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
-import { fetchEnterpriseSearch } from '../../utils/fetch_enterprise_search';
 
 import { registerEnginesRoutes } from './engines';
 
@@ -248,9 +243,7 @@ describe('engines routes', () => {
 
     it('validates correctly with engine_name', () => {
       const request = {
-        body: {
-          indices: ['search-unit-test'],
-        },
+        body: { indices: ['search-unit-test'] },
         params: { engine_name: 'some-engine' },
       };
 
@@ -433,7 +426,7 @@ describe('engines routes', () => {
   describe('GET /internal/enterprise_search/engines/{engine_name}/field_capabilities', () => {
     let mockRouter: MockRouter;
     const mockClient = {
-      asCurrentUser: {},
+      asCurrentUser: { transport: { request: jest.fn() } },
     };
     const mockCore = {
       elasticsearch: { client: mockClient },
@@ -470,26 +463,35 @@ describe('engines routes', () => {
         name: 'unit-test',
       };
 
-      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce(engineResult);
+      (mockClient.asCurrentUser.transport.request as jest.Mock).mockResolvedValueOnce(engineResult);
       (fetchEngineFieldCapabilities as jest.Mock).mockResolvedValueOnce(fieldCapabilitiesResult);
 
       await mockRouter.callRoute({
         params: { engine_name: 'unit-test' },
       });
 
-      expect(fetchEnterpriseSearch).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        '/api/engines/unit-test'
-      );
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_application/search_application/unit-test',
+      });
       expect(fetchEngineFieldCapabilities).toHaveBeenCalledWith(mockClient, engineResult);
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: fieldCapabilitiesResult,
         headers: { 'content-type': 'application/json' },
       });
     });
-    it('returns 404 when fetch engine is undefined', async () => {
-      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce(undefined);
+    it('returns 404 when fetch engine throws a not found exception', async () => {
+      (mockClient.asCurrentUser.transport.request as jest.Mock).mockRejectedValueOnce({
+        meta: {
+          body: {
+            error: {
+              type: 'resource_not_found_exception',
+            },
+          },
+          statusCode: 404,
+        },
+        name: 'ResponseError',
+      });
       await mockRouter.callRoute({
         params: { engine_name: 'unit-test' },
       });
@@ -504,29 +506,15 @@ describe('engines routes', () => {
         statusCode: 404,
       });
     });
-    it('returns 404 when fetch engine is returns 404', async () => {
-      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce({
-        responseStatus: 404,
-        responseStatusText: 'NOT_FOUND',
-      });
-      await mockRouter.callRoute({
-        params: { engine_name: 'unit-test' },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+    it('returns error when fetch engine returns an unknown error', async () => {
+      (mockClient.asCurrentUser.transport.request as jest.Mock).mockRejectedValueOnce({
         body: {
           attributes: {
-            error_code: 'engine_not_found',
+            error_code: 'unknown_error',
           },
-          message: 'Could not find engine',
+          message: 'Unknown error',
         },
-        statusCode: 404,
-      });
-    });
-    it('returns error when fetch engine returns an error', async () => {
-      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce({
-        responseStatus: 500,
-        responseStatusText: 'INTERNAL_SERVER_ERROR',
+        statusCode: 500,
       });
       await mockRouter.callRoute({
         params: { engine_name: 'unit-test' },
@@ -537,9 +525,9 @@ describe('engines routes', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Error fetching engine',
+          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
         },
-        statusCode: 500,
+        statusCode: 502,
       });
     });
   });
