@@ -313,7 +313,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      context.only('with risk weights', () => {
+      context('with risk weights', () => {
         it('weights host scores differently when host risk weight is configured', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
