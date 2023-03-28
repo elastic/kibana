@@ -26,6 +26,7 @@ import type {
   DataViewDeleteOut,
   DataViewSearchIn,
   DataViewSearchOut,
+  DataViewUpdateOptions,
   // DataViewSearchQuery,
 } from '../common/content_management';
 
@@ -74,11 +75,12 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
 
   // SO update method took a `version` value via the options object.
   // This was used to make sure the update was based on the most recent version of the object.
-  async update(id: string, attributes: DataViewAttributes) {
+  async update(id: string, attributes: DataViewAttributes, options: DataViewUpdateOptions) {
     const response = await this.contentManagemntClient.update<DataViewUpdateIn, DataViewUpdateOut>({
       contentTypeId: 'index-pattern',
       id,
       data: attributes,
+      options,
     });
     return response as SavedObject<DataViewAttributes>;
   }

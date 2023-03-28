@@ -17,7 +17,7 @@ export type {
   CreateOptions,
   DataViewUpdateIn,
   DataViewUpdateOut,
-  UpdateOptions,
+  DataViewUpdateOptions,
   DataViewDeleteIn,
   DataViewDeleteOut,
   DataViewSearchIn,

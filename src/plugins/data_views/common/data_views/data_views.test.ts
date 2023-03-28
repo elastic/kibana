@@ -77,7 +77,7 @@ describe('IndexPatterns', () => {
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
-    savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
+    savedObjectsClient.delete = jest.fn(() => Promise.resolve() as Promise<any>);
     savedObjectsClient.create = jest.fn();
     savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => {
       await new Promise((resolve) => setTimeout(resolve, SOClientGetDelay));

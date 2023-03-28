@@ -65,15 +65,16 @@ export type DataViewCreateOut = DataViewSavedObject;
 
 // ----------- UPDATE --------------
 
-export interface UpdateOptions {
+export interface DataViewUpdateOptions {
   /** Array of referenced saved objects. */
   references?: SavedObjectReference[];
+  version?: string;
 }
 
 export type DataViewUpdateIn = UpdateIn<
   typeof DataViewContentType,
   DataViewAttributes,
-  UpdateOptions
+  DataViewUpdateOptions
 >;
 
 export type DataViewUpdateOut = SavedObjectsUpdateResponse<DataViewAttributes>;

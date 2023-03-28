@@ -16,7 +16,7 @@ import type {
   CreateOptions,
   DataViewUpdateIn,
   DataViewUpdateOut,
-  UpdateOptions,
+  DataViewUpdateOptions,
   DataViewDeleteOut,
   DataViewSearchOut,
   DataViewSearchQuery,
@@ -75,7 +75,7 @@ export class DataViewsStorage implements ContentStorage {
     ctx: StorageContext,
     id: string,
     data: DataViewUpdateIn['data'],
-    options: UpdateOptions
+    options: DataViewUpdateOptions
   ): Promise<DataViewUpdateOut> {
     const soClient = await savedObjectClientFromRequest(ctx);
     return soClient.update(DataViewContentType, id, data, options);
