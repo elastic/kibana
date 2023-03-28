@@ -9,8 +9,9 @@
 import { Entity } from '../entity';
 import { Span } from './span';
 import { Transaction } from './transaction';
-import { ApmFields, SpanParams, GeoLocation } from './apm_fields';
+import { ApmFields, SpanParams, GeoLocation, ApmApplicationMetricFields } from './apm_fields';
 import { generateLongId } from '../utils/generate_id';
+import { Metricset } from './metricset';
 
 export interface DeviceInfo {
   manufacturer: string;
@@ -237,5 +238,13 @@ export class MobileDevice extends Entity<ApmFields> {
     }
 
     return this.span(spanParameters);
+  }
+
+  appMetrics(metrics: ApmApplicationMetricFields) {
+    return new Metricset<ApmFields>({
+      ...this.fields,
+      'metricset.name': 'app',
+      ...metrics,
+    });
   }
 }

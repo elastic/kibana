@@ -22,6 +22,7 @@ export type ApmApplicationMetricFields = Partial<{
   'faas.timeout': number;
   'faas.coldstart_duration': number;
   'faas.duration': number;
+  'application.launch.time': number;
 }>;
 
 export type ApmUserAgentFields = Partial<{

@@ -418,7 +418,23 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
         });
       };
 
-      return [...androidDevices, ...iOSDevices].map((device) => sessionTransactions(device));
+      const appLaunchMetrics = (device: MobileDevice) => {
+        return clickRate.generator((timestamp, index) =>
+          device
+            .appMetrics({
+              'application.launch.time': 100 * (index + 1),
+            })
+            .timestamp(timestamp)
+        );
+      };
+
+      return [
+        ...androidDevices.flatMap((device) => [
+          sessionTransactions(device),
+          appLaunchMetrics(device),
+        ]),
+        ...iOSDevices.map((device) => sessionTransactions(device)),
+      ];
     },
   };
 };
