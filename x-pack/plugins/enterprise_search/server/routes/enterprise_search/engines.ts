@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 
 import {
   EnterpriseSearchEngine,
-  EnterpriseSearchEngineDetails,
   EnterpriseSearchEnginesResponse,
   EnterpriseSearchEngineUpsertResponse,
 } from '../../../common/types/engines';
