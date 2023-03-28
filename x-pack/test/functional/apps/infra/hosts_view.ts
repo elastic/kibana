@@ -88,6 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
         kibanaServer.savedObjects.cleanStandardList(),
       ]);
     });
@@ -95,6 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     after(() => {
       esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts');
       esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
       browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
     });
 
@@ -150,6 +152,56 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('#Single host Flyout', () => {
+      const START_HOST_PROCESSES_DATE = moment.utc('2023-03-28T18:20:00.000Z');
+      const END_HOST_PROCESSES_DATE = moment.utc('2023-03-28T18:21:00.000Z');
+      before(async () => {
+        await Promise.all([
+          await setHostViewEnabled(true),
+          await loginWithReadOnlyUser(),
+          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH),
+          await pageObjects.timePicker.setAbsoluteRange(
+            START_HOST_PROCESSES_DATE.format(timepickerFormat),
+            END_HOST_PROCESSES_DATE.format(timepickerFormat)
+          ),
+          pageObjects.infraHostsView.clickTableOpenFlyoutButton(),
+        ]);
+      });
+
+      after(async () => {
+        await pageObjects.infraHostsView.clickCloseFlyoutButton();
+        await logoutAndDeleteReadOnlyUser();
+      });
+
+      it('should render metadata tab', async () => {
+        const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
+        expect(metadataTab).to.contain('Metadata');
+      });
+
+      describe('should render processes tab', async () => {
+        const processTitles = [
+          'Total processes',
+          'Running',
+          'Sleeping',
+          'Dead',
+          'Stopped',
+          'Idle',
+          'Zombie',
+          'Unknown',
+        ];
+
+        processTitles.forEach((value, index) => {
+          it(`Render title: ${value}`, async () => {
+            await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+            const processesTitleValue =
+              await pageObjects.infraHostsView.getProcessesTabContentTitle(index);
+            const processValue = await processesTitleValue.getVisibleText();
+            expect(processValue).to.eql(value);
+          });
+        });
+      });
+    });
+
     describe('#Page Content', () => {
       before(async () => {
         await setHostViewEnabled(true);
@@ -173,45 +225,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should render a table with 6 hosts', async () => {
         const hosts = await pageObjects.infraHostsView.getHostsTableData();
         expect(hosts.length).to.equal(6);
-      });
-
-      describe('should open single host flyout', async () => {
-        it('should render metadata tab', async () => {
-          await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
-          const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
-          expect(metadataTab).to.contain('Metadata');
-          await pageObjects.infraHostsView.clickCloseFlyoutButton();
-        });
-      });
-
-      describe('should render processes tab', async () => {
-        const processTitles = [
-          'Total processes',
-          'Running',
-          'Sleeping',
-          'Dead',
-          'Stopped',
-          'Idle',
-          'Zombie',
-          'Unknown',
-        ];
-        before(async () => {
-          await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
-        });
-
-        after(async () => {
-          await pageObjects.infraHostsView.clickCloseFlyoutButton();
-        });
-
-        processTitles.forEach((value, index) => {
-          it(`Render title: ${value}`, async () => {
-            await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-            const processesTitleValue =
-              await pageObjects.infraHostsView.getProcessesTabContentTitle(index);
-            const processValue = await processesTitleValue.getVisibleText();
-            expect(processValue).to.eql(value);
-          });
-        });
       });
 
       describe('KPI tiles', () => {
