@@ -86,7 +86,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="dashboardSettings.embeddableApi.showSettings.flyout.form.duplicateTitleLabel"
+            id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleLabel"
             defaultMessage="This dashboard already exists"
           />
         }
@@ -96,7 +96,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
       >
         <p>
           <FormattedMessage
-            id="dashboardSettings.embeddableApi.showSettings.flyout.form.duplicateTitleDescription"
+            id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleDescription"
             defaultMessage="Saving '{title}' creates a duplicate title."
             values={{
               title: dashboardSettingsState.title,
@@ -113,7 +113,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="dashboardSettings.embeddableApi.showSettings.flyout.form.tagsFormRowLabel"
+            id="dashboard.embeddableApi.showSettings.flyout.form.tagsFormRowLabel"
             defaultMessage="Tags"
           />
         }
@@ -132,7 +132,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="dashboardContainer.embeddableApi.showSettings.flyout.title"
+              id="dashboard.embeddableApi.showSettings.flyout.title"
               defaultMessage="Dashboard settings"
             />
           </h2>
@@ -144,7 +144,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           <EuiFormRow
             label={
               <FormattedMessage
-                id="dashboardSettings.embeddableApi.showSettings.flyout.form.panelTitleFormRowLabel"
+                id="dashboard.embeddableApi.showSettings.flyout.form.panelTitleFormRowLabel"
                 defaultMessage="Title"
               />
             }
@@ -162,7 +162,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
                 updateDashboardSetting({ title: event.target.value });
               }}
               aria-label={i18n.translate(
-                'dashboardSettings.embeddableApi.showSettings.flyout.form.panelTitleInputAriaLabel',
+                'dashboard.embeddableApi.showSettings.flyout.form.panelTitleInputAriaLabel',
                 {
                   defaultMessage: 'Change the dashboard title',
                 }
@@ -173,7 +173,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           <EuiFormRow
             label={
               <FormattedMessage
-                id="dashboardSettings.embeddableApi.showSettings.flyout.form.panelDescriptionFormRowLabel"
+                id="dashboard.embeddableApi.showSettings.flyout.form.panelDescriptionFormRowLabel"
                 defaultMessage="Description"
               />
             }
@@ -186,7 +186,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               value={dashboardSettingsState.description ?? ''}
               onChange={(event) => updateDashboardSetting({ description: event.target.value })}
               aria-label={i18n.translate(
-                'dashboardSettings.embeddableApi.showSettings.flyout.form.panelDescriptionAriaLabel',
+                'dashboard.embeddableApi.showSettings.flyout.form.panelDescriptionAriaLabel',
                 {
                   defaultMessage: 'Change the dashboard description',
                 }
@@ -197,7 +197,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           <EuiFormRow
             helpText={
               <FormattedMessage
-                id="dashboardSettings.embeddableApi.showSettings.flyout.form.storeTimeWithDashboardFormRowHelpText"
+                id="dashboard.embeddableApi.showSettings.flyout.form.storeTimeWithDashboardFormRowHelpText"
                 defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
               />
             }
@@ -208,7 +208,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               onChange={(event) => updateDashboardSetting({ timeRestore: event.target.checked })}
               label={
                 <FormattedMessage
-                  id="dashboardSettings.embeddableApi.showSettings.flyout.form.storeTimeWithDashboardFormRowLabel"
+                  id="dashboard.embeddableApi.showSettings.flyout.form.storeTimeWithDashboardFormRowLabel"
                   defaultMessage="Store time with dashboard"
                 />
               }
@@ -217,7 +217,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate(
-                'dashboardSettings.embeddableApi.showSettings.flyout.form.useMarginsBetweenPanelsSwitchLabel',
+                'dashboard.embeddableApi.showSettings.flyout.form.useMarginsBetweenPanelsSwitchLabel',
                 {
                   defaultMessage: 'Use margins between panels',
                 }
@@ -231,7 +231,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate(
-                'dashboardSettings.embeddableApi.showSettings.flyout.form.hideAllPanelTitlesSwitchLabel',
+                'dashboard.embeddableApi.showSettings.flyout.form.hideAllPanelTitlesSwitchLabel',
                 {
                   defaultMessage: 'Show panel titles',
                 }
@@ -248,7 +248,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               <EuiFormRow>
                 <EuiSwitch
                   label={i18n.translate(
-                    'dashboardSettings.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
+                    'dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
                     {
                       defaultMessage: 'Sync color palettes across panels',
                     }
@@ -261,7 +261,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               <EuiFormRow>
                 <EuiSwitch
                   label={i18n.translate(
-                    'dashboardSettings.embeddableApi.showSettings.flyout.form.syncCursorBetweenPanelsSwitchLabel',
+                    'dashboard.embeddableApi.showSettings.flyout.form.syncCursorBetweenPanelsSwitchLabel',
                     {
                       defaultMessage: 'Sync cursor across panels',
                     }
@@ -281,7 +281,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               <EuiFormRow>
                 <EuiSwitch
                   label={i18n.translate(
-                    'dashboardSettings.embeddableApi.showSettings.flyout.form.syncTooltipsBetweenPanelsSwitchLabel',
+                    'dashboard.embeddableApi.showSettings.flyout.form.syncTooltipsBetweenPanelsSwitchLabel',
                     {
                       defaultMessage: 'Sync tooltips across panels',
                     }
@@ -306,7 +306,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               onClick={() => onClose()}
             >
               <FormattedMessage
-                id="dashboardSettings.embeddableApi.showSettings.flyout.cancelButtonTitle"
+                id="dashboard.embeddableApi.showSettings.flyout.cancelButtonTitle"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -333,12 +333,12 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
             >
               {isTitleDuplicate ? (
                 <FormattedMessage
-                  id="dashboardSettings.embeddableApi.showSettings.flyout.confirmApplyButtonTitle"
+                  id="dashboard.embeddableApi.showSettings.flyout.confirmApplyButtonTitle"
                   defaultMessage="Confirm and apply"
                 />
               ) : (
                 <FormattedMessage
-                  id="dashboardSettings.embeddableApi.showSettings.flyout.applyButtonTitle"
+                  id="dashboard.embeddableApi.showSettings.flyout.applyButtonTitle"
                   defaultMessage="Apply"
                 />
               )}
