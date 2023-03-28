@@ -57,14 +57,22 @@ export const useRetrieveStepImage = ({
   const imageResult = useGetStepScreenshotUrls(checkGroup, imgPath, imgState);
   const isImageUrlAvailable = imageResult?.[imgPath]?.url ?? false;
 
-  const shouldRetry = useMemo(
-    () => retryFetchOnRevisit || !((imgState[imgPath]?.attempts ?? 0) > 0),
-    [imgPath, imgState, retryFetchOnRevisit]
-  );
+  const shouldFetch = useMemo(() => {
+    const shouldRetry = retryFetchOnRevisit || !(imgState[imgPath]?.attempts ?? 0 > 0);
+    return !skippedStep && hasIntersected && !isImageUrlAvailable && shouldRetry && checkGroup;
+  }, [
+    checkGroup,
+    hasIntersected,
+    imgPath,
+    imgState,
+    isImageUrlAvailable,
+    retryFetchOnRevisit,
+    skippedStep,
+  ]);
 
   useEffect(() => {
     async function run() {
-      if (!skippedStep && hasIntersected && !isImageUrlAvailable && shouldRetry && checkGroup) {
+      if (shouldFetch) {
         setImgState((prevState) => {
           return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
         });
@@ -72,33 +80,26 @@ export const useRetrieveStepImage = ({
           ? { shouldBackoff: false }
           : undefined;
         try {
-          const data = await getJourneyScreenshot(imgPath, backoffOptions);
-          setImgState((prevState) => {
-            return getUpdatedState({ prevState, imgPath, increment: false, data, loading: false });
-          });
-          return data;
+          getJourneyScreenshot(imgPath, backoffOptions).then((data) =>
+            setImgState((prevState) =>
+              getUpdatedState({
+                prevState,
+                imgPath,
+                increment: false,
+                data,
+                loading: false,
+              })
+            )
+          );
         } catch (e: unknown) {
           setImgState((prevState) => {
             return getUpdatedState({ prevState, imgPath, increment: false, loading: false });
           });
         }
-      } else {
-        return null;
       }
     }
     run();
-  }, [
-    skippedStep,
-    hasIntersected,
-    imgPath,
-    retryFetchOnRevisit,
-    timestamp,
-    isImageUrlAvailable,
-    checkGroup,
-    stepStatus,
-    testNowMode,
-    shouldRetry,
-  ]);
+  }, [imgPath, shouldFetch, testNowMode]);
 
   return imageResult;
 };
