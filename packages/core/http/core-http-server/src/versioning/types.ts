@@ -54,6 +54,92 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
 /**
  * A router, very similar to {@link IRouter} that will return an {@link VersionedRoute}
  * instead.
+ *
+ * @example
+ * const versionedRoute = versionedRouter
+ *   .post({
+ *     access: 'internal',
+ *     path: '/api/my-app/foo/{id?}',
+ *     options: { timeout: { payload: 60000 } },
+ *   })
+ *   .addVersion(
+ *     {
+ *       version: '1',
+ *       validate: {
+ *         request: {
+ *           query: schema.object({
+ *             name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+ *           }),
+ *           params: schema.object({
+ *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+ *           }),
+ *           body: schema.object({ foo: schema.string() }),
+ *         },
+ *         response: {
+ *           200: {
+ *             body: schema.object({ foo: schema.string() }),
+ *           },
+ *         },
+ *       },
+ *     },
+ *     async (ctx, req, res) => {
+ *       await ctx.fooService.create(req.body.foo, req.params.id, req.query.name);
+ *       return res.ok({ body: { foo: req.body.foo } });
+ *     }
+ *   )
+ *   // BREAKING CHANGE: { foo: string } => { fooString: string } in body
+ *   .addVersion(
+ *     {
+ *       version: '2',
+ *       validate: {
+ *         request: {
+ *           query: schema.object({
+ *             name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+ *           }),
+ *           params: schema.object({
+ *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+ *           }),
+ *           body: schema.object({ fooString: schema.string() }),
+ *         },
+ *         response: {
+ *           200: {
+ *             body: schema.object({ fooName: schema.string() }),
+ *           },
+ *         },
+ *       },
+ *     },
+ *     async (ctx, req, res) => {
+ *       await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
+ *       return res.ok({ body: { fooName: req.body.fooString } });
+ *     }
+ *   )
+ *   // BREAKING CHANGES: Enforce min/max length on fooString
+ *   .addVersion(
+ *     {
+ *       version: '3',
+ *       validate: {
+ *         request: {
+ *           query: schema.object({
+ *             name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+ *           }),
+ *           params: schema.object({
+ *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+ *           }),
+ *           body: schema.object({ fooString: schema.string({ minLength: 0, maxLength: 1000 }) }),
+ *         },
+ *         response: {
+ *           200: {
+ *             body: schema.object({ fooName: schema.string() }),
+ *           },
+ *         },
+ *       },
+ *     },
+ *     async (ctx, req, res) => {
+ *       await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
+ *       return res.ok({ body: { fooName: req.body.fooString } });
+ *     }
+ *   );
+
  * @experimental
  */
 export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
