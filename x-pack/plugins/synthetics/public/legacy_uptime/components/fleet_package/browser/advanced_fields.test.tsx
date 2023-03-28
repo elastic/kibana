@@ -23,7 +23,7 @@ import {
   defaultBrowserAdvancedFields as defaultConfig,
   defaultBrowserSimpleFields,
 } from '../contexts';
-import { validate as centralValidation } from '../validation';
+import { validate as centralValidation } from '../../monitor_management/validation';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const defaultValidation = centralValidation[DataStream.BROWSER];
@@ -89,29 +89,14 @@ describe('<BrowserAdvancedFields />', () => {
     });
   });
 
-  it('only displayed filter options when zip url is truthy', () => {
-    const { queryByText, getByText, rerender } = render(<WrappedComponent />);
+  it('does not display filter options (zip url has been deprecated)', () => {
+    const { queryByText } = render(<WrappedComponent />);
 
     expect(
       queryByText(
         /Use these options to apply the selected monitor settings to a subset of the tests in your suite./
       )
     ).not.toBeInTheDocument();
-
-    rerender(
-      <WrappedComponent
-        defaultSimpleFields={{
-          ...defaultBrowserSimpleFields,
-          [ConfigKey.SOURCE_ZIP_URL]: 'https://elastic.zip',
-        }}
-      />
-    );
-
-    expect(
-      getByText(
-        /Use these options to apply the selected monitor settings to a subset of the tests in your suite./
-      )
-    ).toBeInTheDocument();
   });
 
   it('renders upstream fields', () => {
