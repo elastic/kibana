@@ -17,7 +17,7 @@ export interface TabContentProps {
   environment: string;
   start: string;
   end: string;
-  kueryWithMobileFilters: string;
+  kuery: string;
   comparisonEnabled: boolean;
   offset?: string;
   mobileSelectedTab?: string;
@@ -29,7 +29,7 @@ export function TransactionOverviewTabs({
   environment,
   start,
   end,
-  kueryWithMobileFilters,
+  kuery,
   comparisonEnabled,
   offset,
   mobileSelectedTab,
@@ -64,7 +64,7 @@ export function TransactionOverviewTabs({
           environment,
           start,
           end,
-          kueryWithMobileFilters,
+          kuery,
           comparisonEnabled,
           offset,
         }}

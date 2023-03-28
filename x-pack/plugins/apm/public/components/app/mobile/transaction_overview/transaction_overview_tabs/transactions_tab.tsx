@@ -11,12 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { TabContentProps } from '.';
 import { TransactionsTable } from '../../../../shared/transactions_table';
 
-function TransactionsTab({
-  environment,
-  kueryWithMobileFilters,
-  start,
-  end,
-}: TabContentProps) {
+function TransactionsTab({ environment, kuery, start, end }: TabContentProps) {
   return (
     <TransactionsTable
       hideTitle
@@ -24,7 +19,7 @@ function TransactionsTab({
       numberOfTransactionsPerPage={25}
       showMaxTransactionGroupsExceededWarning
       environment={environment}
-      kuery={kueryWithMobileFilters}
+      kuery={kuery}
       start={start}
       end={end}
       saveTableOptionsToUrl

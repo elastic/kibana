@@ -15,7 +15,7 @@ import { DEVICE_MODEL_IDENTIFIER } from '../../../../../../common/es_fields/apm'
 
 function DevicesTab({
   environment,
-  kueryWithMobileFilters,
+  kuery,
   start,
   end,
   comparisonEnabled,
@@ -30,7 +30,7 @@ function DevicesTab({
   } = useMobileStatisticsFetcher({
     field: DEVICE_MODEL_IDENTIFIER,
     environment,
-    kueryWithMobileFilters,
+    kuery,
     start,
     end,
     comparisonEnabled,

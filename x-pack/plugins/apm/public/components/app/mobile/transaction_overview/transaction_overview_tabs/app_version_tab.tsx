@@ -15,7 +15,7 @@ import { useMobileStatisticsFetcher } from './use_mobile_statistics_fetcher';
 
 function AppVersionTab({
   environment,
-  kueryWithMobileFilters,
+  kuery,
   start,
   end,
   comparisonEnabled,
@@ -30,7 +30,7 @@ function AppVersionTab({
   } = useMobileStatisticsFetcher({
     field: SERVICE_VERSION,
     environment,
-    kueryWithMobileFilters,
+    kuery,
     start,
     end,
     comparisonEnabled,

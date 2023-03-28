@@ -15,7 +15,7 @@ import { HOST_OS_VERSION } from '../../../../../../common/es_fields/apm';
 
 function OSVersionTab({
   environment,
-  kueryWithMobileFilters,
+  kuery,
   start,
   end,
   comparisonEnabled,
@@ -30,7 +30,7 @@ function OSVersionTab({
   } = useMobileStatisticsFetcher({
     field: HOST_OS_VERSION,
     environment,
-    kueryWithMobileFilters,
+    kuery,
     start,
     end,
     comparisonEnabled,

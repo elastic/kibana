@@ -27,7 +27,7 @@ interface Props {
   environment: string;
   start: string;
   end: string;
-  kueryWithMobileFilters: string;
+  kuery: string;
   comparisonEnabled: boolean;
   offset?: string;
 }
@@ -37,7 +37,7 @@ export function useMobileStatisticsFetcher({
   environment,
   start,
   end,
-  kueryWithMobileFilters,
+  kuery,
   comparisonEnabled,
   offset,
 }: Props) {
@@ -54,7 +54,7 @@ export function useMobileStatisticsFetcher({
                 path: { serviceName },
                 query: {
                   environment,
-                  kuery: kueryWithMobileFilters,
+                  kuery,
                   start,
                   end,
                   field,
@@ -72,7 +72,7 @@ export function useMobileStatisticsFetcher({
           });
         }
       },
-      [environment, start, end, kueryWithMobileFilters, serviceName, field]
+      [environment, start, end, kuery, serviceName, field]
     );
 
   const { mainStatistics, requestId, totalItems, agentName } = data;
@@ -90,7 +90,7 @@ export function useMobileStatisticsFetcher({
               path: { serviceName },
               query: {
                 environment,
-                kuery: kueryWithMobileFilters,
+                kuery,
                 start,
                 end,
                 field,

@@ -91,7 +91,7 @@ export function MobileTransactionOverview() {
       <EuiPanel hasBorder={true}>
         <TransactionOverviewTabs
           environment={environment}
-          kueryWithMobileFilters={kueryWithMobileFilters}
+          kuery={kueryWithMobileFilters}
           start={start}
           end={end}
           comparisonEnabled={comparisonEnabled}
