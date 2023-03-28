@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EnterpriseSearchEngine } from '../../../../../common/types/engines';
+import { EnterpriseSearchEngineUpsertResponse } from '../../../../../common/types/engines';
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -14,7 +14,7 @@ export interface CreateEngineApiParams {
   indices: string[];
 }
 
-export type CreateEngineApiResponse = EnterpriseSearchEngine;
+export type CreateEngineApiResponse = EnterpriseSearchEngineUpsertResponse;
 
 export type CreateEngineApiLogicActions = Actions<CreateEngineApiParams, CreateEngineApiResponse>;
 
@@ -22,10 +22,11 @@ export const createEngine = async ({
   engineName,
   indices,
 }: CreateEngineApiParams): Promise<CreateEngineApiResponse> => {
-  const route = `/internal/enterprise_search/engines`;
+  const route = `/internal/enterprise_search/engines/${engineName}`;
 
-  return await HttpLogic.values.http.post<EnterpriseSearchEngine>(route, {
+  return await HttpLogic.values.http.put<EnterpriseSearchEngineUpsertResponse>(route, {
     body: JSON.stringify({ indices, name: engineName }),
+    query: { create: true },
   });
 };
 

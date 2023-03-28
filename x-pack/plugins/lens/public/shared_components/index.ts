@@ -36,6 +36,7 @@ export { LegendActionPopover } from './legend/action/legend_action_popover';
 export { NameInput } from './name_input';
 export { ValueLabelsSettings } from './value_labels_settings';
 export { AxisTitleSettings } from './axis/title/axis_title_settings';
+export { AxisTicksSettings } from './axis/ticks/axis_ticks_settings';
 export { DimensionEditorSection } from './dimension_section';
 export { FilterQueryInput } from './filter_query_input';
 export * from './static_header';

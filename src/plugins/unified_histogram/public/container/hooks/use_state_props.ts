@@ -40,7 +40,11 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
    */
 
   const isPlainRecord = useMemo(() => {
-    return query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql';
+    return (
+      query &&
+      isOfAggregateQueryType(query) &&
+      ['sql', 'esql'].some((mode) => mode === getAggregateQueryMode(query))
+    );
   }, [query]);
 
   const isTimeBased = useMemo(() => {
@@ -48,7 +52,7 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
   }, [dataView]);
 
   const hits = useMemo(() => {
-    if (isPlainRecord || totalHitsResult instanceof Error) {
+    if (totalHitsResult instanceof Error) {
       return undefined;
     }
 
@@ -56,10 +60,10 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
       status: totalHitsStatus,
       total: totalHitsResult,
     };
-  }, [isPlainRecord, totalHitsResult, totalHitsStatus]);
+  }, [totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
-    if (isPlainRecord || !isTimeBased) {
+    if (!isTimeBased && !isPlainRecord) {
       return undefined;
     }
 
@@ -136,6 +140,13 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
     [stateService]
   );
 
+  const onSuggestionChange = useCallback(
+    (suggestion) => {
+      stateService?.setCurrentSuggestion(suggestion);
+    },
+    [stateService]
+  );
+
   /**
    * Effects
    */
@@ -152,11 +163,13 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
     chart,
     breakdown,
     request,
+    isPlainRecord,
     onTopPanelHeightChange,
     onTimeIntervalChange,
     onTotalHitsChange,
     onChartHiddenChange,
     onChartLoad,
     onBreakdownFieldChange,
+    onSuggestionChange,
   };
 };
