@@ -15,6 +15,7 @@ export {
   type IndexMapping,
   type IndexMappingMeta,
   type SavedObjectsTypeMappingDefinitions,
+  type IndexMappingMigrationStateMeta,
 } from './src/mappings';
 export { SavedObjectsSerializer } from './src/serialization';
 export { SavedObjectsTypeValidator } from './src/validation';
