@@ -12,8 +12,9 @@ import { Comparator } from '../../../../common/alerting/metrics';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 
-jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
-  useSourceViaHttp: () => ({
+jest.mock('../../../containers/metrics_source/source', () => ({
+  withSourceProvider: () => jest.fn,
+  useSourceContext: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),

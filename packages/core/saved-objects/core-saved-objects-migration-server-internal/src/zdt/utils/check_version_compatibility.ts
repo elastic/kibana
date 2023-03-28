@@ -29,7 +29,11 @@ export const checkVersionCompatibility = ({
   deletedTypes,
 }: CheckVersionCompatibilityOpts): CompareModelVersionResult => {
   const appVersions = getModelVersionMapForTypes(types);
-  const indexVersions = getModelVersionsFromMappings({ mappings, source });
+  const indexVersions = getModelVersionsFromMappings({
+    mappings,
+    source,
+    knownTypes: types.map((type) => type.name),
+  });
   if (!indexVersions) {
     throw new Error(`Cannot check version: ${source} not present in the mapping meta`);
   }
