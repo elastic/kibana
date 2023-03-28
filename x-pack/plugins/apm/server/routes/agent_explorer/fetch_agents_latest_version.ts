@@ -23,6 +23,7 @@ export interface OtelAgentLatestVersion {
 interface AgentLatestVersionsResponse {
   data: AgentLatestVersions;
   timedOut?: boolean;
+  error?: { message: string; type: string };
 }
 
 type AgentLatestVersions = Record<
@@ -34,7 +35,7 @@ export const fetchAgentsLatestVersion = async (
   logger: Logger
 ): Promise<AgentLatestVersionsResponse> => {
   try {
-    const response = await fetchWithTimeout(bucketUrl, { timeout: 1 });
+    const response = await fetchWithTimeout(bucketUrl);
     const data = await response.json();
 
     return { data };
@@ -48,6 +49,7 @@ export const fetchAgentsLatestVersion = async (
     return {
       data: {} as AgentLatestVersions,
       timedOut,
+      error,
     };
   }
 };

@@ -48,6 +48,7 @@ export interface AgentExplorerAgentsResponse {
     latestVersion?: string;
   }>;
   latestVersionTimedOut?: boolean;
+  latestVersionError?: { message: string; type: string };
 }
 
 export async function getAgents({
@@ -85,7 +86,7 @@ export async function getAgents({
     fetchAgentsLatestVersion(logger),
   ]);
 
-  const { data: latestVersionsData, timedOut } = latestVersions;
+  const { data: latestVersionsData, timedOut, error } = latestVersions;
 
   return {
     items: items.map((item) => {
@@ -118,5 +119,6 @@ export async function getAgents({
       };
     }),
     latestVersionTimedOut: timedOut,
+    latestVersionError: error,
   };
 }
