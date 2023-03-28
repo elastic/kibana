@@ -19,7 +19,7 @@ export interface ITermJoinSource extends ISource {
   getTermField(): IField;
   getWhereQuery(): Query | undefined;
   getPropertiesMap(
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,

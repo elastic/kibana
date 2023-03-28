@@ -205,47 +205,47 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async makeSearchSource(
-    searchFilters: VectorSourceRequestMeta | BoundsRequestMeta,
+    requestMeta: VectorSourceRequestMeta | BoundsRequestMeta,
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource> {
     const indexPattern = await this.getIndexPattern();
-    const globalFilters: Filter[] = searchFilters.applyGlobalQuery ? searchFilters.filters : [];
+    const globalFilters: Filter[] = requestMeta.applyGlobalQuery ? requestMeta.filters : [];
     const allFilters: Filter[] = [...globalFilters];
-    if (searchFilters.joinKeyFilter) {
-      allFilters.push(searchFilters.joinKeyFilter);
+    if (requestMeta.joinKeyFilter) {
+      allFilters.push(requestMeta.joinKeyFilter);
     }
-    if (this.isFilterByMapBounds() && 'buffer' in searchFilters && searchFilters.buffer) {
+    if (this.isFilterByMapBounds() && 'buffer' in requestMeta && requestMeta.buffer) {
       // buffer can be empty
       const geoField = await this._getGeoField();
       const buffer: MapExtent =
         'isGeoGridPrecisionAware' in this && 
         'getGeoGridPrecision' in this &&
         (this as IESAggSource).isGeoGridPrecisionAware()
-          ? expandToTileBoundaries(searchFilters.buffer, (this as IESAggSource).getGeoGridPrecision(searchFilters.zoom))
-          : searchFilters.buffer;
+          ? expandToTileBoundaries(requestMeta.buffer, (this as IESAggSource).getGeoGridPrecision(requestMeta.zoom))
+          : requestMeta.buffer;
       const extentFilter = createExtentFilter(buffer, [geoField.name]);
 
       allFilters.push(extentFilter);
     }
 
     let isFeatureEditorOpenForLayer = false;
-    if ('isFeatureEditorOpenForLayer' in searchFilters) {
-      isFeatureEditorOpenForLayer = searchFilters.isFeatureEditorOpenForLayer;
+    if ('isFeatureEditorOpenForLayer' in requestMeta) {
+      isFeatureEditorOpenForLayer = requestMeta.isFeatureEditorOpenForLayer;
     }
 
     if (
-      searchFilters.applyGlobalTime &&
+      requestMeta.applyGlobalTime &&
       (await this.isTimeAware()) &&
       !isFeatureEditorOpenForLayer
     ) {
-      const timeRange = searchFilters.timeslice
+      const timeRange = requestMeta.timeslice
         ? {
-            from: new Date(searchFilters.timeslice.from).toISOString(),
-            to: new Date(searchFilters.timeslice.to).toISOString(),
+            from: new Date(requestMeta.timeslice.from).toISOString(),
+            to: new Date(requestMeta.timeslice.to).toISOString(),
             mode: 'absolute' as 'absolute',
           }
-        : searchFilters.timeFilters;
+        : requestMeta.timeFilters;
       const filter = getTimeFilter().createFilter(indexPattern, timeRange);
       if (filter) {
         allFilters.push(filter);
@@ -258,23 +258,23 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
-    if (searchFilters.applyGlobalQuery && !isFeatureEditorOpenForLayer) {
-      searchSource.setField('query', searchFilters.query);
+    if (requestMeta.applyGlobalQuery && !isFeatureEditorOpenForLayer) {
+      searchSource.setField('query', requestMeta.query);
     }
 
     const parents = [];
-    if (searchFilters.sourceQuery && !isFeatureEditorOpenForLayer) {
+    if (requestMeta.sourceQuery && !isFeatureEditorOpenForLayer) {
       const layerSearchSource = searchService.searchSource.createEmpty();
       layerSearchSource.setField('index', indexPattern);
-      layerSearchSource.setField('query', searchFilters.sourceQuery);
+      layerSearchSource.setField('query', requestMeta.sourceQuery);
       parents.push(layerSearchSource);
     }
 
-    if (searchFilters.embeddableSearchContext && !isFeatureEditorOpenForLayer) {
+    if (requestMeta.embeddableSearchContext && !isFeatureEditorOpenForLayer) {
       const embeddableSearchSource = searchService.searchSource.createEmpty();
       embeddableSearchSource.setField('index', indexPattern);
-      embeddableSearchSource.setField('query', searchFilters.embeddableSearchContext.query);
-      embeddableSearchSource.setField('filter', searchFilters.embeddableSearchContext.filters);
+      embeddableSearchSource.setField('query', requestMeta.embeddableSearchContext.query);
+      embeddableSearchSource.setField('filter', requestMeta.embeddableSearchContext.filters);
       parents.push(embeddableSearchSource);
     }
 

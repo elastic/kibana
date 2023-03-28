@@ -132,13 +132,13 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destSplit: {
@@ -156,7 +156,7 @@ export class ESPewPewSource extends AbstractESAggSource {
           sourceGrid: {
             geotile_grid: {
               field: this._descriptor.sourceGeoField,
-              precision: this.getGeoGridPrecision(searchFilters.zoom),
+              precision: this.getGeoGridPrecision(requestMeta.zoom),
               size: 500,
             },
             aggs: {
@@ -190,7 +190,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
         defaultMessage: 'Source-destination connections request',
       }),
-      searchSessionId: searchFilters.searchSessionId,
+      searchSessionId: requestMeta.searchSessionId,
       executionContext: makePublicExecutionContext('es_pew_pew_source:connections'),
       requestsAdapter: inspectorAdapters.requests,
     });

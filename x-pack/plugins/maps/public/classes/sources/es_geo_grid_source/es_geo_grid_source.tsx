@@ -436,17 +436,17 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
-    if (!searchFilters.buffer) {
+    if (!requestMeta.buffer) {
       throw new Error('Cannot get GeoJson without searchFilter.buffer');
     }
 
     const indexPattern: DataView = await this.getIndexPattern();
-    const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource: ISearchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
 
     let bucketsPerGrid = 1;
@@ -464,29 +464,29 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     // https://github.com/elastic/elasticsearch/issues/60626
     const supportsCompositeAgg = !(await this._isGeoShape());
 
-    const precision = this.getGeoGridPrecision(searchFilters.zoom);
+    const precision = this.getGeoGridPrecision(requestMeta.zoom);
     const features: Feature[] =
       supportsCompositeAgg && tooManyBuckets
         ? await this._compositeAggRequest({
             searchSource,
-            searchSessionId: searchFilters.searchSessionId,
+            searchSessionId: requestMeta.searchSessionId,
             indexPattern,
             precision,
             layerName,
             registerCancelCallback,
             bucketsPerGrid,
             isRequestStillActive,
-            bufferedExtent: searchFilters.buffer,
+            bufferedExtent: requestMeta.buffer,
             inspectorAdapters,
           })
         : await this._nonCompositeAggRequest({
             searchSource,
-            searchSessionId: searchFilters.searchSessionId,
+            searchSessionId: requestMeta.searchSessionId,
             indexPattern,
             precision,
             layerName,
             registerCancelCallback,
-            bufferedExtent: searchFilters.buffer,
+            bufferedExtent: requestMeta.buffer,
             tooManyBuckets,
             inspectorAdapters,
           });
@@ -507,13 +507,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   async getTileUrl(
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     refreshToken: string,
     hasLabels: boolean,
     buffer: number
   ): Promise<string> {
     const dataView = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(dataView));
 
     const mvtUrlServicePath = getHttp().basePath.prepend(

@@ -122,7 +122,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   async getPropertiesMap(
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,
@@ -133,7 +133,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource: ISearchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = {
@@ -158,7 +158,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
           rightSource: `${indexPattern.getName()}:${this._termField.getName()}`,
         },
       }),
-      searchSessionId: searchFilters.searchSessionId,
+      searchSessionId: requestMeta.searchSessionId,
       executionContext: makePublicExecutionContext('es_term_source:terms'),
       requestsAdapter: inspectorAdapters.requests,
     });
