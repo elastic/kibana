@@ -23,7 +23,11 @@ export const useMonitorNotFound = (error?: IHttpFetchError<ResponseErrorBody>) =
             add a new monitor, please click on the button below.
           </p>
 
-          <EuiButton href="#" color="primary">
+          <EuiButton
+            data-test-subj="syntheticsUseMonitorNotFoundCreateNewMonitorButton"
+            href="#"
+            color="primary"
+          >
             Create new monitor
           </EuiButton>
         </EuiCallOut>
@@ -34,11 +38,18 @@ export const useMonitorNotFound = (error?: IHttpFetchError<ResponseErrorBody>) =
               Please click on the button below to delete the integration. Normally this should not
               happen. Since the monitor has been deleted, the integration is deleted as well
               automatically.{' '}
-              <EuiLink href="https://github.com/elastic/kibana/issues/new/choose">
+              <EuiLink
+                data-test-subj="syntheticsUseMonitorNotFoundReportAnIssueLink"
+                href="https://github.com/elastic/kibana/issues/new/choose"
+              >
                 Report an issue.
               </EuiLink>
             </p>
-            <EuiButton href={`#/policies/${packagePolicyId}/edit`} color="danger">
+            <EuiButton
+              data-test-subj="syntheticsUseMonitorNotFoundDeleteIntegrationButton"
+              href={`#/policies/${packagePolicyId}/edit`}
+              color="danger"
+            >
               Delete integration
             </EuiButton>
           </EuiCallOut>
