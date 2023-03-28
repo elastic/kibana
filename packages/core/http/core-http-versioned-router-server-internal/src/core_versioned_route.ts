@@ -21,7 +21,6 @@ import type {
   VersionedRoute,
   VersionedRouteConfig,
 } from '@kbn/core-http-server';
-import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { Mutable } from 'utility-types';
 import type { Method } from './types';
 
@@ -105,7 +104,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const validation = handler.options.validate || undefined;
 
-    const mutableCoreKibanaRequest = req as Mutable<CoreKibanaRequest>;
+    const mutableCoreKibanaRequest = req as Mutable<KibanaRequest>;
     if (
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)

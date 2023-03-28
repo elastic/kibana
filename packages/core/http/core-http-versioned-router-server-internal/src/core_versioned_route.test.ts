@@ -12,7 +12,6 @@ import type { IRouter, RequestHandler } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { CoreVersionedRouter } from '.';
-import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 describe('Versioned route', () => {
   let router: IRouter;
@@ -135,7 +134,7 @@ describe('Versioned route', () => {
         params: { foo: 1 },
         query: { foo: 1 },
       }),
-      kibanaResponseFactory
+      httpServerMock.createResponseFactory()
     );
 
     expect(kibanaResponse.status).toBe(200);
@@ -157,7 +156,7 @@ describe('Versioned route', () => {
         httpServerMock.createKibanaRequest({
           headers: { [ELASTIC_HTTP_VERSION_HEADER]: '999' },
         }),
-        kibanaResponseFactory
+        httpServerMock.createResponseFactory()
       )
     ).resolves.toEqual({
       options: {},
@@ -181,7 +180,7 @@ describe('Versioned route', () => {
         httpServerMock.createKibanaRequest({
           headers: {},
         }),
-        kibanaResponseFactory
+        httpServerMock.createResponseFactory()
       )
     ).resolves.toEqual({
       options: {},
@@ -209,7 +208,7 @@ describe('Versioned route', () => {
           headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
           body: {},
         }),
-        kibanaResponseFactory
+        httpServerMock.createResponseFactory()
       )
     ).resolves.toEqual({
       options: {},
