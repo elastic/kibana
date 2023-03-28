@@ -134,7 +134,7 @@ export function FieldValueSelection({
 
   const filterButton = (
     <EuiFilterButton
-      aria-label={i18n.translate('xpack.observability.filterButton.label', {
+      aria-label={i18n.translate('xpack.exploratoryView.filterButton.label', {
         defaultMessage: 'expands filter group for {label} filter',
         values: { label },
       })}
@@ -181,7 +181,7 @@ export function FieldValueSelection({
           searchable
           singleSelection={singleSelection}
           searchProps={{
-            placeholder: i18n.translate('xpack.observability.fieldValueSelection.placeholder', {
+            placeholder: i18n.translate('xpack.exploratoryView.fieldValueSelection.placeholder', {
               defaultMessage: 'Filter {label}',
               values: { label },
             }),
@@ -203,7 +203,7 @@ export function FieldValueSelection({
               {list}
               {loading && query && (
                 <EuiText className="eui-textCenter" color="subdued">
-                  {i18n.translate('xpack.observability.fieldValueSelection.loading', {
+                  {i18n.translate('xpack.exploratoryView.fieldValueSelection.loading', {
                     defaultMessage: 'Loading',
                   })}{' '}
                   <EuiLoadingSpinner size="m" />
@@ -221,7 +221,7 @@ export function FieldValueSelection({
                           color: euiTheme.colors.subduedText,
                         }}
                         label={i18n.translate(
-                          'xpack.observability.fieldValueSelection.logicalAnd',
+                          'xpack.exploratoryView.fieldValueSelection.logicalAnd',
                           {
                             defaultMessage: 'Use logical AND',
                           }
@@ -241,7 +241,7 @@ export function FieldValueSelection({
                 <EuiButton
                   data-test-subj="o11yFieldValueSelectionApplyButton"
                   aria-label={i18n.translate(
-                    'xpack.observability.fieldValueSelection.apply.label',
+                    'xpack.exploratoryView.fieldValueSelection.apply.label',
                     {
                       defaultMessage: 'Apply the selected filters for {label}',
                       values: { label },
@@ -272,7 +272,7 @@ export function FieldValueSelection({
                     setForceOpen?.(false);
                   }}
                 >
-                  {i18n.translate('xpack.observability.fieldValueSelection.apply', {
+                  {i18n.translate('xpack.exploratoryView.fieldValueSelection.apply', {
                     defaultMessage: 'Apply',
                   })}
                 </EuiButton>

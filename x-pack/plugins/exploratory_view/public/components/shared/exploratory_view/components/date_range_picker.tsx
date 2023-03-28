@@ -89,7 +89,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
           startDate={startDate}
           endDate={endDate}
           isInvalid={startDate > endDate}
-          aria-label={i18n.translate('xpack.observability.expView.dateRanger.startDate', {
+          aria-label={i18n.translate('xpack.exploratoryView.expView.dateRanger.startDate', {
             defaultMessage: 'Start date',
           })}
           dateFormat={dateFormat.replace('ss.SSS', 'ss')}
@@ -106,7 +106,7 @@ export function DateRangePicker({ seriesId, series }: { seriesId: number; series
           startDate={startDate}
           endDate={endDate}
           isInvalid={startDate > endDate}
-          aria-label={i18n.translate('xpack.observability.expView.dateRanger.endDate', {
+          aria-label={i18n.translate('xpack.exploratoryView.expView.dateRanger.endDate', {
             defaultMessage: 'End date',
           })}
           dateFormat={dateFormat.replace('ss.SSS', 'ss')}

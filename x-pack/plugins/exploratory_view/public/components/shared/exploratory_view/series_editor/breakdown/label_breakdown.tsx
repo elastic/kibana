@@ -61,7 +61,7 @@ export function LabelsBreakdown({ series, seriesId }: Props) {
 }
 
 export const CHOOSE_BREAKDOWN_FIELD = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.labelField',
+  'xpack.exploratoryView.expView.seriesBuilder.labelField',
   {
     defaultMessage: 'Choose label field',
   }

@@ -69,7 +69,7 @@ export function ExpViewActionMenuContent({
               }
             }}
           >
-            {i18n.translate('xpack.observability.expView.heading.openInLens', {
+            {i18n.translate('xpack.exploratoryView.expView.heading.openInLens', {
               defaultMessage: 'Open in Lens',
             })}
           </EuiButton>
@@ -88,7 +88,7 @@ export function ExpViewActionMenuContent({
             }}
             size="s"
           >
-            {i18n.translate('xpack.observability.expView.heading.saveLensVisualization', {
+            {i18n.translate('xpack.exploratoryView.expView.heading.saveLensVisualization', {
               defaultMessage: 'Save',
             })}
           </EuiButton>

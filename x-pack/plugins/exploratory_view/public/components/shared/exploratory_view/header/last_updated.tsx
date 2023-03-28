@@ -57,7 +57,7 @@ export function LastUpdated({ chartTimeRange }: Props) {
         <EuiIcon type="iInCircle" />
       </StyledToolTipWrapper>{' '}
       <FormattedMessage
-        id="xpack.observability.expView.lastUpdated.label"
+        id="xpack.exploratoryView.expView.lastUpdated.label"
         defaultMessage="Last Updated: {updatedDate}"
         values={{
           updatedDate: moment(lastUpdated).from(refresh),

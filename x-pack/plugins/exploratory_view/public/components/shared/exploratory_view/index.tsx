@@ -56,7 +56,7 @@ export function ExploratoryViewPage({
   useBreadcrumbs(
     [
       {
-        text: i18n.translate('xpack.observability.overview.exploratoryView', {
+        text: i18n.translate('xpack.exploratoryView.overview.exploratoryView', {
           defaultMessage: 'Explore data',
         }),
       },

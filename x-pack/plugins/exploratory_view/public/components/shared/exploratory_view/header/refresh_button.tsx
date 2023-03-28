@@ -33,7 +33,7 @@ export function RefreshButton() {
 }
 
 export const REFRESH_LABEL = i18n.translate(
-  'xpack.observability.overview.exploratoryView.refresh',
+  'xpack.exploratoryView.overview.exploratoryView.refresh',
   {
     defaultMessage: 'Refresh',
   }

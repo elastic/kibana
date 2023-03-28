@@ -99,14 +99,14 @@ export function DataTypesSelect({ seriesId, series }: Props) {
 }
 
 const SELECT_DATA_TYPE_LABEL = i18n.translate(
-  'xpack.observability.overview.exploratoryView.selectDataType',
+  'xpack.exploratoryView.overview.exploratoryView.selectDataType',
   {
     defaultMessage: 'Select data type',
   }
 );
 
 const SELECT_DATA_TYPE_TOOLTIP = i18n.translate(
-  'xpack.observability.overview.exploratoryView.selectDataTypeTooltip',
+  'xpack.exploratoryView.overview.exploratoryView.selectDataTypeTooltip',
   {
     defaultMessage: 'Data type cannot be edited.',
   }

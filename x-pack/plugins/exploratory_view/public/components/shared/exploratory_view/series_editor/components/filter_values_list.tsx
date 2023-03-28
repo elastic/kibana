@@ -111,12 +111,12 @@ export function FilterValuesList({
   );
 }
 
-const NO_RESULT_FOUND = i18n.translate('xpack.observability.filters.expanded.noFilter', {
+const NO_RESULT_FOUND = i18n.translate('xpack.exploratoryView.filters.expanded.noFilter', {
   defaultMessage: 'No filters found.',
 });
 
 const getSearchLabel = (label: string) =>
-  i18n.translate('xpack.observability.filters.expanded.search', {
+  i18n.translate('xpack.exploratoryView.filters.expanded.search', {
     defaultMessage: 'Search for {label}',
     values: { label },
   });

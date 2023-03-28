@@ -19,12 +19,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-const CORE_WEB_VITALS = i18n.translate('xpack.observability.ux.coreWebVitals', {
+const CORE_WEB_VITALS = i18n.translate('xpack.exploratoryView.ux.coreWebVitals', {
   defaultMessage: 'Core web vitals',
 });
 
 const BROWSER_CORE_WEB_VITALS = i18n.translate(
-  'xpack.observability.ux.coreWebVitals.browser.support',
+  'xpack.exploratoryView.ux.coreWebVitals.browser.support',
   {
     defaultMessage: 'browser support for core web vitals',
   }
@@ -48,7 +48,7 @@ export function WebCoreVitalsTitle({
   const closeBrowserPopover = () => setIsBrowserPopoverOpen(false);
 
   const helpAriaLabel = i18n.translate(
-    'xpack.observability.ux.dashboard.webCoreVitals.helpAriaLabel',
+    'xpack.exploratoryView.ux.dashboard.webCoreVitals.helpAriaLabel',
     { defaultMessage: 'help' }
   );
 
@@ -73,7 +73,7 @@ export function WebCoreVitalsTitle({
               <div>
                 <EuiText>
                   <FormattedMessage
-                    id="xpack.observability.ux.dashboard.webCoreVitals.help"
+                    id="xpack.exploratoryView.ux.dashboard.webCoreVitals.help"
                     defaultMessage="Learn more about"
                   />{' '}
                   <EuiLink
@@ -97,7 +97,7 @@ export function WebCoreVitalsTitle({
           ) : (
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.observability.ux.dashboard.webCoreVitals.traffic"
+                id="xpack.exploratoryView.ux.dashboard.webCoreVitals.traffic"
                 defaultMessage="{trafficPerc} of the traffic represented"
                 values={{
                   trafficPerc: (
@@ -121,7 +121,7 @@ export function WebCoreVitalsTitle({
                 <div>
                   <EuiText>
                     <FormattedMessage
-                      id="xpack.observability.ux.dashboard.webCoreVitals.browser.help"
+                      id="xpack.exploratoryView.ux.dashboard.webCoreVitals.browser.help"
                       defaultMessage="Learn more about"
                     />{' '}
                     <EuiLink

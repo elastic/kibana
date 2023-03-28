@@ -60,7 +60,7 @@ export const renderApp = ({
   const isDarkMode = core.uiSettings.get('theme:darkMode');
 
   core.chrome.setHelpExtension({
-    appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
+    appName: i18n.translate('xpack.exploratoryView.feedbackMenu.appName', {
       defaultMessage: 'Observability',
     }),
     links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
@@ -82,27 +82,20 @@ export const renderApp = ({
               ...plugins,
               storage: new Storage(localStorage),
               isDev,
-              kibanaVersion,
             }}
           >
             <PluginContext.Provider
               value={{
-                config,
                 appMountParameters,
-                observabilityRuleTypeRegistry,
-                ObservabilityPageTemplate,
               }}
             >
               <Router history={history}>
                 <EuiThemeProvider darkMode={isDarkMode}>
                   <i18nCore.Context>
                     <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                      <QueryClientProvider client={queryClient}>
-                        <HasDataContextProvider>
-                          <App />
-                        </HasDataContextProvider>
-                        <ReactQueryDevtools />
-                      </QueryClientProvider>
+                      <HasDataContextProvider>
+                        <App />
+                      </HasDataContextProvider>
                     </RedirectAppLinks>
                   </i18nCore.Context>
                 </EuiThemeProvider>

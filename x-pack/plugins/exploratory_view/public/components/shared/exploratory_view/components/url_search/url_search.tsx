@@ -51,7 +51,7 @@ const processSelectedItems = (items: UrlOption[]) => {
 };
 
 const getWildcardLabel = (wildcard: string) => {
-  return i18n.translate('xpack.observability.urlFilter.wildcard', {
+  return i18n.translate('xpack.exploratoryView.urlFilter.wildcard', {
     defaultMessage: 'Use wildcard *{wildcard}*',
     values: { wildcard },
   });

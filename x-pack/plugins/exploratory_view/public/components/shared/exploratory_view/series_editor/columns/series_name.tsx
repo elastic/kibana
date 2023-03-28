@@ -87,7 +87,7 @@ export function SeriesName({ series, seriesId }: Props) {
               onKeyDown={onKeyDown}
               fullWidth
               inputRef={inputRef}
-              aria-label={i18n.translate('xpack.observability.expView.seriesEditor.seriesName', {
+              aria-label={i18n.translate('xpack.exploratoryView.expView.seriesEditor.seriesName', {
                 defaultMessage: 'Series name',
               })}
               data-test-subj="exploratoryViewSeriesNameInput"
@@ -103,7 +103,7 @@ export function SeriesName({ series, seriesId }: Props) {
         <EuiButtonIcon
           onClick={() => setIsEditingEnabled(!isEditingEnabled)}
           iconType="pencil"
-          aria-label={i18n.translate('xpack.observability.expView.seriesEditor.editName', {
+          aria-label={i18n.translate('xpack.exploratoryView.expView.seriesEditor.editName', {
             defaultMessage: 'Edit name',
           })}
           color="text"

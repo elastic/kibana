@@ -110,7 +110,7 @@ export function AddToCaseAction({
             }
           }}
         >
-          {i18n.translate('xpack.observability.expView.heading.addToCase', {
+          {i18n.translate('xpack.exploratoryView.expView.heading.addToCase', {
             defaultMessage: 'Add to case',
           })}
         </EuiButtonEmpty>
@@ -127,7 +127,7 @@ export function CaseToastText({ linkUrl }: { linkUrl: string }) {
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem>
         <EuiLink data-test-subj="o11yCaseToastTextViewCaseLink" href={linkUrl} target="_blank">
-          {i18n.translate('xpack.observability.expView.heading.addToCase.notification.viewCase', {
+          {i18n.translate('xpack.exploratoryView.expView.heading.addToCase.notification.viewCase', {
             defaultMessage: 'View case',
           })}
         </EuiLink>

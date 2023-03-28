@@ -58,10 +58,10 @@ const { ExploratoryViewEmbeddable } = observability;
   );
 }
 
-const EMBED_TITLE_LABEL = i18n.translate('xpack.observability.expView.heading.embedTitle', {
+const EMBED_TITLE_LABEL = i18n.translate('xpack.exploratoryView.expView.heading.embedTitle', {
   defaultMessage: 'Embed Exploratory view (Dev only feature)',
 });
 
-const EMBED_LABEL = i18n.translate('xpack.observability.expView.heading.embed', {
+const EMBED_LABEL = i18n.translate('xpack.exploratoryView.expView.heading.embed', {
   defaultMessage: 'Embed <></>',
 });

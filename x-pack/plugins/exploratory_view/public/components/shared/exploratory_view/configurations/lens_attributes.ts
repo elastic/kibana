@@ -417,7 +417,7 @@ export class LensAttributes {
       ...buildNumberColumn(sourceField),
       label:
         label ??
-        i18n.translate('xpack.observability.expView.columns.operation.label', {
+        i18n.translate('xpack.exploratoryView.expView.columns.operation.label', {
           defaultMessage: '{operationType} of {sourceField}',
           values: {
             sourceField: seriesConfig.labels[sourceField],
@@ -472,7 +472,7 @@ export class LensAttributes {
       ...buildNumberColumn(sourceField),
       label:
         label ??
-        i18n.translate('xpack.observability.expView.columns.label', {
+        i18n.translate('xpack.exploratoryView.expView.columns.label', {
           defaultMessage: '{percentileValue} percentile of {sourceField}',
           values: { sourceField: seriesConfig.labels[sourceField]?.toLowerCase(), percentileValue },
         }),

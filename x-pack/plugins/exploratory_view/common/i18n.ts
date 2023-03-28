@@ -7,6 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.observability.notAvailable', {
+export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.exploratoryView.notAvailable', {
   defaultMessage: 'N/A',
 });

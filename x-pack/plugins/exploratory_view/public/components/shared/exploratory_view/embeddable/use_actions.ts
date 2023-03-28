@@ -105,7 +105,7 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
   return {
     id: 'expViewOpenInLens',
     getDisplayName(context: ActionExecutionContext<object>): string {
-      return i18n.translate('xpack.observability.expView.openInLens', {
+      return i18n.translate('xpack.exploratoryView.expView.openInLens', {
         defaultMessage: 'Open in Lens',
       });
     },
@@ -127,7 +127,7 @@ const getExploreAction = ({ href, callback }: { href: string; callback: () => vo
   return {
     id: 'expViewExplore',
     getDisplayName(context: ActionExecutionContext<object>): string {
-      return i18n.translate('xpack.observability.expView.explore', {
+      return i18n.translate('xpack.exploratoryView.expView.explore', {
         defaultMessage: 'Explore',
       });
     },
@@ -153,7 +153,7 @@ const getSaveAction = ({ callback }: { callback: () => void }): Action => {
   return {
     id: 'expViewSave',
     getDisplayName(context: ActionExecutionContext<object>): string {
-      return i18n.translate('xpack.observability.expView.save', {
+      return i18n.translate('xpack.exploratoryView.expView.save', {
         defaultMessage: 'Save visualization',
       });
     },
@@ -176,7 +176,7 @@ const getAddToCaseAction = ({ callback }: { callback: () => void }): Action => {
   return {
     id: 'expViewAddToCase',
     getDisplayName(context: ActionExecutionContext<object>): string {
-      return i18n.translate('xpack.observability.expView.addToCase', {
+      return i18n.translate('xpack.exploratoryView.expView.addToCase', {
         defaultMessage: 'Add to case',
       });
     },

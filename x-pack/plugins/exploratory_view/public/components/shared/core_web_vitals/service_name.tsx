@@ -13,11 +13,11 @@ interface Props {
   name: string;
 }
 
-const SERVICE_LABEL = i18n.translate('xpack.observability.ux.coreWebVitals.service', {
+const SERVICE_LABEL = i18n.translate('xpack.exploratoryView.ux.coreWebVitals.service', {
   defaultMessage: 'Service',
 });
 
-const SERVICE_LABEL_HELP = i18n.translate('xpack.observability.ux.service.help', {
+const SERVICE_LABEL_HELP = i18n.translate('xpack.exploratoryView.ux.service.help', {
   defaultMessage: 'The RUM service with the most traffic is selected',
 });
 

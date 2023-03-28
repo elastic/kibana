@@ -63,7 +63,7 @@ export function ViewActions({ onApply }: Props) {
           fill
           data-test-subj={'seriesChangesApplyButton'}
         >
-          {i18n.translate('xpack.observability.expView.seriesBuilder.apply', {
+          {i18n.translate('xpack.exploratoryView.expView.seriesBuilder.apply', {
             defaultMessage: 'Apply changes',
           })}
         </EuiButton>

@@ -107,7 +107,7 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
 }
 
 export const ACCORDION_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.accordion.label',
+  'xpack.exploratoryView.expView.seriesBuilder.accordion.label',
   {
     defaultMessage: 'Toggle series information',
   }

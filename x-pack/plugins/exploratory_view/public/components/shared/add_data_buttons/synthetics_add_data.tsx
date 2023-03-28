@@ -15,7 +15,7 @@ export function SyntheticsAddData() {
 
   return (
     <EuiHeaderLink
-      aria-label={i18n.translate('xpack.observability.page_header.addUptimeDataLink.label', {
+      aria-label={i18n.translate('xpack.exploratoryView.page_header.addUptimeDataLink.label', {
         defaultMessage: 'Navigate to a tutorial about adding Uptime data',
       })}
       href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
@@ -27,6 +27,6 @@ export function SyntheticsAddData() {
   );
 }
 
-const ADD_DATA_LABEL = i18n.translate('xpack.observability..synthetics.addDataButtonLabel', {
+const ADD_DATA_LABEL = i18n.translate('xpack.exploratoryView..synthetics.addDataButtonLabel', {
   defaultMessage: 'Add synthetics data',
 });
