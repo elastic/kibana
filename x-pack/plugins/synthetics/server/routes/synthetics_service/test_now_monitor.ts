@@ -16,7 +16,6 @@ import {
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
-import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -49,16 +48,14 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
 
-    const errors = await syntheticsService.runOnceConfigs([
-      formatHeartbeatRequest({
-        // making it enabled, even if it's disabled in the UI
-        monitor: { ...normalizedMonitor.attributes, enabled: true },
-        monitorId,
-        heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
-        testRunId,
-        params: paramsBySpace[spaceId],
-      }),
-    ]);
+    const errors = await syntheticsService.runOnceConfigs({
+      // making it enabled, even if it's disabled in the UI
+      monitor: { ...normalizedMonitor.attributes, enabled: true },
+      configId: monitorId,
+      heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+      testRunId,
+      params: paramsBySpace[spaceId],
+    });
 
     if (errors && errors?.length > 0) {
       return {
