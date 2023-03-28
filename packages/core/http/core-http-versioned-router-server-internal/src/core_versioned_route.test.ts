@@ -196,8 +196,7 @@ describe('Versioned route', () => {
       )
     ).resolves.toEqual({
       options: {},
-      payload:
-        'Version expected at [post] [/test/{id}]. Please specify a version using the "Elastic-Api-Version" header. Available versions are: "1"',
+      payload: `Version expected at [post] [/test/{id}]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. Available versions are: "1"`,
       status: 406,
     });
   });
