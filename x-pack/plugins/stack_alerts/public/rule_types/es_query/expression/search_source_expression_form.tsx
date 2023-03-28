@@ -14,12 +14,7 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  mapAndFlattenFilters,
-  getTime,
-  type SavedQuery,
-  type ISearchSource,
-} from '@kbn/data-plugin/public';
+import { getTime, type SavedQuery, type ISearchSource } from '@kbn/data-plugin/public';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -100,7 +95,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     {
       index: searchSource.getField('index'),
       query: searchSource.getField('query')! as Query,
-      filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
+      filter: searchSource.getField('filter') as Filter[],
       threshold: ruleParams.threshold ?? DEFAULT_VALUES.THRESHOLD,
       thresholdComparator: ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       timeWindowSize: ruleParams.timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
@@ -129,7 +124,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   }, []);
 
   const onUpdateFilters = useCallback((newFilters) => {
-    dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
+    dispatch({ type: 'filter', payload: newFilters });
   }, []);
 
   const onChangeQuery = useCallback(
