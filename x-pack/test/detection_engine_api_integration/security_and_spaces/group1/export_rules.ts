@@ -352,6 +352,48 @@ export default ({ getService }: FtrProviderContext): void => {
           missing_action_connections: [],
         });
       });
+      it('should export rule without the action connector if it is Preconfigured Connector', async () => {
+        const action = {
+          group: 'default',
+          id: 'my-test-email',
+          action_type_id: '.email',
+          params: {},
+        };
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action],
+        };
+
+        await createRule(supertest, log, rule1);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportDetailsParsed = JSON.parse(body.toString().split(/\n/)[1]);
+
+        expect(exportDetailsParsed).toEqual({
+          exported_exception_list_count: 0,
+          exported_exception_list_item_count: 0,
+          exported_count: 1,
+          exported_rules_count: 1,
+          missing_exception_list_item_count: 0,
+          missing_exception_list_items: [],
+          missing_exception_lists: [],
+          missing_exception_lists_count: 0,
+          missing_rules: [],
+          missing_rules_count: 0,
+          excluded_action_connection_count: 0,
+          excluded_action_connections: [],
+          exported_action_connector_count: 0,
+          missing_action_connection_count: 0,
+          missing_action_connections: [],
+        });
+      });
 
       /**
        * Tests the legacy actions to ensure we can export legacy notifications
