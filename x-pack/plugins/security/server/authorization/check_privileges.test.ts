@@ -315,7 +315,7 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions]`
       );
     });
 
@@ -337,7 +337,7 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions]`
       );
     });
   });
@@ -1127,7 +1127,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(
-      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions]`
     );
   });
 
@@ -1413,7 +1413,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions]`
       );
     });
 
@@ -1440,7 +1440,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions]`
       );
     });
 
@@ -1473,7 +1473,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected resources]`
       );
     });
 
@@ -1496,7 +1496,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected resources]`
       );
     });
   });
@@ -2335,7 +2335,7 @@ describe('#checkPrivilegesWithRequest.globally', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(
-      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions]`
     );
   });
 
@@ -2453,7 +2453,7 @@ describe('#checkPrivilegesWithRequest.globally', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions]`
       );
     });
 
@@ -2474,7 +2474,7 @@ describe('#checkPrivilegesWithRequest.globally', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected actions]`
       );
     });
   });
