@@ -10,14 +10,15 @@ import { isEmpty } from 'lodash';
 import { OWNERS } from '../constants';
 import type { HttpApiTagOperation, Owner } from '../constants/types';
 
-export const CaseFileMetadataRt = rt.type({
-  // TODO: do we want this as an array?
-  caseId: rt.string,
-  // TODO: do we want this as an array?
-  owner: rt.array(rt.string),
+/**
+ * This type is only used to validate for deletion, it does not check all the fields that should exist in the file
+ * metadata.
+ */
+export const CaseFileMetadataForDeletionRt = rt.type({
+  caseId: rt.array(rt.string),
 });
 
-export type CaseFileMetadata = rt.TypeOf<typeof CaseFileMetadataRt>;
+export type CaseFileMetadata = rt.TypeOf<typeof CaseFileMetadataForDeletionRt>;
 
 export const constructFilesHttpOperationTag = (owner: Owner, operation: HttpApiTagOperation) => {
   return `${owner}FilesCases${operation}`;

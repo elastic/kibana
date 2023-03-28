@@ -6,19 +6,28 @@
  */
 
 import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 
 import pMap from 'p-map';
 import { partition } from 'lodash';
 import type { File } from '@kbn/files-plugin/common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import { Actions, ActionTypes } from '../../../common/api';
+import {
+  Actions,
+  ActionTypes,
+  BulkDeleteFileAttachmentsRequestRt,
+  excess,
+  throwErrors,
+} from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs, DeleteFileArgs } from './types';
-import { constructOwnerFromFileKind, CaseFileMetadataRt } from '../../../common/files';
+import { constructOwnerFromFileKind, CaseFileMetadataForDeletionRt } from '../../../common/files';
 
 /**
  * Delete all comments for a case.
@@ -75,7 +84,7 @@ export async function deleteAll(
 }
 
 export const deleteFileAttachments = async (
-  { caseId, fileIds }: DeleteFileArgs,
+  { caseId, requestBody }: DeleteFileArgs,
   clientArgs: CasesClientArgs
 ) => {
   const {
@@ -87,6 +96,15 @@ export const deleteFileAttachments = async (
   } = clientArgs;
 
   try {
+    const request = pipe(
+      excess(BulkDeleteFileAttachmentsRequestRt).decode(requestBody),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    const fileIds = request.ids;
+
+    // TODO: do a resolve for case id just to be sure we have access
+
     const fileEntities = await getFileEntities(caseId, fileIds, fileService);
 
     // It's possible for this to return an empty array if there was an error creating file attachments in which case the
@@ -125,7 +143,7 @@ export const deleteFileAttachments = async (
     });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete file attachments for case: ${caseId} file ids: ${fileIds}: ${error}`,
+      message: `Failed to delete file attachments for case: ${caseId}: ${error}`,
       error,
       logger,
     });
@@ -134,7 +152,7 @@ export const deleteFileAttachments = async (
 
 const getFileEntities = async (
   caseId: DeleteFileArgs['caseId'],
-  fileIds: DeleteFileArgs['fileIds'],
+  fileIds: string[],
   fileService: FileServiceStart
 ) => {
   const files = await getFiles(caseId, fileIds, fileService);
@@ -146,7 +164,7 @@ const getFileEntities = async (
 
 const getFiles = async (
   caseId: DeleteFileArgs['caseId'],
-  fileIds: DeleteFileArgs['fileIds'],
+  fileIds: string[],
   fileService: FileServiceStart
 ) => {
   // it's possible that we're trying to delete a file when an attachment wasn't created (for example if the create
@@ -156,7 +174,9 @@ const getFiles = async (
   });
 
   const [validFiles, invalidFiles] = partition(files, (file) => {
-    return CaseFileMetadataRt.is(file.data.meta) && file.data.meta.caseId === caseId;
+    // TODO: only check that the caseIds field is an array and contains the passed in case id
+    // also check if the caseIds is an array of 1 item, if not throw
+    return CaseFileMetadataForDeletionRt.is(file.data.meta) && file.data.meta.caseId === caseId;
   }) as [File[], File[]];
 
   if (invalidFiles.length > 0) {

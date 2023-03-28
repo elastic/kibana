@@ -10,29 +10,28 @@ import { schema } from '@kbn/config-schema';
 import { INTERNAL_DELETE_FILE_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
-import { MAX_DELETE_FILES } from '../../../files';
+import { escapeHatch } from '../utils';
+import type { BulkDeleteFileAttachmentsRequest } from '../../../../common/api';
 
 export const deleteFileAttachments = createCasesRoute({
-  method: 'delete',
+  method: 'post',
   path: INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   params: {
     params: schema.object({
       case_id: schema.string(),
     }),
-    query: schema.object({
-      ids: schema.arrayOf(schema.string({ minLength: 1 }), {
-        minSize: 1,
-        maxSize: MAX_DELETE_FILES,
-      }),
-    }),
+    body: escapeHatch,
   },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
+
+      const requestBody = request.body as BulkDeleteFileAttachmentsRequest;
+
       await client.attachments.deleteFileAttachments({
         caseId: request.params.case_id,
-        fileIds: request.query.ids,
+        requestBody,
       });
 
       return response.noContent();

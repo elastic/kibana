@@ -49,10 +49,12 @@ export interface DeleteFileArgs {
    * The id of the case
    */
   caseId: string;
-  /**
-   * The ids of the file saved objects
-   */
-  fileIds: string[];
+  requestBody: {
+    /**
+     * The ids of the file saved objects
+     */
+    ids: string[];
+  };
 }
 
 /**
