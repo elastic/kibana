@@ -67,7 +67,7 @@ describe('Stage: init', () => {
     });
   });
 
-  it('loops to INIT when cluster routing allocation is incompatible', () => {
+  it('INIT -> INIT when cluster routing allocation is incompatible', () => {
     const state = createState();
     const res: StateActionResponse<'INIT'> = Either.left({
       type: 'incompatible_cluster_routing_allocation',
@@ -126,7 +126,7 @@ describe('Stage: init', () => {
       });
     });
 
-    it('forwards to CREATE_TARGET_INDEX', () => {
+    it('INIT -> CREATE_TARGET_INDEX', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -166,7 +166,7 @@ describe('Stage: init', () => {
       });
     });
 
-    it('forwards to UPDATE_INDEX_MAPPINGS', () => {
+    it('INIT -> UPDATE_INDEX_MAPPINGS', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -206,7 +206,7 @@ describe('Stage: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `equal`', () => {
-    it('forwards to UPDATE_ALIASES if alias actions are not empty', () => {
+    it('INIT -> UPDATE_ALIASES if alias actions are not empty', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -228,7 +228,7 @@ describe('Stage: init', () => {
       );
     });
 
-    it('forwards to INDEX_STATE_UPDATE_DONE if alias actions are empty', () => {
+    it('INIT -> INDEX_STATE_UPDATE_DONE if alias actions are empty', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -267,7 +267,7 @@ describe('Stage: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `lesser`', () => {
-    it('forwards to FATAL', () => {
+    it('INIT -> FATAL', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -303,7 +303,7 @@ describe('Stage: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `conflict`', () => {
-    it('forwards to FATAL', () => {
+    it('INIT -> FATAL', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
