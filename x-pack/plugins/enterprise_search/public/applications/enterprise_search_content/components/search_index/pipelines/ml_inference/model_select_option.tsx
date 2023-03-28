@@ -16,7 +16,11 @@ import {
   TEXT_EXPANSION_FRIENDLY_TYPE,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { TrainedModel } from '../../../../api/ml_models/ml_trained_models_logic';
-import { getMLType, getModelDisplayTitle, isTextExpansionModel } from '../../../shared/ml_inference/utils';
+import {
+  getMLType,
+  getModelDisplayTitle,
+  isTextExpansionModel,
+} from '../../../shared/ml_inference/utils';
 
 import { TrainedModelHealth } from '../ml_model_health';
 import { MLModelTypeBadge } from '../ml_model_type_badge';

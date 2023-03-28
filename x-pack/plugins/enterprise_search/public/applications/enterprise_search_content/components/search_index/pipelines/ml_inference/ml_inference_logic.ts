@@ -408,8 +408,7 @@ export const MLInferenceLogic = kea<
     supportedMLModels: [
       () => [selectors.mlModelsData],
       (mlModelsData: MLInferenceProcessorsValues['mlModelsData']) => {
-        return (mlModelsData?.filter(isSupportedMLModel) ?? [])
-          .sort(sortModels);
+        return (mlModelsData?.filter(isSupportedMLModel) ?? []).sort(sortModels);
       },
     ],
     existingInferencePipelines: [
