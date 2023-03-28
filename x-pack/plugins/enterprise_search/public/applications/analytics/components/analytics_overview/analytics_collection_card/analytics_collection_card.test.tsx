@@ -14,6 +14,8 @@ import { shallow } from 'enzyme';
 import { Chart } from '@elastic/charts';
 import { EuiCard, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 
+import { FilterBy } from '../../../utils/get_formula_by_filter';
+
 import { AnalyticsCollectionCard } from './analytics_collection_card';
 
 const mockCollection = {
@@ -36,6 +38,7 @@ describe('AnalyticsCollectionCard', () => {
         metric={null}
         secondaryMetric={null}
         data={[]}
+        filterBy={FilterBy.Searches}
       />
     );
 
@@ -58,7 +61,8 @@ describe('AnalyticsCollectionCard', () => {
         isLoading={false}
         metric={mockMetric}
         secondaryMetric={secondaryMetric}
-        data={[[0, 0]]}
+        data={[[0, 23]]}
+        filterBy={FilterBy.Searches}
       />
     );
 
@@ -78,6 +82,7 @@ describe('AnalyticsCollectionCard', () => {
         metric={mockMetric}
         secondaryMetric={secondaryMetric}
         data={[]}
+        filterBy={FilterBy.Searches}
       />
     );
 
