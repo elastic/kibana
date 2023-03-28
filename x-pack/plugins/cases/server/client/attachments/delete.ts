@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 
 import pMap from 'p-map';
 import { partition } from 'lodash';
-import type { File, FileJSON } from '@kbn/files-plugin/common';
+import type { File } from '@kbn/files-plugin/common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import { Actions, ActionTypes } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
@@ -18,7 +18,6 @@ import { createCaseError } from '../../common/error';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs, DeleteFileArgs } from './types';
-import type { CaseFileMetadata } from '../../../common/files';
 import { constructOwnerFromFileKind, CaseFileMetadataRt } from '../../../common/files';
 
 /**
@@ -145,10 +144,6 @@ const getFileEntities = async (
   return fileEntities;
 };
 
-type FileWithRequiredCaseMetadata = Omit<File<CaseFileMetadata>, 'data'> & {
-  data: Omit<FileJSON<CaseFileMetadata>, 'meta'> & { meta: CaseFileMetadata };
-};
-
 const getFiles = async (
   caseId: DeleteFileArgs['caseId'],
   fileIds: DeleteFileArgs['fileIds'],
@@ -162,7 +157,7 @@ const getFiles = async (
 
   const [validFiles, invalidFiles] = partition(files, (file) => {
     return CaseFileMetadataRt.is(file.data.meta) && file.data.meta.caseId === caseId;
-  }) as [FileWithRequiredCaseMetadata[], File[]];
+  }) as [File[], File[]];
 
   if (invalidFiles.length > 0) {
     const invalidIds = invalidFiles.map((fileInfo) => fileInfo.id);
@@ -178,7 +173,7 @@ const getFiles = async (
   return validFiles;
 };
 
-const createFileEntities = (files: FileWithRequiredCaseMetadata[]) => {
+const createFileEntities = (files: File[]) => {
   const fileEntities: OwnerEntity[] = [];
 
   // It's possible that the owner array could have invalid information in it so we'll use the file kind for determining if the user
