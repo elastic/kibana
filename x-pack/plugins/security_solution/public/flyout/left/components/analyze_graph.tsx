@@ -19,7 +19,7 @@ import { isActiveTimeline } from '../../../helpers';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
 
-const ANALYZER = i18n.translate('xpack.securitySolution.flyout.analyzer', {
+const ANALYZER = i18n.translate('xpack.securitySolution.flyout.analyzerErrorTitle', {
   defaultMessage: 'analyzer',
 });
 

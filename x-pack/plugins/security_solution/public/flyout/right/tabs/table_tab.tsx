@@ -15,13 +15,16 @@ import { EventFieldsBrowser } from '../../../common/components/event_details/eve
 import { useRightPanelContext } from '../context';
 import { TABLE_TAB_ERROR_TEST_ID } from './test_ids';
 
-export const DOCUMENT = i18n.translate('xpack.securitySolution.flyout.analyzer', {
+export const DOCUMENT = i18n.translate('xpack.securitySolution.flyout.documentErrorTitle', {
   defaultMessage: 'document information',
 });
 
-export const DOCUMENT_DETAILS = i18n.translate('xpack.securitySolution.flyout.analyzer', {
-  defaultMessage: 'the document fields and values',
-});
+export const DOCUMENT_DETAILS = i18n.translate(
+  'xpack.securitySolution.flyout.documentErrorMessage',
+  {
+    defaultMessage: 'the document fields and values',
+  }
+);
 
 /**
  * Table view displayed in the document details expandable flyout right section
