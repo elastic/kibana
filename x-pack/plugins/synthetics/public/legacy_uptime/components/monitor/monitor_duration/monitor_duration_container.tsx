@@ -8,7 +8,7 @@
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { JobStat } from '@kbn/ml-plugin/public';
-import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { useGetUrlParams } from '../../../hooks';
 import {
   getAnomalyRecordsAction,
