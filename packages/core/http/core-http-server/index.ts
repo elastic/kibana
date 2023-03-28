@@ -131,9 +131,9 @@ export type {
 
 export type {
   AddVersionOpts,
-  RequestValidation,
-  ResponseValidation,
-  Version,
+  VersionedRouteRequestValidation,
+  VersionedRouteResponseValidation,
+  ApiVersion,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,

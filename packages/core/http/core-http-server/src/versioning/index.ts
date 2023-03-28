@@ -7,10 +7,10 @@
  */
 
 export type {
-  Version,
+  ApiVersion,
   AddVersionOpts,
-  RequestValidation,
-  ResponseValidation,
+  VersionedRouteRequestValidation,
+  VersionedRouteResponseValidation,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,

@@ -15,7 +15,7 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import type {
-  Version,
+  ApiVersion,
   AddVersionOpts,
   VersionedRoute,
   VersionedRouteConfig,
@@ -36,7 +36,7 @@ const passThroughValidation = { body: schema.any(), params: schema.any(), query:
 
 export class CoreVersionedRoute implements VersionedRoute {
   private readonly handlers = new Map<
-    Version,
+    ApiVersion,
     {
       fn: RequestHandler;
       options: Options;
@@ -85,7 +85,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     req: KibanaRequest,
     res: KibanaResponseFactory
   ) => {
-    const version = req.headers[VERSION_HEADER] as undefined | Version;
+    const version = req.headers[VERSION_HEADER] as undefined | ApiVersion;
     if (!version) {
       return res.custom({
         statusCode: 406,

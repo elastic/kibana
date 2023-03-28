@@ -25,7 +25,7 @@ type RqCtx = RequestHandlerContextBase;
  * Assuming that version will be a monotonically increasing number where: version > 0.
  * @experimental
  */
-export type Version = `${number}`;
+export type ApiVersion = `${number}`;
 
 /**
  * Configuration for a versioned route
@@ -156,10 +156,10 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 }
 
 /** @experimental */
-export type RequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
+export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
 
 /** @experimental */
-export interface ResponseValidation<R> {
+export interface VersionedRouteResponseValidation<R> {
   [statusCode: number]: { body: RouteValidationFunction<R> | Type<R> };
   unsafe?: { body?: boolean };
 }
@@ -173,14 +173,14 @@ interface FullValidationConfig<P, Q, B, R> {
    * Validation to run against route inputs: params, query and body
    * @experimental
    */
-  request?: RequestValidation<P, Q, B>;
+  request?: VersionedRouteRequestValidation<P, Q, B>;
   /**
    * Validation to run against route output
    * @note This validation is only intended to run in development. Do not use this
    *       for setting default values!
    * @experimental
    */
-  response?: ResponseValidation<R>;
+  response?: VersionedRouteResponseValidation<R>;
 }
 
 /**
@@ -193,7 +193,7 @@ export interface AddVersionOpts<P, Q, B, R> {
    * Version to assign to this route
    * @experimental
    */
-  version: Version;
+  version: ApiVersion;
   /**
    * Validation for this version of a route
    * @experimental
