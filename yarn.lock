@@ -3421,6 +3421,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-versioned-router-server-internal@link:packages/core/http/core-http-versioned-router-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-i18n-browser-internal@link:packages/core/i18n/core-i18n-browser-internal":
   version "0.0.0"
   uid ""
@@ -3854,10 +3858,6 @@
   uid ""
 
 "@kbn/core-usage-data-server@link:packages/core/usage-data/core-usage-data-server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-version-http-server@link:packages/core/versioning/core-version-http-server":
   version "0.0.0"
   uid ""
 
