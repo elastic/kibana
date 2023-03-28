@@ -57,8 +57,10 @@ export interface PostInitState extends BaseState {
    */
   readonly currentIndexMeta: IndexMappingMeta;
   /**
-   * If true, will fully skip document migration after the INDEX_STATE_UPDATE_DONE stage.
-   * Used when 'upgrading' a fresh cluster (and going through CREATE_TARGET_INDEX)
+   * When true, will fully skip document migration after the INDEX_STATE_UPDATE_DONE stage.
+   * Used when 'upgrading' a fresh cluster (via CREATE_TARGET_INDEX), as we create
+   * the index with the correct meta and because we're sure we don't need to migrate documents
+   * in that case.
    */
   readonly newIndexCreation: boolean;
 }
