@@ -17,6 +17,8 @@ import {
 import { Subject } from 'rxjs';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import pMap from 'p-map';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { syntheticsParamType } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
@@ -420,7 +422,7 @@ export class SyntheticsService {
     const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitor>({
       type: syntheticsMonitorType,
       perPage: 100,
-      namespaces: ['*'],
+      namespaces: [ALL_SPACES_ID],
     });
 
     for await (const result of finder.find()) {
@@ -428,11 +430,12 @@ export class SyntheticsService {
 
       const configDataList: ConfigData[] = (monitors ?? []).map((monitor) => {
         const attributes = monitor.attributes as unknown as MonitorFields;
+        const monitorSpace = monitor.namespaces?.[0] ?? DEFAULT_SPACE_ID;
 
-        const params = paramsBySpace[monitor.namespaces?.[0] ?? 'default'];
+        const params = paramsBySpace[monitorSpace];
 
         return {
-          params,
+          params: { ...params, ...(paramsBySpace?.[ALL_SPACES_ID] ?? {}) },
           monitor: normalizeSecrets(monitor).attributes,
           configId: monitor.id,
           heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -522,12 +525,18 @@ export class SyntheticsService {
     // no need to wait here
     finder.close();
 
-    if (paramsBySpace['*']) {
+    if (paramsBySpace[ALL_SPACES_ID]) {
       Object.keys(paramsBySpace).forEach((space) => {
-        if (space !== '*') {
+        if (space !== ALL_SPACES_ID) {
           paramsBySpace[space] = Object.assign(paramsBySpace[space], paramsBySpace['*']);
         }
       });
+      if (spaceId) {
+        paramsBySpace[spaceId] = {
+          ...(paramsBySpace?.[spaceId] ?? {}),
+          ...(paramsBySpace?.[ALL_SPACES_ID] ?? {}),
+        };
+      }
     }
 
     return paramsBySpace;
