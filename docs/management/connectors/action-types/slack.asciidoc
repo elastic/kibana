@@ -103,9 +103,9 @@ Use the <<action-settings,Action configuration settings>> to customize connector
 ==== Configure a Slack account with Web API
 
 . Create Slack App: https://api.slack.com/authentication/basics#creating
-. Add scope: `channels:read, groups:read, chat:write and chat:write.public` as it is explained here: https://api.slack.com/authentication/basics#scopes
+. Add scope: `channels:read`, `groups:read`, `chat:write` and `chat:write.public` as it is explained here: https://api.slack.com/authentication/basics#scopes
 . Installing the app to a workspace: https://api.slack.com/authentication/basics#installing.
+. Copy `Bot User OAuth Token` so you can paste it into your Slack connector form.
 . If you need to send messages to a private channel you need to write `/invite @App_name` in it. 
   Putting "@" triggers Slack to start auto-suggesting, which is why it then becomes easy to find your app name in the list.
-. Go to `OAuth & Permissions` in the app menu and copy `Bot User OAuth Token` so you can paste it into your Slack connector form.
 
