@@ -101,10 +101,6 @@ export interface LinkItem {
    */
   landingImage?: string;
   /**
-   * Disables link in the landing page. Defaults to false.
-   */
-  landingPageDisabled?: boolean;
-  /**
    * Minimum license required to enable the link
    */
   licenseType?: LicenseType;
@@ -120,10 +116,6 @@ export interface LinkItem {
    * Disables link in the side navigation. Defaults to false.
    */
   sideNavDisabled?: boolean;
-  /**
-   * Disables this id in the breadcrumb. Defaults to false.
-   */
-  skipBreadcrumb?: boolean;
   /**
    * Disables the state query string in the URL. Defaults to false.
    */

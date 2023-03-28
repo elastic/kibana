@@ -27,21 +27,16 @@ export const getLeadingBreadcrumbsForSecurityPage = (
     href: getAppLandingUrl(landingPath),
   };
 
-  const breadcrumbs: ChromeBreadcrumb[] = getAncestorLinksInfo(pageName).reduce(
-    (acc, { title, id, skipBreadcrumb }) => {
-      const newTitle = title;
-      // Get title from navTabs because pages title on the new structure might be different.
-      const oldTitle = navTabs[id] ? navTabs[id].name : title;
-      if (!skipBreadcrumb) {
-        acc.push({
-          text: isGroupedNavigationEnabled ? newTitle : oldTitle,
-          href: getSecuritySolutionUrl({ deepLinkId: id }),
-        });
-      }
-      return acc;
-    },
-    [] as ChromeBreadcrumb[]
-  );
+  const breadcrumbs: ChromeBreadcrumb[] = getAncestorLinksInfo(pageName).map(({ title, id }) => {
+    const newTitle = title;
+    // Get title from navTabs because pages title on the new structure might be different.
+    const oldTitle = navTabs[id] ? navTabs[id].name : title;
+
+    return {
+      text: isGroupedNavigationEnabled ? newTitle : oldTitle,
+      href: getSecuritySolutionUrl({ deepLinkId: id }),
+    };
+  });
 
   return [siemRootBreadcrumb, ...breadcrumbs];
 };
