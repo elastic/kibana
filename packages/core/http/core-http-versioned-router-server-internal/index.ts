@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/versioning/core-version-http-server'],
-};
+export { CoreVersionedRouter } from './src';
