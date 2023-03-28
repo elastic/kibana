@@ -101,7 +101,10 @@ export const DiscoverMainContent = ({
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule margin="none" />
             {!isPlainRecord && (
-              <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
+              <DocumentViewModeToggle
+                viewMode={viewMode}
+                setDiscoverViewMode={setDiscoverViewMode}
+              />
             )}
           </EuiFlexItem>
           {dataState.error && (
