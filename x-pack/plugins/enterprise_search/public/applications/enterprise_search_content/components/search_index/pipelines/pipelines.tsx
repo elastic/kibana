@@ -36,7 +36,6 @@ import { InferenceHistory } from './inference_history';
 import { CopyAndCustomizePipelinePanel } from './ingest_pipelines/customize_pipeline_item';
 import { IngestPipelinesCard } from './ingest_pipelines/ingest_pipelines_card';
 import { AddInferencePipelineFlyout } from './ml_inference/add_inference_pipeline_flyout';
-import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 import { PipelinesJSONConfigurations } from './pipelines_json_configurations';
 import { PipelinesLogic } from './pipelines_logic';
@@ -49,8 +48,7 @@ export const SearchIndexPipelines: React.FC = () => {
     index,
     pipelineName,
   } = useValues(PipelinesLogic);
-  const { closeAddMlInferencePipelineModal, openAddMlInferencePipelineModal } =
-    useActions(PipelinesLogic);
+  const { closeAddMlInferencePipelineModal } = useActions(PipelinesLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
@@ -221,9 +219,6 @@ export const SearchIndexPipelines: React.FC = () => {
                   )
             }
             iconType="compute"
-            action={
-              <AddMLInferencePipelineButton onClick={() => openAddMlInferencePipelineModal()} />
-            }
           >
             <MlInferencePipelineProcessorsCard />
           </DataPanel>
