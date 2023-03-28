@@ -12731,44 +12731,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-server.IndexPatternsFetcher.validatePatternListActive",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "validatePatternListActive",
-            "description": [
-              "\n Returns an index pattern list of only those index pattern strings in the given list that return indices\n"
-            ],
-            "signature": [
-              "(patternList: string[]) => Promise<string[]>"
-            ],
-            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-server.IndexPatternsFetcher.validatePatternListActive.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "patternList",
-                "description": [
-                  "string[]"
-                ],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
