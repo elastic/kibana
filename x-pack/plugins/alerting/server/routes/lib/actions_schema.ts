@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { validateTimezone } from './validate_timezone';
 import { validateDurationSchema } from '../../lib';
 import { validateHours } from './validate_hours';
 
@@ -55,7 +56,7 @@ export const actionsSchema = schema.arrayOf(
                 validate: validateHours,
               }),
             }),
-            timezone: schema.string(),
+            timezone: schema.string({ validate: validateTimezone }),
           })
         ),
       })

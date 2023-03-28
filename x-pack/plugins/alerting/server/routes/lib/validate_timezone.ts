@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
+import 'moment-timezone';
 
-export function validateHours(time: string) {
-  if (/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
+export function validateTimezone(timezone: string) {
+  if (moment.tz.names().includes(timezone)) {
     return;
   }
-  return 'string is not a valid time in HH:mm format ' + time;
+  return 'string is not a valid timezone: ' + timezone;
 }
