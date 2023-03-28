@@ -8,17 +8,17 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
-import type { IRouter, RequestHandler } from '@kbn/core-http-server';
-import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
+import type { IRouter, KibanaResponseFactory, RequestHandler } from '@kbn/core-http-server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
 
 describe('Versioned route', () => {
   let router: IRouter;
-  let responseFactory: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let responseFactory: jest.Mocked<KibanaResponseFactory>;
   const handlerFn: RequestHandler = async (ctx, req, res) => res.ok({ body: { foo: 1 } });
   beforeEach(() => {
-    responseFactory = httpServerMock.createResponseFactory();
+    responseFactory = { custom: jest.fn(), ok: jest.fn() } as any;
     responseFactory.custom.mockImplementation(({ body, statusCode }) => ({
       options: {},
       status: statusCode,
@@ -29,7 +29,7 @@ describe('Versioned route', () => {
       status: 200,
       payload: body,
     }));
-    router = httpServiceMock.createRouter();
+    router = createRouter();
   });
 
   it('can register multiple handlers', () => {
@@ -140,12 +140,12 @@ describe('Versioned route', () => {
 
     const kibanaResponse = await handler!(
       {} as any,
-      httpServerMock.createKibanaRequest({
+      {
         headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
         body: { foo: 1 },
         params: { foo: 1 },
         query: { foo: 1 },
-      }),
+      } as any,
       responseFactory
     );
 
@@ -165,9 +165,9 @@ describe('Versioned route', () => {
     await expect(
       handler!(
         {} as any,
-        httpServerMock.createKibanaRequest({
+        {
           headers: { [ELASTIC_HTTP_VERSION_HEADER]: '999' },
-        }),
+        } as any,
         responseFactory
       )
     ).resolves.toEqual({
@@ -189,9 +189,9 @@ describe('Versioned route', () => {
     await expect(
       handler!(
         {} as any,
-        httpServerMock.createKibanaRequest({
+        {
           headers: {},
-        }),
+        } as any,
         responseFactory
       )
     ).resolves.toEqual({
@@ -215,10 +215,10 @@ describe('Versioned route', () => {
     await expect(
       handler!(
         {} as any,
-        httpServerMock.createKibanaRequest({
+        {
           headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
           body: {},
-        }),
+        } as any,
         responseFactory
       )
     ).resolves.toEqual({

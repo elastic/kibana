@@ -13,7 +13,6 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-http-server",
-    "@kbn/core-http-server-mocks",
     "@kbn/core-http-common",
     "@kbn/core-http-route-validator-internal",
   ],
