@@ -66,6 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add annotation layer
       await PageObjects.lens.createLayer('annotations');
       await PageObjects.lens.openLayerContextMenu(1);
+      await testSubjects.existOrFail('lnsXY_annotationLayer_keepFilters');
       // layer settings not available
       await testSubjects.missingOrFail('lnsLayerSettings');
     });
@@ -92,12 +93,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lns-layerPanel-2 > lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'max',
         field: 'bytes',
+        keepOpen: true, // keep it open as the toast will cover the close button anyway
       });
 
+      // close the toast about disabling sampling
+      // note: this has also the side effect to close the dimension editor
+      await testSubjects.click('toastCloseButton');
+
       // check that sampling info is hidden as disabled now the dataView picker
-      expect(
-        await testSubjects.exists('lns-layerPanel-2 > lnsChangeIndexPatternSamplingInfo')
-      ).to.be(false);
+      await testSubjects.missingOrFail('lns-layerPanel-2 > lnsChangeIndexPatternSamplingInfo');
       // open the layer settings and check that the slider is disabled
       await PageObjects.lens.openLayerContextMenu(2);
       // click on open layer settings
@@ -136,6 +140,78 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         3 // 1%
       );
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+    });
+
+    it('should show visualization modifiers for layer settings when embedded in a dashboard', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      // click on open layer settings
+      await PageObjects.lens.openLayerContextMenu();
+      await testSubjects.click('lnsLayerSettings');
+      // tweak the value
+      await PageObjects.lens.dragRangeInput('lns-indexPattern-random-sampling-slider', 2, 'left');
+      await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      // add another layer with a different sampling rate
+      await PageObjects.lens.createLayer('data');
+
+      await PageObjects.lens.openLayerContextMenu(1);
+      // click on open layer settings
+      await testSubjects.click('lnsLayerSettings');
+      // tweak the value
+      await PageObjects.lens.dragRangeInput('lns-indexPattern-random-sampling-slider', 3, 'left');
+      await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      // add annotation layer
+      // by default annotations ignore global filters
+      await PageObjects.lens.createLayer('annotations');
+
+      await PageObjects.lens.save('sampledVisualization', false, true, false, 'new');
+
+      // now check for the bottom-left badge
+      await testSubjects.existOrFail('lns-feature-badges-trigger');
+
+      // click on the badge and check the popover
+      await testSubjects.click('lns-feature-badges-trigger');
+      expect((await testSubjects.getVisibleText('lns-feature-badges-0-0')).split('\n')).to.eql([
+        'Bar vertical stacked',
+        '1%',
+        'logstash-*',
+      ]);
+      expect((await testSubjects.getVisibleText('lns-feature-badges-0-1')).split('\n')).to.eql([
+        'Bar vertical stacked',
+        '0.1%',
+        'logstash-*',
+      ]);
+      expect((await testSubjects.getVisibleText('lns-feature-badges-1-0')).split('\n')).to.eql([
+        'Annotations',
+        'logstash-*',
+      ]);
     });
   });
 }

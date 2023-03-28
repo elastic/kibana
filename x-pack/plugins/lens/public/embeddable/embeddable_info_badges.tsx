@@ -45,7 +45,7 @@ export const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) =
       button={
         <EuiToolTip content={iconTitle}>
           <EuiButtonEmpty
-            data-test-subj="lens-feature-badges-trigger"
+            data-test-subj="lns-feature-badges-trigger"
             color={'text'}
             onClick={onButtonClick}
             title={iconTitle}
@@ -92,6 +92,7 @@ export const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) =
                     <li
                       key={`${layerTitle}-${dataView}-${layerIndex}`}
                       className="lnsEmbeddablePanelFeatureList__item"
+                      data-test-subj={`lns-feature-badges-${index}-${layerIndex}`}
                     >
                       <EuiFlexGroup justifyContent="spaceBetween">
                         <EuiFlexItem grow={false}>{layerTitle}</EuiFlexItem>
