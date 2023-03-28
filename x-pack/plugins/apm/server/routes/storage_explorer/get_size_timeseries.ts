@@ -26,6 +26,11 @@ import {
 } from './indices_stats_helpers';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
+export type SizeTimeseriesResponse = Array<{
+  serviceName: string;
+  timeseries: Array<{ x: number; y: number }>;
+}>;
+
 export async function getSizeTimeseries({
   environment,
   kuery,
@@ -46,7 +51,7 @@ export async function getSizeTimeseries({
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
   context: ApmPluginRequestHandlerContext;
-}) {
+}): Promise<SizeTimeseriesResponse> {
   const { intervalString } = getBucketSizeForAggregatedTransactions({
     start,
     end,

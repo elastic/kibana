@@ -290,6 +290,7 @@ export const LegendControls = ({
         >
           <div style={{ maxWidth: 150 }}>
             <EuiFieldNumber
+              data-test-subj="infraLegendControlsFieldNumber"
               disabled={draftAuto}
               step={1}
               value={isNaN(draftBounds.min) ? '' : draftBounds.min}
@@ -317,6 +318,7 @@ export const LegendControls = ({
         >
           <div style={{ maxWidth: 150 }}>
             <EuiFieldNumber
+              data-test-subj="infraLegendControlsFieldNumber"
               disabled={draftAuto}
               step={1}
               isInvalid={!boundsValidRange}
@@ -331,7 +333,12 @@ export const LegendControls = ({
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty type="submit" size="s" onClick={handleCancelClick}>
+            <EuiButtonEmpty
+              data-test-subj="infraLegendControlsCancelButton"
+              type="submit"
+              size="s"
+              onClick={handleCancelClick}
+            >
               <FormattedMessage
                 id="xpack.infra.legendControls.cancelButton"
                 defaultMessage="Cancel"

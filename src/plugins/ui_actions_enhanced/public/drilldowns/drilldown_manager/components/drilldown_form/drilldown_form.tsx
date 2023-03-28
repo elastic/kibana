@@ -53,7 +53,7 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
   if (!!triggers && !triggers.items.length) {
     // Below callout is not translated, because this message is only for developers.
     return (
-      <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+      <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
         <p>
           No triggers provided in <EuiCode>triggers</EuiCode> prop.
         </p>

@@ -17,12 +17,14 @@ export const StepDetailsLinkIcon = ({
   configId,
   asButton,
   label,
+  target = '_self',
 }: {
   checkGroup: string;
   label?: string;
   configId: string;
   stepIndex?: number;
   asButton?: boolean;
+  target?: '_self' | '_blank';
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
@@ -30,6 +32,7 @@ export const StepDetailsLinkIcon = ({
   if (asButton) {
     return (
       <EuiButtonEmpty
+        data-test-subj="syntheticsStepDetailsLinkIconButton"
         flush="left"
         iconType="apmTrace"
         href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`}
@@ -45,7 +48,7 @@ export const StepDetailsLinkIcon = ({
       title={VIEW_DETAILS}
       size="s"
       href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`}
-      target="_self"
+      target={target}
       iconType="apmTrace"
     />
   );

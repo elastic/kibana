@@ -30,15 +30,15 @@ export const FetchAnalyticsCollectionLogic = kea<
   MakeLogicType<FetchAnalyticsCollectionValues, FetchAnalyticsCollectionActions>
 >({
   actions: {
-    fetchAnalyticsCollection: (id) => ({ id }),
+    fetchAnalyticsCollection: (name) => ({ name }),
   },
   connect: {
     actions: [FetchAnalyticsCollectionAPILogic, ['makeRequest']],
     values: [FetchAnalyticsCollectionAPILogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({
-    fetchAnalyticsCollection: ({ id }) => {
-      actions.makeRequest({ id });
+    fetchAnalyticsCollection: ({ name }) => {
+      actions.makeRequest({ name });
     },
   }),
   path: ['enterprise_search', 'analytics', 'collection'],

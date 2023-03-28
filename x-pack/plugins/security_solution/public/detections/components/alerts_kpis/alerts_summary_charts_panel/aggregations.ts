@@ -18,7 +18,7 @@ export const severityAggregations = {
 };
 
 export const alertTypeAggregations = {
-  alertsByRule: {
+  alertsByType: {
     terms: {
       field: ALERT_RULE_NAME,
       size: DEFAULT_QUERY_SIZE,
@@ -30,6 +30,15 @@ export const alertTypeAggregations = {
           size: DEFAULT_QUERY_SIZE,
         },
       },
+    },
+  },
+};
+
+export const alertRuleAggregations = {
+  alertsByRule: {
+    terms: {
+      field: ALERT_RULE_NAME,
+      size: DEFAULT_QUERY_SIZE,
     },
   },
 };

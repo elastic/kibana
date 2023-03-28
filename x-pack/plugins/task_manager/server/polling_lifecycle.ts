@@ -270,7 +270,18 @@ export class TaskPollingLifecycle {
       this.createTaskRunnerForTask,
       // place tasks in the Task Pool
       async (tasks: TaskRunner[]) => {
-        const result = await this.pool.run(tasks);
+        const tasksToRun = [];
+        const removeTaskPromises = [];
+        for (const task of tasks) {
+          if (task.isAdHocTaskAndOutOfAttempts) {
+            this.logger.debug(`Removing ${task} because the max attempts have been reached.`);
+            removeTaskPromises.push(task.removeTask());
+          } else {
+            tasksToRun.push(task);
+          }
+        }
+        // Wait for all the promises at once to speed up the polling cycle
+        const [result] = await Promise.all([this.pool.run(tasksToRun), ...removeTaskPromises]);
         // Emit the load after fetching tasks, giving us a good metric for evaluating how
         // busy Task manager tends to be in this Kibana instance
         this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));

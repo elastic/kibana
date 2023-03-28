@@ -200,7 +200,11 @@ async function getInputChanges(
   await container.untilInitialized();
   const keyComparePromises = keys.map(
     (key) =>
-      new Promise<{ key: keyof DashboardContainerByValueInput; isEqual: boolean }>((resolve) =>
+      new Promise<{ key: keyof DashboardContainerByValueInput; isEqual: boolean }>((resolve) => {
+        if (input[key] === undefined && lastInput[key] === undefined) {
+          resolve({ key, isEqual: true });
+        }
+
         isKeyEqual(
           key,
           {
@@ -213,8 +217,8 @@ async function getInputChanges(
             lastInput,
           },
           diffingFunctions
-        ).then((isEqual) => resolve({ key, isEqual }))
-      )
+        ).then((isEqual) => resolve({ key, isEqual }));
+      })
   );
   const inputChanges = (await Promise.allSettled(keyComparePromises)).reduce((changes, current) => {
     if (current.status === 'fulfilled') {

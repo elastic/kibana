@@ -544,6 +544,7 @@ export const performBulkActionRoute = (
                       exceptionsList: exceptions,
                     },
                   },
+                  shouldIncrementRevision: () => false,
                 });
 
                 // TODO: figureout why types can't return just updatedRule

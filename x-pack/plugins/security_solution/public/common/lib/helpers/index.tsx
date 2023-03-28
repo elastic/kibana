@@ -30,4 +30,3 @@ export type ValueOf<T> = T[keyof T];
  */
 
 export const gutterTimeline = '70px'; // Michael: Temporary until timeline is moved.
-export const bottomNavOffset = '50px';

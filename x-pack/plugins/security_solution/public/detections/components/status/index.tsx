@@ -31,7 +31,7 @@ export const getIconTypeFromStatus = (status: string) => {
     case 'recovered':
       return 'check';
     default:
-      return 'alert';
+      return 'warning';
   }
 };
 
