@@ -81,7 +81,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  describe('Response Actions Responder', function () {
+  //FLAKY: https://github.com/elastic/kibana/issues/153855
+  describe.skip('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
