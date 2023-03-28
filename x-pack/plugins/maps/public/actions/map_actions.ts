@@ -169,9 +169,6 @@ export function mapReady() {
     });
 
     const waitingForMapReadyLayerList = getWaitingForMapReadyLayerListRaw(getState());
-    dispatch({
-      type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
-    });
 
     if (getMapSettings(getState()).initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
@@ -183,6 +180,12 @@ export function mapReady() {
         dispatch(addLayer(layerDescriptor));
       });
     }
+
+    // clear waiting list after transfer to avoid state condition
+    // where waiting list is empty and layers have not been added to layerList
+    dispatch({
+      type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
+    });
   };
 }
 

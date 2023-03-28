@@ -15,19 +15,29 @@ import { isEmpty } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
-export const getIndexTemplate = (
-  kibanaVersion: string,
-  ilmPolicyName: string,
-  indexPatterns: IIndexPatternString,
-  componentTemplateRefs: string[],
-  totalFieldsLimit: number
-): IndicesPutIndexTemplateRequest => {
+interface GetIndexTemplateOpts {
+  componentTemplateRefs: string[];
+  ilmPolicyName: string;
+  indexPatterns: IIndexPatternString;
+  kibanaVersion: string;
+  namespace: string;
+  totalFieldsLimit: number;
+}
+
+export const getIndexTemplate = ({
+  componentTemplateRefs,
+  ilmPolicyName,
+  indexPatterns,
+  kibanaVersion,
+  namespace,
+  totalFieldsLimit,
+}: GetIndexTemplateOpts): IndicesPutIndexTemplateRequest => {
   const indexMetadata: Metadata = {
     kibana: {
       version: kibanaVersion,
     },
     managed: true,
-    namespace: 'default', // hard-coded to default here until we start supporting space IDs
+    namespace,
   };
 
   return {
@@ -61,7 +71,9 @@ export const getIndexTemplate = (
       },
       _meta: indexMetadata,
 
-      // TODO - set priority of this template when we start supporting spaces
+      // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
+      // then newly created indices will use the matching template with the *longest* namespace
+      priority: namespace.length,
     },
   };
 };
