@@ -35,6 +35,8 @@ export const SUPPORTED_PYTORCH_TASKS = {
   ZERO_SHOT_CLASSIFICATION: 'zero_shot_classification',
 } as const;
 
+export const ELSER_TASK_TYPE = 'text_expansion';
+
 export interface MlInferencePipelineParams {
   description?: string;
   destinationField: string;
