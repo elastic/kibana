@@ -201,10 +201,10 @@ export const useDashboardMenuItems = ({
         run: showShare,
       } as TopNavMenuData,
 
-      options: {
-        ...topNavStrings.options,
-        id: 'options',
-        testId: 'dashboardOptionsButton',
+      settings: {
+        ...topNavStrings.settings,
+        id: 'settings',
+        testId: 'dashboardSettingsButton',
         disableButton: isSaveInProgress,
         run: () => dashboardContainer.showSettings(),
       } as TopNavMenuData,

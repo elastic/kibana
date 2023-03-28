@@ -22,18 +22,37 @@ export function showSettings(this: DashboardContainer) {
     overlays,
   } = pluginServices.getServices();
 
-  const { Wrapper: DashboardReduxWrapper } = this.getReduxEmbeddableTools();
+  const {
+    dispatch,
+    Wrapper: DashboardReduxWrapper,
+    actions: { setHasOverlays },
+  } = this.getReduxEmbeddableTools();
 
-  const handle = overlays.openFlyout(
-    toMountPoint(
-      <DashboardReduxWrapper>
-        <DashboardSettings onClose={() => handle.close()} />
-      </DashboardReduxWrapper>,
-      { theme$ }
-    ),
-    {
-      size: 's',
-      'data-test-subj': 'dashboardOptionsFlyout',
-    }
+  // TODO Move this action into DashboardContainer.openOverlay
+  dispatch(setHasOverlays(true));
+
+  this.openOverlay(
+    overlays.openFlyout(
+      toMountPoint(
+        <DashboardReduxWrapper>
+          <DashboardSettings
+            onClose={() => {
+              dispatch(setHasOverlays(false));
+              this.clearOverlays();
+            }}
+          />
+        </DashboardReduxWrapper>,
+        { theme$ }
+      ),
+      {
+        size: 's',
+        'data-test-subj': 'dashboardSettingsFlyout',
+        onClose: (flyout) => {
+          this.clearOverlays();
+          dispatch(setHasOverlays(false));
+          flyout.close();
+        },
+      }
+    )
   );
 }

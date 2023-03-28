@@ -323,7 +323,7 @@ export const topNavStrings = {
       defaultMessage: 'Share Dashboard',
     }),
   },
-  options: {
+  settings: {
     label: i18n.translate('dashboard.topNave.settingsButtonAriaLabel', {
       defaultMessage: 'settings',
     }),
