@@ -14,9 +14,8 @@ import { useLeftPanelContext } from '../context';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
-import { ERROR_TITLE, ERROR_MESSAGE } from '../../translations';
-import { ALERTS_ACTIONS } from '../../../common/lib/apm/user_actions';
-import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
+import { ERROR_TITLE, ERROR_MESSAGE } from '../../shared/translations';
+import { isActiveTimeline } from '../../../helpers';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
 
@@ -30,8 +29,9 @@ const ANALYZER = i18n.translate('xpack.securitySolution.flyout.analyzer', {
 export const AnalyzeGraph: FC = () => {
   const { eventId } = useLeftPanelContext();
   const scopeId = 'fly-out';
-  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(false); // always false because flyout is not in timeline
-  const { startTransaction } = useStartTransaction();
+  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
+    isActiveTimeline(scopeId)
+  );
 
   if (!eventId) {
     return (
@@ -44,8 +44,6 @@ export const AnalyzeGraph: FC = () => {
       />
     );
   }
-
-  startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
 
   return (
     <div data-test-subj={ANALYZER_GRAPH_TEST_ID}>
