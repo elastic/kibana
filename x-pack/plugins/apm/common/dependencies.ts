@@ -13,13 +13,15 @@ import {
 } from './es_fields/apm';
 import { environmentQuery } from './utils/environment_query';
 
-export const kueryBarPlaceholder = i18n.translate(
-  'xpack.apm.dependencies.kueryBarPlaceholder',
+export const unifiedSearchBarPlaceholder = i18n.translate(
+  'xpack.apm.dependencies.unifiedSearchBarPlaceholder',
   {
     defaultMessage: `Search dependency metrics (e.g. span.destination.service.resource:elasticsearch)`,
   }
 );
 
+// TODO: This function must be deleted in favour of Unified Search.
+//  Since we are keeping the KueryBar code for now, will delete this once we get rid of that as well
 export const getKueryBarBoolFilter = ({
   dependencyName,
   environment,

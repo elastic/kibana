@@ -83,7 +83,6 @@ export function UnifiedSearchBar(props: {
       queryStringService.setQuery(urlQuery);
     }
     if (!urlQuery) {
-      // queryStringService.setQuery({ query: '', language: 'kuery' });
       queryStringService.clearQuery();
     }
   }, [queryStringService, urlQuery]);

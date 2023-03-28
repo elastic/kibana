@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiFlexGroup,
   EuiFlexGroupProps,
@@ -22,20 +20,18 @@ import { UnifiedSearchBar } from '../unified_search_bar';
 
 interface Props {
   hidden?: boolean;
-  showKueryBar?: boolean;
+  showUnifiedSearchBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
-  kueryBarPlaceholder?: string;
-  kueryBarBoolFilter?: QueryDslQueryContainer[];
+  searchBarPlaceholder?: string;
 }
 
 export function SearchBar({
   hidden = false,
-  showKueryBar = true,
+  showUnifiedSearchBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
-  kueryBarBoolFilter,
-  kueryBarPlaceholder,
+  searchBarPlaceholder,
 }: Props) {
   const { agentName } = useApmServiceContext();
   const isMobileAgent = isMobileAgentName(agentName);
@@ -68,9 +64,9 @@ export function SearchBar({
               </EuiFlexItem>
             )}
 
-            {showKueryBar && (
+            {showUnifiedSearchBar && (
               <EuiFlexItem>
-                <UnifiedSearchBar />
+                <UnifiedSearchBar placeholder={searchBarPlaceholder} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
