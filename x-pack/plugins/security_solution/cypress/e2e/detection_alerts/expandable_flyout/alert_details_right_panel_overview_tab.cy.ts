@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { upperFirst } from 'lodash';
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE,
@@ -15,6 +16,11 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE,
+  DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_RISK_SCORE,
+  DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_RISK_SCORE_VALUE,
+  DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_SEVERITY,
+  DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_SEVERITY_VALUE,
+  DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_TITLE,
 } from '../../../screens/document_expandable_flyout';
 import {
   expandFirstAlertExpandableFlyout,
@@ -33,19 +39,50 @@ describe.skip(
   'Alert details expandable flyout right panel overview tab',
   { testIsolation: false },
   () => {
+    const rule = getNewRule();
+
     before(() => {
       cleanKibana();
       login();
-      createRule(getNewRule());
+      createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
       openOverviewTab();
     });
 
+    it('should display correct title in header', () => {
+      cy.get(DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_TITLE)
+        .should('be.visible')
+        .and('have.text', rule.name);
+    });
+
+    it('should display risk score in header', () => {
+      cy.get(DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_RISK_SCORE).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_RISK_SCORE_VALUE)
+        .should('be.visible')
+        .and('have.text', rule.risk_score);
+    });
+
+    it('should display severity in header', () => {
+      cy.get(DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_SEVERITY).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_SEVERITY_VALUE)
+        .should('be.visible')
+        .and('have.text', upperFirst(rule.severity));
+    });
+
     it('should display mitre attack', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE)
+        .should('be.visible')
+        // @ts-ignore
+        .and('contain.text', rule.threat[0].framework);
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS)
+        .should('be.visible')
+        // @ts-ignore
+        .and('contain.text', rule.threat[0].technique[0].name)
+        // @ts-ignore
+        .and('contain.text', rule.threat[0].tactic.name);
     });
 
     it('should display highlighted fields', () => {
