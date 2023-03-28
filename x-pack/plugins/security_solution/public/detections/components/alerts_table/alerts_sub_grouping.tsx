@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
-import type { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query, BoolQuery } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type {
   DynamicGroupingProps,
@@ -50,11 +50,10 @@ interface OwnProps {
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;
-  pagination: {
-    pagingSettings: GroupsPagingSettingsById;
-  };
+  pagination: GroupsPagingSettingsById;
   parentGroupingFilter?: Filter[];
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
+  resetPagination: () => void;
   runtimeMappings: MappingRuntimeFields;
   selectedGroup: string;
   signalIndexName: string | null;
@@ -78,6 +77,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   pagination,
   parentGroupingFilter,
   renderChildComponent,
+  resetPagination,
   runtimeMappings,
   selectedGroup,
   signalIndexName,
@@ -133,7 +133,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     startDate: from,
     endDate: to,
   });
-
   const additionalFilters = useMemo(() => {
     try {
       return [
@@ -148,6 +147,19 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
+  const prevFilters = useRef<
+    Array<{
+      bool: BoolQuery;
+    }>
+  >([]);
+
+  useEffect(() => {
+    if (JSON.stringify(prevFilters.current) !== JSON.stringify(additionalFilters)) {
+      prevFilters.current = additionalFilters;
+      resetPagination();
+    }
+  }, [additionalFilters, prevFilters, resetPagination]);
+
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       additionalFilters,
@@ -155,14 +167,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       from,
       runtimeMappings,
       to,
-      pageSize: pagination.pagingSettings[selectedGroup]
-        ? pagination.pagingSettings[selectedGroup].itemsPerPage
-        : 25,
-      pageIndex: pagination.pagingSettings[selectedGroup]
-        ? pagination.pagingSettings[selectedGroup].activePage
-        : 0,
+      pageSize: pagination[selectedGroup] ? pagination[selectedGroup].itemsPerPage : 25,
+      pageIndex: pagination[selectedGroup] ? pagination[selectedGroup].activePage : 0,
     });
-  }, [additionalFilters, selectedGroup, from, runtimeMappings, to, pagination.pagingSettings]);
+  }, [additionalFilters, selectedGroup, from, runtimeMappings, to, pagination]);
 
   const {
     data: alertsGroupsData,
@@ -220,7 +228,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
 
-  const groupedAlerts = useMemo(
+  return useMemo(
     () =>
       getGrouping({
         data: alertsGroupsData?.aggregations,
@@ -243,8 +251,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       selectedGroup,
     ]
   );
-
-  return groupedAlerts;
 };
 
 export const GroupedSubLevel = React.memo(GroupedSubLevelComponent);

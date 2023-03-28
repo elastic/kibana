@@ -23,10 +23,8 @@ import { Grouping as GroupingComponent } from '../components/grouping';
 interface Grouping<T> {
   getGrouping: (props: DynamicGroupingProps<T>) => React.ReactElement;
   groupSelector: React.ReactElement<GroupSelectorProps>;
-  pagination: {
-    pagingSettings: GroupsPagingSettingsById;
-    reset: () => void;
-  };
+  pagination: GroupsPagingSettingsById;
+  resetPagination: () => void;
   selectedGroups: string[];
 }
 
@@ -146,10 +144,8 @@ export const useGrouping = <T,>({
       getGrouping,
       groupSelector,
       selectedGroups,
-      pagination: {
-        pagingSettings: pagination.pagingSettings,
-        reset: resetPagination,
-      },
+      pagination: pagination.pagingSettings,
+      resetPagination,
     }),
     [getGrouping, groupSelector, pagination.pagingSettings, resetPagination, selectedGroups]
   );

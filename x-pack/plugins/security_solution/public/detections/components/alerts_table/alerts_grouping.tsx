@@ -62,7 +62,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [telemetry]
   );
 
-  const { groupSelector, getGrouping, selectedGroups, pagination } = useGrouping({
+  const { groupSelector, getGrouping, selectedGroups, pagination, resetPagination } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
       groupStatsRenderer: getStats,
@@ -118,13 +118,14 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           getGrouping={getGrouping}
           groupingLevel={level}
           pagination={pagination}
+          resetPagination={resetPagination}
           parentGroupingFilter={parentGroupingFilter}
           renderChildComponent={rcc}
           selectedGroup={selectedGroup}
         />
       );
     },
-    [getGrouping, pagination, props, selectedGroups]
+    [getGrouping, pagination, props, resetPagination, selectedGroups]
   );
 
   if (isEmpty(selectedPatterns)) {
