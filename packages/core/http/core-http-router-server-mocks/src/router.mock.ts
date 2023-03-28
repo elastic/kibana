@@ -12,7 +12,7 @@ import { stringify } from 'query-string';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { schema } from '@kbn/config-schema';
 import type {
-  IRouter,
+  IRouterWithVersion,
   KibanaRequest,
   RouteMethod,
   RouteValidationSpec,
@@ -23,7 +23,7 @@ import type {
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { createVersionedRouterMock } from '@kbn/core-http-versioned-router-server-mocks';
 
-export type RouterMock = jest.Mocked<IRouter<any>>;
+export type RouterMock = jest.Mocked<IRouterWithVersion<any>>;
 
 function createRouterMock({ routerPath = '' }: { routerPath?: string } = {}): RouterMock {
   return {
