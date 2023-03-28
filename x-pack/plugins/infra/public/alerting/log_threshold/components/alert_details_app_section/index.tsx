@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React from 'react';
@@ -33,19 +34,23 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
 
   return (
     // Create a chart per-criteria
-    rule.params.criteria.map((criteria) => {
-      const chartCriterion = criteria as PartialCriterion;
-      return (
-        <CriterionPreview
-          key={chartCriterion.field}
-          ruleParams={rule.params}
-          sourceId={rule.params.logView.logViewId}
-          chartCriterion={chartCriterion}
-          showThreshold={true}
-          executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
-        />
-      );
-    })
+    <EuiFlexGroup>
+      {rule.params.criteria.map((criteria) => {
+        const chartCriterion = criteria as PartialCriterion;
+        return (
+          <EuiFlexItem>
+            <CriterionPreview
+              key={chartCriterion.field}
+              ruleParams={rule.params}
+              sourceId={rule.params.logView.logViewId}
+              chartCriterion={chartCriterion}
+              showThreshold={true}
+              executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
+            />
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
 };
 // eslint-disable-next-line import/no-default-export
