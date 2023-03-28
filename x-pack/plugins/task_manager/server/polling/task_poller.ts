@@ -9,18 +9,18 @@
  * This module contains the logic for polling the task manager index for new work.
  */
 
-import { merge, of, Observable, combineLatest, timer } from 'rxjs';
-import { map, filter, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
 
 import { Option, none } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
-import { Result, map as mapResult, asOk, asErr, promiseResult } from '../lib/result_type';
+import { Result, asOk, asErr } from '../lib/result_type';
 import { timeoutPromiseAfter } from './timeout_promise_after';
 
 type WorkFn<H> = () => Promise<H>;
 
 interface Opts<H> {
   logger: Logger;
+  initialPollInterval: number;
   pollInterval$: Observable<number>;
   pollIntervalDelay$: Observable<number>;
   getCapacity: () => number;
@@ -41,57 +41,75 @@ interface Opts<H> {
  */
 export function createTaskPoller<T, H>({
   logger,
+  initialPollInterval,
   pollInterval$,
   pollIntervalDelay$,
   getCapacity,
   work,
   workTimeout,
-}: Opts<H>): Observable<Result<H, PollingError<T>>> {
+}: Opts<H>): {
+  start: () => void;
+  stop: () => void;
+  events$: Observable<Result<H, PollingError<T>>>;
+} {
   const hasCapacity = () => getCapacity() > 0;
+  let running: boolean = false;
+  let timeoutId: NodeJS.Timeout | null = null;
+  let pollInterval = initialPollInterval;
+  let pollIntervalDelay = 0;
+  const subject = new Subject<Result<H, PollingError<T>>>();
 
-  const requestWorkProcessing$ = combineLatest([
-    // emit a polling event on a fixed interval
-    pollInterval$.pipe(
-      tap((period) => {
-        logger.debug(`Task poller now using interval of ${period}ms`);
-      })
-    ),
-    pollIntervalDelay$.pipe(
-      tap((pollDelay) => {
-        logger.debug(`Task poller now delaying emission by ${pollDelay}ms`);
-      })
-    ),
-  ])
-    .pipe(
-      // We don't have control over `pollDelay` in the poller, and a change to `delayOnClaimConflicts` could accidentally cause us to pause Task Manager
-      // polling for a far longer duration that we intended.
-      // Since the goal is to shift it within the range of `period`, we use modulo as a safe guard to ensure this doesn't happen.
-      switchMap(([period, pollDelay]) => timer(period + (pollDelay % period), period)),
-      map(() => none)
-    )
-    .pipe(
-      // only emit polling events when there's capacity to handle them
-      filter(hasCapacity),
-      // take as many argumented calls as we have capacity for and call `work` with
-      // those arguments. If the queue is empty this will still trigger work to be done
-      concatMap(async () => {
-        return mapResult<H, Error, Result<H, PollingError<T>>>(
-          await promiseResult<H, Error>(
-            timeoutPromiseAfter<H, Error>(
-              work(),
-              workTimeout,
-              () => new Error(`work has timed out`)
-            )
-          ),
-          (workResult) => asOk(workResult),
-          (err: Error) => asPollingError<T>(err, PollingErrorType.WorkError)
+  pollInterval$.subscribe((interval) => {
+    pollInterval = interval;
+    logger.debug(`Task poller now using interval of ${interval}ms`);
+  });
+  pollIntervalDelay$.subscribe((delay) => {
+    pollIntervalDelay = delay;
+    logger.debug(`Task poller now delaying emission by ${delay}ms`);
+  });
+
+  async function runCycle() {
+    timeoutId = null;
+    const start = Date.now();
+    if (hasCapacity()) {
+      try {
+        const result = await timeoutPromiseAfter<H, Error>(
+          work(),
+          workTimeout,
+          () => new Error(`work has timed out`)
         );
-      }),
-      // catch errors during polling for work
-      catchError((err: Error) => of(asPollingError<T>(err, PollingErrorType.WorkError)))
-    );
+        subject.next(asOk(result));
+      } catch (e) {
+        subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
+      }
+    }
+    if (running) {
+      // Set the next runCycle call
+      timeoutId = setTimeout(
+        runCycle,
+        Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
+      );
+      // Reset delay, it's designed to shuffle only once
+      pollIntervalDelay = 0;
+    }
+  }
 
-  return merge(requestWorkProcessing$);
+  return {
+    events$: subject,
+    start: () => {
+      if (!running) {
+        running = true;
+        runCycle();
+      }
+    },
+    stop: () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      running = false;
+    },
+  };
 }
 
 export enum PollingErrorType {
