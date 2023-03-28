@@ -54,12 +54,13 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     state: {
       type: 'text',
     },
+    // NO NEED TO BE INDEXED
     // user: {
     //   type: 'keyword',
     // },
-    // scope: {
-    //   type: 'keyword',
-    // },
+    scope: {
+      type: 'keyword',
+    },
     ownerId: {
       type: 'keyword',
     },
