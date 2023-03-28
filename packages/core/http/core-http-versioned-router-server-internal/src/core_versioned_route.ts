@@ -43,13 +43,15 @@ export class CoreVersionedRoute implements VersionedRoute {
     method,
     path,
     options,
+    validateResponses = false,
   }: {
     router: IRouter;
     method: Method;
     path: string;
     options: VersionedRouteConfig<Method>;
+    validateResponses?: boolean;
   }) {
-    return new CoreVersionedRoute(router, method, path, options);
+    return new CoreVersionedRoute(router, method, path, options, validateResponses);
   }
 
   private constructor(
@@ -57,8 +59,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly method: Method,
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>,
-    // TODO: Make "true" dev-only
-    private readonly validateResponses: boolean = true
+    private readonly validateResponses: boolean = false
   ) {
     this.router[this.method](
       {
