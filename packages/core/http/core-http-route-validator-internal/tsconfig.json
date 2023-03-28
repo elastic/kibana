@@ -11,6 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

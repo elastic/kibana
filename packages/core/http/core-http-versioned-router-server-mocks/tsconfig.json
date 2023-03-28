@@ -11,6 +11,7 @@
     "**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

@@ -17,6 +17,8 @@
     "@kbn/hapi-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/logging",
+    "@kbn/core-http-route-validator-internal",
+    "@kbn/core-http-versioned-router-server-internal",
   ],
   "exclude": [
     "target/**/*",
