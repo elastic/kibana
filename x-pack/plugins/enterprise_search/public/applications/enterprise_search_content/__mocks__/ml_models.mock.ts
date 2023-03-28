@@ -83,7 +83,11 @@ export const textExpansionModel: TrainedModelConfigResponse = {
   version: '1',
 };
 
-export const mlModels: TrainedModelConfigResponse[] = [nerModel, textClassificationModel, textExpansionModel];
+export const mlModels: TrainedModelConfigResponse[] = [
+  nerModel,
+  textClassificationModel,
+  textExpansionModel,
+];
 
 export const mlModelStats: {
   count: number;

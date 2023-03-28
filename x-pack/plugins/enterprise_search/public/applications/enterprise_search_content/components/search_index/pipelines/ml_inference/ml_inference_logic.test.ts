@@ -428,7 +428,7 @@ describe('MlInferenceLogic', () => {
           ...DEFAULT_VALUES,
           addInferencePipelineModal: {
             ...mockModelConfiguration,
-          }
+          },
         });
         jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
 
