@@ -23,10 +23,10 @@ export async function createNewAPIKeySet(
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = await context.isAuthenticationTypeApiKey();
+    isAuthTypeApiKey = await context.isAuthenticationTypeAPIKey();
     const name = generateAPIKeyName(attributes.alertTypeId, attributes.name);
     createdAPIKey = isAuthTypeApiKey
-      ? await context.getAuthenticationApiKey(name)
+      ? await context.getAuthenticationAPIKey(name)
       : await context.createAPIKey(name);
   } catch (error) {
     throw Boom.badRequest(`Error creating API key for rule: ${error.message}`);

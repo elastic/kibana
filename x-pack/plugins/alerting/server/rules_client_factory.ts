@@ -137,14 +137,14 @@ export class RulesClientFactory {
         return eventLog.getClient(request);
       },
       eventLogger: this.eventLogger,
-      async isAuthenticationTypeApiKey() {
+      async isAuthenticationTypeAPIKey() {
         if (!securityPluginStart) {
           return false;
         }
         const user = await securityPluginStart.authc.getCurrentUser(request);
         return user && user.authentication_type ? user.authentication_type === 'api_key' : false;
       },
-      async getAuthenticationApiKey(name: string) {
+      async getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
           const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')

@@ -67,8 +67,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeApiKey: isAuthenticationTypeApiKeyMock,
-  getAuthenticationApiKey: getAuthenticationApiKeyMock,
+  isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
+  getAuthenticationAPIKey: getAuthenticationApiKeyMock,
 };
 const paramsModifier = jest.fn();
 
@@ -2194,7 +2194,7 @@ describe('bulkEdit()', () => {
             },
           ],
         });
-        expect(rulesClientParams.getAuthenticationApiKey).not.toHaveBeenCalledWith();
+        expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalledWith();
       });
 
       test('should return error in rule errors if key is not generated', async () => {
@@ -2208,7 +2208,7 @@ describe('bulkEdit()', () => {
             },
           ],
         });
-        expect(rulesClientParams.getAuthenticationApiKey).toHaveBeenCalledWith(
+        expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledWith(
           'Alerting: myType/my rule name'
         );
       });

@@ -209,11 +209,11 @@ async function updateAlert<Params extends RuleTypeParams>(
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = await context.isAuthenticationTypeApiKey();
+    isAuthTypeApiKey = await context.isAuthenticationTypeAPIKey();
     const name = generateAPIKeyName(ruleType.id, data.name);
     createdAPIKey = attributes.enabled
       ? isAuthTypeApiKey
-        ? await context.getAuthenticationApiKey(name)
+        ? await context.getAuthenticationAPIKey(name)
         : await context.createAPIKey(name)
       : null;
   } catch (error) {
