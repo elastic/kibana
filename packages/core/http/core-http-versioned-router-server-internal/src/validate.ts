@@ -7,14 +7,14 @@
  */
 
 import type { RouteValidatorFullConfig } from '@kbn/core-http-server';
-import type { Version } from '@kbn/core-http-server';
+import type { ApiVersion } from '@kbn/core-http-server';
 import { RouteValidator } from '@kbn/core-http-router-server-internal';
 
 /** Will throw if any of the validation checks fail */
 export function validate(
   data: { body?: unknown; params?: unknown; query?: unknown },
   runtimeSchema: RouteValidatorFullConfig<unknown, unknown, unknown>,
-  version: Version
+  version: ApiVersion
 ): { body: unknown; params: unknown; query: unknown } {
   const validator = RouteValidator.from(runtimeSchema);
   return {
