@@ -80,7 +80,7 @@ export interface ClientPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   dataViews: DataViewsPublicPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   cloud?: CloudStart;
   appName: string;
   storage: IStorageWrapper;
@@ -132,7 +132,7 @@ export class UptimePlugin
     plugins.share.url.locators.create(editMonitorNavigatorParams);
 
     plugins.observability.dashboard.register({
-      appName: 'synthetics',
+      appName: 'uptime',
       hasData: async () => {
         const dataHelper = await getUptimeDataHelper();
         const status = await dataHelper.indexStatus();
