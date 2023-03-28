@@ -9,9 +9,18 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../../common/types/api';
 
@@ -23,39 +32,30 @@ import { CreateCustomPipelineApiLogic } from '../../../../api/index/create_custo
 
 import { RevertConnectorPipelineApilogic } from '../../../../api/pipelines/revert_connector_pipeline_api_logic';
 import { IndexViewLogic } from '../../index_view_logic';
+
 import { PipelinesLogic } from '../pipelines_logic';
 
 export const CustomizeIngestPipelineItem: React.FC = () => {
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
-  const { makeRequest: createCustomPipeline } = useActions(CreateCustomPipelineApiLogic);
-  const { status: createStatus } = useValues(CreateCustomPipelineApiLogic);
   const { isDeleteModalOpen, hasIndexIngestionPipeline } = useValues(PipelinesLogic);
   const { closeDeleteModal, openDeleteModal } = useActions(PipelinesLogic);
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const { status: revertStatus } = useValues(RevertConnectorPipelineApilogic);
   const isGated = !isCloud && !hasPlatinumLicense;
 
+  if (!isGated && !hasIndexIngestionPipeline) return null;
+
   return (
     <>
-      {isGated ? (
+      {isGated && (
         <EuiText color="subdued" size="s" grow={false}>
           {i18n.translate(
             'xpack.enterpriseSearch.content.index.pipelines.copyAndCustomize.platinumText',
             {
               defaultMessage:
                 'With a platinum license, you can create an index-specific version of this configuration and modify it for your use case.',
-            }
-          )}
-        </EuiText>
-      ) : (
-        <EuiText color="subdued" size="s" grow={false}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.index.pipelines.copyAndCustomize.description',
-            {
-              defaultMessage:
-                'You can create an index-specific version of this configuration and modify it for your use case.',
             }
           )}
         </EuiText>
@@ -92,7 +92,7 @@ export const CustomizeIngestPipelineItem: React.FC = () => {
             </p>
           </EuiConfirmModal>
         )}
-        {hasIndexIngestionPipeline ? (
+        {hasIndexIngestionPipeline && (
           <EuiButtonEmpty
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-revertPipeline`}
             onClick={() => openDeleteModal()}
@@ -102,22 +102,55 @@ export const CustomizeIngestPipelineItem: React.FC = () => {
               { defaultMessage: 'Delete custom pipeline' }
             )}
           </EuiButtonEmpty>
-        ) : (
-          <EuiButtonEmpty
-            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-copyAndCustomize`}
-            disabled={isGated}
-            isLoading={createStatus === Status.LOADING}
-            iconType={isGated ? 'lock' : undefined}
-            onClick={() => createCustomPipeline({ indexName })}
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.copyButtonLabel',
-              { defaultMessage: 'Copy and customize' }
-            )}
-          </EuiButtonEmpty>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+    </>
+  );
+};
+
+export const CopyAndCustomizePipelinePanel: React.FC = () => {
+  const { indexName, ingestionMethod } = useValues(IndexViewLogic);
+  const { isCloud } = useValues(KibanaLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { status: createStatus } = useValues(CreateCustomPipelineApiLogic);
+  const { hasIndexIngestionPipeline, pipelineName } = useValues(PipelinesLogic);
+  const { makeRequest: createCustomPipeline } = useActions(CreateCustomPipelineApiLogic);
+
+  const isGated = !isCloud && !hasPlatinumLicense;
+
+  if (isGated || hasIndexIngestionPipeline) return null;
+  return (
+    <>
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.enterpriseSearch.content.index.pipelines.copyCustomizeCallout.title',
+          { defaultMessage: 'Unlock your custom pipelines' }
+        )}
+        iconType="lock"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.index.pipelines.copyCustomizeCallout.description"
+            defaultMessage="Your index is using our default ingestion pipeline, {defaultPipeline}. Copy that pipeline into an index-specific configuration to unlock the ability to create custom ingestion and inference pipelines."
+            values={{
+              defaultPipeline: <strong>{pipelineName}</strong>,
+            }}
+          />
+        </p>
+        <EuiButton
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-copyAndCustomize`}
+          isLoading={createStatus === Status.LOADING}
+          iconType="lockOpen"
+          onClick={() => createCustomPipeline({ indexName })}
+        >
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.copyButtonLabel',
+            { defaultMessage: 'Copy and customize' }
+          )}
+        </EuiButton>
+      </EuiCallOut>
+      <EuiSpacer />
     </>
   );
 };
