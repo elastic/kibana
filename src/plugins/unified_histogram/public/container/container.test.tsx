@@ -31,6 +31,8 @@ describe('UnifiedHistogramContainer', () => {
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
+    columns: [],
+    currentSuggestion: undefined,
   };
 
   it('should set ref', () => {
@@ -61,7 +63,7 @@ describe('UnifiedHistogramContainer', () => {
     const component = mountWithIntl(
       <UnifiedHistogramContainer ref={setApi} resizeRef={{ current: null }} />
     );
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
     expect(component.update().isEmptyRender()).toBe(false);
   });
 
@@ -80,6 +82,7 @@ describe('UnifiedHistogramContainer', () => {
         });
       }
     });
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
     expect(api?.initialized).toBe(true);
   });
 });
