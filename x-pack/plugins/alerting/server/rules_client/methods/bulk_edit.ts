@@ -121,9 +121,17 @@ export type BulkEditOperation =
       value?: undefined;
     };
 
-type ApiKeysMap = Map<string, { oldApiKey?: string; newApiKey?: string }>;
+type ApiKeysMap = Map<
+  string,
+  {
+    oldApiKey?: string;
+    newApiKey?: string;
+    oldApiKeyCreatedByUser?: boolean | null;
+    newApiKeyCreatedByUser?: boolean | null;
+  }
+>;
 
-type ApiKeyAttributes = Pick<RawRule, 'apiKey' | 'apiKeyOwner'>;
+type ApiKeyAttributes = Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'>;
 
 type RuleType = ReturnType<RuleTypeRegistry['get']>;
 
@@ -433,7 +441,10 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
 }): Promise<void> {
   try {
     if (rule.attributes.apiKey) {
-      apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
+      apiKeysMap.set(rule.id, {
+        oldApiKey: rule.attributes.apiKey,
+        oldApiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser,
+      });
     }
 
     const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
@@ -737,11 +748,12 @@ async function prepareApiKeys(
   const shouldUpdateApiKey = attributes.enabled || hasUpdateApiKeyOperation;
 
   let createdAPIKey: CreateAPIKeyResult | null = null;
+  let isAuthTypeApiKey = false;
   try {
-    const isApiKey = await context.isAuthenticationTypeApiKey();
+    isAuthTypeApiKey = await context.isAuthenticationTypeApiKey();
     const name = generateAPIKeyName(ruleType.id, attributes.name);
     createdAPIKey = shouldUpdateApiKey
-      ? isApiKey
+      ? isAuthTypeApiKey
         ? await context.getAuthenticationApiKey(name)
         : await context.createAPIKey(name)
       : null;
@@ -749,12 +761,13 @@ async function prepareApiKeys(
     throw Error(`Error updating rule: could not create API key - ${error.message}`);
   }
 
-  const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username);
+  const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey);
   // collect generated API keys
   if (apiKeyAttributes.apiKey) {
     apiKeysMap.set(rule.id, {
       ...apiKeysMap.get(rule.id),
       newApiKey: apiKeyAttributes.apiKey,
+      newApiKeyCreatedByUser: apiKeyAttributes.apiKeyCreatedByUser,
     });
   }
 
@@ -816,7 +829,7 @@ async function saveBulkUpdatedRules(
       await bulkMarkApiKeysForInvalidation(
         {
           apiKeys: Array.from(apiKeysMap.values())
-            .filter((value) => value.newApiKey)
+            .filter((value) => value.newApiKey && !value.newApiKeyCreatedByUser)
             .map((value) => value.newApiKey as string),
         },
         context.logger,
@@ -828,13 +841,15 @@ async function saveBulkUpdatedRules(
 
   result.saved_objects.map(({ id, error }) => {
     const oldApiKey = apiKeysMap.get(id)?.oldApiKey;
+    const oldApiKeyCreatedByUser = apiKeysMap.get(id)?.oldApiKeyCreatedByUser;
     const newApiKey = apiKeysMap.get(id)?.newApiKey;
+    const newApiKeyCreatedByUser = apiKeysMap.get(id)?.newApiKeyCreatedByUser;
 
     // if SO wasn't saved and has new API key it will be invalidated
-    if (error && newApiKey) {
+    if (error && newApiKey && !newApiKeyCreatedByUser) {
       apiKeysToInvalidate.push(newApiKey);
       // if SO saved and has old Api Key it will be invalidate
-    } else if (!error && oldApiKey) {
+    } else if (!error && oldApiKey && !oldApiKeyCreatedByUser) {
       apiKeysToInvalidate.push(oldApiKey);
     }
   });

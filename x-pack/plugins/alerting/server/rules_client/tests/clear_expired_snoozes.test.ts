@@ -60,6 +60,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   eventLogger,
+  isAuthenticationTypeApiKey: jest.fn(),
+  getAuthenticationApiKey: jest.fn(),
 };
 
 describe('clearExpiredSnoozes()', () => {

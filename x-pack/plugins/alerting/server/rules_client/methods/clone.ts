@@ -96,11 +96,12 @@ export async function clone<Params extends RuleTypeParams = never>(
   const lastRunTimestamp = new Date();
   const legacyId = Semver.lt(context.kibanaVersion, '8.0.0') ? id : null;
   let createdAPIKey = null;
+  let isAuthTypeApiKey = false;
   try {
-    const isApiKey = await context.isAuthenticationTypeApiKey();
+    isAuthTypeApiKey = await context.isAuthenticationTypeApiKey();
     const name = generateAPIKeyName(ruleType.id, ruleName);
     createdAPIKey = ruleSavedObject.attributes.enabled
-      ? isApiKey
+      ? isAuthTypeApiKey
         ? await context.getAuthenticationApiKey(name)
         : await context.createAPIKey(name)
       : null;
@@ -110,7 +111,7 @@ export async function clone<Params extends RuleTypeParams = never>(
   const rawRule: RawRule = {
     ...ruleSavedObject.attributes,
     name: ruleName,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username),
+    ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
     legacyId,
     createdBy: username,
     updatedBy: username,

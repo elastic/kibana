@@ -28,6 +28,7 @@ export async function updateApiKey(
 
 async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: string }) {
   let apiKeyToInvalidate: string | null = null;
+  let apiKeyCreatedByUser: boolean | undefined | null = false;
   let attributes: RawRule;
   let version: string | undefined;
 
@@ -37,6 +38,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
         namespace: context.namespace,
       });
     apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+    apiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
   } catch (e) {
@@ -106,14 +108,19 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: updateAttributes.apiKey ? [updateAttributes.apiKey] : [] },
+      {
+        apiKeys:
+          updateAttributes.apiKey && !updateAttributes.apiKeyCreatedByUser
+            ? [updateAttributes.apiKey]
+            : [],
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     );
     throw e;
   }
 
-  if (apiKeyToInvalidate) {
+  if (apiKeyToInvalidate && !apiKeyCreatedByUser) {
     await bulkMarkApiKeysForInvalidation(
       { apiKeys: [apiKeyToInvalidate] },
       context.logger,

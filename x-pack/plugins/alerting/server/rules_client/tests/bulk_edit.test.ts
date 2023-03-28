@@ -47,6 +47,9 @@ const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
+const isAuthenticationTypeApiKeyMock = jest.fn();
+const getAuthenticationApiKeyMock = jest.fn();
+
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -64,6 +67,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeApiKey: isAuthenticationTypeApiKeyMock,
+  getAuthenticationApiKey: getAuthenticationApiKeyMock,
 };
 const paramsModifier = jest.fn();
 
@@ -104,6 +109,7 @@ describe('bulkEdit()', () => {
     attributes: {
       ...existingRule.attributes,
       apiKey: MOCK_API_KEY,
+      apiKeyCreatedByUser: false,
     },
   };
 
@@ -580,6 +586,7 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyCreatedByUser: false,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -2069,6 +2076,142 @@ describe('bulkEdit()', () => {
         ],
       });
       expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my rule name');
+    });
+
+    describe('set by the user when authenticated using api keys', () => {
+      beforeEach(() => {
+        isAuthenticationTypeApiKeyMock.mockResolvedValue(true);
+        getAuthenticationApiKeyMock.mockResolvedValueOnce({
+          apiKeysEnabled: true,
+          result: { api_key: '111' },
+        });
+        mockCreatePointInTimeFinderAsInternalUser({
+          saved_objects: [
+            {
+              ...existingDecryptedRule,
+              attributes: {
+                ...existingDecryptedRule.attributes,
+                enabled: true,
+                apiKeyCreatedByUser: true,
+              },
+            },
+          ],
+        });
+      });
+
+      test('should not call bulkMarkApiKeysForInvalidation', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+
+        expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      });
+
+      test('should call bulkMarkApiKeysForInvalidation with empty array if bulkCreate failed', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
+          throw new Error('Fail');
+        });
+
+        await expect(
+          rulesClient.bulkEdit({
+            filter: 'alert.attributes.tags: "APM"',
+            operations: [
+              {
+                field: 'tags',
+                operation: 'add',
+                value: ['test-1'],
+              },
+            ],
+          })
+        ).rejects.toThrow('Fail');
+
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+          { apiKeys: [] },
+          expect.any(Object),
+          expect.any(Object)
+        );
+      });
+
+      test('should call bulkMarkApiKeysForInvalidation with empty array if SO update failed', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: '1',
+              type: 'alert',
+              attributes: {
+                enabled: true,
+                tags: ['foo'],
+                alertTypeId: 'myType',
+                schedule: { interval: '1m' },
+                consumer: 'myApp',
+                scheduledTaskId: 'task-123',
+                params: { index: ['test-index-*'] },
+                throttle: null,
+                notifyWhen: null,
+                actions: [],
+              },
+              references: [],
+              version: '123',
+              error: {
+                error: 'test failure',
+                statusCode: 500,
+                message: 'test failure',
+              },
+            },
+          ],
+        });
+
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+
+        expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      });
+
+      test('should not call get apiKey if rule is disabled', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+        expect(rulesClientParams.getAuthenticationApiKey).not.toHaveBeenCalledWith();
+      });
+
+      test('should return error in rule errors if key is not generated', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+        expect(rulesClientParams.getAuthenticationApiKey).toHaveBeenCalledWith(
+          'Alerting: myType/my rule name'
+        );
+      });
     });
   });
 
