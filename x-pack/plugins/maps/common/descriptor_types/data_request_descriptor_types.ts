@@ -35,6 +35,11 @@ export type DataFilters = {
   joinKeyFilter?: Filter;
 };
 
+export type TMSSourceRequestMeta = DataFilters & {
+  applyGlobalTime: boolean;
+  sourceQuery?: Query;
+};
+
 export type VectorSourceRequestMeta = DataFilters & {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
