@@ -195,8 +195,21 @@ export function DiscoverMainRoute(props: Props) {
   );
 
   useEffect(() => {
+    // initial search + triggered when id changes
     loadSavedSearch();
   }, [loadSavedSearch, id]);
+
+  useEffect(() => {
+    // this listener is waiting for such a path http://localhost:5601/app/discover#/
+    // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
+    // to reload the page in a right way
+    const unlistenHistoryBasePath = history.listen(async ({ pathname, search, hash }) => {
+      if (!search && !hash && pathname === '/' && !stateContainer.savedSearchState.getState().id) {
+        await loadSavedSearch();
+      }
+    });
+    return () => unlistenHistoryBasePath();
+  }, [history, stateContainer, loadSavedSearch]);
 
   if (showNoDataPage) {
     const analyticsServices = {
