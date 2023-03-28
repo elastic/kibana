@@ -31,30 +31,23 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
 };
 
 const disableCommonProtections = (policy: PolicyConfig) => {
-  let policyOutput = policy;
-
-  for (const key in policyOutput) {
-    if (Object.prototype.hasOwnProperty.call(policyOutput, key)) {
-      if (key === 'meta') {
-        /* eslint-disable no-continue*/
-        continue;
-      }
-      const os = key as keyof Omit<PolicyConfig, 'meta'>;
-
-      policyOutput = {
-        ...policyOutput,
-        [os]: {
-          ...policyOutput[os],
-          ...getDisabledCommonProtectionsForOS(policyOutput, os),
-          popup: {
-            ...policyOutput[os].popup,
-            ...getDisabledCommonPopupsForOS(policyOutput, os),
-          },
-        },
-      };
+  return Object.keys(policy).reduce((acc, item) => {
+    const os = item as keyof PolicyConfig;
+    if (os === 'meta') {
+      return acc;
     }
-  }
-  return policyOutput;
+    return {
+      ...acc,
+      [os]: {
+        ...policy[os],
+        ...getDisabledCommonProtectionsForOS(policy, os),
+        popup: {
+          ...policy[os].popup,
+          ...getDisabledCommonPopupsForOS(policy, os),
+        },
+      },
+    };
+  }, policy);
 };
 
 const getDisabledCommonProtectionsForOS = (
