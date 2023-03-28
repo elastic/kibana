@@ -35,7 +35,6 @@ import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 import { getFieldItemActions } from '../common/get_field_item_actions';
 
 export interface FieldItemProps {
-  isSelected: boolean;
   core: DatasourceDataPanelProps['core'];
   fieldFormats: FieldFormatsStart;
   field: IndexPatternField;
@@ -58,7 +57,6 @@ export interface FieldItemProps {
 
 export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const {
-    isSelected,
     field,
     indexPattern,
     highlight,
@@ -171,13 +169,12 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             onDragStart={closePopover}
           >
             <FieldItemButton<IndexPatternField>
-              isSelected={isSelected}
+              isSelected={false} // multiple selections are allowed
               isEmpty={!exists}
               isActive={infoIsOpen}
               field={field}
               fieldSearchHighlight={highlight}
               onClick={togglePopover}
-              canAddMultipleTimes
               buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
               onAddFieldToWorkspace={onAddFieldToWorkspace}
             />

@@ -138,14 +138,13 @@ export function TextBasedDataPanel({
           dataTestSubj={`lnsFieldListPanelField-${field.name}`}
         >
           <FieldItemButton<DatatableColumn>
-            isSelected={groupName === FieldsGroupNames.SelectedFields}
+            isSelected={false} // multiple selections are allowed
             isEmpty={false}
             isActive={false}
             field={field}
             fieldSearchHighlight={fieldSearchHighlight}
             getCustomFieldType={getCustomFieldType}
             onClick={undefined}
-            canAddMultipleTimes
             buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
             onAddFieldToWorkspace={onAddFieldToWorkspace}
           />

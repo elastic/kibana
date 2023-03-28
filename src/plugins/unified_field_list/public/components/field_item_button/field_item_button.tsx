@@ -34,7 +34,6 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   size?: FieldButtonProps['size'];
   onClick: FieldButtonProps['onClick'];
   shouldAlwaysShowAction?: boolean; // should the field action be visible on hover or always
-  canAddMultipleTimes?: boolean; // whether to toggle between Add/Remove buttons or show only Add button
   buttonAddFieldToWorkspaceProps?: Partial<EuiButtonIconProps>;
   buttonRemoveFieldFromWorkspaceProps?: Partial<EuiButtonIconProps>;
   onAddFieldToWorkspace?: (field: T) => unknown;
@@ -55,7 +54,6 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
  * @param size
  * @param onClick
  * @param shouldAlwaysShowAction
- * @param canAddMultipleTimes
  * @param buttonAddFieldToWorkspaceProps
  * @param buttonRemoveFieldFromWorkspaceProps
  * @param onAddFieldToWorkspace
@@ -76,7 +74,6 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   size,
   onClick,
   shouldAlwaysShowAction,
-  canAddMultipleTimes,
   buttonAddFieldToWorkspaceProps,
   buttonRemoveFieldFromWorkspaceProps,
   onAddFieldToWorkspace,
@@ -131,54 +128,50 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   const fieldActionClassName = classnames('unifiedFieldListItemButton__action', {
     'unifiedFieldListItemButton__action--always': shouldAlwaysShowAction,
   });
-  const fieldAction =
-    isSelected && !canAddMultipleTimes
-      ? onRemoveFieldFromWorkspace && (
-          <EuiToolTip
-            key={`selected-to-remove-${field.name}-${removeFieldFromWorkspaceTooltip}`}
-            content={removeFieldFromWorkspaceTooltip}
-          >
-            <EuiButtonIcon
-              data-test-subj={`unifiedFieldListItem_removeField-${field.name}`}
-              aria-label={removeFieldFromWorkspaceTooltip}
-              {...(buttonRemoveFieldFromWorkspaceProps || {})}
-              className={classnames(
-                fieldActionClassName,
-                buttonRemoveFieldFromWorkspaceProps?.className
-              )}
-              color="danger"
-              iconType="cross"
-              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onRemoveFieldFromWorkspace(field);
-              }}
-            />
-          </EuiToolTip>
-        )
-      : onAddFieldToWorkspace && (
-          <EuiToolTip
-            key={`deselected-to-add-${field.name}-${addFieldToWorkspaceTooltip}`}
-            content={addFieldToWorkspaceTooltip}
-          >
-            <EuiButtonIcon
-              data-test-subj={`unifiedFieldListItem_addField-${field.name}`}
-              aria-label={addFieldToWorkspaceTooltip}
-              {...(buttonAddFieldToWorkspaceProps || {})}
-              className={classnames(
-                fieldActionClassName,
-                buttonAddFieldToWorkspaceProps?.className
-              )}
-              color="text"
-              iconType="plusInCircle"
-              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onAddFieldToWorkspace(field);
-              }}
-            />
-          </EuiToolTip>
-        );
+  const fieldAction = isSelected
+    ? onRemoveFieldFromWorkspace && (
+        <EuiToolTip
+          key={`selected-to-remove-${field.name}-${removeFieldFromWorkspaceTooltip}`}
+          content={removeFieldFromWorkspaceTooltip}
+        >
+          <EuiButtonIcon
+            data-test-subj={`unifiedFieldListItem_removeField-${field.name}`}
+            aria-label={removeFieldFromWorkspaceTooltip}
+            {...(buttonRemoveFieldFromWorkspaceProps || {})}
+            className={classnames(
+              fieldActionClassName,
+              buttonRemoveFieldFromWorkspaceProps?.className
+            )}
+            color="danger"
+            iconType="cross"
+            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onRemoveFieldFromWorkspace(field);
+            }}
+          />
+        </EuiToolTip>
+      )
+    : onAddFieldToWorkspace && (
+        <EuiToolTip
+          key={`deselected-to-add-${field.name}-${addFieldToWorkspaceTooltip}`}
+          content={addFieldToWorkspaceTooltip}
+        >
+          <EuiButtonIcon
+            data-test-subj={`unifiedFieldListItem_addField-${field.name}`}
+            aria-label={addFieldToWorkspaceTooltip}
+            {...(buttonAddFieldToWorkspaceProps || {})}
+            className={classnames(fieldActionClassName, buttonAddFieldToWorkspaceProps?.className)}
+            color="text"
+            iconType="plusInCircle"
+            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onAddFieldToWorkspace(field);
+            }}
+          />
+        </EuiToolTip>
+      );
 
   const conflictInfoIcon = field.type === 'conflict' ? <FieldConflictInfoIcon /> : null;
 

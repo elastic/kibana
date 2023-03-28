@@ -372,7 +372,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     ({ field, itemIndex, groupIndex, groupName, hideDetails, fieldSearchHighlight }) => (
       <FieldItem
         field={field}
-        isSelected={groupName === FieldsGroupNames.SelectedFields}
         exists={groupName !== FieldsGroupNames.EmptyFields}
         hideDetails={hideDetails || field.type === 'document'}
         itemIndex={itemIndex}
