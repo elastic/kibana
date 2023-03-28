@@ -1082,9 +1082,7 @@
         "label": "getIndexTemplate",
         "description": [],
         "signature": [
-          "(kibanaVersion: string, ilmPolicyName: string, indexPatterns: ",
-          "IIndexPatternString",
-          ", componentTemplateRefs: string[], totalFieldsLimit: number) => ",
+          "({ componentTemplateRefs, ilmPolicyName, indexPatterns, kibanaVersion, namespace, totalFieldsLimit, }: GetIndexTemplateOpts) => ",
           "IndicesPutIndexTemplateRequest"
         ],
         "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
@@ -1094,72 +1092,12 @@
           {
             "parentPluginId": "alerting",
             "id": "def-server.getIndexTemplate.$1",
-            "type": "string",
-            "tags": [],
-            "label": "kibanaVersion",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.getIndexTemplate.$2",
-            "type": "string",
-            "tags": [],
-            "label": "ilmPolicyName",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.getIndexTemplate.$3",
             "type": "Object",
             "tags": [],
-            "label": "indexPatterns",
+            "label": "{\n  componentTemplateRefs,\n  ilmPolicyName,\n  indexPatterns,\n  kibanaVersion,\n  namespace,\n  totalFieldsLimit,\n}",
             "description": [],
             "signature": [
-              "IIndexPatternString"
-            ],
-            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.getIndexTemplate.$4",
-            "type": "Array",
-            "tags": [],
-            "label": "componentTemplateRefs",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.getIndexTemplate.$5",
-            "type": "number",
-            "tags": [],
-            "label": "totalFieldsLimit",
-            "description": [],
-            "signature": [
-              "number"
+              "GetIndexTemplateOpts"
             ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
             "deprecated": false,
@@ -1959,6 +1897,22 @@
             "label": "useLegacyAlerts",
             "description": [
               "\nOptional flag to include a reference to the legacy alert component template.\nAny rule type that is migrating from the rule registry should set this\nflag to true to ensure their alerts-as-data indices are backwards compatible."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.isSpaceAware",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSpaceAware",
+            "description": [
+              "\nOptional flag to indicate that resources should be space-aware. When set to\ntrue, alerts-as-data resources will be created for every space where a rule\nof this type runs."
             ],
             "signature": [
               "boolean | undefined"
