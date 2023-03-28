@@ -44,22 +44,6 @@ export interface PluginSetupContract {
   registerElasticsearchFeature(feature: ElasticsearchFeatureConfig): void;
 
   /**
-   * Calling this function during setup will crash Kibana.
-   * Use start contract instead.
-   * @deprecated
-   * @removeBy 8.8.0
-   */
-  getKibanaFeatures(): KibanaFeature[];
-
-  /**
-   * Calling this function during setup will crash Kibana.
-   * Use start contract instead.
-   * @deprecated
-   * @removeBy 8.8.0
-   */
-  getElasticsearchFeatures(): ElasticsearchFeature[];
-
-  /**
    * In the future, OSS features should register their own subfeature
    * privileges. This can be done when parts of Reporting are moved to
    * src/plugins. For now, this method exists for `reporting` to tell
@@ -113,10 +97,6 @@ export class FeaturesPlugin
     return deepFreeze({
       registerKibanaFeature: this.featureRegistry.registerKibanaFeature.bind(this.featureRegistry),
       registerElasticsearchFeature: this.featureRegistry.registerElasticsearchFeature.bind(
-        this.featureRegistry
-      ),
-      getKibanaFeatures: this.featureRegistry.getAllKibanaFeatures.bind(this.featureRegistry),
-      getElasticsearchFeatures: this.featureRegistry.getAllElasticsearchFeatures.bind(
         this.featureRegistry
       ),
       enableReportingUiCapabilities: this.enableReportingUiCapabilities.bind(this),
