@@ -814,6 +814,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
+/x-pack/test/api_integration/apis/synthetics @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/field_value_suggestions @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/core_web_vitals @elastic/uptime
