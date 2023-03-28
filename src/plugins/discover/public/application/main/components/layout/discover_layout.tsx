@@ -56,11 +56,9 @@ const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function DiscoverLayout({
   inspectorAdapters,
-  expandedDoc,
   navigateTo,
   onChangeDataView,
   onUpdateQuery,
-  setExpandedDoc,
   resetSavedSearch,
   savedSearch,
   searchSource,
@@ -122,8 +120,8 @@ export function DiscoverLayout({
   );
 
   const onOpenInspector = useInspector({
-    setExpandedDoc,
     inspector,
+    stateContainer,
     inspectorAdapters,
     savedSearch,
   });
@@ -239,8 +237,6 @@ export function DiscoverLayout({
           dataView={dataView}
           navigateTo={navigateTo}
           resetSavedSearch={resetSavedSearch}
-          expandedDoc={expandedDoc}
-          setExpandedDoc={setExpandedDoc}
           savedSearch={savedSearch}
           stateContainer={stateContainer}
           columns={currentColumns}
@@ -257,7 +253,6 @@ export function DiscoverLayout({
     currentColumns,
     data,
     dataView,
-    expandedDoc,
     inspectorAdapters,
     isPlainRecord,
     isTimeBased,
@@ -268,7 +263,6 @@ export function DiscoverLayout({
     resetSavedSearch,
     resultState,
     savedSearch,
-    setExpandedDoc,
     stateContainer,
     viewMode,
   ]);
