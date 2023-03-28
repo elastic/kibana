@@ -100,7 +100,10 @@ export const createOrUpdateIndexTemplate = async ({
   let mappings: MappingTypeMapping = {};
   try {
     // Simulate the index template to proactively identify any issues with the mapping
-    const simulateResponse = await esClient.indices.simulateTemplate(template);
+    const simulateResponse = await retryTransientEsErrors(
+      () => esClient.indices.simulateTemplate(template),
+      { logger }
+    );
     mappings = simulateResponse.template.mappings;
   } catch (err) {
     logger.error(
