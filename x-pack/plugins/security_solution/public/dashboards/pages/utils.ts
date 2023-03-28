@@ -11,6 +11,7 @@ import type { RouteSpyState } from '../../common/utils/route/types';
 
 export const getTrailingBreadcrumbs = (params: RouteSpyState): ChromeBreadcrumb[] => {
   let breadcrumb: ChromeBreadcrumb[] = [];
+
   const dashboardTitle = params?.state?.dashboardTitle?.trim();
   if (params?.state?.dashboardTitle || params.detailName) {
     breadcrumb = [

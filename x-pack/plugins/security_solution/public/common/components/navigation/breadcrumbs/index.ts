@@ -135,7 +135,7 @@ const getTrailingBreadcrumbsForRoutes = (
       return getAlertDetailBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.cloudSecurityPostureBenchmarks:
       return getCSPBreadcrumbs(spyState, getSecuritySolutionUrl);
-    case SecurityPageName.dashboardView:
+    case SecurityPageName.dashboardsLanding:
       return getDashboardBreadcrumbs(spyState);
   }
 
