@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'uptime', 'timePicker']);
   const testSubjects = getService('testSubjects');
 
-
   describe('check heartbeat overview page', function () {
     it('Uptime app should show 1 UP monitor', async function () {
       await PageObjects.common.navigateToApp('uptime', { insertTimestamp: false });
