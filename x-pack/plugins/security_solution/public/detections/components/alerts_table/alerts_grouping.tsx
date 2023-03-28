@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEmpty } from 'lodash/fp';
 import { updateGroupSelector } from '../../../common/store/grouping/actions';
-import { groupSelectors } from '../../../common/store/grouping';
-import type { State } from '../../../common/store';
 import type { TableIdLiteral } from '../../../../common/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
@@ -79,17 +77,17 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     tracker: track,
   });
 
-  const getGroupSelector = groupSelectors.getGroupSelector();
-
-  const groupSelectorState = useSelector((state: State) => getGroupSelector(state));
+  const selectorOptions = useRef('');
 
   useEffect(() => {
-    if (isNoneGroup(selectedGroups) && groupSelectorState == null) {
-      dispatch(updateGroupSelector({ groupSelector }));
-    } else if (groupSelectorState !== null) {
-      dispatch(updateGroupSelector({ groupSelector: null }));
+    if (isNoneGroup(selectedGroups)) {
+      const stringifiedOptions = JSON.stringify(groupSelector.props.options);
+      if (stringifiedOptions !== selectorOptions.current) {
+        selectorOptions.current = stringifiedOptions;
+        dispatch(updateGroupSelector({ groupSelector }));
+      }
     }
-  }, [dispatch, groupSelector, groupSelectorState, selectedGroups]);
+  }, [dispatch, groupSelector, selectedGroups]);
 
   const getLevel = useCallback(
     (
@@ -133,12 +131,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     return null;
   }
 
-  return (
-    <>
-      {groupSelector}
-      {getLevel(0, selectedGroups[0])}
-    </>
-  );
+  return getLevel(0, selectedGroups[0]);
 };
 
 export const GroupedAlertsTable = React.memo(GroupedAlertsTableComponent);
