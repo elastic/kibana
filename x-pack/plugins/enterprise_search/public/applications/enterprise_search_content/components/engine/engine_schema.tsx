@@ -146,9 +146,9 @@ export const EngineSchema: React.FC = () => {
   const { engineName } = useValues(EngineIndicesLogic);
   const { isLoadingEngineSchema, schemaFields } = useValues(EngineViewLogic);
   const { fetchEngineSchema } = useActions(EngineViewLogic);
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
-    [id: string]: JSX.Element;
-  }>({});
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
+    {}
+  );
 
   useEffect(() => {
     fetchEngineSchema({ engineName });
