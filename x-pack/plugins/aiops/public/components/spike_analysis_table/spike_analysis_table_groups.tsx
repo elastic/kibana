@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import md5 from 'md5';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { sortBy } from 'lodash';
 
@@ -253,7 +254,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                   {(duplicate ?? 0) <= 1 ? '* ' : ''}
                   {`${fieldName}: `}
                 </span>
-                <span style={{ color: visColors[2] }}>{`${fieldValue}`}</span>
+                <span style={{ color: visColors[2] }}>{`${md5(fieldValue + '')}`}</span>
               </EuiBadge>
               <EuiSpacer size="xs" />
             </>
@@ -502,7 +503,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       onChange={onChange}
-      pagination={pagination}
+      pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
       loading={false}
       sorting={sorting as EuiTableSortingType<GroupTableItem>}
       rowProps={(group) => {

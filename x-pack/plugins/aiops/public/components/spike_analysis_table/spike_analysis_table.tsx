@@ -395,7 +395,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       columns={columns}
       items={pageOfItems}
       onChange={onChange}
-      pagination={pagination}
+      pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
       loading={false}
       sorting={sorting as EuiTableSortingType<SignificantTerm>}
       rowProps={(significantTerm) => {

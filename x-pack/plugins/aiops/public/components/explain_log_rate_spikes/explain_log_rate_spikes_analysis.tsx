@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, FC } from 'react';
-import { isEqual } from 'lodash';
+import React, { useEffect, useMemo, useState, type ChangeEvent, type FC } from 'react';
+import { isEqual, uniq } from 'lodash';
+import { css } from '@emotion/react';
 
 import {
+  euiYScrollWithShadows,
+  useEuiTheme,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -74,8 +84,18 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   windowParameters,
   searchQuery,
 }) => {
+  const euiThemeContext = useEuiTheme();
   const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
+
+  // maxHeight: $euiDataGridPopoverMaxHeight
+  const fieldSelectPopover = useMemo(
+    () => css`
+      ${euiYScrollWithShadows(euiThemeContext, {})}
+      max-height: 400px;
+    `,
+    [euiThemeContext]
+  );
 
   const { clearAllRowState } = useSpikeAnalysisTableRowContext();
 
@@ -94,6 +114,30 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     // When toggling the group switch, clear all row selections
     clearAllRowState();
   };
+
+  const [fieldSearchText, setFieldSearchText] = useState('');
+  const [skippedFields, setSkippedFields] = useState<string[]>([]);
+  const setFieldsFilter = (fieldNames: string[], checked: boolean) => {
+    let updatedSkippedFields = [...skippedFields];
+    if (!checked) {
+      updatedSkippedFields.push(...fieldNames);
+    } else {
+      updatedSkippedFields = skippedFields.filter((d) => !fieldNames.includes(d));
+    }
+    setSkippedFields(updatedSkippedFields);
+    setOverrides({
+      loaded: 0,
+      remainingFieldCandidates: [],
+      significantTerms: data.significantTerms.filter(
+        (d) => !updatedSkippedFields.includes(d.fieldName)
+      ),
+      skipSignificantTermsHistograms: true,
+    });
+  };
+
+  const [isFieldSelectionPopoverOpen, setIsFieldSelectionPopoverOpen] = useState(false);
+  const onFieldSelectionButtonClick = () => setIsFieldSelectionPopoverOpen((isOpen) => !isOpen);
+  const closePopover = () => setIsFieldSelectionPopoverOpen(false);
 
   const {
     cancel,
@@ -118,6 +162,17 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     { reducer: streamReducer, initialState }
   );
 
+  const { significantTerms } = data;
+  const uniqueFieldNames = useMemo(
+    () => uniq(significantTerms.map((d) => d.fieldName)).sort(),
+    [significantTerms]
+  );
+  const filteredUniqueFieldNames = useMemo(() => {
+    return uniqueFieldNames.filter(
+      (d) => d.toLowerCase().indexOf(fieldSearchText.toLowerCase()) !== -1
+    );
+  }, [fieldSearchText, uniqueFieldNames]);
+
   useEffect(() => {
     if (!isRunning) {
       const { loaded, remainingFieldCandidates, groupsMissing } = data;
@@ -139,14 +194,18 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   // Start handler clears possibly hovered or pinned
   // significant terms on analysis refresh.
-  function startHandler(continueAnalysis = false) {
+  function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
       setOverrides(undefined);
     }
 
     // Reset grouping to false and clear all row selections when restarting the analysis.
-    setGroupResults(false);
-    clearAllRowState();
+    if (resetGroupButton) {
+      setGroupResults(false);
+      clearAllRowState();
+      setSkippedFields([]);
+      setIsFieldSelectionPopoverOpen(false);
+    }
 
     setCurrentAnalysisWindowParameters(windowParameters);
 
@@ -196,7 +255,130 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         onRefresh={() => startHandler(false)}
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
-      />
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFormRow display="columnCompressedSwitch">
+            <EuiSwitch
+              data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
+                groupResults ? ' checked' : ''
+              }`}
+              disabled={!foundGroups}
+              showLabel={true}
+              label={groupResultsMessage}
+              checked={groupResults}
+              onChange={onSwitchToggle}
+              compressed
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <>
+            <EuiPopover
+              data-test-subj="aiopsFieldFilterPopover"
+              anchorPosition="downLeft"
+              panelPaddingSize="s"
+              button={
+                <EuiButton
+                  data-test-subj="aiopsFieldFilterButton"
+                  onClick={onFieldSelectionButtonClick}
+                  disabled={!groupResults || isRunning}
+                  size="s"
+                  iconType="arrowDown"
+                  iconSide="right"
+                  iconSize="s"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.explainLogRateSpikesPage.fieldFilterButtonLabel"
+                    defaultMessage="Filter fields"
+                  />
+                </EuiButton>
+              }
+              isOpen={isFieldSelectionPopoverOpen}
+              closePopover={closePopover}
+            >
+              <EuiPopoverTitle>
+                <EuiFieldText
+                  compressed
+                  placeholder={i18n.translate('xpack.aiops.analysis.fieldSelectorPlaceholder', {
+                    defaultMessage: 'Search',
+                  })}
+                  aria-label={i18n.translate('xpack.aiops.analysis.fieldSelectorAriaLabel', {
+                    defaultMessage: 'Filter fields',
+                  })}
+                  value={fieldSearchText}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setFieldSearchText(e.currentTarget.value)
+                  }
+                  data-test-subj="dataGridColumnSelectorSearch"
+                />
+              </EuiPopoverTitle>
+              <div css={fieldSelectPopover}>
+                {filteredUniqueFieldNames.map((fieldName) => (
+                  <div key={fieldName} css={{ padding: '4px' }}>
+                    <EuiSwitch
+                      className="euiSwitch--mini"
+                      compressed
+                      label={fieldName}
+                      onChange={(e) => setFieldsFilter([fieldName], e.target.checked)}
+                      checked={!skippedFields.includes(fieldName)}
+                    />
+                  </div>
+                ))}
+              </div>
+              <EuiPopoverFooter>
+                <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="spaceBetween">
+                  {fieldSearchText.length > 0 && (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          flush="left"
+                          onClick={() => setFieldsFilter(filteredUniqueFieldNames, true)}
+                          data-test-subj="dataGridColumnSelectorShowAllButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.aiops.explainLogRateSpikesPage.enableAllSelected"
+                            defaultMessage="Enable filtered fields"
+                          />
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          flush="right"
+                          onClick={() => setFieldsFilter(filteredUniqueFieldNames, false)}
+                          data-test-subj="dataGridColumnSelectorHideAllButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.aiops.explainLogRateSpikesPage.disableAllSelected"
+                            defaultMessage="Disable filtered fields"
+                          />
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      onClick={() => {
+                        startHandler(true, false);
+                        setFieldSearchText('');
+                        closePopover();
+                      }}
+                      disabled={isRunning}
+                    >
+                      <FormattedMessage
+                        id="xpack.aiops.explainLogRateSpikesPage.applyFieldFilterLabel"
+                        defaultMessage="Apply"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPopoverFooter>
+            </EuiPopover>
+          </>
+        </EuiFlexItem>
+      </ProgressControls>
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
@@ -235,24 +417,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           <EuiSpacer size="xs" />
         </>
       ) : null}
-      {showSpikeAnalysisTable && foundGroups && (
+      {showSpikeAnalysisTable && groupResults && foundGroups && (
         <>
           <EuiSpacer size="xs" />
-          <EuiFormRow
-            display="columnCompressedSwitch"
-            helpText={groupResults ? groupResultsHelpMessage : undefined}
-          >
-            <EuiSwitch
-              data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
-                groupResults ? ' checked' : ''
-              }`}
-              showLabel={true}
-              label={groupResultsMessage}
-              checked={groupResults}
-              onChange={onSwitchToggle}
-              compressed
-            />
-          </EuiFormRow>
+          <EuiText size="xs">{groupResults ? groupResultsHelpMessage : undefined}</EuiText>
         </>
       )}
       <EuiSpacer size="xs" />

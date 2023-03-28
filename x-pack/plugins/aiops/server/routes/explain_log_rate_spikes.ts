@@ -560,7 +560,11 @@ export const defineExplainLogRateSpikesRoute = (
           logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
 
           // time series filtered by fields
-          if (significantTerms.length > 0 && overallTimeSeries !== undefined) {
+          if (
+            significantTerms.length > 0 &&
+            overallTimeSeries !== undefined &&
+            !request.body.overrides?.skipSignificantTermsHistograms
+          ) {
             const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
               if (shouldStop) {
                 logDebugMessage('shouldStop abort fetching field/value histograms.');
