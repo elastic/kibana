@@ -14,4 +14,4 @@
 export type ApiVersion = `${number}`;
 
 /** @internal */
-export const ELASTIC_HTTP_VERSION_HEADER = 'Elastic-Api-Version' as const;
+export const ELASTIC_HTTP_VERSION_HEADER = 'elastic-api-version' as const;
