@@ -35,21 +35,19 @@ export type DataFilters = {
   joinKeyFilter?: Filter;
 };
 
-export type TMSSourceRequestMeta = DataFilters & {
-  applyGlobalTime: boolean;
-  sourceQuery?: Query;
-};
-
-export type VectorSourceRequestMeta = DataFilters & {
+export type SourceRequestMeta = DataFilters & {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
   applyForceRefresh: boolean;
+  sourceQuery?: Query;
+  isForceRefresh: boolean;
+};
+
+export type VectorSourceRequestMeta = SourceRequestMeta & {
   fieldNames: string[];
   geogridPrecision?: number;
   timesliceMaskField?: string;
-  sourceQuery?: Query;
   sourceMeta: object | null;
-  isForceRefresh: boolean;
   isFeatureEditorOpenForLayer: boolean;
 };
 

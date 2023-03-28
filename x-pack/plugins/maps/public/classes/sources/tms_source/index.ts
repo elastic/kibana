@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TMSSourceRequestMeta } from '../../../../common/descriptor_types';
+import { SourceRequestMeta } from '../../../../common/descriptor_types';
 import { ISource } from '../source';
 export interface ITMSSource extends ISource {
-  getUrlTemplate(requestMeta: TMSSourceRequestMeta): Promise<string>;
+  getUrlTemplate(requestMeta: SourceRequestMeta): Promise<string>;
 }
