@@ -40,8 +40,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   async find(options: SavedObjectsClientCommonFindArgs) {
     const results = await this.contentManagemntClient.search<DataViewSearchIn, DataViewSearchOut>({
       contentTypeId: 'index-pattern',
-      query: { search: options.search },
-      // ...options,
+      query: options,
     });
     return results.savedObjects;
   }
