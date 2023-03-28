@@ -152,8 +152,10 @@ export const LogsSettingsPage = () => {
                 <>
                   {isInlineLogView && (
                     <EuiFlexGroup>
-                      <InlineLogViewCallout revertToDefaultLogView={revertToDefaultLogView} />
-                      <EuiSpacer />
+                      <EuiFlexItem>
+                        <InlineLogViewCallout revertToDefaultLogView={revertToDefaultLogView} />
+                        <EuiSpacer />
+                      </EuiFlexItem>
                     </EuiFlexGroup>
                   )}
                   <EuiFlexGroup justifyContent="flexEnd">
