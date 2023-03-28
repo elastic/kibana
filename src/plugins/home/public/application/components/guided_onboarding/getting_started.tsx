@@ -52,8 +52,18 @@ export const GettingStarted = () => {
   const { search } = useLocation();
   const query = parse(search);
 
+  const isTypeOfGuideFilterValue = (useCase: string | string[] | null) => {
+    const filterValues = ['search', 'observability', 'security', 'all'];
+
+    if (!useCase) {
+      return false;
+    }
+
+    return filterValues.includes(useCase as string);
+  };
+
   const [filter, setFilter] = useState<GuideFilterValues>(
-    query.useCase ? (query.useCase as GuideFilterValues) : 'all'
+    isTypeOfGuideFilterValue(query.useCase) ? (query.useCase as GuideFilterValues) : 'all'
   );
   const history = useHistory();
 
