@@ -33,7 +33,7 @@ const testImageDataResult = {
   },
 };
 jest.mock('../monitor_test_result/use_retrieve_step_image', () => ({
-  useRetrieveStepImage: () => ({ imageResult: testImageDataResult, isLoading: false }),
+  useRetrieveStepImage: () => testImageDataResult,
 }));
 
 describe('JourneyScreenshotDialog', () => {
