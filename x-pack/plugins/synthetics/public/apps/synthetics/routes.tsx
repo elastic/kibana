@@ -215,7 +215,7 @@ export const PageRouter: FC = () => {
                 isPageDataLoaded={true}
                 {...pageTemplateProps}
               >
-                {isUnPrivileged ? isUnPrivileged : <RouteComponent />}
+                {isUnPrivileged || <RouteComponent />}
               </PageTemplateComponent>
             </div>
           </Route>
