@@ -8,6 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { EuiFlexGroup } from '@elastic/eui';
 import {
   buildCustomKqlIndicator,
   buildApmAvailabilityIndicator,
@@ -23,7 +24,11 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
+const Template: ComponentStory<typeof Component> = (props: Props) => (
+  <EuiFlexGroup gutterSize="s">
+    <Component {...props} />
+  </EuiFlexGroup>
+);
 
 export const WithCustomKql = Template.bind({});
 WithCustomKql.args = { slo: buildSlo({ indicator: buildCustomKqlIndicator() }) };
