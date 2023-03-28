@@ -340,6 +340,24 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getOnRenderComplete$",
+            "type": "Function",
+            "tags": [],
+            "label": "getOnRenderComplete$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<void>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.reportsEmbeddableLoad",
             "type": "Function",
             "tags": [],
@@ -615,38 +633,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.setOnInitialRenderComplete",
-            "type": "Function",
-            "tags": [],
-            "label": "setOnInitialRenderComplete",
-            "description": [],
-            "signature": [
-              "(onInitialRenderComplete?: (() => void) | undefined) => void"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.setOnInitialRenderComplete.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "onInitialRenderComplete",
-                "description": [],
-                "signature": [
-                  "(() => void) | undefined"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
