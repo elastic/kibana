@@ -38,7 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
     body: Record<string, unknown> | undefined;
   }
 
-  describe('When attempting to call an endpoint api', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/153855
+  describe.skip('When attempting to call an endpoint api', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
     let actionId = '';
     let agentId = '';

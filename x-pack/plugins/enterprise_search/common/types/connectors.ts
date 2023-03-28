@@ -8,7 +8,7 @@
 export interface KeyValuePair {
   label: string;
   order?: number | null;
-  value: string | null;
+  value: string | number | boolean | null;
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
