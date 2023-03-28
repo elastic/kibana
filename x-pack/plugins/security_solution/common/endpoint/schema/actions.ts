@@ -152,7 +152,7 @@ export const EndpointActionListRequestSchema = {
       ])
     ),
     withRuleActions: schema.boolean({ defaultValue: true }),
-    alertIds: schema.maybe(
+    alertId: schema.maybe(
       schema.oneOf([
         schema.arrayOf(schema.string({ minLength: 1 }), {
           minSize: 1,

@@ -37,7 +37,7 @@ export const getActions = async ({
   userIds,
   unExpiredOnly,
   withRuleActions,
-  alertIds,
+  alertId,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
   actionRequests: TransportResult<estypes.SearchResponse<LogsEndpointAction>, unknown>;
@@ -52,8 +52,8 @@ export const getActions = async ({
     });
   }
 
-  if (alertIds?.length) {
-    additionalFilters.push({ terms: { 'EndpointActions.data.alert_ids': alertIds } });
+  if (alertId?.length) {
+    additionalFilters.push({ terms: { 'data.alert_id': alertId } });
   }
 
   if (elasticAgentIds?.length) {
@@ -86,7 +86,7 @@ export const getActions = async ({
       ? {
           must_not: {
             exists: {
-              field: 'EndpointActions.data.alert_ids',
+              field: 'data.alert_id',
             },
           },
         }

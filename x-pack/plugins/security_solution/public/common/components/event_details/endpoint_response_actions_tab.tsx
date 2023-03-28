@@ -36,7 +36,7 @@ export const useEndpointResponseActionsTab = ({
     isFetched,
   } = useGetEndpointActionList(
     {
-      alertIds: [rawEventData?._id ?? ''],
+      alertId: [rawEventData?._id ?? ''],
       withRuleActions: true,
     },
     { retry: false, enabled: rawEventData && responseActionsEnabled }

@@ -112,14 +112,16 @@ export class ActionCreateService {
         data: {
           command: payload.command,
           comment: payload.comment ?? undefined,
-          ...(payload.alert_ids ? { alert_ids: payload.alert_ids } : {}),
-          ...(payload.rule_id ? { rule_id: payload.rule_id } : {}),
-          ...(payload.rule_name ? { rule_name: payload.rule_name } : {}),
+          ...(payload.alert_ids ? { alert_id: payload.alert_ids } : {}),
           parameters: getActionParameters() ?? undefined,
         },
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
       user: {
         id: payload.user ? payload.user.username : 'unknown',
+      },
+      rule: {
+        ...(payload.rule_id ? { id: payload.rule_id } : {}),
+        ...(payload.rule_name ? { name: payload.rule_name } : {}),
       },
     };
 

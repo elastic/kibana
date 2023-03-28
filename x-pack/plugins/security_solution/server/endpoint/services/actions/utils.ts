@@ -86,9 +86,9 @@ export const mapToNormalizedActionRequest = (
       id: actionRequest.EndpointActions.action_id,
       type,
       parameters: actionRequest.EndpointActions.data.parameters,
-      alertIds: actionRequest.EndpointActions.data.alert_ids,
-      ruleId: actionRequest.EndpointActions.data.rule_id,
-      ruleName: actionRequest.EndpointActions.data.rule_name,
+      alertIds: actionRequest.EndpointActions.data.alert_id,
+      ruleId: actionRequest.rule?.id,
+      ruleName: actionRequest.rule?.name,
     };
   }
 
