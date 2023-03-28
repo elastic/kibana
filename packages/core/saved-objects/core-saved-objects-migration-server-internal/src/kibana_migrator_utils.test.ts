@@ -48,6 +48,7 @@ describe('getIndicesInvoledInRelocation', () => {
     return {
       client,
       mainIndex: '.kibana',
+      legacyIndex: '.kibana_1',
       indexTypesMap: {},
       defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
       logger: loggerMock.create(),
@@ -91,7 +92,7 @@ describe('getIndicesInvoledInRelocation', () => {
     );
   });
 
-  it('assumes fresh deployment if the mainIndex does not exist, returns an empty list of moving types', async () => {
+  it('assumes fresh deployment if the mainIndex and legacyIndex do not exist, returns an empty list of moving types', async () => {
     const params = getIndicesInvoledInRelocationParams();
     params.client.indices.getMapping.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(

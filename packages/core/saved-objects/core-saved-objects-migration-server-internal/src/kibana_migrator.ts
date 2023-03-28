@@ -41,6 +41,7 @@ import { createMultiPromiseDefer, indexMapToIndexTypesMap } from './kibana_migra
 import {
   ALLOWED_CONVERT_VERSION,
   DEFAULT_INDEX_TYPES_MAP,
+  LEGACY_SAVED_OBJECT_INDEX,
   MAIN_SAVED_OBJECT_INDEX,
   type IndexTypesMap,
 } from './kibana_migrator_constants';
@@ -194,6 +195,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     // and check if some SO types have been moved to different indices
     const indicesWithMovingTypes = await getIndicesInvoledInRelocation({
       mainIndex: MAIN_SAVED_OBJECT_INDEX,
+      legacyIndex: LEGACY_SAVED_OBJECT_INDEX,
       client: this.client,
       indexTypesMap,
       logger: this.log,

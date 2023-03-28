@@ -38,49 +38,99 @@ export function createMultiPromiseDefer(indices: string[]): Record<string, Defer
   }, {});
 }
 
+export async function getCurrentIndexTypesMap({
+  client,
+  mainIndex,
+  legacyIndex,
+  defaultIndexTypesMap,
+  logger,
+}: {
+  client: ElasticsearchClient;
+  mainIndex: string;
+  legacyIndex: string;
+  defaultIndexTypesMap: IndexTypesMap;
+  logger: Logger;
+}): Promise<IndexTypesMap | undefined> {
+  try {
+    // check if the main index (i.e. .kibana) exists
+    const mapping = await client.indices.getMapping({
+      index: mainIndex,
+    });
+
+    // main index exists, try to extract the indexTypesMap from _meta
+    const meta = Object.values(mapping)?.[0]?.mappings._meta;
+    return meta?.indexTypesMap ?? defaultIndexTypesMap;
+  } catch (mainError) {
+    if (mainError.meta?.statusCode === 404) {
+      // the main index does NOT exist. Check if the legacy index (i.e. .kibana_1) exists
+      try {
+        await client.indices.getMapping({
+          index: legacyIndex,
+        });
+        // legacy exists, we assume we will have a default indexTypesMap after LEGACY migration
+        return defaultIndexTypesMap;
+      } catch (legacyError) {
+        if (legacyError.meta?.statusCode === 404) {
+          // legacy does NOT exist, we assume this is a fresh deployment
+          logger.debug(
+            `The ${mainIndex} and ${legacyIndex} indices do NOT exist. Assuming this is a fresh deployment`
+          );
+          return undefined;
+        } else {
+          logger.fatal(
+            `Cannot query the meta information on the ${legacyIndex} saved object index`
+          );
+          throw legacyError;
+        }
+      }
+    } else {
+      logger.fatal(`Cannot query the meta information on the ${mainIndex} saved object index`);
+      throw mainError;
+    }
+  }
+}
+
 export async function getIndicesInvoledInRelocation({
   client,
   mainIndex,
+  legacyIndex,
   indexTypesMap,
   defaultIndexTypesMap,
   logger,
 }: {
   client: ElasticsearchClient;
   mainIndex: string;
+  legacyIndex: string;
   indexTypesMap: IndexTypesMap;
   defaultIndexTypesMap: IndexTypesMap;
   logger: Logger;
 }): Promise<string[]> {
   const indicesWithMovingTypesSet = new Set<string>();
 
-  try {
-    // obtain the current type index map from the
-    const mapping = await client.indices.getMapping({
-      index: mainIndex,
-    });
-    const meta = Object.values(mapping)?.[0]?.mappings._meta;
-    const currentIndexMap: IndexTypesMap = meta?.indexTypesMap ?? defaultIndexTypesMap;
+  const currentIndexTypesMap = await getCurrentIndexTypesMap({
+    client,
+    mainIndex,
+    legacyIndex,
+    defaultIndexTypesMap,
+    logger,
+  });
 
-    const typeIndexDistribution = calculateTypeStatuses(currentIndexMap, indexTypesMap);
-
-    const relocated = Object.entries(typeIndexDistribution).filter(
-      ([, { status }]) => status === TypeStatus.Moved
-    );
-    relocated.forEach(([, { currentIndex, targetIndex }]) => {
-      indicesWithMovingTypesSet.add(currentIndex!);
-      indicesWithMovingTypesSet.add(targetIndex!);
-    });
-
-    return Array.from(indicesWithMovingTypesSet);
-  } catch (error) {
-    if (error.meta?.statusCode === 404) {
-      logger.debug(`The ${mainIndex} index does NOT exist. Assuming this is a fresh deployment`);
-      return [];
-    } else {
-      logger.fatal('Cannot query the meta information of the main saved object index');
-      throw error;
-    }
+  if (!currentIndexTypesMap) {
+    // this is a fresh deployment, no indices must be relocated
+    return [];
   }
+
+  const typeIndexDistribution = calculateTypeStatuses(currentIndexTypesMap, indexTypesMap);
+
+  const relocated = Object.entries(typeIndexDistribution).filter(
+    ([, { status }]) => status === TypeStatus.Moved
+  );
+  relocated.forEach(([, { currentIndex, targetIndex }]) => {
+    indicesWithMovingTypesSet.add(currentIndex!);
+    indicesWithMovingTypesSet.add(targetIndex!);
+  });
+
+  return Array.from(indicesWithMovingTypesSet);
 }
 
 export function indexMapToIndexTypesMap(indexMap: IndexMap): IndexTypesMap {
