@@ -7,4 +7,4 @@
 
 export { useStartAction } from './use_start_action';
 export { StartActionModal } from './start_action_modal';
-export { StartActionName } from './start_action_name';
+export { isStartActionDisabled, StartActionName } from './start_action_name';
