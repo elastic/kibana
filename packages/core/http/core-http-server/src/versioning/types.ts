@@ -7,6 +7,7 @@
  */
 
 import type { Type } from '@kbn/config-schema';
+import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
   RouteConfig,
@@ -21,11 +22,7 @@ import type {
 
 type RqCtx = RequestHandlerContextBase;
 
-/**
- * Assuming that version will be a monotonically increasing number where: version > 0.
- * @experimental
- */
-export type ApiVersion = `${number}`;
+export type { ApiVersion };
 
 /**
  * Configuration for a versioned route

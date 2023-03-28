@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { IExternalUrlPolicy } from './src/external_url_policy';
-
-export type { ApiVersion } from './src/versioning';
+/**
+ * A Kibana HTTP API version
+ * @note assumption that version will be monotonically increasing number where: version > 0.
+ * @experimental
+ */
+export type ApiVersion = `${number}`;
