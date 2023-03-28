@@ -44,17 +44,11 @@ describe('mapSpatialFilter', () => {
 
 describe('mapFilter', () => {
   test('should set key and value properties to undefined', async () => {
-    const filter = {
-      meta: {
-        type: FILTERS.SPATIAL_FILTER,
-      } as FilterMeta,
+    const before = {
+      meta: { type: FILTERS.SPATIAL_FILTER } as FilterMeta,
       query: {},
     } as Filter;
-    const before: any = {
-      meta: { type: FILTERS.SPATIAL_FILTER },
-      query: {},
-    };
-    const after = mapFilter(before as Filter);
+    const after = mapFilter(before);
 
     expect(after).toHaveProperty('meta');
     expect(after.meta).toHaveProperty('key', undefined);
