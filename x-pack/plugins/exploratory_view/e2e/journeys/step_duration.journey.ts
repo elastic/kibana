@@ -27,7 +27,7 @@ journey('Exploratory view', async ({ page, params }) => {
     reportType: 'kpi-over-time',
     allSeries: [
       {
-        dataType: 'synthetics',
+        dataType: 'uptime',
         time: {
           from: moment().subtract(10, 'y').toISOString(),
           to: moment().toISOString(),

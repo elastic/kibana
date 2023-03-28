@@ -39,6 +39,10 @@ import { getSingleMetricConfig } from './configurations/rum/single_metric_config
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {
+    id: DataTypes.UPTIME,
+    label: DataTypesLabels[DataTypes.UPTIME],
+  },
+  {
     id: DataTypes.SYNTHETICS,
     label: DataTypesLabels[DataTypes.SYNTHETICS],
   },
@@ -80,6 +84,12 @@ export const obsvReportConfigMap = {
     getSingleMetricConfig,
   ],
   [DataTypes.SYNTHETICS]: [
+    getSyntheticsKPIConfig,
+    getSyntheticsDistributionConfig,
+    getSyntheticsSingleMetricConfig,
+    getSyntheticsHeatmapConfig,
+  ],
+  [DataTypes.UPTIME]: [
     getSyntheticsKPIConfig,
     getSyntheticsDistributionConfig,
     getSyntheticsSingleMetricConfig,

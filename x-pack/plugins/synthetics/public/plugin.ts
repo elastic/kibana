@@ -147,7 +147,7 @@ export class UptimePlugin
     });
 
     plugins.exploratoryView.register({
-      appName: 'synthetics',
+      appName: 'uptime',
       hasData: async () => {
         const dataHelper = await getUptimeDataHelper();
         const status = await dataHelper.indexStatus();

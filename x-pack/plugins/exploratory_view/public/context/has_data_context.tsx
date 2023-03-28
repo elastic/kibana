@@ -13,7 +13,7 @@ import {
   APM_APP,
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
-  SYNTHETICS_APP,
+  UPTIME_APP,
   UX_APP,
 } from './constants';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
@@ -46,7 +46,7 @@ export const HasDataContext = createContext({} as HasDataContextValue);
 
 const apps: DataContextApps[] = [
   APM_APP,
-  SYNTHETICS_APP,
+  UPTIME_APP,
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
   UX_APP,
