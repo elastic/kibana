@@ -60,7 +60,7 @@ export const ScreenReaderRouteAnnouncements: FC<{
 
 const fallbackContentQueries = [
   'main', // Ideal target for all plugins using KibanaPageTemplate
-  '.euiPageContent', // Fallback for plugins using deprecated EuiPageContent
+  '[role="main"]', // Fallback for plugins using deprecated EuiPageContent
   '.kbnAppWrapper', // Last-ditch fallback for all plugins regardless of page template
 ];
 
