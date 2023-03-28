@@ -282,6 +282,7 @@ export interface HttpFetchOptions extends HttpRequestInit {
 
   context?: KibanaExecutionContext;
 
+  /** @experimental */
   version?: ApiVersion;
 }
 

@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
   RequestHandler,
   IRouter,
@@ -27,9 +28,6 @@ import type { Method } from './types';
 import { validate } from './validate';
 
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
-
-/** @internal */
-export const VERSION_HEADER = 'Elastic-Api-Version';
 
 // This validation is a pass-through so that we can apply our version-specific validation later
 const passThroughValidation = { body: schema.any(), params: schema.any(), query: schema.any() };
@@ -85,13 +83,13 @@ export class CoreVersionedRoute implements VersionedRoute {
     req: KibanaRequest,
     res: KibanaResponseFactory
   ) => {
-    const version = req.headers[VERSION_HEADER] as undefined | ApiVersion;
+    const version = req.headers?.[ELASTIC_HTTP_VERSION_HEADER] as undefined | ApiVersion;
     if (!version) {
       return res.custom({
         statusCode: 406,
         body: `Version expected at [${this.method}] [${
           this.path
-        }]. Please specify a version using the "${VERSION_HEADER}" header. ${this.getAvailableVersionsMessage()}`,
+        }]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. ${this.getAvailableVersionsMessage()}`,
       });
     }
 

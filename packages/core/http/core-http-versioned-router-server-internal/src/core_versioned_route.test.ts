@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { IRouter, RequestHandler } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import { VERSION_HEADER } from './core_versioned_route';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { CoreVersionedRouter } from '.';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
@@ -130,7 +130,7 @@ describe('Versioned route', () => {
     const kibanaResponse = await handler!(
       {} as any,
       httpServerMock.createKibanaRequest({
-        headers: { [VERSION_HEADER]: '1' },
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
         body: { foo: 1 },
         params: { foo: 1 },
         query: { foo: 1 },
@@ -155,7 +155,7 @@ describe('Versioned route', () => {
       handler!(
         {} as any,
         httpServerMock.createKibanaRequest({
-          headers: { [VERSION_HEADER]: '999' },
+          headers: { [ELASTIC_HTTP_VERSION_HEADER]: '999' },
         }),
         kibanaResponseFactory
       )
@@ -206,7 +206,7 @@ describe('Versioned route', () => {
       handler!(
         {} as any,
         httpServerMock.createKibanaRequest({
-          headers: { [VERSION_HEADER]: '1' },
+          headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
           body: {},
         }),
         kibanaResponseFactory
