@@ -6,5 +6,13 @@
  * Side Public License, v 1.
  */
 
-// TODO: export once types are ready
-export {};
+export type {
+  ApiVersion,
+  AddVersionOpts,
+  VersionedRouteRequestValidation,
+  VersionedRouteResponseValidation,
+  VersionedRoute,
+  VersionedRouteConfig,
+  VersionedRouteRegistrar,
+  VersionedRouter,
+} from './types';
