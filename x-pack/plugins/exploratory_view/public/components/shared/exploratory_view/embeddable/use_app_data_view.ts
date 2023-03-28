@@ -7,12 +7,9 @@
 
 import { useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { useLocalDataView } from './use_local_data_view';
-import {
-  ExploratoryEmbeddableProps,
-  ObservabilityPublicPluginsStart,
-  useFetcher,
-} from '../../../..';
+import { ExploratoryEmbeddableProps, ExploratoryViewPublicPluginsStart } from '../../../..';
 import type { DataViewState } from '../hooks/use_app_data_view';
 import type { AppDataType } from '../types';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views/observability_data_views';
@@ -28,7 +25,7 @@ export const useAppDataView = ({
   series: SeriesUrl;
   seriesDataType: AppDataType;
   dataViewCache: Record<string, DataView>;
-  dataViewsService: ObservabilityPublicPluginsStart['dataViews'];
+  dataViewsService: ExploratoryViewPublicPluginsStart['dataViews'];
   dataTypesIndexPatterns: ExploratoryEmbeddableProps['dataTypesIndexPatterns'];
 }) => {
   const [dataViews, setDataViews] = useState<DataViewState>({} as DataViewState);

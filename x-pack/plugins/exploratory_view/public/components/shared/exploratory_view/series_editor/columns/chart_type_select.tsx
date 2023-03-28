@@ -9,8 +9,9 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
-import { SeriesUrl, useFetcher } from '../../../../..';
+import { useFetcher } from '@kbn/observability-plugin/public';
+import { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';
+import { SeriesUrl } from '../../../../..';
 import { SeriesConfig } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
 
@@ -25,7 +26,7 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
 
   const {
     services: { lens },
-  } = useKibana<ObservabilityPublicPluginsStart>();
+  } = useKibana<ExploratoryViewPublicPluginsStart>();
 
   const { data = [] } = useFetcher(() => lens.getXyVisTypes(), [lens]);
 
@@ -63,12 +64,12 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
 }
 
 const EDIT_CHART_TYPE_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesEditor.editChartSeriesLabel',
+  'xpack.exploratoryView.expView.seriesEditor.editChartSeriesLabel',
   {
     defaultMessage: 'Edit chart type for series',
   }
 );
 
-const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
+const CHART_TYPE_LABEL = i18n.translate('xpack.exploratoryView.expView.chartTypes.label', {
   defaultMessage: 'Chart type',
 });

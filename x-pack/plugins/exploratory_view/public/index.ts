@@ -9,98 +9,45 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { lazy } from 'react';
 import {
   Plugin,
-  ObservabilityPublicPluginsStart,
-  ObservabilityPublicPluginsSetup,
-  ObservabilityPublicStart,
-  ObservabilityPublicSetup,
+  ExploratoryViewPublicPluginsStart,
+  ExploratoryViewPublicPluginsSetup,
+  ExploratoryViewPublicStart,
+  ExploratoryViewPublicSetup,
 } from './plugin';
-export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/configurations/constants/url_constants';
 export type {
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
-  ObservabilityPublicPluginsSetup,
-  ObservabilityPublicPluginsStart,
+  ExploratoryViewPublicSetup,
+  ExploratoryViewPublicStart,
+  ExploratoryViewPublicPluginsSetup,
+  ExploratoryViewPublicPluginsStart,
 };
-export {
-  enableInspectEsQueries,
-  enableComparisonByDefault,
-  apmServiceGroupMaxNumberOfServices,
-  enableInfrastructureHostsView,
-  enableAgentExplorerView,
-} from '../common/ui_settings_keys';
-export { uptimeOverviewLocatorID } from '../common';
-
 export const plugin: PluginInitializer<
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
-  ObservabilityPublicPluginsSetup,
-  ObservabilityPublicPluginsStart
+  ExploratoryViewPublicSetup,
+  ExploratoryViewPublicStart,
+  ExploratoryViewPublicPluginsSetup,
+  ExploratoryViewPublicPluginsStart
 > = (initializerContext: PluginInitializerContext) => {
   return new Plugin(initializerContext);
 };
 
+export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/configurations/constants/url_constants';
+
 export * from './components/shared/action_menu';
 
+export { APP_ROUTE as EXPLORATORY_VIEW_APP_URL } from './constants';
+
 export type { UXMetrics } from './components/shared/core_web_vitals';
-export { DatePickerContextProvider } from './context/date_picker_context';
 
-export {
-  getCoreVitalsComponent,
-  HeaderMenuPortal,
-  FieldValueSuggestions,
-  FieldValueSelection,
-  FilterValueLabel,
-  SelectableUrlList,
-  ExploratoryView,
-  DatePicker,
-  LoadWhenInView,
-  ObservabilityAlertSearchBar,
-} from './components/shared';
-
-export type { LazyObservabilityPageTemplateProps } from './components/shared';
-
-export type { UiTracker, TrackMetricOptions } from './hooks/use_track_metric';
-export {
-  useTrackPageview,
-  useUiTracker,
-  useTrackMetric,
-  METRIC_TYPE,
-} from './hooks/use_track_metric';
-
-export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout'));
-export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
-export { useEsSearch, createEsParams } from './hooks/use_es_search';
+export { ExploratoryView } from './components/shared';
 
 export * from './typings';
-import { TopAlert } from './typings/alerts';
-import { AlertSummary } from './pages/alert_details/components/alert_summary';
-import { AlertSummaryField } from './pages/alert_details/components/alert_summary';
-export type { TopAlert, AlertSummary, AlertSummaryField };
-
-export { useChartTheme } from './hooks/use_chart_theme';
-export { useBreadcrumbs } from './hooks/use_breadcrumbs';
-export { useTheme } from './hooks/use_theme';
-export { useTimeZone } from './hooks/use_time_zone';
-export { useTimeBuckets } from './hooks/use_time_buckets';
-export { createUseRulesLink } from './hooks/create_use_rules_link';
-export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
-export type { LinkDescriptor } from './hooks/use_link_props';
 
 export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warning_prompt';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
 export type { SeriesUrl, UrlFilter } from './components/shared/exploratory_view/types';
-
-export type {
-  ObservabilityRuleTypeFormatter,
-  ObservabilityRuleTypeModel,
-  ObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
-export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
 export type { ExploratoryEmbeddableProps } from './components/shared/exploratory_view/embeddable/embeddable';
 
 export type { AddInspectorRequest } from './context/inspector/inspector_context';
@@ -121,8 +68,6 @@ export {
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
-export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
-export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate_bucket_size';
 
 export type { NavigationSection } from './services/navigation_registry';
 export { convertTo } from '../common/utils/formatters/duration';

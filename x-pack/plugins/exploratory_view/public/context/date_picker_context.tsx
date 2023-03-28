@@ -10,7 +10,7 @@ import useMount from 'react-use/lib/useMount';
 import { useLocation, useHistory } from 'react-router-dom';
 import { parse } from 'query-string';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { fromQuery, ObservabilityPublicPluginsStart, toQuery } from '..';
+import { fromQuery, ExploratoryViewPublicPluginsStart, toQuery } from '..';
 import { getAbsoluteTime } from '../utils/date';
 
 export interface DatePickerContextValue {
@@ -65,7 +65,7 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
 
   const [lastUpdated, setLastUpdated] = useState(Date.now());
 
-  const { data } = useKibana<ObservabilityPublicPluginsStart>().services;
+  const { data } = useKibana<ExploratoryViewPublicPluginsStart>().services;
 
   const defaultTimeRange = data.query.timefilter.timefilter.getTimeDefaults();
   const sharedTimeRange = data.query.timefilter.timefilter.getTime();

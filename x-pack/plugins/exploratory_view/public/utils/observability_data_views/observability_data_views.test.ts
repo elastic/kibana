@@ -106,7 +106,6 @@ describe('ObservabilityDataViews', function () {
       timeFieldName: '@timestamp',
       title: 'trace-*,apm-*',
       name: 'User experience (RUM)',
-      allowNoIndex: true,
     });
 
     expect(dataViews?.createAndSave).toHaveBeenCalledTimes(1);

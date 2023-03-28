@@ -96,6 +96,7 @@ export const obsvReportConfigMap = {
 
 export function ObservabilityExploratoryView() {
   const { appMountParameters } = usePluginContext();
+
   return (
     <EuiErrorBoundary>
       <ExploratoryViewContextProvider

@@ -11,9 +11,9 @@ import { HttpSetup, MountPoint } from '@kbn/core/public';
 import { Case } from '@kbn/cases-plugin/common';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
+import { observabilityFeatureId } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../../utils/kibana_react';
 import { AddToCaseProps } from '../header/add_to_case_action';
-import { observabilityFeatureId } from '../../../../../common';
 
 async function addToCase(
   http: HttpSetup,

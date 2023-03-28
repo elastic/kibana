@@ -5,41 +5,15 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110905
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
-import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
-import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
+import { ExploratoryViewPlugin, ExploratoryViewPluginSetup } from './plugin';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
-import {
-  unwrapEsResponse,
-  WrappedElasticsearchClientError,
-} from '../common/utils/unwrap_es_response';
-export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
-export { getInspectResponse } from '../common/utils/get_inspect_response';
-
-export * from './types';
 
 const configSchema = schema.object({
   annotations: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     index: schema.string({ defaultValue: 'observability-annotations' }),
-  }),
-  unsafe: schema.object({
-    alertDetails: schema.object({
-      metrics: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
-      logs: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
-      uptime: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
-    }),
   }),
 });
 
@@ -53,14 +27,6 @@ export const config: PluginConfigDescriptor = {
 export type ObservabilityConfig = TypeOf<typeof configSchema>;
 
 export const plugin = (initContext: PluginInitializerContext) =>
-  new ObservabilityPlugin(initContext);
+  new ExploratoryViewPlugin(initContext);
 
-export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
-export {
-  createOrUpdateIndex,
-  createOrUpdateIndexTemplate,
-  unwrapEsResponse,
-  WrappedElasticsearchClientError,
-};
-
-export { uiSettings } from './ui_settings';
+export type { ExploratoryViewPluginSetup as ObservabilityPluginSetup, ScopedAnnotationsClient };

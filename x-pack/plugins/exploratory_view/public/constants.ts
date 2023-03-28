@@ -7,3 +7,5 @@
 
 export const DEFAULT_INTERVAL = '60s';
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
+
+export const APP_ROUTE = '/app/exploratory-view' as const;

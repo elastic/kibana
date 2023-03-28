@@ -1,12 +1,12 @@
 {
   "type": "plugin",
-  "id": "@kbn/observability-plugin",
-  "owner": "@elastic/actionable-observability",
+  "id": "@kbn/exploratory-view-plugin",
+  "owner": "@elastic/uptime",
   "plugin": {
-    "id": "observability",
+    "id": "exploratoryView",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "observability"],
+    "configPath": ["xpack", "exploratory_view"],
     "requiredPlugins": [
       "alerting",
       "cases",
@@ -15,14 +15,14 @@
       "dataViews",
       "features",
       "files",
-      "inspector",
-      "ruleRegistry",
-      "triggersActionsUi",
-      "inspector",
-      "unifiedSearch",
-      "security",
       "guidedOnboarding",
-      "share"
+      "inspector",
+      "inspector",
+      "observability",
+      "security",
+      "share",
+      "triggersActionsUi",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "discover",
@@ -34,13 +34,14 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "data",
       "dataViews",
       "embeddable",
       "kibanaReact",
       "kibanaUtils",
       "lens",
+      "observability",
+      "unifiedSearch",
       "visualizations"
     ],
     "extraPublicDirs": ["common"]

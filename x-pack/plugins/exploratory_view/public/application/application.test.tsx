@@ -11,9 +11,7 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
-import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
+import { ExploratoryViewPublicPluginsStart } from '../plugin';
 import { renderApp } from '.';
 
 describe('renderApp', () => {
@@ -44,7 +42,7 @@ describe('renderApp', () => {
           },
         },
       },
-    } as unknown as ObservabilityPublicPluginsStart;
+    } as unknown as ExploratoryViewPublicPluginsStart;
 
     const core = {
       application: { currentAppId$: new Observable(), navigateToUrl: noop },
@@ -66,31 +64,17 @@ describe('renderApp', () => {
       theme$: themeServiceMock.createTheme$(),
     } as unknown as AppMountParameters;
 
-    const config = {
-      unsafe: {
-        alertDetails: {
-          logs: { enabled: false },
-          metrics: { enabled: false },
-          uptime: { enabled: false },
-        },
-      },
-    } as ConfigSchema;
-
     expect(() => {
       const unmount = renderApp({
         core,
-        config,
         plugins,
         appMountParameters: params,
-        observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-        ObservabilityPageTemplate: KibanaPageTemplate,
         usageCollection: {
           components: {
             ApplicationUsageTrackingProvider: (props) => null,
           },
           reportUiCounter: jest.fn(),
         },
-        kibanaVersion: '8.7.0',
       });
       unmount();
     }).not.toThrowError();

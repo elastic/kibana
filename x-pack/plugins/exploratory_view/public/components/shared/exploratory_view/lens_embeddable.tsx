@@ -12,7 +12,7 @@ import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/pub
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUiTracker } from '../../../hooks/use_track_metric';
 import { useSeriesStorage } from './hooks/use_series_storage';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import { useExpViewTimeRange } from './hooks/use_time_range';
 import { parseRelativeDate } from './components/date_range_picker';
 import { trackTelemetryOnLoad } from './utils/telemetry';
@@ -30,7 +30,7 @@ export function LensEmbeddable(props: Props) {
   const { lensAttributes, setChartTimeRangeContext } = props;
   const {
     services: { lens, notifications },
-  } = useKibana<ObservabilityPublicPluginsStart>();
+  } = useKibana<ExploratoryViewPublicPluginsStart>();
 
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;

@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewInsufficientAccessError } from '@kbn/data-views-plugin/common';
 import { AppDataType } from '../types';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import { ExploratoryViewPublicPluginsStart } from '../../../../plugin';
 import {
   getDataTypeIndices,
   ObservabilityDataViews,
@@ -44,13 +44,12 @@ export function DataViewContextProvider({ children }: ProviderProps) {
 
   const {
     services: { dataViews: dataViewsService },
-  } = useKibana<ObservabilityPublicPluginsStart>();
+  } = useKibana<ExploratoryViewPublicPluginsStart>();
 
   const loadDataView: DataViewContext['loadDataView'] = useCallback(
     async ({ dataType }) => {
       if (typeof hasAppData[dataType] === 'undefined' && !loading[dataType]) {
         setLoading((prevState) => ({ ...prevState, [dataType]: true }));
-
         try {
           const { indices, hasData } = await getDataTypeIndices(dataType);
 

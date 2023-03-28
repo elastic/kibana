@@ -11,12 +11,13 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import styled from 'styled-components';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useAppDataView } from './use_app_data_view';
-import { ObservabilityPublicPluginsStart, useFetcher } from '../../../..';
+import type { ExploratoryViewPublicPluginsStart } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
 
 const Embeddable = React.lazy(() => import('./embeddable'));
@@ -30,7 +31,7 @@ function ExploratoryViewEmbeddable(props: ExploratoryEmbeddableComponentProps) {
 }
 
 export function getExploratoryViewEmbeddable(
-  services: CoreStart & ObservabilityPublicPluginsStart
+  services: CoreStart & ExploratoryViewPublicPluginsStart
 ) {
   const { lens, dataViews: dataViewsService, uiSettings } = services;
 

@@ -69,8 +69,8 @@ describe('userSeriesStorage', function () {
     }
 
     render(
-      <Router history={getHistoryFromUrl('/app/observability/exploratory-view/configure')}>
-        <Route path={'/app/observability/exploratory-view/:mode'}>
+      <Router history={getHistoryFromUrl('/app/exploratory-view/configure')}>
+        <Route path={'/app/exploratory-view/:mode'}>
           <UrlStorageContextProvider
             storage={{
               get: jest

@@ -15,11 +15,13 @@ import {
   XYState,
 } from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
+import { observabilityFeatureId } from '@kbn/observability-plugin/public';
 import styled from 'styled-components';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
-import { AllSeries, ReportTypes, useTheme } from '../../../..';
+import { AllSeries, ReportTypes } from '../../../..';
+import { useTheme } from '../../../../hooks/use_theme';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
@@ -29,7 +31,6 @@ import { ReportConfigMap } from '../contexts/exploratory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
-import { observabilityFeatureId } from '../../../../../common';
 
 export interface ExploratoryEmbeddableProps {
   id?: string;

@@ -6,10 +6,11 @@
  */
 import type { Space } from '@kbn/spaces-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityPublicPluginsStart, useFetcher } from '..';
+import { useFetcher } from '@kbn/observability-plugin/public';
+import { ExploratoryViewPublicPluginsStart } from '..';
 
 export const useKibanaSpace = () => {
-  const { services } = useKibana<ObservabilityPublicPluginsStart>();
+  const { services } = useKibana<ExploratoryViewPublicPluginsStart>();
 
   const {
     data: space,

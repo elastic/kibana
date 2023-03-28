@@ -31,7 +31,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { rumFieldFormats } from './configurations/rum/field_formats';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
 import { DataViewContext, DataViewContextProvider } from './hooks/use_app_data_view';
 import {
@@ -108,12 +108,12 @@ function setSetting$<T = any>(key: string): T {
 
 /* default mock core */
 const defaultCore = coreMock.createStart();
-export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart> = () => {
-  const core: Partial<CoreStart & ObservabilityPublicPluginsStart> = {
+export const mockCore: () => Partial<CoreStart & ExploratoryViewPublicPluginsStart> = () => {
+  const core: Partial<CoreStart & ExploratoryViewPublicPluginsStart> = {
     ...defaultCore,
     application: {
       ...defaultCore.application,
-      getUrlForApp: () => '/app/observability',
+      getUrlForApp: () => '/app/exploratory-view',
       navigateToUrl: jest.fn(),
       capabilities: {
         ...defaultCore.application.capabilities,
@@ -170,7 +170,7 @@ export function MockRouter<ExtraCore extends Partial<CoreStart>>({
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
-      <Route path={'/app/observability/exploratory-view/'}>
+      <Route path={'/app/exploratory-view/'}>
         <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
           {children}
         </MockKibanaProvider>
@@ -187,7 +187,7 @@ export function render<ExtraCore>(
     core: customCore,
     kibanaProps,
     renderOptions,
-    url = '/app/observability/exploratory-view/',
+    url = '/app/exploratory-view/',
     initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
 ): any {

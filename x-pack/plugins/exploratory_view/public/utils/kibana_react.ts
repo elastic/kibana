@@ -8,10 +8,10 @@
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ObservabilityPublicPluginsStart } from '../plugin';
+import { ExploratoryViewPublicPluginsStart } from '../plugin';
 
 export type StartServices<AdditionalServices extends object = {}> = CoreStart &
-  ObservabilityPublicPluginsStart &
+  ExploratoryViewPublicPluginsStart &
   AdditionalServices & {
     storage: Storage;
   };

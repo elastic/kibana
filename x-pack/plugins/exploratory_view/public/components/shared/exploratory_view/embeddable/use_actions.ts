@@ -55,8 +55,7 @@ export function useActions({
 
   const href = createExploratoryViewUrl(
     { reportType, allSeries: attributes },
-    http?.basePath.get(),
-    appId
+    http?.basePath.get()
   );
 
   const routePath = createExploratoryViewRoutePath({ reportType, allSeries: attributes });

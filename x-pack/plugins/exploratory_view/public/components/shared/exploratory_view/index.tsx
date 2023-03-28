@@ -15,16 +15,15 @@ import {
   createSessionStorageStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { ExploratoryView } from './exploratory_view';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { DataViewContextProvider } from './hooks/use_app_data_view';
 import { UrlStorageContextProvider } from './hooks/use_series_storage';
-import { useTrackPageview } from '../../..';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { RefreshButton } from './header/refresh_button';
 
-const PAGE_TITLE = i18n.translate('xpack.observability.expView.heading.label', {
+const PAGE_TITLE = i18n.translate('xpack.exploratoryView.expView.heading.label', {
   defaultMessage: 'Explore data',
 });
 
@@ -39,6 +38,14 @@ export function ExploratoryViewPage({
   saveAttributes,
   useSessionStorage = false,
 }: ExploratoryViewPageProps) {
+  const {
+    services: { uiSettings, notifications, observability },
+  } = useKibana<ExploratoryViewPublicPluginsStart>();
+
+  const history = useHistory();
+
+  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
+
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
   useTrackPageview({
     app: 'observability-overview',
@@ -56,13 +63,6 @@ export function ExploratoryViewPage({
     ],
     app
   );
-
-  const { ObservabilityPageTemplate } = usePluginContext();
-  const {
-    services: { uiSettings, notifications },
-  } = useKibana<ObservabilityPublicPluginsStart>();
-
-  const history = useHistory();
 
   const kbnUrlStateStorage = useSessionStorage
     ? createSessionStorageStateStorage()

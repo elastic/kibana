@@ -7,9 +7,10 @@
 
 import { useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { getDataTypeIndices } from '../../../../utils/observability_data_views';
 import { AppDataType } from '../types';
-import { ExploratoryEmbeddableProps, useFetcher } from '../../../..';
+import { ExploratoryEmbeddableProps } from '../../../..';
 
 export function useLocalDataView(
   seriesDataType: AppDataType,

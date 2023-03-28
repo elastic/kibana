@@ -10,11 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SeriesType } from '@kbn/lens-plugin/public';
-import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
-import { SeriesUrl, useFetcher } from '../../../../..';
+import { useFetcher } from '@kbn/observability-plugin/public';
+import { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';
+import { SeriesUrl } from '../../../../..';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
-const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
+const CHART_TYPE_LABEL = i18n.translate('xpack.exploratoryView.expView.chartTypes.label', {
   defaultMessage: 'Chart type',
 });
 
@@ -70,7 +71,7 @@ export function XYChartTypesSelect({
 }: XYChartTypesProps) {
   const {
     services: { lens },
-  } = useKibana<ObservabilityPublicPluginsStart>();
+  } = useKibana<ExploratoryViewPublicPluginsStart>();
 
   const { data = [], loading } = useFetcher(() => lens.getXyVisTypes(), [lens]);
 

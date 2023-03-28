@@ -8,7 +8,6 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { LoadWhenInViewProps } from './load_when_in_view/load_when_in_view';
-import { ObservabilityAlertSearchBarProps } from './alert_search_bar/types';
 import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
 import type {
   FieldValueSuggestionsProps,
@@ -18,8 +17,7 @@ import type { DatePickerProps } from './date_picker';
 import type { FilterValueLabelProps } from './filter_value_label/filter_value_label';
 import type { SelectableUrlListProps } from './exploratory_view/components/url_search/selectable_url_list';
 import type { ExploratoryViewPageProps } from './exploratory_view';
-export { createLazyObservabilityPageTemplate } from './page_template';
-export type { LazyObservabilityPageTemplateProps } from './page_template';
+export type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 
 const CoreVitalsLazy = lazy(() => import('./core_web_vitals'));
 
@@ -111,16 +109,6 @@ export function LoadWhenInView(props: LoadWhenInViewProps) {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <LoadWhenInViewLazy {...props} />
-    </Suspense>
-  );
-}
-
-const ObservabilityAlertSearchBarLazy = lazy(() => import('./alert_search_bar/alert_search_bar'));
-
-export function ObservabilityAlertSearchBar(props: ObservabilityAlertSearchBarProps) {
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <ObservabilityAlertSearchBarLazy {...props} />
     </Suspense>
   );
 }

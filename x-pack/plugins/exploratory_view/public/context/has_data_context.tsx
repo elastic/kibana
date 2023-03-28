@@ -7,8 +7,6 @@
 
 import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
-import { asyncForEach } from '@kbn/std';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ALERT_APP,
@@ -18,9 +16,7 @@ import {
   SYNTHETICS_APP,
   UX_APP,
 } from './constants';
-import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
-import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
 import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { ApmIndicesConfig } from '../../common/typings';
@@ -60,85 +56,8 @@ const apps: DataContextApps[] = [
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
   const { http } = useKibana<ObservabilityAppServices>().services;
   const [forceUpdate, setForceUpdate] = useState('');
-  const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
-
-  const isExploratoryView = useRouteMatch('/exploratory-view');
-
-  useEffect(
-    () => {
-      if (!isExploratoryView)
-        asyncForEach(apps, async (app) => {
-          try {
-            const updateState = ({
-              hasData,
-              indices,
-              serviceName,
-            }: {
-              hasData?: boolean;
-              serviceName?: string;
-              indices?: string | ApmIndicesConfig;
-            }) => {
-              setHasDataMap((prevState) => ({
-                ...prevState,
-                [app]: {
-                  hasData,
-                  ...(serviceName ? { serviceName } : {}),
-                  ...(indices ? { indices } : {}),
-                  status: FETCH_STATUS.SUCCESS,
-                },
-              }));
-            };
-            switch (app) {
-              case UX_APP:
-                const params = { absoluteTime: { start: absoluteStart!, end: absoluteEnd! } };
-                const resultUx = await getDataHandler(app)?.hasData(params);
-                updateState({
-                  hasData: resultUx?.hasData,
-                  indices: resultUx?.indices,
-                  serviceName: resultUx?.serviceName as string,
-                });
-                break;
-              case SYNTHETICS_APP:
-                const resultSy = await getDataHandler(app)?.hasData();
-                updateState({ hasData: resultSy?.hasData, indices: resultSy?.indices });
-
-                break;
-              case APM_APP:
-                const resultApm = await getDataHandler(app)?.hasData();
-                updateState({ hasData: resultApm?.hasData, indices: resultApm?.indices });
-
-                break;
-              case INFRA_LOGS_APP:
-                const resultInfraLogs = await getDataHandler(app)?.hasData();
-                updateState({
-                  hasData: resultInfraLogs?.hasData,
-                  indices: resultInfraLogs?.indices,
-                });
-                break;
-              case INFRA_METRICS_APP:
-                const resultInfraMetrics = await getDataHandler(app)?.hasData();
-                updateState({
-                  hasData: resultInfraMetrics?.hasData,
-                  indices: resultInfraMetrics?.indices,
-                });
-                break;
-            }
-          } catch (e) {
-            setHasDataMap((prevState) => ({
-              ...prevState,
-              [app]: {
-                hasData: undefined,
-                status: FETCH_STATUS.FAILURE,
-              },
-            }));
-          }
-        });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isExploratoryView]
-  );
 
   useEffect(() => {
     async function fetchAlerts() {

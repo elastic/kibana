@@ -6,13 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { AppNavLinkStatus } from '@kbn/core-application-browser';
+import { BehaviorSubject } from 'rxjs';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  AppDeepLink,
   AppMountParameters,
-  AppNavLinkStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -26,67 +24,38 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import {
-  ActionTypeRegistryContract,
-  RuleTypeRegistryContract,
-} from '@kbn/triggers-actions-ui-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
-import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
-import { createLazyObservabilityPageTemplate } from './components/shared';
-import { registerDataHandler } from './data_handler';
 import {
-  createObservabilityRuleTypeRegistry,
-  ObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
-import { createCallObservabilityApi } from './services/call_observability_api';
-import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
-import { updateGlobalNavigation } from './update_global_navigation';
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
+} from '@kbn/observability-plugin/public';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
-import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
-import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { registerDataHandler } from './data_handler';
+import { APP_ROUTE } from './constants';
 
-export interface ConfigSchema {
-  unsafe: {
-    alertDetails: {
-      metrics: {
-        enabled: boolean;
-      };
-      logs: {
-        enabled: boolean;
-      };
-      uptime: {
-        enabled: boolean;
-      };
-    };
-  };
-}
-export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
-
-export interface ObservabilityPublicPluginsSetup {
+export interface ExploratoryViewPublicPluginsSetup {
   data: DataPublicPluginSetup;
+  observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  home?: HomePublicPluginSetup;
 }
 
-export interface ObservabilityPublicPluginsStart {
-  actionTypeRegistry: ActionTypeRegistryContract;
+export interface ExploratoryViewPublicPluginsStart {
   cases: CasesUiStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
@@ -96,7 +65,7 @@ export interface ObservabilityPublicPluginsStart {
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
-  ruleTypeRegistry: RuleTypeRegistryContract;
+  observability: ObservabilityPublicStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
   spaces?: SpacesPluginStart;
@@ -106,123 +75,49 @@ export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
 }
 
-export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
+export type ExploratoryViewPublicSetup = ReturnType<Plugin['setup']>;
+export type ExploratoryViewPublicStart = ReturnType<Plugin['start']>;
 
 export class Plugin
   implements
     PluginClass<
-      ObservabilityPublicSetup,
-      ObservabilityPublicStart,
-      ObservabilityPublicPluginsSetup,
-      ObservabilityPublicPluginsStart
+      ExploratoryViewPublicSetup,
+      ExploratoryViewPublicStart,
+      ExploratoryViewPublicPluginsSetup,
+      ExploratoryViewPublicPluginsStart
     >
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private readonly navigationRegistry = createNavigationRegistry();
-  private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
-    {} as ObservabilityRuleTypeRegistry;
 
-  // Define deep links as constant and hidden. Whether they are shown or hidden
-  // in the global navigation will happen in `updateGlobalNavigation`.
-  private readonly deepLinks: AppDeepLink[] = [
-    {
-      id: 'alerts',
-      title: i18n.translate('xpack.observability.alertsLinkTitle', {
-        defaultMessage: 'Alerts',
-      }),
-      order: 8001,
-      path: '/alerts',
-      navLinkStatus: AppNavLinkStatus.hidden,
-      deepLinks: [
-        {
-          id: 'rules',
-          title: i18n.translate('xpack.observability.rulesLinkTitle', {
-            defaultMessage: 'Rules',
-          }),
-          path: '/alerts/rules',
-          navLinkStatus: AppNavLinkStatus.hidden,
-        },
-      ],
-    },
-    {
-      id: 'slos',
-      title: i18n.translate('xpack.observability.slosLinkTitle', {
-        defaultMessage: 'SLOs',
-      }),
-      navLinkStatus: AppNavLinkStatus.hidden,
-      order: 8002,
-      path: '/slos',
-    },
-    getCasesDeepLinks({
-      basePath: casesPath,
-      extend: {
-        [CasesDeepLinkId.cases]: {
-          order: 8003,
-          navLinkStatus: AppNavLinkStatus.hidden,
-        },
-        [CasesDeepLinkId.casesCreate]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: false,
-        },
-        [CasesDeepLinkId.casesConfigure]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: false,
-        },
-      },
-    }),
-  ];
-
-  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(
-    coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
-    pluginsSetup: ObservabilityPublicPluginsSetup
+    core: CoreSetup<ExploratoryViewPublicPluginsStart, ExploratoryViewPublicStart>,
+    plugins: ExploratoryViewPublicPluginsSetup
   ) {
-    const category = DEFAULT_APP_CATEGORIES.observability;
-    const euiIconType = 'logoObservability';
-    const config = this.initContext.config.get();
-    const kibanaVersion = this.initContext.env.packageInfo.version;
-
-    createCallObservabilityApi(coreSetup.http);
-
-    this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
-      pluginsSetup.triggersActionsUi.ruleTypeRegistry
-    );
-    pluginsSetup.share.url.locators.create(new RuleDetailsLocatorDefinition());
-
-    const mount = async (params: AppMountParameters<unknown>) => {
-      // Load application bundle
-      const { renderApp } = await import('./application');
-      // Get start services
-      const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
-
-      const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
-
-      return renderApp({
-        core: coreStart,
-        config,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
-        appMountParameters: params,
-        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: navigation.PageTemplate,
-        usageCollection: pluginsSetup.usageCollection,
-        isDev: this.initContext.env.mode.dev,
-        kibanaVersion,
-      });
-    };
-
     const appUpdater$ = this.appUpdater$;
-    const app = {
-      appRoute: '/app/observability',
-      category,
-      deepLinks: this.deepLinks,
-      euiIconType,
-      id: observabilityAppId,
-      mount,
-      order: 8000,
-      title: i18n.translate('xpack.observability.overviewLinkTitle', {
-        defaultMessage: 'Overview',
+
+    core.application.register({
+      appRoute: APP_ROUTE,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      euiIconType: 'logoObservability',
+      id: 'exploratory-view',
+      mount: async (params: AppMountParameters<unknown>) => {
+        const { renderApp } = await import('./application');
+        const [coreStart, pluginsStart] = await core.getStartServices();
+
+        return renderApp({
+          core: coreStart,
+          appMountParameters: params,
+          plugins: { ...pluginsStart },
+          usageCollection: plugins.usageCollection,
+          isDev: this.initContext.env.mode.dev,
+        });
+      },
+      title: i18n.translate('xpack.exploratoryView.appTitle', {
+        defaultMessage: 'Exploratory View',
       }),
+      searchable: false,
       updater$: appUpdater$,
       keywords: [
         'observability',
@@ -230,132 +125,28 @@ export class Plugin
         'logs',
         'metrics',
         'apm',
-        'slo',
         'performance',
         'trace',
-        'agent',
         'rum',
         'user',
         'experience',
       ],
-    };
-
-    coreSetup.application.register(app);
-
-    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
-
-    if (pluginsSetup.home) {
-      pluginsSetup.home.featureCatalogue.registerSolution({
-        id: observabilityFeatureId,
-        title: i18n.translate('xpack.observability.featureCatalogueTitle', {
-          defaultMessage: 'Observability',
-        }),
-        description: i18n.translate('xpack.observability.featureCatalogueDescription', {
-          defaultMessage:
-            'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
-        }),
-        icon: 'logoObservability',
-        path: '/app/observability/',
-        order: 200,
-      });
-    }
-
-    this.navigationRegistry.registerSections(
-      from(appUpdater$).pipe(
-        map((value) => {
-          const deepLinks = value(app)?.deepLinks ?? [];
-
-          const overviewLink = {
-            label: i18n.translate('xpack.observability.overviewLinkTitle', {
-              defaultMessage: 'Overview',
-            }),
-            app: observabilityAppId,
-            path: '/overview',
-          };
-
-          // Reformat the visible links to be NavigationEntry objects instead of
-          // AppDeepLink objects.
-          //
-          // In our case the deep links and sections being registered are the
-          // same, and the logic to hide them based on flags or capabilities is
-          // the same, so we just want to make a new list with the properties
-          // needed by `registerSections`, which are different than the
-          // properties used by the deepLinks.
-          //
-          // See https://github.com/elastic/kibana/issues/103325.
-          const otherLinks: NavigationEntry[] = deepLinks
-            .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
-            .map((link) => ({
-              app: observabilityAppId,
-              label: link.title,
-              path: link.path ?? '',
-              isBetaFeature: link.id === 'slos' ? true : false,
-            }));
-
-          const sections = [
-            {
-              label: '',
-              sortKey: 100,
-              entries: [overviewLink, ...otherLinks],
-            },
-          ];
-
-          return sections;
-        })
-      )
-    );
+    });
 
     return {
-      dashboard: { register: registerDataHandler },
-      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      navigation: {
-        registerSections: this.navigationRegistry.registerSections,
-      },
-      useRulesLink: createUseRulesLink(),
+      register: registerDataHandler,
     };
   }
 
-  public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
-    const { application } = coreStart;
-    const config = this.initContext.config.get();
-
-    updateGlobalNavigation({
-      capabilities: application.capabilities,
-      deepLinks: this.deepLinks,
-      updater$: this.appUpdater$,
-    });
-
-    const PageTemplate = createLazyObservabilityPageTemplate({
-      currentAppId$: application.currentAppId$,
-      getUrlForApp: application.getUrlForApp,
-      navigateToApp: application.navigateToApp,
-      navigationSections$: this.navigationRegistry.sections$,
-      guidedOnboardingApi: pluginsStart.guidedOnboarding.guidedOnboardingApi,
-      getPageTemplateServices: () => ({ coreStart }),
-    });
-
-    const getAsyncO11yAlertsTableConfiguration = async () => {
-      const { getAlertsTableConfiguration } = await import(
-        './components/alerts_table/get_alerts_table_configuration'
-      );
-      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
-    };
-
-    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-
-    getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
-      alertsTableConfigurationRegistry.register(alertsTableConfig);
-    });
+  public start(coreStart: CoreStart, pluginsStart: ExploratoryViewPublicPluginsStart) {
+    this.appUpdater$.next(() => ({
+      navLinkStatus: AppNavLinkStatus.hidden,
+    }));
 
     return {
-      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      navigation: {
-        PageTemplate,
-      },
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),
       ExploratoryViewEmbeddable: getExploratoryViewEmbeddable({ ...coreStart, ...pluginsStart }),
-      useRulesLink: createUseRulesLink(),
     };
   }
 }
