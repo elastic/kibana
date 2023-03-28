@@ -6,27 +6,32 @@
  */
 
 import { Boom } from '@hapi/boom';
+import pMap from 'p-map';
+import { chunk } from 'lodash';
 import type { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
+import type { FileServiceStart } from '@kbn/files-plugin/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  MAX_DELETE_CASE_IDS,
+  MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
+import { createFileEntities, deleteFiles } from '../files';
 
 /**
  * Deletes the specified cases and their attachments.
- *
- * @ignore
  */
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
     services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
+    fileService,
   } = clientArgs;
   try {
     const cases = await caseService.getCases({ caseIds: ids });
@@ -44,9 +49,11 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       entities.set(theCase.id, { id: theCase.id, owner: theCase.attributes.owner });
     }
 
+    const fileEntities = await getFileEntities(ids, fileService);
+
     await authorization.ensureAuthorized({
       operation: Operations.deleteCase,
-      entities: Array.from(entities.values()),
+      entities: [...Array.from(entities.values()), ...fileEntities],
     });
 
     const attachmentIds = await attachmentService.getter.getAttachmentIdsForCases({
@@ -61,10 +68,14 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       ...userActionIds.map((id) => ({ id, type: CASE_USER_ACTION_SAVED_OBJECT })),
     ];
 
-    await caseService.bulkDeleteCaseEntities({
-      entities: bulkDeleteEntities,
-      options: { refresh: 'wait_for' },
-    });
+    const fileIds = fileEntities.map((entity) => entity.id);
+    await Promise.all([
+      deleteFiles(fileIds, fileService),
+      caseService.bulkDeleteCaseEntities({
+        entities: bulkDeleteEntities,
+        options: { refresh: 'wait_for' },
+      }),
+    ]);
 
     await userActionService.creator.bulkAuditLogCaseDeletion(
       cases.saved_objects.map((caseInfo) => caseInfo.id)
@@ -77,3 +88,29 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     });
   }
 }
+
+const getFileEntities = async (
+  caseIds: string[],
+  fileService: FileServiceStart
+): Promise<OwnerEntity[]> => {
+  // using 50 just to be safe, each case can have 100 files = 50 * 100 = 5000 which is half the max number of docs that
+  // the client can request
+  const chunkSize = MAX_DELETE_CASE_IDS / 2;
+  const chunkedIds = chunk(caseIds, chunkSize);
+
+  const fileResults = await pMap(chunkedIds, async (ids: string[]) => {
+    const files = await fileService.find({
+      perPage: MAX_DOCS_PER_PAGE,
+      meta: {
+        caseId: ids,
+      },
+    });
+
+    return files;
+  });
+
+  const files = fileResults.flatMap((res) => res.files);
+  const fileEntities = createFileEntities(files);
+
+  return fileEntities;
+};

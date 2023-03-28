@@ -15,11 +15,11 @@ import { Actions, ActionTypes } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
-import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs, DeleteFileArgs } from './types';
 import type { CaseFileMetadata } from '../../../common/files';
-import { constructOwnerFromFileKind, CaseFileMetadataRt } from '../../../common/files';
+import { CaseFileMetadataRt } from '../../../common/files';
+import { createFileEntities, deleteFiles } from '../files';
 
 /**
  * Delete all comments for a case.
@@ -106,9 +106,7 @@ export const deleteFileAttachments = async (
     });
 
     await Promise.all([
-      pMap(fileIds, async (fileId: string) => fileService.delete({ id: fileId }), {
-        concurrency: MAX_CONCURRENT_SEARCHES,
-      }),
+      deleteFiles(fileIds, fileService),
       attachmentService.bulkDelete({
         attachmentIds: fileAttachments.map((so) => so.id),
         refresh: false,
@@ -140,7 +138,7 @@ const getFileEntities = async (
 ) => {
   const files = await getFiles(caseId, fileIds, fileService);
 
-  const fileEntities = createFileEntities(files);
+  const fileEntities = createFileEntities(files.map((fileInfo) => fileInfo.data));
 
   return fileEntities;
 };
@@ -176,26 +174,6 @@ const getFiles = async (
   }
 
   return validFiles;
-};
-
-const createFileEntities = (files: FileWithRequiredCaseMetadata[]) => {
-  const fileEntities: OwnerEntity[] = [];
-
-  // It's possible that the owner array could have invalid information in it so we'll use the file kind for determining if the user
-  // has the correct authorization for deleting these files
-  for (const fileInfo of files) {
-    const ownerFromFileKind = constructOwnerFromFileKind(fileInfo.data.fileKind);
-
-    if (ownerFromFileKind == null) {
-      throw Boom.badRequest(
-        `File id ${fileInfo.id} has invalid file kind ${fileInfo.data.fileKind}`
-      );
-    }
-
-    fileEntities.push({ id: fileInfo.id, owner: ownerFromFileKind });
-  }
-
-  return fileEntities;
 };
 
 /**
