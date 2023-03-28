@@ -7,12 +7,9 @@
 
 import { Rule } from '@kbn/alerting-plugin/common';
 import { TopAlert } from '@kbn/observability-plugin/public';
-import { AlertSummaryField } from '@kbn/observability-plugin/public';
 import { PartialRuleParams } from '../../../../../common/alerting/logs/log_threshold';
 
 export interface AlertDetailsAppSectionProps {
   rule: Rule<PartialRuleParams>;
   alert: TopAlert;
-  timeZone: string;
-  setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
