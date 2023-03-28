@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { BulkOperation } from '../model/create_batches';
 
 export const redactBulkOperationBatches = (
