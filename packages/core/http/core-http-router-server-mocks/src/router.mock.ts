@@ -21,6 +21,7 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { createVersionedRouterMock } from '@kbn/core-http-versioned-router-server-mocks';
 
 export type RouterMock = jest.Mocked<IRouter<any>>;
 
@@ -34,6 +35,7 @@ function createRouterMock({ routerPath = '' }: { routerPath?: string } = {}): Ro
     patch: jest.fn(),
     getRoutes: jest.fn(),
     handleLegacyErrors: jest.fn().mockImplementation((handler) => handler),
+    versioned: createVersionedRouterMock(),
   };
 }
 
