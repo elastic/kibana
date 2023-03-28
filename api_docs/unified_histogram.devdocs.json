@@ -780,6 +780,26 @@
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramServices.expressions",
+            "type": "Object",
+            "tags": [],
+            "label": "expressions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionsStart",
+                "text": "ExpressionsStart"
+              }
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -808,6 +828,45 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramState.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [
+              "\nThe current selected columns"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramState.currentSuggestion",
+            "type": "Object",
+            "tags": [],
+            "label": "currentSuggestion",
+            "description": [
+              "\nThe current Lens suggestion"
+            ],
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.Suggestion",
+                "text": "Suggestion"
+              },
+              "<unknown, unknown> | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
@@ -1334,7 +1393,7 @@
         "signature": [
           "{ initialized: true; refetch: () => void; } & Pick<",
           "UnifiedHistogramStateService",
-          ", \"state$\" | \"setChartHidden\" | \"setTopPanelHeight\" | \"setBreakdownField\" | \"setTimeInterval\" | \"setRequestParams\" | \"setTotalHits\">"
+          ", \"state$\" | \"setChartHidden\" | \"setTopPanelHeight\" | \"setBreakdownField\" | \"setColumns\" | \"setTimeInterval\" | \"setRequestParams\" | \"setTotalHits\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,
