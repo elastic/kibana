@@ -96,10 +96,7 @@ export function UnifiedSearchBar(props: {
   const { dataView } = useApmDataView();
   const placeholder = useSearchBarPlaceholder(props.placeholder);
 
-  const handleSubmit = (
-    payload: { dateRange: TimeRange; query?: Query },
-    isUpdate?: boolean
-  ) => {
+  const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
     const { dateRange, query } = payload;
     const { from: rangeFrom, to: rangeTo } = dateRange;
     const toQueryId = toQuery(location.search);

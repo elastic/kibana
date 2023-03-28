@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { ApmDatePicker } from '../../shared/date_picker/apm_date_picker';
 import { TimeComparison } from '../../shared/time_comparison';
 import { TransactionTypeSelect } from '../../shared/transaction_type_select';
 import { MobileFilters } from './service_overview/filters';
@@ -68,9 +67,6 @@ export function MobileSearchBar({
               <UnifiedSearchBar placeholder={searchBarPlaceholder} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={isSmall}>
-            <ApmDatePicker />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size={isSmall ? 's' : 'm'} />
