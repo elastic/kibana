@@ -30,6 +30,7 @@ export type {
   TableSuggestion,
   Visualization,
   VisualizationSuggestion,
+  Suggestion,
 } from './types';
 export type {
   LegacyMetricState as MetricState,
@@ -109,6 +110,6 @@ export type { ChartInfo } from './chart_info_api';
 export { layerTypes } from '../common/layer_types';
 export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
-export type { LensPublicStart, LensPublicSetup } from './plugin';
+export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';
 
 export const plugin = () => new LensPlugin();
