@@ -55,10 +55,3 @@ export const SHARE_ALERT = i18n.translate(
     defaultMessage: 'Share alert',
   }
 );
-
-export const ALERT_COPY_TO_CLIPBOARD_SUCCESS = i18n.translate(
-  'xpack.securitySolution.timeline.expandableEvent.shareAlert.copySuccessMessage',
-  {
-    defaultMessage: 'Alert link copied to the clipboard',
-  }
-);

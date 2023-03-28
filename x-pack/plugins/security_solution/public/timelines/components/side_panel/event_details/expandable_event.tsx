@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiCopy,
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
@@ -85,7 +86,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
       path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
     });
 
-    const { isOnAlertsPage, copyAlertDetailsLink } = useGetAlertDetailsFlyoutLink({ timestamp });
+    const { isOnAlertsPage, alertDetailsLink } = useGetAlertDetailsFlyoutLink({ timestamp });
 
     return (
       <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
@@ -123,9 +124,13 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
           </EuiFlexItem>
         )}
         {isAlert && isOnAlertsPage && (
-          <EuiButtonEmpty onClick={copyAlertDetailsLink} iconType="share">
-            {i18n.SHARE_ALERT}
-          </EuiButtonEmpty>
+          <EuiCopy textToCopy={alertDetailsLink}>
+            {(copy) => (
+              <EuiButtonEmpty onClick={copy} iconType="share">
+                {i18n.SHARE_ALERT}
+              </EuiButtonEmpty>
+            )}
+          </EuiCopy>
         )}
       </StyledEuiFlexGroup>
     );
