@@ -28,6 +28,7 @@ interface Props {
 }
 
 export const JourneyStepScreenshotContainer = ({
+  allStepsLoaded,
   timestamp,
   checkGroup,
   stepStatus,
@@ -62,12 +63,7 @@ export const JourneyStepScreenshotContainer = ({
     timestamp,
   });
 
-  const { url, loading: imageResultLoading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
-
-  const isLoading =
-    // failed steps oftentimes do not have an associated image; therefore we don't wait for the image loading to resolve
-    // if status is `failed`
-    !!imageResultLoading && ![undefined, 'failed'].some((s) => s === stepStatus);
+  const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
 
   return (
     <div ref={intersectionRef}>
@@ -78,7 +74,7 @@ export const JourneyStepScreenshotContainer = ({
         stepNumber={initialStepNumber}
         isStepFailed={stepStatus === 'failed'}
         maxSteps={maxSteps}
-        isLoading={isLoading}
+        isLoading={Boolean(loading || !allStepsLoaded)}
         size={size}
         unavailableMessage={unavailableMessage}
         borderRadius={borderRadius}
