@@ -211,6 +211,8 @@ export interface FieldStatsCommonRequestParams {
   samplingOption: SamplingOption;
 }
 
+export type SupportedAggs = Set<string>;
+
 export interface OverallStatsSearchStrategyParams {
   sessionId?: string;
   earliest?: number;
@@ -222,7 +224,10 @@ export interface OverallStatsSearchStrategyParams {
   index: string;
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
-  aggregatableFields: Array<{ name: string; supportedAggs: Set<string> }>;
+  aggregatableFields: Array<{
+    name: string;
+    supportedAggs: SupportedAggs;
+  }>;
   nonAggregatableFields: string[];
   fieldsToFetch?: string[];
   browserSessionSeed: number;

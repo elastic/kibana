@@ -178,9 +178,6 @@ export function useFieldStatsSearchStrategy(
     const batches = createBatchedRequests(
       pageOfConfigs.map((config, idx) => ({
         ...config,
-        // fieldName: config.fieldName,
-        // type: config.type,
-        // cardinality: config.cardinality,
         safeFieldName: getSafeAggregationName(config.fieldName, idx),
       })),
       10

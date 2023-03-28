@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SupportedAggs } from './field_stats';
 import type { Percentile, SupportedFieldType, FieldVisStats } from '.';
 export interface MetricFieldVisStats {
   avg?: number;
@@ -31,7 +32,7 @@ export interface FieldVisConfig {
   fieldFormat?: any;
   isUnsupportedType?: boolean;
   deletable?: boolean;
-  supportedAggs: Set<string>;
+  supportedAggs: SupportedAggs;
 }
 
 export interface FileBasedFieldVisConfig {

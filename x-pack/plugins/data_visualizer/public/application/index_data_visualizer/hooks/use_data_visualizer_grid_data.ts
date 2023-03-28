@@ -37,27 +37,13 @@ import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
 import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
+import { getSupportedAggs } from '../utils/get_supported_aggs';
 
 const defaults = getDefaultPageState();
 
 function isDisplayField(fieldName: string): boolean {
   return !OMIT_FIELDS.includes(fieldName);
 }
-
-export const isCounterTimeSeriesMetricField = (config: DataViewField) =>
-  config.timeSeriesMetric === 'counter';
-
-/**
- * Temporarily add list of supported ES aggs below PR is merged
- * https://github.com/elastic/elasticsearch/pull/93884
- * @param config
- */
-export const getSupportedAggs = (config: DataViewField) => {
-  if (isCounterTimeSeriesMetricField(config)) {
-    return new Set(['count', 'min', 'max']);
-  }
-  return new Set(['count', 'cardinality', 'percentiles', 'stats', 'terms']);
-};
 
 const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   mode: 'random_sampling',
@@ -211,7 +197,7 @@ export const useDataVisualizerGridData = (
 
       const aggInterval = buckets.getInterval();
 
-      const aggregatableFields: Array<{ name: string; supportedAggs: Set<string> }> = [];
+      const aggregatableFields: OverallStatsSearchStrategyParams['aggregatableFields'] = [];
       const nonAggregatableFields: string[] = [];
 
       const fields = currentDataView.fields;
