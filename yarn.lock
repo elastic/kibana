@@ -4869,7 +4869,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-data-table@link:packages/kbn-securitysolution-data-table":
+"@kbn/securitysolution-data-table@link:x-pack/packages/kbn-securitysolution-data-table":
   version "0.0.0"
   uid ""
 
