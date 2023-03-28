@@ -20,6 +20,12 @@ type ModelStageMap = {
   [K in AllActionStates]: ModelStage<K, any>;
 };
 
+type AnyModelStageHandler = (
+  state: State,
+  response: Either.Either<unknown, unknown>,
+  ctx: MigratorContext
+) => State;
+
 export const modelStageMap: ModelStageMap = {
   INIT: Stages.init,
   CREATE_TARGET_INDEX: Stages.createTargetIndex,
@@ -62,12 +68,10 @@ export const model = (
     return throwBadControlState(current as never);
   }
 
-  const stageHandler = modelStageMap[current.controlState];
+  const stageHandler = modelStageMap[current.controlState] as AnyModelStageHandler;
   if (!stageHandler) {
     return throwBadControlState(current as never);
   }
 
-  // couldn't find a way to infer the type of the state depending on the state of the handler
-  // even if they are directly coupled, so had to force-cast to this ugly any instead.
-  return stageHandler(current as any, response as any, context);
+  return stageHandler(current, response, context);
 };
