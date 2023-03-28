@@ -4,7 +4,6 @@
   "include": ["./**/*"],
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node"]
+    "types": [ "node"],
   },
-  "kbn_references": ["@kbn/test", "@kbn/apm-plugin", "@kbn/es-archiver"]
 }
