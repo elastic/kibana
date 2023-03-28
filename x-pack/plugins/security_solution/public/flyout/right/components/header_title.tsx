@@ -7,20 +7,41 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import { DocumentSeverity } from './severity';
+import { RiskScore } from './risk_score';
+import { DOCUMENT_DETAILS } from './translations';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useRightPanelContext } from '../context';
+import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { HEADER_TITLE } from '../translations';
 
 /**
  * Document details flyout right section header
  */
 export const HeaderTitle: FC = memo(() => {
+  const { dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { isAlert, ruleName, timestamp } = useBasicDataFromDetailsData(
+    dataFormattedForFieldBrowser
+  );
+
   return (
     <>
       <EuiTitle size="s" data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
-        <h4>{HEADER_TITLE}</h4>
+        <h4>{isAlert && !isEmpty(ruleName) ? ruleName : DOCUMENT_DETAILS}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
+      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="row" gutterSize="l">
+        <EuiFlexItem grow={false}>
+          <DocumentSeverity />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RiskScore />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 });

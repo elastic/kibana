@@ -308,7 +308,11 @@ export const createLifecycleExecutor =
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
           [TAGS]: Array.from(
-            new Set([...(currentAlertData?.tags ?? []), ...(options.rule.tags ?? [])])
+            new Set([
+              ...(currentAlertData?.tags ?? []),
+              ...(alertData?.fields[TAGS] ?? []),
+              ...(options.rule.tags ?? []),
+            ])
           ),
           [VERSION]: ruleDataClient.kibanaVersion,
           [ALERT_FLAPPING]: flapping,
