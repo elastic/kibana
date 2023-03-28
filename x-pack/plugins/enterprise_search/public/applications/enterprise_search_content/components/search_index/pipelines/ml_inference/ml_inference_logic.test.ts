@@ -441,9 +441,9 @@ describe('MlInferenceLogic', () => {
             model_type: 'pytorch',
             tags: [],
             version: '1',
-          }
+          },
         ]);
-      
+
         expect(MLInferenceLogic.values.supportedMLModels).toEqual([
           expect.objectContaining({
             inference_config: {
