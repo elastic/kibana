@@ -237,8 +237,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(alertsCount).to.be('6');
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/153236
-        describe.skip('#FilterButtonGroup', () => {
+        describe('#FilterButtonGroup', () => {
+          it('can be filtered to only show "all" alerts using the filter button', async () => {
+            await pageObjects.infraHostsView.setAlertStatusFilter();
+            await retry.try(async () => {
+              const tableRows = await observability.alerts.common.getTableCellsInRows();
+              expect(tableRows.length).to.be(ALL_ALERTS);
+            });
+          });
+
           it('can be filtered to only show "active" alerts using the filter button', async () => {
             await pageObjects.infraHostsView.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
             await retry.try(async () => {
@@ -254,14 +261,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(tableRows.length).to.be(RECOVERED_ALERTS);
             });
           });
-
-          it('can be filtered to only show "all" alerts using the filter button', async () => {
-            await pageObjects.infraHostsView.setAlertStatusFilter();
-            await retry.try(async () => {
-              const tableRows = await observability.alerts.common.getTableCellsInRows();
-              expect(tableRows.length).to.be(ALL_ALERTS);
-            });
-          });
         });
 
         describe('#AlertsTable', () => {
@@ -270,6 +269,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should renders the correct number of cells', async () => {
+            await pageObjects.infraHostsView.setAlertStatusFilter();
             await retry.try(async () => {
               const cells = await observability.alerts.common.getTableCells();
               expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
