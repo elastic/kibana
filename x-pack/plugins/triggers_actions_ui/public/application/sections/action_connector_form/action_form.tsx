@@ -388,6 +388,23 @@ export const ActionForm = ({
               }}
               onConnectorSelected={(id: string) => {
                 setActionIdByIndex(id, index);
+                const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
+                if (actionTypeRegistered.resetParamsOnConnectorChange) {
+                  const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                    if (i === index) {
+                      return {
+                        ..._item,
+                        id,
+                        params:
+                          actionTypeRegistered.resetParamsOnConnectorChange != null
+                            ? actionTypeRegistered.resetParamsOnConnectorChange(_item.params)
+                            : {},
+                      };
+                    }
+                    return _item;
+                  });
+                  setActions(updatedActions);
+                }
               }}
               actionTypeRegistry={actionTypeRegistry}
               onDeleteAction={() => {
