@@ -72,7 +72,7 @@ async function getMobileDetailedStatisticsByField({
           bool: {
             filter: [
               ...termQuery(SERVICE_NAME, serviceName),
-              ...rangeQuery(start, end),
+              ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
             ],
