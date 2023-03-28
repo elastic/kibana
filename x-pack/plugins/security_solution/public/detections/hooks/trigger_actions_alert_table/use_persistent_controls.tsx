@@ -8,11 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
-import { useGetGroupSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
-import { defaultGroup } from '../../../common/store/grouping/defaults';
 import type { State } from '../../../common/store';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { dataTableSelectors } from '../../../common/store/data_table';
 import { changeViewMode } from '../../../common/store/data_table/actions';
@@ -26,18 +22,12 @@ import { groupSelectors } from '../../../common/store/grouping';
 export const getPersistentControlsHook = (tableId: TableId) => {
   const usePersistentControls = () => {
     const dispatch = useDispatch();
-    const getGroupbyIdSelector = groupSelectors.getGroupByIdSelector();
+    const getGroupSelector = groupSelectors.getGroupSelector();
 
-    const { activeGroup: selectedGroup } =
-      useSelector((state: State) => getGroupbyIdSelector(state, tableId)) ?? defaultGroup;
+    const groupSelector = useSelector((state: State) => getGroupSelector(state));
+    const getSelectedGroup = groupSelectors.getSelectedGroup();
 
-    const { indexPattern: indexPatterns } = useSourcererDataView(SourcererScopeName.detections);
-
-    const groupsSelector = useGetGroupSelector({
-      fields: indexPatterns.fields,
-      groupingId: tableId,
-      tableId,
-    });
+    const selectedGroup = useSelector((state: State) => getSelectedGroup(state));
 
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
@@ -94,10 +84,10 @@ export const getPersistentControlsHook = (tableId: TableId) => {
           hasRightOffset={false}
           additionalFilters={additionalFiltersComponent}
           showInspect={false}
-          additionalMenuOptions={isNoneGroup(selectedGroup) ? [groupsSelector] : []}
+          additionalMenuOptions={isNoneGroup(selectedGroup) ? [groupSelector] : []}
         />
       ),
-      [tableView, handleChangeTableView, additionalFiltersComponent, groupsSelector, selectedGroup]
+      [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector, selectedGroup]
     );
 
     return {

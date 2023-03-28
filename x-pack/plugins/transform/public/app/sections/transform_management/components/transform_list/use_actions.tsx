@@ -18,6 +18,7 @@ import { useDiscoverAction } from '../action_discover';
 import { EditTransformFlyout } from '../edit_transform_flyout';
 import { useEditAction } from '../action_edit';
 import { useResetAction, ResetActionModal } from '../action_reset';
+import { useScheduleNowAction } from '../action_schedule_now';
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
 import { useCreateAlertRuleAction } from '../action_create_alert';
@@ -39,6 +40,7 @@ export const useActions = ({
   const editAction = useEditAction(forceDisable, transformNodes);
   const reauthorizeAction = useReauthorizeAction(forceDisable, transformNodes);
   const resetAction = useResetAction(forceDisable);
+  const scheduleNowAction = useScheduleNowAction(forceDisable, transformNodes);
   const startAction = useStartAction(forceDisable, transformNodes);
   const stopAction = useStopAction(forceDisable);
   const createAlertRuleAction = useCreateAlertRuleAction(forceDisable);
@@ -46,23 +48,19 @@ export const useActions = ({
   return {
     modals: (
       <>
+        {reauthorizeAction.isModalVisible && <ReauthorizeActionModal {...reauthorizeAction} />}
         {resetAction.isModalVisible && <ResetActionModal {...resetAction} />}
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
         {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
-        {reauthorizeAction.isModalVisible && <ReauthorizeActionModal {...reauthorizeAction} />}
-        {editAction.config && editAction.isFlyoutVisible && (
-          <EditTransformFlyout
-            closeFlyout={editAction.closeFlyout}
-            config={editAction.config}
-            dataViewId={editAction.dataViewId}
-          />
-        )}
+
+        <EditTransformFlyout {...editAction} />
         {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
       </>
     ),
     actions: [
       discoverAction.action,
       createAlertRuleAction.action,
+      scheduleNowAction.action,
       startAction.action,
       stopAction.action,
       editAction.action,

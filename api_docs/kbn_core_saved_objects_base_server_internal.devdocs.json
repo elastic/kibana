@@ -189,6 +189,60 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.compareModelVersions",
+        "type": "Function",
+        "tags": [],
+        "label": "compareModelVersions",
+        "description": [],
+        "signature": [
+          "({ appVersions, indexVersions, deletedTypes, }: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-base-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+            "section": "def-common.CompareModelVersionMapParams",
+            "text": "CompareModelVersionMapParams"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-base-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+            "section": "def-common.CompareModelVersionResult",
+            "text": "CompareModelVersionResult"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.compareModelVersions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  appVersions,\n  indexVersions,\n  deletedTypes,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-base-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+                "section": "def-common.CompareModelVersionMapParams",
+                "text": "CompareModelVersionMapParams"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.decodeRequestVersion",
         "type": "Function",
         "tags": [],
@@ -396,6 +450,290 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getLatestModelVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "getLatestModelVersion",
+        "description": [
+          "\nReturns the latest registered model version number for the given type."
+        ],
+        "signature": [
+          "(type: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
+          "<any>) => number"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getLatestModelVersion.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getModelVersionDelta",
+        "type": "Function",
+        "tags": [],
+        "label": "getModelVersionDelta",
+        "description": [
+          "\nWill generate the difference to go from `currentVersions` to `targetVersions`.\n"
+        ],
+        "signature": [
+          "({ currentVersions, targetVersions, deletedTypes, }: GetModelVersionDeltaOpts) => ModelVersionDeltaResult"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/get_version_delta.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getModelVersionDelta.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  currentVersions,\n  targetVersions,\n  deletedTypes,\n}",
+            "description": [],
+            "signature": [
+              "GetModelVersionDeltaOpts"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/get_version_delta.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getModelVersionMapForTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "getModelVersionMapForTypes",
+        "description": [
+          "\nBuild a version map for the given types."
+        ],
+        "signature": [
+          "(types: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
+          "<any>[]) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-base-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+            "section": "def-common.ModelVersionMap",
+            "text": "ModelVersionMap"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getModelVersionMapForTypes.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "types",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getModelVersionsFromMappingMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "getModelVersionsFromMappingMeta",
+        "description": [
+          "\nBuild the version map from the specified source of the provided mappings meta."
+        ],
+        "signature": [
+          "({ meta, source, }: { meta: ",
+          "IndexMappingMeta",
+          "; source: \"mappingVersions\" | \"docVersions\"; }) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-base-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+            "section": "def-common.ModelVersionMap",
+            "text": "ModelVersionMap"
+          },
+          " | undefined"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getModelVersionsFromMappingMeta.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  meta,\n  source,\n}",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+                "id": "def-common.getModelVersionsFromMappingMeta.$1.meta",
+                "type": "Object",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "IndexMappingMeta"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+                "id": "def-common.getModelVersionsFromMappingMeta.$1.source",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  "\"mappingVersions\" | \"docVersions\""
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.getModelVersionsFromMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "getModelVersionsFromMappings",
+        "description": [
+          "\nBuild the version map from the specified source of the provided mappings."
+        ],
+        "signature": [
+          "({ mappings, source, }: { mappings: ",
+          "IndexMapping",
+          "; source: \"mappingVersions\" | \"docVersions\"; }) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-base-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+            "section": "def-common.ModelVersionMap",
+            "text": "ModelVersionMap"
+          },
+          " | undefined"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.getModelVersionsFromMappings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  mappings,\n  source,\n}",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+                "id": "def-common.getModelVersionsFromMappings.$1.mappings",
+                "type": "Object",
+                "tags": [],
+                "label": "mappings",
+                "description": [],
+                "signature": [
+                  "IndexMapping"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+                "id": "def-common.getModelVersionsFromMappings.$1.source",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  "\"mappingVersions\" | \"docVersions\""
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -704,9 +1042,208 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.CompareModelVersionDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "CompareModelVersionDetails",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.CompareModelVersionDetails.greater",
+            "type": "Array",
+            "tags": [],
+            "label": "greater",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.CompareModelVersionDetails.lesser",
+            "type": "Array",
+            "tags": [],
+            "label": "lesser",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.CompareModelVersionDetails.equal",
+            "type": "Array",
+            "tags": [],
+            "label": "equal",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.CompareModelVersionMapParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CompareModelVersionMapParams",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.CompareModelVersionMapParams.appVersions",
+            "type": "Object",
+            "tags": [],
+            "label": "appVersions",
+            "description": [
+              "The latest model version of the types registered in the application"
+            ],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.CompareModelVersionMapParams.indexVersions",
+            "type": "Object",
+            "tags": [],
+            "label": "indexVersions",
+            "description": [
+              "The model version stored in the index"
+            ],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.CompareModelVersionMapParams.deletedTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "deletedTypes",
+            "description": [
+              "The list of deleted types to exclude during the compare process"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.CompareModelVersionResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "CompareModelVersionResult",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.CompareModelVersionResult.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.CompareModelVersionResult.details",
+            "type": "Object",
+            "tags": [],
+            "label": "details",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-base-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+                "section": "def-common.CompareModelVersionDetails",
+                "text": "CompareModelVersionDetails"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.CompareModelVersionStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "CompareModelVersionStatus",
+        "description": [
+          "\nThe overall status of the model version comparison:\n- `greater`: app version is greater than the index version\n- `lesser`: app version is lesser than the index version\n- `equal`: app version is equal to the index version\n- `conflict`: app and index versions are incompatible (versions for some types are higher, and for other types lower)"
+        ],
+        "signature": [
+          "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.ModelVersionMap",
+        "type": "Type",
+        "tags": [],
+        "label": "ModelVersionMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: number; }"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.modelVersionVirtualMajor",

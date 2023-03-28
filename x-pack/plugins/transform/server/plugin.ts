@@ -32,6 +32,8 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   private readonly license: License;
   private readonly logger: Logger;
 
+  private fieldFormatsStart: PluginStartDependencies['fieldFormats'] | null = null;
+
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
     this.apiRoutes = new ApiRoutes();
@@ -80,13 +82,19 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     });
 
     if (alerting) {
-      registerTransformHealthRuleType({ alerting, logger: this.logger });
+      registerTransformHealthRuleType({
+        alerting,
+        logger: this.logger,
+        getFieldFormatsStart: () => this.fieldFormatsStart!,
+      });
     }
 
     return {};
   }
 
-  start(core: CoreStart, plugins: PluginStartDependencies) {}
+  start(core: CoreStart, plugins: PluginStartDependencies) {
+    this.fieldFormatsStart = plugins.fieldFormats;
+  }
 
   stop() {}
 }

@@ -10,7 +10,14 @@ const nextTick = () => new Promise((res) => process.nextTick(res));
 
 import lodash from 'lodash';
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
-import { EuiInMemoryTable, EuiLink, EuiSearchBarProps, Query } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiLink,
+  EuiSearchBarProps,
+  EuiText,
+  EuiButton,
+  Query,
+} from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
@@ -133,63 +140,130 @@ describe('SavedObjectsFinder', () => {
     });
   });
 
-  it('should list initial items', async () => {
-    const core = coreMock.createStart();
-    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ saved_objects: [doc] })
-    );
-    core.uiSettings.get.mockImplementation(() => 10);
+  describe('render', () => {
+    it('lists initial items', async () => {
+      const core = coreMock.createStart();
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc] })
+      );
+      core.uiSettings.get.mockImplementation(() => 10);
 
-    const wrapper = shallow(
-      <SavedObjectFinder
-        services={{
-          http: core.http,
-          uiSettings: core.uiSettings,
-          savedObjectsManagement,
-          savedObjectsTagging,
-        }}
-        savedObjectMetaData={searchMetaData}
-      />
-    );
+      const wrapper = shallow(
+        <SavedObjectFinder
+          services={{
+            http: core.http,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsTagging,
+          }}
+          savedObjectMetaData={searchMetaData}
+        />
+      );
 
-    wrapper.instance().componentDidMount!();
-    await nextTick();
-    expect(
-      wrapper
-        .find(EuiInMemoryTable)
-        .prop('items')
-        .map((item: any) => item.attributes)
-    ).toEqual([doc.attributes]);
-  });
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      expect(
+        wrapper
+          .find(EuiInMemoryTable)
+          .prop('items')
+          .map((item: any) => item.attributes)
+      ).toEqual([doc.attributes]);
+    });
 
-  it('should call onChoose on item click', async () => {
-    const chooseStub = sinon.stub();
-    const core = coreMock.createStart();
-    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ saved_objects: [doc] })
-    );
-    core.uiSettings.get.mockImplementation(() => 10);
+    it('calls onChoose on item click', async () => {
+      const chooseStub = sinon.stub();
+      const core = coreMock.createStart();
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc] })
+      );
+      core.uiSettings.get.mockImplementation(() => 10);
 
-    const wrapper = mount(
-      <SavedObjectFinder
-        services={{
-          http: core.http,
-          uiSettings: core.uiSettings,
-          savedObjectsManagement,
-          savedObjectsTagging,
-        }}
-        onChoose={chooseStub}
-        savedObjectMetaData={searchMetaData}
-      />
-    );
+      const wrapper = mount(
+        <SavedObjectFinder
+          services={{
+            http: core.http,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsTagging,
+          }}
+          onChoose={chooseStub}
+          savedObjectMetaData={searchMetaData}
+        />
+      );
 
-    wrapper.instance().componentDidMount!();
-    await nextTick();
-    wrapper.update();
-    findTestSubject(wrapper, 'savedObjectTitleExample-title').simulate('click');
-    expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`, doc)).toEqual(
-      true
-    );
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      wrapper.update();
+      findTestSubject(wrapper, 'savedObjectTitleExample-title').simulate('click');
+      expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`, doc)).toEqual(
+        true
+      );
+    });
+
+    it('with help text', async () => {
+      const core = coreMock.createStart();
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc] })
+      );
+      core.uiSettings.get.mockImplementation(() => 10);
+
+      const wrapper = shallow(
+        <SavedObjectFinder
+          services={{
+            http: core.http,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsTagging,
+          }}
+          savedObjectMetaData={searchMetaData}
+          helpText="This is some description about the action"
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      expect(wrapper.find(EuiText).childAt(0).text()).toEqual(
+        'This is some description about the action'
+      );
+    });
+
+    it('with left button', async () => {
+      const core = coreMock.createStart();
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc] })
+      );
+      core.uiSettings.get.mockImplementation(() => 10);
+      const button = <EuiButton>Hello</EuiButton>;
+      const wrapper = shallow(
+        <SavedObjectFinder
+          services={{
+            http: core.http,
+            uiSettings: core.uiSettings,
+            savedObjectsManagement,
+            savedObjectsTagging,
+          }}
+          savedObjectMetaData={searchMetaData}
+          leftChildren={button}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      const searchBar = wrapper.find(EuiInMemoryTable).prop('search') as EuiSearchBarProps;
+      const toolsLeft = searchBar!.toolsLeft;
+      expect(toolsLeft).toMatchInlineSnapshot(
+        `
+        <React.Fragment>
+          <EuiButton
+            color="primary"
+            size="m"
+          >
+            Hello
+          </EuiButton>
+        </React.Fragment>
+      `
+      );
+    });
   });
 
   describe('sorting', () => {

@@ -15,23 +15,23 @@ import React, {
   type SetStateAction,
 } from 'react';
 
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from './types';
 
-type ChangePointOrNull = ChangePoint | null;
+type SignificantTermOrNull = SignificantTerm | null;
 type GroupOrNull = GroupTableItem | null;
 
 interface SpikeAnalysisTableRow {
-  pinnedChangePoint: ChangePointOrNull;
-  setPinnedChangePoint: Dispatch<SetStateAction<ChangePointOrNull>>;
+  pinnedSignificantTerm: SignificantTermOrNull;
+  setPinnedSignificantTerm: Dispatch<SetStateAction<SignificantTermOrNull>>;
   pinnedGroup: GroupOrNull;
   setPinnedGroup: Dispatch<SetStateAction<GroupOrNull>>;
-  selectedChangePoint: ChangePointOrNull;
-  setSelectedChangePoint: Dispatch<SetStateAction<ChangePointOrNull>>;
+  selectedSignificantTerm: SignificantTermOrNull;
+  setSelectedSignificantTerm: Dispatch<SetStateAction<SignificantTermOrNull>>;
   selectedGroup: GroupOrNull;
   setSelectedGroup: Dispatch<SetStateAction<GroupOrNull>>;
-  currentSelectedChangePoint?: ChangePoint;
+  currentSelectedSignificantTerm?: SignificantTerm;
   currentSelectedGroup?: GroupTableItem;
   clearAllRowState: () => void;
 }
@@ -42,19 +42,20 @@ export const spikeAnalysisTableRowContext = createContext<SpikeAnalysisTableRow 
 
 export const SpikeAnalysisTableRowStateProvider: FC = ({ children }) => {
   // State that will be shared with all components
-  const [pinnedChangePoint, setPinnedChangePoint] = useState<ChangePointOrNull>(null);
+  const [pinnedSignificantTerm, setPinnedSignificantTerm] = useState<SignificantTermOrNull>(null);
   const [pinnedGroup, setPinnedGroup] = useState<GroupOrNull>(null);
-  const [selectedChangePoint, setSelectedChangePoint] = useState<ChangePointOrNull>(null);
+  const [selectedSignificantTerm, setSelectedSignificantTerm] =
+    useState<SignificantTermOrNull>(null);
   const [selectedGroup, setSelectedGroup] = useState<GroupOrNull>(null);
 
   // If a row is pinned, still overrule with a potentially hovered row.
-  const currentSelectedChangePoint = useMemo(() => {
-    if (selectedChangePoint) {
-      return selectedChangePoint;
-    } else if (pinnedChangePoint) {
-      return pinnedChangePoint;
+  const currentSelectedSignificantTerm = useMemo(() => {
+    if (selectedSignificantTerm) {
+      return selectedSignificantTerm;
+    } else if (pinnedSignificantTerm) {
+      return pinnedSignificantTerm;
     }
-  }, [pinnedChangePoint, selectedChangePoint]);
+  }, [pinnedSignificantTerm, selectedSignificantTerm]);
 
   // If a group is pinned, still overrule with a potentially hovered group.
   const currentSelectedGroup = useMemo(() => {
@@ -67,33 +68,33 @@ export const SpikeAnalysisTableRowStateProvider: FC = ({ children }) => {
 
   const contextValue: SpikeAnalysisTableRow = useMemo(
     () => ({
-      pinnedChangePoint,
-      setPinnedChangePoint,
+      pinnedSignificantTerm,
+      setPinnedSignificantTerm,
       pinnedGroup,
       setPinnedGroup,
-      selectedChangePoint,
-      setSelectedChangePoint,
+      selectedSignificantTerm,
+      setSelectedSignificantTerm,
       selectedGroup,
       setSelectedGroup,
-      currentSelectedChangePoint,
+      currentSelectedSignificantTerm,
       currentSelectedGroup,
       clearAllRowState: () => {
-        setPinnedChangePoint(null);
+        setPinnedSignificantTerm(null);
         setPinnedGroup(null);
-        setSelectedChangePoint(null);
+        setSelectedSignificantTerm(null);
         setSelectedGroup(null);
       },
     }),
     [
-      pinnedChangePoint,
-      setPinnedChangePoint,
+      pinnedSignificantTerm,
+      setPinnedSignificantTerm,
       pinnedGroup,
       setPinnedGroup,
-      selectedChangePoint,
-      setSelectedChangePoint,
+      selectedSignificantTerm,
+      setSelectedSignificantTerm,
       selectedGroup,
       setSelectedGroup,
-      currentSelectedChangePoint,
+      currentSelectedSignificantTerm,
       currentSelectedGroup,
     ]
   );

@@ -12,4 +12,10 @@ export * from './group_selector';
 export * from './types';
 export * from './grouping';
 
-export const isNoneGroup = (groupKey: string) => groupKey === NONE_GROUP_KEY;
+/**
+ * Checks if no group is selected
+ * @param groupKey selected group field value
+ *
+ * @returns {boolean} True if no group is selected
+ */
+export const isNoneGroup = (groupKey: string | null) => groupKey === NONE_GROUP_KEY;

@@ -100,7 +100,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
           aria-label={i18n.translate('unifiedFieldList.fieldsAccordion.existenceErrorAriaLabel', {
             defaultMessage: 'Existence fetch failed',
           })}
-          type="alert"
+          type="warning"
           color="warning"
           content={i18n.translate('unifiedFieldList.fieldsAccordion.existenceErrorLabel', {
             defaultMessage: "Field information can't be loaded",

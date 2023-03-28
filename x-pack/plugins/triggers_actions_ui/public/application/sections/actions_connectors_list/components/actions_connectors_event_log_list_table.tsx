@@ -378,6 +378,21 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           ]
         : []),
       {
+        id: 'source',
+        actions: {
+          showSortAsc: false,
+          showSortDesc: false,
+        },
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.source',
+          {
+            defaultMessage: 'Source',
+          }
+        ),
+        isSortable: getIsColumnSortable('source'),
+        cellActions: [],
+      },
+      {
         id: 'message',
         actions: {
           showSortAsc: false,

@@ -117,24 +117,8 @@ export const useColumns = (
       scope: 'row',
       render: (transformId, item) => {
         if (!isManagedTransform(item)) return transformId;
-        const needsReauth = needsReauthorization(item);
-
-        const needsReauthMsg = needsReauth ? (
-          <>
-            <EuiToolTip
-              content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
-                defaultMessage:
-                  'This transform was created with insufficient permissions. Re-authorize from a user with transforms_admin privilege to start and run the transform.',
-              })}
-            >
-              <EuiIcon size="s" color="warning" type={'alert'} />
-            </EuiToolTip>
-            &nbsp;
-          </>
-        ) : null;
         return (
           <>
-            {needsReauthMsg}
             {transformId}
             &nbsp;
             <EuiToolTip
@@ -167,7 +151,23 @@ export const useColumns = (
       ),
       width: '30px',
       render: (item) => {
-        return Array.isArray(item.alerting_rules) ? (
+        const needsReauth = needsReauthorization(item);
+
+        const needsReauthTooltipIcon = needsReauth ? (
+          <>
+            <EuiToolTip
+              content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
+                defaultMessage:
+                  'This transform was created with insufficient permissions. Re-authorize from a user with transforms_admin privilege to start and run the transform.',
+              })}
+            >
+              <EuiIcon size="s" color="warning" type={'alert'} />
+            </EuiToolTip>
+            &nbsp;
+          </>
+        ) : null;
+
+        const alertingRulesTooltipIcon = Array.isArray(item.alerting_rules) ? (
           <EuiToolTip
             position="bottom"
             content={
@@ -182,6 +182,12 @@ export const useColumns = (
           </EuiToolTip>
         ) : (
           <span />
+        );
+        return (
+          <>
+            {needsReauthTooltipIcon}
+            {alertingRulesTooltipIcon}
+          </>
         );
       },
     },

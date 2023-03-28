@@ -78,7 +78,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
           defaultMessage: 'An error occurred while retrieving the latest snapshot status',
         })}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="cloudBackupErrorCallout"
       >
         <p>
@@ -128,7 +128,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   ) : (
     <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="dataNotBackedUpStatus">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="alert" color="danger" />
+        <EuiIcon type="warning" color="danger" />
       </EuiFlexItem>
 
       <EuiFlexItem>

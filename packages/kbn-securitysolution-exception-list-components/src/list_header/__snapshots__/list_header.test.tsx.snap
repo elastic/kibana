@@ -29,7 +29,7 @@ Object {
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                     href=""
                     rel="noreferrer"
-                    title="Rule exceptions"
+                    title="Shared Exception Lists"
                   >
                     <div
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -38,7 +38,7 @@ Object {
                       <span
                         data-euiicon-type="arrowLeft"
                       />
-                      Rule exceptions
+                      Shared Exception Lists
                     </div>
                   </a>
                 </li>
@@ -409,7 +409,7 @@ Object {
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                   href=""
                   rel="noreferrer"
-                  title="Rule exceptions"
+                  title="Shared Exception Lists"
                 >
                   <div
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -418,7 +418,7 @@ Object {
                     <span
                       data-euiicon-type="arrowLeft"
                     />
-                    Rule exceptions
+                    Shared Exception Lists
                   </div>
                 </a>
               </li>
@@ -692,7 +692,7 @@ Object {
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                     href=""
                     rel="noreferrer"
-                    title="Rule exceptions"
+                    title="Shared Exception Lists"
                   >
                     <div
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -701,7 +701,7 @@ Object {
                       <span
                         data-euiicon-type="arrowLeft"
                       />
-                      Rule exceptions
+                      Shared Exception Lists
                     </div>
                   </a>
                 </li>
@@ -918,7 +918,7 @@ Object {
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                   href=""
                   rel="noreferrer"
-                  title="Rule exceptions"
+                  title="Shared Exception Lists"
                 >
                   <div
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -927,7 +927,7 @@ Object {
                     <span
                       data-euiicon-type="arrowLeft"
                     />
-                    Rule exceptions
+                    Shared Exception Lists
                   </div>
                 </a>
               </li>
@@ -1201,7 +1201,7 @@ Object {
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                     href=""
                     rel="noreferrer"
-                    title="Rule exceptions"
+                    title="Shared Exception Lists"
                   >
                     <div
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1210,7 +1210,7 @@ Object {
                       <span
                         data-euiicon-type="arrowLeft"
                       />
-                      Rule exceptions
+                      Shared Exception Lists
                     </div>
                   </a>
                 </li>
@@ -1400,7 +1400,7 @@ Object {
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                   href=""
                   rel="noreferrer"
-                  title="Rule exceptions"
+                  title="Shared Exception Lists"
                 >
                   <div
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1409,7 +1409,7 @@ Object {
                     <span
                       data-euiicon-type="arrowLeft"
                     />
-                    Rule exceptions
+                    Shared Exception Lists
                   </div>
                 </a>
               </li>
@@ -1656,7 +1656,7 @@ Object {
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                     href=""
                     rel="noreferrer"
-                    title="Rule exceptions"
+                    title="Shared Exception Lists"
                   >
                     <div
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1665,7 +1665,7 @@ Object {
                       <span
                         data-euiicon-type="arrowLeft"
                       />
-                      Rule exceptions
+                      Shared Exception Lists
                     </div>
                   </a>
                 </li>
@@ -1916,7 +1916,7 @@ Object {
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                   href=""
                   rel="noreferrer"
-                  title="Rule exceptions"
+                  title="Shared Exception Lists"
                 >
                   <div
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1925,7 +1925,7 @@ Object {
                     <span
                       data-euiicon-type="arrowLeft"
                     />
-                    Rule exceptions
+                    Shared Exception Lists
                   </div>
                 </a>
               </li>

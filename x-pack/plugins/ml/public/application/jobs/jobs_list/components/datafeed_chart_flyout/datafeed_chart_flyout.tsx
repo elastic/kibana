@@ -188,7 +188,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
           chartSourceData = fillMissingChartData(chartSourceData, chartBucketData);
         }
       }
-
       setSourceData(chartSourceData);
       setBucketData(chartBucketData);
       setAnnotationData({
@@ -260,6 +259,12 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const { datafeedConfig, bucketSpan, isInitialized } = data;
   const checkboxIdAnnotation = useMemo(() => htmlIdGenerator()(), []);
   const checkboxIdModelSnapshot = useMemo(() => htmlIdGenerator()(), []);
+  const hasOnlyEmptyValues = useMemo(
+    () =>
+      !bucketData.some((datum) => datum[1] !== null && datum[1] !== 0) &&
+      !sourceData.some((datum) => datum[1] !== null && datum[1] !== 0),
+    [bucketData, sourceData]
+  );
 
   return (
     <EuiPortal>
@@ -443,6 +448,14 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             defaultMessage: 'Count',
                           })}
                           position={Position.Left}
+                          domain={
+                            hasOnlyEmptyValues
+                              ? {
+                                  min: 0,
+                                  max: 10,
+                                }
+                              : undefined
+                          }
                           tickFormat={(d) => (d === null ? notAvailableMessage : String(d))}
                         />
                         {showAnnotations ? (

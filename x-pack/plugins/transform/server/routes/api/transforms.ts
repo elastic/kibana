@@ -52,6 +52,11 @@ import {
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
 import {
+  scheduleNowTransformsRequestSchema,
+  ScheduleNowTransformsRequestSchema,
+  ScheduleNowTransformsResponseSchema,
+} from '../../../common/api_schemas/schedule_now_transforms';
+import {
   postTransformsPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
   putTransformsRequestSchema,
@@ -72,7 +77,9 @@ import { transformHealthServiceProvider } from '../../lib/alerting/transform_hea
 
 enum TRANSFORM_ACTIONS {
   DELETE = 'delete',
+  REAUTHORIZE = 'reauthorize',
   RESET = 'reset',
+  SCHEDULE_NOW = 'schedule_now',
   STOP = 'stop',
   START = 'start',
 }
@@ -102,10 +109,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
           const alerting = await ctx.alerting;
           if (alerting) {
-            const transformHealthService = transformHealthServiceProvider(
-              esClient.asCurrentUser,
-              alerting.getRulesClient()
-            );
+            const transformHealthService = transformHealthServiceProvider({
+              esClient: esClient.asCurrentUser,
+              rulesClient: alerting.getRulesClient(),
+            });
 
             // @ts-ignore
             await transformHealthService.populateTransformsWithAssignedRules(body.transforms);
@@ -499,6 +506,27 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *
+   * @api {post} /api/transform/schedule_now_transforms Schedules transforms now
+   * @apiName PostScheduleNowTransforms
+   * @apiDescription Schedules transforms now
+   *
+   * @apiSchema (body) scheduleNowTransformsRequestSchema
+   */
+  router.post<undefined, undefined, ScheduleNowTransformsRequestSchema>(
+    {
+      path: addBasePath('schedule_now_transforms'),
+      validate: {
+        body: scheduleNowTransformsRequestSchema,
+      },
+    },
+    license.guardApiRoute<undefined, undefined, ScheduleNowTransformsRequestSchema>(
+      scheduleNowTransformsHandler
+    )
+  );
+
+  /**
+   * @apiGroup Transforms
+   *
    * @api {post} /api/transform/es_search Transform ES Search Proxy
    * @apiName PostTransformEsSearchProxy
    * @apiDescription ES Search Proxy
@@ -844,51 +872,143 @@ async function stopTransforms(
   return results;
 }
 
+const scheduleNowTransformsHandler: RequestHandler<
+  undefined,
+  undefined,
+  ScheduleNowTransformsRequestSchema
+> = async (ctx, req, res) => {
+  const transformsInfo = req.body;
+
+  try {
+    const esClient = (await ctx.core).elasticsearch.client;
+    return res.ok({
+      body: await scheduleNowTransforms(transformsInfo, esClient.asCurrentUser),
+    });
+  } catch (e) {
+    return res.customError(wrapError(wrapEsError(e)));
+  }
+};
+
+async function scheduleNowTransforms(
+  transformsInfo: ScheduleNowTransformsRequestSchema,
+  esClient: ElasticsearchClient
+) {
+  const results: ScheduleNowTransformsResponseSchema = {};
+
+  for (const transformInfo of transformsInfo) {
+    const transformId = transformInfo.id;
+    try {
+      await esClient.transport.request({
+        method: 'POST',
+        path: `_transform/${transformId}/_schedule_now`,
+      });
+
+      results[transformId] = { success: true };
+    } catch (e) {
+      if (isRequestTimeout(e)) {
+        return fillResultsWithTimeouts({
+          results,
+          id: transformId,
+          items: transformsInfo,
+          action: TRANSFORM_ACTIONS.SCHEDULE_NOW,
+        });
+      }
+      results[transformId] = { success: false, error: e.meta.body.error };
+    }
+  }
+  return results;
+}
+
 async function reauthorizeAndStartTransforms(
   transformsInfo: ReauthorizeTransformsRequestSchema,
   esClient: ElasticsearchClient,
   options?: TransportRequestOptions
-): Promise<ReauthorizeTransformsResponseSchema> {
-  try {
-    const result: ReauthorizeTransformsResponseSchema = {};
-    const authorizeTransformsPromises = transformsInfo.map((t) =>
-      esClient.transform.updateTransform(
+) {
+  const results: ReauthorizeTransformsResponseSchema = {};
+
+  for (const transformInfo of transformsInfo) {
+    const transformId = transformInfo.id;
+    try {
+      const updatedTransform = await esClient.transform.updateTransform(
         {
-          // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
           body: {},
-          transform_id: t.id,
+          transform_id: transformId,
         },
         options ?? {}
-      )
-    );
-    const authorizedTransforms = await Promise.all(authorizeTransformsPromises).then((results) =>
-      results.flat()
-    );
+      );
 
-    authorizedTransforms.forEach((t) => (result[t.id] = { success: true }));
-    console.log('authorizedTransforms', JSON.stringify(authorizedTransforms));
-    console.log('result', JSON.stringify(result));
-
-    // authorizedTransforms [{"id":"logs-host_risk_score.latest_transform-default-0.2.0","authorization":{"roles":["superuser"]},"version":"8.8.0","create_time":1679942122456,"source":{"index":[".alerts-security.host-risk-score.latest"],"query":{"match_all":{}}},"dest":{"index":".alerts-security.host-risk-score-latest-0.3.0"},"frequency":"1h","sync":{"time":{"field":"ingest_timestamp","delay":"1s"}},"latest":{"unique_key":["host.name"],"sort":"@timestamp"},"settings":{},"_meta":{"fleet_transform_version":"0.2.0","order":2,"managed_by":"fleet","managed":true,"package":{"name":"host_risk_score"}}}]
-    // startedTransforms [{"id":"logs-host_risk_score.latest_transform-default-0.2.0","authorization":{"roles":["superuser"]},"version":"8.8.0","create_time":1679942122456,"source":{"index":[".alerts-security.host-risk-score.latest"],"query":{"match_all":{}}},"dest":{"index":".alerts-security.host-risk-score-latest-0.3.0"},"frequency":"1h","sync":{"time":{"field":"ingest_timestamp","delay":"1s"}},"latest":{"unique_key":["host.name"],"sort":"@timestamp"},"settings":{},"_meta":{"fleet_transform_version":"0.2.0","order":2,"managed_by":"fleet","managed":true,"package":{"name":"host_risk_score"}}}]
-
-    const startTransforms = transformsInfo.map((t) =>
-      esClient.transform.startTransform(
+      console.log('--@@updatedTransform--\n', JSON.stringify(updatedTransform));
+      await esClient.transform.startTransform(
         {
-          // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
-          body: {},
-          transform_id: t.id,
+          transform_id: transformId,
         },
         { ignore: [409] }
-      )
-    );
-    const startedTransforms = await Promise.all(authorizeTransformsPromises).then((results) =>
-      results.flat()
-    );
-    // authorizedTransforms.forEach((t) => (result[t.id] = { success: true }));
+      );
 
-    console.log('startedTransforms', JSON.stringify(startedTransforms));
-
-    return result;
-  } catch (e) {}
+      results[transformId] = { success: true };
+    } catch (e) {
+      if (isRequestTimeout(e)) {
+        return fillResultsWithTimeouts({
+          results,
+          id: transformId,
+          items: transformsInfo,
+          action: TRANSFORM_ACTIONS.REAUTHORIZE,
+        });
+      }
+      results[transformId] = { success: false, error: e.meta.body.error };
+    }
+  }
+  return results;
 }
+//   const result: ReauthorizeTransformsResponseSchema = {};
+//   const authorizeTransformsPromises = transformsInfo.map((t) =>
+//     esClient.transform.updateTransform(
+//       {
+//         // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+//         body: {},
+//         transform_id: t.id,
+//       },
+//       options ?? {}
+//     )
+//   );
+//   const authorizedTransforms = await Promise.all(authorizeTransformsPromises).then((results) =>
+//     results.flat()
+//   );
+//
+//   authorizedTransforms.forEach((t) => (result[t.id] = { success: true }));
+//   console.log('authorizedTransforms', JSON.stringify(authorizedTransforms));
+//   console.log('result', JSON.stringify(result));
+//
+//   // authorizedTransforms [{"id":"logs-host_risk_score.latest_transform-default-0.2.0","authorization":{"roles":["superuser"]},"version":"8.8.0","create_time":1679942122456,"source":{"index":[".alerts-security.host-risk-score.latest"],"query":{"match_all":{}}},"dest":{"index":".alerts-security.host-risk-score-latest-0.3.0"},"frequency":"1h","sync":{"time":{"field":"ingest_timestamp","delay":"1s"}},"latest":{"unique_key":["host.name"],"sort":"@timestamp"},"settings":{},"_meta":{"fleet_transform_version":"0.2.0","order":2,"managed_by":"fleet","managed":true,"package":{"name":"host_risk_score"}}}]
+//   // startedTransforms [{"id":"logs-host_risk_score.latest_transform-default-0.2.0","authorization":{"roles":["superuser"]},"version":"8.8.0","create_time":1679942122456,"source":{"index":[".alerts-security.host-risk-score.latest"],"query":{"match_all":{}}},"dest":{"index":".alerts-security.host-risk-score-latest-0.3.0"},"frequency":"1h","sync":{"time":{"field":"ingest_timestamp","delay":"1s"}},"latest":{"unique_key":["host.name"],"sort":"@timestamp"},"settings":{},"_meta":{"fleet_transform_version":"0.2.0","order":2,"managed_by":"fleet","managed":true,"package":{"name":"host_risk_score"}}}]
+//
+//   const startTransforms = transformsInfo.map((t) =>
+//     esClient.transform.startTransform(
+//       {
+//         // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+//         body: {},
+//         transform_id: t.id,
+//       },
+//       { ignore: [409] }
+//     )
+//   );
+//   const startedTransforms = await Promise.all(authorizeTransformsPromises).then((results) =>
+//     results.flat()
+//   );
+//   // authorizedTransforms.forEach((t) => (result[t.id] = { success: true }));
+//
+//   console.log('startedTransforms', JSON.stringify(startedTransforms));
+//
+//   return result;
+// } catch (e) {
+//   // @TODO
+//   // if (isRequestTimeout(e)) {
+//   //   return fillResultsWithTimeouts({
+//   //     results,
+//   //     id: transformId,
+//   //     items: transformsInfo,
+//   //     action: TRANSFORM_ACTIONS.SCHEDULE_NOW,
+//   //   });
+//   // }
+//   // results[transformId] = { success: false, error: e.meta.body.error };
+// }

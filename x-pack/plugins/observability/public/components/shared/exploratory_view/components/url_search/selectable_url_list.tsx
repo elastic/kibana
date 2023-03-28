@@ -199,6 +199,7 @@ export function SelectableUrlList({
               <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="o11ySelectableUrlListApplyButton"
                     fill
                     size="s"
                     onClick={() => {

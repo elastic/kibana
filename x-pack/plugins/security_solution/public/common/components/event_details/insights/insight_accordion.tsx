@@ -51,7 +51,7 @@ export const InsightAccordion = React.memo<Props>(
             id={accordionId}
             buttonContent={
               <span>
-                <EuiIcon type="alert" color="danger" style={{ marginRight: '6px' }} />
+                <EuiIcon type="warning" color="danger" style={{ marginRight: '6px' }} />
                 {text}
               </span>
             }

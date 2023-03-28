@@ -106,6 +106,12 @@
   font-weight: $euiFontWeightRegular;
 }
 
+.domDragDrop-isReplacing {
+  .lnsLayerPanel__triggerText {
+    text-decoration: line-through;
+  }
+}
+
 .lnsLayerPanel__triggerTextLabel {
   transition: background-color $euiAnimSpeedFast ease-in-out;
 }

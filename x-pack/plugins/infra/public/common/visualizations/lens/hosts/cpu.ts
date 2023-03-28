@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { type Filter, FilterStateStore } from '@kbn/es-query';
 import type {
   FormBasedLayer,
   FormulaPublicApi,
@@ -13,10 +12,11 @@ import type {
   XYState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import {
   DEFAULT_LAYER_ID,
+  getAdhocDataView,
   getBreakdownColumn,
+  getDefaultReferences,
   getHistogramColumn,
   getXYVisualizationState,
 } from '../utils';
@@ -92,37 +92,6 @@ export class CPU implements ILensVisualization {
     });
   };
 
-  getFilters = (): Filter[] => {
-    return [
-      {
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-          index: '3be1e71b-4bc5-4462-a314-04539f877a19',
-          key: 'system.cpu.total.norm.pct',
-          value: 'exists',
-          type: 'exists',
-        },
-        query: {
-          exists: {
-            field: 'system.cpu.total.norm.pct',
-          },
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-      },
-    ];
-  };
-
-  getReferences = (): SavedObjectReference[] => {
-    return [
-      {
-        type: 'index-pattern',
-        id: this.dataView.id ?? '',
-        name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-      },
-    ];
-  };
+  getReferences = () => getDefaultReferences(this.dataView, DEFAULT_LAYER_ID);
+  getAdhocDataView = () => getAdhocDataView(this.dataView);
 }

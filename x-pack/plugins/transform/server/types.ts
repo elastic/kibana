@@ -10,6 +10,7 @@ import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugi
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { License } from './services';
 
@@ -17,11 +18,13 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
   alerting?: AlertingPlugin['setup'];
+  fieldFormats: FieldFormatsSetup;
   security: SecurityPluginSetup;
 }
 
 export interface PluginStartDependencies {
   dataViews: DataViewsServerPluginStart;
+  fieldFormats: FieldFormatsStart;
   security: SecurityPluginStart;
 }
 

@@ -160,7 +160,7 @@ async function cleanPreconfiguredFleetProxies(
         }
       );
     } else {
-      await deleteFleetProxy(soClient, existingFleetProxy.id, {
+      await deleteFleetProxy(soClient, esClient, existingFleetProxy.id, {
         fromPreconfiguration: true,
       });
     }

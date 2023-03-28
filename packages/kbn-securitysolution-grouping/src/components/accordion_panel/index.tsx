@@ -13,29 +13,17 @@ import { firstNonNullValue } from '../../helpers';
 import type { RawBucket } from '../types';
 import { createGroupFilter } from './helpers';
 
-export interface BadgeMetric {
-  title: string;
-  value: number;
-  color?: string;
-  width?: number;
-}
-
-export interface CustomMetric {
-  title: string;
-  customStatRenderer: JSX.Element;
-}
-
-interface GroupPanelProps {
+interface GroupPanelProps<T> {
   customAccordionButtonClassName?: string;
   customAccordionClassName?: string;
   extraAction?: React.ReactNode;
   forceState?: 'open' | 'closed';
-  groupBucket: RawBucket;
+  groupBucket: RawBucket<T>;
   groupPanelRenderer?: JSX.Element;
   isLoading: boolean;
   level?: number;
-  onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket) => void;
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
+  onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
+  renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
 }
 
@@ -51,7 +39,7 @@ const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
   </div>
 );
 
-const GroupPanelComponent = ({
+const GroupPanelComponent = <T,>({
   customAccordionButtonClassName = 'groupingAccordionForm__button',
   customAccordionClassName = 'groupingAccordionForm',
   extraAction,
@@ -63,7 +51,7 @@ const GroupPanelComponent = ({
   onToggleGroup,
   renderChildComponent,
   selectedGroup,
-}: GroupPanelProps) => {
+}: GroupPanelProps<T>) => {
   const groupFieldValue = useMemo(() => firstNonNullValue(groupBucket.key), [groupBucket.key]);
 
   const groupFilters = useMemo(

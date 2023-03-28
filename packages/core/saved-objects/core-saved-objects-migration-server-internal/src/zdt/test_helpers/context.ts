@@ -17,6 +17,7 @@ import type { MigratorContext } from '../context';
 
 export type MockedMigratorContext = Omit<MigratorContext, 'elasticsearchClient'> & {
   elasticsearchClient: ElasticsearchClientMock;
+  typeRegistry: SavedObjectTypeRegistry;
 };
 
 export const createContextMock = (
@@ -25,13 +26,19 @@ export const createContextMock = (
   const typeRegistry = new SavedObjectTypeRegistry();
 
   return {
+    kibanaVersion: '8.7.0',
     indexPrefix: '.kibana',
     types: ['foo', 'bar'],
+    typeModelVersions: {
+      foo: 1,
+      bar: 2,
+    },
     elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
     maxRetryAttempts: 15,
     migrationDocLinks: docLinksServiceMock.createSetupContract().links.kibanaUpgradeSavedObjects,
     typeRegistry,
     serializer: serializerMock.create(),
+    deletedTypes: ['deleted-type'],
     ...parts,
   };
 };

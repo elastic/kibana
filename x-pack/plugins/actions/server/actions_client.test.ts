@@ -12,7 +12,12 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType, ActionType } from './types';
-import { ActionExecutor, TaskRunnerFactory, ILicenseState } from './lib';
+import {
+  ActionExecutor,
+  TaskRunnerFactory,
+  ILicenseState,
+  asHttpRequestExecutionSource,
+} from './lib';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
@@ -2171,6 +2176,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
+        source: asHttpRequestExecutionSource(request),
       });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
@@ -2189,6 +2195,7 @@ describe('execute()', () => {
           params: {
             name: 'my name',
           },
+          source: asHttpRequestExecutionSource(request),
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
@@ -2205,6 +2212,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
+        source: asHttpRequestExecutionSource(request),
       });
 
       expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith('execute', mockUsageCounter);
@@ -2221,6 +2229,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
+        source: asHttpRequestExecutionSource(request),
       })
     ).resolves.toMatchObject({ status: 'ok', actionId });
 
@@ -2231,6 +2240,7 @@ describe('execute()', () => {
         name: 'my name',
       },
       actionExecutionId,
+      source: asHttpRequestExecutionSource(request),
     });
 
     await expect(
@@ -2239,6 +2249,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
+        source: asHttpRequestExecutionSource(request),
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -2263,6 +2274,7 @@ describe('execute()', () => {
         },
       ],
       actionExecutionId,
+      source: asHttpRequestExecutionSource(request),
     });
 
     await expect(
@@ -2271,6 +2283,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
+        source: asHttpRequestExecutionSource(request),
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -2288,6 +2301,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
+      source: asHttpRequestExecutionSource(request),
       relatedSavedObjects: [
         {
           id: 'some-id',
@@ -2313,6 +2327,7 @@ describe('enqueueExecution()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
@@ -2332,6 +2347,7 @@ describe('enqueueExecution()', () => {
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
@@ -2349,6 +2365,7 @@ describe('enqueueExecution()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       });
 
       expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
@@ -2365,6 +2382,7 @@ describe('enqueueExecution()', () => {
       spaceId: 'default',
       executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
+      source: asHttpRequestExecutionSource(request),
     };
     await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);
 
@@ -2385,6 +2403,7 @@ describe('bulkEnqueueExecution()', () => {
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
         {
           id: uuidv4(),
@@ -2392,6 +2411,7 @@ describe('bulkEnqueueExecution()', () => {
           spaceId: 'default',
           executionId: '456def',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
       ]);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
@@ -2413,6 +2433,7 @@ describe('bulkEnqueueExecution()', () => {
             spaceId: 'default',
             executionId: '123abc',
             apiKey: null,
+            source: asHttpRequestExecutionSource(request),
           },
           {
             id: uuidv4(),
@@ -2420,6 +2441,7 @@ describe('bulkEnqueueExecution()', () => {
             spaceId: 'default',
             executionId: '456def',
             apiKey: null,
+            source: asHttpRequestExecutionSource(request),
           },
         ])
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
@@ -2439,6 +2461,7 @@ describe('bulkEnqueueExecution()', () => {
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
         {
           id: uuidv4(),
@@ -2446,6 +2469,7 @@ describe('bulkEnqueueExecution()', () => {
           spaceId: 'default',
           executionId: '456def',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
       ]);
 
@@ -2468,6 +2492,7 @@ describe('bulkEnqueueExecution()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       },
       {
         id: uuidv4(),
@@ -2475,6 +2500,7 @@ describe('bulkEnqueueExecution()', () => {
         spaceId: 'default',
         executionId: '456def',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       },
     ];
     await expect(actionsClient.bulkEnqueueExecution(opts)).resolves.toMatchInlineSnapshot(
