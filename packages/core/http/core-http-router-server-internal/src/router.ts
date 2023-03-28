@@ -22,13 +22,15 @@ import type {
   RouterRoute,
   IRouter,
   RequestHandler,
+  VersionedRouter,
 } from '@kbn/core-http-server';
 import { validBodyOutput } from '@kbn/core-http-server';
+import { CoreVersionedRouter } from '@kbn/core-http-versioned-router-server-internal';
+import { RouteValidator } from '@kbn/core-http-route-validator-internal';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
-import { RouteValidator } from './validator';
 
 export type ContextEnhancer<
   P,
@@ -201,6 +203,14 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       }
       return hapiResponseAdapter.toInternalError();
     }
+  }
+
+  private versionedRouter: undefined | VersionedRouter<Context> = undefined;
+  public get versioned(): VersionedRouter<Context> {
+    if (this.versionedRouter === undefined) {
+      this.versionedRouter = CoreVersionedRouter.from({ router: this });
+    }
+    return this.versionedRouter;
   }
 }
 

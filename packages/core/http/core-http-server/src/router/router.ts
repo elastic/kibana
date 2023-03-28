@@ -8,6 +8,7 @@
 
 import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import type Boom from '@hapi/boom';
+import type { VersionedRouter } from '../versioning';
 import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
@@ -85,6 +86,14 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * @internal
    */
   getRoutes: () => RouterRoute[];
+
+  /**
+   * An instance very similar to {@link IRouter} that can be used for versioning HTTP routes
+   * following the Elastic versioning specification.
+   *
+   * @experimental
+   */
+  versioned: VersionedRouter<Context>;
 }
 
 /** @public */
