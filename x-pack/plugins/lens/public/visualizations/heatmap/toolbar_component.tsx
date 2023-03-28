@@ -18,6 +18,7 @@ import {
   ValueLabelsSettings,
   AxisTitleSettings,
   TooltipWrapper,
+  AxisTicksSettings,
 } from '../../shared_components';
 import type { HeatmapVisualizationState } from './types';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
@@ -165,6 +166,19 @@ export const HeatmapToolbar = memo(
                   }}
                   isAxisTitleVisible={state?.gridConfig.isYAxisTitleVisible}
                 />
+                <AxisTicksSettings
+                  axis="yLeft"
+                  updateTicksVisibilityState={(visible) => {
+                    setState({
+                      ...state,
+                      gridConfig: {
+                        ...state.gridConfig,
+                        isYAxisLabelVisible: visible,
+                      },
+                    });
+                  }}
+                  isAxisLabelVisible={state?.gridConfig.isYAxisLabelVisible}
+                />
               </ToolbarPopover>
             </TooltipWrapper>
 
@@ -197,6 +211,19 @@ export const HeatmapToolbar = memo(
                     })
                   }
                   isAxisTitleVisible={state?.gridConfig.isXAxisTitleVisible}
+                />
+                <AxisTicksSettings
+                  axis="x"
+                  updateTicksVisibilityState={(visible) => {
+                    setState({
+                      ...state,
+                      gridConfig: {
+                        ...state.gridConfig,
+                        isXAxisLabelVisible: visible,
+                      },
+                    });
+                  }}
+                  isAxisLabelVisible={state?.gridConfig.isXAxisLabelVisible}
                 />
               </ToolbarPopover>
             </TooltipWrapper>

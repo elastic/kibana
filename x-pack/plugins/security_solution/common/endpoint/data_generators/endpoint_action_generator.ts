@@ -231,7 +231,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         details.outputs = {
           [details.agents[0]]: this.generateExecuteActionResponseOutput({
             content: {
-              outputFileId: getFileDownloadId(details, details.agents[0]),
+              output_file_id: getFileDownloadId(details, details.agents[0]),
             },
           }),
         };
@@ -320,12 +320,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           error line 3 that is quite very long and will be truncated, and should not be visible in the UI\
           errorline4thathasalotmoretextthatdoesnotendfortestingpurposesrepeatalotoftexthereandkeepaddingmoreandmoretextwithoutendtheideabeingthatwedonotuseperiodsorcommassothattheconsoleuiisunabletobreakthislinewithoutsomecssrulessowiththislineweshouldbeabletotestthatwithgenerateddata`,
           ]),
-          stdoutTruncated: true,
-          stderrTruncated: true,
+          stdout_truncated: true,
+          stderr_truncated: true,
           shell_code: 0,
           shell: 'bash',
           cwd: '/some/path',
-          outputFileId: 'some-output-file-id',
+          output_file_id: 'some-output-file-id',
         },
       },
       overrides

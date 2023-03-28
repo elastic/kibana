@@ -31,6 +31,7 @@ beforeEach(() => {
     logger,
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
+    alertsService: null,
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },

@@ -29,8 +29,16 @@ describe('useAddToCase', function () {
 
       return (
         <span>
-          <EuiButton onClick={() => result.onCaseClicked()}>Add new case</EuiButton>
-          <EuiButton onClick={() => result.onCaseClicked({ id: 'test' } as any)}>
+          <EuiButton
+            data-test-subj="o11yTestComponentAddNewCaseButton"
+            onClick={() => result.onCaseClicked()}
+          >
+            Add new case
+          </EuiButton>
+          <EuiButton
+            data-test-subj="o11yTestComponentOnCaseClickButton"
+            onClick={() => result.onCaseClicked({ id: 'test' } as any)}
+          >
             On case click
           </EuiButton>
         </span>

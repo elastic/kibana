@@ -63,7 +63,7 @@ export const actionListHandler = (
 
     try {
       const indexExists = await doesLogsEndpointActionsIndexExist({
-        context,
+        esClient,
         logger,
         indexName: ENDPOINT_ACTIONS_INDEX,
       });

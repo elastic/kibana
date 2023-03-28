@@ -17,7 +17,10 @@ export function CardFooterContent() {
 
   return (
     <div>
-      <EuiButton href={fleetCloudAgentPolicyHref}>
+      <EuiButton
+        data-test-subj="apmCardFooterContentViewTheApmIntegrationInFleetButton"
+        href={fleetCloudAgentPolicyHref}
+      >
         {i18n.translate(
           'xpack.apm.settings.schema.success.viewIntegrationInFleet.buttonText',
           { defaultMessage: 'View the APM integration in Fleet' }

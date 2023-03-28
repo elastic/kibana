@@ -97,6 +97,11 @@ export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
 export { updateMappings, type IncompatibleMappingException } from './update_mappings';
 
+export {
+  type UpdateSourceMappingsPropertiesParams,
+  updateSourceMappingsProperties,
+} from './update_source_mappings_properties';
+
 import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
 import { ClusterShardLimitExceeded } from './create_index';

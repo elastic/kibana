@@ -222,6 +222,13 @@ export interface IRuleTypeAlerts {
   useLegacyAlerts?: boolean;
 
   /**
+   * Optional flag to indicate that resources should be space-aware. When set to
+   * true, alerts-as-data resources will be created for every space where a rule
+   * of this type runs.
+   */
+  isSpaceAware?: boolean;
+
+  /**
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
@@ -369,6 +376,7 @@ export interface RawRule extends SavedObjectAttributes {
   isSnoozedUntil?: string | null;
   lastRun?: RawRuleLastRun | null;
   nextRun?: string | null;
+  revision: number;
   running?: boolean | null;
 }
 

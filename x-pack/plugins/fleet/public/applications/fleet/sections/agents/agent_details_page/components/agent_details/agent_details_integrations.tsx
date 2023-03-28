@@ -234,7 +234,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
               </EuiFlexItem>
               {showNeedsAttentionBadge && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={theme.euiTheme.colors.danger} iconType="alert" iconSide="left">
+                  <EuiBadge color={theme.euiTheme.colors.danger} iconType="warning" iconSide="left">
                     <FormattedMessage
                       id="xpack.fleet.agentDetailsIntegrations.needsAttention.label"
                       defaultMessage="Needs attention"

@@ -23,6 +23,12 @@ export const openSourcerer = (sourcererScope?: string) => {
   cy.get(SOURCERER.wrapper).should('be.visible');
 };
 
+export const selectDataView = (dataView: string, sourcererScope?: string) => {
+  openSourcerer(sourcererScope);
+  openDataViewSelection();
+  cy.get(SOURCERER.selectListOption).contains(dataView).click();
+};
+
 const openTimelineSourcerer = () => {
   cy.get(SOURCERER.triggerTimeline).should('be.enabled');
   cy.get(SOURCERER.triggerTimeline).should('be.visible');
@@ -148,7 +154,7 @@ const refreshUntilAlertsIndexExists = async () => {
 };
 
 export const waitForAlertsIndexToExist = () => {
-  createRule({ ...getNewRule(), rule_id: '1', max_signals: 100 });
+  createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
   refreshUntilAlertsIndexExists();
 };
 

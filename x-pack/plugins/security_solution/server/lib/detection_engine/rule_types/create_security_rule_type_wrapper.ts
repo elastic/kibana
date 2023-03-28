@@ -537,6 +537,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         },
         useEcs: true,
         useLegacyAlerts: true,
+        isSpaceAware: true,
         secondaryAlias: config.signalsIndex,
       },
     });

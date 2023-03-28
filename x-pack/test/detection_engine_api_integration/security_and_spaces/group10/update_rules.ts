@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleMlRuleOutput();
         // @ts-expect-error type narrowing is lost due to Omit<>
         outputRule.machine_learning_job_id = ['legacy_job_id'];
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleMlRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -182,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         // Expect an empty array
         outputRule.actions = [];
         // Expect "no_actions"
@@ -242,7 +242,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 2; // Migration of action results in additional revision increment (change to `notifyWhen`), so expected revision is 2
         outputRule.actions = [
           {
             action_type_id: '.slack',
@@ -281,12 +281,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should change the version of a rule when it updates enabled and another property', async () => {
+      it('should change the revision of a rule when it updates enabled and another property', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // update a simple rule's enabled to false and another property
@@ -303,7 +303,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
         outputRule.severity = 'low';
-        outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -335,7 +335,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
-        outputRule.version = 3;
+        outputRule.revision = 2;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);

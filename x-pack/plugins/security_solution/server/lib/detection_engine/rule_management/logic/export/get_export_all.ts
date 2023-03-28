@@ -12,7 +12,7 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { getNonPackagedRules } from '../search/get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
-import { transformAlertsToRules } from '../../utils/utils';
+import { transformAlertsToRules, transformRuleToExportableFormat } from '../../utils/utils';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
 
@@ -32,6 +32,8 @@ export const getExportAll = async (
   const ruleAlertTypes = await getNonPackagedRules({ rulesClient });
   const rules = transformAlertsToRules(ruleAlertTypes);
 
+  const exportRules = rules.map((r) => transformRuleToExportableFormat(r));
+
   // Gather exceptions
   const exceptions = rules.flatMap((rule) => rule.exceptions_list ?? []);
   const { exportData: exceptionLists, exportDetails: exceptionDetails } =
@@ -44,7 +46,7 @@ export const getExportAll = async (
     request
   );
 
-  const rulesNdjson = transformDataToNdjson(rules);
+  const rulesNdjson = transformDataToNdjson(exportRules);
   const exportDetails = getExportDetailsNdjson(rules, [], exceptionDetails, actionConnectorDetails);
 
   return { rulesNdjson, exportDetails, exceptionLists, actionConnectors };
