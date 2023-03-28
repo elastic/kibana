@@ -989,6 +989,7 @@ describe('update()', () => {
         ],
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": undefined,
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
         "enabled": true,
@@ -2724,6 +2725,212 @@ describe('update()', () => {
         references: [{ id: '1', name: 'action_0', type: 'action' }],
         version: '123',
       }
+    );
+  });
+
+  it('calls the getAuthenticationApiKey function if the user is authenticated using api keys', async () => {
+    rulesClientParams.isAuthenticationTypeApiKey.mockResolvedValueOnce(true);
+    rulesClientParams.getAuthenticationApiKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: 'onThrottleInterval',
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyCreatedByUser: true,
+        revision: 1,
+        scheduledTaskId: 'task-123',
+      },
+      updated_at: new Date().toISOString(),
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: {
+        ...existingDecryptedAlert.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: '5m',
+        notifyWhen: 'onThrottleInterval',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": true,
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onThrottleInterval",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).not.toHaveBeenCalled();
+
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionRef": "action_0",
+            "actionTypeId": "test",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+            "uuid": "152",
+          },
+        ],
+        "alertTypeId": "myType",
+        "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": true,
+        "apiKeyOwner": "elastic",
+        "consumer": "myApp",
+        "enabled": true,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
+        "name": "abc",
+        "notifyWhen": "onThrottleInterval",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": "5m",
+        "updatedAt": "2019-02-12T21:01:22.479Z",
+        "updatedBy": "elastic",
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "overwrite": true,
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+        "version": "123",
+      }
+    `);
+  });
+
+  test('throws when unsecuredSavedObjectsClient update fails and does not invalidates newly created API key if the user is authenticated using api keys', async () => {
+    rulesClientParams.isAuthenticationTypeApiKey.mockResolvedValueOnce(true);
+    rulesClientParams.getAuthenticationApiKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.create.mockRejectedValue(new Error('Fail'));
+    await expect(
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: [],
+      },
+      expect.any(Object),
+      expect.any(Object)
     );
   });
 });

@@ -148,6 +148,56 @@ describe('updateApiKey()', () => {
     );
   });
 
+  test('updates the API key for the alert and does not invalidate the old api key if created by a user authenticated using api keys', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingEncryptedAlert,
+      attributes: {
+        ...existingEncryptedAlert.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '234', name: '123', api_key: 'abc' },
+    });
+    await rulesClient.updateApiKey({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+        enabled: true,
+        apiKey: Buffer.from('234:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        revision: 0,
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+      },
+      { version: '123' }
+    );
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+  });
+
   test('throws an error if API key creation throws', async () => {
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');

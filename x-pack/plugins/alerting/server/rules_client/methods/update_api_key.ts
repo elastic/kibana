@@ -109,10 +109,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
       {
-        apiKeys:
-          updateAttributes.apiKey && !updateAttributes.apiKeyCreatedByUser
-            ? [updateAttributes.apiKey]
-            : [],
+        apiKeys: updateAttributes.apiKey ? [updateAttributes.apiKey] : [],
       },
       context.logger,
       context.unsecuredSavedObjectsClient
