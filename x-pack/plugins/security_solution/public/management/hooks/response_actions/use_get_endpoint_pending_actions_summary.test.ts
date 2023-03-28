@@ -49,6 +49,31 @@ describe('useGetEndpointPendingActionsSummary hook', () => {
     });
   });
 
+  it('should be disabled when disabled using options', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointPendingActionsSummary(['123', '456'], { enabled: false })
+    );
+
+    expect(apiMocks.responseProvider.agentPendingActionsSummary).not.toHaveBeenCalled();
+  });
+
+  it('should be disabled when empty endpoint Id', async () => {
+    await renderReactQueryHook(() => useGetEndpointPendingActionsSummary(['']));
+
+    expect(apiMocks.responseProvider.agentPendingActionsSummary).not.toHaveBeenCalled();
+  });
+
+  it('should be enabled when there is some valid list of ids', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointPendingActionsSummary(['', '123', '', '', '', '456'])
+    );
+
+    expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalledWith({
+      path: `${ACTION_STATUS_ROUTE}`,
+      query: { agent_ids: ['123', '456'] },
+    });
+  });
+
   it('should allow custom options to be used', async () => {
     await renderReactQueryHook(
       () =>
@@ -60,6 +85,8 @@ describe('useGetEndpointPendingActionsSummary hook', () => {
     );
 
     expect(useQueryMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
       expect.objectContaining({
         queryKey: ['1', '2'],
         enabled: false,
