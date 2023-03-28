@@ -9,21 +9,21 @@ import { LogicMounter } from '../../../__mocks__/kea_logic';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../common/types/api';
-import { EnterpriseSearchEngine } from '../../../../../common/types/engines';
+import { EnterpriseSearchEngineDetails } from '../../../../../common/types/engines';
 
 import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
 
 import { EngineListFlyoutValues, EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 
 const DEFAULT_VALUES: EngineListFlyoutValues = {
+  fetchEngineApiError: undefined,
+  fetchEngineApiStatus: Status.IDLE,
   fetchEngineData: undefined,
   fetchEngineName: null,
   isFetchEngineFlyoutVisible: false,
-  fetchEngineApiStatus: Status.IDLE,
-  fetchEngineApiError: undefined,
   isFetchEngineLoading: false,
 };
-const mockEngineData: EnterpriseSearchEngine = {
+const mockEngineData: EnterpriseSearchEngineDetails = {
   indices: [
     {
       count: 10,
@@ -66,10 +66,10 @@ describe('EngineListFlyoutLogic', () => {
         EnginesListFlyoutLogic.actions.openFetchEngineFlyout('my-test-engine');
         expect(EnginesListFlyoutLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          isFetchEngineFlyoutVisible: true,
-          fetchEngineName: 'my-test-engine',
-          isFetchEngineLoading: true,
           fetchEngineApiStatus: Status.LOADING,
+          fetchEngineName: 'my-test-engine',
+          isFetchEngineFlyoutVisible: true,
+          isFetchEngineLoading: true,
         });
       });
     });

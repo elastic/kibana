@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import {
-  EnterpriseSearchEngine,
+  EnterpriseSearchEngineDetails,
   EnterpriseSearchEngineIndex,
 } from '../../../../../common/types/engines';
 import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
@@ -22,7 +22,7 @@ const DEFAULT_VALUES: EngineIndicesLogicValues = {
   isLoadingEngine: true,
 };
 
-const mockEngineData: EnterpriseSearchEngine = {
+const mockEngineData: EnterpriseSearchEngineDetails = {
   indices: [
     {
       count: 10,
@@ -76,9 +76,7 @@ describe('EngineViewLogic', () => {
 
         EngineIndicesLogic.actions.engineUpdated({
           ...mockEngineData,
-          indices: mockEngineData.indices.map(
-            (index) => index.name
-          ) as unknown as EnterpriseSearchEngineIndex[],
+          indices: mockEngineData.indices.map((index) => index.name),
         });
 
         expect(EngineIndicesLogic.actions.fetchEngine).toHaveBeenCalledTimes(1);

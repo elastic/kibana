@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import {
   EnterpriseSearchEngine,
+  EnterpriseSearchEngineDetails,
   EnterpriseSearchEnginesResponse,
   EnterpriseSearchEngineUpsertResponse,
 } from '../../../common/types/engines';
@@ -60,7 +61,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngine>({
+      const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
         method: 'GET',
         path: `/_application/search_application/${request.params.engine_name}`,
       });

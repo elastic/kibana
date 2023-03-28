@@ -14,11 +14,16 @@ export interface EnterpriseSearchEnginesResponse {
 }
 
 export interface EnterpriseSearchEngine {
-  indices: EnterpriseSearchEngineIndex[];
+  indices: string[];
   name: string;
   updated_at_millis: number;
 }
 
+export interface EnterpriseSearchEngineDetails {
+  indices: EnterpriseSearchEngineIndex[];
+  name: string;
+  updated_at_millis: number;
+}
 export interface EnterpriseSearchEngineIndex {
   count: number;
   health: HealthStatus | 'unknown';

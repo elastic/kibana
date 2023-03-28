@@ -10,10 +10,7 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
-import {
-  EnterpriseSearchEngine,
-  EnterpriseSearchEngineIndex,
-} from '../../../../../common/types/engines';
+import { EnterpriseSearchEngine } from '../../../../../common/types/engines';
 
 import { FetchEnginesAPILogic } from '../../api/engines/fetch_engines_api_logic';
 
@@ -40,22 +37,17 @@ const DEFAULT_VALUES = {
 // may need to call mock engines response when ready
 const results: EnterpriseSearchEngine[] = [
   {
-    indices: ['index-18', 'index-23'] as unknown as EnterpriseSearchEngineIndex[],
+    indices: ['index-18', 'index-23'],
     name: 'engine-name-1',
     updated_at_millis: 1679337823167,
   },
   {
-    indices: [
-      'index-180',
-      'index-230',
-      'index-8',
-      'index-2',
-    ] as unknown as EnterpriseSearchEngineIndex[],
+    indices: ['index-180', 'index-230', 'index-8', 'index-2'],
     name: 'engine-name-2',
     updated_at_millis: 1679337823167,
   },
   {
-    indices: ['index-2', 'index-3'] as unknown as EnterpriseSearchEngineIndex[],
+    indices: ['index-2', 'index-3'],
     name: 'engine-name-3',
     updated_at_millis: 1679337823167,
   },
