@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show a top values popover for a keyword field', async () => {
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
+          const [fieldId] = await PageObjects.lens.findFieldIdsByType('keyword');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should show stats for a keyword runtime field', async () => {
           await PageObjects.lens.searchField('runtime');
           await PageObjects.lens.waitForField('runtime_string');
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
+          const [fieldId] = await PageObjects.lens.findFieldIdsByType('keyword');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should change popover content if user defines a filter that affects field values', async () => {
           // check the current records count for stats
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
+          const [fieldId] = await PageObjects.lens.findFieldIdsByType('keyword');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           const valuesCount = parseInt(
@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await filterBar.removeAllFilters();
           await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '-1' });
           // check via popup fields have no data
-          const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
+          const [fieldId] = await PageObjects.lens.findFieldIdsByType('keyword');
           await log.debug(`Opening field stats for ${fieldId}`);
           await retry.try(async () => {
             await testSubjects.click(fieldId);

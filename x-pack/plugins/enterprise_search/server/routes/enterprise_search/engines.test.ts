@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks__';
+import { mockDependencies, MockRouter } from '../../__mocks__';
 
-jest.mock('../../utils/fetch_enterprise_search', () => ({
-  ...jest.requireActual('../../utils/fetch_enterprise_search'),
-  fetchEnterpriseSearch: jest.fn(),
-}));
 jest.mock('../../lib/engines/field_capabilities', () => ({
   fetchEngineFieldCapabilities: jest.fn(),
 }));
@@ -18,7 +14,6 @@ jest.mock('../../lib/engines/field_capabilities', () => ({
 import { RequestHandlerContext } from '@kbn/core/server';
 
 import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
-import { fetchEnterpriseSearch } from '../../utils/fetch_enterprise_search';
 
 import { registerEnginesRoutes } from './engines';
 
@@ -26,22 +21,41 @@ describe('engines routes', () => {
   describe('GET /internal/enterprise_search/engines', () => {
     let mockRouter: MockRouter;
 
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'get',
         path: '/internal/enterprise_search/engines',
       });
-
       registerEnginesRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines',
+    it('GET search applications API creates request', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({}));
+      const request = { query: {} };
+      await mockRouter.callRoute({});
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_application/search_application',
+        querystring: request.query,
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {},
       });
     });
 
@@ -64,72 +78,23 @@ describe('engines routes', () => {
     });
   });
 
-  describe('POST /internal/enterprise_search/engines', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'post',
-        path: '/internal/enterprise_search/engines',
-      });
-
-      registerEnginesRoutes({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines',
-      });
-    });
-
-    it('validates correctly with engine_name', () => {
-      const request = {
-        body: {
-          indices: ['search-unit-test'],
-          name: 'some-engine',
-        },
-      };
-
-      mockRouter.shouldValidate(request);
-    });
-
-    it('fails validation without body', () => {
-      const request = { params: {} };
-
-      mockRouter.shouldThrow(request);
-    });
-
-    it('fails validation without name', () => {
-      const request = {
-        body: {
-          indices: ['search-unit-test'],
-        },
-      };
-
-      mockRouter.shouldThrow(request);
-    });
-
-    it('fails validation without indices', () => {
-      const request = {
-        body: {
-          name: 'some-engine',
-        },
-      };
-
-      mockRouter.shouldThrow(request);
-    });
-  });
-
   describe('GET /internal/enterprise_search/engines/{engine_name}', () => {
     let mockRouter: MockRouter;
-
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'get',
         path: '/internal/enterprise_search/engines/{engine_name}',
       });
@@ -140,9 +105,18 @@ describe('engines routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines/:engine_name',
+    it('GET search application API creates request', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({}));
+      await mockRouter.callRoute({
+        params: { engine_name: 'engine-name' },
+      });
+
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_application/search_application/engine-name',
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {},
       });
     });
 
@@ -161,10 +135,21 @@ describe('engines routes', () => {
 
   describe('PUT /internal/enterprise_search/engines/{engine_name}', () => {
     let mockRouter: MockRouter;
-
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'put',
         path: '/internal/enterprise_search/engines/{engine_name}',
       });
@@ -175,18 +160,72 @@ describe('engines routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines/:engine_name',
+    it('PUT - Upsert API creates request - create', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        body: {
+          indices: ['test-indices-1'],
+        },
+        params: {
+          engine_name: 'engine-name',
+        },
+        query: { create: true },
+      });
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        body: {
+          indices: ['test-indices-1'],
+        },
+        method: 'PUT',
+        path: '/_application/search_application/engine-name',
+        querystring: { create: true },
+      });
+      const mock = jest.fn();
+      const mockResponse = mock({ result: 'created' });
+      expect(mockRouter.response.ok).toHaveReturnedWith(mockResponse);
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
+        },
+      });
+    });
+    it('PUT - Upsert API creates request - update', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        body: {
+          indices: ['test-indices-1'],
+        },
+        params: {
+          engine_name: 'engine-name',
+        },
+      });
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        body: {
+          indices: ['test-indices-1'],
+        },
+        method: 'PUT',
+        path: '/_application/search_application/engine-name',
+        querystring: {},
+      });
+      const mock = jest.fn();
+      const mockResponse = mock({ result: 'updated' });
+      expect(mockRouter.response.ok).toHaveReturnedWith(mockResponse);
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
+        },
       });
     });
 
     it('validates correctly with engine_name', () => {
       const request = {
+        body: { indices: ['search-unit-test'] },
         params: { engine_name: 'some-engine' },
-        body: {
-          indices: ['search-unit-test'],
-        },
       };
 
       mockRouter.shouldValidate(request);
@@ -200,10 +239,10 @@ describe('engines routes', () => {
 
     it('fails validation without indices', () => {
       const request = {
-        params: { engine_name: 'some-engine' },
         body: {
           name: 'some-engine',
         },
+        params: { engine_name: 'some-engine' },
       };
 
       mockRouter.shouldThrow(request);
@@ -212,10 +251,21 @@ describe('engines routes', () => {
 
   describe('DELETE /internal/enterprise_search/engines/{engine_name}', () => {
     let mockRouter: MockRouter;
-
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'delete',
         path: '/internal/enterprise_search/engines/{engine_name}',
       });
@@ -226,9 +276,24 @@ describe('engines routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines/:engine_name',
+    it('Delete API creates request', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        params: {
+          engine_name: 'engine-name',
+        },
+      });
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'DELETE',
+        path: '_application/search_application/engine-name',
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
+        },
       });
     });
 
@@ -245,12 +310,23 @@ describe('engines routes', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/engines/{engine_name}/search', () => {
+  describe('POST /internal/enterprise_search/engines/{engine_name}/search', () => {
     let mockRouter: MockRouter;
-
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'post',
         path: '/internal/enterprise_search/engines/{engine_name}/search',
       });
@@ -260,17 +336,33 @@ describe('engines routes', () => {
         router: mockRouter.router,
       });
     });
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines/:engine_name/_search',
+    it('POST - Search preview API creates a request', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        params: {
+          engine_name: 'engine-name',
+        },
+      });
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        body: {},
+        method: 'POST',
+        path: '/engine-name/_search',
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
+        },
       });
     });
 
     it('validates correctly with engine_name and pagination', () => {
       const request = {
         body: {
-          query: 'test-query',
           fields: ['test-field-1', 'test-field-2'],
+          query: 'test-query',
         },
         params: {
           engine_name: 'some-engine',
@@ -294,12 +386,12 @@ describe('engines routes', () => {
 
     it('validation with query and without fields', () => {
       const request = {
+        body: {
+          fields: [],
+          query: 'sample-query',
+        },
         params: {
           engine_name: 'my-test-engine',
-        },
-        body: {
-          query: 'sample-query',
-          fields: [],
         },
       };
       mockRouter.shouldValidate(request);
@@ -315,7 +407,7 @@ describe('engines routes', () => {
   describe('GET /internal/enterprise_search/engines/{engine_name}/field_capabilities', () => {
     let mockRouter: MockRouter;
     const mockClient = {
-      asCurrentUser: {},
+      asCurrentUser: { transport: { request: jest.fn() } },
     };
     const mockCore = {
       elasticsearch: { client: mockClient },
@@ -352,26 +444,35 @@ describe('engines routes', () => {
         name: 'unit-test',
       };
 
-      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce(engineResult);
+      (mockClient.asCurrentUser.transport.request as jest.Mock).mockResolvedValueOnce(engineResult);
       (fetchEngineFieldCapabilities as jest.Mock).mockResolvedValueOnce(fieldCapabilitiesResult);
 
       await mockRouter.callRoute({
         params: { engine_name: 'unit-test' },
       });
 
-      expect(fetchEnterpriseSearch).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        '/api/engines/unit-test'
-      );
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_application/search_application/unit-test',
+      });
       expect(fetchEngineFieldCapabilities).toHaveBeenCalledWith(mockClient, engineResult);
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: fieldCapabilitiesResult,
         headers: { 'content-type': 'application/json' },
       });
     });
-    it('returns 404 when fetch engine is undefined', async () => {
-      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce(undefined);
+    it('returns 404 when fetch engine throws a not found exception', async () => {
+      (mockClient.asCurrentUser.transport.request as jest.Mock).mockRejectedValueOnce({
+        meta: {
+          body: {
+            error: {
+              type: 'resource_not_found_exception',
+            },
+          },
+          statusCode: 404,
+        },
+        name: 'ResponseError',
+      });
       await mockRouter.callRoute({
         params: { engine_name: 'unit-test' },
       });
@@ -386,29 +487,15 @@ describe('engines routes', () => {
         statusCode: 404,
       });
     });
-    it('returns 404 when fetch engine is returns 404', async () => {
-      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce({
-        responseStatus: 404,
-        responseStatusText: 'NOT_FOUND',
-      });
-      await mockRouter.callRoute({
-        params: { engine_name: 'unit-test' },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+    it('returns error when fetch engine returns an unknown error', async () => {
+      (mockClient.asCurrentUser.transport.request as jest.Mock).mockRejectedValueOnce({
         body: {
           attributes: {
-            error_code: 'engine_not_found',
+            error_code: 'unknown_error',
           },
-          message: 'Could not find engine',
+          message: 'Unknown error',
         },
-        statusCode: 404,
-      });
-    });
-    it('returns error when fetch engine returns an error', async () => {
-      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce({
-        responseStatus: 500,
-        responseStatusText: 'INTERNAL_SERVER_ERROR',
+        statusCode: 500,
       });
       await mockRouter.callRoute({
         params: { engine_name: 'unit-test' },
@@ -419,9 +506,9 @@ describe('engines routes', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Error fetching engine',
+          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
         },
-        statusCode: 500,
+        statusCode: 502,
       });
     });
   });

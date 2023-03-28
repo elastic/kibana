@@ -22,6 +22,7 @@ export function EmbedAction({
 
   const button = (
     <EuiButtonEmpty
+      data-test-subj="o11yEmbedActionButton"
       size="s"
       isDisabled={lensAttributes === null}
       onClick={() => {

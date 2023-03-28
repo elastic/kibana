@@ -42,7 +42,7 @@ export const simpleAlertEnabled = (
           />
         </EuiText>
         <EuiSpacer size="xs" />
-        <EuiLink href={alertUrl}>
+        <EuiLink data-test-subj="syntheticsSimpleAlertEnabledEditAlertLink" href={alertUrl}>
           {i18n.translate('xpack.synthetics.enableAlert.editAlert', {
             defaultMessage: 'Edit alert',
           })}

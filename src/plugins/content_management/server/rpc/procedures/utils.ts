@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { validateVersion } from '../../../common/utils';
-import type { Version } from '../../../common';
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
+import type { Version } from '@kbn/object-versioning';
 
 export const validateRequestVersion = (
   requestVersion: Version | undefined,
@@ -18,12 +18,15 @@ export const validateRequestVersion = (
     throw new Error('Request version missing');
   }
 
-  const requestVersionNumber = validateVersion(requestVersion);
-  const latestVersionNumber = parseInt(latestVersion.substring(1), 10);
+  const { result, value: requestVersionNumber } = validateVersion(requestVersion);
 
-  if (requestVersionNumber > latestVersionNumber) {
+  if (!result) {
+    throw new Error(`Invalid version [${requestVersion}]. Must be an integer.`);
+  }
+
+  if (requestVersionNumber > latestVersion) {
     throw new Error(`Invalid version. Latest version is [${latestVersion}].`);
   }
 
-  return requestVersion;
+  return requestVersionNumber;
 };

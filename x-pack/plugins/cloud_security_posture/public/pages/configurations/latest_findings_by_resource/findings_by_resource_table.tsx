@@ -44,7 +44,8 @@ interface Props {
 }
 
 export const getResourceId = (resource: FindingsByResourcePage) => {
-  return [resource.resource_id, ...resource['rule.section']].join('/');
+  const sections = resource['rule.section'] || [];
+  return [resource.resource_id, ...sections].join('/');
 };
 
 const FindingsByResourceTableComponent = ({
@@ -81,9 +82,7 @@ const FindingsByResourceTableComponent = ({
         getNonSortableColumn(findingsByResourceColumns['rule.benchmark.name']),
         { onAddFilter }
       ),
-      createColumnWithFilters(getNonSortableColumn(findingsByResourceColumns.belongs_to), {
-        onAddFilter,
-      }),
+      getNonSortableColumn(findingsByResourceColumns.belongs_to),
       findingsByResourceColumns.compliance_score,
     ],
     [onAddFilter]
@@ -124,17 +123,21 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
     ...baseFindingsColumns['resource.id'],
     field: 'resource_id',
     width: '15%',
-    render: (resourceId: FindingsByResourcePage['resource_id']) => (
-      <Link
-        to={generatePath(findingsNavigation.resource_findings.path, {
-          resourceId: encodeURIComponent(resourceId),
-        })}
-        className="eui-textTruncate"
-        title={resourceId}
-      >
-        {resourceId}
-      </Link>
-    ),
+    render: (resourceId: FindingsByResourcePage['resource_id']) => {
+      if (!resourceId) return;
+
+      return (
+        <Link
+          to={generatePath(findingsNavigation.resource_findings.path, {
+            resourceId: encodeURIComponent(resourceId),
+          })}
+          className="eui-textTruncate"
+          title={resourceId}
+        >
+          {resourceId}
+        </Link>
+      );
+    },
   },
   baseFindingsColumns['resource.sub_type'],
   baseFindingsColumns['resource.name'],

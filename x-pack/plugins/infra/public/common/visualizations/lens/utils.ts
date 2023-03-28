@@ -10,8 +10,11 @@ import {
   TermsIndexPatternColumn,
   XYState,
 } from '@kbn/lens-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 
 export const DEFAULT_LAYER_ID = 'layer1';
+export const DEFAULT_AD_HOC_DATA_VIEW_ID = 'infra_lens_ad_hoc_default';
 
 export const getHistogramColumn = (columnName: string, sourceField: string) => {
   return {
@@ -101,3 +104,24 @@ export const getXYVisualizationState = (
   hideEndzones: true,
   ...custom,
 });
+
+export const getDefaultReferences = (
+  dataView: DataView,
+  dataLayerId: string
+): SavedObjectReference[] => {
+  return [
+    {
+      type: 'index-pattern',
+      id: dataView.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID,
+      name: `indexpattern-datasource-layer-${dataLayerId}`,
+    },
+  ];
+};
+
+export const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
+  return {
+    [dataView.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID]: {
+      ...dataView.toSpec(),
+    },
+  };
+};
