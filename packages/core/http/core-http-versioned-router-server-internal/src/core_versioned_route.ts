@@ -14,8 +14,6 @@ import type {
   RequestHandlerContextBase,
   KibanaRequest,
   KibanaResponseFactory,
-} from '@kbn/core-http-server';
-import type {
   ApiVersion,
   AddVersionOpts,
   VersionedRoute,
