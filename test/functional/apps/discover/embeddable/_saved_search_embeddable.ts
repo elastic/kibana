@@ -13,8 +13,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
+  const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
 
   describe('discover saved search embeddable', () => {
@@ -101,6 +103,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const secondGridCellContent = await secondGridCell.getVisibleText();
 
       expect(firstGridCellContent).to.be.equal(secondGridCellContent);
+    });
+
+    it('should display an error', async () => {
+      await addSearchEmbeddableToDashboard();
+      await queryBar.setQuery('bytes > 5000');
+      await queryBar.submitQuery();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('2,572 documents');
+      await queryBar.setQuery('this < is not : a valid > query');
+      await queryBar.submitQuery();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const embeddableError = await testSubjects.find('embeddableError');
+      const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
+      expect(await errorMessage.getVisibleText()).to.equal(
+        'Expected AND, OR, end of input, whitespace but "n" found. this < is not : a valid > query ----------^'
+      );
     });
   });
 }
