@@ -20,6 +20,7 @@ export interface ChartProps {
 export interface Props {
   chartProps: ChartProps;
   comparator: Comparator;
+  id: string;
   threshold: number;
   title: string;
   value: number;
@@ -29,6 +30,7 @@ export interface Props {
 export const Threshold = ({
   chartProps: { theme, baseTheme },
   comparator,
+  id,
   threshold,
   title,
   value,
@@ -51,7 +53,7 @@ export const Threshold = ({
       <Chart>
         <Settings theme={theme} baseTheme={baseTheme} />
         <Metric
-          id="1"
+          id={id}
           data={[
             [
               {

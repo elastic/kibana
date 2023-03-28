@@ -31,11 +31,12 @@ export default {
 
 const defaultProps: Props = {
   chartProps: { theme: EUI_CHARTS_THEME_LIGHT.theme, baseTheme: LIGHT_THEME },
-  title: 'Threshold breached',
+  comparator: Comparator.GT,
+  id: 'componentId',
   threshold: 90,
+  title: 'Threshold breached',
   value: 93,
   valueFormatter: (d) => `${d}%`,
-  comparator: Comparator.GT,
 };
 
 export const Default = {
