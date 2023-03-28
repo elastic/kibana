@@ -19,7 +19,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
+import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardContainerContext } from '../../dashboard_container_context';
 import { useDashboardPerformanceTracker } from './use_dashboard_performance_tracker';
@@ -111,7 +111,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       isResizable={!expandedPanelId}
       isDraggable={!expandedPanelId}
       rowHeight={DASHBOARD_GRID_HEIGHT}
-      margin={useMargins ? [8, 8] : [0, 0]}
+      margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
       draggableHandle={'.embPanel--dragHandle'}
     >
       {panelComponents}

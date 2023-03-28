@@ -26,6 +26,9 @@ export const useDashboardGridSettings = () => {
       lg: Object.values(panels)
         .map((panel) => panel.gridData)
         .sort((panelA, panelB) => {
+          // need to manually sort the layout because we want the panels to be collapsed from the left to the
+          // right when switching to the single column layout, but RGL sorts by ID which can cause unexpected
+          // behaviour between by-reference and by-value panels.
           if (panelA.y === panelB.y) {
             return panelA.x - panelB.x;
           } else {
