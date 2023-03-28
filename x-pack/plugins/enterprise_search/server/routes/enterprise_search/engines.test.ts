@@ -7,10 +7,6 @@
 
 import { mockDependencies, MockRouter } from '../../__mocks__';
 
-jest.mock('../../utils/fetch_enterprise_search', () => ({
-  ...jest.requireActual('../../utils/fetch_enterprise_search'),
-  fetchEnterpriseSearch: jest.fn(),
-}));
 jest.mock('../../lib/engines/field_capabilities', () => ({
   fetchEngineFieldCapabilities: jest.fn(),
 }));
@@ -491,10 +487,15 @@ describe('engines routes', () => {
         statusCode: 404,
       });
     });
-    it('returns error when fetch engine returns an error', async () => {
+    it('returns error when fetch engine returns an unknown error', async () => {
       (mockClient.asCurrentUser.transport.request as jest.Mock).mockRejectedValueOnce({
-        responseStatus: 500,
-        responseStatusText: 'INTERNAL_SERVER_ERROR',
+        body: {
+          attributes: {
+            error_code: 'unknown_error',
+          },
+          message: 'Unknown error',
+        },
+        statusCode: 500,
       });
       await mockRouter.callRoute({
         params: { engine_name: 'unit-test' },
@@ -505,9 +506,9 @@ describe('engines routes', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Error fetching engine',
+          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
         },
-        statusCode: 500,
+        statusCode: 502,
       });
     });
   });

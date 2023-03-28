@@ -20,7 +20,6 @@ import { RouteDependencies } from '../../plugin';
 
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { isResponseError } from '../../utils/fetch_enterprise_search';
 import { isNotFoundException } from '../../utils/identify_exceptions';
 
 export function registerEnginesRoutes({ log, router }: RouteDependencies) {
@@ -190,14 +189,6 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
             message: 'Could not find engine',
             response,
             statusCode: 404,
-          });
-        }
-        if (isResponseError(e)) {
-          return createError({
-            errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
-            message: 'Error fetching engine',
-            response,
-            statusCode: e.responseStatus,
           });
         }
         throw e;
