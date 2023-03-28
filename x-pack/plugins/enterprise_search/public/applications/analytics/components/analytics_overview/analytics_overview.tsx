@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -50,28 +50,13 @@ export const AnalyticsOverview: React.FC = () => {
         rightSideItems: [<AddAnalyticsCollection />],
       }}
     >
-      {!hasNoAnalyticsCollections && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle>
-              <h2>
-                {i18n.translate('xpack.enterpriseSearch.analytics.collections.headingTitle', {
-                  defaultMessage: 'Collections',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddAnalyticsCollection />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-
-      <EuiSpacer size="l" />
       {hasNoAnalyticsCollections ? (
-        <AnalyticsOverviewEmptyPage />
+        <>
+          <EuiSpacer size="l" />
+          <AnalyticsOverviewEmptyPage />
+        </>
       ) : (
-        <AnalyticsCollectionTable collections={analyticsCollections} isLoading={isLoading} />
+        <AnalyticsCollectionTable collections={analyticsCollections} />
       )}
     </EnterpriseSearchAnalyticsPageTemplate>
   );

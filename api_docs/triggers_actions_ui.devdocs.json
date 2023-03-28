@@ -2624,6 +2624,38 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.resetParamsOnConnectorChange",
+            "type": "Function",
+            "tags": [],
+            "label": "resetParamsOnConnectorChange",
+            "description": [],
+            "signature": [
+              "((params: ActionParams) => {} | ActionParams) | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.ActionTypeModel.resetParamsOnConnectorChange.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ActionParams"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -7070,10 +7102,10 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditRuleFlyout",
           "type": "Function",
           "tags": [],
-          "label": "getEditAlertFlyout",
+          "label": "getEditRuleFlyout",
           "description": [],
           "signature": [
             "(props: Omit<",
@@ -7088,7 +7120,7 @@
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout.$1",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditRuleFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",

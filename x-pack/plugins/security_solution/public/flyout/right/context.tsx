@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { css } from '@emotion/react';
 import React, { createContext, useContext, useMemo } from 'react';
 import type { SearchHit } from '@kbn/es-types';
@@ -17,6 +18,7 @@ import { SecurityPageName } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import type { RightPanelProps } from '.';
+import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
 
 export interface RightPanelContext {
   /**
@@ -28,9 +30,21 @@ export interface RightPanelContext {
    */
   indexName: string;
   /**
+   * An object containing fields by type
+   */
+  browserFields: BrowserFields | null;
+  /**
+   * An array of field objects with category and value
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  /**
    * The actual raw document object
    */
   searchHit: SearchHit<object> | undefined;
+  /**
+   *
+   */
+  getFieldsData: (field: string) => unknown | unknown[];
 }
 
 export const RightPanelContext = createContext<RightPanelContext | undefined>(undefined);
@@ -51,12 +65,13 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, _, searchHit] = useTimelineEventsDetails({
+  const [loading, dataFormattedForFieldBrowser, searchHit] = useTimelineEventsDetails({
     indexName: eventIndex,
     eventId: id ?? '',
     runtimeMappings: sourcererDataView.runtimeMappings,
     skip: !id,
   });
+  const getFieldsData = useGetFieldsData(searchHit?.fields);
 
   const contextValue = useMemo(
     () =>
@@ -64,10 +79,20 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
         ? {
             eventId: id,
             indexName,
+            browserFields: sourcererDataView.browserFields,
+            dataFormattedForFieldBrowser,
             searchHit: searchHit as SearchHit<object>,
+            getFieldsData,
           }
         : undefined,
-    [id, indexName, searchHit]
+    [
+      id,
+      indexName,
+      sourcererDataView.browserFields,
+      dataFormattedForFieldBrowser,
+      searchHit,
+      getFieldsData,
+    ]
   );
 
   if (loading) {
