@@ -531,6 +531,10 @@ security and spaces filtering.
 activities.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/exploratory_view/README.md[exploratoryView]
+|A shared component for visualizing observability data types via lens embeddable.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
 
