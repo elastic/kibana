@@ -323,11 +323,19 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
                 }
               }}
               fill
+              aria-describedby={isTitleDuplicate ? DUPLICATE_TITLE_CALLOUT_ID : undefined}
             >
-              <FormattedMessage
-                id="dashboardContainer.embeddableApi.showSettings.flyout.applyButtonTitle"
-                defaultMessage="Apply"
-              />
+              {isTitleDuplicate ? (
+                <FormattedMessage
+                  id="dashboardContainer.embeddableApi.showSettings.flyout.confirmApplyButtonTitle"
+                  defaultMessage="Confirm and apply"
+                />
+              ) : (
+                <FormattedMessage
+                  id="dashboardContainer.embeddableApi.showSettings.flyout.applyButtonTitle"
+                  defaultMessage="Apply"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
