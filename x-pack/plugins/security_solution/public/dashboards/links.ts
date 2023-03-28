@@ -18,7 +18,7 @@ import {
 } from '../overview/links';
 
 export const dashboardsLandingLinks: LinkItem = {
-  id: SecurityPageName.dashboardsLanding,
+  id: SecurityPageName.dashboards,
   title: DASHBOARDS,
   path: DASHBOARDS_PATH,
   globalNavPosition: 1,

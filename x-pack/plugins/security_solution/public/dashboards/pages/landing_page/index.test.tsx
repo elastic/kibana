@@ -29,7 +29,7 @@ const OVERVIEW_ITEM_LABEL = 'Overview';
 const DETECTION_RESPONSE_ITEM_LABEL = 'Detection & Response';
 
 const APP_DASHBOARD_LINKS: NavLinkItem = {
-  id: SecurityPageName.dashboardsLanding,
+  id: SecurityPageName.dashboards,
   title: 'Dashboards',
   links: [
     {

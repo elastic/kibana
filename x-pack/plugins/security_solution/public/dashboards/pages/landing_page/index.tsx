@@ -54,7 +54,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 };
 
 export const DashboardsLandingPage = () => {
-  const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboardsLanding)?.links ?? [];
+  const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboards)?.links ?? [];
   const { show: canReadDashboard, createNew: canCreateDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
 
@@ -81,7 +81,7 @@ export const DashboardsLandingPage = () => {
         </>
       )}
 
-      <SpyRoute pageName={SecurityPageName.dashboardsLanding} />
+      <SpyRoute pageName={SecurityPageName.dashboards} />
     </SecuritySolutionPageWrapper>
   );
 };

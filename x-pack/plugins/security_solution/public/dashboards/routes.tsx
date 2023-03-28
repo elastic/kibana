@@ -14,7 +14,7 @@ import { DashboardsContainer } from './pages';
 
 export const DashboardRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.dashboardsLanding}>
+    <TrackApplicationView viewId={SecurityPageName.dashboards}>
       <DashboardsContainer />
     </TrackApplicationView>
   </PluginTemplateWrapper>

@@ -96,7 +96,7 @@ const DashboardViewComponent: React.FC = () => {
         )}
 
         <StatusPropmpt currentState={currentState} />
-        <SpyRoute pageName={SecurityPageName.dashboardsLanding} state={dashboardDetails} />
+        <SpyRoute pageName={SecurityPageName.dashboards} state={dashboardDetails} />
       </SecuritySolutionPageWrapper>
     </>
   );
