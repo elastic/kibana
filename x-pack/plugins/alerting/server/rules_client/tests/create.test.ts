@@ -69,8 +69,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeApiKey: jest.fn(),
-  getAuthenticationApiKey: jest.fn(),
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -3210,11 +3210,11 @@ describe('create()', () => {
 
   test('calls the authentication API key function if the user is authenticated using an api key', async () => {
     const data = getMockData();
-    rulesClientParams.getAuthenticationApiKey.mockResolvedValueOnce({
+    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    rulesClientParams.isAuthenticationTypeApiKey.mockResolvedValueOnce(true);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -3260,8 +3260,8 @@ describe('create()', () => {
     });
     await rulesClient.create({ data });
 
-    expect(rulesClientParams.isAuthenticationTypeApiKey).toHaveBeenCalledTimes(1);
-    expect(rulesClientParams.getAuthenticationApiKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.isAuthenticationTypeAPIKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
       {
@@ -3322,11 +3322,11 @@ describe('create()', () => {
 
   test('throws error and does not add API key to invalidatePendingApiKey SO when create saved object fails if the user is authenticated using an api key', async () => {
     const data = getMockData();
-    rulesClientParams.getAuthenticationApiKey.mockResolvedValueOnce({
+    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    rulesClientParams.isAuthenticationTypeApiKey.mockResolvedValueOnce(true);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`

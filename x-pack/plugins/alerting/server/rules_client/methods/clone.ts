@@ -98,11 +98,11 @@ export async function clone<Params extends RuleTypeParams = never>(
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = await context.isAuthenticationTypeApiKey();
+    isAuthTypeApiKey = await context.isAuthenticationTypeAPIKey();
     const name = generateAPIKeyName(ruleType.id, ruleName);
     createdAPIKey = ruleSavedObject.attributes.enabled
       ? isAuthTypeApiKey
-        ? await context.getAuthenticationApiKey(name)
+        ? await context.getAuthenticationAPIKey(name)
         : await context.createAPIKey(name)
       : null;
   } catch (error) {

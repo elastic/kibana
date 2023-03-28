@@ -741,11 +741,11 @@ async function prepareApiKeys(
   let createdAPIKey: CreateAPIKeyResult | null = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = await context.isAuthenticationTypeApiKey();
+    isAuthTypeApiKey = await context.isAuthenticationTypeAPIKey();
     const name = generateAPIKeyName(ruleType.id, attributes.name);
     createdAPIKey = shouldUpdateApiKey
       ? isAuthTypeApiKey
-        ? await context.getAuthenticationApiKey(name)
+        ? await context.getAuthenticationAPIKey(name)
         : await context.createAPIKey(name)
       : null;
   } catch (error) {

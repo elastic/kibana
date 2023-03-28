@@ -69,8 +69,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeApiKey: jest.fn(),
-  getAuthenticationApiKey: jest.fn(),
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -2728,9 +2728,9 @@ describe('update()', () => {
     );
   });
 
-  it('calls the getAuthenticationApiKey function if the user is authenticated using api keys', async () => {
-    rulesClientParams.isAuthenticationTypeApiKey.mockResolvedValueOnce(true);
-    rulesClientParams.getAuthenticationApiKey.mockResolvedValueOnce({
+  it('calls the authentication API key function if the user is authenticated using an api key', async () => {
+    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
@@ -2890,9 +2890,9 @@ describe('update()', () => {
     `);
   });
 
-  test('throws when unsecuredSavedObjectsClient update fails and does not invalidates newly created API key if the user is authenticated using api keys', async () => {
-    rulesClientParams.isAuthenticationTypeApiKey.mockResolvedValueOnce(true);
-    rulesClientParams.getAuthenticationApiKey.mockResolvedValueOnce({
+  test('throws when unsecuredSavedObjectsClient update fails and does not invalidate newly created API key if the user is authenticated using an api key', async () => {
+    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });

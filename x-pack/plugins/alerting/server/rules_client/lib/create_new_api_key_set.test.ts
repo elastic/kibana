@@ -43,8 +43,8 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   minimumScheduleIntervalInMs: 1,
   fieldsToExcludeFromPublicApi: [],
-  isAuthenticationTypeApiKey: jest.fn(),
-  getAuthenticationApiKey: jest.fn(),
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 const username = 'test';
@@ -97,19 +97,19 @@ describe('createNewAPIKeySet', () => {
   });
 
   test('should get api key from the request if the user is authenticated using api keys', async () => {
-    rulesClientParams.getAuthenticationApiKey.mockResolvedValueOnce({
+    rulesClientParams.getAuthenticationAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
     });
-    rulesClientParams.isAuthenticationTypeApiKey.mockResolvedValueOnce(true);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockResolvedValueOnce(true);
     const apiKey = await createNewAPIKeySet(rulesClientParams, { attributes, username });
     expect(apiKey).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyCreatedByUser: true,
       apiKeyOwner: 'test',
     });
-    expect(rulesClientParams.getAuthenticationApiKey).toHaveBeenCalledTimes(1);
-    expect(rulesClientParams.isAuthenticationTypeApiKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.isAuthenticationTypeAPIKey).toHaveBeenCalledTimes(1);
   });
 
   test('should throw an ereror if getting the api key fails', async () => {
