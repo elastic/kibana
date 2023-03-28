@@ -337,6 +337,8 @@ export function getDiscoverStateContainer({
   ): Promise<SavedSearch> => {
     const { dataView } = nextDataView
       ? { dataView: nextDataView }
+      : id
+      ? { dataView: undefined }
       : await loadAndResolveDataView(appStateContainer.getState().index, dataViewSpec);
 
     const nextSavedSearch = await loadNextSavedSearch(id, dataView, {
@@ -344,11 +346,25 @@ export function getDiscoverStateContainer({
       savedSearchContainer,
     });
 
+    if (
+      id &&
+      appStateContainer.getState().index &&
+      appStateContainer.getState().index !== nextSavedSearch.searchSource.getField('index')
+    ) {
+      const { dataView: appStateDataView } = await loadAndResolveDataView(
+        appStateContainer.getState().index,
+        dataViewSpec
+      );
+      if (appStateDataView) {
+        nextSavedSearch.searchSource.setField('index', appStateDataView);
+      }
+    }
+
     const actualDataView = nextSavedSearch.searchSource.getField('index');
     if (actualDataView) {
       setDataView(actualDataView);
-      if (!dataView.isPersisted()) {
-        internalStateContainer.transitions.appendAdHocDataViews(dataView);
+      if (!actualDataView.isPersisted()) {
+        internalStateContainer.transitions.appendAdHocDataViews(actualDataView);
       }
     }
     dataStateContainer.reset(nextSavedSearch);
@@ -432,6 +448,7 @@ export function getDiscoverStateContainer({
     return nextSavedSearch;
   };
   const fetchData = (initial: boolean = false) => {
+    addLog('fetchData', { initial });
     if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {
       dataStateContainer.fetch();
     }

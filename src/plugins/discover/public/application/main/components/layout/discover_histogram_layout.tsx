@@ -41,6 +41,7 @@ export const DiscoverHistogramLayout = ({
     inspectorAdapters: stateContainer.dataState.inspectorAdapters,
     savedSearchFetch$: dataState.fetch$,
     searchSessionId,
+    isPlainRecord,
     ...commonProps,
   });
   if (!searchSessionId && !isPlainRecord) {
