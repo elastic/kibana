@@ -17,11 +17,11 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { migrateRuleHook } from '../lib';
+import { migrateLegacyActions } from '../lib';
 
-jest.mock('../lib/migrate_rule_hook', () => {
+jest.mock('../lib/migrate_legacy_actions', () => {
   return {
-    migrateRuleHook: jest.fn(),
+    migrateLegacyActions: jest.fn(),
   };
 });
 
@@ -206,10 +206,12 @@ describe('delete()', () => {
     );
   });
 
-  test('should call migrateRuleHook', async () => {
+  test('should call migrateLegacyActions', async () => {
     await rulesClient.delete({ id: '1' });
 
-    expect(migrateRuleHook).toHaveBeenCalledWith(expect.any(Object), { ruleId: '1' });
+    expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+      rule: expect.objectContaining({ id: '1' }),
+    });
   });
 
   describe('authorization', () => {
