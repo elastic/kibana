@@ -24,7 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'timeline']);
 
-  //FLAKY: https://github.com/elastic/kibana/issues/153855
+  // FLAKY: https://github.com/elastic/kibana/issues/153855
   describe.skip('App level Endpoint functionality', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
     let indexedAlerts: IndexedEndpointRuleAlerts;

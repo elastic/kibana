@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esClient = getService('es');
   const unzipPromisify = promisify(unzip);
 
-  //FLAKY: https://github.com/elastic/kibana/issues/153855
+  // FLAKY: https://github.com/elastic/kibana/issues/153855
   describe.skip('For each artifact list under management', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 

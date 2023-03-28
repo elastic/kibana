@@ -20,7 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
 
-  //FLAKY: https://github.com/elastic/kibana/issues/153855
+  // FLAKY: https://github.com/elastic/kibana/issues/153855
   describe.skip('Endpoint permissions:', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
 

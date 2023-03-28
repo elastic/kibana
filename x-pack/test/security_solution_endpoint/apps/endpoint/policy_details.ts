@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  //FLAKY: https://github.com/elastic/kibana/issues/153855
+  // FLAKY: https://github.com/elastic/kibana/issues/153855
   describe.skip('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 

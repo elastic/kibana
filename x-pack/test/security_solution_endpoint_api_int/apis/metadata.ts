@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const endpointTestResources = getService('endpointTestResources');
 
-  //FLAKY: https://github.com/elastic/kibana/issues/153855
+  // FLAKY: https://github.com/elastic/kibana/issues/153855
   describe.skip('test metadata apis', () => {
     before(async () => {
       await endpointTestResources.setMetadataTransformFrequency('1s');
