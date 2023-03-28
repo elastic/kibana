@@ -7,18 +7,11 @@
 
 import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiAccordion,
-  EuiSelect,
-  EuiFieldText,
-  EuiCheckbox,
-  EuiFormRow,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiAccordion, EuiSelect, EuiCheckbox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { ComboBox } from '../combo_box';
 import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
-import { useBrowserAdvancedFieldsContext, useBrowserSimpleFieldsContext } from '../contexts';
+import { useBrowserAdvancedFieldsContext } from '../contexts';
 
 import { ConfigKey, Validation, ScreenshotOption } from '../types';
 
@@ -35,7 +28,6 @@ interface Props {
 export const BrowserAdvancedFields = memo<Props>(
   ({ validate, children, minColumnWidth, onFieldBlur }) => {
     const { fields, setFields } = useBrowserAdvancedFieldsContext();
-    const { fields: simpleFields } = useBrowserSimpleFieldsContext();
 
     const handleInputChange = useCallback(
       ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -51,78 +43,6 @@ export const BrowserAdvancedFields = memo<Props>(
         data-test-subj="syntheticsBrowserAdvancedFieldsAccordion"
       >
         <EuiSpacer size="m" />
-        {simpleFields[ConfigKey.SOURCE_ZIP_URL] && (
-          <DescribedFormGroupWithWrap
-            minColumnWidth={minColumnWidth}
-            title={
-              <h4>
-                <FormattedMessage
-                  id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.title"
-                  defaultMessage="Selective tests"
-                />
-              </h4>
-            }
-            description={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.description"
-                defaultMessage="Use these options to apply the selected monitor settings to a subset of the tests in your suite. Only the configured subset will be run by this monitor."
-              />
-            }
-          >
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.label"
-                  defaultMessage="Filter match"
-                />
-              }
-              labelAppend={<OptionalLabel />}
-              helpText={
-                <FormattedMessage
-                  id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.helpText"
-                  defaultMessage="Run only journeys with a name that matches the provided glob with this monitor."
-                />
-              }
-            >
-              <EuiFieldText
-                value={fields[ConfigKey.JOURNEY_FILTERS_MATCH]}
-                onChange={(event) =>
-                  handleInputChange({
-                    value: event.target.value,
-                    configKey: ConfigKey.JOURNEY_FILTERS_MATCH,
-                  })
-                }
-                onBlur={() => onFieldBlur?.(ConfigKey.JOURNEY_FILTERS_MATCH)}
-                data-test-subj="syntheticsBrowserJourneyFiltersMatch"
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.label"
-                  defaultMessage="Filter tags"
-                />
-              }
-              labelAppend={<OptionalLabel />}
-              helpText={
-                <FormattedMessage
-                  id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.helpText"
-                  defaultMessage="Run only journeys with the given tags with this monitor."
-                />
-              }
-            >
-              <ComboBox
-                selectedOptions={fields[ConfigKey.JOURNEY_FILTERS_TAGS]}
-                onChange={(value) =>
-                  handleInputChange({ value, configKey: ConfigKey.JOURNEY_FILTERS_TAGS })
-                }
-                onBlur={() => onFieldBlur?.(ConfigKey.JOURNEY_FILTERS_TAGS)}
-                data-test-subj="syntheticsBrowserJourneyFiltersTags"
-              />
-            </EuiFormRow>
-          </DescribedFormGroupWithWrap>
-        )}
         <DescribedFormGroupWithWrap
           minColumnWidth={minColumnWidth}
           title={
