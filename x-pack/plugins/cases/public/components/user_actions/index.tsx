@@ -134,10 +134,9 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       lines={8}
       data-test-subj="user-actions-loading"
       isLoading={
-        showBottomList ? 
-        (isLoadingLastPageUserActions ||
-        loadingCommentIds.includes(NEW_COMMENT_ID))
-        : isLoadingInfiniteUserActions
+        showBottomList
+          ? isLoadingLastPageUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)
+          : isLoadingInfiniteUserActions
       }
     >
       <EuiPanel
