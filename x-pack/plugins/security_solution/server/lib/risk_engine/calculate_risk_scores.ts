@@ -35,7 +35,7 @@ const bucketToResponse = ({
 }): SimpleRiskScore | FullRiskScore => ({
   '@timestamp': now,
   identifierField,
-  identifierValue: bucket.key,
+  identifierValue: bucket.key[identifierField],
   calculatedLevel: bucket.risk_details.value.level,
   calculatedScore: bucket.risk_details.value.score,
   calculatedScoreNorm: bucket.risk_details.value.normalized_score,
@@ -114,12 +114,23 @@ const buildIdentifierTypeAggregation = (
   weights?: GetScoresParams['weights']
 ): SearchRequest['aggs'] => {
   const riskWeight = getRiskWeightForIdentifier({ identifierType, weights });
+  const identifierField = getFieldForIdentifierAgg(identifierType);
 
   return {
     [identifierType]: {
-      terms: {
-        field: getFieldForIdentifierAgg(identifierType),
-        size: 65536,
+      // per identity field, per category
+      composite: {
+        size: 65536, // TODO make a param,
+        sources: [
+          {
+            [identifierField]: {
+              terms: {
+                field: identifierField,
+              },
+            },
+          },
+        ],
+        after: undefined, // TODO make a param
       },
       aggs: {
         riskiest_inputs: {

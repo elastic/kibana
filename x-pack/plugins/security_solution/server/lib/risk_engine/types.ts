@@ -56,15 +56,17 @@ export interface FullRiskScore extends BaseRiskScore {
 
 export interface CalculateRiskScoreAggregations {
   user?: {
+    after_key: { [key: string]: string };
     buckets: RiskScoreBucket[];
   };
   host?: {
+    after_key: { [key: string]: string };
     buckets: RiskScoreBucket[];
   };
 }
 
 export interface RiskScoreBucket {
-  key: string;
+  key: { [key: string]: string };
   doc_count: number;
   risk_details: {
     value: {
