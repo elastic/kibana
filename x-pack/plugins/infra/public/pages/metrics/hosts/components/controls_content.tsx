@@ -54,6 +54,7 @@ export const ControlsContent: React.FC<Props> = ({
 
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupAPI) => {
+      if (!controlGroup) return;
       inputSubscription.current = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
         onFiltersChange(newFilters);
       });
