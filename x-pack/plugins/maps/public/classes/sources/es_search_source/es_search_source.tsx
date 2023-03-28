@@ -409,13 +409,13 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     // to allow for client-side masking of timeslice
     const requestMetaWithoutTimeslice = { ...requestMeta };
     delete requestMetaWithoutTimeslice.timeslice;
-    const useSearchFiltersWithoutTimeslice =
+    const useRequestMetaWithoutTimeslice =
       requestMeta.timeslice !== undefined &&
       (await this.canLoadAllDocuments(requestMetaWithoutTimeslice, registerCancelCallback));
 
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(
-      useSearchFiltersWithoutTimeslice ? requestMetaWithoutTimeslice : requestMeta,
+      useRequestMetaWithoutTimeslice ? requestMetaWithoutTimeslice : requestMeta,
       maxResultWindow,
       initialSearchContext
     );
@@ -443,7 +443,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     });
 
     const isTimeExtentForTimeslice =
-      requestMeta.timeslice !== undefined && !useSearchFiltersWithoutTimeslice;
+      requestMeta.timeslice !== undefined && !useRequestMetaWithoutTimeslice;
     return {
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
