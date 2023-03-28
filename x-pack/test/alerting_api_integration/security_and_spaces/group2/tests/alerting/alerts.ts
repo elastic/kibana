@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { omit } from 'lodash';
+import { omit, padStart } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
@@ -1359,13 +1359,14 @@ instanceStateValue: true
 
         it('should filter alerts by hours', async () => {
           const now = new Date();
-          const hour = now.getUTCHours();
-          // +1 hour from now
-          const generateHour = () => (hour + 1 > 23 ? '01' : ('0' + (hour + 1)).slice(-2));
-          const minutes = '00';
+          now.setMinutes(now.getMinutes() + 10);
+          const hour = padStart(now.getUTCHours().toString(), 2);
+          const minutesStart = padStart(now.getUTCMinutes().toString(), 2, '0');
+          now.setMinutes(now.getMinutes() + 1);
+          const minutesEnd = padStart(now.getUTCMinutes().toString(), 2, '0');
 
-          const start = `${generateHour()}:${minutes}`;
-          const end = `${generateHour()}:${minutes}`;
+          const start = `${hour}:${minutesStart}`;
+          const end = `${hour}:${minutesEnd}`;
 
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringSummaryAction({
