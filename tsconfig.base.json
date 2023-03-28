@@ -348,6 +348,8 @@
       "@kbn/core-http-server-mocks/*": ["packages/core/http/core-http-server-mocks/*"],
       "@kbn/core-http-versioned-router-server-internal": ["packages/core/http/core-http-versioned-router-server-internal"],
       "@kbn/core-http-versioned-router-server-internal/*": ["packages/core/http/core-http-versioned-router-server-internal/*"],
+      "@kbn/core-http-versioned-router-server-mocks": ["packages/core/http/core-http-versioned-router-server-mocks"],
+      "@kbn/core-http-versioned-router-server-mocks/*": ["packages/core/http/core-http-versioned-router-server-mocks/*"],
       "@kbn/core-i18n-browser": ["packages/core/i18n/core-i18n-browser"],
       "@kbn/core-i18n-browser/*": ["packages/core/i18n/core-i18n-browser/*"],
       "@kbn/core-i18n-browser-internal": ["packages/core/i18n/core-i18n-browser-internal"],
