@@ -50,7 +50,7 @@ const MetricEmbeddableComponent = ({
                   <VisualizationEmbeddable
                     data-test-subj="embeddable-metric"
                     height="36px"
-                    id={id}
+                    id={`${id}-${field.key}-metric-embeddable`}
                     lensAttributes={field.lensAttributes}
                     timerange={timerange}
                     inspectTitle={inspectTitle}

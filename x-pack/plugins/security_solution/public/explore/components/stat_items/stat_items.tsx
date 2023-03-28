@@ -92,7 +92,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
               {isChartEmbeddablesEnabled ? (
                 <MetricEmbeddable
                   fields={fields}
-                  id={`${id}-metric-embeddable`}
+                  id={id}
                   timerange={timerange}
                   inspectTitle={description}
                 />
