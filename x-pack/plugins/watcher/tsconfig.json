@@ -34,6 +34,7 @@
     "@kbn/ace",
     "@kbn/shared-ux-router",
     "@kbn/license-management-plugin",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",
