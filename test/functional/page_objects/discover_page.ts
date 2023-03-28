@@ -210,6 +210,10 @@ export class DiscoverPageObject extends FtrService {
     await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
   }
 
+  public async chooseLensChart(chart: string) {
+    await this.comboBox.set('unifiedHistogramSuggestionSelector', chart);
+  }
+
   public async getHistogramLegendList() {
     const unifiedHistogram = await this.testSubjects.find('unifiedHistogramChart');
     const list = await unifiedHistogram.findAllByClassName('echLegendItem__label');
