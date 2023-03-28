@@ -15,15 +15,24 @@ import { selectAgentPolicies } from '../../../state/private_locations';
 export const ManageEmptyState: FC<{
   privateLocations: PrivateLocation[];
   hasFleetPermissions: boolean;
-  setIsAddingNew: (val: boolean) => void;
-}> = ({ children, privateLocations, setIsAddingNew, hasFleetPermissions }) => {
+  setIsAddingNew?: (val: boolean) => void;
+  showNeedAgentPolicy?: boolean;
+  showEmptyLocations?: boolean;
+}> = ({
+  children,
+  privateLocations,
+  setIsAddingNew,
+  hasFleetPermissions,
+  showNeedAgentPolicy = true,
+  showEmptyLocations = true,
+}) => {
   const { data: agentPolicies } = useSelector(selectAgentPolicies);
 
-  if (agentPolicies?.total === 0) {
+  if (agentPolicies?.total === 0 && showNeedAgentPolicy) {
     return <AgentPolicyNeeded disabled={!hasFleetPermissions} />;
   }
 
-  if (privateLocations.length === 0) {
+  if (privateLocations.length === 0 && showEmptyLocations) {
     return <EmptyLocations setIsAddingNew={setIsAddingNew} disabled={!hasFleetPermissions} />;
   }
 

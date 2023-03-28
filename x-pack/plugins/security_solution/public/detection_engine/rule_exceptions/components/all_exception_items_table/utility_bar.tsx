@@ -42,6 +42,7 @@ interface ExceptionsViewerUtilityProps {
   lastUpdated: string | number;
   exceptionsToShow: { [id: string]: boolean };
   onChangeExceptionsToShow: (optionId: string) => void;
+  isEndpoint: boolean;
 }
 
 /**
@@ -52,6 +53,7 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
   lastUpdated,
   exceptionsToShow,
   onChangeExceptionsToShow,
+  isEndpoint,
 }): JSX.Element => {
   return (
     <MyUtilities>
@@ -88,22 +90,24 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
                 />
               </EuiText>
             </UtilityBarText>
-            <EuiButtonGroup
-              legend="Displayed exceptions button group"
-              options={[
-                {
-                  id: `active`,
-                  label: i18n.ACTIVE_EXCEPTIONS,
-                },
-                {
-                  id: `expired`,
-                  label: i18n.EXPIRED_EXCEPTIONS,
-                },
-              ]}
-              idToSelectedMap={exceptionsToShow}
-              onChange={onChangeExceptionsToShow}
-              type="multi"
-            />
+            {!isEndpoint && (
+              <EuiButtonGroup
+                legend="Displayed exceptions button group"
+                options={[
+                  {
+                    id: `active`,
+                    label: i18n.ACTIVE_EXCEPTIONS,
+                  },
+                  {
+                    id: `expired`,
+                    label: i18n.EXPIRED_EXCEPTIONS,
+                  },
+                ]}
+                idToSelectedMap={exceptionsToShow}
+                onChange={onChangeExceptionsToShow}
+                type="multi"
+              />
+            )}
           </StyledBarGroup>
         </UtilityBarSection>
       </UtilityBar>

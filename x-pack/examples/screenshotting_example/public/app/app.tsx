@@ -88,7 +88,7 @@ export function App() {
                 <EuiCallOut
                   title="Sorry, there was an error"
                   color="danger"
-                  iconType="alert"
+                  iconType="warning"
                   data-test-subj="error"
                 >
                   <p>{response.errors.join('\n')}</p>

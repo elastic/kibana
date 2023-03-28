@@ -8,7 +8,7 @@
 import { ANALYZER_NODE } from '../../screens/alerts';
 
 import { openAnalyzerForFirstAlertInTimeline } from '../../tasks/alerts';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { getNewRule } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
 import { setStartDate } from '../../tasks/date_picker';
@@ -21,7 +21,7 @@ describe('Analyze events view for alerts', () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule());
+    createRule(getNewRule());
   });
   beforeEach(() => {
     visit(ALERTS_URL);

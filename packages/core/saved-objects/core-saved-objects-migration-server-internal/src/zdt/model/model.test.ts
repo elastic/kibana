@@ -10,7 +10,7 @@ import { StageMocks } from './model.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { createContextMock, MockedMigratorContext } from '../test_helpers';
 import type { RetryableEsClientError } from '../../actions';
-import type { State, BaseState, FatalState } from '../state';
+import type { State, BaseState, FatalState, AllActionStates } from '../state';
 import type { StateActionResponse } from './types';
 import { model } from './model';
 
@@ -113,22 +113,39 @@ describe('model', () => {
   });
 
   describe('dispatching to correct stage', () => {
-    test('dispatching INIT state', () => {
-      const state: State = {
+    const createStubState = (controlState: AllActionStates): State =>
+      ({
         ...baseState,
-        controlState: 'INIT',
-      };
-      const res: StateActionResponse<'INIT'> = Either.right({
+        controlState,
+      } as unknown as State);
+
+    const createStubResponse = () =>
+      Either.right({
         '.kibana_7.11.0_001': {
           aliases: {},
           mappings: { properties: {} },
           settings: {},
         },
       });
-      model(state, res, context);
 
-      expect(StageMocks.init).toHaveBeenCalledTimes(1);
-      expect(StageMocks.init).toHaveBeenCalledWith(state, res, context);
+    const stageMapping: Record<AllActionStates, Function> = {
+      INIT: StageMocks.init,
+      CREATE_TARGET_INDEX: StageMocks.createTargetIndex,
+      UPDATE_INDEX_MAPPINGS: StageMocks.updateIndexMappings,
+      UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: StageMocks.updateIndexMappingsWaitForTask,
+      UPDATE_MAPPING_MODEL_VERSIONS: StageMocks.updateMappingModelVersion,
+      UPDATE_ALIASES: StageMocks.updateAliases,
+    };
+
+    Object.entries(stageMapping).forEach(([stage, handler]) => {
+      test(`dispatch ${stage} state`, () => {
+        const state = createStubState(stage as AllActionStates);
+        const res = createStubResponse();
+        model(state, res, context);
+
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenCalledWith(state, res, context);
+      });
     });
   });
 });

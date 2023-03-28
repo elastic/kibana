@@ -418,7 +418,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             <EuiFlexItem>
               <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="rule">
                 <p>
-                  <EuiIcon color="danger" type="alert" />
+                  <EuiIcon color="danger" type="warning" />
                   &nbsp;
                   <b>{getRuleStatusErrorReasonText()}</b>&#44;&nbsp;
                   {rule.executionStatus.error?.message}
@@ -445,10 +445,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 color="warning"
                 data-test-subj="ruleWarningBanner"
                 size="s"
-                iconType="alert"
+                iconType="warning"
               >
                 <p>
-                  <EuiIcon color="warning" type="alert" />
+                  <EuiIcon color="warning" type="warning" />
                   &nbsp;
                   {getRuleStatusWarningReasonText()}
                   &nbsp;
@@ -468,7 +468,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 size="s"
               >
                 <p>
-                  <EuiIcon color="warning" type="alert" />
+                  <EuiIcon color="warning" type="warning" />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"

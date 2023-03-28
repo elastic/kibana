@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { changePointGroups } from '../../../common/__mocks__/farequote/change_point_groups';
+import { significantTermGroups } from '../../../common/__mocks__/farequote/significant_term_groups';
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
 import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
 
@@ -15,9 +15,9 @@ import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
 
 describe('markDuplicates', () => {
-  it('marks duplicates based on change point groups for farequote', () => {
-    const fieldValuePairCounts = getFieldValuePairCounts(changePointGroups);
-    const markedDuplicates = getMarkedDuplicates(changePointGroups, fieldValuePairCounts);
+  it('marks duplicates based on significant terms groups for farequote', () => {
+    const fieldValuePairCounts = getFieldValuePairCounts(significantTermGroups);
+    const markedDuplicates = getMarkedDuplicates(significantTermGroups, fieldValuePairCounts);
 
     expect(markedDuplicates).toEqual([
       {
@@ -26,12 +26,16 @@ describe('markDuplicates', () => {
           {
             fieldName: 'custom_field.keyword',
             fieldValue: 'deviation',
-            duplicate: true,
+            docCount: 101,
+            duplicate: 2,
+            pValue: 0.01,
           },
           {
             fieldName: 'airline',
             fieldValue: 'UAL',
-            duplicate: false,
+            docCount: 101,
+            duplicate: 1,
+            pValue: 0.01,
           },
         ],
         docCount: 101,
@@ -43,12 +47,16 @@ describe('markDuplicates', () => {
           {
             fieldName: 'custom_field.keyword',
             fieldValue: 'deviation',
-            duplicate: true,
+            docCount: 49,
+            duplicate: 2,
+            pValue: 0.001,
           },
           {
             fieldName: 'airline',
             fieldValue: 'AAL',
-            duplicate: false,
+            docCount: 49,
+            duplicate: 1,
+            pValue: 0.001,
           },
         ],
         docCount: 49,
@@ -57,7 +65,7 @@ describe('markDuplicates', () => {
     ]);
   });
 
-  it('marks duplicates based on change point groups for artificial logs', () => {
+  it('marks duplicates based on significant terms groups for artificial logs', () => {
     const simpleHierarchicalTree = getSimpleHierarchicalTree(
       filteredFrequentItemSets,
       true,
@@ -70,20 +78,45 @@ describe('markDuplicates', () => {
 
     expect(markedDuplicates).toEqual([
       {
-        docCount: 792,
+        id: '40215074',
         group: [
           {
-            duplicate: false,
             fieldName: 'response_code',
             fieldValue: '500',
+            docCount: 792,
+            duplicate: 1,
+            pValue: 0.010770456205312423,
           },
           {
-            duplicate: false,
             fieldName: 'url',
             fieldValue: 'home.php',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
           },
         ],
-        id: '2038579476',
+        docCount: 792,
+        pValue: 0.010770456205312423,
+      },
+      {
+        id: '47022118',
+        group: [
+          {
+            fieldName: 'url',
+            fieldValue: 'home.php',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
+          },
+          {
+            fieldName: 'user',
+            fieldValue: 'Peter',
+            docCount: 634,
+            duplicate: 1,
+            pValue: 0.010770456205312423,
+          },
+        ],
+        docCount: 634,
         pValue: 0.010770456205312423,
       },
     ]);

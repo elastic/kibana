@@ -22,7 +22,7 @@ export function ServiceNowSelectableRowIcon({
   return (
     <EuiIconTip
       aria-label={deprecatedTooltipTitle}
-      type="alert"
+      type="warning"
       color="warning"
       content={connectorDeprecatedMessage}
       data-test-subj={`deprecated-connector-icon-${actionConnector.id}`}

@@ -182,7 +182,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
                 : advancedEditorMessage.error
             }
             color={advancedEditorMessage.error !== undefined ? 'danger' : 'primary'}
-            iconType={advancedEditorMessage.error !== undefined ? 'alert' : 'checkInCircleFilled'}
+            iconType={advancedEditorMessage.error !== undefined ? 'error' : 'checkInCircleFilled'}
             size="s"
           >
             {advancedEditorMessage.message !== '' && advancedEditorMessage.error !== undefined ? (

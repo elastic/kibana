@@ -1176,7 +1176,7 @@
               },
               {
                 "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/public/pages/findings/findings_flyout/overview_tab.tsx"
+                "path": "x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/overview_tab.tsx"
               },
               {
                 "plugin": "discoverEnhanced",

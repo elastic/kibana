@@ -70,13 +70,15 @@ export {
   METRIC_TYPE,
 } from './hooks/use_track_metric';
 
-export const LazyAlertsFlyout = lazy(
-  () => import('./pages/alerts/components/alerts_flyout/alerts_flyout')
-);
+export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout'));
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
 
 export * from './typings';
+import { TopAlert } from './typings/alerts';
+import { AlertSummary } from './pages/alert_details/components/alert_summary';
+import { AlertSummaryField } from './pages/alert_details/components/alert_summary';
+export type { TopAlert, AlertSummary, AlertSummaryField };
 
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
@@ -120,7 +122,8 @@ export {
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
 export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
-export { calculateTimeRangeBucketSize } from './pages/overview/containers/overview_page/helpers';
+export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate_bucket_size';
 
 export type { NavigationSection } from './services/navigation_registry';
 export { convertTo } from '../common/utils/formatters/duration';
+export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';

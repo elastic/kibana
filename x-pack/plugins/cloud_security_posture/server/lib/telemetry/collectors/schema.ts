@@ -74,6 +74,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       benchmark_id: { type: 'keyword' },
       benchmark_name: { type: 'keyword' },
       benchmark_version: { type: 'keyword' },
+      kubernetes_version: { type: 'keyword' },
       passed_findings_count: { type: 'long' },
       failed_findings_count: { type: 'long' },
       agents_count: { type: 'short' },
@@ -84,6 +85,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
   rules_stats: {
     type: 'array',
     items: {
+      account_id: { type: 'keyword' },
       rule_id: { type: 'keyword' },
       rule_name: { type: 'keyword' },
       rule_section: { type: 'keyword' },

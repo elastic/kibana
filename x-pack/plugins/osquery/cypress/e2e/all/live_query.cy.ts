@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   addToCase,
@@ -26,24 +25,69 @@ import {
   RESULTS_TABLE_CELL_WRRAPER,
 } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ROLES } from '../../test';
+import {
+  loadPack,
+  loadSavedQuery,
+  cleanupPack,
+  cleanupCase,
+  cleanupSavedQuery,
+  loadCase,
+} from '../../tasks/api_fixtures';
 
 describe('ALL - Live Query', () => {
+  let packId: string;
+  let packName: string;
+  let savedQueryId: string;
+  let savedQueryName: string;
+  let caseId: string;
+
   before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
+    loadPack({
+      queries: {
+        system_memory_linux_elastic: {
+          ecs_mapping: {},
+          interval: 3600,
+          platform: 'linux',
+          query: 'SELECT * FROM memory_info;',
+        },
+        system_info_elastic: {
+          ecs_mapping: {},
+          interval: 3600,
+          platform: 'linux,windows,darwin',
+          query: 'SELECT * FROM system_info;',
+        },
+        failingQuery: {
+          ecs_mapping: {},
+          interval: 10,
+          query: 'select opera_extensions.* from users join opera_extensions using (uid);',
+        },
+      },
+    }).then((pack) => {
+      packId = pack.id;
+      packName = pack.attributes.name;
+    });
+    loadSavedQuery({
+      interval: '3600',
+      query: 'select * from uptime;',
+      ecs_mapping: {},
+    }).then((savedQuery) => {
+      savedQueryId = savedQuery.id;
+      savedQueryName = savedQuery.attributes.name;
+    });
+    loadCase('securitySolution').then((caseInfo) => {
+      caseId = caseInfo.id;
+    });
   });
 
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    login(ROLE.soc_manager);
     navigateTo('/app/osquery');
   });
 
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
+    cleanupPack(packId);
+    cleanupSavedQuery(savedQueryId);
+    cleanupCase(caseId);
   });
 
   it('should validate the form', () => {
@@ -52,7 +96,7 @@ describe('ALL - Live Query', () => {
     cy.contains('Agents is a required field');
     cy.contains('Query is a required field');
     selectAllAgents();
-    inputQuery('select * from uptime; ');
+    inputQuery('select * from uptime;');
     submitQuery();
     cy.contains('Agents is a required field').should('not.exist');
     cy.contains('Query is a required field').should('not.exist');
@@ -77,7 +121,7 @@ describe('ALL - Live Query', () => {
     const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
     cy.contains('New live query').click();
     selectAllAgents();
-    inputQuery('select * from uptime; ');
+    inputQuery('select * from uptime;');
     cy.wait(500);
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
@@ -117,8 +161,7 @@ describe('ALL - Live Query', () => {
   it('should run customized saved query', () => {
     cy.contains('New live query').click();
     selectAllAgents();
-    cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
-    // cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1); // TODO do we need it?
+    cy.react('SavedQueriesDropdown').type(`${savedQueryName}{downArrow}{enter}`);
     inputQuery('{selectall}{backspace}select * from users;');
     cy.wait(1000);
     submitQuery();
@@ -144,7 +187,7 @@ describe('ALL - Live Query', () => {
     cy.contains('New live query').click();
     cy.contains('Run a set of queries in a pack.').click();
     cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-    cy.getBySel('select-live-pack').click().type('Example{downArrow}{enter}');
+    cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
     cy.contains('This table contains 3 rows.');
     cy.contains('system_memory_linux_elastic');
     cy.contains('system_info_elastic');
@@ -173,7 +216,7 @@ describe('ALL - Live Query', () => {
     cy.contains('query failed, code: 1, message: no such table: opera_extensions');
     cy.getBySel('toggleIcon-failingQuery').click();
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
-    addToCase();
+    addToCase(caseId);
     viewRecentCaseAndCheckResults();
   });
 

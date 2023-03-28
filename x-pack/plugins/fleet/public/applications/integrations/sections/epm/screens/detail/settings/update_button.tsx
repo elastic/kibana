@@ -239,7 +239,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           <>
             <EuiCallOut
               color="warning"
-              iconType="alert"
+              iconType="warning"
               title={i18n.translate(
                 'xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.title',
                 { defaultMessage: 'Some integration policies have conflicts' }

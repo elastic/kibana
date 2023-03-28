@@ -22,6 +22,15 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 
 const TRACE_SAMPLES_SIZE = 500;
 
+export interface TransactionTraceSamplesResponse {
+  traceSamples: Array<{
+    score: number | null | undefined;
+    timestamp: string;
+    transactionId: string;
+    traceId: string;
+  }>;
+}
+
 export async function getTraceSamples({
   environment,
   kuery,
@@ -48,7 +57,7 @@ export async function getTraceSamples({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<TransactionTraceSamplesResponse> {
   return withApmSpan('get_trace_samples', async () => {
     const commonFilters = [
       { term: { [SERVICE_NAME]: serviceName } },

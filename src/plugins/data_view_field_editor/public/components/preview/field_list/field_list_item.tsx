@@ -83,7 +83,7 @@ export const PreviewListItem: React.FC<Props> = ({
     if (hasScriptError) {
       return (
         <div>
-          <EuiBadge iconType="alert" color="danger" data-test-subj="scriptErrorBadge">
+          <EuiBadge iconType="warning" color="danger" data-test-subj="scriptErrorBadge">
             {i18n.translate('indexPatternFieldEditor.fieldPreview.scriptErrorBadgeLabel', {
               defaultMessage: 'Script error',
             })}

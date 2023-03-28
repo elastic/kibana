@@ -46,7 +46,7 @@ export type GenericMetricsRequest = APMEventESSearchRequest & {
   };
 };
 
-export type GenericMetricsChart = Awaited<FetchAndTransformMetrics>;
+export type GenericMetricsChart = FetchAndTransformMetrics;
 
 export interface FetchAndTransformMetrics {
   title: string;
