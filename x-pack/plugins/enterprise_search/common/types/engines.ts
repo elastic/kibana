@@ -37,10 +37,6 @@ export interface EnterpriseSearchEngineFieldCapabilities {
   name: string;
   updated_at_millis: number;
 }
-export interface EnterpriseSearchSchemaField {
-  field_name: string;
-  field_type: string[];
-}
 
 export interface EnterpriseSearchEngineUpsertResponse {
   result: string;
