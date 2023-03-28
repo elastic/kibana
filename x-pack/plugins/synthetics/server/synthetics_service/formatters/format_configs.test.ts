@@ -6,7 +6,11 @@
  */
 import { omit } from 'lodash';
 import { FormattedValue } from './common';
-import { formatMonitorConfig, formatHeartbeatRequest } from './format_configs';
+import {
+  formatMonitorConfigFields,
+  formatHeartbeatRequest,
+  mixParamsWithGlobalParams,
+} from './format_configs';
 import {
   ConfigKey,
   DataStream,
@@ -17,6 +21,7 @@ import {
   SyntheticsMonitor,
   VerificationMode,
 } from '../../../common/runtime_types';
+import { loggerMock } from '@kbn/logging-mocks';
 
 const testHTTPConfig: Partial<MonitorFields> = {
   type: 'http' as DataStream,
@@ -31,7 +36,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   urls: 'https://www.google.com',
   max_redirects: '0',
   password: '3z9SBOQWW5F0UrdqLVFqlF6z',
-  proxy_url: '',
+  proxy_url: '${proxyUrl}',
   'check.response.body.negative': [],
   'check.response.body.positive': [],
   'response.include_body': 'on_error' as ResponseBodyIndexPolicy,
@@ -43,6 +48,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   'check.request.method': 'GET',
   'ssl.verification_mode': VerificationMode.NONE,
   username: '',
+  params: '{"proxyUrl":"https://www.google.com"}',
 };
 
 const testBrowserConfig: Partial<MonitorFields> = {
@@ -82,11 +88,15 @@ const testBrowserConfig: Partial<MonitorFields> = {
 };
 
 describe('formatMonitorConfig', () => {
+  const logger = loggerMock.create();
+
   describe('http fields', () => {
     it('sets https keys properly', () => {
-      const yamlConfig = formatMonitorConfig(
+      const yamlConfig = formatMonitorConfigFields(
         Object.keys(testHTTPConfig) as ConfigKey[],
-        testHTTPConfig
+        testHTTPConfig,
+        logger,
+        { proxyUrl: 'https://www.google.com' }
       );
 
       expect(yamlConfig).toEqual({
@@ -102,16 +112,22 @@ describe('formatMonitorConfig', () => {
         timeout: '16s',
         type: 'http',
         urls: 'https://www.google.com',
+        proxy_url: 'https://www.google.com',
       });
     });
 
     it.each([true, false])(
       'omits ssl fields when tls is disabled and includes ssl fields when enabled',
       (isTLSEnabled) => {
-        const yamlConfig = formatMonitorConfig(Object.keys(testHTTPConfig) as ConfigKey[], {
-          ...testHTTPConfig,
-          [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
-        });
+        const yamlConfig = formatMonitorConfigFields(
+          Object.keys(testHTTPConfig) as ConfigKey[],
+          {
+            ...testHTTPConfig,
+            [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
+          },
+          logger,
+          { proxyUrl: 'https://www.google.com' }
+        );
 
         expect(yamlConfig).toEqual({
           'check.request.method': 'GET',
@@ -120,6 +136,7 @@ describe('formatMonitorConfig', () => {
           max_redirects: '0',
           name: 'Test',
           password: '3z9SBOQWW5F0UrdqLVFqlF6z',
+          proxy_url: 'https://www.google.com',
           'response.include_body': 'on_error',
           'response.include_headers': true,
           schedule: '@every 3m',
@@ -135,6 +152,7 @@ describe('formatMonitorConfig', () => {
 
 describe('browser fields', () => {
   let formattedBrowserConfig: Record<string, FormattedValue>;
+  const logger = loggerMock.create();
 
   beforeEach(() => {
     formattedBrowserConfig = {
@@ -165,20 +183,27 @@ describe('browser fields', () => {
   });
 
   it('sets browser keys properly', () => {
-    const yamlConfig = formatMonitorConfig(
+    const yamlConfig = formatMonitorConfigFields(
       Object.keys(testBrowserConfig) as ConfigKey[],
-      testBrowserConfig
+      testBrowserConfig,
+      logger,
+      { proxyUrl: 'https://www.google.com' }
     );
 
     expect(yamlConfig).toEqual(formattedBrowserConfig);
   });
 
   it('does not set empty strings or empty objects for params and playwright options', () => {
-    const yamlConfig = formatMonitorConfig(Object.keys(testBrowserConfig) as ConfigKey[], {
-      ...testBrowserConfig,
-      playwright_options: '{}',
-      params: '',
-    });
+    const yamlConfig = formatMonitorConfigFields(
+      Object.keys(testBrowserConfig) as ConfigKey[],
+      {
+        ...testBrowserConfig,
+        playwright_options: '{}',
+        params: '',
+      },
+      logger,
+      { proxyUrl: 'https://www.google.com' }
+    );
 
     expect(yamlConfig).toEqual(omit(formattedBrowserConfig, ['params', 'playwright_options']));
   });
@@ -187,9 +212,11 @@ describe('browser fields', () => {
     testBrowserConfig['throttling.is_enabled'] = false;
     testBrowserConfig['throttling.upload_speed'] = '3';
 
-    const formattedConfig = formatMonitorConfig(
+    const formattedConfig = formatMonitorConfigFields(
       Object.keys(testBrowserConfig) as ConfigKey[],
-      testBrowserConfig
+      testBrowserConfig,
+      logger,
+      { proxyUrl: 'https://www.google.com' }
     );
 
     const expected = {
@@ -205,9 +232,11 @@ describe('browser fields', () => {
   it('excludes empty array values', () => {
     testBrowserConfig['filter_journeys.tags'] = [];
 
-    const formattedConfig = formatMonitorConfig(
+    const formattedConfig = formatMonitorConfigFields(
       Object.keys(testBrowserConfig) as ConfigKey[],
-      testBrowserConfig
+      testBrowserConfig,
+      logger,
+      { proxyUrl: 'https://www.google.com' }
     );
 
     const expected = {
@@ -221,9 +250,11 @@ describe('browser fields', () => {
   it('does not exclude "false" fields', () => {
     testBrowserConfig.enabled = false;
 
-    const formattedConfig = formatMonitorConfig(
+    const formattedConfig = formatMonitorConfigFields(
       Object.keys(testBrowserConfig) as ConfigKey[],
-      testBrowserConfig
+      testBrowserConfig,
+      logger,
+      { proxyUrl: 'https://www.google.com' }
     );
 
     const expected = { ...formattedConfig, enabled: false };
@@ -236,12 +267,14 @@ describe('formatHeartbeatRequest', () => {
   it('uses heartbeat id', () => {
     const monitorId = 'test-monitor-id';
     const heartbeatId = 'test-custom-heartbeat-id';
-    const actual = formatHeartbeatRequest({
-      monitor: testBrowserConfig as SyntheticsMonitor,
-      monitorId,
-      heartbeatId,
-      params: {},
-    });
+    const actual = formatHeartbeatRequest(
+      {
+        monitor: testBrowserConfig as SyntheticsMonitor,
+        configId: monitorId,
+        heartbeatId,
+      },
+      '{"a":"param"}'
+    );
     expect(actual).toEqual({
       ...testBrowserConfig,
       id: heartbeatId,
@@ -258,12 +291,14 @@ describe('formatHeartbeatRequest', () => {
 
   it('uses monitor id when custom heartbeat id is not defined', () => {
     const monitorId = 'test-monitor-id';
-    const actual = formatHeartbeatRequest({
-      monitor: testBrowserConfig as SyntheticsMonitor,
-      monitorId,
-      heartbeatId: monitorId,
-      params: {},
-    });
+    const actual = formatHeartbeatRequest(
+      {
+        monitor: testBrowserConfig as SyntheticsMonitor,
+        configId: monitorId,
+        heartbeatId: monitorId,
+      },
+      JSON.stringify({ key: 'value' })
+    );
     expect(actual).toEqual({
       ...testBrowserConfig,
       id: monitorId,
@@ -275,6 +310,7 @@ describe('formatHeartbeatRequest', () => {
         test_run_id: undefined,
       },
       fields_under_root: true,
+      params: '{"key":"value"}',
     });
   });
 
@@ -283,9 +319,8 @@ describe('formatHeartbeatRequest', () => {
     const monitor = { ...testBrowserConfig, project_id: undefined } as SyntheticsMonitor;
     const actual = formatHeartbeatRequest({
       monitor,
-      monitorId,
+      configId: monitorId,
       heartbeatId: monitorId,
-      params: {},
     });
 
     expect(actual).toEqual({
@@ -307,9 +342,8 @@ describe('formatHeartbeatRequest', () => {
     const monitor = { ...testBrowserConfig, project_id: '' } as SyntheticsMonitor;
     const actual = formatHeartbeatRequest({
       monitor,
-      monitorId,
+      configId: monitorId,
       heartbeatId: monitorId,
-      params: {},
     });
 
     expect(actual).toEqual({
@@ -330,10 +364,9 @@ describe('formatHeartbeatRequest', () => {
     const monitorId = 'test-monitor-id';
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
-      monitorId,
+      configId: monitorId,
       runOnce: true,
       heartbeatId: monitorId,
-      params: {},
     });
 
     expect(actual).toEqual({
@@ -355,10 +388,9 @@ describe('formatHeartbeatRequest', () => {
     const testRunId = 'beep';
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
-      monitorId,
+      configId: monitorId,
       testRunId,
       heartbeatId: monitorId,
-      params: {},
     });
 
     expect(actual).toEqual({
@@ -380,10 +412,9 @@ describe('formatHeartbeatRequest', () => {
     const testRunId = 'beep';
     const actual = formatHeartbeatRequest({
       monitor: { ...testBrowserConfig, params: '' } as SyntheticsMonitor,
-      monitorId,
+      configId: monitorId,
       testRunId,
       heartbeatId: monitorId,
-      params: {},
     });
 
     expect(actual).toEqual({
@@ -398,6 +429,47 @@ describe('formatHeartbeatRequest', () => {
         test_run_id: testRunId,
       },
       fields_under_root: true,
+    });
+  });
+});
+
+describe('mixParamsWithGlobalParams', () => {
+  it('mixes global params with local', () => {
+    const actual = mixParamsWithGlobalParams(
+      {
+        username: 'test-user',
+        password: 'test-password',
+        url: 'test-url',
+      },
+      { params: '{"a":"param"}' } as any
+    );
+    expect(actual).toEqual({
+      params: {
+        a: 'param',
+        password: 'test-password',
+        url: 'test-url',
+        username: 'test-user',
+      },
+      str: '{"username":"test-user","password":"test-password","url":"test-url","a":"param"}',
+    });
+  });
+
+  it('local params gets preference', () => {
+    const actual = mixParamsWithGlobalParams(
+      {
+        username: 'test-user',
+        password: 'test-password',
+        url: 'test-url',
+      },
+      { params: '{"username":"superpower-user"}' } as any
+    );
+    expect(actual).toEqual({
+      params: {
+        password: 'test-password',
+        url: 'test-url',
+        username: 'superpower-user',
+      },
+      str: '{"username":"superpower-user","password":"test-password","url":"test-url"}',
     });
   });
 });
