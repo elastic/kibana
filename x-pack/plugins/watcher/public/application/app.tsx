@@ -20,10 +20,6 @@ import { Router, Switch, Redirect, withRouter, RouteComponentProps } from 'react
 
 import { Route } from '@kbn/shared-ux-router';
 
-import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n-react';
-
 import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -32,6 +28,7 @@ import { LicenseStatus } from '../../common/types/license_status';
 import { WatchListPage, WatchEditPage, WatchStatusPage } from './sections';
 import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';
+import { LicensePrompt } from './license_prompt';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });
@@ -62,45 +59,8 @@ export const App = (deps: AppDeps) => {
   }, [deps.licenseStatus$]);
 
   if (!valid) {
-    const licenseManagementUrl = deps.licenseManagementLocator?.useUrl({ page: 'dashboard' });
-    // if there is no licenseManagementUrl, the license management plugin might be disabled
-    const promptAction = licenseManagementUrl ? (
-      <EuiLink href={licenseManagementUrl}>
-        <FormattedMessage
-          id="xpack.watcher.app.licenseErrorLinkText"
-          defaultMessage="Manage your license"
-        />
-      </EuiLink>
-    ) : undefined;
-    const promptBody = licenseManagementUrl ? (
-      <p>{message}</p>
-    ) : (
-      <>
-        <p>{message}</p>
-        <p>
-          <FormattedMessage
-            id="xpack.watcher.app.licenseErrorBody"
-            defaultMessage="Contact your administrator to change your license."
-          />
-        </p>
-      </>
-    );
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-        <EuiEmptyPrompt
-          iconType="warning"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.watcher.app.licenseErrorTitle"
-                defaultMessage="License error"
-              />
-            </h1>
-          }
-          body={promptBody}
-          actions={[promptAction]}
-        />
-      </EuiPageContent>
+      <LicensePrompt licenseManagementLocator={deps.licenseManagementLocator} message={message} />
     );
   }
   return (
