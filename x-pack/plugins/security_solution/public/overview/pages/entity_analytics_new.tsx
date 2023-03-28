@@ -13,6 +13,11 @@ import {
   EuiSwitch,
   EuiButtonEmpty,
   EuiInMemoryTable,
+  EuiFieldNumber,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 import { buildEsQuery } from '@kbn/es-query';
 import { Panel } from '../../common/components/panel';
@@ -42,6 +47,15 @@ const StyledFullHeightContainer = styled.div`
 
 const EntityAnalyticsPageNewComponent = () => {
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
+  const [categories, setCategories] = useState([
+    {
+      type: 'threat',
+      weights: {
+        host: 1,
+        user: 1,
+      },
+    },
+  ]);
   const {
     data: {
       query: {
@@ -65,12 +79,18 @@ const EntityAnalyticsPageNewComponent = () => {
     } else {
       itemIdToExpandedRowMapValues[row.identifierValue] = (
         <div style={{ width: '100%' }}>
+          {row.notes.map((note) => (
+            <div>
+              <EuiCallOut>{note}</EuiCallOut>
+              <EuiSpacer size="m" />
+            </div>
+          ))}
           <AlertsTableComponent
             configId={`securitySolution-riskScores`}
-            globalQuery={query}
-            loadingEventIds={[]}
-            globalFilters={filters}
-            defaultFilters={[
+            // globalQuery={query}
+            // loadingEventIds={[]}
+            // globalFilters={filters}
+            inputFilters={[
               {
                 meta: {
                   alias: null,
@@ -114,6 +134,7 @@ const EntityAnalyticsPageNewComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       const q = buildEsQuery(undefined, query, filters);
+      const threatWeights = categories[0].weights;
       const data = await http.fetch(RISK_SCORES_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -123,6 +144,7 @@ const EntityAnalyticsPageNewComponent = () => {
             start: range.from,
             end: range.to,
           },
+          weights: threatWeights,
         }),
       });
       setHostRiskList(data.scores.filter((item) => item.identifierField === 'host.name'));
@@ -136,19 +158,19 @@ const EntityAnalyticsPageNewComponent = () => {
           : null
       );
 
-      console.log(data);
+      console.log('data', data);
     };
 
     try {
       fetchData();
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
-  }, [range, filters, query, withDebug]);
+  }, [range, filters, query, withDebug, categories]);
 
-  console.log('query', query);
-  console.log('filters', filters);
-  console.log('range', range);
+  // console.log('query', query);
+  // console.log('filters', filters);
+  // console.log('range', range);
   const data = [
     {
       '@timestamp': 1,
@@ -292,6 +314,24 @@ const EntityAnalyticsPageNewComponent = () => {
     tab?.document?.close();
   };
 
+  const updateCategoryWeight = (weights, index) => {
+    const newCategories = categories.map((category, i) => {
+      if (i === index) {
+        return {
+          ...category,
+          weights: {
+            ...category.weights,
+            ...weights,
+          },
+        };
+      } else {
+        return category;
+      }
+    });
+
+    setCategories(newCategories);
+  };
+
   return (
     <StyledFullHeightContainer>
       <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
@@ -306,6 +346,61 @@ const EntityAnalyticsPageNewComponent = () => {
               onChange={(e) => setWithDebug(e.target.checked)}
               label="With Debug info"
             />
+            <EuiSpacer size="l" />
+            <EuiTitle size="s">
+              <h2>Weights</h2>
+            </EuiTitle>
+            <EuiSpacer size="l" />
+            <div>
+              {categories.map((category, index) => (
+                <div>
+                  <EuiTitle size="xs">
+                    <h3>{category.type}</h3>
+                  </EuiTitle>
+                  <EuiSpacer size="xs" />
+                  <EuiFlexGroup style={{ maxWidth: 600 }}>
+                    <EuiFlexItem>
+                      <EuiFormRow label="Host weight">
+                        <EuiFieldNumber
+                          placeholder="Host weight"
+                          value={category.weights.host}
+                          step={'0.1'}
+                          min={0}
+                          max={1}
+                          onChange={(e) =>
+                            updateCategoryWeight(
+                              {
+                                host: Number(e.target.value),
+                              },
+                              index
+                            )
+                          }
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow label="User weight">
+                        <EuiFieldNumber
+                          placeholder="User weight"
+                          value={category.weights.user}
+                          step={'0.1'}
+                          min={0}
+                          max={1}
+                          onChange={(e) =>
+                            updateCategoryWeight(
+                              {
+                                user: Number(e.target.value),
+                              },
+                              index
+                            )
+                          }
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              ))}
+            </div>
 
             <div>
               {withDebug && (
