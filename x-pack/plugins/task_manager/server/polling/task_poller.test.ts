@@ -178,11 +178,12 @@ describe('TaskPoller', () => {
       advance(pollInterval);
       await sleep(pollInterval);
 
+      // We did 3x "advance(pollInterval)"
       expect(handler).toHaveBeenCalledTimes(3);
 
       advance(pollInterval);
-
-      expect(handler).toHaveBeenCalledTimes(3);
+      await sleep(pollInterval);
+      expect(handler).toHaveBeenCalledTimes(4);
     })
   );
 
