@@ -44,7 +44,7 @@ const validateResponse = (
   actionNames: string[],
   resourceNames: string[]
 ): void => {
-  const actualApplicationNames = Object.keys(response.application);
+  const actualApplicationNames = Object.keys(response.application ?? {});
   if (actualApplicationNames.length !== 1) {
     throw new Error(`Expected one application but received ${actualApplicationNames.length}`);
   }
