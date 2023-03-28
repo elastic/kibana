@@ -30,7 +30,12 @@ export const InlineLogViewCallout = ({
               'An inline Log View is currently being used, changes will be synchronized to the URL, but they will not be persisted.',
           })}
         </p>
-        <EuiButton fullWidth={false} fill onClick={revertToDefaultLogView}>
+        <EuiButton
+          data-test-subj="infraInlineLogViewCalloutRevertToDefaultPersistedLogViewButton"
+          fullWidth={false}
+          fill
+          onClick={revertToDefaultLogView}
+        >
           <FormattedMessage
             id="xpack.infra.logs.settings.inlineLogViewCalloutButtonText"
             defaultMessage="Revert to default (persisted) Log View"
