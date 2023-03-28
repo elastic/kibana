@@ -46,6 +46,7 @@ describe('kibanaContextFn', () => {
         delete: jest.fn(),
         find: jest.fn(),
         get: jest.fn(),
+        getSavedSearch: jest.fn(),
         update: jest.fn(),
       },
     };
