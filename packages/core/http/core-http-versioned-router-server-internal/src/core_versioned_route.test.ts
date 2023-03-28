@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { ApiVersion } from '@kbn/core-http-common';
 import type { IRouter, RequestHandler } from '@kbn/core-http-server';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { VERSION_HEADER } from './core_versioned_route';
@@ -45,6 +46,31 @@ describe('Versioned route', () => {
         .addVersion({ version: '3', validate: false }, handlerFn)
     ).toThrowError(
       `Version "1" handler has already been registered for the route [get] [/test/{id}]`
+    );
+  });
+
+  it('only allows versions that are numbers great than 0', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'internal' })
+        .addVersion({ version: 'foo' as ApiVersion, validate: false }, handlerFn)
+    ).toThrowError(
+      `Invalid version number. Received "foo", expected any finite, whole number greater than 0.`
+    );
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'internal' })
+        .addVersion({ version: '-1', validate: false }, handlerFn)
+    ).toThrowError(
+      `Invalid version number. Received "-1", expected any finite, whole number greater than 0.`
+    );
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'internal' })
+        .addVersion({ version: '1.1', validate: false }, handlerFn)
+    ).toThrowError(
+      `Invalid version number. Received "1.1", expected any finite, whole number greater than 0.`
     );
   });
 

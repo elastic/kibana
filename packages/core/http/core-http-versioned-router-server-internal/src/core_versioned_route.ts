@@ -155,19 +155,26 @@ export class CoreVersionedRoute implements VersionedRoute {
     return result;
   };
 
-  public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
-    if (this.handlers.has(options.version)) {
+  private validateVersion(version: string) {
+    const float = parseFloat(version);
+    if (!isFinite(float) || isNaN(float) || float <= 0 || Math.round(float) !== float) {
       throw new Error(
-        `Version "${
-          options.version
-        }" handler has already been registered for the route [${this.method.toLowerCase()}] [${
+        `Invalid version number. Received "${version}", expected any finite, whole number greater than 0.`
+      );
+    }
+
+    if (this.handlers.has(version as ApiVersion)) {
+      throw new Error(
+        `Version "${version}" handler has already been registered for the route [${this.method.toLowerCase()}] [${
           this.path
         }]"`
       );
     }
+  }
 
+  public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
+    this.validateVersion(options.version);
     this.handlers.set(options.version, { fn: handler, options });
-
     return this;
   }
 
