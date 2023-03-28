@@ -100,3 +100,13 @@ export const HIGHLIGHTED_FIELDS_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.highlightedFieldsTitle',
   { defaultMessage: 'Highlighted fields' }
 );
+
+export const ENTITIES_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.entitiesTitle',
+  { defaultMessage: 'Entities' }
+);
+
+export const INSIGHTS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.insightsTitle',
+  { defaultMessage: 'Insights' }
+);

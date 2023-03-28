@@ -10,6 +10,7 @@ import React, { memo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { InvestigationSection } from '../components/investigation_section';
 import { DescriptionSection } from '../components/description_section';
+import { Insights } from '../components/insights';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
@@ -20,6 +21,7 @@ export const OverviewTab: FC = memo(() => {
       <DescriptionSection />
       <EuiHorizontalRule margin="l" />
       <InvestigationSection />
+      <Insights />
     </>
   );
 });
