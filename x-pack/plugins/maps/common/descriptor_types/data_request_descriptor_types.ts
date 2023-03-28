@@ -90,7 +90,7 @@ export type DataRequestMeta = {
   requestStopTime?: number;
 } & Partial<
   SourceRequestMeta &
-  VectorSourceRequestMeta &
+    VectorSourceRequestMeta &
     VectorStyleRequestMeta &
     ESSearchSourceResponseMeta &
     ESGeoLineSourceResponseMeta &

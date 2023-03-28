@@ -89,7 +89,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   getSyncMeta(dataFilters: DataFilters) {
     return {
       geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
-    }
+    };
   }
 
   isGeoGridPrecisionAware() {

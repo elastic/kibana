@@ -57,11 +57,11 @@ import { isMvt } from './is_mvt';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { getIconSize } from './get_icon_size';
 
-type ESGeoGridSourceSyncMeta = {
+interface ESGeoGridSourceSyncMeta {
   geogridPrecision: number;
   requestType: RENDER_AS;
   resolution: GRID_RESOLUTION;
-};
+}
 
 const MAX_GEOTILE_LEVEL = 29;
 

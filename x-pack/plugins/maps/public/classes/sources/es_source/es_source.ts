@@ -221,10 +221,13 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       // buffer can be empty
       const geoField = await this._getGeoField();
       const buffer: MapExtent =
-        'isGeoGridPrecisionAware' in this && 
+        'isGeoGridPrecisionAware' in this &&
         'getGeoGridPrecision' in this &&
         (this as IESAggSource).isGeoGridPrecisionAware()
-          ? expandToTileBoundaries(requestMeta.buffer, (this as IESAggSource).getGeoGridPrecision(requestMeta.zoom))
+          ? expandToTileBoundaries(
+              requestMeta.buffer,
+              (this as IESAggSource).getGeoGridPrecision(requestMeta.zoom)
+            )
           : requestMeta.buffer;
       const extentFilter = createExtentFilter(buffer, [geoField.name]);
 
@@ -236,11 +239,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       isFeatureEditorOpenForLayer = requestMeta.isFeatureEditorOpenForLayer;
     }
 
-    if (
-      requestMeta.applyGlobalTime &&
-      (await this.isTimeAware()) &&
-      !isFeatureEditorOpenForLayer
-    ) {
+    if (requestMeta.applyGlobalTime && (await this.isTimeAware()) && !isFeatureEditorOpenForLayer) {
       const timeRange = requestMeta.timeslice
         ? {
             from: new Date(requestMeta.timeslice.from).toISOString(),
