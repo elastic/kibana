@@ -1360,10 +1360,12 @@ instanceStateValue: true
         it('should filter alerts by hours', async () => {
           const now = new Date();
           const hour = now.getUTCHours();
-          const minutes = (offset: number) => ('0' + (now.getUTCMinutes() + offset)).slice(-2);
-          // Filter the alerts that will start between (now+10 min) and (now+11 min)
-          const start = `${hour}:${minutes(10)}`;
-          const end = `${hour}:${minutes(11)}`;
+          // +1 hour from now
+          const generateHour = () => (hour + 1 > 23 ? '01' : ('0' + (hour + 1)).slice(-2));
+          const minutes = '00';
+
+          const start = `${generateHour()}:${minutes}`;
+          const end = `${generateHour()}:${minutes}`;
 
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringSummaryAction({
