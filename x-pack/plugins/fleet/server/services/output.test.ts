@@ -375,7 +375,7 @@ describe('Output Service', () => {
       expect(soClient.create).toBeCalled();
     });
 
-    it('Should update fleet server policies with data_output_id=default_output_id if a default new logstash output is created', async () => {
+    it('Should update fleet server policies with data_output_id=default_output_id if a new default logstash output is created', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
@@ -419,6 +419,66 @@ describe('Output Service', () => {
         esClientMock,
         {
           is_default: true,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'logstash',
+        },
+        { id: 'output-1' }
+      );
+
+      expect(mockedAgentPolicyService.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'fleet_server_policy',
+        { data_output_id: 'output-test' },
+        { force: true }
+      );
+    });
+
+    it('Should allow to create a new logstash output with no errors if is not set as default', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [
+          {
+            name: 'fleet server policy',
+            id: 'fleet_server_policy',
+            is_default_fleet_server: true,
+            package_policies: [
+              {
+                name: 'fleet-server-123',
+                package: {
+                  name: 'fleet_server',
+                },
+              },
+            ],
+          },
+          {
+            name: 'agent policy 1',
+            id: 'agent_policy_1',
+            is_managed: false,
+            package_policies: [
+              {
+                name: 'nginx',
+                package: {
+                  name: 'nginx',
+                },
+              },
+            ],
+          },
+        ],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
           is_default_monitoring: false,
           name: 'Test',
           type: 'logstash',
@@ -496,7 +556,7 @@ describe('Output Service', () => {
     });
 
     // With preconfigured outputs
-    it('Do not allow to update a preconfigured output outisde from preconfiguration', async () => {
+    it('Do not allow to update a preconfigured output outside from preconfiguration', async () => {
       const soClient = getMockedSoClient();
       await expect(
         outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
