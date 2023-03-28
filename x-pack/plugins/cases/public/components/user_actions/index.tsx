@@ -54,7 +54,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const { isLoadingLastPageUserActions, lastPageUserActions } = useLastPageUserActions({
     userActivityQueryParams,
-    userActionsStats,
     caseId: caseData.id,
     lastPage,
     showBottomList,
@@ -135,9 +134,10 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       lines={8}
       data-test-subj="user-actions-loading"
       isLoading={
-        isLoadingInfiniteUserActions ||
-        isLoadingLastPageUserActions ||
-        loadingCommentIds.includes(NEW_COMMENT_ID)
+        showBottomList ? 
+        (isLoadingLastPageUserActions ||
+        loadingCommentIds.includes(NEW_COMMENT_ID))
+        : isLoadingInfiniteUserActions
       }
     >
       <EuiPanel
@@ -184,7 +184,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           manualAlertsData={manualAlertsData}
           commentRefs={commentRefs}
           handleManageQuote={handleManageQuote}
-          bottomActions={lastPage === 1 ? bottomActions : []}
+          bottomActions={lastPage === 0 || lastPage === 1 ? bottomActions : []}
           isExpandable
         />
         {hasNextPage && <ShowMoreButton onShowMoreClick={handleShowMore} />}
