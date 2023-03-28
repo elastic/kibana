@@ -44,6 +44,21 @@ function isDisplayField(fieldName: string): boolean {
   return !OMIT_FIELDS.includes(fieldName);
 }
 
+export const isCounterTimeSeriesMetricField = (config: DataViewField) =>
+  config.timeSeriesMetric === 'counter';
+
+/**
+ * Temporarily add list of supported ES aggs below PR is merged
+ * https://github.com/elastic/elasticsearch/pull/93884
+ * @param config
+ */
+export const getSupportedAggs = (config: DataViewField) => {
+  if (isCounterTimeSeriesMetricField(config)) {
+    return new Set(['count', 'min', 'max']);
+  }
+  return new Set(['count', 'cardinality', 'percentiles', 'stats', 'terms']);
+};
+
 const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   mode: 'random_sampling',
   seed: '',
@@ -196,7 +211,7 @@ export const useDataVisualizerGridData = (
 
       const aggInterval = buckets.getInterval();
 
-      const aggregatableFields: string[] = [];
+      const aggregatableFields: Array<{ name: string; supportedAggs: Set<string> }> = [];
       const nonAggregatableFields: string[] = [];
 
       const fields = currentDataView.fields;
@@ -211,7 +226,7 @@ export const useDataVisualizerGridData = (
             !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) &&
             !field.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE)
           ) {
-            aggregatableFields.push(field.name);
+            aggregatableFields.push({ name: field.name, supportedAggs: getSupportedAggs(field) });
           } else {
             nonAggregatableFields.push(field.name);
           }
@@ -266,8 +281,9 @@ export const useDataVisualizerGridData = (
         return {
           fieldName: config.fieldName,
           type: config.type,
-          cardinality: config.stats?.cardinality ?? 0,
+          cardinality: config.stats?.cardinality,
           existsInDocs: config.existsInDocs,
+          supportedAggs: config.supportedAggs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -279,8 +295,9 @@ export const useDataVisualizerGridData = (
         return {
           fieldName: config.fieldName,
           type: config.type,
-          cardinality: config.stats?.cardinality ?? 0,
+          cardinality: config.stats?.cardinality,
           existsInDocs: config.existsInDocs,
+          supportedAggs: config.supportedAggs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -374,7 +391,9 @@ export const useDataVisualizerGridData = (
         loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
+        supportedAggs: getSupportedAggs(field),
       };
+
       if (field.displayName !== metricConfig.fieldName) {
         metricConfig.displayName = field.displayName;
       }
@@ -392,7 +411,7 @@ export const useDataVisualizerGridData = (
   const createNonMetricCards = useCallback(() => {
     const allNonMetricFields = dataViewFields.filter((f) => {
       return (
-        (f.type !== KBN_FIELD_TYPES.NUMBER || f.timeSeriesMetric === 'counter') &&
+        f.type !== KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
         isDisplayField(f.displayName) === true
       );
@@ -485,6 +504,7 @@ export const useDataVisualizerGridData = (
     () => {
       const fieldStats = strategyResponse.fieldStats;
       let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
+
       if (visibleFieldTypes && visibleFieldTypes.length > 0) {
         combinedConfigs = combinedConfigs.filter(
           (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1

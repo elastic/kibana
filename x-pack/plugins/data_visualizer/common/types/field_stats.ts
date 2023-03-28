@@ -74,9 +74,9 @@ export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchRespo
 export interface NumericFieldStats {
   fieldName: string;
   count?: number;
-  min: number;
-  max: number;
-  avg: number;
+  min?: number;
+  max?: number;
+  avg?: number;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
   topValuesSampleSize: number;
@@ -222,7 +222,7 @@ export interface OverallStatsSearchStrategyParams {
   index: string;
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
-  aggregatableFields: string[];
+  aggregatableFields: Array<{ name: string; supportedAggs: Set<string> }>;
   nonAggregatableFields: string[];
   fieldsToFetch?: string[];
   browserSessionSeed: number;
@@ -258,6 +258,7 @@ export interface Field {
   type: string;
   cardinality: number;
   safeFieldName: string;
+  supportedAggs?: Set<string>;
 }
 
 export interface Aggs {

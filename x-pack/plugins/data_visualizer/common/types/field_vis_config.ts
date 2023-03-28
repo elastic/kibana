@@ -31,6 +31,7 @@ export interface FieldVisConfig {
   fieldFormat?: any;
   isUnsupportedType?: boolean;
   deletable?: boolean;
+  supportedAggs: Set<string>;
 }
 
 export interface FileBasedFieldVisConfig {

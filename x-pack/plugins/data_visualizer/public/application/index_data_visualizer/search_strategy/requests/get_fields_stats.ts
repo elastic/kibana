@@ -26,6 +26,7 @@ export const getFieldsStats = (
     type: string;
     cardinality: number;
     safeFieldName: string;
+    supportedAggs?: Set<string>;
   }>,
   options: ISearchOptions
 ): Observable<FieldStats[] | FieldStatsError> | undefined => {

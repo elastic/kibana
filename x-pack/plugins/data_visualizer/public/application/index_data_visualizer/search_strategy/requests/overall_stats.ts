@@ -20,7 +20,7 @@ import { Aggs, SamplingOption } from '../../../../../common/types/field_stats';
 export const checkAggregatableFieldsExistRequest = (
   dataViewTitle: string,
   query: Query['query'],
-  aggregatableFields: string[],
+  aggregatableFields: Array<{ name: string; supportedAggs: Set<string> }>,
   samplingOption: SamplingOption,
   timeFieldName: string | undefined,
   earliestMs?: number,
@@ -45,23 +45,28 @@ export const checkAggregatableFieldsExistRequest = (
       : {}),
   };
 
-  aggregatableFields.forEach((field, i) => {
+  aggregatableFields.forEach(({ name: field, supportedAggs }, i) => {
     const safeFieldName = getSafeAggregationName(field, i);
-    aggs[`${safeFieldName}_count`] = {
-      filter: { exists: { field } },
-    };
 
-    let cardinalityField: AggCardinality;
-    if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
-      cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
-        cardinality: { script: datafeedConfig?.script_fields[field].script },
-      };
-    } else {
-      cardinalityField = {
-        cardinality: { field },
+    if (supportedAggs.has('count')) {
+      aggs[`${safeFieldName}_count`] = {
+        filter: { exists: { field } },
       };
     }
-    aggs[`${safeFieldName}_cardinality`] = cardinalityField;
+
+    if (supportedAggs.has('cardinality')) {
+      let cardinalityField: AggCardinality;
+      if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
+        cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
+          cardinality: { script: datafeedConfig?.script_fields[field].script },
+        };
+      } else {
+        cardinalityField = {
+          cardinality: { field },
+        };
+      }
+      aggs[`${safeFieldName}_cardinality`] = cardinalityField;
+    }
   });
 
   const searchBody = {
@@ -88,7 +93,7 @@ export const checkAggregatableFieldsExistRequest = (
 };
 
 export interface AggregatableFieldOverallStats extends IKibanaSearchResponse {
-  aggregatableFields: string[];
+  aggregatableFields: Array<{ name: string; supportedAggs: Set<string> }>;
 }
 
 export type NonAggregatableFieldOverallStats = IKibanaSearchResponse;
@@ -107,7 +112,7 @@ export function isNonAggregatableFieldOverallStats(
 
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
-  aggregatableFields: string[],
+  aggregatableFields: Array<{ name: string; supportedAggs: Set<string> }>,
   datafeedConfig?: estypes.MlDatafeed
 ) => {
   const stats = {
@@ -122,7 +127,7 @@ export const processAggregatableFieldsExistResponse = (
 
     const aggsPath = ['sample'];
     const sampleCount = aggregations.sample.doc_count;
-    aggregatableFieldsChunk.forEach((field, i) => {
+    aggregatableFieldsChunk.forEach(({ name: field, supportedAggs }, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
       // Sampler agg will yield doc_count that's bigger than the actual # of sampled records
       // because it uses the stored _doc_count if available
@@ -132,11 +137,11 @@ export const processAggregatableFieldsExistResponse = (
       const multiplier =
         count > sampleCount ? get(aggregations, [...aggsPath, 'probability'], 1) : 1;
       if (count > 0) {
-        const cardinality = get(
-          aggregations,
-          [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
-          0
-        );
+        const cardinality = get(aggregations, [
+          ...aggsPath,
+          `${safeFieldName}_cardinality`,
+          'value',
+        ]);
         stats.aggregatableExistsFields.push({
           fieldName: field,
           existsInDocs: true,
@@ -151,11 +156,11 @@ export const processAggregatableFieldsExistResponse = (
           datafeedConfig?.script_fields?.hasOwnProperty(field) ||
           datafeedConfig?.runtime_mappings?.hasOwnProperty(field)
         ) {
-          const cardinality = get(
-            aggregations,
-            [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
-            0
-          );
+          const cardinality = get(aggregations, [
+            ...aggsPath,
+            `${safeFieldName}_cardinality`,
+            'value',
+          ]);
           stats.aggregatableExistsFields.push({
             fieldName: field,
             existsInDocs: true,
