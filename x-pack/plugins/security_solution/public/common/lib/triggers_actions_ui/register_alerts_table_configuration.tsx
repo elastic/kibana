@@ -103,6 +103,19 @@ const registerAlertsTableConfiguration = (
     sort,
     showInspectButton: true,
   });
+
+  registerIfNotAlready(registry, {
+    id: `securitySolution-riskScores`,
+    app_id: APP_ID,
+    casesFeatureId: CASES_FEATURE_ID,
+    columns: alertColumns,
+    getRenderCellValue: renderCellValueHookCasePage,
+    useInternalFlyout,
+    useBulkActions: getBulkActionHook(TableId.alertsOnCasePage),
+    useCellActions: getUseCellActionsHook(TableId.alertsOnCasePage),
+    sort,
+    showInspectButton: true,
+  });
 };
 
 const registerIfNotAlready = (
