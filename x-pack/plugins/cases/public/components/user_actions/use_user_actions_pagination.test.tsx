@@ -59,7 +59,6 @@ describe('useUserActionsPagination', () => {
         expect.objectContaining({
           lastPage: 3,
           showBottomList: true,
-          showLoadMore: true,
           isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
           infiniteCaseUserActions: defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
           hasNextPage: defaultInfiniteUseFindCaseUserActions.hasNextPage,
@@ -113,7 +112,6 @@ describe('useUserActionsPagination', () => {
         expect.objectContaining({
           lastPage: 1,
           showBottomList: false,
-          showLoadMore: false,
           isLoadingInfiniteUserActions: false,
           infiniteCaseUserActions: defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
           hasNextPage: false,
@@ -146,7 +144,6 @@ describe('useUserActionsPagination', () => {
         expect.objectContaining({
           lastPage: 3,
           showBottomList: true,
-          showLoadMore: false,
           isLoadingInfiniteUserActions: true,
           infiniteCaseUserActions: [],
           hasNextPage: undefined,
@@ -156,7 +153,7 @@ describe('useUserActionsPagination', () => {
     });
   });
 
-  it('return showLoadMore and hasNextPage as false when it has less than 10 user actions', async () => {
+  it('return hasNextPage as false when it has less than 10 user actions', async () => {
     useInfiniteFindCaseUserActionsMock.mockReturnValue({
       ...defaultInfiniteUseFindCaseUserActions,
       data: {
@@ -184,7 +181,6 @@ describe('useUserActionsPagination', () => {
         expect.objectContaining({
           lastPage: 1,
           showBottomList: false,
-          showLoadMore: false,
           isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
           infiniteCaseUserActions: [],
           hasNextPage: false,
@@ -225,7 +221,6 @@ describe('useUserActionsPagination', () => {
           expect.objectContaining({
             lastPage: 3,
             showBottomList: true,
-            showLoadMore: true,
             isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
             infiniteCaseUserActions:
               defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
@@ -273,7 +268,6 @@ describe('useUserActionsPagination', () => {
           expect.objectContaining({
             lastPage: 1,
             showBottomList: false,
-            showLoadMore: false,
             isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
             infiniteCaseUserActions:
               defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
@@ -324,7 +318,6 @@ describe('useUserActionsPagination', () => {
           expect.objectContaining({
             lastPage: 3,
             showBottomList: true,
-            showLoadMore: true,
             isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
             infiniteCaseUserActions:
               defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
@@ -377,7 +370,6 @@ describe('useUserActionsPagination', () => {
           expect.objectContaining({
             lastPage: 3,
             showBottomList: true,
-            showLoadMore: true,
             isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
             infiniteCaseUserActions:
               defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,

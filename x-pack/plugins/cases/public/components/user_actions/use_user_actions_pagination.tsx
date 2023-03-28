@@ -45,6 +45,8 @@ export const useUserActionsPagination = ({
     }
   }, [userActionsStats, userActivityQueryParams]);
 
+  const prevLastPage = useRef(lastPage);
+
   const isExpandable = userActivityQueryParams.page <= lastPage;
 
   const isActivityParamsUpdated =
@@ -55,6 +57,8 @@ export const useUserActionsPagination = ({
     !deepEqual(actionsStats.current, userActionsStats) &&
     !isFirstRender.current; // refetch top actions only when new action added in the top list (i.e. in descending order)
 
+  const lastPageChanged = prevLastPage.current !== lastPage; // when comments are 21st comment added, it should refetch user actions as last page has changed
+
   const {
     data: caseInfiniteUserActionsData,
     isLoading: isLoadingInfiniteUserActions,
@@ -64,7 +68,11 @@ export const useUserActionsPagination = ({
     caseId,
     userActivityQueryParams,
     isExpandable &&
-      (isFirstRender.current || isActivityParamsUpdated || isActionsStatsUpdated || lastPage === 1)
+      (isFirstRender.current ||
+        isActivityParamsUpdated ||
+        isActionsStatsUpdated ||
+        lastPage === 1 ||
+        lastPageChanged)
   );
 
   if (isFirstRender.current) {
@@ -79,9 +87,11 @@ export const useUserActionsPagination = ({
     actionsStats.current = userActionsStats;
   }
 
-  const showBottomList = lastPage > 1;
+  if (lastPageChanged) {
+    prevLastPage.current = lastPage;
+  }
 
-  const showLoadMore = !isLoadingInfiniteUserActions && userActivityQueryParams.page < lastPage;
+  const showBottomList = lastPage > 1;
 
   const infiniteCaseUserActions = useMemo<CaseUserActions[]>(() => {
     if (!caseInfiniteUserActionsData?.pages?.length || isLoadingInfiniteUserActions) {
@@ -98,7 +108,6 @@ export const useUserActionsPagination = ({
   return {
     lastPage,
     showBottomList,
-    showLoadMore,
     isLoadingInfiniteUserActions,
     infiniteCaseUserActions,
     hasNextPage,

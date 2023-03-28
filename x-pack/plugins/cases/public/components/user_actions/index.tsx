@@ -45,7 +45,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     lastPage,
     hasNextPage,
     fetchNextPage,
-    showLoadMore,
     showBottomList,
   } = useUserActionsPagination({
     userActivityQueryParams,
@@ -119,42 +118,44 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const { euiTheme } = useEuiTheme();
 
-  const customSize =
-    showLoadMore && hasNextPage
-      ? {
-          showMoreSectionSize: euiTheme.size.xxxl,
-          marginTopShowMoreSectionSize: euiTheme.size.xl,
-          marginBottomShowMoreSectionSize: euiTheme.size.xl,
-        }
-      : {
-          showMoreSectionSize: euiTheme.size.s,
-          marginTopShowMoreSectionSize: euiTheme.size.s,
-          marginBottomShowMoreSectionSize: euiTheme.size.s,
-        };
+  const customSize = hasNextPage
+    ? {
+        showMoreSectionSize: euiTheme.size.xxxl,
+        marginTopShowMoreSectionSize: euiTheme.size.xl,
+        marginBottomShowMoreSectionSize: euiTheme.size.xl,
+      }
+    : {
+        showMoreSectionSize: euiTheme.size.s,
+        marginTopShowMoreSectionSize: euiTheme.size.s,
+        marginBottomShowMoreSectionSize: euiTheme.size.s,
+      };
 
   return (
     <EuiSkeletonText
       lines={8}
       data-test-subj="user-actions-loading"
       isLoading={
-        showLoadMore && hasNextPage
-          ? isLoadingInfiniteUserActions
-          : isLoadingLastPageUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)
+        isLoadingInfiniteUserActions ||
+        isLoadingLastPageUserActions ||
+        loadingCommentIds.includes(NEW_COMMENT_ID)
       }
     >
       <EuiPanel
         color="plain"
         hasShadow={false}
         css={css`
-          .commentList--hasShowMore
+          ${showBottomList
+            ? `.commentList--hasShowMore
             [class*='euiTimelineItem-center']:last-child:not(:only-child)
             > [class*='euiTimelineItemIcon-']::before {
             block-size: calc(
               100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
                 ${customSize.marginBottomShowMoreSectionSize}
             );
-          }
-          .commentList--hasShowMore
+          }`
+            : ''}
+          ${showBottomList
+            ? `.commentList--hasShowMore
             [class*='euiTimelineItem-center']:first-child
             > [class*='euiTimelineItemIcon-']::before {
             inset-block-start: 0%;
@@ -162,15 +163,16 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
               100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
                 ${customSize.marginBottomShowMoreSectionSize}
             );
-          }
-          ${showLoadMore
+          }`
+            : ''}
+          ${showBottomList
             ? `.commentList--hasShowMore
-                [class*='euiTimelineItem-']
-                > [class*='euiTimelineItemIcon-']::before {
-                block-size: calc(
-                  100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
-                    ${customSize.marginBottomShowMoreSectionSize}
-                );
+              [class*='euiTimelineItem-']
+              > [class*='euiTimelineItemIcon-']::before {
+              block-size: calc(
+                100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
+                  ${customSize.marginBottomShowMoreSectionSize}
+              );
               }`
             : ''}
         `}
@@ -185,7 +187,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           bottomActions={lastPage === 1 ? bottomActions : []}
           isExpandable
         />
-        {showLoadMore && hasNextPage && <ShowMoreButton onShowMoreClick={handleShowMore} />}
+        {hasNextPage && <ShowMoreButton onShowMoreClick={handleShowMore} />}
         {showBottomList ? (
           <BottomUserActionsListWrapper>
             <UserActionsList
