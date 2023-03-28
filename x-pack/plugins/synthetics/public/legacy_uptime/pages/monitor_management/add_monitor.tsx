@@ -43,7 +43,6 @@ export const AddMonitorPage: React.FC = () => {
         policyDefaultValues={{
           throttling,
           runsOnService: true,
-          isZipUrlSourceEnabled: false,
           allowedScheduleUnits: [ScheduleUnit.MINUTES],
         }}
       >

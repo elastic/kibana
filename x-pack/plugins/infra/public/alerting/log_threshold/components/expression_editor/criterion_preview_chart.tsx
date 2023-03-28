@@ -21,6 +21,7 @@ import {
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,
   LoadingState,
@@ -56,6 +57,7 @@ interface Props {
   chartCriterion: Partial<Criterion>;
   sourceId: string;
   showThreshold: boolean;
+  executionTimeRange?: ExecutionTimeRange;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
@@ -63,6 +65,7 @@ export const CriterionPreview: React.FC<Props> = ({
   chartCriterion,
   sourceId,
   showThreshold,
+  executionTimeRange,
 }) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
@@ -106,6 +109,7 @@ export const CriterionPreview: React.FC<Props> = ({
       threshold={ruleParams.count}
       chartAlertParams={chartAlertParams}
       showThreshold={showThreshold}
+      executionTimeRange={executionTimeRange}
     />
   );
 };
@@ -116,6 +120,7 @@ interface ChartProps {
   threshold?: Threshold;
   chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   showThreshold: boolean;
+  executionTimeRange?: ExecutionTimeRange;
 }
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
@@ -124,6 +129,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   threshold,
   chartAlertParams,
   showThreshold,
+  executionTimeRange,
 }) => {
   const { uiSettings } = useKibana().services;
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
@@ -138,6 +144,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     sourceId,
     ruleParams: chartAlertParams,
     buckets,
+    executionTimeRange,
   });
 
   useDebounce(
