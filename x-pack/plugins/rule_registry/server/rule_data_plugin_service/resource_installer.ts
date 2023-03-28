@@ -6,10 +6,7 @@
  */
 
 import { type Observable } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   createConcreteWriteIndex,
@@ -19,6 +16,7 @@ import {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   ECS_COMPONENT_TEMPLATE_NAME,
+  getIndexTemplate,
   installWithTimeout,
   TOTAL_FIELDS_LIMIT,
   type PublicFrameworkAlertsService,
@@ -26,7 +24,6 @@ import {
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
-
 import type { IndexInfo } from './index_info';
 
 interface ConstructorOptions {
@@ -195,13 +192,10 @@ export class ResourceInstaller {
 
     const alias = indexInfo.getPrimaryAlias(namespace);
 
-    if (
-      namespace === 'default' &&
-      !indexInfo.indexOptions.additionalPrefix &&
-      frameworkAlerts.enabled()
-    ) {
+    if (!indexInfo.indexOptions.additionalPrefix && frameworkAlerts.enabled()) {
       const { result: initialized, error } = await frameworkAlerts.getContextInitializationPromise(
-        indexInfo.indexOptions.registrationContext
+        indexInfo.indexOptions.registrationContext,
+        namespace
       );
 
       if (!initialized) {
@@ -215,97 +209,50 @@ export class ResourceInstaller {
 
     logger.info(`Installing namespace-level resources and creating concrete index for ${alias}`);
 
+    const secondaryNamespacedAlias = indexInfo.getSecondaryAlias(namespace);
+    const indexPatterns = {
+      basePattern: indexInfo.basePattern,
+      pattern: indexInfo.getPatternForBackingIndices(namespace),
+      alias: indexInfo.getPrimaryAlias(namespace),
+      name: indexInfo.getConcreteIndexInitialName(namespace),
+      template: indexInfo.getIndexTemplateName(namespace),
+      ...(secondaryNamespacedAlias ? { secondaryAlias: secondaryNamespacedAlias } : {}),
+    };
+
+    const technicalComponentNames = [TECHNICAL_COMPONENT_TEMPLATE_NAME];
+    const ownComponentNames = indexInfo.indexOptions.componentTemplates.map((template) =>
+      indexInfo.getComponentTemplateName(template.name)
+    );
+    // Order matters:
+    // - first go external component templates referenced by this index (e.g. the common full ECS template)
+    // - then we include own component templates registered with this index
+    // - finally, we include technical component templates to make sure the index gets all the
+    //   mappings and settings required by all Kibana plugins using rule registry to work properly
+    const componentTemplateRefs = [
+      ...indexInfo.indexOptions.componentTemplateRefs,
+      ...ownComponentNames,
+      ...technicalComponentNames,
+    ];
+
     // Install / update the index template
     await createOrUpdateIndexTemplate({
       logger: this.options.logger,
       esClient: clusterClient,
-      // TODO - switch to using getIndexTemplate from alerting once that supports spaces
-      template: this.getIndexTemplate(indexInfo, namespace),
+      template: getIndexTemplate({
+        componentTemplateRefs,
+        ilmPolicyName: DEFAULT_ALERTS_ILM_POLICY_NAME,
+        indexPatterns,
+        kibanaVersion: indexInfo.kibanaVersion,
+        namespace,
+        totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+      }),
     });
 
     await createConcreteWriteIndex({
       logger: this.options.logger,
       esClient: clusterClient,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
-      indexPatterns: {
-        basePattern: indexInfo.basePattern,
-        pattern: indexInfo.getPatternForBackingIndices(namespace),
-        alias: indexInfo.getPrimaryAlias(namespace),
-        name: indexInfo.getConcreteIndexInitialName(namespace),
-        template: indexInfo.getIndexTemplateName(namespace),
-      },
+      indexPatterns,
     });
-  }
-
-  private getIndexTemplate(indexInfo: IndexInfo, namespace: string) {
-    const {
-      componentTemplateRefs,
-      componentTemplates,
-      indexTemplate = {},
-      ilmPolicy,
-    } = indexInfo.indexOptions;
-
-    const primaryNamespacedAlias = indexInfo.getPrimaryAlias(namespace);
-    const secondaryNamespacedAlias = indexInfo.getSecondaryAlias(namespace);
-    const indexPatternForBackingIndices = indexInfo.getPatternForBackingIndices(namespace);
-
-    const technicalComponentNames = [TECHNICAL_COMPONENT_TEMPLATE_NAME];
-    const ownComponentNames = componentTemplates.map((template) =>
-      indexInfo.getComponentTemplateName(template.name)
-    );
-    const ilmPolicyName = ilmPolicy ? indexInfo.getIlmPolicyName() : DEFAULT_ALERTS_ILM_POLICY_NAME;
-
-    const indexMetadata: estypes.Metadata = {
-      ...indexTemplate._meta,
-      kibana: {
-        ...indexTemplate._meta?.kibana,
-        version: indexInfo.kibanaVersion,
-      },
-      namespace,
-    };
-
-    return {
-      name: indexInfo.getIndexTemplateName(namespace),
-      body: {
-        index_patterns: [indexPatternForBackingIndices],
-
-        // Order matters:
-        // - first go external component templates referenced by this index (e.g. the common full ECS template)
-        // - then we include own component templates registered with this index
-        // - finally, we include technical component templates to make sure the index gets all the
-        //   mappings and settings required by all Kibana plugins using rule registry to work properly
-        composed_of: [...componentTemplateRefs, ...ownComponentNames, ...technicalComponentNames],
-
-        template: {
-          settings: {
-            hidden: true,
-            'index.lifecycle': {
-              name: ilmPolicyName,
-              rollover_alias: primaryNamespacedAlias,
-            },
-            'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
-            auto_expand_replicas: '0-1',
-          },
-          mappings: {
-            dynamic: false,
-            _meta: indexMetadata,
-          },
-          aliases:
-            secondaryNamespacedAlias != null
-              ? {
-                  [secondaryNamespacedAlias]: {
-                    is_write_index: false,
-                  },
-                }
-              : undefined,
-        },
-
-        _meta: indexMetadata,
-
-        // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
-        // then newly created indices will use the matching template with the *longest* namespace
-        priority: namespace.length,
-      },
-    };
   }
 }

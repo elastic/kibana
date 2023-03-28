@@ -328,9 +328,6 @@ class OutputService {
             }
           );
         }
-      } else {
-        // prevent changing an ES output to logstash if it's used by fleet server policies
-        validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
       }
     }
 
