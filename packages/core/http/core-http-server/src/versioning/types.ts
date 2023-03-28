@@ -156,8 +156,8 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
 
 /** @experimental */
-export interface VersionedRouteResponseValidation<R> {
-  [statusCode: number]: { body: RouteValidationFunction<R> | Type<R> };
+export interface VersionedRouteResponseValidation {
+  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
   unsafe?: { body?: boolean };
 }
 
@@ -165,7 +165,7 @@ export interface VersionedRouteResponseValidation<R> {
  * Versioned route validation
  * @experimental
  */
-interface FullValidationConfig<P, Q, B, R> {
+interface FullValidationConfig<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @experimental
@@ -177,7 +177,7 @@ interface FullValidationConfig<P, Q, B, R> {
    *       for setting default values!
    * @experimental
    */
-  response?: VersionedRouteResponseValidation<R>;
+  response?: VersionedRouteResponseValidation;
 }
 
 /**
@@ -195,7 +195,7 @@ export interface AddVersionOpts<P, Q, B, R> {
    * Validation for this version of a route
    * @experimental
    */
-  validate: false | FullValidationConfig<P, Q, B, R>;
+  validate: false | FullValidationConfig<P, Q, B>;
 }
 
 /**

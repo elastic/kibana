@@ -91,6 +91,18 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * An instance very similar to {@link IRouter} that can be used for versioning HTTP routes
    * following the Elastic versioning specification.
    *
+   * @example
+   * const router = core.http.createRouter();
+   * router.versioned.get({ path: '/api/my-path', access: 'public' }).addVersion(
+   *   {
+   *     version: '1',
+   *     validate: false,
+   *   },
+   *   async (ctx, req, res) => {
+   *     return res.ok();
+   *   }
+   * );
+   *
    * @experimental
    */
   versioned: VersionedRouter<Context>;
