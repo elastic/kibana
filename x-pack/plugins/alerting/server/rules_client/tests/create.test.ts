@@ -69,6 +69,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeApiKey: jest.fn(),
+  getAuthenticationApiKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -3204,5 +3206,138 @@ describe('create()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
+  });
+
+  test('calls the authentication API key function if the user is authenticated using an api key', async () => {
+    const data = getMockData();
+    rulesClientParams.getAuthenticationApiKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    rulesClientParams.isAuthenticationTypeApiKey.mockResolvedValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          id: '1',
+          name: 'action_0',
+          type: 'action',
+        },
+      ],
+    });
+    await rulesClient.create({ data });
+
+    expect(rulesClientParams.isAuthenticationTypeApiKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.getAuthenticationApiKey).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            group: 'default',
+            actionTypeId: 'test',
+            params: { foo: true },
+            uuid: '149',
+          },
+        ],
+        alertTypeId: '123',
+        consumer: 'bar',
+        name: 'abc',
+        legacyId: null,
+        params: { bar: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: true,
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        schedule: { interval: '1m' },
+        throttle: null,
+        notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        tags: ['foo'],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+          error: null,
+          warning: null,
+        },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
+        running: false,
+      },
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+  });
+
+  test('throws error and does not add API key to invalidatePendingApiKey SO when create saved object fails if the user is authenticated using an api key', async () => {
+    const data = getMockData();
+    rulesClientParams.getAuthenticationApiKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    rulesClientParams.isAuthenticationTypeApiKey.mockResolvedValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Test failure"`
+    );
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 });

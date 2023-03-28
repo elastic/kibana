@@ -53,6 +53,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeApiKey: jest.fn(),
+  getAuthenticationApiKey: jest.fn(),
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:

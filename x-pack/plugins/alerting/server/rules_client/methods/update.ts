@@ -122,7 +122,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
   );
 
   await Promise.all([
-    alertSavedObject.attributes.apiKey
+    alertSavedObject.attributes.apiKey && !alertSavedObject.attributes.apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
           { apiKeys: [alertSavedObject.attributes.apiKey] },
           context.logger,
@@ -207,11 +207,12 @@ async function updateAlert<Params extends RuleTypeParams>(
   const username = await context.getUserName();
 
   let createdAPIKey = null;
+  let isAuthTypeApiKey = false;
   try {
-    const isApiKey = await context.isAuthenticationTypeApiKey();
+    isAuthTypeApiKey = await context.isAuthenticationTypeApiKey();
     const name = generateAPIKeyName(ruleType.id, data.name);
     createdAPIKey = attributes.enabled
-      ? isApiKey
+      ? isAuthTypeApiKey
         ? await context.getAuthenticationApiKey(name)
         : await context.createAPIKey(name)
       : null;
@@ -219,7 +220,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
   }
 
-  const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username);
+  const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey);
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
   // Increment revision if applicable field has changed
@@ -264,7 +265,12 @@ async function updateAlert<Params extends RuleTypeParams>(
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: createAttributes.apiKey ? [createAttributes.apiKey] : [] },
+      {
+        apiKeys:
+          createAttributes.apiKey && !createAttributes.apiKeyCreatedByUser
+            ? [createAttributes.apiKey]
+            : [],
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

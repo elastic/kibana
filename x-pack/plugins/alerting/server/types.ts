@@ -339,6 +339,7 @@ export interface RawRule extends SavedObjectAttributes {
   updatedAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
+  apiKeyCreatedByUser?: boolean | null;
   throttle?: string | null;
   notifyWhen?: RuleNotifyWhenType | null;
   muteAll: boolean;
