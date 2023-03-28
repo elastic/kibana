@@ -9,7 +9,6 @@ import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import { useGetEndpointPendingActionsSummary } from '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';

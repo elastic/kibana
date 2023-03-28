@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { compact, isEmpty } from 'lodash';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -24,17 +24,18 @@ export const useGetEndpointPendingActionsSummary = <T = PendingActionsResponse>(
   endpointAgentIds: string[],
   options: UseQueryOptions<PendingActionsResponse, IHttpFetchError, T, string[]> = {}
 ) => {
+  const endpointIds = compact(endpointAgentIds);
   const autoRefetchIntervalValue = useEndpointSelector(autoRefreshInterval);
-  const enabled = options.enabled ?? !isEmpty(endpointAgentIds);
+  const enabled = options.enabled ?? !isEmpty(endpointIds);
 
   return useQuery<PendingActionsResponse, IHttpFetchError, T, string[]>(
-    ['fetch-endpoint-pending-actions-summary', ...endpointAgentIds],
-    () => fetchPendingActionsByAgentId(endpointAgentIds),
+    ['fetch-endpoint-pending-actions-summary', ...endpointIds],
+    () => fetchPendingActionsByAgentId(endpointIds),
     {
       refetchInterval: autoRefetchIntervalValue ?? DEFAULT_ENDPOINT_REFRESH_INTERVAL,
       ...options,
       enabled,
-      initialData: { data: [] },
+      placeholderData: { data: [] },
     }
   );
 };

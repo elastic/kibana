@@ -4,15 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PendingActions } from './host_isolation';
+import type { EndpointPendingActionsSummary } from './host_isolation';
 
-export const AgentPendingActionStatusBadge = memo<
-  { 'data-test-subj'?: string } & { pendingActions: PendingActions }
->(({ 'data-test-subj': dataTestSubj, pendingActions }) => {
-  return (
+interface AgentPendingActionStatusBadgeProps {
+  'data-test-subj'?: string;
+  pendingActions: EndpointPendingActionsSummary;
+}
+
+export const AgentPendingActionStatusBadge = memo<AgentPendingActionStatusBadgeProps>(
+  ({ 'data-test-subj': dataTestSubj, pendingActions }) => (
     <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
       <EuiToolTip
         display="block"
@@ -110,13 +114,13 @@ export const AgentPendingActionStatusBadge = memo<
             id="xpack.securitySolution.endpoint.hostIsolationStatus.multiplePendingActions"
             defaultMessage="{count} {count, plural, one {action} other {actions}} pending"
             values={{
-              count: Object.values(pendingActions).reduce((prev, curr) => prev + curr, 0),
+              count: pendingActions.totalPending,
             }}
           />
         </EuiTextColor>
       </EuiToolTip>
     </EuiBadge>
-  );
-});
+  )
+);
 
 AgentPendingActionStatusBadge.displayName = 'AgentPendingActionStatusBadge';
