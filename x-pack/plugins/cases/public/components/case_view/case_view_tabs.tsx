@@ -20,6 +20,34 @@ const ExperimentalBadge = styled(EuiBetaBadge)`
   margin-left: 5px;
 `;
 
+const StyledNotificationBadge = styled(EuiNotificationBadge)`
+  margin-left: 5px;
+`;
+
+const FilesTab = ({
+  activeTab,
+  fileStatsData,
+  isLoading,
+}: {
+  activeTab: string;
+  fileStatsData: { total: number } | undefined;
+  isLoading: boolean;
+}) => (
+  <>
+    {FILES_TAB}
+    {!isLoading && fileStatsData && (
+      <StyledNotificationBadge
+        data-test-subj="case-view-files-stats-badge"
+        color={activeTab === CASE_VIEW_PAGE_TABS.FILES ? 'accent' : 'subdued'}
+      >
+        {fileStatsData.total > 0 ? fileStatsData.total : 0}
+      </StyledNotificationBadge>
+    )}
+  </>
+);
+
+FilesTab.displayName = 'FilesTab';
+
 export interface CaseViewTabsProps {
   caseData: Case;
   activeTab: CASE_VIEW_PAGE_TABS;
@@ -61,21 +89,11 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       {
         id: CASE_VIEW_PAGE_TABS.FILES,
         name: (
-          <>
-            {FILES_TAB}
-            {!isLoading && fileStatsData && (
-              <>
-                {' '}
-                <EuiNotificationBadge data-test-subj="case-view-files-stats-badge">
-                  {fileStatsData.total}
-                </EuiNotificationBadge>
-              </>
-            )}
-          </>
+          <FilesTab isLoading={isLoading} fileStatsData={fileStatsData} activeTab={activeTab} />
         ),
       },
     ],
-    [features.alerts.enabled, features.alerts.isExperimental, fileStatsData, isLoading]
+    [activeTab, features.alerts.enabled, features.alerts.isExperimental, fileStatsData, isLoading]
   );
 
   const renderTabs = useCallback(() => {

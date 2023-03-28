@@ -100,12 +100,38 @@ describe('CaseViewTabs', () => {
     );
   });
 
-  it('shows the files tab count correctly', async () => {
+  it('shows the files tab with the correct count and colour', async () => {
     appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />);
 
-    expect(await screen.findByTestId('case-view-files-stats-badge')).toHaveTextContent(
-      `${data.total}`
-    );
+    expect(await screen.findByTestId('case-view-files-stats-badge')).toMatchInlineSnapshot(`
+    .c0 {
+      margin-left: 5px;
+    }
+
+    <span
+      class="euiNotificationBadge c0 emotion-euiNotificationBadge-s-accent"
+      data-test-subj="case-view-files-stats-badge"
+    >
+      3
+    </span>
+  `);
+  });
+
+  it('the files tab count has a different colour if the tab is not active', async () => {
+    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />);
+
+    expect(await screen.findByTestId('case-view-files-stats-badge')).toMatchInlineSnapshot(`
+      .c0 {
+        margin-left: 5px;
+      }
+
+      <span
+        class="euiNotificationBadge c0 emotion-euiNotificationBadge-s-subdued"
+        data-test-subj="case-view-files-stats-badge"
+      >
+        3
+      </span>
+    `);
   });
 
   it('navigates to the activity tab when the activity tab is clicked', async () => {
