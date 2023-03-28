@@ -8,27 +8,27 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LazyObservabilityPageTemplateProps, useLinkProps } from '@kbn/observability-plugin/public';
+import { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { PageTemplate } from '../page_template';
 
-export const InlineLogViewSplashPage: React.FC<LazyObservabilityPageTemplateProps> = (
-  templateProps
-) => {
+type InlineLogViewSplashPageProps = {
+  revertToDefaultLogView: () => void;
+} & LazyObservabilityPageTemplateProps;
+
+export const InlineLogViewSplashPage: React.FC<InlineLogViewSplashPageProps> = (props) => {
+  const { revertToDefaultLogView, ...templateProps } = props;
   return (
     <PageTemplate {...templateProps} isEmptyState={true}>
-      <InlineLogViewSplashPrompt />
+      <InlineLogViewSplashPrompt revertToDefaultLogView={revertToDefaultLogView} />
     </PageTemplate>
   );
 };
 
-export const InlineLogViewSplashPrompt: React.FC = () => {
-  const linkProps = useLinkProps({
-    app: 'logs',
-    pathname: '/settings',
-  });
-
+export const InlineLogViewSplashPrompt: React.FC<{
+  revertToDefaultLogView: InlineLogViewSplashPageProps['revertToDefaultLogView'];
+}> = ({ revertToDefaultLogView }) => {
   const title = (
     <FormattedMessage
       id="xpack.infra.ml.splash.inlineLogView.title"
@@ -37,10 +37,15 @@ export const InlineLogViewSplashPrompt: React.FC = () => {
   );
 
   const ctaButton = (
-    <EuiButton fullWidth={false} fill {...linkProps}>
+    <EuiButton
+      data-test-subj="infraInlineLogViewSplashPromptRevertToDefaultPersistedLogViewButton"
+      fullWidth={false}
+      fill
+      onClick={revertToDefaultLogView}
+    >
       <FormattedMessage
         id="xpack.infra.ml.splash.inlineLogView.buttonText"
-        defaultMessage="Settings"
+        defaultMessage="Revert to default (persisted) Log View"
       />
     </EuiButton>
   );
@@ -48,7 +53,7 @@ export const InlineLogViewSplashPrompt: React.FC = () => {
   const description = (
     <FormattedMessage
       id="xpack.infra.ml.splash.inlineLogView.description"
-      defaultMessage="This feature does not support inline Log Views, you can switch to a persisted Log View via the settings page"
+      defaultMessage="This feature does not support inline Log Views"
     />
   );
 

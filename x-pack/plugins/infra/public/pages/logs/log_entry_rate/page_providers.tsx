@@ -24,6 +24,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
     logViewReference,
     resolvedLogView,
     isPersistedLogView,
+    revertToDefaultLogView,
   } = useLogViewContext();
 
   const { space } = useActiveKibanaSpace();
@@ -34,7 +35,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
   if (space == null) {
     return null;
   } else if (!isPersistedLogView) {
-    return <InlineLogViewSplashPage />;
+    return <InlineLogViewSplashPage revertToDefaultLogView={revertToDefaultLogView} />;
   } else if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {

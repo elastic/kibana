@@ -22,6 +22,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
     resolvedLogView,
     logViewReference,
     isPersistedLogView,
+    revertToDefaultLogView,
   } = useLogViewContext();
   const { space } = useActiveKibanaSpace();
 
@@ -31,7 +32,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
   if (space == null) {
     return null;
   } else if (!isPersistedLogView) {
-    return <InlineLogViewSplashPage />;
+    return <InlineLogViewSplashPage revertToDefaultLogView={revertToDefaultLogView} />;
   } else if (hasFailedLoading) {
     return <ConnectedLogViewErrorPage />;
   } else if (isLoading || isUninitialized) {
