@@ -71,6 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Query type rules', () => {
     before(async () => {
@@ -79,11 +80,15 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
     });
 
+    afterEach(async () => {
+      await esDeleteAllIndices('.preview.alerts*');
+    });
+
     after(async () => {
+      await clearSignalsIndex(supertest, es, log);
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await clearSignalsIndex(supertest, es, log);
       await deleteAllRules(supertest, log);
     });
 

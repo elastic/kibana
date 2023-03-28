@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability.apm.alerts",
+    "index": ".internal.alerts-observability.apm.alerts-space2-000001",
     "id": "NoxgpHkBqbdrfX07MqXV",
     "source": {
       "event.kind" : "signal",
@@ -22,7 +22,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability.apm.alerts",
+    "index": ".internal.alerts-observability.apm.alerts-default-000001",
     "id": "space1alert",
     "source": {
       "event.kind" : "signal",
@@ -44,7 +44,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability.apm.alerts",
+    "index": ".internal.alerts-observability.apm.alerts-default-000001",
     "id": "space2alert",
     "source": {
       "event.kind" : "signal",
@@ -62,7 +62,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-security.alerts",
+    "index": ".internal.alerts-security.alerts-default-000001",
     "id": "020202",
     "source": {
       "event.kind" : "signal",
@@ -79,7 +79,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-security.alerts",
+    "index": ".internal.alerts-security.alerts-default-000001",
     "id": "020204",
     "source": {
       "event.kind" : "signal",
@@ -96,7 +96,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-security.alerts",
+    "index": ".internal.alerts-security.alerts-default-000001",
     "id": "space1securityalert",
     "source": {
       "@timestamp": "2020-12-16T15:16:22.570Z",
@@ -112,7 +112,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-security.alerts",
+    "index": ".internal.alerts-security.alerts-default-000001",
     "id": "space2securityalert",
     "source": {
       "@timestamp": "2020-12-16T15:16:23.570Z",
@@ -128,7 +128,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability.logs.alerts-default",
+    "index": ".internal.alerts-observability.logs.alerts-default-000001",
     "id": "123456789XYZ",
     "source": {
       "event.kind": "signal",
@@ -149,7 +149,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability.logs.alerts-default",
+    "index": ".internal.alerts-observability.logs.alerts-default-000001",
     "id": "space1alertLogs",
     "source": {
       "event.kind": "signal",

@@ -20,6 +20,5 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     });
 
     // Basic
-    loadTestFile(require.resolve('./bootstrap'));
   });
 };

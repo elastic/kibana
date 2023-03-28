@@ -42,7 +42,6 @@ import {
   bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
-  createSignalsIndex,
   clearSignalsIndex,
   deleteAllRules,
 } from '../../../../../detection_engine_api_integration/utils';
@@ -471,7 +470,6 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('security_solution', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest, log);
         });
 
         afterEach(async () => {
