@@ -797,7 +797,6 @@ describe('helpers', () => {
         meta: {
           kibana_siem_app_url: 'http://localhost:5601/app/siem',
         },
-        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);
@@ -829,7 +828,6 @@ describe('helpers', () => {
         meta: {
           kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
-        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);

@@ -123,6 +123,11 @@ describe('patchRules', () => {
                   message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
                 },
                 group: 'default',
+                frequency: {
+                  summary: true,
+                  throttle: null,
+                  notifyWhen: 'onActionGroupChange',
+                },
               },
             ],
           }),
@@ -158,6 +163,11 @@ describe('patchRules', () => {
                   message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
                 },
                 group: 'default',
+                frequency: {
+                  summary: true,
+                  throttle: null,
+                  notifyWhen: 'onActionGroupChange',
+                },
               },
             ],
           }),

@@ -575,6 +575,11 @@ describe('Perform bulk action request schema', () => {
                         rule_id: '{{rule.id}}',
                       },
                     },
+                    frequency: {
+                      summary: true,
+                      throttle: '1h',
+                      notifyWhen: 'onThrottleInterval',
+                    },
                   },
                 ],
               },
@@ -606,6 +611,11 @@ describe('Perform bulk action request schema', () => {
                       body: {
                         rule_id: '{{rule.id}}',
                       },
+                    },
+                    frequency: {
+                      summary: true,
+                      throttle: '1h',
+                      notifyWhen: 'onThrottleInterval',
                     },
                   },
                 ],
@@ -639,6 +649,11 @@ describe('Perform bulk action request schema', () => {
                           rule_id: '{{rule.id}}',
                         },
                       ],
+                    },
+                    frequency: {
+                      summary: true,
+                      throttle: '1h',
+                      notifyWhen: 'onThrottleInterval',
                     },
                   },
                 ],

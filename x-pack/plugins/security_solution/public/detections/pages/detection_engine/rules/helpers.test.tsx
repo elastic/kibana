@@ -35,6 +35,7 @@ import type {
   ActionsStepRule,
 } from './types';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 
 describe('rule helpers', () => {
   moment.suppressDeprecationWarnings = true;
@@ -146,7 +147,6 @@ describe('rule helpers', () => {
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
         enabled: true,
-        throttle: 'no_actions',
         actions: [],
         responseActions: undefined,
       };
@@ -418,7 +418,12 @@ describe('rule helpers', () => {
             group: 'group',
             params: {},
             action_type_id: 'action_type_id',
-          },
+            frequency: {
+              summary: true,
+              throttle: null,
+              notifyWhen: 'onActionGroupChange',
+            },
+          } as RuleAlertAction,
         ],
       };
       const result: ActionsStepRule = getActionsStepsData(mockedRule);
@@ -429,11 +434,15 @@ describe('rule helpers', () => {
             group: 'group',
             params: {},
             actionTypeId: 'action_type_id',
+            frequency: {
+              summary: true,
+              throttle: null,
+              notifyWhen: 'onActionGroupChange',
+            },
           },
         ],
         responseActions: undefined,
         enabled: mockedRule.enabled,
-        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);
