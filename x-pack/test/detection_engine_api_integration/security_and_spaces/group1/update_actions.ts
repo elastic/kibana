@@ -18,7 +18,7 @@ import {
   removeServerGeneratedProperties,
   getRuleWithWebHookAction,
   getSimpleRuleOutputWithWebHookAction,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   createRule,
   getSimpleRule,
   updateRule,
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
             `${bodyToCompare.actions?.[0].id}`,
             `${bodyToCompare.actions?.[0].uuid}`
           ),
-          version: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
+          revision: 1, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
         };
         expect(bodyToCompare).to.eql(expected);
       });
@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(ruleAfterActionRemoved);
         const expected = {
           ...getSimpleRuleOutput(),
-          version: 3, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
+          revision: 2, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
         };
         expect(bodyToCompare).to.eql(expected);
       });
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
+        await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
           meta: {}, // create a rule with the action attached and a meta field
         };
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
+        await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
       it('should not change properties of immutable rule when applying actions to it', async () => {
@@ -130,10 +130,10 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
         const expected = omit(removeServerGeneratedProperties(updatedRule), actionsProps);
 
-        const immutableRuleToAssert = omit(
-          removeServerGeneratedProperties(immutableRule),
-          actionsProps
-        );
+        const immutableRuleToAssert = {
+          ...omit(removeServerGeneratedProperties(immutableRule), actionsProps),
+          revision: 1, // Unlike `version` which is static for immutable rules, `revision` will increment when an action/exception is added
+        };
 
         expect(immutableRuleToAssert).to.eql(expected);
         expect(expected.immutable).to.be(true); // It should stay immutable true when returning

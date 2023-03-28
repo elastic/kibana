@@ -12,6 +12,7 @@ import { ProcedureName } from '../../../common';
 import type { ContentRegistry } from '../../core';
 
 import type { RpcService } from '../rpc_service';
+import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import type { Context as RpcContext } from '../types';
 import { wrapError } from './error_wrapper';
 
@@ -53,6 +54,7 @@ export function initRpcRoutes(
         const context: RpcContext = {
           contentRegistry,
           requestHandlerContext,
+          getTransformsFactory: getServiceObjectTransformFactory,
         };
         const { name } = request.params as { name: ProcedureName };
 

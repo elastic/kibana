@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
@@ -25,9 +25,9 @@ import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { parseAlert } from '../helpers/parse_alert';
-import { paths } from '../../../config';
+import { paths } from '../../../config/paths';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import { ObservabilityRuleTypeRegistry } from '../../..';
+import type { ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import type { TopAlert } from '../../../typings/alerts';
 
@@ -37,7 +37,6 @@ export interface Props {
   config: ConfigSchema;
   data: TimelineNonEcsData[];
   ecsData: Ecs;
-  eventId: string;
   id?: string;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
@@ -47,7 +46,6 @@ export function AlertActions({
   config,
   data,
   ecsData,
-  eventId,
   id: pageId,
   observabilityRuleTypeRegistry,
   setFlyoutAlert,
@@ -62,8 +60,8 @@ export function AlertActions({
     },
   } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
-
-  const [openActionsPopoverId, setActionsPopover] = useState(null);
+  const createCaseFlyout = getUseCasesAddToNewCaseFlyout();
+  const selectCaseModal = getUseCasesAddToExistingCaseModal();
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -73,19 +71,14 @@ export function AlertActions({
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const alert = parseObservabilityAlert(dataFieldEs);
 
-  const closeActionsPopover = useCallback(() => {
-    setActionsPopover(null);
-  }, []);
-
-  const toggleActionsPopover = useCallback((id) => {
-    setActionsPopover((current) => (current ? null : id));
-  }, []);
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule =
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? prepend(paths.observability.ruleDetails(ruleId))
       : null;
+
   const alertId = alert.fields['kibana.alert.uuid'] ?? null;
   const linkToAlert =
     pageId !== ALERT_DETAILS_PAGE_ID && alertId
@@ -105,98 +98,91 @@ export function AlertActions({
       : [];
   }, [ecsData, getRuleIdFromEvent, data]);
 
-  const createCaseFlyout = getUseCasesAddToNewCaseFlyout();
+  const closeActionsPopover = () => {
+    setIsPopoverOpen(false);
+  };
 
-  const selectCaseModal = getUseCasesAddToExistingCaseModal();
+  const toggleActionsPopover = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
 
-  const handleAddToNewCaseClick = useCallback(() => {
+  const handleAddToNewCaseClick = () => {
     createCaseFlyout.open({ attachments: caseAttachments });
     closeActionsPopover();
-  }, [createCaseFlyout, caseAttachments, closeActionsPopover]);
+  };
 
-  const handleAddToExistingCaseClick = useCallback(() => {
+  const handleAddToExistingCaseClick = () => {
     selectCaseModal.open({ attachments: caseAttachments });
     closeActionsPopover();
-  }, [caseAttachments, closeActionsPopover, selectCaseModal]);
+  };
 
-  const actionsMenuItems = useMemo(() => {
-    return [
-      ...(userCasesPermissions.create && userCasesPermissions.read
-        ? [
-            <EuiContextMenuItem
-              data-test-subj="add-to-existing-case-action"
-              onClick={handleAddToExistingCaseClick}
-              size="s"
-            >
-              {i18n.translate('xpack.observability.alerts.actions.addToCase', {
-                defaultMessage: 'Add to existing case',
-              })}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              data-test-subj="add-to-new-case-action"
-              onClick={handleAddToNewCaseClick}
-              size="s"
-            >
-              {i18n.translate('xpack.observability.alerts.actions.addToNewCase', {
-                defaultMessage: 'Add to new case',
-              })}
-            </EuiContextMenuItem>,
-          ]
-        : []),
-
-      ...(!!linkToRule
-        ? [
-            <EuiContextMenuItem
-              key="viewRuleDetails"
-              data-test-subj="viewRuleDetails"
-              href={linkToRule}
-            >
-              {i18n.translate('xpack.observability.alertsTable.viewRuleDetailsButtonText', {
-                defaultMessage: 'View rule details',
-              })}
-            </EuiContextMenuItem>,
-          ]
-        : []),
-
-      ...[
-        isAlertDetailsEnabledPerApp(alert, config) && linkToAlert ? (
+  const actionsMenuItems = [
+    ...(userCasesPermissions.create && userCasesPermissions.read
+      ? [
           <EuiContextMenuItem
-            key="viewAlertDetailsPage"
-            data-test-subj="viewAlertDetailsPage"
-            href={linkToAlert}
+            data-test-subj="add-to-existing-case-action"
+            key="addToExistingCase"
+            onClick={handleAddToExistingCaseClick}
+            size="s"
           >
-            {i18n.translate('xpack.observability.alertsTable.viewAlertDetailsButtonText', {
-              defaultMessage: 'View alert details',
+            {i18n.translate('xpack.observability.alerts.actions.addToCase', {
+              defaultMessage: 'Add to existing case',
             })}
-          </EuiContextMenuItem>
-        ) : (
+          </EuiContextMenuItem>,
           <EuiContextMenuItem
-            key="viewAlertDetailsFlyout"
-            data-test-subj="viewAlertDetailsFlyout"
-            onClick={() => {
-              closeActionsPopover();
-              setFlyoutAlert(alert);
-            }}
+            data-test-subj="add-to-new-case-action"
+            key="addToNewCase"
+            onClick={handleAddToNewCaseClick}
+            size="s"
           >
-            {i18n.translate('xpack.observability.alertsTable.viewAlertDetailsButtonText', {
-              defaultMessage: 'View alert details',
+            {i18n.translate('xpack.observability.alerts.actions.addToNewCase', {
+              defaultMessage: 'Add to new case',
             })}
-          </EuiContextMenuItem>
-        ),
-      ],
-    ];
-  }, [
-    userCasesPermissions.create,
-    userCasesPermissions.read,
-    handleAddToExistingCaseClick,
-    handleAddToNewCaseClick,
-    linkToRule,
-    alert,
-    config,
-    linkToAlert,
-    closeActionsPopover,
-    setFlyoutAlert,
-  ]);
+          </EuiContextMenuItem>,
+        ]
+      : []),
+
+    ...(!!linkToRule
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="viewRuleDetails"
+            key="viewRuleDetails"
+            href={linkToRule}
+          >
+            {i18n.translate('xpack.observability.alertsTable.viewRuleDetailsButtonText', {
+              defaultMessage: 'View rule details',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+
+    ...[
+      isAlertDetailsEnabledPerApp(alert, config) && linkToAlert ? (
+        <EuiContextMenuItem
+          data-test-subj="viewAlertDetailsPage"
+          key="viewAlertDetailsPage"
+          href={linkToAlert}
+        >
+          {i18n.translate('xpack.observability.alertsTable.viewAlertDetailsButtonText', {
+            defaultMessage: 'View alert details',
+          })}
+        </EuiContextMenuItem>
+      ) : (
+        <EuiContextMenuItem
+          data-test-subj="viewAlertDetailsFlyout"
+          key="viewAlertDetailsFlyout"
+          onClick={() => {
+            closeActionsPopover();
+            setFlyoutAlert(alert);
+          }}
+        >
+          {i18n.translate('xpack.observability.alertsTable.viewAlertDetailsButtonText', {
+            defaultMessage: 'View alert details',
+          })}
+        </EuiContextMenuItem>
+      ),
+    ],
+  ];
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
@@ -216,35 +202,36 @@ export function AlertActions({
           })}
         >
           <EuiButtonIcon
-            size="s"
-            href={prepend(alert.link ?? '')}
-            iconType="eye"
-            color="text"
             aria-label={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
               defaultMessage: 'View in app',
             })}
+            color="text"
+            href={prepend(alert.link ?? '')}
+            iconType="eye"
+            size="s"
           />
         </EuiToolTip>
       </EuiFlexItem>
+
       <EuiFlexItem>
         <EuiPopover
+          anchorPosition="downLeft"
           button={
             <EuiToolTip content={actionsToolTip}>
               <EuiButtonIcon
-                display="empty"
-                size="s"
-                color="text"
-                iconType="boxesHorizontal"
                 aria-label={actionsToolTip}
-                onClick={() => toggleActionsPopover(eventId)}
+                color="text"
                 data-test-subj="alertsTableRowActionMore"
+                display="empty"
+                iconType="boxesHorizontal"
+                onClick={toggleActionsPopover}
+                size="s"
               />
             </EuiToolTip>
           }
-          isOpen={openActionsPopoverId === eventId}
           closePopover={closeActionsPopover}
+          isOpen={isPopoverOpen}
           panelPaddingSize="none"
-          anchorPosition="downLeft"
         >
           <EuiContextMenuPanel size="s" items={actionsMenuItems} />
         </EuiPopover>

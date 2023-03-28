@@ -41,7 +41,7 @@ export class RangeSliderEmbeddableFactory
 
   public canCreateNew = () => false;
 
-  public isEditable = () => Promise.resolve(false);
+  public isEditable = () => Promise.resolve(true);
 
   public async create(initialInput: RangeSliderEmbeddableInput, parent?: IContainer) {
     const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();

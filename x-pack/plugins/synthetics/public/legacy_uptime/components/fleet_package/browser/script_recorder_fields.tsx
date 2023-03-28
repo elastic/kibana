@@ -44,7 +44,11 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiLink href="https://github.com/elastic/synthetics-recorder/releases/" target="_blank">
+      <EuiLink
+        data-test-subj="syntheticsScriptRecorderFieldsDownloadTheElasticSyntheticsRecorderLink"
+        href="https://github.com/elastic/synthetics-recorder/releases/"
+        target="_blank"
+      >
         <FormattedMessage
           id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.recorderLink"
           defaultMessage="Download the Elastic Synthetics Recorder"
@@ -66,6 +70,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="syntheticsScriptRecorderFieldsShowScriptButton"
                 onClick={() => setShowScript(true)}
                 iconType="editorCodeBlock"
                 iconSide="right"
@@ -79,6 +84,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
             <EuiFlexItem grow={false}>
               {isEditable && (
                 <EuiButton
+                  data-test-subj="syntheticsScriptRecorderFieldsRemoveScriptButton"
                   onClick={() => onChange({ scriptText: '', fileName: '' })}
                   iconType="trash"
                   iconSide="right"

@@ -130,7 +130,7 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
             {error && (
               <EuiToolTip position="top" content={error}>
                 <EuiIcon
-                  type="alert"
+                  type="warning"
                   color="warning"
                   data-test-subj="preview-warning"
                 />

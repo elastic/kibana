@@ -22,6 +22,7 @@ import { environmentStringRt } from '../../../../common/environment_rt';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { getApmIndices } from '../apm_indices/get_apm_indices';
+import { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/anomaly-detection/jobs',
@@ -31,9 +32,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    jobs: Array<
-      import('./../../../../common/anomaly_detection/apm_ml_job').ApmMlJob
-    >;
+    jobs: ApmMlJob[];
     hasLegacyJobs: boolean;
   }> => {
     const mlClient = await getMlClient(resources);

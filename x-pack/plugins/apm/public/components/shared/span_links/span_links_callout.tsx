@@ -28,6 +28,7 @@ export function SpanLinksCallout({ dismissCallout }: Props) {
         />
       </p>
       <EuiButton
+        data-test-subj="apmSpanLinksCalloutDismissButton"
         onClick={() => {
           dismissCallout();
         }}

@@ -14,7 +14,7 @@ import {
   getSyntheticsPrivateLocations,
 } from '../../../../state/private_locations/api';
 
-export const useLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
+export const usePrivateLocationsAPI = ({ isOpen }: { isOpen: boolean }) => {
   const [formData, setFormData] = useState<PrivateLocation>();
   const [deleteId, setDeleteId] = useState<string>();
   const [privateLocations, setPrivateLocations] = useState<PrivateLocation[]>([]);

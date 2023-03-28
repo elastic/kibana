@@ -21,6 +21,7 @@ export const AgentPolicyNeeded = ({ disabled }: { disabled: boolean }) => {
       body={<p>{ADD_AGENT_POLICY_DESCRIPTION}</p>}
       actions={
         <EuiButton
+          data-test-subj="syntheticsAgentPolicyNeededButton"
           fill
           href={`${basePath}/app/fleet/policies?create`}
           color="primary"
@@ -35,6 +36,7 @@ export const AgentPolicyNeeded = ({ disabled }: { disabled: boolean }) => {
             <h3>{LEARN_MORE}</h3>
           </EuiTitle>
           <EuiLink
+            data-test-subj="syntheticsAgentPolicyNeededLink"
             target="_blank"
             href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
           >

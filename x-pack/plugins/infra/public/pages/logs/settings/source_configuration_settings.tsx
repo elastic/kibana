@@ -138,7 +138,12 @@ export const LogsSettingsPage = () => {
               {isLoading ? (
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
-                    <EuiButton color="primary" isLoading fill>
+                    <EuiButton
+                      data-test-subj="infraLogsSettingsPageLoadingButton"
+                      color="primary"
+                      isLoading
+                      fill
+                    >
                       Loading
                     </EuiButton>
                   </EuiFlexItem>

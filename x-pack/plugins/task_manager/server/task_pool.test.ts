@@ -409,6 +409,8 @@ describe('TaskPool', () => {
       run: mockRun(),
       stage: TaskRunningStage.PENDING,
       toString: () => `TaskType "shooooo"`,
+      isAdHocTaskAndOutOfAttempts: false,
+      removeTask: jest.fn(),
       get expiration() {
         return new Date();
       },

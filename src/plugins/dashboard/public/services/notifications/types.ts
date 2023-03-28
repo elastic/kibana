@@ -10,4 +10,5 @@ import type { CoreStart } from '@kbn/core/public';
 
 export interface DashboardNotificationsService {
   toasts: CoreStart['notifications']['toasts'];
+  showErrorDialog: CoreStart['notifications']['showErrorDialog'];
 }

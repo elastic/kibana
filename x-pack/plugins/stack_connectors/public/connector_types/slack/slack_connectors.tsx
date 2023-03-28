@@ -5,55 +5,88 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { DocLinksStart } from '@kbn/core/public';
+import React, { useEffect, useState } from 'react';
+import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { HiddenField } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
+import { SlackWebApiActionsFields } from './slack_web_api_connectors';
+import { SlackWebhookActionFields } from './slack_webhook_connectors';
 
-const { urlField } = fieldValidators;
-
-const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
-  label: i18n.WEBHOOK_URL_LABEL,
-  helpText: (
-    <EuiLink href={docLinks.links.alerting.slackAction} target="_blank">
-      <FormattedMessage
-        id="xpack.stackConnectors.components.slack.webhookUrlHelpLabel"
-        defaultMessage="Create a Slack Webhook URL"
-      />
-    </EuiLink>
-  ),
-  validations: [
-    {
-      validator: urlField(i18n.WEBHOOK_URL_INVALID),
-    },
-  ],
-});
+const slackTypeButtons = [
+  {
+    id: 'webhook',
+    label: i18n.WEBHOOK,
+    'data-test-subj': 'webhookButton',
+  },
+  {
+    id: 'web_api',
+    label: i18n.WEB_API,
+    'data-test-subj': 'webApiButton',
+  },
+];
 
 const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   isEdit,
   readOnly,
+  registerPreSubmitValidator,
 }) => {
-  const { docLinks } = useKibana().services;
+  const { setFieldValue, getFieldDefaultValue } = useFormContext();
+
+  const defaultSlackType = getFieldDefaultValue('config.type');
+  const [selectedSlackType, setSelectedSlackType] = useState(
+    getFieldDefaultValue<string>('config.type') ?? 'web_api'
+  );
+
+  const onChange = (id: string) => {
+    setSelectedSlackType(id);
+  };
+
+  useEffect(() => {
+    setFieldValue('config.type', selectedSlackType);
+  }, [selectedSlackType, setFieldValue]);
 
   return (
-    <UseField
-      path="secrets.webhookUrl"
-      config={getWebhookUrlConfig(docLinks)}
-      component={Field}
-      componentProps={{
-        euiFieldProps: {
-          readOnly,
-          'data-test-subj': 'slackWebhookUrlInput',
-          fullWidth: true,
-        },
-      }}
-    />
+    <>
+      <EuiSpacer size="xs" />
+      {!isEdit && (
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="m"
+          color="primary"
+          legend={i18n.SLACK_LEGEND}
+          options={slackTypeButtons}
+          idSelected={selectedSlackType}
+          onChange={onChange}
+          data-test-subj="slackTypeChangeButton"
+        />
+      )}
+      <HiddenField path={'config.type'} config={{ defaultValue: defaultSlackType }} />
+      <EuiSpacer size="m" />
+      {/* The components size depends on slack type option we choose. Just putting a limit to form
+          width would change component dehaviour during the sizing. This line make component size to
+          max, so it does not change during sizing, but keep the same behaviour the designer put into
+          it.
+      */}
+      <div style={{ width: '100vw', height: 0 }} />
+      {selectedSlackType === 'webhook' ? (
+        <SlackWebhookActionFields
+          isEdit={isEdit}
+          readOnly={readOnly}
+          registerPreSubmitValidator={registerPreSubmitValidator}
+        />
+      ) : null}
+      {selectedSlackType === 'web_api' ? (
+        <>
+          <SlackWebApiActionsFields
+            isEdit={isEdit}
+            readOnly={readOnly}
+            registerPreSubmitValidator={registerPreSubmitValidator}
+          />
+        </>
+      ) : null}
+    </>
   );
 };
 
