@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
+import { css } from '@emotion/react';
 import { type IndexPatternRef } from '../../types';
 import { type ToolbarButtonProps, ToolbarButton } from './toolbar_button';
 import { RandomSamplingIcon } from './sampling_icon';
@@ -50,10 +51,10 @@ function TriggerButton({
     : {};
   const content =
     samplingValue != null && samplingValue !== 1 ? (
-      <EuiFlexGroup justifyContent={'spaceBetween'} style={{ lineHeight: '16px' }}>
-        <EuiFlexItem>{label}</EuiFlexItem>
+      <EuiFlexGroup justifyContent={'spaceBetween'}>
+        <EuiFlexItem grow={1}>{label}</EuiFlexItem>
 
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
               defaultMessage: '{value}% sampling',
@@ -64,16 +65,25 @@ function TriggerButton({
             display="block"
             position="top"
           >
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <RandomSamplingIcon color={euiTheme.colors.mediumShade} fill="currentColor" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTextColor color={euiTheme.colors.mediumShade}>
-                  {samplingValue * 100}%
-                </EuiTextColor>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <>
+              <RandomSamplingIcon
+                color={euiTheme.colors.mediumShade}
+                fill="currentColor"
+                css={css`
+                  margin-top: -1px;
+                  vertical-align: middle;
+                  display: inline-block;
+                `}
+              />
+              <EuiTextColor
+                color={euiTheme.colors.mediumShade}
+                css={css`
+                  padding-left: 8px;
+                `}
+              >
+                {samplingValue * 100}%
+              </EuiTextColor>
+            </>
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -81,7 +91,14 @@ function TriggerButton({
       label
     );
   return (
-    <ToolbarButton title={title} onClick={() => togglePopover()} fullWidth {...colorProp} {...rest}>
+    <ToolbarButton
+      title={title}
+      onClick={() => togglePopover()}
+      fullWidth
+      {...colorProp}
+      {...rest}
+      textProps={{ style: { width: '100%' } }}
+    >
       {content}
     </ToolbarButton>
   );

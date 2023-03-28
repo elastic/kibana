@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiText,
   useEuiTheme,
-  EuiIcon,
   EuiButtonEmpty,
   useEuiFontSize,
 } from '@elastic/eui';
@@ -35,7 +34,10 @@ export const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) =
     return null;
   }
   const iconTitle = i18n.translate('xpack.lens.embeddable.featureBadge.iconDescription', {
-    defaultMessage: `Visualization modifiers`,
+    defaultMessage: `{count} visualization {count, plural, one {modifier} other {modifiers}}`,
+    values: {
+      count: badges.length,
+    },
   });
   return (
     <EuiPopover
@@ -51,14 +53,18 @@ export const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) =
               block-size: ${euiTheme.size.l};
               border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
               font-size: ${xsFontSize};
-              padding: 0 ${euiTheme.size.xs};
-              & > * {
-                gap: ${euiTheme.size.xs};
-              }
+              padding: 0 ${euiTheme.size.xxs};
             `}
+            iconType="wrench"
+            textProps={{
+              css: css`
+                & > * + * {
+                  margin-inline-start: ${euiTheme.size.xs};
+                }
+              `,
+            }}
           >
-            <EuiIcon type="wrench" aria-label={iconTitle} />
-            {badges ? badges.length : null}
+            {badges.length}
           </EuiButtonEmpty>
         </EuiToolTip>
       }
