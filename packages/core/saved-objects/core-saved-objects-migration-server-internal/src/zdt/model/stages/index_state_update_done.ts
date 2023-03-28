@@ -19,6 +19,8 @@ export const indexStateUpdateDone: ModelStage<
   }
 
   if (state.newIndexCreation) {
+    // we created the index, so we can safely skip the whole document migration
+    // and go directly to DONE
     return {
       ...state,
       controlState: 'DONE',
