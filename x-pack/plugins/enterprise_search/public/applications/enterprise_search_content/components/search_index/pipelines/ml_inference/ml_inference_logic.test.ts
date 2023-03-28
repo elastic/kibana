@@ -444,57 +444,7 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
           indexName: mockModelConfiguration.indexName,
           pipelineName: mockModelConfiguration.configuration.pipelineName,
-          pipelineDefinition: {
-            description: '',
-            processors: [
-              {
-                remove: {
-                  field: 'ml.inference.my-dest-field',
-                  ignore_missing: true,
-                },
-              },
-              {
-                inference: {
-                  field_map: {
-                    'my-field': 'text_field'
-                  },
-                  model_id: 'text-expansion-mocked-model',
-                  on_failure: [
-                    {
-                      append: {
-                        field: '_source._ingest.inference_errors',
-                        value: [
-                          {
-                            message: "Processor 'inference' in pipeline 'mock-pipeline-name' failed with message '{{ _ingest.on_failure_message }}'",
-                            pipeline: 'mock-pipeline-name',
-                            timestamp: '{{{ _ingest.timestamp }}}',
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                  target_field: 'ml.inference.my-dest-field',
-                }
-              },
-              {
-                append: {
-                  field: '_source._ingest.processors',
-                  value: [
-                    {
-                      model_version: "1",
-                      pipeline: 'mock-pipeline-name',
-                      processed_timestamp: '{{{ _ingest.timestamp }}}',
-                      types: [
-                        'pytorch',
-                        'text_expansion',
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-            version: 1
-          },
+          pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
         });
       });
     });
