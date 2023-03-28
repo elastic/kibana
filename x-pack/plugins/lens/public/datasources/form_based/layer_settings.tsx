@@ -164,6 +164,7 @@ export function LayerSettingsPanel({
           })}
           values={samplingValues}
           currentValue={state.layers[layerId].sampling}
+          data-test-subj="lns-indexPattern-random-sampling-slider"
           onChange={(newSamplingValue) => {
             setState({
               ...state,

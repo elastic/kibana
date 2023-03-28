@@ -54,7 +54,7 @@ function TriggerButton({
       <EuiFlexGroup justifyContent={'spaceBetween'}>
         <EuiFlexItem grow={1}>{label}</EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="lnsChangeIndexPatternSamplingInfo">
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
               defaultMessage: '{value}% sampling',
