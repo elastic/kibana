@@ -24,28 +24,31 @@ describe('TaskPoller', () => {
 
       const work = jest.fn(async () => true);
       createTaskPoller<void, boolean>({
+        initialPollInterval: pollInterval,
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
         getCapacity: () => 1,
         work,
         workTimeout: pollInterval * 5,
-      }).subscribe(() => {});
+      }).start();
+
+      expect(work).toHaveBeenCalledTimes(1);
 
       // `work` is async, we have to force a node `tick`
       await sleep(0);
       advance(halfInterval);
-      expect(work).toHaveBeenCalledTimes(0);
+      expect(work).toHaveBeenCalledTimes(1);
       advance(halfInterval);
 
       await sleep(0);
-      expect(work).toHaveBeenCalledTimes(1);
+      expect(work).toHaveBeenCalledTimes(2);
 
       await sleep(0);
       await sleep(0);
       advance(pollInterval + 10);
       await sleep(0);
-      expect(work).toHaveBeenCalledTimes(2);
+      expect(work).toHaveBeenCalledTimes(3);
     })
   );
 
@@ -57,34 +60,37 @@ describe('TaskPoller', () => {
 
       const work = jest.fn(async () => true);
       createTaskPoller<void, boolean>({
+        initialPollInterval: pollInterval,
         logger: loggingSystemMock.create().get(),
         pollInterval$,
         pollIntervalDelay$: of(0),
         getCapacity: () => 1,
         work,
         workTimeout: pollInterval * 5,
-      }).subscribe(() => {});
+      }).start();
+
+      expect(work).toHaveBeenCalledTimes(1);
 
       // `work` is async, we have to force a node `tick`
       await sleep(0);
       advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(1);
+      expect(work).toHaveBeenCalledTimes(2);
 
       pollInterval$.next(pollInterval * 2);
 
       // `work` is async, we have to force a node `tick`
       await sleep(0);
       advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(1);
-      advance(pollInterval);
       expect(work).toHaveBeenCalledTimes(2);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(3);
 
       pollInterval$.next(pollInterval / 2);
 
       // `work` is async, we have to force a node `tick`
       await sleep(0);
       advance(pollInterval / 2);
-      expect(work).toHaveBeenCalledTimes(3);
+      expect(work).toHaveBeenCalledTimes(4);
     })
   );
 
@@ -97,23 +103,24 @@ describe('TaskPoller', () => {
 
       let hasCapacity = true;
       createTaskPoller<void, boolean>({
+        initialPollInterval: pollInterval,
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
         work,
         workTimeout: pollInterval * 5,
         getCapacity: () => (hasCapacity ? 1 : 0),
-      }).subscribe(() => {});
+      }).start();
 
-      expect(work).toHaveBeenCalledTimes(0);
-
-      await sleep(0);
-      advance(pollInterval);
       expect(work).toHaveBeenCalledTimes(1);
 
       await sleep(0);
       advance(pollInterval);
       expect(work).toHaveBeenCalledTimes(2);
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(3);
 
       hasCapacity = false;
 
@@ -122,17 +129,7 @@ describe('TaskPoller', () => {
 
       await sleep(0);
       advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(2);
-
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(2);
-
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(2);
-
-      hasCapacity = true;
+      expect(work).toHaveBeenCalledTimes(3);
 
       await sleep(0);
       advance(pollInterval);
@@ -140,7 +137,17 @@ describe('TaskPoller', () => {
 
       await sleep(0);
       advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(3);
+
+      hasCapacity = true;
+
+      await sleep(0);
+      advance(pollInterval);
       expect(work).toHaveBeenCalledTimes(4);
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(5);
     })
   );
 
@@ -152,7 +159,8 @@ describe('TaskPoller', () => {
       const worker = resolvable();
 
       const handler = jest.fn();
-      createTaskPoller<string, string[]>({
+      const poller = createTaskPoller<string, string[]>({
+        initialPollInterval: pollInterval,
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
@@ -162,7 +170,9 @@ describe('TaskPoller', () => {
         },
         getCapacity: () => 5,
         workTimeout: pollInterval * 5,
-      }).subscribe(handler);
+      });
+      poller.events$.subscribe(handler);
+      poller.start();
 
       advance(pollInterval);
 
@@ -178,11 +188,11 @@ describe('TaskPoller', () => {
       advance(pollInterval);
       await sleep(pollInterval);
 
-      expect(handler).toHaveBeenCalledTimes(3);
+      expect(handler).toHaveBeenCalledTimes(1);
 
       advance(pollInterval);
 
-      expect(handler).toHaveBeenCalledTimes(3);
+      expect(handler).toHaveBeenCalledTimes(1);
     })
   );
 
@@ -195,7 +205,8 @@ describe('TaskPoller', () => {
       const handler = jest.fn();
 
       type ResolvableTupple = [string, PromiseLike<void> & Resolvable];
-      createTaskPoller<[string, Resolvable], string[]>({
+      const poller = createTaskPoller<[string, Resolvable], string[]>({
+        initialPollInterval: pollInterval,
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
@@ -204,7 +215,9 @@ describe('TaskPoller', () => {
         },
         getCapacity: () => 5,
         workTimeout,
-      }).subscribe(handler);
+      });
+      poller.events$.subscribe(handler);
+      poller.start();
 
       const one: ResolvableTupple = ['one', resolvable()];
 
@@ -238,7 +251,7 @@ describe('TaskPoller', () => {
       advance(pollInterval);
       await sleep(pollInterval);
 
-      expect(handler).toHaveBeenCalledTimes(4);
+      expect(handler).toHaveBeenCalledTimes(2);
     })
   );
 
@@ -248,7 +261,8 @@ describe('TaskPoller', () => {
       const pollInterval = 100;
 
       const handler = jest.fn();
-      createTaskPoller<string, string[]>({
+      const poller = createTaskPoller<string, string[]>({
+        initialPollInterval: pollInterval,
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
@@ -257,7 +271,9 @@ describe('TaskPoller', () => {
         },
         workTimeout: pollInterval * 5,
         getCapacity: () => 5,
-      }).subscribe(handler);
+      });
+      poller.events$.subscribe(handler);
+      poller.start();
 
       advance(pollInterval);
       await sleep(0);
@@ -286,14 +302,17 @@ describe('TaskPoller', () => {
         }
         return callCount;
       });
-      createTaskPoller<string, number>({
+      const poller = createTaskPoller<string, number>({
+        initialPollInterval: pollInterval,
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
         work,
         workTimeout: pollInterval * 5,
         getCapacity: () => 5,
-      }).subscribe(handler);
+      });
+      poller.events$.subscribe(handler);
+      poller.start();
 
       advance(pollInterval);
       await sleep(0);

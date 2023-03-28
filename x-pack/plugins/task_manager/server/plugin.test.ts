@@ -96,50 +96,6 @@ describe('TaskManagerPlugin', () => {
       );
     });
 
-    test('throws if setup methods are called after start', async () => {
-      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
-        pluginInitializerContextParams
-      );
-
-      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-
-      const setupApi = await taskManagerPlugin.setup(coreMock.createSetup(), {
-        usageCollection: undefined,
-      });
-
-      // we only start a poller if we have task types that we support and we track
-      // phases (moving from Setup to Start) based on whether the poller is working
-      setupApi.registerTaskDefinitions({
-        setupTimeType: {
-          title: 'setupTimeType',
-          createTaskRunner: () => ({ async run() {} }),
-        },
-      });
-
-      await taskManagerPlugin.start(coreMock.createStart());
-
-      expect(() =>
-        setupApi.addMiddleware({
-          beforeSave: async (saveOpts) => saveOpts,
-          beforeRun: async (runOpts) => runOpts,
-          beforeMarkRunning: async (runOpts) => runOpts,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot add Middleware after the task manager has started"`
-      );
-
-      expect(() =>
-        setupApi.registerTaskDefinitions({
-          lateRegisteredType: {
-            title: 'lateRegisteredType',
-            createTaskRunner: () => ({ async run() {} }),
-          },
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot register task definitions after the task manager has started"`
-      );
-    });
-
     test('it logs a warning when the unsafe `exclude_task_types` config is used', async () => {
       const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
         ...pluginInitializerContextParams,
