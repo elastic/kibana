@@ -58,9 +58,10 @@ export class DataViewsStorage implements ContentStorage {
     data: DataViewCreateIn['data'],
     options: CreateOptions
   ): Promise<DataViewCreateOut> {
-    const { migrationVersion, coreMigrationVersion, references, overwrite } = options!;
+    const { migrationVersion, coreMigrationVersion, references, overwrite, id } = options!;
 
     const createOptions = {
+      id,
       overwrite,
       migrationVersion,
       coreMigrationVersion,

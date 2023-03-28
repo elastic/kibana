@@ -47,6 +47,7 @@ export interface DataViewGetOut {
 
 export interface CreateOptions {
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
+  id?: string;
   overwrite?: boolean;
   migrationVersion?: SavedObjectsMigrationVersion;
   /** A semver value that is used when upgrading objects between Kibana versions. */

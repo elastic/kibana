@@ -14,6 +14,8 @@ import {
 } from '../common/types';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 
+import type { CreateOptions } from '../common/content_management';
+
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;
   constructor(savedObjectClient: SavedObjectsClientContract) {
@@ -48,7 +50,7 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
       options
     )) as SavedObject;
   }
-  async create(attributes: DataViewAttributes, options: {}) {
+  async create(attributes: DataViewAttributes, options: CreateOptions) {
     return await this.savedObjectClient.create('index-pattern', attributes, options);
   }
   async delete(id: string) {

@@ -27,6 +27,7 @@ import type {
   DataViewSearchIn,
   DataViewSearchOut,
   DataViewUpdateOptions,
+  CreateOptions,
   // DataViewSearchQuery,
 } from '../common/content_management';
 
@@ -84,12 +85,12 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return response as SavedObject<DataViewAttributes>;
   }
 
-  async create(attributes: DataViewAttributes) {
+  async create(attributes: DataViewAttributes, options: CreateOptions) {
     return (await this.contentManagemntClient.create<DataViewCreateIn, DataViewCreateOut>({
       contentTypeId: 'index-pattern',
       data: attributes,
       // this is required, shouldn't be.
-      options: {},
+      options,
     })) as SavedObject<DataViewAttributes>;
   }
 
