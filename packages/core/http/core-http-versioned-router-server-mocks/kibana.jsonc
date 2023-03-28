@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-http-versioned-router-server-mocks",
+  "devOnly": true,
+  "owner": "@elastic/kibana-core"
+}
