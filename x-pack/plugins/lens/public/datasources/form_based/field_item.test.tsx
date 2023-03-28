@@ -167,7 +167,6 @@ describe('IndexPattern Field Item', () => {
         aggregatable: true,
         searchable: true,
       },
-      isSelected: false,
       exists: true,
       chartsThemeService,
       groupIndex: 0,
