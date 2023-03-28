@@ -366,6 +366,7 @@ const getStatusResponse = (statusResponseInfo: StatusResponseInfo) => {
     statusVulnMgmt,
     healthyAgentsCspm,
     healthyAgentsKspm,
+    healthyAgentsVulMgmt,
     installedPackagePoliciesTotalKspm,
     installedPackagePoliciesTotalCspm,
     installedPackagePoliciesTotalVulnMgmt,
@@ -386,7 +387,7 @@ const getStatusResponse = (statusResponseInfo: StatusResponseInfo) => {
     },
     [VULN_MGMT_POLICY_TEMPLATE]: {
       status: statusVulnMgmt,
-      healthyAgents: healthyAgentsKspm,
+      healthyAgents: healthyAgentsVulMgmt,
       installedPackagePolicies: installedPackagePoliciesTotalVulnMgmt,
     },
     indicesDetails,
