@@ -53,7 +53,7 @@ export interface DiscoverSavedSearchContainer {
   /**
    * Get the title of the current saved search
    */
-  getTitle: () => string;
+  getTitle: () => string | undefined;
   /**
    * Get an BehaviorSubject containing the state if there have been changes to the initial state of the saved search
    * Can be used to track if the saved search has been modified and displayed in the UI
@@ -117,7 +117,7 @@ export function getSavedSearchContainer({
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
   const getHasChanged$ = () => hasChanged$;
-  const getTitle = () => savedSearchCurrent$.getValue().title ?? '';
+  const getTitle = () => savedSearchCurrent$.getValue().title;
   const getId = () => savedSearchCurrent$.getValue().id;
 
   const newSavedSearch = async (nextDataView: DataView | undefined) => {

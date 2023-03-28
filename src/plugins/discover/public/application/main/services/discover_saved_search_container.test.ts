@@ -28,6 +28,19 @@ describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
 
+  describe('getTitle', () => {
+    it('returns undefined for new saved searches', () => {
+      const container = getSavedSearchContainer({ services });
+      expect(container.getTitle()).toBe(undefined);
+    });
+
+    it('returns the title of a persisted saved searches', () => {
+      const container = getSavedSearchContainer({ services });
+      container.set(savedSearch);
+      expect(container.getTitle()).toBe(savedSearch.title);
+    });
+  });
+
   describe('set', () => {
     it('should update the current and initial state of the saved search', () => {
       const container = getSavedSearchContainer({ services });
