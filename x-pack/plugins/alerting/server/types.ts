@@ -50,6 +50,7 @@ import {
   IntervalSchedule,
   RuleLastRun,
   SanitizedRule,
+  AlertsFilterTimeframe,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -279,6 +280,13 @@ export interface RawRuleAction extends SavedObjectAttributes {
     summary: boolean;
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
+  };
+  alertsFilter?: {
+    timeframe: null | AlertsFilterTimeframe;
+    query: null | {
+      kql: string;
+      dsl?: string;
+    };
   };
 }
 

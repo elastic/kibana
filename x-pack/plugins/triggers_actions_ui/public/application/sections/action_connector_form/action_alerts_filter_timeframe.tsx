@@ -18,24 +18,15 @@ import {
   EuiDatePickerRange,
   EuiDatePicker,
   EuiComboBox,
+  EuiFormRow,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import { AlertsFilterTimeframe, IsoWeekday } from '@kbn/alerting-plugin/common';
 import { I18N_WEEKDAY_OPTIONS, ISO_WEEKDAYS } from '../../../common/constants';
 
-interface AlertsFilterTimeframe {
-  days: number[];
-  timezone: string;
-  hours: {
-    start: string;
-    end: string;
-  };
-}
-
-interface ActionAlertsFilterProps {
-  state: {
-    timeframe: null | AlertsFilterTimeframe;
-  };
-  onChange: (update: any) => void;
+interface ActionAlertsFilterTimeframeProps {
+  state: AlertsFilterTimeframe | null;
+  onChange: (update: AlertsFilterTimeframe | null) => void;
 }
 
 const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
@@ -64,23 +55,23 @@ const useTimeFormat = () => {
   return PT1M;
 };
 
-export const ActionAlertsFilter: React.FC<ActionAlertsFilterProps> = ({ state, onChange }) => {
+export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframeProps> = ({
+  state,
+  onChange,
+}) => {
   const timeFormat = useTimeFormat();
-  const [timeframe, setTimeframe] = useTimeframe(state.timeframe);
+  const [timeframe, setTimeframe] = useTimeframe(state);
   const [selectedTimezone, setSelectedTimezone] = useState([{ label: timeframe.timezone }]);
 
-  const timeframeEnabled = useMemo(() => Boolean(state.timeframe), [state]);
+  const timeframeEnabled = useMemo(() => Boolean(state), [state]);
 
   useEffect(() => {
-    const nextState = {
-      ...state,
-      timeframe: timeframeEnabled ? timeframe : null,
-    };
+    const nextState = timeframeEnabled ? timeframe : null;
     if (!deepEqual(state, nextState)) onChange(nextState);
   }, [timeframeEnabled, timeframe, state, onChange]);
 
   const toggleTimeframe = useCallback(
-    () => onChange({ ...state, timeframe: state.timeframe ? null : timeframe }),
+    () => onChange(state ? null : timeframe),
     [state, timeframe, onChange]
   );
   const updateTimeframe = useCallback(
@@ -105,7 +96,7 @@ export const ActionAlertsFilter: React.FC<ActionAlertsFilterProps> = ({ state, o
   const onToggleWeekday = useCallback(
     (id: string) => {
       if (!timeframe) return;
-      const day = Number(id);
+      const day = Number(id) as IsoWeekday;
       const previouslyHasDay = timeframe.days.includes(day);
       const newDays = previouslyHasDay
         ? timeframe.days.filter((d) => d !== day)
@@ -149,7 +140,7 @@ export const ActionAlertsFilter: React.FC<ActionAlertsFilterProps> = ({ state, o
       {timeframeEnabled && (
         <>
           <EuiSpacer size="s" />
-          <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
               <EuiButtonGroup
                 buttonSize="compressed"
@@ -166,43 +157,43 @@ export const ActionAlertsFilter: React.FC<ActionAlertsFilterProps> = ({ state, o
                 onChange={onToggleWeekday}
               />
             </EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiDatePickerRange
-                  startDateControl={
-                    <EuiDatePicker
-                      showTimeSelect
-                      showTimeSelectOnly
-                      dateFormat={timeFormat}
-                      timeFormat={timeFormat}
-                      selected={moment().set('hour', startH).set('minute', startM)}
-                      onChange={onChangeHours('start')}
-                    />
-                  }
-                  endDateControl={
-                    <EuiDatePicker
-                      showTimeSelect
-                      showTimeSelectOnly
-                      dateFormat={timeFormat}
-                      timeFormat={timeFormat}
-                      selected={moment().set('hour', endH).set('minute', endM)}
-                      onChange={onChangeHours('end')}
-                    />
-                  }
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiComboBox
-                  compressed
-                  singleSelection={{ asPlainText: true }}
-                  options={TIMEZONE_OPTIONS}
-                  selectedOptions={selectedTimezone}
-                  onChange={onChangeTimezone}
-                  isClearable={false}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDatePickerRange
+                startDateControl={
+                  <EuiDatePicker
+                    showTimeSelect
+                    showTimeSelectOnly
+                    dateFormat={timeFormat}
+                    timeFormat={timeFormat}
+                    selected={moment().set('hour', startH).set('minute', startM)}
+                    onChange={onChangeHours('start')}
+                  />
+                }
+                endDateControl={
+                  <EuiDatePicker
+                    showTimeSelect
+                    showTimeSelectOnly
+                    dateFormat={timeFormat}
+                    timeFormat={timeFormat}
+                    selected={moment().set('hour', endH).set('minute', endM)}
+                    onChange={onChangeHours('end')}
+                  />
+                }
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiFormRow label="Timezone">
+            <EuiFlexItem>
+              <EuiComboBox
+                compressed
+                singleSelection={{ asPlainText: true }}
+                options={TIMEZONE_OPTIONS}
+                selectedOptions={selectedTimezone}
+                onChange={onChangeTimezone}
+                isClearable={false}
+              />
+            </EuiFlexItem>
+          </EuiFormRow>
         </>
       )}
     </>

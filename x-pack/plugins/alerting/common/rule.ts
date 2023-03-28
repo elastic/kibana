@@ -77,13 +77,25 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
-export interface RuleActionAlertsFilterTimeframe {
-  days: Array<1 | 2 | 3 | 4 | 5 | 6 | 7>;
+export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export interface AlertsFilterTimeframe extends SavedObjectAttributes {
+  days: IsoWeekday[];
+  timezone: string;
   hours: {
     start: string;
     end: string;
   };
 }
+
+export interface AlertsFilter extends SavedObjectAttributes {
+  query: null | {
+    kql: string;
+    dsl?: string; // This fields is generated in the code by using "kql", therefore it's not optional but defined as optional to avoid modifying a lot of files in different plugins
+  };
+  timeframe: null | AlertsFilterTimeframe;
+}
+
+export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 
 export interface RuleAction {
   uuid?: string;
@@ -96,10 +108,7 @@ export interface RuleAction {
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
   };
-  alertsFilter?: {
-    timeframe: null | RuleActionAlertsFilterTimeframe;
-    kql: null | string;
-  };
+  alertsFilter?: AlertsFilter;
 }
 
 export interface AggregateOptions {

@@ -23,10 +23,11 @@ export const rewriteActionsReq: (
   }) => ({ ...rest, notifyWhen });
   if (!actions) return [];
   return actions.map(
-    (action) =>
+    ({ alertsFilter, frequency, ...action }) =>
       ({
         ...action,
-        ...(action.frequency ? { frequency: rewriteFrequency(action.frequency) } : {}),
+        ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
+        ...(alertsFilter ? { alerts_filter: alertsFilter } : {}),
       } as RuleAction)
   );
 };
@@ -37,9 +38,10 @@ export const rewriteActionsRes = (actions?: RuleAction[]) => {
     notify_when: notifyWhen,
   });
   if (!actions) return [];
-  return actions.map(({ actionTypeId, frequency, ...action }) => ({
+  return actions.map(({ actionTypeId, frequency, alertsFilter, ...action }) => ({
     ...action,
     connector_type_id: actionTypeId,
     ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
+    ...(alertsFilter ? { alerts_filter: alertsFilter } : {}),
   }));
 };

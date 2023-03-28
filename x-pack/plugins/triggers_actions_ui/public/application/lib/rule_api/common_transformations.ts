@@ -15,6 +15,7 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   connector_type_id: actionTypeId,
   params,
   frequency,
+  alerts_filter: alertsFilter,
 }) => ({
   group,
   id,
@@ -29,6 +30,7 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
         },
       }
     : {}),
+  ...(alertsFilter ? { alertsFilter } : {}),
   ...(uuid && { uuid }),
 });
 

@@ -30,7 +30,11 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  ActionVariable,
+  RuleActionAlertsFilterProperty,
+  RuleActionParam,
+} from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -54,7 +58,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { ActionNotifyWhen } from './action_notify_when';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
-import { ActionAlertsFilter } from './action_alerts_filter';
+import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -65,6 +69,11 @@ export type ActionTypeFormProps = {
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionAlertsFilterProperty: (
+    key: string,
+    value: RuleActionAlertsFilterProperty,
+    index: number
+  ) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -101,6 +110,7 @@ export const ActionTypeForm = ({
   onDeleteAction,
   setActionParamsProperty,
   setActionFrequencyProperty,
+  setActionAlertsFilterProperty,
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
@@ -147,13 +157,6 @@ export const ActionTypeForm = ({
 
   const [useDefaultMessage, setUseDefaultMessage] = useState(false);
 
-  const [actionAlertsFilter, setActionAlertsFilter] = useState(
-    actionItem.alertsFilter ?? {
-      timeframe: null,
-      kql: null,
-      filter: '',
-    }
-  );
   const isSummaryAction = actionItem.frequency?.summary;
 
   const getDefaultParams = async () => {
@@ -392,7 +395,10 @@ export const ActionTypeForm = ({
         {showActionAlertsFilter && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
-            <ActionAlertsFilter state={actionAlertsFilter} onChange={setActionAlertsFilter} />
+            <ActionAlertsFilterTimeframe
+              state={actionItem.alertsFilter?.timeframe ?? null}
+              onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
+            />
           </>
         )}
       </EuiSplitPanel.Inner>
