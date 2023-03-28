@@ -56,7 +56,9 @@
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
     "@kbn/cases-plugin",
-    "@kbn/shared-ux-prompt-not-found"
+    "@kbn/shared-ux-prompt-not-found",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": ["target/**/*"]
 }

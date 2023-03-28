@@ -20,11 +20,13 @@ export const useTimeRange = ({
   bucketInterval,
   timeRange: { from, to },
   timeInterval,
+  isPlainRecord,
 }: {
   uiSettings: IUiSettingsClient;
   bucketInterval?: UnifiedHistogramBucketInterval;
   timeRange: TimeRange;
   timeInterval?: string;
+  isPlainRecord?: boolean;
 }) => {
   const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
 
@@ -47,26 +49,28 @@ export const useTimeRange = ({
       to: dateMath.parse(to, { roundUp: true }),
     };
 
-    const intervalText = i18n.translate('unifiedHistogram.histogramTimeRangeIntervalDescription', {
-      defaultMessage: '(interval: {value})',
-      values: {
-        value: `${
-          timeInterval === 'auto'
-            ? `${i18n.translate('unifiedHistogram.histogramTimeRangeIntervalAuto', {
-                defaultMessage: 'Auto',
-              })} - `
-            : ''
-        }${
-          bucketInterval?.description ??
-          i18n.translate('unifiedHistogram.histogramTimeRangeIntervalLoading', {
-            defaultMessage: 'Loading',
-          })
-        }`,
-      },
-    });
+    const intervalText = Boolean(isPlainRecord)
+      ? ''
+      : i18n.translate('unifiedHistogram.histogramTimeRangeIntervalDescription', {
+          defaultMessage: '(interval: {value})',
+          values: {
+            value: `${
+              timeInterval === 'auto'
+                ? `${i18n.translate('unifiedHistogram.histogramTimeRangeIntervalAuto', {
+                    defaultMessage: 'Auto',
+                  })} - `
+                : ''
+            }${
+              bucketInterval?.description ??
+              i18n.translate('unifiedHistogram.histogramTimeRangeIntervalLoading', {
+                defaultMessage: 'Loading',
+              })
+            }`,
+          },
+        });
 
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
-  }, [bucketInterval, from, timeInterval, to, toMoment]);
+  }, [bucketInterval?.description, from, isPlainRecord, timeInterval, to, toMoment]);
 
   const { euiTheme } = useEuiTheme();
   const timeRangeCss = css`
