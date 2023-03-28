@@ -28,7 +28,6 @@ import { useUrlPagination } from '../../hooks/use_url_pagination';
 import { ManagementPageLoader } from '../management_page_loader';
 import { ActionsLogEmptyState } from './components/actions_log_empty_state';
 import { ActionsLogTable } from './components/actions_log_table';
-import { ActionsLogWithRuleToggle } from './components/actions_log_with_rule_toggle';
 
 export const ResponseActionsLog = memo<
   Pick<EndpointActionListRequestQuery, 'agentIds'> & {
@@ -230,11 +229,6 @@ export const ResponseActionsLog = memo<
       [isFlyout, setUrlWithOutputs]
     );
 
-    const renderAutomatedResponsesButton = useMemo(
-      () => <ActionsLogWithRuleToggle getTestId={getTestId} isFlyout={isFlyout} />,
-      [getTestId, isFlyout]
-    );
-
     if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
       return <ActionsLogEmptyState data-test-subj={getTestId('empty-state')} />;
     } else if (isFetching && isFirstAttempt) {
@@ -255,7 +249,6 @@ export const ResponseActionsLog = memo<
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
           showHostsFilter={showHostNames}
-          renderAutomatedResponsesButton={renderAutomatedResponsesButton}
           data-test-subj={dataTestSubj}
         />
         {isFetched && !totalItemCount ? (

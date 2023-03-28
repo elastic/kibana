@@ -104,29 +104,24 @@ const getResponseActionListTableColumns = ({
       name: TABLE_COLUMN_NAMES.user,
       width: !showHostNames ? '21%' : '14%',
       truncateText: true,
-      render: ({ createdBy, ruleId, ruleName }: ActionListApiResponse['data'][number]) => {
+      render: ({ createdBy, ruleId }: ActionListApiResponse['data'][number]) => {
         if (createdBy === 'unknown' && ruleId) {
           return (
-            <StyledFacetButton>
-              <EuiToolTip
-                content={ruleName ?? UX_MESSAGES.triggeredByRule}
-                anchorClassName="eui-textTruncate"
+            <EuiToolTip content={UX_MESSAGES.triggeredByRule} anchorClassName="eui-textTruncate">
+              <SecuritySolutionLinkAnchor
+                data-test-subj="ruleName"
+                deepLinkId={SecurityPageName.rules}
+                path={getRuleDetailsUrl(ruleId)}
               >
-                <SecuritySolutionLinkAnchor
-                  data-test-subj="ruleName"
-                  deepLinkId={SecurityPageName.rules}
-                  path={getRuleDetailsUrl(ruleId)}
+                <EuiText
+                  size="s"
+                  className="eui-textTruncate eui-fullWidth"
+                  data-test-subj={getTestId('column-user-name')}
                 >
-                  <EuiText
-                    size="s"
-                    className="eui-textTruncate eui-fullWidth"
-                    data-test-subj={getTestId('column-user-name')}
-                  >
-                    {ruleName ?? UX_MESSAGES.triggeredByRule}
-                  </EuiText>
-                </SecuritySolutionLinkAnchor>
-              </EuiToolTip>
-            </StyledFacetButton>
+                  {UX_MESSAGES.triggeredByRule}
+                </EuiText>
+              </SecuritySolutionLinkAnchor>
+            </EuiToolTip>
           );
         }
         return (

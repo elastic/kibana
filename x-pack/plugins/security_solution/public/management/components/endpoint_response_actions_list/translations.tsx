@@ -93,6 +93,9 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
   status: i18n.translate('xpack.securitySolution.responseActionsList.list.status', {
     defaultMessage: 'Status',
   }),
+  rule: i18n.translate('xpack.securitySolution.responseActionsList.list.rule', {
+    defaultMessage: 'Rule',
+  }),
 });
 
 export const UX_MESSAGES = Object.freeze({

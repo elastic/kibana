@@ -6,34 +6,34 @@
  */
 
 import { EuiFilterButton } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { FILTER_NAMES } from '../translations';
 
 interface ActionsLogWithRuleToggleProps {
   isFlyout: boolean;
-  getTestId: (id?: string) => string | undefined;
+  dataTestSubj?: string;
 }
 
 export const ActionsLogWithRuleToggle = ({
   isFlyout,
-  getTestId,
+  dataTestSubj,
 }: ActionsLogWithRuleToggleProps) => {
   const { withRuleActions: withRuleActionsUrlParam, setUrlWithRuleActions } =
     useActionHistoryUrlParams();
 
-  const onClick = () => {
+  const onClick = useCallback(() => {
     if (!isFlyout) {
       // set and show `withRuleActions` URL param on history page
       setUrlWithRuleActions(!withRuleActionsUrlParam);
     }
-  };
+  }, [isFlyout, setUrlWithRuleActions, withRuleActionsUrlParam]);
 
   return (
     <EuiFilterButton
       hasActiveFilters={withRuleActionsUrlParam}
       onClick={onClick}
-      data-test-subj={getTestId('automated-responses-filter')}
+      data-test-subj={`${dataTestSubj}-automated-responses-filter`}
     >
       {FILTER_NAMES.automated}
     </EuiFilterButton>

@@ -10,6 +10,7 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { ActionsLogWithRuleToggle } from './actions_log_with_rule_toggle';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   type DateRangePickerValues,
@@ -33,7 +34,6 @@ export const ActionsLogFilters = memo(
     onRefreshChange,
     onTimeChange,
     showHostsFilter,
-    renderAutomatedResponsesButton,
     'data-test-subj': dataTestSubj,
   }: {
     dateRangePickerState: DateRangePickerValues;
@@ -48,7 +48,6 @@ export const ActionsLogFilters = memo(
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
     showHostsFilter: boolean;
-    renderAutomatedResponsesButton: JSX.Element;
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -75,7 +74,7 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
-          {renderAutomatedResponsesButton}
+          <ActionsLogWithRuleToggle dataTestSubj={dataTestSubj} isFlyout={isFlyout} />
         </>
       );
     }, [
@@ -85,7 +84,6 @@ export const ActionsLogFilters = memo(
       onChangeHostsFilter,
       onChangeStatusesFilter,
       showHostsFilter,
-      renderAutomatedResponsesButton,
     ]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);

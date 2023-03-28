@@ -96,16 +96,17 @@ export const queryExecutor = async ({
             state: {},
           };
 
-    if (hasPlatinumLicense) {
-      if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
-        if (scheduleNotificationResponseActionsService) {
-          scheduleNotificationResponseActionsService({
-            signals: result.createdSignals,
-            responseActions: completeRule.ruleParams.responseActions,
-            hasEnterpriseLicense,
-          });
-        }
-      }
+    if (
+      hasPlatinumLicense &&
+      completeRule.ruleParams.responseActions?.length &&
+      result.createdSignalsCount &&
+      scheduleNotificationResponseActionsService
+    ) {
+      scheduleNotificationResponseActionsService({
+        signals: result.createdSignals,
+        responseActions: completeRule.ruleParams.responseActions,
+        hasEnterpriseLicense,
+      });
     }
 
     return result;
