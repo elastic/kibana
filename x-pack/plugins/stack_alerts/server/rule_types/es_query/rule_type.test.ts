@@ -713,6 +713,7 @@ async function invokeExecutor({
       tags: [],
       consumer: '',
       producer: '',
+      revision: 0,
       ruleTypeId: '',
       ruleTypeName: '',
       enabled: true,
