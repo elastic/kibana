@@ -65,7 +65,13 @@ export class RasterTileLayer extends AbstractLayer {
     return this._style;
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters, isForceRefresh }: DataRequestContext) {
+  async syncData({
+    startLoading,
+    stopLoading,
+    onLoadError,
+    dataFilters,
+    isForceRefresh,
+  }: DataRequestContext) {
     const source = this.getSource();
     const nextMeta = {
       ...dataFilters,
