@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useMemo, useRef } from 'react';
-import deepEqual from 'fast-deep-equal';
+import { useMemo } from 'react';
 
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import type { CaseUserActions, CaseUserActionsStats } from '../../containers/types';
@@ -23,10 +22,6 @@ export const useUserActionsPagination = ({
   userActionsStats,
   caseId,
 }: UserActionsPagination) => {
-  const isFirstRender = useRef(true);
-  const activityParams = useRef(userActivityQueryParams);
-  const actionsStats = useRef(userActionsStats);
-
   const lastPage = useMemo(() => {
     if (!userActionsStats) {
       return 1;
@@ -45,51 +40,12 @@ export const useUserActionsPagination = ({
     }
   }, [userActionsStats, userActivityQueryParams]);
 
-  const prevLastPage = useRef(lastPage);
-
-  const isExpandable = userActivityQueryParams.page <= lastPage;
-
-  const isActivityParamsUpdated =
-    !deepEqual(activityParams.current, userActivityQueryParams) && !isFirstRender.current; // refetch top actions when query params changed
-
-  const isActionsStatsUpdated =
-    userActivityQueryParams.sortOrder === 'desc' &&
-    !deepEqual(actionsStats.current, userActionsStats) &&
-    !isFirstRender.current; // refetch top actions only when new action added in the top list (i.e. in descending order)
-
-  const lastPageChanged = prevLastPage.current !== lastPage; // when comments are 21st comment added, it should refetch user actions as last page has changed
-
   const {
     data: caseInfiniteUserActionsData,
     isLoading: isLoadingInfiniteUserActions,
     hasNextPage,
     fetchNextPage,
-  } = useInfiniteFindCaseUserActions(
-    caseId,
-    userActivityQueryParams,
-    isExpandable &&
-      (isFirstRender.current ||
-        isActivityParamsUpdated ||
-        isActionsStatsUpdated ||
-        lastPage === 1 ||
-        lastPageChanged)
-  );
-
-  if (isFirstRender.current) {
-    isFirstRender.current = false;
-  }
-
-  if (isActivityParamsUpdated) {
-    activityParams.current = userActivityQueryParams;
-  }
-
-  if (isActionsStatsUpdated) {
-    actionsStats.current = userActionsStats;
-  }
-
-  if (lastPageChanged) {
-    prevLastPage.current = lastPage;
-  }
+  } = useInfiniteFindCaseUserActions(caseId, userActivityQueryParams, true);
 
   const showBottomList = lastPage > 1;
 

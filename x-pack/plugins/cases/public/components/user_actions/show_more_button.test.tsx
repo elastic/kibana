@@ -25,13 +25,13 @@ describe('ShowMoreButton', () => {
   it('renders correctly', () => {
     appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
 
-    expect(screen.getByTestId('show-more-user-actions')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-show-more-user-actions')).toBeInTheDocument();
   });
 
   it('calls onShowMoreClick on button click', () => {
     appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
 
-    userEvent.click(screen.getByTestId('show-more-user-actions'));
+    userEvent.click(screen.getByTestId('cases-show-more-user-actions'));
     expect(showMoreClickMock).toHaveBeenCalled();
   });
 });

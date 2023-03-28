@@ -109,39 +109,6 @@ describe(`UserActions`, () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('Loading spinner when user actions loading and displays fullName/username', () => {
-    useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
-    useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
-    appMockRender.render(
-      <UserActions {...{ ...defaultProps, currentUserProfile: userProfiles[0] }} />
-    );
-
-    expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
-  });
-
-  it('renders two user actions list', () => {
-    appMockRender.render(<UserActions {...defaultProps} />);
-
-    expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
-  });
-
-  it('renders only one user actions list when last page is 0', async () => {
-    const props = {
-      ...defaultProps,
-      userActionsStats: {
-        total: 0,
-        totalComments: 0,
-        totalOtherActions: 0,
-      },
-    };
-
-    appMockRender.render(<UserActions {...props} />);
-
-    await waitForComponentToUpdate();
-
-    expect(screen.getAllByTestId('user-actions-list')).toHaveLength(1);
-  });
-
   it('Renders service now update line with top and bottom when push is required', async () => {
     const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
     const ourActions = [
@@ -405,6 +372,144 @@ describe(`UserActions`, () => {
       expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
       expect(screen.getByText('DR')).toBeInTheDocument();
       expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    });
+  });
+
+  describe('pagination', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('Loading spinner when user actions loading and displays fullName/username', () => {
+      useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
+      appMockRender.render(
+        <UserActions {...{ ...defaultProps, currentUserProfile: userProfiles[0] }} />
+      );
+
+      expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
+    });
+
+    it('renders two user actions list when user actions are more than 10', () => {
+      appMockRender.render(<UserActions {...defaultProps} />);
+
+      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
+    });
+
+    it('renders only one user actions list when last page is 0', async () => {
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: [] },
+      });
+      const props = {
+        ...defaultProps,
+        userActionsStats: {
+          total: 0,
+          totalComments: 0,
+          totalOtherActions: 0,
+        },
+      };
+
+      appMockRender.render(<UserActions {...props} />);
+
+      await waitForComponentToUpdate();
+
+      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(1);
+    });
+
+    it('renders only one user actions list when last page is 1', async () => {
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: [] },
+      });
+      const props = {
+        ...defaultProps,
+        userActionsStats: {
+          total: 1,
+          totalComments: 0,
+          totalOtherActions: 1,
+        },
+      };
+
+      appMockRender.render(<UserActions {...props} />);
+
+      await waitForComponentToUpdate();
+
+      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(1);
+    });
+
+    it('renders only one action list when user actions are less than or equal to 10', async () => {
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: [] },
+      });
+      const props = {
+        ...defaultProps,
+        userActionsStats: {
+          total: 10,
+          totalComments: 6,
+          totalOtherActions: 4,
+        },
+      };
+
+      appMockRender.render(<UserActions {...props} />);
+
+      await waitForComponentToUpdate();
+
+      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(1);
+    });
+
+    it('shows more button visible when hasNext page is true', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        ...defaultInfiniteUseFindCaseUserActions,
+        hasNextPage: true,
+      });
+      const props = {
+        ...defaultProps,
+        userActionsStats: {
+          total: 25,
+          totalComments: 10,
+          totalOtherActions: 15,
+        },
+      };
+
+      appMockRender.render(<UserActions {...props} />);
+
+      await waitForComponentToUpdate();
+
+      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
+      expect(screen.getByTestId('cases-show-more-user-actions')).toBeInTheDocument();
+    });
+
+    it('call fetchNextPage on showMore button click', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        ...defaultInfiniteUseFindCaseUserActions,
+        hasNextPage: true,
+      });
+      const props = {
+        ...defaultProps,
+        userActionsStats: {
+          total: 25,
+          totalComments: 10,
+          totalOtherActions: 15,
+        },
+      };
+
+      appMockRender.render(<UserActions {...props} />);
+
+      await waitForComponentToUpdate();
+
+      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
+
+      const showMore = screen.getByTestId('cases-show-more-user-actions');
+
+      expect(showMore).toBeInTheDocument();
+
+      userEvent.click(showMore);
+
+      await waitFor(() => {
+        expect(defaultInfiniteUseFindCaseUserActions.fetchNextPage).toHaveBeenCalled();
+      });
     });
   });
 });

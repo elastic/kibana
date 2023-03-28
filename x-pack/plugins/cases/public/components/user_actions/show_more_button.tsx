@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiPanel, useEuiTheme } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
@@ -16,9 +16,9 @@ interface ShowMoreButtonProps {
 }
 
 export const ShowMoreButton = React.memo<ShowMoreButtonProps>(({ onShowMoreClick }) => {
-  const handleShowMore = useCallback(() => {
+  const handleShowMore = () => {
     onShowMoreClick();
-  }, [onShowMoreClick]);
+  };
 
   const { euiTheme } = useEuiTheme();
 
@@ -37,7 +37,7 @@ export const ShowMoreButton = React.memo<ShowMoreButtonProps>(({ onShowMoreClick
         color="text"
         size="s"
         onClick={handleShowMore}
-        data-test-subj="show-more-user-actions"
+        data-test-subj="cases-show-more-user-actions"
       >
         {i18n.SHOW_MORE}
       </EuiButton>

@@ -56,7 +56,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     userActivityQueryParams,
     caseId: caseData.id,
     lastPage,
-    showBottomList,
   });
 
   const alertIdsWithoutRuleInfo = useMemo(
@@ -187,7 +186,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           isExpandable
         />
         {hasNextPage && <ShowMoreButton onShowMoreClick={handleShowMore} />}
-        {showBottomList ? (
+        {lastPageUserActions?.length ? (
           <BottomUserActionsListWrapper>
             <UserActionsList
               {...props}
