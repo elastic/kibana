@@ -3401,6 +3401,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-route-validator-internal@link:packages/core/http/core-http-route-validator-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-router-server-internal@link:packages/core/http/core-http-router-server-internal":
   version "0.0.0"
   uid ""
