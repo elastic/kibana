@@ -16,10 +16,9 @@ import React from 'react';
 import { isMobileAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { ApmDatePicker } from '../date_picker/apm_date_picker';
-import { KueryBar } from '../kuery_bar';
 import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';
+import { UnifiedSearchBar } from '../unified_search_bar';
 
 interface Props {
   hidden?: boolean;
@@ -71,10 +70,7 @@ export function SearchBar({
 
             {showKueryBar && (
               <EuiFlexItem>
-                <KueryBar
-                  placeholder={kueryBarPlaceholder}
-                  boolFilter={kueryBarBoolFilter}
-                />
+                <UnifiedSearchBar />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -91,9 +87,6 @@ export function SearchBar({
                 <TimeComparison />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <ApmDatePicker />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
