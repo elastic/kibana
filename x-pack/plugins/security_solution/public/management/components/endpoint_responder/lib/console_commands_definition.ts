@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ExecuteFileAction } from '../command_render_components/execute_file_action';
+import { ArgumentFileSelector } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
@@ -420,6 +422,39 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 3,
       helpDisabled: doesEndpointSupportCommand('processes') === false,
       helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
+    },
+
+    {
+      name: 'execute-file',
+      about: 'Upload and execute a file on host machine',
+      RenderComponent: ExecuteFileAction,
+      meta: {
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'execute-file --file',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      args: {
+        file: {
+          about: 'Select the file that should be uploaded and executed',
+          required: true,
+          allowMultiples: false,
+          validate: () => {
+            // FIXME:PT Validate File was selected
+            return true;
+          },
+          SelectorComponent: ArgumentFileSelector,
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 3,
     },
   ];
 

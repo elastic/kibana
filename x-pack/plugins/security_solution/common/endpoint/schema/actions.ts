@@ -13,7 +13,7 @@ import {
   RESPONSE_ACTION_STATUS,
 } from '../service/response_actions/constants';
 
-const BaseActionRequestSchema = {
+export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
   endpoint_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
     minSize: 1,

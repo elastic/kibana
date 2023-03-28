@@ -14,6 +14,7 @@ import { registerActionStatusRoutes } from './status';
 import { registerActionAuditLogRoutes } from './audit_log';
 import { registerActionListRoutes } from './list';
 import { registerResponseActionRoutes } from './response_actions';
+import { registerActionFileUploadRoutes } from './file_upload_handler';
 
 // wrap route registration
 
@@ -31,5 +32,6 @@ export function registerActionRoutes(
   if (endpointContext.experimentalFeatures.responseActionGetFileEnabled) {
     registerActionFileDownloadRoutes(router, endpointContext);
     registerActionFileInfoRoute(router, endpointContext);
+    registerActionFileUploadRoutes(router, endpointContext);
   }
 }

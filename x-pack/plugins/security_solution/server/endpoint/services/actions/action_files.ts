@@ -11,6 +11,8 @@ import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { File } from '@kbn/files-plugin/common';
+import { v4 as uuidV4 } from 'uuid';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { FileUploadMetadata, UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
@@ -182,4 +184,24 @@ export const validateActionFileId = async (
   if (fileInfo.actionId !== actionId) {
     throw new CustomHttpRequestError(`Invalid file id [${fileId}] for action [${actionId}]`, 400);
   }
+};
+
+/**
+ * Creates a new file record (file metadata only - no actual file content)
+ */
+export const createNewFile = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  fileInfo: {
+    filename: string;
+  }
+): Promise<File> => {
+  const fileClient = getFileClient(esClient, logger);
+
+  return fileClient.create({
+    id: `kbn_upload.${uuidV4()}`,
+    metadata: {
+      name: fileInfo.filename,
+    },
+  });
 };
