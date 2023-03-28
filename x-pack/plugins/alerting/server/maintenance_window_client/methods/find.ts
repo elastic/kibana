@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { buildKueryNodeFilter } from '../../rules_client/common';
 import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
 import {
+  MaintenanceWindowSOAttributes,
   MaintenanceWindow,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   MaintenanceWindowClientContext,
@@ -31,7 +32,7 @@ export async function find(
   const filterKueryNode = buildKueryNodeFilter(filter);
 
   try {
-    const result = await savedObjectsClient.find<MaintenanceWindow>({
+    const result = await savedObjectsClient.find<MaintenanceWindowSOAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       filter: filterKueryNode,
     });

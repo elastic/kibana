@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { findRecentEventWithStatus } from './get_maintenance_window_date_and_status';
+import moment from 'moment';
+import {
+  getMaintenanceWindowDateAndStatus,
+  findRecentEventWithStatus,
+} from './get_maintenance_window_date_and_status';
 import { DateRange, MaintenanceWindowStatus } from '../../common';
 
 const events: DateRange[] = [
@@ -38,6 +42,56 @@ const events: DateRange[] = [
     lte: '2023-03-31T01:00:00.000Z',
   },
 ];
+
+describe('getMaintenanceWindowDateAndStatus', () => {
+  it('should return finished if there is are no events', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
+    const result = getMaintenanceWindowDateAndStatus({
+      events: [],
+      dateToCompare: new Date(),
+      expirationDate: moment().add(1, 'year').toDate(),
+    });
+
+    expect(result.startDate).toEqual(null);
+    expect(result.endDate).toEqual(null);
+    expect(result.status).toEqual('finished');
+  });
+
+  it('should return archived if expiration date is before or equal to now', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-03-23T00:30:00.000Z'));
+    let result = getMaintenanceWindowDateAndStatus({
+      events,
+      dateToCompare: new Date(),
+      expirationDate: moment().subtract(1, 'minute').toDate(),
+    });
+
+    expect(result.startDate).toEqual('2023-03-25T00:00:00.000Z');
+    expect(result.endDate).toEqual('2023-03-25T01:00:00.000Z');
+    expect(result.status).toEqual('archived');
+
+    jest.useFakeTimers().setSystemTime(new Date('2023-03-28T00:30:00.000Z'));
+    result = getMaintenanceWindowDateAndStatus({
+      events,
+      dateToCompare: new Date(),
+      expirationDate: moment().subtract(1, 'minute').toDate(),
+    });
+
+    expect(result.startDate).toEqual('2023-03-28T00:00:00.000Z');
+    expect(result.endDate).toEqual('2023-03-28T01:00:00.000Z');
+    expect(result.status).toEqual('archived');
+
+    jest.useFakeTimers().setSystemTime(new Date('2023-04-28T00:30:00.000Z'));
+    result = getMaintenanceWindowDateAndStatus({
+      events,
+      dateToCompare: new Date(),
+      expirationDate: moment().subtract(1, 'minute').toDate(),
+    });
+
+    expect(result.startDate).toEqual('2023-03-31T00:00:00.000Z');
+    expect(result.endDate).toEqual('2023-03-31T01:00:00.000Z');
+    expect(result.status).toEqual('archived');
+  });
+});
 
 describe('findRecentEventWithStatus', () => {
   it('should find the status if event is running', () => {
@@ -130,6 +184,68 @@ describe('findRecentEventWithStatus', () => {
         lte: '2023-03-31T01:00:00.000Z',
       },
       index: 6,
+      status: MaintenanceWindowStatus.Finished,
+    });
+  });
+
+  it('should find the status if there is only 1 event', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-01-01T00:00:00.000Z'));
+    expect(
+      findRecentEventWithStatus(
+        [
+          {
+            gte: '2023-03-31T00:00:00.000Z',
+            lte: '2023-03-31T01:00:00.000Z',
+          },
+        ],
+        new Date()
+      )
+    ).toEqual({
+      event: {
+        gte: '2023-03-31T00:00:00.000Z',
+        lte: '2023-03-31T01:00:00.000Z',
+      },
+      index: 0,
+      status: MaintenanceWindowStatus.Upcoming,
+    });
+
+    jest.useFakeTimers().setSystemTime(new Date('2023-03-31T00:30:00.000Z'));
+    expect(
+      findRecentEventWithStatus(
+        [
+          {
+            gte: '2023-03-31T00:00:00.000Z',
+            lte: '2023-03-31T01:00:00.000Z',
+          },
+        ],
+        new Date()
+      )
+    ).toEqual({
+      event: {
+        gte: '2023-03-31T00:00:00.000Z',
+        lte: '2023-03-31T01:00:00.000Z',
+      },
+      index: 0,
+      status: MaintenanceWindowStatus.Running,
+    });
+
+    jest.useFakeTimers().setSystemTime(new Date('2023-04-20T00:00:00.000Z'));
+    expect(
+      findRecentEventWithStatus(
+        [
+          {
+            gte: '2023-03-31T00:00:00.000Z',
+            lte: '2023-03-31T01:00:00.000Z',
+          },
+        ],
+        new Date()
+      )
+    ).toEqual({
+      event: {
+        gte: '2023-03-31T00:00:00.000Z',
+        lte: '2023-03-31T01:00:00.000Z',
+      },
+      index: 0,
       status: MaintenanceWindowStatus.Finished,
     });
   });

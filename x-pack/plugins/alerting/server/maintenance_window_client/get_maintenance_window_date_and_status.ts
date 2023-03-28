@@ -19,6 +19,7 @@ export interface MaintenanceWindowDateAndStatus {
   status: MaintenanceWindowStatus;
 }
 
+// Returns the most recent/relevant event and the status for a maintenance window
 export const getMaintenanceWindowDateAndStatus = ({
   events,
   dateToCompare,
@@ -54,7 +55,7 @@ export const getMaintenanceWindowDateAndStatus = ({
   };
 };
 
-// Binary search to find the closest (or running) event relative to an arbitrary date
+// Binary date search to find the closest (or running) event relative to an arbitrary date
 export const findRecentEventWithStatus = (
   events: DateRange[],
   dateToCompare: Date

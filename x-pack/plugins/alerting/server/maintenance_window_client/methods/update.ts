@@ -11,6 +11,7 @@ import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw'
 import { generateMaintenanceWindowEvents } from '../generate_maintenance_window_events';
 import {
   MaintenanceWindow,
+  MaintenanceWindowSOAttributes,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   RRuleParams,
   MaintenanceWindowClientContext,
@@ -48,14 +49,24 @@ async function updateWithOCC(
   const expirationDate = moment().add(1, 'year').toISOString();
 
   try {
-    const { attributes, version } = await savedObjectsClient.get<MaintenanceWindow>(
+    const {
+      attributes,
+      version,
+      id: updatedId,
+    } = await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       id
     );
 
-    const result = await savedObjectsClient.update<MaintenanceWindow>(
+    if (moment(attributes.expirationDate).isBefore(new Date())) {
+      throw Boom.badRequest('Cannot edit archived maintenance windows');
+    }
+
+    const events = generateMaintenanceWindowEvents({ rRule, expirationDate, duration });
+
+    const result = await savedObjectsClient.update<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      id,
+      updatedId,
       {
         ...attributes,
         title,
@@ -63,7 +74,7 @@ async function updateWithOCC(
         expirationDate,
         duration,
         rRule,
-        events: generateMaintenanceWindowEvents({ rRule, expirationDate, duration }),
+        events,
         ...modificationMetadata,
       },
       {
@@ -76,7 +87,7 @@ async function updateWithOCC(
         ...attributes,
         ...result.attributes,
       },
-      id,
+      id: updatedId,
     });
   } catch (e) {
     const errorMessage = `Failed to update maintenance window by id: ${id}, Error: ${e}`;

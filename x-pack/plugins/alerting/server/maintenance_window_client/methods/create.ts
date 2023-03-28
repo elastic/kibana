@@ -35,9 +35,8 @@ export async function create(
   const expirationDate = moment().add(1, 'year').toISOString();
   const modificationMetadata = await getModificationMetadata();
 
-  const events = generateMaintenanceWindowEvents({ rRule, expirationDate, duration });
-
   try {
+    const events = generateMaintenanceWindowEvents({ rRule, expirationDate, duration });
     const result = await savedObjectsClient.create<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       {

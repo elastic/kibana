@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 import { nodeBuilder, fromKueryExpression } from '@kbn/es-query';
-
 import {
   MaintenanceWindow,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -85,7 +84,7 @@ export async function active(
       return bucket.doc_count > 0;
     });
   } catch (e) {
-    const errorMessage = `Failed to find active maintenance window by interval: ${interval}, Error: ${e}`;
+    const errorMessage = `Failed to find active maintenance window by interval: ${interval} with start date: ${startDate}, Error: ${e}`;
     logger.error(errorMessage);
   }
   return false;

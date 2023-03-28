@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
 import {
+  MaintenanceWindowSOAttributes,
   MaintenanceWindow,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   MaintenanceWindowClientContext,
@@ -24,7 +25,7 @@ export async function get(
   const { savedObjectsClient, logger } = context;
   const { id } = params;
   try {
-    const result = await savedObjectsClient.get<MaintenanceWindow>(
+    const result = await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       id
     );
