@@ -57,6 +57,21 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return response.savedObject;
   }
 
+  async getSavedSearch(id: string) {
+    const response = await this.contentManagemntClient.get({
+      contentTypeId: 'search',
+      id,
+    });
+
+    // todo
+    // @ts-ignore
+    if (response.outcome === 'conflict') {
+      throw new DataViewSavedObjectConflictError(id);
+    }
+    // @ts-ignore
+    return response.savedObject;
+  }
+
   // SO update method took a `version` value via the options object.
   // This was used to make sure the update was based on the most recent version of the object.
   async update(id: string, attributes: DataViewAttributes) {

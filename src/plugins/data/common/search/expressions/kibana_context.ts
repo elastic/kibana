@@ -129,7 +129,7 @@ export const getKibanaContextFn = (
       let filters = [...(input?.filters || [])];
 
       if (args.savedSearchId) {
-        const obj = await savedObjectsClient.get('search', args.savedSearchId);
+        const obj = await savedObjectsClient.getSavedSearch(args.savedSearchId);
         const search = (obj.attributes as any).kibanaSavedObjectMeta.searchSourceJSON as string;
         const { query, filter } = getParsedValue(search, {});
 
