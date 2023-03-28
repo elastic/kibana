@@ -343,10 +343,6 @@ export const MLInferenceLogic = kea<
         return Object.keys(errors).length === 0;
       },
     ],
-    isTextExpansionModelSelected: [
-      () => [selectors.selectedMLModel],
-      (model: TrainedModel | null) => !!model?.inference_config?.text_expansion,
-    ],
     isLoading: [
       () => [selectors.mlModelsStatus, selectors.mappingStatus],
       (mlModelsStatus, mappingStatus) =>
@@ -356,6 +352,10 @@ export const MLInferenceLogic = kea<
     isPipelineDataValid: [
       () => [selectors.formErrors],
       (errors: AddInferencePipelineFormErrors) => Object.keys(errors).length === 0,
+    ],
+    isTextExpansionModelSelected: [
+      () => [selectors.selectedMLModel],
+      (model: TrainedModel | null) => !!model?.inference_config?.text_expansion,
     ],
     mlInferencePipeline: [
       () => [
