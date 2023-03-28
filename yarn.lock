@@ -4593,6 +4593,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-alert-details@link:x-pack/packages/observability/alert_details":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/observability":
   version "0.0.0"
   uid ""

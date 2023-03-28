@@ -928,6 +928,8 @@
       "@kbn/notifications-plugin/*": ["x-pack/plugins/notifications/*"],
       "@kbn/object-versioning": ["packages/kbn-object-versioning"],
       "@kbn/object-versioning/*": ["packages/kbn-object-versioning/*"],
+      "@kbn/observability-alert-details": ["x-pack/packages/observability/alert_details"],
+      "@kbn/observability-alert-details/*": ["x-pack/packages/observability/alert_details/*"],
       "@kbn/observability-fixtures-plugin": ["x-pack/test/cases_api_integration/common/plugins/observability"],
       "@kbn/observability-fixtures-plugin/*": ["x-pack/test/cases_api_integration/common/plugins/observability/*"],
       "@kbn/observability-plugin": ["x-pack/plugins/observability"],
