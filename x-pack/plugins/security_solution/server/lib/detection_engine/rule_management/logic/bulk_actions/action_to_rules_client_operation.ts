@@ -11,22 +11,6 @@ import type { BulkActionEditForRuleAttributes } from '../../../../../../common/d
 import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
-import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
-
-const getThrottleOperation = (throttle: string) =>
-  ({
-    field: 'throttle',
-    operation: 'set',
-    value: transformToAlertThrottle(throttle),
-  } as const);
-
-const getNotifyWhenOperation = (throttle: string) =>
-  ({
-    field: 'notifyWhen',
-    operation: 'set',
-    value: transformToNotifyWhen(throttle),
-  } as const);
-
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
  * @param action BulkActionEditForRuleAttributes
@@ -72,20 +56,15 @@ export const bulkEditActionToRulesClientOperation = (
           operation: 'add',
           value: action.value.actions,
         },
-        getThrottleOperation(action.value.throttle),
-        getNotifyWhenOperation(action.value.throttle),
       ];
 
     case BulkActionEditType.set_rule_actions:
-      // TODO: [Frequency Integration] should we convert actions here???
       return [
         {
           field: 'actions',
           operation: 'set',
           value: action.value.actions,
         },
-        getThrottleOperation(action.value.throttle),
-        getNotifyWhenOperation(action.value.throttle),
       ];
 
     // schedule actions

@@ -24,21 +24,13 @@ import {
   Field,
 } from '../../../../../../shared_imports';
 import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type {
-  BulkActionEditPayload,
-  ThrottleForBulkActions,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { NOTIFICATION_THROTTLE_RULE } from '../../../../../../../common/constants';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import {
-  ThrottleSelectField,
-  THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS,
-} from '../../../../../../detections/components/rules/throttle_select_field';
 import { getAllActionMessageParams } from '../../../../../../detections/pages/detection_engine/rules/helpers';
 
 import { RuleActionsField } from '../../../../../../detections/components/rules/rule_actions_field';
@@ -51,7 +43,6 @@ export interface RuleActionForBulkActions extends RuleAction {
 }
 
 export interface RuleActionsFormData {
-  throttle: ThrottleForBulkActions;
   actions: RuleActionForBulkActions[];
   overwrite: boolean;
 }
@@ -59,10 +50,6 @@ export interface RuleActionsFormData {
 const getFormSchema = (
   actionTypeRegistry: ActionTypeRegistryContract
 ): FormSchema<RuleActionsFormData> => ({
-  throttle: {
-    label: i18n.THROTTLE_LABEL,
-    helpText: i18n.THROTTLE_HELP_TEXT,
-  },
   actions: {
     validations: [
       {
@@ -80,7 +67,6 @@ const getFormSchema = (
 });
 
 const defaultFormData: RuleActionsFormData = {
-  throttle: NOTIFICATION_THROTTLE_RULE,
   actions: [],
   overwrite: false,
 };
@@ -113,7 +99,22 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       return;
     }
 
-    const { actions = [], throttle: throttleToSubmit, overwrite: overwriteValue } = data;
+    const aaaaa = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message:
+        '[request body]: \
+        Invalid value "edit" supplied to "action",\
+        Invalid value "add_rule_actions" supplied to "edit,type",\
+        Invalid value "{"actions":[{"id":"30020090-c98e-11ed-8047-1790dbc90385","group":"default","params":{"message":"asdasdasd","to":["asdasd@sdasdasd.com"],"subject":"asdasdasd"},"frequency":{"notifyWhen":"onThrottleInterval","throttle":"1m","summary":true}}]}" supplied to "edit,value",\
+        Invalid value "undefined" supplied to "edit,value,timeline_id",\
+        Invalid value "undefined" supplied to "edit,value,timeline_title",\
+        Invalid value "1m" supplied to "edit,value,actions,frequency,throttle",\
+        Invalid value "undefined" supplied to "edit,value,interval",\
+        Invalid value "undefined" supplied to "edit,value,lookback"',
+    };
+
+    const { actions = [], overwrite: overwriteValue } = data;
     const editAction = overwriteValue
       ? BulkActionEditType.set_rule_actions
       : BulkActionEditType.add_rule_actions;
@@ -122,22 +123,9 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       type: editAction,
       value: {
         actions: actions.map(({ actionTypeId, ...action }) => action),
-        throttle: throttleToSubmit,
       },
     });
   }, [form, onConfirm]);
-
-  const throttleFieldComponentProps = useMemo(
-    () => ({
-      idAria: 'bulkEditRulesRuleActionThrottle',
-      'data-test-subj': 'bulkEditRulesRuleActionThrottle',
-      hasNoInitialSelection: false,
-      euiFieldProps: {
-        options: THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS,
-      },
-    }),
-    []
-  );
 
   const messageVariables = useMemo(() => getAllActionMessageParams(), []);
 
@@ -161,22 +149,9 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
         }
       >
         <ul>
-          <li>
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.actionFrequencyDetail"
-              defaultMessage="The actions frequency you select below is applied to all actions (both new and existing) for all selected rules."
-            />
-          </li>
           <li>{i18n.RULE_VARIABLES_DETAIL}</li>
         </ul>
       </EuiCallOut>
-      <EuiSpacer size="m" />
-
-      <UseField
-        path="throttle"
-        component={ThrottleSelectField}
-        componentProps={throttleFieldComponentProps}
-      />
       <EuiSpacer size="m" />
 
       <UseField
