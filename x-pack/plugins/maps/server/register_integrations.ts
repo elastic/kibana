@@ -21,7 +21,7 @@ export function registerIntegrations(
     }),
     description: i18n.translate('xpack.maps.registerIntegrations.gdal.integrationDescription', {
       defaultMessage:
-        'Upload shapefiles and ingest from relational databases such as PostGIS or Oracle Spatial with GDAL and Elastic Maps.',
+        'Upload shapefiles and ingest from relational databases such as PostGIS or Oracle Spatial with GDAL. [file upload, geo, maps]',
     }),
     uiInternalPath:
       'https://www.elastic.co/blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal',
@@ -41,7 +41,7 @@ export function registerIntegrations(
       defaultMessage: 'GeoJSON',
     }),
     description: i18n.translate('xpack.maps.registerIntegrations.geojson.integrationDescription', {
-      defaultMessage: 'Upload GeoJSON files with Elastic Maps.',
+      defaultMessage: 'Upload GeoJSON files with Elastic Maps. [file upload, geo]',
     }),
     uiInternalPath: `${getFullPath('')}#?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`,
     icons: [
@@ -62,7 +62,7 @@ export function registerIntegrations(
     description: i18n.translate(
       'xpack.maps.registerIntegrations.shapefile.integrationDescription',
       {
-        defaultMessage: 'Upload Shapefiles with Elastic Maps.',
+        defaultMessage: 'Upload Shapefiles with Elastic Maps. [file upload, geo]',
       }
     ),
     uiInternalPath: `${getFullPath('')}#?${OPEN_LAYER_WIZARD}=${WIZARD_ID.GEO_FILE}`,
