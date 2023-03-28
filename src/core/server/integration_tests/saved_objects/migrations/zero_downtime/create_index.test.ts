@@ -70,7 +70,7 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
     const mappings = index.mappings ?? {};
     const mappingMeta = mappings._meta ?? {};
 
-    expect(aliases).toEqual(['.kibana', '.kibana_8.7.0']);
+    expect(aliases).toEqual(['.kibana', '.kibana_8.8.0']);
 
     expect(mappings.properties).toEqual(
       expect.objectContaining({

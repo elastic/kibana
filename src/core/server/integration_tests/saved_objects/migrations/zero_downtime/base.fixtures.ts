@@ -8,11 +8,11 @@
 
 import { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { createType } from '../test_utils';
-import { type KibanaMigratorTestKitParams, currentVersion } from '../kibana_migrator_test_kit';
+import { type KibanaMigratorTestKitParams } from '../kibana_migrator_test_kit';
 
 export const getBaseMigratorParams = (): KibanaMigratorTestKitParams => ({
   kibanaIndex: '.kibana',
-  kibanaVersion: currentVersion,
+  kibanaVersion: '8.8.0',
   settings: {
     migrations: {
       algorithm: 'zdt',
