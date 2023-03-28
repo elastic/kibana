@@ -7570,7 +7570,6 @@
     "xpack.apm.dataView.autoCreateDisabled": "已通过“autoCreateApmDataView”配置选项禁止自动创建数据视图",
     "xpack.apm.dataView.noApmData": "无 APM 数据",
     "xpack.apm.dependecyOperationDetailView.header.backLinkLabel": "所有操作",
-    "xpack.apm.dependencies.kueryBarPlaceholder": "搜索依赖项指标（例如，span.destination.service.resource:elasticsearch）",
     "xpack.apm.dependenciesInventory.dependencyTableColumn": "依赖项",
     "xpack.apm.dependenciesTable.columnErrorRate": "失败事务率",
     "xpack.apm.dependenciesTable.columnErrorRateTip": "选定服务的失败事务百分比。状态代码为 4xx 的 HTTP 服务器事务（客户端错误）不会视为失败，因为是调用方而不是服务器造成了失败。",
