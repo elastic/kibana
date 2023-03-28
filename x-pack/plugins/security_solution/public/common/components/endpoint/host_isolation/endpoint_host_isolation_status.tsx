@@ -42,7 +42,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       endpointId ? [endpointId] : [],
       {
         select: (pending): PendingActions => {
-          const pendingActions = pending.data[0].pending_actions ?? {};
+          const pendingActions = pending.data[0]?.pending_actions ?? {};
 
           return {
             pendingIsolate: pendingActions?.isolate ?? 0,
