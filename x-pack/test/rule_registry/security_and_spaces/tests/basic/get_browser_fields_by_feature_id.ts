@@ -46,7 +46,16 @@ export default ({ getService }: FtrProviderContext) => {
           'logs',
           'uptime',
         ]);
-        expect(Object.keys(browserFields)).to.eql(['base', 'event', 'kibana', 'message']);
+        expect(Object.keys(browserFields)).to.eql([
+          'base',
+          'agent',
+          'ecs',
+          'event',
+          'kibana',
+          'processor',
+          'service',
+          'transaction',
+        ]);
       });
 
       it(`${superUser.username} should be able to get browser fields for o11y featureIds`, async () => {
@@ -56,7 +65,53 @@ export default ({ getService }: FtrProviderContext) => {
           'logs',
           'uptime',
         ]);
-        expect(Object.keys(browserFields)).to.eql(['base', 'event', 'kibana', 'message']);
+        expect(Object.keys(browserFields)).to.eql([
+          'base',
+          'agent',
+          'anomaly',
+          'client',
+          'cloud',
+          'container',
+          'data_stream',
+          'destination',
+          'device',
+          'dll',
+          'dns',
+          'ecs',
+          'email',
+          'error',
+          'event',
+          'faas',
+          'file',
+          'group',
+          'host',
+          'http',
+          'kibana',
+          'log',
+          'monitor',
+          'network',
+          'observer',
+          'orchestrator',
+          'organization',
+          'package',
+          'process',
+          'processor',
+          'registry',
+          'related',
+          'rule',
+          'server',
+          'service',
+          'source',
+          'span',
+          'threat',
+          'tls',
+          'trace',
+          'transaction',
+          'url',
+          'user',
+          'user_agent',
+          'vulnerability',
+        ]);
       });
 
       it(`${superUser.username} should NOT be able to get browser fields for siem featureId`, async () => {

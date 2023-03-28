@@ -1,11 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-      ".alerts-observability.apm.alerts": {
-      }
-    },
-    "index": ".internal.alerts-observability.apm.alerts-default-000001",
+    "index": ".alerts-observability.apm.alerts",
     "mappings": {
       "properties": {
         "message": {
@@ -33,43 +29,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-      ".alerts-observability.apm.alerts": {
-      }
-    },
-    "index": ".internal.alerts-observability.apm.alerts-space2-000001",
-    "mappings": {
-      "properties": {
-        "message": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        },
-        "kibana.alert.rule.consumer": {
-          "type": "keyword",
-          "ignore_above": 256
-        },
-        "kibana.alert.time_range": {
-          "type": "date_range",
-          "format": "epoch_millis||strict_date_optional_time"
-        }
-      }
-    }
-  }
-}
-
-{
-  "type": "index",
-  "value": {
-    "aliases": {
-      ".alerts-security.alerts": {
-      }
-    },
-    "index": ".internal.alerts-security.alerts-default-000001",
+    "index": ".alerts-security.alerts",
     "mappings": {
       "properties": {
         "message": {
@@ -93,11 +53,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-      ".alerts-observability.logs.alerts": {
-      }
-    },
-    "index": ".internal.alerts-observability.logs.alerts-default-000001",
+    "index": ".alerts-observability.logs.alerts-000001",
     "mappings": {
       "properties": {
         "message": {
