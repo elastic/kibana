@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectReference } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../lib';
@@ -27,6 +28,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   let existingApiKey: string | null = null;
   let attributes: RawRule;
   let version: string | undefined;
+  let references: SavedObjectReference[];
 
   try {
     const decryptedAlert =
@@ -36,12 +38,14 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     existingApiKey = decryptedAlert.attributes.apiKey;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
+    references = decryptedAlert.references;
   } catch (e) {
     context.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
     // Still attempt to load the attributes and version using SOC
     const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     attributes = alert.attributes;
     version = alert.version;
+    references = alert.references;
   }
 
   try {
@@ -77,8 +81,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
-    // TODO: fix enable
-    const { actions: migratedActions } = await migrateLegacyActions(context, {
+    const { legacyActions, legacyActionsReferences } = await migrateLegacyActions(context, {
       ruleId: id,
     });
 
@@ -93,7 +96,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
-      actions: [...attributes.actions, ...migratedActions],
+      actions: [...attributes.actions, ...legacyActions],
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
       updatedBy: username,
@@ -108,7 +111,10 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     });
 
     try {
-      await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
+      await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
+        version,
+        references: [...references, ...legacyActionsReferences],
+      });
     } catch (e) {
       throw e;
     }

@@ -45,13 +45,13 @@ export interface LegacyIRuleActionsAttributes extends Record<string, unknown> {
 type MigrateLegacyActions = (
   context: RulesClientContext,
   { ruleId }: { ruleId: string }
-) => Promise<{ actions: RawRuleAction[]; references?: SavedObjectReference[] }>;
+) => Promise<{ legacyActions: RawRuleAction[]; legacyActionsReferences: SavedObjectReference[] }>;
 
 export const migrateLegacyActions: MigrateLegacyActions = async (context, { ruleId }) => {
   const { unsecuredSavedObjectsClient } = context;
   try {
     if (ruleId == null) {
-      return { actions: [] };
+      return { legacyActions: [], legacyActionsReferences: [] };
     }
     /**
      * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
@@ -86,7 +86,7 @@ export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule
     // Assumption: if no legacy sidecar SO or notification rule types exist
     // that reference the rule in question, assume rule actions are not legacy
     if (!siemNotificationsExist && !legacyRuleNotificationSOsExist) {
-      return { actions: [] };
+      return { legacyActions: [], legacyActionsReferences: [] };
     }
     // If the legacy notification rule type ("siem.notification") exist,
     // migration and cleanup are needed
@@ -111,22 +111,22 @@ export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule
         legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'no_actions' ||
         legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'rule'
       ) {
-        return { actions: [] };
+        return { legacyActions: [], legacyActionsReferences: [] };
       }
 
       return {
-        actions: transformFromLegacyActions(
+        legacyActions: transformFromLegacyActions(
           legacyRuleActionsSO.saved_objects[0].attributes,
           legacyRuleActionsSO.saved_objects[0].references
         ),
-        references: legacyRuleActionsSO.saved_objects[0].references,
+        legacyActionsReferences: legacyRuleActionsSO.saved_objects[0].references ?? [],
       };
     }
   } catch (e) {
     context.logger.debug(`Migration has failed for rule ${ruleId}: ${e.message}`);
   }
 
-  return { actions: [] };
+  return { legacyActions: [], legacyActionsReferences: [] };
 };
 
 const transformFromLegacyActions = (

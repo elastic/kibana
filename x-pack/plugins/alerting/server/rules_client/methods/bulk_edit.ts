@@ -433,11 +433,12 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
-    const { actions: migratedActions, references: legacyActionsReferences } =
-      await migrateLegacyActions(context, { ruleId: rule.id });
+    const { legacyActions, legacyActionsReferences } = await migrateLegacyActions(context, {
+      ruleId: rule.id,
+    });
 
-    if (migratedActions.length && legacyActionsReferences?.length) {
-      rule.attributes.actions = [...rule.attributes.actions, ...migratedActions];
+    if (legacyActions.length && legacyActionsReferences?.length) {
+      rule.attributes.actions = [...rule.attributes.actions, ...legacyActions];
       rule.references = [...rule.references, ...legacyActionsReferences];
     }
 
