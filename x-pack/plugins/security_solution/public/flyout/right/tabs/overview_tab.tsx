@@ -10,6 +10,7 @@ import React, { memo } from 'react';
 import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import { DescriptionSection } from '../components/description_section';
 import { HighlightedFields } from '../components/highlighted_fields';
+import { Insights } from '../components/insights';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
@@ -22,6 +23,8 @@ export const OverviewTab: FC = memo(() => {
       <EuiPanel hasBorder hasShadow={false}>
         <HighlightedFields />
       </EuiPanel>
+      <EuiHorizontalRule />
+      <Insights />
     </>
   );
 });
