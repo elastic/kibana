@@ -102,10 +102,6 @@ export class CustomRasterSource implements IRasterSource {
     return false;
   }
 
-  isGeoGridPrecisionAware(): boolean {
-    return false;
-  }
-
   isQueryAware(): boolean {
     return false;
   }
@@ -136,10 +132,6 @@ export class CustomRasterSource implements IRasterSource {
 
   getQueryableIndexPatternIds(): string[] {
     return [];
-  }
-
-  getGeoGridPrecision(zoom: number): number {
-    return 0;
   }
 
   isESSource(): boolean {

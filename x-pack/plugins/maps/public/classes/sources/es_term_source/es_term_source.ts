@@ -26,7 +26,7 @@ import {
 } from '../../../../common/elasticsearch_util';
 import {
   ESTermSourceDescriptor,
-  VectorJoinSourceRequestMeta,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
@@ -122,7 +122,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   async getPropertiesMap(
-    searchFilters: VectorJoinSourceRequestMeta,
+    searchFilters: VectorSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,

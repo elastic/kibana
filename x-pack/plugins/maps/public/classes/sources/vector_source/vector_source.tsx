@@ -27,6 +27,7 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
+  DataFilters,
   ESSearchSourceResponseMeta,
   MapExtent,
   Timeslice,
@@ -107,7 +108,7 @@ export interface IVectorSource extends ISource {
    * Vector layer avoids unnecessarily re-fetching source data.
    * Use getSyncMeta to expose fields that require source data re-fetch when changed.
    */
-  getSyncMeta(): object | null;
+  getSyncMeta(dataFilters: DataFilters): object | null;
 
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
@@ -230,7 +231,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
-  getSyncMeta(): object | null {
+  getSyncMeta(dataFilters: DataFilters): object | null {
     return null;
   }
 

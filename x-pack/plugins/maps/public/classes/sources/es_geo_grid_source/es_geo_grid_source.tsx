@@ -42,6 +42,7 @@ import { LICENSED_FEATURES } from '../../../licensed_features';
 import { getHttp } from '../../../kibana_services';
 import { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
 import {
+  DataFilters,
   ESGeoGridSourceDescriptor,
   MapExtent,
   SizeDynamicOptions,
@@ -55,7 +56,11 @@ import { isMvt } from './is_mvt';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { getIconSize } from './get_icon_size';
 
-type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
+type ESGeoGridSourceSyncMeta = {
+  geogridPrecision: number;
+  requestType: RENDER_AS;
+  resolution: GRID_RESOLUTION;
+};
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -134,8 +139,9 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     );
   }
 
-  getSyncMeta(): ESGeoGridSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESGeoGridSourceSyncMeta {
     return {
+      geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
       requestType: this._descriptor.requestType,
       resolution: this._descriptor.resolution,
     };
@@ -188,9 +194,9 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   getGeoGridPrecision(zoom: number): number {
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+    if (this.isMvt()) {
       // The target-precision needs to be determined server side.
-      return NaN;
+      return 0;
     }
 
     const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
@@ -458,13 +464,14 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     // https://github.com/elastic/elasticsearch/issues/60626
     const supportsCompositeAgg = !(await this._isGeoShape());
 
+    const precision = this.getGeoGridPrecision(searchFilters.zoom);
     const features: Feature[] =
       supportsCompositeAgg && tooManyBuckets
         ? await this._compositeAggRequest({
             searchSource,
             searchSessionId: searchFilters.searchSessionId,
             indexPattern,
-            precision: searchFilters.geogridPrecision || 0,
+            precision,
             layerName,
             registerCancelCallback,
             bucketsPerGrid,
@@ -476,7 +483,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
             searchSource,
             searchSessionId: searchFilters.searchSessionId,
             indexPattern,
-            precision: searchFilters.geogridPrecision || 0,
+            precision,
             layerName,
             registerCancelCallback,
             bufferedExtent: searchFilters.buffer,

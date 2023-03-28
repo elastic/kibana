@@ -45,13 +45,10 @@ export type SourceRequestMeta = DataFilters & {
 
 export type VectorSourceRequestMeta = SourceRequestMeta & {
   fieldNames: string[];
-  geogridPrecision?: number;
   timesliceMaskField?: string;
   sourceMeta: object | null;
   isFeatureEditorOpenForLayer: boolean;
 };
-
-export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'>;
 
 export type VectorStyleRequestMeta = DataFilters & {
   dynamicStyleFields: string[];
@@ -90,8 +87,8 @@ export type DataRequestMeta = {
   // request stop time in milliseconds since epoch
   requestStopTime?: number;
 } & Partial<
+  SourceRequestMeta &
   VectorSourceRequestMeta &
-    VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
     ESSearchSourceResponseMeta &
     ESGeoLineSourceResponseMeta &

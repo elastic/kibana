@@ -29,6 +29,7 @@ import { DataRequestAbortError } from '../../util/data_request';
 import { makePublicExecutionContext } from '../../../util';
 import { SourceEditorArgs } from '../source';
 import {
+  DataFilters,
   ESPewPewSourceDescriptor,
   MapExtent,
   VectorSourceRequestMeta,
@@ -83,6 +84,12 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   showJoinEditor() {
     return false;
+  }
+
+  getSyncMeta(dataFilters: DataFilters) {
+    return {
+      geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
+    }
   }
 
   isGeoGridPrecisionAware() {
@@ -149,7 +156,7 @@ export class ESPewPewSource extends AbstractESAggSource {
           sourceGrid: {
             geotile_grid: {
               field: this._descriptor.sourceGeoField,
-              precision: searchFilters.geogridPrecision,
+              precision: this.getGeoGridPrecision(searchFilters.zoom),
               size: 500,
             },
             aggs: {

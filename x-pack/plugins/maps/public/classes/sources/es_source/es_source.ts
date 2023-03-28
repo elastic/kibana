@@ -15,6 +15,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
+import type { IESAggSource } from '../es_agg_source';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
@@ -33,7 +34,6 @@ import {
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
-  VectorJoinSourceRequestMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorStyle } from '../../styles/vector/vector_style';
@@ -205,7 +205,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async makeSearchSource(
-    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | BoundsRequestMeta,
+    searchFilters: VectorSourceRequestMeta | BoundsRequestMeta,
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource> {
@@ -219,10 +219,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       // buffer can be empty
       const geoField = await this._getGeoField();
       const buffer: MapExtent =
-        this.isGeoGridPrecisionAware() &&
-        'geogridPrecision' in searchFilters &&
-        typeof searchFilters.geogridPrecision === 'number'
-          ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
+        'isGeoGridPrecisionAware' in this && 
+        'getGeoGridPrecision' in this &&
+        (this as IESAggSource).isGeoGridPrecisionAware()
+          ? expandToTileBoundaries(searchFilters.buffer, (this as IESAggSource).getGeoGridPrecision(searchFilters.zoom))
           : searchFilters.buffer;
       const extentFilter = createExtentFilter(buffer, [geoField.name]);
 
