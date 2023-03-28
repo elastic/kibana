@@ -1,7 +1,0 @@
-title: Budgeting method
-type: string
-description: The budgeting method to use
-enum:
-  - occurrences
-  - timeslices
-example: occurrences
