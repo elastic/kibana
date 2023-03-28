@@ -51,6 +51,10 @@ describe('MonitorPendingWrapper', () => {
             lastRun: {
               loaded: true,
               loading: false,
+              // overwrite default from
+              // merged properties for default
+              // mock state
+              // @ts-ignore
               data: null,
             },
           },
