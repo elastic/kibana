@@ -1,18 +1,17 @@
 
 .lnsEmbeddablePanelFeatureList {
-    @include euiYScroll;
-    max-height: $euiSize * 20;
+  @include euiYScroll;
+  max-height: $euiSize * 20;
 }
 
 .lnsEmbeddablePanelFeatureList_header {
-    padding: $euiSize $euiSize 0;
+  padding: $euiSize $euiSize 0;
 }
 
 .lnsEmbeddablePanelFeatureList__item {
-    padding: $euiSize;
+  padding: $euiSize;
 
-    .lnsEmbeddablePanelFeatureList__value {
-        padding-right: 0;
-    }
+  .lnsEmbeddablePanelFeatureList__value {
+    padding-right: 0;
+  }
 }
-  
