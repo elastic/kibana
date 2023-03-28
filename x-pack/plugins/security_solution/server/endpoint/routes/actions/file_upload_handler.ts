@@ -117,8 +117,7 @@ export const getActionFileUploadRouteHandler = (
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const fileStream = req.body as stream.Readable;
 
-    const file = await createNewFile(esClient, logger, { filename: 'some-file.sh' });
-    await file.uploadContent(fileStream);
+    const file = await createNewFile(esClient, logger, { filename: 'some-file.sh' }, fileStream);
 
     // FIXME:PT remove this await. Only needed for POC.
     // Need this because there seems to be a delay in the file chunks being saved/propogated in ES,
@@ -151,13 +150,17 @@ export const getActionExecuteFileRouteHandler = (
     const metadataService = endpointContext.service.getEndpointMetadataService();
     const actionID = uuidv4();
 
-    const { file } = req.body;
+    const { file: fileStream } = req.body;
 
     // Upload file first
-    const uploadedFile = await createNewFile(esClient, logger, {
-      filename: file?.hapi?.filename ?? 'some-file',
-    });
-    await uploadedFile.uploadContent(file as stream.Readable);
+    const uploadedFile = await createNewFile(
+      esClient,
+      logger,
+      {
+        filename: fileStream?.hapi?.filename ?? 'some-file',
+      },
+      fileStream as stream.Readable
+    );
 
     const parameters = {
       ...(req.body.parameters ?? {}),
@@ -165,7 +168,17 @@ export const getActionExecuteFileRouteHandler = (
     };
 
     // --------------------------------------------------
+    //
+    //
+    //
+    //
+    //
     //  MOST OF THE CODE BELOW WAS A COPY / PASTE
+    //
+    //
+    //
+    //
+    //
     // --------------------------------------------------
 
     // fetch the Agent IDs to send the commands to

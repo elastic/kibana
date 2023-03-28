@@ -13,7 +13,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { File } from '@kbn/files-plugin/common';
 import { v4 as uuidV4 } from 'uuid';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type stream from 'stream';
 import type { FileUploadMetadata, UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
@@ -111,7 +111,7 @@ export const getFileInfo = async (
     }
 
     const { upload_start: uploadStart, action_id: actionId, agent_id: agentId } = fileDoc;
-    const { name, Status: status, mime_type: mimeType, size } = fileDoc.file;
+    const { name, Status: status, mime_type: mimeType, size, created } = fileDoc.file;
     let fileHasChunks: boolean = true;
 
     if (status === 'READY') {
@@ -131,7 +131,7 @@ export const getFileInfo = async (
       size,
       actionId,
       agentId,
-      created: new Date(uploadStart).toISOString(),
+      created: new Date(uploadStart || created).toISOString(),
       status: fileHasChunks ? status : 'DELETED',
     };
   } catch (error) {
@@ -181,9 +181,12 @@ export const validateActionFileId = async (
 ): Promise<void> => {
   const fileInfo = await getFileInfo(esClient, logger, fileId);
 
-  if (fileInfo.actionId !== actionId) {
-    throw new CustomHttpRequestError(`Invalid file id [${fileId}] for action [${actionId}]`, 400);
-  }
+  // FIXME:PT remove. POC CODE. NOT PRODUCTION
+  return true;
+
+  // if (fileInfo.actionId !== actionId) {
+  //   throw new CustomHttpRequestError(`Invalid file id [${fileId}] for action [${actionId}]`, 400);
+  // }
 };
 
 /**
@@ -194,14 +197,19 @@ export const createNewFile = async (
   logger: Logger,
   fileInfo: {
     filename: string;
-  }
+  },
+  fileStream: stream.Readable
 ): Promise<File> => {
   const fileClient = getFileClient(esClient, logger);
 
-  return fileClient.create({
-    id: `kbn_upload.${uuidV4()}`,
+  const file = await fileClient.create({
+    id: uuidV4(),
     metadata: {
       name: fileInfo.filename,
     },
   });
+
+  await file.uploadContent(fileStream);
+
+  return file;
 };

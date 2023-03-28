@@ -59,10 +59,9 @@ export const ExecuteFileAction = memo<
   });
 
   if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
-    const fileId = actionDetails.parameters.file.id;
     const downloadUrl = resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
-      action_id: 'kbn_upload',
-      agent_id: fileId.substring(fileId.indexOf('.') + 1),
+      action_id: actionDetails.id,
+      file_id: actionDetails.parameters.file.id,
     });
 
     return (
