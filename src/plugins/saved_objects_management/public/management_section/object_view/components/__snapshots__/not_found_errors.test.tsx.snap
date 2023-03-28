@@ -11,7 +11,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="alert"
+      data-euiicon-type="warning"
     />
     There is a problem with this saved object
   </p>
@@ -60,7 +60,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="alert"
+      data-euiicon-type="warning"
     />
     There is a problem with this saved object
   </p>
@@ -109,7 +109,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="alert"
+      data-euiicon-type="warning"
     />
     There is a problem with this saved object
   </p>
@@ -158,7 +158,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="alert"
+      data-euiicon-type="warning"
     />
     There is a problem with this saved object
   </p>

@@ -248,8 +248,11 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
   cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
-  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
-  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).trigger('click', { force: true });
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE)
+    .should('be.visible')
+    .then((el) => {
+      cy.wrap(el).trigger('click');
+    });
 };
 
 export const addNewCase = () => {

@@ -17,7 +17,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { AllControlStates, State } from './state';
+import type { AllControlStates, State } from './state';
 import { createInitialState } from './initial_state';
 import { ByteSizeValue } from '@kbn/config-schema';
 
@@ -44,6 +44,7 @@ describe('migrationsStateActionMachine', () => {
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
     migrationsConfig: {
+      algorithm: 'v2',
       batchSize: 1000,
       maxBatchSizeBytes: new ByteSizeValue(1e8),
       pollInterval: 0,
@@ -102,7 +103,9 @@ describe('migrationsStateActionMachine', () => {
         ...initialState,
         reason: 'the fatal reason',
         outdatedDocuments: [{ _id: '1234', password: 'sensitive password' }],
-        transformedDocBatches: [[{ _id: '1234', password: 'sensitive transformed password' }]],
+        bulkOperationBatches: [
+          [[{ index: { _id: '1234' } }, { password: 'sensitive transformed password' }]],
+        ],
       } as State,
       logger: mockLogger.get(),
       model: transitionModel(['LEGACY_DELETE', 'FATAL']),

@@ -82,7 +82,7 @@ export const useAnomaliesColumns = (
           } else if (job.isCompatible) {
             return <EnableJob job={job} isLoading={loading} onJobStateChange={onJobStateChange} />;
           } else {
-            return <EuiIcon aria-label="Warning" size="s" type="alert" color="warning" />;
+            return <EuiIcon aria-label="Warning" size="s" type="warning" color="warning" />;
           }
         },
       },

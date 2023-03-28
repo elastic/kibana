@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -30,10 +30,10 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
-import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -55,6 +55,7 @@ import {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
   type CellValueContext,
+  shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
@@ -203,7 +204,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         data-test-subj="embeddable-lens-failure"
         body={
@@ -381,11 +382,9 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
-  private subscription: Subscription;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
-  private embeddableTitle?: string;
   private lensInspector: LensInspector;
 
   private logError(type: 'runtime' | 'validation') {
@@ -394,13 +393,6 @@ export class Embeddable
       this.getExecutionContext()
     );
   }
-
-  private externalSearchContext: {
-    timeRange?: TimeRange;
-    query?: Query;
-    filters?: Filter[];
-    searchSessionId?: string;
-  } = {};
 
   private activeData?: TableInspectorAdapter;
 
@@ -423,25 +415,14 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
-    let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
       .then(() => {
         this.loadUserMessages();
-        if (!containerStateChangedCalledAlready) {
-          this.onContainerStateChanged(initialInput);
-        } else {
-          this.reload();
-        }
+        this.reload();
       })
       .catch((e) => this.onFatalError(e));
 
-    this.subscription = this.getUpdated$().subscribe(() => {
-      containerStateChangedCalledAlready = true;
-      this.onContainerStateChanged(this.input);
-    });
-
     const input$ = this.getInput$();
-    this.embeddableTitle = this.getTitle();
 
     this.inputReloadSubscriptions = [];
 
@@ -480,40 +461,41 @@ export class Embeddable
         })
     );
 
-    // Re-initialize the visualization if either the attributes or the saved object id changes
+    // Use a trigger to distinguish between observables in the subscription
+    const withTrigger = (trigger: 'attributesOrSavedObjectId' | 'searchContext') =>
+      map((input: LensEmbeddableInput) => ({ trigger, input }));
 
-    this.inputReloadSubscriptions.push(
-      input$
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
-            )
-          ),
-          skip(1)
+    // Re-initialize the visualization if either the attributes or the saved object id changes
+    const attributesOrSavedObjectId$ = input$.pipe(
+      distinctUntilChanged((a, b) =>
+        fastIsEqual(
+          ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
+          ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
         )
-        .subscribe(async (input) => {
-          await this.initializeSavedVis(input);
-          this.reload();
-        })
+      ),
+      skip(1),
+      withTrigger('attributesOrSavedObjectId')
     );
 
     // Update search context and reload on changes related to search
+    const searchContext$ = shouldFetch$<LensEmbeddableInput>(input$, () => this.getInput()).pipe(
+      withTrigger('searchContext')
+    );
+
+    // Merge and debounce the observables to avoid multiple reloads
     this.inputReloadSubscriptions.push(
-      this.getUpdated$()
-        .pipe(map(() => this.getInput()))
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              [a.filters, a.query, a.timeRange, a.searchSessionId],
-              [b.filters, b.query, b.timeRange, b.searchSessionId]
-            )
-          ),
-          skip(1)
-        )
-        .subscribe(async (input) => {
-          this.onContainerStateChanged(input);
+      merge(searchContext$, attributesOrSavedObjectId$)
+        .pipe(debounceTime(0))
+        .subscribe(async ({ trigger, input }) => {
+          if (trigger === 'attributesOrSavedObjectId') {
+            await this.initializeSavedVis(input);
+          }
+
+          // reset removable messages
+          // Dashboard search/context changes are detected here
+          this.additionalUserMessages = {};
+
+          this.reload();
         })
     );
   }
@@ -596,11 +578,10 @@ export class Embeddable
       })
     );
 
-    const mergedSearchContext = this.getMergedSearchContext();
-
     if (!this.savedVis) {
       return userMessages;
     }
+    const mergedSearchContext = this.getMergedSearchContext();
 
     const frameDatasourceAPI: FrameDatasourceAPI = {
       dataViews: {
@@ -652,13 +633,9 @@ export class Embeddable
     }
 
     return () => {
-      const withMessagesRemoved = {
-        ...this.additionalUserMessages,
-      };
-
-      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
-
-      this.additionalUserMessages = withMessagesRemoved;
+      messages.forEach(({ uniqueId }) => {
+        delete this.additionalUserMessages[uniqueId];
+      });
     };
   };
 
@@ -736,45 +713,6 @@ export class Embeddable
     this.setInitializationFinished();
 
     this.isInitialized = true;
-  }
-
-  onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState)) {
-      this.reload();
-    }
-  }
-
-  handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
-    let isDirty = false;
-    const cleanedFilters = containerState.filters
-      ? containerState.filters.filter((filter) => !filter.meta.disabled)
-      : undefined;
-    const nextTimeRange =
-      containerState.timeslice !== undefined
-        ? {
-            from: new Date(containerState.timeslice[0]).toISOString(),
-            to: new Date(containerState.timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : containerState.timeRange;
-    if (
-      !isEqual(nextTimeRange, this.externalSearchContext.timeRange) ||
-      !isEqual(containerState.query, this.externalSearchContext.query) ||
-      !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
-      this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
-      this.embeddableTitle !== this.getTitle()
-    ) {
-      this.externalSearchContext = {
-        timeRange: nextTimeRange,
-        query: containerState.query,
-        filters: cleanedFilters,
-        searchSessionId: containerState.searchSessionId,
-      };
-      this.embeddableTitle = this.getTitle();
-      isDirty = true;
-    }
-
-    return isDirty;
   }
 
   private getSearchWarningMessages(adapters?: Partial<DefaultInspectorAdapters>): UserMessage[] {
@@ -938,7 +876,7 @@ export class Embeddable
                 embeddableTitle: this.getTitle(),
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
               }}
-              searchSessionId={this.externalSearchContext.searchSessionId}
+              searchSessionId={this.getInput().searchSessionId}
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
@@ -1078,8 +1016,16 @@ export class Embeddable
       throw new Error('savedVis is required for getMergedSearchContext');
     }
 
+    const input = this.getInput();
     const context: ExecutionContextSearch = {
-      timeRange: this.externalSearchContext.timeRange,
+      timeRange:
+        input.timeslice !== undefined
+          ? {
+              from: new Date(input.timeslice[0]).toISOString(),
+              to: new Date(input.timeslice[1]).toISOString(),
+              mode: 'absolute' as 'absolute',
+            }
+          : input.timeRange,
       query: [this.savedVis.state.query],
       filters: this.deps.injectFilterReferences(
         this.savedVis.state.filters,
@@ -1088,12 +1034,15 @@ export class Embeddable
       disableShardWarnings: true,
     };
 
-    if (this.externalSearchContext.query) {
-      context.query = [this.externalSearchContext.query, ...(context.query as Query[])];
+    if (input.query) {
+      context.query = [input.query, ...(context.query as Query[])];
     }
 
-    if (this.externalSearchContext.filters?.length) {
-      context.filters = [...this.externalSearchContext.filters, ...(context.filters as Filter[])];
+    if (input.filters?.length) {
+      context.filters = [
+        ...input.filters.filter((filter) => !filter.meta.disabled),
+        ...(context.filters as Filter[]),
+      ];
     }
 
     return context;
@@ -1182,7 +1131,7 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
-    this.handleContainerStateChanged(this.input);
+
     if (this.domNode) {
       this.render(this.domNode);
     }
@@ -1367,9 +1316,6 @@ export class Embeddable
     }
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
     }
   }
 

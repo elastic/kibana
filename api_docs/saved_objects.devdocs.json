@@ -499,6 +499,195 @@
                     "trackAdoption": false
                   }
                 ]
+              },
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectFinderUi.propTypes.euiFormRowProps",
+                "type": "Function",
+                "tags": [],
+                "label": "euiFormRowProps",
+                "description": [],
+                "signature": [
+                  "Requireable",
+                  "<object>"
+                ],
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFormRowProps.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "props",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; }"
+                    ],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFormRowProps.$2",
+                    "type": "string",
+                    "tags": [],
+                    "label": "propName",
+                    "description": [],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFormRowProps.$3",
+                    "type": "string",
+                    "tags": [],
+                    "label": "componentName",
+                    "description": [],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFormRowProps.$4",
+                    "type": "string",
+                    "tags": [],
+                    "label": "location",
+                    "description": [],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFormRowProps.$5",
+                    "type": "string",
+                    "tags": [],
+                    "label": "propFullName",
+                    "description": [],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectFinderUi.propTypes.euiFieldSearchProps",
+                "type": "Function",
+                "tags": [],
+                "label": "euiFieldSearchProps",
+                "description": [],
+                "signature": [
+                  "Requireable",
+                  "<object>"
+                ],
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFieldSearchProps.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "props",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; }"
+                    ],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFieldSearchProps.$2",
+                    "type": "string",
+                    "tags": [],
+                    "label": "propName",
+                    "description": [],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFieldSearchProps.$3",
+                    "type": "string",
+                    "tags": [],
+                    "label": "componentName",
+                    "description": [],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFieldSearchProps.$4",
+                    "type": "string",
+                    "tags": [],
+                    "label": "location",
+                    "description": [],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "savedObjects",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.euiFieldSearchProps.$5",
+                    "type": "string",
+                    "tags": [],
+                    "label": "propFullName",
+                    "description": [],
+                    "path": "node_modules/@types/prop-types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectFinderUi.defaultProps",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultProps",
+            "description": [],
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectFinderUi.defaultProps.euiFormRowProps",
+                "type": "Object",
+                "tags": [],
+                "label": "euiFormRowProps",
+                "description": [],
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": []
+              },
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectFinderUi.defaultProps.euiFieldSearchProps",
+                "type": "Object",
+                "tags": [],
+                "label": "euiFieldSearchProps",
+                "description": [],
+                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": []
               }
             ]
           },

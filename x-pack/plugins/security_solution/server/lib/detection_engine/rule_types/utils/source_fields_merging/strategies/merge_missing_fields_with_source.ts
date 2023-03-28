@@ -12,8 +12,8 @@ import { filterFieldEntries } from '../utils/filter_field_entries';
 import type { FieldsType, MergeStrategyFunction } from '../types';
 import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
 import { isTypeObject } from '../utils/is_type_object';
-import { arrayInPathExists } from '../utils/array_in_path_exists';
 import { isNestedObject } from '../utils/is_nested_object';
+import { isPathValid } from '../utils/is_path_valid';
 
 /**
  * Merges only missing sections of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information
@@ -79,7 +79,7 @@ const hasEarlyReturnConditions = ({
   return (
     fieldsValue.length === 0 ||
     valueInMergedDocument !== undefined ||
-    arrayInPathExists(fieldsKey, merged) ||
+    !isPathValid(fieldsKey, merged) ||
     isNestedObject(fieldsValue) ||
     isTypeObject(fieldsValue)
   );

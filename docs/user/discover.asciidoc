@@ -13,7 +13,7 @@ about the structure of the fields, and display your findings in a visualization.
 You can also customize and save your searches and place them on a dashboard.
 
 [role="screenshot"]
-image::images/discover.png[A view of the Discover app]
+image::images/hello-field.png[A view of the Discover app]
 
 
 [float]
@@ -82,13 +82,12 @@ that shows all the documents that match your search.
 By default, the document table includes a column for the time field and a column that lists all other fields in the document.
 You’ll modify the document table to display your fields of interest.
 
-. Scan through the list of **Available fields** until you find the `manufacturer` field.
-You can also search for the field by name.
+. In the sidebar, enter `ma` to in the search field to find the `manufacturer` field.
 +
 [role="screenshot"]
 image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
 
-. Click `manufacturer` to view its most popular values.
+. In the *Available fields* list, click `manufacturer` to view its most popular values.
 +
 **Discover** shows the top 10 values and the number of records used to calculate those values.
 
@@ -104,14 +103,30 @@ them to the document table. Your table should look similar to this:
 [role="screenshot"]
 image:images/document-table.png[Document table with fields for manufacturer, customer_first_name, and customer_last_name]
 
-. To rearrange the table columns, click a
-column header, and then select *Move left* or *Move right*.
 
-. To view more of the document table,
+. Optionally try out these actions:
++
+* To rearrange the table columns, click a
+column header, and then select *Move left* or *Move right*.
++
+* To copy the name or values in a column to the clipboard, click the column header and select the desired **Copy** option.
++
+* For keyboard shortcuts on the document table, click
+image:images/keyboard-shortcut-icon.png[icon button for opening list of keyboard shortcuts, width=24px].
++
+* To view more of the document table,
 click
 image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
 to open the *Chart options* menu,
 and then select *Hide chart*.
++
+* To toggle the table in and out of fullscreen mode, click the fullscreen icon
+image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode].
+
+
+
+
+
 
 [float]
 [[add-field-in-discover]]
@@ -137,7 +152,7 @@ emit("Hello World!");
 
 . Click *Save*.
 
-. In the fields list, search for the *hello* field, and then add it to the document table.
+. In the sidebar, search for the *hello* field, and then add it to the document table.
 +
 [role="screenshot"]
 image:images/hello-field.png[hello field in the document tables]
@@ -178,7 +193,7 @@ you can use to build a structured query.
 Search the ecommerce data for documents where the country matches US:
 
 . Enter `g`, and then select *geoip.country_iso_code*.
-. Select *:* for equals some value and *US*, and then click *Refresh*.
+. Select *:* for equals some value and *US*, and then click the refresh button or press the Enter key.
 . For a more complex search, try:
 +
 ```ts
@@ -197,7 +212,8 @@ and more.
 Exclude documents where day of week is not Wednesday:
 
 . Click image:images/add-icon.png[Add icon] next to the query bar.
-. In the *Add filter* pop-up, set *Field* to *day_of_week*, *Operator* to *is not*, and *Value* to *Wednesday*.
+. In the *Add filter* pop-up, set the field to *day_of_week*, the operator to *is not*,
+and the value to *Wednesday*.
 +
 [role="screenshot"]
 image:images/discover-add-filter.png[Add filter dialog in Discover]
@@ -242,19 +258,20 @@ the document table, the sort order, and the {data-source}.
 
 . In the toolbar, click **Save**.
 
+. Give your search a title.
+
 . Optionally store <<managing-tags,tags>> and the time range with the search.
 
-. Give your search a title, and then click **Save**.
+. Click **Save**.
 
 [float]
 === Visualize your findings
 If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
 visualize it from **Discover**.
 
-. From the **Available fields** list, click  `day_of_week`, and then click **Visualize**.
-+
-[role="screenshot"]
-image:images/discover-visualize.png[Discover sidebar field popover with visualize button, width=75%]
+. In the sidebar, find and then click `day_of_week`.
+
+. In the popup, click **Visualize**.
 +
 {kib} creates a visualization best suited for this field.
 
@@ -315,6 +332,6 @@ include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
 
 include::{kib-repo-dir}/discover/save-search.asciidoc[]
 
-include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
-
 include::{kib-repo-dir}/discover/field-statistics.asciidoc[]
+
+include::{kib-repo-dir}/discover/search-sessions.asciidoc[]

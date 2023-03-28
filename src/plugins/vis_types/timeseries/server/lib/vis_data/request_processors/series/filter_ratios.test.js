@@ -73,7 +73,7 @@ describe('ratios(req, panel, series, esQueryConfig, seriesIndex)', () => {
                     },
                     script:
                       'params.numerator != null && params.denominator != null &&' +
-                      ' params.denominator > 0 ? params.numerator / params.denominator : 0',
+                      ' params.denominator != 0 ? params.numerator / params.denominator : 0',
                   },
                 },
                 'metric-1-denominator': {
@@ -150,7 +150,7 @@ describe('ratios(req, panel, series, esQueryConfig, seriesIndex)', () => {
                     },
                     script:
                       'params.numerator != null && params.denominator != null &&' +
-                      ' params.denominator > 0 ? params.numerator / params.denominator : 0',
+                      ' params.denominator != 0 ? params.numerator / params.denominator : 0',
                   },
                 },
                 'metric-1-denominator': {

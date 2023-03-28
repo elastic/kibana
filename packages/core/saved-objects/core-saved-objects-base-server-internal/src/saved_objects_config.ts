@@ -11,6 +11,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const migrationSchema = schema.object({
+  algorithm: schema.oneOf([schema.literal('v2'), schema.literal('zdt')], {
+    defaultValue: 'v2',
+  }),
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
   discardUnknownObjects: schema.maybe(

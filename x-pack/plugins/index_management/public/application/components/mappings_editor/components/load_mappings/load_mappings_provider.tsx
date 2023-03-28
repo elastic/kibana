@@ -249,7 +249,11 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
             </div>
           ) : (
             <>
-              <EuiCallOut title={i18nTexts.validationErrors.title} iconType="alert" color="warning">
+              <EuiCallOut
+                title={i18nTexts.validationErrors.title}
+                iconType="warning"
+                color="warning"
+              >
                 <EuiText>
                   <p>{i18nTexts.validationErrors.description}</p>
                 </EuiText>

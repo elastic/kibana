@@ -58,7 +58,7 @@ export const MonitorEditPage: React.FC = () => {
   if (error) {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         color="danger"
         title={
           <h3>

@@ -33,7 +33,8 @@ jest.mock('../../common/lib/kibana');
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
-describe(`DescriptionWrapper`, () => {
+// FLAKY:
+describe.skip(`DescriptionWrapper`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };

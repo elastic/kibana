@@ -37,7 +37,7 @@ export const useLogEntryHighlights = (
 
         return await fetchLogEntriesHighlights(
           {
-            sourceId,
+            logView: { type: 'log-view-reference', logViewId: sourceId },
             startTimestamp,
             endTimestamp,
             center: centerPoint,

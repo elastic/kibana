@@ -44,7 +44,10 @@ function setup({
   // mock transaction types
   jest
     .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
-    .mockReturnValue(serviceTransactionTypes);
+    .mockReturnValue({
+      transactionTypes: serviceTransactionTypes,
+      status: useFetcherHook.FETCH_STATUS.SUCCESS,
+    });
 
   // mock transaction types
   jest

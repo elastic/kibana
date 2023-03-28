@@ -57,7 +57,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
 
   const foundJourney = journeyStartHit || journeySummaryHit;
 
-  const journeySource = journeyStartHit?._source ?? journeySummaryHit?._source;
+  const journeySource = journeySummaryHit?._source ?? journeyStartHit?._source;
 
   if (journeySource && foundJourney) {
     const baseSiblingParams = createEsParams({

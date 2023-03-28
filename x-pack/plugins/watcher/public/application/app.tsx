@@ -63,7 +63,7 @@ export const App = (deps: AppDeps) => {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h1>
               <FormattedMessage

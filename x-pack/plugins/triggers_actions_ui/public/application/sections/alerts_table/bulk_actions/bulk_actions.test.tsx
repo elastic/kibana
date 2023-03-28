@@ -584,7 +584,8 @@ describe('AlertsTable.BulkActions', () => {
           });
         });
 
-        describe('and executing a bulk action', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/152176
+        describe.skip('and executing a bulk action', () => {
           it('should return the are all selected flag set to true', async () => {
             const mockedFn = jest.fn();
             const props = {

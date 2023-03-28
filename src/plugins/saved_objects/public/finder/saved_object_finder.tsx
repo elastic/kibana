@@ -27,6 +27,9 @@ import {
   EuiSpacer,
   EuiTablePagination,
   IconType,
+  EuiFormRow,
+  EuiFieldSearchProps,
+  EuiFormRowProps,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
@@ -80,6 +83,8 @@ interface BaseSavedObjectFinder {
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
+  euiFormRowProps?: Partial<EuiFormRowProps>;
+  euiFieldSearchProps?: EuiFieldSearchProps;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -110,6 +115,13 @@ class SavedObjectFinderUi extends React.Component<
     initialPageSize: PropTypes.oneOf([5, 10, 15, 25]),
     fixedPageSize: PropTypes.number,
     showFilter: PropTypes.bool,
+    euiFormRowProps: PropTypes.object,
+    euiFieldSearchProps: PropTypes.object,
+  };
+
+  static defaultProps = {
+    euiFormRowProps: {},
+    euiFieldSearchProps: {},
   };
 
   private isComponentMounted: boolean = false;
@@ -336,109 +348,114 @@ class SavedObjectFinderUi extends React.Component<
     const availableSavedObjectMetaData = this.getAvailableSavedObjectMetaData();
 
     return (
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={true}>
-          <EuiFieldSearch
-            placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
-              defaultMessage: 'Search…',
-            })}
-            aria-label={i18n.translate('savedObjects.finder.searchPlaceholder', {
-              defaultMessage: 'Search…',
-            })}
-            fullWidth
-            value={this.state.query}
-            onChange={(e) => {
-              this.setState(
-                {
-                  query: e.target.value,
-                },
-                this.fetchItems
-              );
-            }}
-            data-test-subj="savedObjectFinderSearchInput"
-            isLoading={this.state.isFetchingItems}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
-            <EuiPopover
-              id="addPanelSortPopover"
-              panelClassName="euiFilterGroup__popoverPanel"
-              panelPaddingSize="none"
-              isOpen={this.state.sortOpen}
-              closePopover={() => this.setState({ sortOpen: false })}
-              button={
-                <EuiFilterButton
-                  onClick={() =>
-                    this.setState(({ sortOpen }) => ({
-                      sortOpen: !sortOpen,
-                    }))
-                  }
-                  iconType="arrowDown"
-                  isSelected={this.state.sortOpen}
-                  data-test-subj="savedObjectFinderSortButton"
-                >
-                  {i18n.translate('savedObjects.finder.sortButtonLabel', {
-                    defaultMessage: 'Sort',
-                  })}
-                </EuiFilterButton>
-              }
-            >
-              <EuiContextMenuPanel items={this.getSortOptions()} />
-            </EuiPopover>
-            {this.props.showFilter && (
+      <EuiFormRow fullWidth {...this.props.euiFormRowProps}>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={true}>
+            <EuiFieldSearch
+              placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
+                defaultMessage: 'Search…',
+              })}
+              aria-label={i18n.translate('savedObjects.finder.searchPlaceholder', {
+                defaultMessage: 'Search…',
+              })}
+              fullWidth
+              value={this.state.query}
+              onChange={(e) => {
+                this.setState(
+                  {
+                    query: e.target.value,
+                  },
+                  this.fetchItems
+                );
+              }}
+              data-test-subj="savedObjectFinderSearchInput"
+              isLoading={this.state.isFetchingItems}
+              {...this.props.euiFieldSearchProps}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup>
               <EuiPopover
-                id="addPanelFilterPopover"
+                id="addPanelSortPopover"
                 panelClassName="euiFilterGroup__popoverPanel"
                 panelPaddingSize="none"
-                isOpen={this.state.filterOpen}
-                closePopover={() => this.setState({ filterOpen: false })}
+                isOpen={this.state.sortOpen}
+                closePopover={() => this.setState({ sortOpen: false })}
                 button={
                   <EuiFilterButton
                     onClick={() =>
-                      this.setState(({ filterOpen }) => ({
-                        filterOpen: !filterOpen,
+                      this.setState(({ sortOpen }) => ({
+                        sortOpen: !sortOpen,
                       }))
                     }
                     iconType="arrowDown"
-                    data-test-subj="savedObjectFinderFilterButton"
-                    isSelected={this.state.filterOpen}
-                    numFilters={this.props.savedObjectMetaData.length}
-                    hasActiveFilters={this.state.filteredTypes.length > 0}
-                    numActiveFilters={this.state.filteredTypes.length}
+                    isSelected={this.state.sortOpen}
+                    data-test-subj="savedObjectFinderSortButton"
                   >
-                    {i18n.translate('savedObjects.finder.filterButtonLabel', {
-                      defaultMessage: 'Types',
+                    {i18n.translate('savedObjects.finder.sortButtonLabel', {
+                      defaultMessage: 'Sort',
                     })}
                   </EuiFilterButton>
                 }
               >
-                <EuiContextMenuPanel
-                  items={this.props.savedObjectMetaData.map((metaData) => (
-                    <EuiContextMenuItem
-                      key={metaData.type}
-                      disabled={!availableSavedObjectMetaData.includes(metaData)}
-                      icon={this.state.filteredTypes.includes(metaData.type) ? 'check' : 'empty'}
-                      data-test-subj={`savedObjectFinderFilter-${metaData.type}`}
-                      onClick={() => {
-                        this.setState(({ filteredTypes }) => ({
-                          filteredTypes: filteredTypes.includes(metaData.type)
-                            ? filteredTypes.filter((t) => t !== metaData.type)
-                            : [...filteredTypes, metaData.type],
-                          page: 0,
-                        }));
-                      }}
-                    >
-                      {metaData.name}
-                    </EuiContextMenuItem>
-                  ))}
-                />
+                <EuiContextMenuPanel items={this.getSortOptions()} />
               </EuiPopover>
-            )}
-          </EuiFilterGroup>
-        </EuiFlexItem>
-        {this.props.children ? <EuiFlexItem grow={false}>{this.props.children}</EuiFlexItem> : null}
-      </EuiFlexGroup>
+              {this.props.showFilter && (
+                <EuiPopover
+                  id="addPanelFilterPopover"
+                  panelClassName="euiFilterGroup__popoverPanel"
+                  panelPaddingSize="none"
+                  isOpen={this.state.filterOpen}
+                  closePopover={() => this.setState({ filterOpen: false })}
+                  button={
+                    <EuiFilterButton
+                      onClick={() =>
+                        this.setState(({ filterOpen }) => ({
+                          filterOpen: !filterOpen,
+                        }))
+                      }
+                      iconType="arrowDown"
+                      data-test-subj="savedObjectFinderFilterButton"
+                      isSelected={this.state.filterOpen}
+                      numFilters={this.props.savedObjectMetaData.length}
+                      hasActiveFilters={this.state.filteredTypes.length > 0}
+                      numActiveFilters={this.state.filteredTypes.length}
+                    >
+                      {i18n.translate('savedObjects.finder.filterButtonLabel', {
+                        defaultMessage: 'Types',
+                      })}
+                    </EuiFilterButton>
+                  }
+                >
+                  <EuiContextMenuPanel
+                    items={this.props.savedObjectMetaData.map((metaData) => (
+                      <EuiContextMenuItem
+                        key={metaData.type}
+                        disabled={!availableSavedObjectMetaData.includes(metaData)}
+                        icon={this.state.filteredTypes.includes(metaData.type) ? 'check' : 'empty'}
+                        data-test-subj={`savedObjectFinderFilter-${metaData.type}`}
+                        onClick={() => {
+                          this.setState(({ filteredTypes }) => ({
+                            filteredTypes: filteredTypes.includes(metaData.type)
+                              ? filteredTypes.filter((t) => t !== metaData.type)
+                              : [...filteredTypes, metaData.type],
+                            page: 0,
+                          }));
+                        }}
+                      >
+                        {metaData.name}
+                      </EuiContextMenuItem>
+                    ))}
+                  />
+                </EuiPopover>
+              )}
+            </EuiFilterGroup>
+          </EuiFlexItem>
+          {this.props.children ? (
+            <EuiFlexItem grow={false}>{this.props.children}</EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFormRow>
     );
   }
 

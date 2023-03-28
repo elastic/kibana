@@ -5,26 +5,14 @@
  * 2.0.
  */
 import React, { memo, useMemo } from 'react';
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
+
 import type {
   ActionDetails,
   MaybeImmutable,
   ResponseActionExecuteOutputContent,
 } from '../../../../common/endpoint/types';
-
-const EXECUTE_FILE_LINK_TITLE = i18n.translate(
-  'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
-  { defaultMessage: 'Click here to download full output' }
-);
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
   output: {
@@ -57,14 +45,15 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
   },
 });
 interface ExecuteActionOutputProps {
-  content: string;
+  content?: string;
   initialIsOpen?: boolean;
-  isTruncated: boolean;
+  isTruncated?: boolean;
+  textSize?: 's' | 'xs';
   type: 'error' | 'output';
 }
 
 const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
-  ({ content, initialIsOpen = false, isTruncated, type }) => {
+  ({ content, initialIsOpen = false, isTruncated = false, textSize, type }) => {
     const id = useGeneratedHtmlId({
       prefix: 'executeActionOutputAccordions',
       suffix: type,
@@ -77,7 +66,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
         paddingSize="s"
       >
         <EuiText
-          size="s"
+          size={textSize}
           style={{
             whiteSpace: 'pre-wrap',
             lineBreak: 'anywhere',
@@ -91,7 +80,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
 );
 ExecutionActionOutputAccordion.displayName = 'ExecutionActionOutputAccordion';
 
-interface ExecuteActionHostResponseOutputProps {
+export interface ExecuteActionHostResponseOutputProps {
   action: MaybeImmutable<ActionDetails>;
   agentId?: string;
   'data-test-subj'?: string;
@@ -99,42 +88,36 @@ interface ExecuteActionHostResponseOutputProps {
 }
 
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
-  ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize }) => {
+  ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
     const outputContent = useMemo(
       () =>
         action.outputs &&
         action.outputs[agentId] &&
         (action.outputs[agentId].content as ResponseActionExecuteOutputContent),
-      [agentId, action]
+      [action.outputs, agentId]
     );
 
-    return (
-      <EuiFlexGroup direction="column" data-test-subj={dataTestSubj}>
-        <EuiFlexItem>
-          <ResponseActionFileDownloadLink
-            action={action}
-            buttonTitle={EXECUTE_FILE_LINK_TITLE}
-            textSize={textSize}
-          />
-        </EuiFlexItem>
+    if (!outputContent) {
+      return <></>;
+    }
 
-        {outputContent && (
-          <EuiFlexItem>
-            <ExecutionActionOutputAccordion
-              content={outputContent.stdout}
-              isTruncated={outputContent.stdoutTruncated}
-              initialIsOpen
-              type="output"
-            />
-            <EuiSpacer size="m" />
-            <ExecutionActionOutputAccordion
-              content={outputContent.stderr}
-              isTruncated={outputContent.stderrTruncated}
-              type="error"
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+    return (
+      <EuiFlexItem data-test-subj={dataTestSubj}>
+        <ExecutionActionOutputAccordion
+          content={outputContent.stdout}
+          isTruncated={outputContent.stdout_truncated}
+          initialIsOpen
+          textSize={textSize}
+          type="output"
+        />
+        <EuiSpacer size="m" />
+        <ExecutionActionOutputAccordion
+          content={outputContent.stderr}
+          isTruncated={outputContent.stderr_truncated}
+          textSize={textSize}
+          type="error"
+        />
+      </EuiFlexItem>
     );
   }
 );

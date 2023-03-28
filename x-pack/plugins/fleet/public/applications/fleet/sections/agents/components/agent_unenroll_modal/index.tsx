@@ -133,7 +133,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
                 defaultMessage: 'This agent is running Fleet Server',
               })}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             >
               <p>
                 <FormattedMessage

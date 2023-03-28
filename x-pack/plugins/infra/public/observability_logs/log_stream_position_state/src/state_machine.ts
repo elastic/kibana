@@ -23,7 +23,7 @@ import type {
 import { initializeFromUrl, updateContextInUrl } from './url_state_storage_service';
 
 export const createPureLogStreamPositionStateMachine = (initialContext: LogStreamPositionContext) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEAMgHkAggBEAkgDkA4gH1BsgGpiAogHUZGACpCASpuUiA2gAYAuolAAHVLEatU9CyAAeiALQAmAJzUPHgGwArIEALAAcHmHhXsEhADQgAJ6IAQDM1IHGYQDs2ZnZxl5e-l6pAL5lCWiYuAQkZGAUVHRMLGwc3BD8wuLScgKKKuoAYkJifAYm5kgg1rb2jjOuCJ4hAIzUqZklHgX+xqlrkQnJCKlB1P4loYH+qV7hHoEVVejYeESk5FiUNAzMdnaXF4glEklk8hkSjUGgAqgBheHKAyTMxOOaAhxOZbZNbZajGXLBVIkrJrYInRBHYzUEIeVIhVJhNZZLws7IhF4garvOpfRo-Zr-NrsYFdUG9CEDKFDOGI5EiSZraZWGyYxagHEhEIEwkeI7Zc7GO6UhCZHzZML7MKBDwhQp0zmVblvWqfBpNGhofAQZhQPjoBSMMAAd26YL6kOhIzGEyMaJmGIW2JS4VpJTCWXp5K82Q8pvN1Et1tt9oedq5PLd9W+v2o3t99H9geDYYl4P6gxhGARSJR8ZVszVyaWiEZPnt-m8Ry8xjta38pqN1FK+uy+w8xhCgS8lddHxrArrDb9AagQdD4clnZl3d7CqVg6TjCxo4QISumy2MWNMWiAVNO58WMFkImMOc50CMI9xqA9+U9etUB9U8W1DYZ8EYZAQR6Dso1lLRdH0Ad0WHF8NRcdxvF8AJYgiKIwhiUIC1SDwMgNcC8g5O1nmdKs4I9QUaAAC3wWAzwvEMxHoX0AGM4BaAFWFFToeB0ZQkTEBQDBkSQxE0MQhD4GRiF0IQAFllH0HQMCmEj5jIlMEBnfxqAiYojjWVJCjnJcwnSIIrSuNZZ2CGJyl4-c+QEusRLE1DJOkxg5NgBSRQ6XgFEMsQRBkABFWFlB0ABNGR4QACSEaRUSfUjX01Kl-DyWk1giW0p3tElTTxfFwhCPYQIXXE1idV5YKi2tmli8TWyk2T5OFQFlN4SRMr4bK8oK4rSoqqriMTWryOWBdGtckCQMCEknn8MIl21FcWLxVJDUzfwWv8GDeXdCbhNE6bQ1mpL5MUoEVNW9b8sKkrysqqRqrs9VHMGwJmtagI7QOVICznFd1yebdMgutY1gqZ16FQCA4CcPjxqPKh4ZHeqVkiHwtl-XZjQOTzTTcNk2NtQ4-A5q0PureDBNSxb0ogemHLfOkurpahyXArIbTZIItxF-jvsQ5Cmz+kMZbqiiEF2DJQiuK0bVyH94iSRAmTCTZ3ICPMtj8HjRs+w8EJPfX4vQzDICNw7EGR5k7S8NJGrZNXAJ3IsnvtImt28aCIrGr7aZ+uLzxmxLkpDxHNxpC7dn2K404pe331YrwokNQ1GIF7ItZphCpvigHkolpSpaLt8jjTMv12NKd6+r04nlYgbDjxO0-KnNus4736u4LoG0rFAfGc8qIi0Cck1cCQ1K4LJ4iznS1zjzG0WOXn3xcIRhYFsf28-+jf4H2+zjaOw4XKbijt4YIWRbjZHjhaJ6T1cSwIxiTMoQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAKqsAlluagHbb5ZgB0Arjee1fsuQF6QBiAEoBRAMIiAkgDURAEQD6kgHKSAKpICCAGQUBFAKoihATQXFNQzQFkRa4xgDaABgC6iUAAcylajQ8gAB6IALQAbACsTAAcAEzRzgCcACzJccmxAIzR0QA0IACeiNkAzExhJSUA7FURsSXRYYklEVUAvm35aJi4BCQ+VLT0jEwcvtx8HFAAYjiohAY4yAIq6lrakgBa8grTQgDy1goGQtou7kgg3hSD-pfBCCGxTBHREYnOTelZ0bX5RQg0okmD8miVMhEwmEqmFGh0uuhsHgiKQbn5hswxlwePwIExrr5aLBRpxyBNcQIAFIGazEBRqfb0ywAcTs5n2GDW+2U5wCBNuAQeVUSz2SULCmQ+zlScQi-0QyWcVSYVU+QIhzlejQi8JA3SRfVRhLoWAYmNJ5Mg+IGfmJWLJOMEomI+yEagU0kknIAQtoROzORpuU43HybbRBYg6mEmGloskqrEqjkwrFYvLAdEyhkItLMlVqtVc+1OnrEb0UeGTWaSeNHXj+bba9i+IINLYFGIABKaZSsuS8y6NiP3RDC57ChOpZzStKxOWFRBZMqpqr5xIpT6xEXRXX6iv9NFDU0je2WvFYAAWcywWB4NCgxHwMBENAgylQVAAZuQAMYMJtyAgZAwGEEQXTdD0vUkX1-RdQNJGDQcvCrSMEHeTJygSWJkg+X5FQhDN4xjNNIk1V4xRKWIwj3ctkUPY0MWbB1Wwva9PzvKYnxfN8P2-P8AKJJgrxvTiHzAiD3U9H0-QDLllBDC4UKPO5QAeTJJTKVVITTRpt3iDMaiiCINUSDTMlw-Nklonp6KNW4mLPethPY2970fZ8wFfd9P3IH9-1uYkRI49yBECWAT2YfAv0YHAAApRG0TQNFkBQRGURQDGIORkv9OQRCSkwAEoBH3Oyq0ci1nOCtyuM87y+L8gTApc0T3OQq5UNHBAzOiFVohFEo5xKZx6mSDNeqYDTakyVMlWiTIhpsg1KxUyq61Y1qQrqnifP4gKmxqsSoDCiKa2i2KEoK5KZH9dLMuy3KFHywqSrKw0Ksi5jzy22qH24rzeN8-zBJoILXOOxxMiUzqVLQ2plTqEoRWnGcUgmpopvjRUYWSbJWhKZaD3s9EvqczajvcgGGuB5qmxoYGCimAQOuHVSggVGpymhMJnAhVUEjqDNMiVKJaiG+dfgG6prN1BmIDgAJ3tWxjIrDOHupCDSyjiBIUjnDJsjyRdHjSGJEwWjd8zeNGifKtavrYcncXV400IyIjMI3b36lVXmIgTO2PodmtnamWZ5kWZBXYFTXnmlWE-hNka+uoxIA6zRJZUJ0tlYYhyyaq1iY78NCSkiFULLnSFkYlaEMwacok2yGcRZF1pMiDlWC9DovcWtFT4CHLq1IVRaYnjapEmTRNnHBYXqKm5vhWaBIJTqLv89J3uNv7tm7T7yAS5HUfAQlCfkinmfYjnzIM23KI04z5Hs83knjx3lt+8pnbAb2pqDpEmPuzB4eMtJV1lBURIdcqgZlhH1PmJkcJDTqItEsCJbLB1Vp-Fi38IZU3qkDfaoM7TATAMA92581wynnFAmBRExQgmormCIFEKjUTfp9HBP0f7-UIf-EGLVeFQAod1cyzx4isKqHOfMkIGEkWYeRYiVEaK5zolgnup5D5sTar-GmxCWoM2-EzB8ojT5t2BK8HClFFqREIibduzgVQRCGiNJUyRWEig6B0IAA */
   createMachine<LogStreamPositionContext, LogStreamPositionEvent, LogStreamPositionTypestate>(
     {
       context: initialContext,
@@ -92,7 +92,7 @@ export const createPureLogStreamPositionStateMachine = (initialContext: LogStrea
                 },
                 throttling: {
                   after: {
-                    [RELATIVE_END_UPDATE_DELAY]: [
+                    RELATIVE_END_UPDATE_DELAY: [
                       {
                         target: 'notifying',
                         cond: 'hasReachedPageEndBuffer',
@@ -184,6 +184,9 @@ export const createPureLogStreamPositionStateMachine = (initialContext: LogStrea
               } as LogStreamPositionContextWithVisiblePositions)
             : {}
         ),
+      },
+      delays: {
+        RELATIVE_END_UPDATE_DELAY,
       },
       guards: {
         // User is close to the bottom of the page.
