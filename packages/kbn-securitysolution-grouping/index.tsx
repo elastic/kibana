@@ -8,21 +8,23 @@
 
 import { getGroupingQuery, isNoneGroup, useGrouping } from './src';
 import type {
+  DynamicGroupingProps,
+  GroupOption,
   GroupingAggregation,
+  GroupsPagingSettingsById,
   NamedAggregation,
   RawBucket,
   StatRenderer,
-  DynamicGroupingProps,
-  GroupsPagingSettingsById,
 } from './src';
 
 export { getGroupingQuery, isNoneGroup, useGrouping };
 
 export type {
+  DynamicGroupingProps,
+  GroupOption,
   GroupingAggregation,
+  GroupsPagingSettingsById,
   NamedAggregation,
   RawBucket,
   StatRenderer,
-  DynamicGroupingProps,
-  GroupsPagingSettingsById,
 };

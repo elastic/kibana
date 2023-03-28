@@ -9,8 +9,9 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
+import type { GroupOption } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isEqual } from 'lodash/fp';
 import { updateGroupSelector } from '../../../common/store/grouping/actions';
 import type { TableIdLiteral } from '../../../../common/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
@@ -77,15 +78,15 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     tracker: track,
   });
 
-  const selectorOptions = useRef('');
+  const selectorOptions = useRef<GroupOption[]>([]);
 
   useEffect(() => {
-    if (isNoneGroup(selectedGroups)) {
-      const stringifiedOptions = JSON.stringify(groupSelector.props.options);
-      if (stringifiedOptions !== selectorOptions.current) {
-        selectorOptions.current = stringifiedOptions;
-        dispatch(updateGroupSelector({ groupSelector }));
-      }
+    if (
+      isNoneGroup(selectedGroups) &&
+      !isEqual(selectorOptions.current, groupSelector.props.options)
+    ) {
+      selectorOptions.current = groupSelector.props.options;
+      dispatch(updateGroupSelector({ groupSelector }));
     }
   }, [dispatch, groupSelector, selectedGroups]);
 

@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
+import { isEqual } from 'lodash/fp';
 import type { Filter, Query, BoolQuery } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type {
@@ -17,6 +18,7 @@ import type {
 } from '@kbn/securitysolution-grouping';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { GroupingQuery } from '@kbn/securitysolution-grouping/src';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { TableIdLiteral } from '../../../../common/types';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -154,11 +156,11 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   >([]);
 
   useEffect(() => {
-    if (JSON.stringify(prevFilters.current) !== JSON.stringify(additionalFilters)) {
+    if (!isEqual(prevFilters.current, additionalFilters)) {
       prevFilters.current = additionalFilters;
       resetPagination();
     }
-  }, [additionalFilters, prevFilters, resetPagination]);
+  }, [additionalFilters, resetPagination]);
 
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
@@ -186,8 +188,13 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     skip: isNoneGroup([selectedGroup]),
   });
 
+  const prevQueryGroups = useRef<GroupingQuery | null>(null);
+
   useEffect(() => {
-    setAlertsQuery(queryGroups);
+    if (!isEqual(prevQueryGroups.current, queryGroups)) {
+      prevQueryGroups.current = queryGroups;
+      setAlertsQuery(queryGroups);
+    }
   }, [queryGroups, setAlertsQuery]);
 
   const { deleteQuery, setQuery } = useGlobalTime(false);
