@@ -242,7 +242,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
-        outputRule.revision = 2; // Migration of action results in additional revision increment (change to `notifyWhen`), so expected revision is 2
+        outputRule.revision = 1;
         outputRule.actions = [
           {
             action_type_id: '.slack',

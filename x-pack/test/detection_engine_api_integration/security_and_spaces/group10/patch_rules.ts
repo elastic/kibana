@@ -380,7 +380,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ];
         outputRule.throttle = '1h';
-        outputRule.revision = 2; // Expected revision is 2 as call to `createLegacyRuleAction()` does two separate rules updates for `notifyWhen` & `actions` field
+        outputRule.revision = 1;
         expect(bodyToCompare).to.eql(outputRule);
 
         // legacy sidecar action should be gone

@@ -182,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
           const bodyToCompare = removeServerGeneratedProperties(response);
           const outputRule = getSimpleRuleOutput(response.rule_id);
           outputRule.name = 'some other name';
-          outputRule.revision = 2;
+          outputRule.revision = 1;
           outputRule.actions = [
             {
               action_type_id: '.slack',
@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
         body.forEach((response) => {
           const outputRule = getSimpleRuleOutput(response.rule_id);
           outputRule.name = 'some other name';
-          outputRule.revision = 2;
+          outputRule.revision = 1;
           outputRule.actions = [];
           outputRule.throttle = 'no_actions';
           const bodyToCompare = removeServerGeneratedProperties(response);
