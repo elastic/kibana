@@ -10,6 +10,7 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
 import { DataView } from '@kbn/data-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -51,7 +52,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { makePublicExecutionContext } from '../../../util';
+import { getExecutionContextId, mergeExecutionContext } from '../execution_context_utils';
 import { isMvt } from './is_mvt';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { getIconSize } from './get_icon_size';
@@ -262,6 +263,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     isRequestStillActive,
     bufferedExtent,
     inspectorAdapters,
+    executionContext,
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
@@ -273,6 +275,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     isRequestStillActive: () => boolean;
     bufferedExtent: MapExtent;
     inspectorAdapters: Adapters;
+    executionContext: KibanaExecutionContext;
   }) {
     const gridsPerRequest: number = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
     const aggs: any = {
@@ -343,7 +346,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
           }
         ),
         searchSessionId,
-        executionContext: makePublicExecutionContext('es_geo_grid_source:cluster_composite'),
+        executionContext: mergeExecutionContext(
+          { description: 'es_geo_grid_source:cluster_composite' },
+          executionContext
+        ),
         requestsAdapter: inspectorAdapters.requests,
       });
 
@@ -371,6 +377,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     bufferedExtent,
     tooManyBuckets,
     inspectorAdapters,
+    executionContext,
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
@@ -381,6 +388,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     bufferedExtent: MapExtent;
     tooManyBuckets: boolean;
     inspectorAdapters: Adapters;
+    executionContext: KibanaExecutionContext;
   }): Promise<Feature[]> {
     const valueAggsDsl = tooManyBuckets
       ? this.getValueAggsDsl(indexPattern, (metric) => {
@@ -417,7 +425,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         defaultMessage: 'Elasticsearch geo grid aggregation request',
       }),
       searchSessionId,
-      executionContext: makePublicExecutionContext('es_geo_grid_source:cluster'),
+      executionContext: mergeExecutionContext(
+        { description: 'es_geo_grid_source:cluster' },
+        executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -478,6 +489,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
             isRequestStillActive,
             bufferedExtent: requestMeta.buffer,
             inspectorAdapters,
+            executionContext: requestMeta.executionContext,
           })
         : await this._nonCompositeAggRequest({
             searchSource,
@@ -489,6 +501,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
             bufferedExtent: requestMeta.buffer,
             tooManyBuckets,
             inspectorAdapters,
+            executionContext: requestMeta.executionContext,
           });
 
     return {
@@ -520,15 +533,21 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    return `${mvtUrlServicePath}\
-?geometryFieldName=${this._descriptor.geoField}\
-&index=${dataView.getIndexPattern()}\
-&gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
-&hasLabels=${hasLabels}\
-&buffer=${buffer}\
-&requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
-&renderAs=${this._descriptor.requestType}\
-&token=${refreshToken}`;
+    const params = new URLSearchParams();
+    params.set('geometryFieldName', this._descriptor.geoField);
+    params.set('index', dataView.getIndexPattern());
+    params.set('gridPrecision', this._getGeoGridPrecisionResolutionDelta().toString());
+    params.set('hasLabels', hasLabels.toString());
+    params.set('buffer', buffer.toString());
+    params.set('requestBody', encodeMvtResponseBody(searchSource.getSearchRequestBody()));
+    params.set('renderAs', this._descriptor.requestType);
+    params.set('token', refreshToken);
+    const executionContextId = getExecutionContextId(requestMeta.executionContext);
+    if (executionContextId) {
+      params.set('executionContextId', executionContextId);
+    }
+
+    return `${mvtUrlServicePath}?${params.toString()}`;
   }
 
   isFilterByMapBounds(): boolean {

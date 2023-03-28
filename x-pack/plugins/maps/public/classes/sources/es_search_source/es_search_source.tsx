@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
@@ -74,7 +75,7 @@ import {
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
-import { makePublicExecutionContext } from '../../../util';
+import { getExecutionContextId, mergeExecutionContext } from '../execution_context_utils';
 import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
 type ESSearchSourceSyncMeta = Pick<
@@ -354,7 +355,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document top hits request',
       searchSessionId: requestMeta.searchSessionId,
-      executionContext: makePublicExecutionContext('es_search_source:top_hits'),
+      executionContext: mergeExecutionContext(
+        { description: 'es_search_source:top_hits' },
+        requestMeta.executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -438,7 +442,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document request',
       searchSessionId: requestMeta.searchSessionId,
-      executionContext: makePublicExecutionContext('es_search_source:doc_search'),
+      executionContext: mergeExecutionContext(
+        { description: 'es_search_source:doc_search' },
+        requestMeta.executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -574,7 +581,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: DataView) {
+  async _loadTooltipProperties(
+    docId: string | number,
+    index: string,
+    indexPattern: DataView,
+    executionContext: KibanaExecutionContext
+  ) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -616,7 +628,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const { rawResponse: resp } = await lastValueFrom(
       searchSource.fetch$({
         legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
+        executionContext: mergeExecutionContext(
+          { description: 'es_search_source:load_tooltip_properties' },
+          executionContext
+        ),
       })
     );
 
@@ -643,7 +658,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._tooltipFields.map((field: IField) => field.getName());
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]> {
     if (properties === null) {
       throw new Error('properties cannot be null');
     }
@@ -651,7 +669,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const propertyValues = await this._loadTooltipProperties(
       properties._id,
       properties._index,
-      indexPattern
+      indexPattern,
+      executionContext
     );
     const tooltipProperties = this._tooltipFields.map((field) => {
       const value = propertyValues[field.getName()];
@@ -869,13 +888,19 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     delete requestBody.script_fields;
     delete requestBody.stored_fields;
 
-    return `${mvtUrlServicePath}\
-?geometryFieldName=${this._descriptor.geoField}\
-&index=${dataView.getIndexPattern()}\
-&hasLabels=${hasLabels}\
-&buffer=${buffer}\
-&requestBody=${encodeMvtResponseBody(requestBody)}\
-&token=${refreshToken}`;
+    const params = new URLSearchParams();
+    params.set('geometryFieldName', this._descriptor.geoField);
+    params.set('index', dataView.getIndexPattern());
+    params.set('hasLabels', hasLabels.toString());
+    params.set('buffer', buffer.toString());
+    params.set('requestBody', encodeMvtResponseBody(requestBody));
+    params.set('token', refreshToken);
+    const executionContextId = getExecutionContextId(requestMeta.executionContext);
+    if (executionContextId) {
+      params.set('executionContextId', executionContextId);
+    }
+
+    return `${mvtUrlServicePath}?${params.toString()}`;
   }
 
   async getTimesliceMaskFieldName(): Promise<string | null> {
@@ -935,7 +960,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         abortSignal: abortController.signal,
         sessionId: requestMeta.searchSessionId,
         legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
+        executionContext: mergeExecutionContext(
+          { description: 'es_search_source:all_doc_counts' },
+          requestMeta.executionContext
+        ),
       })
     );
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);

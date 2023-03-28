@@ -6,6 +6,7 @@
  */
 
 import { GeoJsonProperties } from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Query } from '@kbn/data-plugin/common/query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { IField } from '../../fields/field';
@@ -34,6 +35,9 @@ export interface ITermJoinSource extends ISource {
 
   getId(): string;
   getRightFields(): IField[];
-  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]>;
   getFieldByName(fieldName: string): IField | null;
 }

@@ -188,7 +188,7 @@ describe('registerDataHandler', () => {
   });
   describe('Uptime', () => {
     registerDataHandler({
-      appName: 'synthetics',
+      appName: 'uptime',
       fetchData: async () => {
         return {
           title: 'uptime',
@@ -226,13 +226,13 @@ describe('registerDataHandler', () => {
     });
 
     it('registered data handler', () => {
-      const dataHandler = getDataHandler('synthetics');
+      const dataHandler = getDataHandler('uptime');
       expect(dataHandler?.fetchData).toBeDefined();
       expect(dataHandler?.hasData).toBeDefined();
     });
 
     it('returns data when fetchData is called', async () => {
-      const dataHandler = getDataHandler('synthetics');
+      const dataHandler = getDataHandler('uptime');
       const response = await dataHandler?.fetchData(params);
       expect(response).toEqual({
         title: 'uptime',
