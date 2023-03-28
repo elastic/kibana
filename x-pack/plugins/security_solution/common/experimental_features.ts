@@ -161,6 +161,11 @@ export const getEnabledFeatures = (configValue: string[]): Partial<ExperimentalF
   return enabledFeatures;
 };
 
+export const getEnabledFeaturesArray = (configValue: string[]) => {
+  const enabledFeatures = getEnabledFeatures(configValue);
+  return Object.keys(enabledFeatures);
+};
+
 export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {
   return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
