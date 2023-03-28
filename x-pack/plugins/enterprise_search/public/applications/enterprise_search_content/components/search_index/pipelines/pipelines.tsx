@@ -10,6 +10,7 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
@@ -151,6 +152,23 @@ export const SearchIndexPipelines: React.FC = () => {
                   )
             }
             iconType="logstashInput"
+            action={
+              hasIndexIngestionPipeline ? (
+                <EuiBadge color="success">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.customBadge',
+                    { defaultMessage: 'Custom' }
+                  )}
+                </EuiBadge>
+              ) : (
+                <EuiBadge>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.defaultBadge',
+                    { defaultMessage: 'Default' }
+                  )}
+                </EuiBadge>
+              )
+            }
           >
             <IngestPipelinesCard />
           </DataPanel>
