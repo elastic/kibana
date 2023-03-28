@@ -29,9 +29,9 @@ import {
   RawRequest,
   FakeRawRequest,
 } from '@kbn/core-http-server';
+import { RouteValidator } from '@kbn/core-http-route-validator-internal';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
-import { RouteValidator } from './validator';
 
 const requestSymbol = Symbol('request');
 

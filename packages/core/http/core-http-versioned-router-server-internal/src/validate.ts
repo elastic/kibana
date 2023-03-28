@@ -8,7 +8,7 @@
 
 import type { RouteValidatorFullConfig } from '@kbn/core-http-server';
 import type { ApiVersion } from '@kbn/core-http-server';
-import { RouteValidator } from '@kbn/core-http-router-server-internal';
+import { RouteValidator } from '@kbn/core-http-route-validator-internal';
 
 /** Will throw if any of the validation checks fail */
 export function validate(
