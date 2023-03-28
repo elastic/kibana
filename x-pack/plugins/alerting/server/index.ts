@@ -30,7 +30,6 @@ export type {
   RuleParamsAndRefs,
   GetSummarizedAlertsFnOpts,
   ExecutorType,
-  MigrateRule,
   FormatRules,
   IRuleTypeAlerts,
 } from './types';
