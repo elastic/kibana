@@ -254,7 +254,7 @@ export const useDashboardMenuItems = ({
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.saveAs);
     }
-    return [...labsMenuItem, menuItems.options, ...shareMenuItem, ...editModeItems];
+    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
   }, [lastSavedId, menuItems, share, isLabsEnabled]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
