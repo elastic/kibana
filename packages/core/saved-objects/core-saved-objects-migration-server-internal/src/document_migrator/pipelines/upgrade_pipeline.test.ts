@@ -9,8 +9,8 @@
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
-import { Transform, TransformType, TypeTransforms, TransformFn } from './types';
-import { DocumentMigratorPipeline } from './document_migrator_pipeline';
+import { Transform, TransformType, TypeTransforms, TransformFn } from '../types';
+import { DocumentUpgradePipeline } from './upgrade_pipeline';
 
 // snake case is way better for migration function names in this very specific scenario.
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -70,7 +70,7 @@ describe('DocumentMigratorPipeline', () => {
         { transformType: TransformType.Migrate, version: '8.8.0', transform: migrate8_8_0_up },
       ]);
 
-      const pipeline = new DocumentMigratorPipeline({
+      const pipeline = new DocumentUpgradePipeline({
         document,
         kibanaVersion: '8.8.0',
         convertNamespaceTypes: false,
@@ -79,12 +79,11 @@ describe('DocumentMigratorPipeline', () => {
         },
       });
 
-      pipeline.run();
+      const { document: outputDoc } = pipeline.run();
 
       expect(migrate8_8_0_up).toHaveBeenCalledTimes(1);
       expect(migrate8_8_0_up).toHaveBeenCalledWith(document);
 
-      const outputDoc = pipeline.document;
       expect(outputDoc.typeMigrationVersion).toEqual('8.8.0');
     });
 
@@ -105,7 +104,7 @@ describe('DocumentMigratorPipeline', () => {
         { transformType: TransformType.Migrate, version: '8.8.0', transform: migrate8_8_0_up },
       ]);
 
-      const pipeline = new DocumentMigratorPipeline({
+      const pipeline = new DocumentUpgradePipeline({
         document,
         kibanaVersion: '8.8.0',
         convertNamespaceTypes: false,
@@ -114,7 +113,7 @@ describe('DocumentMigratorPipeline', () => {
         },
       });
 
-      pipeline.run();
+      const { document: outputDoc } = pipeline.run();
 
       expect(migrate8_6_0_up).toHaveBeenCalledTimes(1);
       expect(migrate8_6_0_up).toHaveBeenCalledWith(document);
@@ -132,7 +131,6 @@ describe('DocumentMigratorPipeline', () => {
         migrate8_8_0_up.mock.invocationCallOrder[0]
       );
 
-      const outputDoc = pipeline.document;
       expect(outputDoc.typeMigrationVersion).toEqual('8.8.0');
     });
 
@@ -153,7 +151,7 @@ describe('DocumentMigratorPipeline', () => {
         { transformType: TransformType.Migrate, version: '8.8.0', transform: migrate8_8_0_up },
       ]);
 
-      const pipeline = new DocumentMigratorPipeline({
+      const pipeline = new DocumentUpgradePipeline({
         document,
         kibanaVersion: '8.8.0',
         convertNamespaceTypes: false,
@@ -162,7 +160,7 @@ describe('DocumentMigratorPipeline', () => {
         },
       });
 
-      pipeline.run();
+      const { document: outputDoc } = pipeline.run();
 
       expect(migrate8_6_0_up).not.toHaveBeenCalled();
 
@@ -171,7 +169,6 @@ describe('DocumentMigratorPipeline', () => {
       expect(migrate8_8_0_up).toHaveBeenCalledTimes(1);
       expect(migrate8_8_0_up).toHaveBeenCalledWith({ ...document, typeMigrationVersion: '8.7.0' });
 
-      const outputDoc = pipeline.document;
       expect(outputDoc.typeMigrationVersion).toEqual('8.8.0');
     });
 
@@ -188,7 +185,7 @@ describe('DocumentMigratorPipeline', () => {
         { transformType: TransformType.Migrate, version: '8.8.0', transform: migrate8_8_0_up },
       ]);
 
-      const pipeline = new DocumentMigratorPipeline({
+      const pipeline = new DocumentUpgradePipeline({
         document,
         kibanaVersion: '8.8.0',
         convertNamespaceTypes: false,
@@ -223,7 +220,7 @@ describe('DocumentMigratorPipeline', () => {
         },
       ]);
 
-      const pipeline = new DocumentMigratorPipeline({
+      const pipeline = new DocumentUpgradePipeline({
         document,
         kibanaVersion: '8.8.0',
         convertNamespaceTypes: false,
@@ -232,7 +229,7 @@ describe('DocumentMigratorPipeline', () => {
         },
       });
 
-      pipeline.run();
+      const { document: outputDoc } = pipeline.run();
 
       expect(migrate8_8_0_up).toHaveBeenCalledTimes(1);
       expect(migrate8_8_0_up).toHaveBeenCalledWith({ ...document });
@@ -244,7 +241,6 @@ describe('DocumentMigratorPipeline', () => {
         migrate_mv_3.mock.invocationCallOrder[0]
       );
 
-      const outputDoc = pipeline.document;
       expect(outputDoc.typeMigrationVersion).toEqual(virtualModelVersion_3);
     });
 
@@ -265,7 +261,7 @@ describe('DocumentMigratorPipeline', () => {
         { transformType: TransformType.Migrate, version: '8.8.0', transform: migrate8_8_0_up },
       ]);
 
-      const pipeline = new DocumentMigratorPipeline({
+      const pipeline = new DocumentUpgradePipeline({
         document,
         kibanaVersion: '8.8.0',
         convertNamespaceTypes: false,
@@ -275,7 +271,7 @@ describe('DocumentMigratorPipeline', () => {
         targetTypeVersion: '8.7.0',
       });
 
-      pipeline.run();
+      const { document: outputDoc } = pipeline.run();
 
       expect(migrate8_6_0_up).toHaveBeenCalledTimes(1);
       expect(migrate8_6_0_up).toHaveBeenCalledWith({ ...document });
@@ -285,7 +281,6 @@ describe('DocumentMigratorPipeline', () => {
 
       expect(migrate8_8_0_up).not.toHaveBeenCalled();
 
-      const outputDoc = pipeline.document;
       expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
     });
   });

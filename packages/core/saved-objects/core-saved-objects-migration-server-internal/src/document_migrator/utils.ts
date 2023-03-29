@@ -83,25 +83,3 @@ export function transformComparator(a: Transform, b: Transform) {
 
   return Semver.compare(a.version, b.version) || aPriority - bPriority;
 }
-
-export function maxVersion(a?: string, b?: string) {
-  if (!a) {
-    return b;
-  }
-  if (!b) {
-    return a;
-  }
-
-  return Semver.gt(a, b) ? a : b;
-}
-
-export function minVersion(a?: string, b?: string) {
-  if (!a) {
-    return b;
-  }
-  if (!b) {
-    return a;
-  }
-
-  return Semver.lt(a, b) ? a : b;
-}

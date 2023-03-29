@@ -10,18 +10,22 @@ import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
 import Semver from 'semver';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { ActiveMigrations, Transform, TransformType } from './types';
-import { maxVersion } from './utils';
-import { coreVersionTransformTypes, applyVersion } from './pipeline_utils';
+import { ActiveMigrations, Transform, TransformType } from '../types';
+import type { MigrationPipeline, MigrationPipelineResult } from './types';
+import {
+  coreVersionTransformTypes,
+  applyVersion,
+  assertValidCoreVersion,
+  maxVersion,
+} from './utils';
 
 function isGreater(a?: string, b?: string) {
   return !!a && (!b || Semver.gt(a, b));
 }
 
-export class DocumentMigratorPipeline {
-  public additionalDocs = [] as SavedObjectUnsanitizedDoc[];
-  public document: SavedObjectUnsanitizedDoc;
-
+export class DocumentUpgradePipeline implements MigrationPipeline {
+  private additionalDocs = [] as SavedObjectUnsanitizedDoc[];
+  private document: SavedObjectUnsanitizedDoc;
   private originalDoc: SavedObjectUnsanitizedDoc;
   private migrations: ActiveMigrations;
   private kibanaVersion: string;
@@ -114,32 +118,6 @@ export class DocumentMigratorPipeline {
   }
 
   /**
-   * Asserts the object's core version is valid and not greater than the current Kibana version.
-   * Hence, the object does not belong to a more recent version of Kibana.
-   */
-  private assertValidity() {
-    const { id, coreMigrationVersion } = this.document;
-    if (!coreMigrationVersion) {
-      return;
-    }
-
-    if (!Semver.valid(coreMigrationVersion)) {
-      throw Boom.badData(
-        `Document "${id}" has an invalid "coreMigrationVersion" [${coreMigrationVersion}]. This must be a semver value.`,
-        this.document
-      );
-    }
-
-    if (Semver.gt(coreMigrationVersion, this.kibanaVersion)) {
-      throw Boom.badData(
-        `Document "${id}" has a "coreMigrationVersion" which belongs to a more recent version` +
-          ` of Kibana [${coreMigrationVersion}]. The current version is [${this.kibanaVersion}].`,
-        this.document
-      );
-    }
-  }
-
-  /**
    * Verifies that the document version is not greater than the version supported by Kibana.
    * If we have a document with some version and no migrations available for this type,
    * the document belongs to a future version.
@@ -196,8 +174,8 @@ export class DocumentMigratorPipeline {
     };
   }
 
-  run(): void {
-    this.assertValidity();
+  run(): MigrationPipelineResult {
+    assertValidCoreVersion({ document: this.document, kibanaVersion: this.kibanaVersion });
 
     for (const transform of this.getPipeline()) {
       const { typeMigrationVersion: previousVersion } = this.document;
@@ -212,5 +190,7 @@ export class DocumentMigratorPipeline {
     this.assertCompatibility();
 
     this.document = this.ensureVersion(this.document);
+
+    return { document: this.document, additionalDocs: this.additionalDocs };
   }
 }

@@ -48,9 +48,9 @@ import type {
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import type { ActiveMigrations } from './types';
-import { maxVersion } from './utils';
+import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';
-import { DocumentMigratorPipeline } from './document_migrator_pipeline';
+import { DocumentUpgradePipeline } from './pipelines';
 
 export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
@@ -144,15 +144,13 @@ export class DocumentMigrator implements VersionedTransformer {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
 
-    const pipeline = new DocumentMigratorPipeline({
+    const pipeline = new DocumentUpgradePipeline({
       document: doc,
       migrations: this.migrations,
       kibanaVersion: this.documentMigratorOptions.kibanaVersion,
       convertNamespaceTypes,
     });
-    pipeline.run();
-
-    const { document, additionalDocs } = pipeline;
+    const { document, additionalDocs } = pipeline.run();
 
     return { document, additionalDocs };
   }
