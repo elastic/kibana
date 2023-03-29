@@ -466,7 +466,7 @@ describe('DocumentMigrator', () => {
       });
     });
 
-    it('allows changing type', () => {
+    it('does not allow changing type', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry(
@@ -485,20 +485,17 @@ describe('DocumentMigrator', () => {
         ),
       });
       migrator.prepareMigrations();
-      const actual = migrator.migrate({
-        id: 'smelly',
-        type: 'dog',
-        attributes: { name: 'Callie' },
-        typeMigrationVersion: '',
-        coreMigrationVersion: '8.8.0',
-      });
-      expect(actual).toEqual({
-        id: 'smelly',
-        type: 'cat',
-        attributes: { name: 'Kitty Callie' },
-        coreMigrationVersion: '8.8.0',
-        typeMigrationVersion: '1.0.0',
-      });
+      expect(() =>
+        migrator.migrate({
+          id: 'smelly',
+          type: 'dog',
+          attributes: { name: 'Callie' },
+          typeMigrationVersion: '',
+          coreMigrationVersion: '8.8.0',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Changing a document's type during a migration is not supported."`
+      );
     });
 
     it('disallows updating a typeMigrationVersion prop to a lower version', () => {

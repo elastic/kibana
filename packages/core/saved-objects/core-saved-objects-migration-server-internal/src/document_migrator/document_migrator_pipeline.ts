@@ -17,6 +17,9 @@ function isGreater(a?: string, b?: string) {
   return !!a && (!b || Semver.gt(a, b));
 }
 
+/* transform types using `coreMigrationVersion` and not `typeMigrationVersion` */
+const coreVersionTransformTypes = [TransformType.Core, TransformType.Reference];
+
 export class DocumentMigratorPipeline {
   public additionalDocs = [] as SavedObjectUnsanitizedDoc[];
   public document: SavedObjectUnsanitizedDoc;
@@ -25,38 +28,36 @@ export class DocumentMigratorPipeline {
   private migrations: ActiveMigrations;
   private kibanaVersion: string;
   private convertNamespaceTypes: boolean;
+  private targetTypeVersion: string;
 
   constructor({
     document,
     migrations,
     kibanaVersion,
     convertNamespaceTypes,
+    targetTypeVersion,
   }: {
     document: SavedObjectUnsanitizedDoc;
     migrations: ActiveMigrations;
     kibanaVersion: string;
     convertNamespaceTypes: boolean;
+    targetTypeVersion?: string;
   }) {
     this.originalDoc = document;
     this.document = cloneDeep(document);
     this.migrations = migrations;
     this.kibanaVersion = kibanaVersion;
     this.convertNamespaceTypes = convertNamespaceTypes;
+    this.targetTypeVersion = targetTypeVersion || migrations[document.type]?.latestVersion.migrate;
   }
 
   protected *getPipeline(): Generator<Transform> {
     while (this.hasPendingTransforms()) {
-      const { type: previousType } = this.document;
-
       for (const transform of this.getPendingTransforms()) {
         yield transform;
 
-        if (this.document.type !== previousType) {
-          // In the initial implementation, all the transforms for the new type should be applied.
-          // And at the same time, documents with `undefined` in `typeMigrationVersion` are treated as the most recent ones.
-          // This is a workaround to get into the loop again and apply all the migrations for the new type.
-          this.document.typeMigrationVersion = '';
-          break;
+        if (this.document.type !== this.originalDoc.type) {
+          throw new Error(`Changing a document's type during a migration is not supported.`);
         }
       }
     }
@@ -75,7 +76,7 @@ export class DocumentMigratorPipeline {
     }
 
     return (
-      isGreater(latestVersion?.migrate, typeMigrationVersion) ||
+      isGreater(this.targetTypeVersion, typeMigrationVersion) ||
       (this.convertNamespaceTypes && isGreater(latestVersion?.convert, typeMigrationVersion)) ||
       (this.convertNamespaceTypes && isGreater(latestVersion?.reference, coreMigrationVersion))
     );
@@ -106,7 +107,11 @@ export class DocumentMigratorPipeline {
           isGreater(version, typeMigrationVersion)
         );
       case TransformType.Migrate:
-        return typeMigrationVersion != null && isGreater(version, typeMigrationVersion);
+        return (
+          typeMigrationVersion != null &&
+          isGreater(version, typeMigrationVersion) &&
+          Semver.lte(version, this.targetTypeVersion)
+        );
     }
   }
 
@@ -161,7 +166,7 @@ export class DocumentMigratorPipeline {
    * as this could get us into an infinite loop. So, we explicitly check for that here.
    */
   private assertUpgrade({ transformType, version }: Transform, previousVersion?: string) {
-    if ([TransformType.Core, TransformType.Reference].includes(transformType)) {
+    if (coreVersionTransformTypes.includes(transformType)) {
       return;
     }
 
@@ -177,7 +182,7 @@ export class DocumentMigratorPipeline {
   private bumpVersion({ transformType, version }: Transform) {
     this.document = {
       ...this.document,
-      ...([TransformType.Core, TransformType.Reference].includes(transformType)
+      ...(coreVersionTransformTypes.includes(transformType)
         ? { coreMigrationVersion: maxVersion(this.document.coreMigrationVersion, version) }
         : { typeMigrationVersion: maxVersion(this.document.typeMigrationVersion, version) }),
     };

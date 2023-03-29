@@ -247,5 +247,46 @@ describe('DocumentMigratorPipeline', () => {
       const outputDoc = pipeline.document;
       expect(outputDoc.typeMigrationVersion).toEqual(virtualModelVersion_3);
     });
+
+    it('supports specifying a `targetTypeVersion` and only run migrate transforms up to it', () => {
+      const document = createDoc({
+        id: 'foo-1',
+        type: 'foo',
+        typeMigrationVersion: '8.5.0',
+      });
+
+      const migrate8_6_0_up = createTransformFn();
+      const migrate8_7_0_up = createTransformFn();
+      const migrate8_8_0_up = createTransformFn();
+
+      const fooTransforms = getTypeTransforms([
+        { transformType: TransformType.Migrate, version: '8.6.0', transform: migrate8_6_0_up },
+        { transformType: TransformType.Migrate, version: '8.7.0', transform: migrate8_7_0_up },
+        { transformType: TransformType.Migrate, version: '8.8.0', transform: migrate8_8_0_up },
+      ]);
+
+      const pipeline = new DocumentMigratorPipeline({
+        document,
+        kibanaVersion: '8.8.0',
+        convertNamespaceTypes: false,
+        migrations: {
+          foo: fooTransforms,
+        },
+        targetTypeVersion: '8.7.0',
+      });
+
+      pipeline.run();
+
+      expect(migrate8_6_0_up).toHaveBeenCalledTimes(1);
+      expect(migrate8_6_0_up).toHaveBeenCalledWith({ ...document });
+
+      expect(migrate8_7_0_up).toHaveBeenCalledTimes(1);
+      expect(migrate8_7_0_up).toHaveBeenCalledWith({ ...document, typeMigrationVersion: '8.6.0' });
+
+      expect(migrate8_8_0_up).not.toHaveBeenCalled();
+
+      const outputDoc = pipeline.document;
+      expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
+    });
   });
 });
