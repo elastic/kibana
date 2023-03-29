@@ -61,6 +61,12 @@ There are no breaking changes in {kib} 8.6.2.
 {kibana-ref-all}/8.5/release-notes-8.5.0.html#breaking-changes-8.5.0[8.5.0] | {kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
 [float]
+[[known-issues-8.6.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-153175]
+
+[float]
 [[enhancement-v8.6.2]]
 === Enhancements
 Alerting::
@@ -105,6 +111,12 @@ Omit or include `ssl` keys when appropriate for project monitors and private loc
 == {kib} 8.6.1
 
 Review the following information about the {kib} 8.6.1 release.
+
+[float]
+[[known-issues-8.6.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-153175]
 
 [float]
 [[breaking-changes-8.6.1]]
@@ -180,6 +192,19 @@ Review the following information about the {kib} 8.6.0 release.
 [[known-issues-8.6.0]]
 === Known issues
 
+// tag::known-issue-153175[]
+[discrete]
+.Unable to load *{stack-manage-app}* > *{rules-ui}* due to corrupted rule definitions
+[%collapsible]
+====
+*Details* +
+Releases 8.5 and 8.6 have a bug that corrupts rules when you update API keys or manage snooze schedules. In particular, it affects tracking containment rules and {es} query rules with KQL or Lucene query types. Releases 8.7 and beyond do not include this bug (fixed in {kibana-pull}153370[#153370]).
+
+*Impact* +
+This known issue causes "unable to load rules" messages to occur in *{stack-manage-app}* > *{rules-ui}*. To temporarily work around the problem, copy the rule content (params, name, tags, actions) for the problematic rules, delete the rules, then recreate them. For more details, refer to <<rule-type-es-query-issues,{es} query rules>> and <<geo-alerting-issues,Tracking containment rules>>.
+====
+// end::known-issue-153175[]
+
 [discrete]
 [[known-issue-146020]]
 .Attempting to create APM latency threshold rules from the Observability rules page fail
@@ -187,6 +212,7 @@ Review the following information about the {kib} 8.6.0 release.
 ====
 *Details* +
 When you attempt to create an APM latency threshold rule in **Observability** > **Alerts** > **Rules** for all services or all transaction types, the request will fail with a `params invalid` error.
+
 *Impact* +
 This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {kibana-ref}/apm-alerts.html[Alerts and rules] for detailed instructions.
 ====
@@ -199,6 +225,7 @@ This known issue only impacts the Observability Rules page. To work around this 
 When you upgrade to 8.6.0, progress bars on existing *Lens* metric visualizations are hidden.
 
 To display progress bars in existing *Lens* metric visualizations:
+
 . Open the main menu, then click *Visualize Library*.
 . From the *Visualize Library* list, click the metric visualization. 
 . In *Lens*, click the *Primary metric* field in the layer pane.
