@@ -14,12 +14,12 @@ import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-commo
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
+  IndexTypesMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
 import { getTempIndexName } from './model/helpers';
-import type { IndexTypesMap } from './kibana_migrator_constants';
 
 export interface CreateInitialStateParams {
   kibanaVersion: string;
@@ -125,6 +125,14 @@ export const createInitialState = ({
     );
   }
 
+  const targetIndexMappings: IndexMapping = {
+    ...targetMappings,
+    _meta: {
+      ...targetMappings._meta,
+      indexTypesMap,
+    },
+  };
+
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
@@ -138,7 +146,7 @@ export const createInitialState = ({
     tempIndex: getTempIndexName(indexPrefix, kibanaVersion),
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
-    targetIndexMappings: targetMappings,
+    targetIndexMappings,
     tempIndexMappings: reindexTargetMappings,
     outdatedDocumentsQuery,
     retryCount: 0,

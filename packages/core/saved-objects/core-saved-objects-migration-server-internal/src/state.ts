@@ -13,14 +13,13 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { IndexMapping, IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
 import type { MigrationLog, Progress } from './types';
 import type { BulkOperation } from './model/create_batches';
 import type { Aliases } from './model/helpers';
-import type { IndexTypesMap } from './kibana_migrator_constants';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */

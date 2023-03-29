@@ -7,13 +7,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { IndexMap } from './core';
-import {
-  type IndexTypesMap,
-  TypeStatus,
-  type TypeStatusDetails,
-} from './kibana_migrator_constants';
+import { TypeStatus, type TypeStatusDetails } from './kibana_migrator_constants';
 
 // even though this utility class is present in @kbn/kibana-utils-plugin, we can't easily import it from Core
 // aka. one does not simply reuse code

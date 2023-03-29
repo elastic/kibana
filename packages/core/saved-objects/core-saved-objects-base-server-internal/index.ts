@@ -14,6 +14,7 @@ export {
   getTypes,
   type IndexMapping,
   type IndexMappingMeta,
+  type IndexTypesMap,
   type SavedObjectsTypeMappingDefinitions,
 } from './src/mappings';
 export { SavedObjectsSerializer } from './src/serialization';

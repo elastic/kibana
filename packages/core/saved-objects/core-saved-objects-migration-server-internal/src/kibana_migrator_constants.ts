@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type IndexTypesMap = Record<string, string[]>;
+import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 
 export enum TypeStatus {
   Added = 'added',

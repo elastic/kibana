@@ -29,6 +29,7 @@ import {
   type IKibanaMigrator,
   type KibanaMigratorStatus,
   type MigrationResult,
+  type IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { getIndicesInvoledInRelocation } from './kibana_migrator_utils';
 import { buildActiveMappings, buildTypesMappings } from './core';
@@ -43,7 +44,6 @@ import {
   DEFAULT_INDEX_TYPES_MAP,
   LEGACY_SAVED_OBJECT_INDEX,
   MAIN_SAVED_OBJECT_INDEX,
-  type IndexTypesMap,
 } from './kibana_migrator_constants';
 
 export interface KibanaMigratorOptions {

@@ -9,13 +9,13 @@
 import * as Either from 'fp-ts/lib/Either';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import {
   createBulkDeleteOperationBody,
   createBulkIndexOperationTuple,
   getTempIndexName,
 } from './helpers';
 import type { TransformErrorObjects } from '../core';
-import { IndexTypesMap } from '../kibana_migrator_constants';
 
 export type BulkIndexOperationTuple = [BulkOperationContainer, SavedObjectsRawDocSource];
 export type BulkOperation = BulkIndexOperationTuple | BulkOperationContainer;

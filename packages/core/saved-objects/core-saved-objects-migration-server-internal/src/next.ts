@@ -201,20 +201,10 @@ export const nextActionMap = (
         timeout: '60s',
       }),
     UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsMeta) => {
-      const { properties: _, _meta } = state.targetIndexMappings;
-
-      const mappings = {
-        _meta: {
-          ..._meta,
-          // we store the type index map into the index mapping._meta
-          indexTypesMap: state.indexTypesMap,
-        },
-      };
-
       return Actions.updateMappings({
         client,
         index: state.targetIndex,
-        mappings,
+        mappings: omit(state.targetIndexMappings, ['properties']), // properties already updated on a previous step
       });
     },
     CHECK_VERSION_INDEX_READY_ACTIONS: () => Actions.noop,
