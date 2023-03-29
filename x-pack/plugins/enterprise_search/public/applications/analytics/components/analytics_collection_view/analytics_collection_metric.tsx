@@ -115,7 +115,7 @@ export const AnalyticsCollectionViewMetric: React.FC<
           </EuiText>
         </EuiFlexGroup>
         {isLoading ? (
-          <EuiSkeletonRectangle height={euiTheme.size.xxl} width="100%" />
+          <EuiSkeletonRectangle height={euiTheme.size.xl} width="100%" />
         ) : (
           <EuiText color={isSelected ? euiTheme.colors.primaryText : color}>
             <h2>
