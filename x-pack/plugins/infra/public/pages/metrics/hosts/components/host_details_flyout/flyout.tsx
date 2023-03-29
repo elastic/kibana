@@ -8,8 +8,8 @@
 import React, { useMemo, useState } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetadataTab } from './metadata/metadata';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ProcessesTab } from '../../../inventory_view/components/node_details/tabs/processes';

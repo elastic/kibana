@@ -114,12 +114,16 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getProcessesTabContentTitle(index: number) {
-      const processesListElements = await testSubjects.findAll('processes_summary_table_item');
+      const processesListElements = await testSubjects.findAll(
+        'infra_processes_summary_table_item'
+      );
       return await processesListElements[index].findByCssSelector('dt');
     },
 
     async getProcessesTabContentTotalValue() {
-      const processesListElements = await testSubjects.findAll('processes_summary_table_item');
+      const processesListElements = await testSubjects.findAll(
+        'infra_processes_summary_table_item'
+      );
       return await processesListElements[0].findByCssSelector('dd');
     },
 
