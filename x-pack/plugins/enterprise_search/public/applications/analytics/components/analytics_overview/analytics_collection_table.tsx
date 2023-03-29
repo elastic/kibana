@@ -25,11 +25,11 @@ import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super
 import { i18n } from '@kbn/i18n';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import { FilterBy } from '../../utils/get_formula_by_filter';
 import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 import { AnalyticsCollectionCardWithLens } from './analytics_collection_card/analytics_collection_card';
 
-import { FilterBy } from './analytics_collection_card/with_lens_data';
 import { AnalyticsCollectionTableStyles } from './analytics_collection_table.styles';
 
 const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
@@ -95,10 +95,24 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
           defaultMessage: 'No results',
         }),
       },
+      {
+        css: [analyticsCollectionTableStyles.button],
+        id: FilterBy.Clicks,
+        label: i18n.translate('xpack.enterpriseSearch.analytics.filtering.clicks', {
+          defaultMessage: 'Clicks',
+        }),
+      },
+      {
+        css: [analyticsCollectionTableStyles.button],
+        id: FilterBy.NoResults,
+        label: i18n.translate('xpack.enterpriseSearch.analytics.filtering.sessions', {
+          defaultMessage: 'Sessions',
+        }),
+      },
     ],
     [analyticsCollectionTableStyles.button]
   );
-  const [filterId, setFilterId] = useState<string>(filterOptions[0].id);
+  const [filterId, setFilterId] = useState<FilterBy>(filterOptions[0].id);
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>({
     from: defaultQuickRanges[0].start,
     to: defaultQuickRanges[0].end,
@@ -127,7 +141,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
               css={analyticsCollectionTableStyles.buttonGroup}
-              onChange={setFilterId}
+              onChange={(newFilterId) => setFilterId(newFilterId as FilterBy)}
               color="primary"
               buttonSize="compressed"
               idSelected={filterId}
@@ -156,6 +170,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
         {collections.map((collection) => (
           <AnalyticsCollectionCardWithLens
             key={collection.name}
+            id={`collection-card-${collection.name}`}
             collection={collection}
             subtitle={selectedFilterLabel}
             filterBy={filterId}
