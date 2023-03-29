@@ -243,6 +243,9 @@ describe('alert_form', () => {
                 setActionFrequencyProperty={(key: string, value: any, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }
+                setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
+                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                }
                 actionTypeRegistry={actionTypeRegistry}
                 featureId="alerting"
               />
