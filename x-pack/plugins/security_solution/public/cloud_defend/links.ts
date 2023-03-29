@@ -20,7 +20,8 @@ const commonLinkProperties: Partial<LinkItem> = {
 export const manageLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('policies'),
   description: i18n.translate('xpack.securitySolution.appLinks.cloudDefendPoliciesDescription', {
-    defaultMessage: 'View drift prevention policies.',
+    defaultMessage:
+      'Secure container workloads in Kubernetes from attacks and drift through granular and flexible runtime policies.',
   }),
   landingIcon: IconCloudDefend,
   ...commonLinkProperties,
