@@ -86,7 +86,7 @@ export async function saveSettings(
       const defaultSettings = createDefaultSettings();
 
       auditLoggingService.writeCustomSoAuditLog({
-        action: 'update',
+        action: 'create',
         id: GLOBAL_SETTINGS_ID,
         savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       });
