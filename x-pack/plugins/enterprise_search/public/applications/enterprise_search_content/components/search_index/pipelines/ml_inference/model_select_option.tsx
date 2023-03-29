@@ -13,14 +13,9 @@ import {
   getMlModelTypesForModelConfig,
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
-  TEXT_EXPANSION_FRIENDLY_TYPE,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { TrainedModel } from '../../../../api/ml_models/ml_trained_models_logic';
-import {
-  getMLType,
-  getModelDisplayTitle,
-  isTextExpansionModel,
-} from '../../../shared/ml_inference/utils';
+import { getMLType, getModelDisplayTitle } from '../../../shared/ml_inference/utils';
 
 import { TrainedModelHealth } from '../ml_model_health';
 import { MLModelTypeBadge } from '../ml_model_type_badge';
@@ -30,7 +25,6 @@ export interface MlModelSelectOptionProps {
 }
 export const MlModelSelectOption: React.FC<MlModelSelectOptionProps> = ({ model }) => {
   const type = getMLType(getMlModelTypesForModelConfig(model));
-  const typeFriendlyName = isTextExpansionModel(model) ? TEXT_EXPANSION_FRIENDLY_TYPE : type;
   const title = getModelDisplayTitle(type);
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -55,9 +49,7 @@ export const MlModelSelectOption: React.FC<MlModelSelectOptionProps> = ({ model 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
-                <span>
-                  <MLModelTypeBadge type={type} />
-                </span>
+                <MLModelTypeBadge type={type} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
