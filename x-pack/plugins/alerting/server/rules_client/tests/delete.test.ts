@@ -211,6 +211,7 @@ describe('delete()', () => {
 
     expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
       ruleId: '1',
+      consumer: 'myApp',
     });
   });
 
