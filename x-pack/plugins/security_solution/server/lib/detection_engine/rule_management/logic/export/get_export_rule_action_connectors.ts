@@ -45,9 +45,8 @@ const mapExportedActionConnectorsDetailsToDefault = (
 };
 const filterOutPredefinedActionConnectorsIds = async (
   actionsClient: ActionsClient,
-  actionsIds: string[]
+  actionsIdsToExport: string[]
 ): Promise<string[]> => {
-  const actionsIdsToExport = [...actionsIds];
   const allActions = await actionsClient.getAll();
   const predefinedActionsIds = allActions
     .filter(({ isPreconfigured }) => isPreconfigured)
