@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PostureTypes } from './types';
+
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
@@ -85,3 +87,10 @@ export const SUPPORTED_CLOUDBEAT_INPUTS = [
   CLOUDBEAT_VULN_MGMT_GCP,
   CLOUDBEAT_VULN_MGMT_AZURE,
 ] as const;
+
+export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
+  [KSPM_POLICY_TEMPLATE]: KSPM_POLICY_TEMPLATE,
+  [CSPM_POLICY_TEMPLATE]: CSPM_POLICY_TEMPLATE,
+  [VULN_MGMT_POLICY_TEMPLATE]: VULN_MGMT_POLICY_TEMPLATE,
+  [POSTURE_TYPE_ALL]: POSTURE_TYPE_ALL,
+} as const;

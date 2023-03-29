@@ -8,15 +8,11 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
-import { LogRecord } from '@kbn/logging';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import {
-  getKibanaMigratorTestKit,
-  type KibanaMigratorTestKitParams,
-} from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
-import { getFooType, getBarType, dummyModelVersion } from './base_types.fixtures';
+import '../jest_matchers';
+import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
+import { delay, parseLogFile } from '../test_utils';
+import { getBaseMigratorParams, getFooType, getBarType, dummyModelVersion } from './base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'update_mappings.test.log');
 
@@ -35,16 +31,6 @@ describe('ZDT upgrades - basic mapping update', () => {
     return await startES();
   };
 
-  const baseMigratorParams: KibanaMigratorTestKitParams = {
-    kibanaIndex: '.kibana',
-    kibanaVersion: '8.7.0',
-    settings: {
-      migrations: {
-        algorithm: 'zdt',
-      },
-    },
-  };
-
   beforeAll(async () => {
     await fs.unlink(logFilePath).catch(() => {});
     esServer = await startElasticsearch();
@@ -59,7 +45,7 @@ describe('ZDT upgrades - basic mapping update', () => {
     const fooType = getFooType();
     const barType = getBarType();
     const { runMigrations } = await getKibanaMigratorTestKit({
-      ...baseMigratorParams,
+      ...getBaseMigratorParams(),
       types: [fooType, barType],
     });
     await runMigrations();
@@ -91,7 +77,7 @@ describe('ZDT upgrades - basic mapping update', () => {
     };
 
     const { runMigrations, client } = await getKibanaMigratorTestKit({
-      ...baseMigratorParams,
+      ...getBaseMigratorParams(),
       logFilePath,
       types: [fooType, barType],
     });
@@ -115,7 +101,7 @@ describe('ZDT upgrades - basic mapping update', () => {
     const mappings = index.mappings ?? {};
     const mappingMeta = mappings._meta ?? {};
 
-    expect(aliases).toEqual(['.kibana', '.kibana_8.7.0']);
+    expect(aliases).toEqual(['.kibana', '.kibana_8.8.0']);
 
     expect(mappings.properties).toEqual(
       expect.objectContaining({
@@ -124,32 +110,21 @@ describe('ZDT upgrades - basic mapping update', () => {
       })
     );
 
-    expect(mappingMeta).toEqual({
-      // doc migration not implemented yet - docVersions are not bumped.
-      docVersions: {
-        foo: 2,
-        bar: 1,
-      },
-      mappingVersions: {
-        foo: 3,
-        bar: 2,
-      },
+    expect(mappingMeta.mappingVersions).toEqual({
+      foo: 3,
+      bar: 2,
     });
 
-    const logFileContent = await fs.readFile(logFilePath, 'utf-8');
-    const records = logFileContent
-      .split('\n')
-      .filter(Boolean)
-      .map((str) => JSON5.parse(str)) as LogRecord[];
+    const records = await parseLogFile(logFilePath);
 
-    const expectLogsContains = (messagePrefix: string) => {
-      expect(records.find((entry) => entry.message.includes(messagePrefix))).toBeDefined();
-    };
-
-    expectLogsContains('INIT -> UPDATE_INDEX_MAPPINGS');
-    expectLogsContains('UPDATE_INDEX_MAPPINGS -> UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK');
-    expectLogsContains('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_MAPPING_MODEL_VERSIONS');
-    expectLogsContains('UPDATE_MAPPING_MODEL_VERSIONS -> DONE');
-    expectLogsContains('Migration completed');
+    expect(records).toContainLogEntry('INIT -> UPDATE_INDEX_MAPPINGS');
+    expect(records).toContainLogEntry(
+      'UPDATE_INDEX_MAPPINGS -> UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'
+    );
+    expect(records).toContainLogEntry(
+      'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_MAPPING_MODEL_VERSIONS'
+    );
+    expect(records).toContainLogEntry('UPDATE_MAPPING_MODEL_VERSIONS -> INDEX_STATE_UPDATE_DONE');
+    expect(records).toContainLogEntry('Migration completed');
   });
 });

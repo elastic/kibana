@@ -51,7 +51,7 @@ export function StepFieldTrend({
       selectedMetricField: field,
       time: getLast48Intervals(activeStep),
       seriesType: 'area',
-      dataType: 'synthetics',
+      dataType: 'uptime',
       reportDefinitions: {
         'monitor.name': [activeStep.monitor.name!],
         'synthetics.step.name.keyword': [activeStep.synthetics.step?.name!],
