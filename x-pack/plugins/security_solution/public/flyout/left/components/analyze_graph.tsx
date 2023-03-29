@@ -8,20 +8,16 @@
 import type { FC } from 'react';
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
+import { ANALYZER_ERROR_MESSAGE } from './translations';
 import { useLeftPanelContext } from '../context';
-import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
+import { ANALYZE_GRAPH_ERROR_TEST_ID, ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
 import { ERROR_TITLE, ERROR_MESSAGE } from '../../shared/translations';
 import { isActiveTimeline } from '../../../helpers';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
-
-const ANALYZER = i18n.translate('xpack.securitySolution.flyout.analyzerErrorTitle', {
-  defaultMessage: 'analyzer',
-});
 
 /**
  * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
@@ -38,9 +34,9 @@ export const AnalyzeGraph: FC = () => {
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
-        title={<h2>{ERROR_TITLE(ANALYZER)}</h2>}
-        body={<p>{ERROR_MESSAGE(ANALYZER)}</p>}
-        data-test-subj={ANALYZER_GRAPH_TEST_ID}
+        title={<h2>{ERROR_TITLE(ANALYZER_ERROR_MESSAGE)}</h2>}
+        body={<p>{ERROR_MESSAGE(ANALYZER_ERROR_MESSAGE)}</p>}
+        data-test-subj={ANALYZE_GRAPH_ERROR_TEST_ID}
       />
     );
   }

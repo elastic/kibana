@@ -12,7 +12,7 @@ import type { LeftPanelContext } from '../context';
 import { LeftFlyoutContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import { AnalyzeGraph } from './analyze_graph';
-import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
+import { ANALYZE_GRAPH_ERROR_TEST_ID, ANALYZER_GRAPH_TEST_ID } from './test_ids';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -59,7 +59,7 @@ describe('<AnalyzeGraph />', () => {
         </LeftFlyoutContext.Provider>
       </TestProviders>
     );
-    expect(wrapper.getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(ANALYZE_GRAPH_ERROR_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getByText('Unable to display analyzer')).toBeInTheDocument();
     expect(wrapper.getByText('There was an error displaying analyzer')).toBeInTheDocument();
   });

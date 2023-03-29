@@ -7,6 +7,13 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
+import { Provider as ReduxStoreProvider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { MemoryRouter } from 'react-router-dom';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { sourcererReducer } from '../../../common/store/sourcerer';
+import { inputsReducer } from '../../../common/store/inputs';
 import type { LeftPanelContext } from '../context';
 import { LeftFlyoutContext } from '../context';
 import { AnalyzeGraph } from './analyze_graph';
@@ -23,7 +30,7 @@ export default {
 //   const contextValue = {
 //     eventId: 'some_id',
 //   } as unknown as LeftPanelContext;
-
+//
 //   return (
 //     <LeftFlyoutContext.Provider value={contextValue}>
 //       <AnalyzeGraph />
@@ -32,13 +39,38 @@ export default {
 // };
 
 export const Error: Story<void> = () => {
+  const store = configureStore({
+    reducer: {
+      inputs: inputsReducer,
+      sourcerer: sourcererReducer,
+    },
+  });
+  const services = {
+    data: {},
+    notifications: {
+      toasts: {
+        addError: () => {},
+        addSuccess: () => {},
+        addWarning: () => {},
+        remove: () => {},
+      },
+    },
+  } as unknown as CoreStart;
+  const KibanaReactContext = createKibanaReactContext({ ...services });
+
   const contextValue = {
     eventId: null,
   } as unknown as LeftPanelContext;
 
   return (
-    <LeftFlyoutContext.Provider value={contextValue}>
-      <AnalyzeGraph />
-    </LeftFlyoutContext.Provider>
+    <MemoryRouter>
+      <ReduxStoreProvider store={store}>
+        <KibanaReactContext.Provider>
+          <LeftFlyoutContext.Provider value={contextValue}>
+            <AnalyzeGraph />
+          </LeftFlyoutContext.Provider>
+        </KibanaReactContext.Provider>
+      </ReduxStoreProvider>
+    </MemoryRouter>
   );
 };

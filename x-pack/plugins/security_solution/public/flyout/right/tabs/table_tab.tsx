@@ -8,23 +8,12 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { DOCUMENT_ERROR_DETAILS, DOCUMENT_ERROR_TITLE } from './translations';
 import { ERROR_TITLE, ERROR_MESSAGE } from '../../shared/translations';
 import { TimelineTabs } from '../../../../common/types';
 import { EventFieldsBrowser } from '../../../common/components/event_details/event_fields_browser';
 import { useRightPanelContext } from '../context';
 import { TABLE_TAB_ERROR_TEST_ID } from './test_ids';
-
-export const DOCUMENT = i18n.translate('xpack.securitySolution.flyout.documentErrorTitle', {
-  defaultMessage: 'document information',
-});
-
-export const DOCUMENT_DETAILS = i18n.translate(
-  'xpack.securitySolution.flyout.documentErrorMessage',
-  {
-    defaultMessage: 'the document fields and values',
-  }
-);
 
 /**
  * Table view displayed in the document details expandable flyout right section
@@ -37,8 +26,8 @@ export const TableTab: FC = memo(() => {
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
-        title={<h2>{ERROR_TITLE(DOCUMENT)}</h2>}
-        body={<p>{ERROR_MESSAGE(DOCUMENT_DETAILS)}</p>}
+        title={<h2>{ERROR_TITLE(DOCUMENT_ERROR_TITLE)}</h2>}
+        body={<p>{ERROR_MESSAGE(DOCUMENT_ERROR_DETAILS)}</p>}
         data-test-subj={TABLE_TAB_ERROR_TEST_ID}
       />
     );
