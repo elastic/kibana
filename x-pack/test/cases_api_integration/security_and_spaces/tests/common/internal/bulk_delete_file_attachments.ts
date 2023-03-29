@@ -36,6 +36,7 @@ import {
   obsCasesReadUser,
   obsSecCasesAllUser,
   obsSecCasesReadUser,
+  secAllSpace1User,
   secAllUser,
   secReadUser,
   users as api_int_users,
@@ -750,6 +751,40 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+
+      it('returns a 403 when attempting to delete files from a space the user does not have permissions to', async () => {
+        const postedSecCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolution' }),
+          200,
+          {
+            user: superUser,
+            space: 'space2',
+          }
+        );
+
+        const create = await createFile({
+          supertest: supertestWithoutAuth,
+          params: {
+            name: 'testfile',
+            kind: constructFileKindIdByOwner('securitySolution'),
+            mimeType: 'text/plain',
+            meta: {
+              caseIds: [postedSecCase.id],
+              owner: ['securitySolution'],
+            },
+          },
+          auth: { user: superUser, space: 'space2' },
+        });
+
+        await bulkDeleteFileAttachments({
+          supertest: supertestWithoutAuth,
+          caseId: postedSecCase.id,
+          fileIds: [create.file.id],
+          auth: { user: secAllSpace1User, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+      });
     });
   });
 };
