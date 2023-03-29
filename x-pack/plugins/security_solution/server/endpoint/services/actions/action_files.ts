@@ -209,6 +209,7 @@ export const createNewFile = async (
     id: uuidV4(),
     metadata: {
       name: fileInfo.filename,
+      mime: fileStream?.hapi?.headers['content-type'] ?? 'application/something',
     },
   });
 
