@@ -173,6 +173,11 @@ export const ActionTypeForm = ({
     return defaultParams;
   };
 
+  const handleOnConnectorSelected = (id: string) => {
+    onConnectorSelected(id);
+    setUseDefaultMessage(true);
+  };
+
   const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
     try {
       if (!actionThrottle) return [false, false];
@@ -356,7 +361,7 @@ export const ActionTypeForm = ({
             actionTypesIndex={actionTypesIndex}
             actionTypeRegistered={actionTypeRegistered}
             connectors={connectors}
-            onConnectorSelected={onConnectorSelected}
+            onConnectorSelected={handleOnConnectorSelected}
           />
         </EuiFormRow>
         <EuiSpacer size="xl" />
