@@ -19,7 +19,6 @@ describe('calculateCspStatusCode test', () => {
       },
       1,
       1,
-      1,
       ['cspm']
     );
 
@@ -36,7 +35,6 @@ describe('calculateCspStatusCode test', () => {
       },
       0,
       0,
-      0,
       []
     );
 
@@ -51,7 +49,6 @@ describe('calculateCspStatusCode test', () => {
         findings: 'not-empty',
         score: 'not-empty',
       },
-      1,
       0,
       10,
       ['cspm']
@@ -69,7 +66,6 @@ describe('calculateCspStatusCode test', () => {
         score: 'not-empty',
       },
       1,
-      1,
       10,
       ['cspm']
     );
@@ -85,7 +81,6 @@ describe('calculateCspStatusCode test', () => {
         findings: 'empty',
         score: 'empty',
       },
-      1,
       0,
       10,
       ['cspm']
@@ -103,7 +98,6 @@ describe('calculateCspStatusCode test', () => {
         score: 'empty',
       },
       1,
-      1,
       9,
       ['cspm']
     );
@@ -120,7 +114,6 @@ describe('calculateCspStatusCode test', () => {
         score: 'empty',
       },
       1,
-      1,
       11,
       ['cspm']
     );
@@ -136,7 +129,6 @@ describe('calculateCspStatusCode test', () => {
         findings: 'not-empty',
         score: 'not-empty',
       },
-      1,
       1,
       0,
       ['cspm']
