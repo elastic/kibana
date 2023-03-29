@@ -549,4 +549,22 @@ describe('actions', () => {
     );
     unsubscribe();
   });
+
+  test('undoChanges with timeRestore', async () => {
+    const { state } = await getState('/', {
+      ...savedSearchMock,
+      timeRestore: true,
+      refreshInterval: { pause: false, value: 1000 },
+      timeRange: { from: 'now-15d', to: 'now-10d' },
+    });
+    const setTime = jest.fn();
+    const setRefreshInterval = jest.fn();
+    discoverServiceMock.data.query.timefilter.timefilter.setTime = setTime;
+    discoverServiceMock.data.query.timefilter.timefilter.setRefreshInterval = setRefreshInterval;
+    await state.actions.loadSavedSearch(savedSearchMock.id);
+    await state.actions.undoChanges();
+    expect(setTime).toHaveBeenCalledTimes(1);
+    expect(setTime).toHaveBeenCalledWith({ from: 'now-15d', to: 'now-10d' });
+    expect(setRefreshInterval).toHaveBeenCalledWith({ pause: false, value: 1000 });
+  });
 });

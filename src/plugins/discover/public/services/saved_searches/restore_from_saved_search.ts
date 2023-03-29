@@ -17,14 +17,18 @@ export const restoreStateFromSavedSearch = ({
   savedSearch: SavedSearch;
   timefilter: TimefilterContract;
 }) => {
-  if (!savedSearch || !savedSearch.timeRestore) {
+  if (!savedSearch) {
     return;
   }
 
-  if (savedSearch.timeRange && isTimeRangeValid(savedSearch.timeRange)) {
+  if (savedSearch.timeRestore && savedSearch.timeRange && isTimeRangeValid(savedSearch.timeRange)) {
     timefilter.setTime(savedSearch.timeRange);
   }
-  if (savedSearch.refreshInterval && isRefreshIntervalValid(savedSearch.refreshInterval)) {
+  if (
+    savedSearch.timeRestore &&
+    savedSearch.refreshInterval &&
+    isRefreshIntervalValid(savedSearch.refreshInterval)
+  ) {
     timefilter.setRefreshInterval(savedSearch.refreshInterval);
   }
 };
