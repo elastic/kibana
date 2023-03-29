@@ -122,42 +122,39 @@ const SecuritySolutionCard = withSecuritySolutionLink(PrimaryTitleCard);
 
 export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ items }) => (
   <EuiFlexGroup direction="row" wrap>
-    {items.map(({ id, image, title, description, isBeta, betaOptions, disabled }) =>
-      disabled ? null : (
-        <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
-          <SecuritySolutionCard
-            deepLinkId={id}
-            hasBorder
-            textAlign="left"
-            paddingSize="m"
-            image={
-              image && (
-                <EuiImage
-                  data-test-subj="LandingImageCard-image"
-                  role="presentation"
-                  size={CARD_WIDTH}
-                  alt={title}
-                  src={image}
-                />
-              )
-            }
-            titleElement="h2" // to avoid client side error: <div> <h2> cannot appear as a descendant of <p>
-            title={
-              <PrimaryEuiTitle size="xs">
-                <FlexTitle>
-                  <TitleText>{title}</TitleText>
-                  {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
-                </FlexTitle>
-              </PrimaryEuiTitle>
-            }
-            description={<LandingCardDescription>{description}</LandingCardDescription>}
-            onClick={() => {
-              track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
-            }}
-          />
-        </LandingImageCardItem>
-      )
-    )}
+    {items.map(({ id, image, title, description, isBeta, betaOptions }) => (
+      <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
+        <SecuritySolutionCard
+          deepLinkId={id}
+          hasBorder
+          textAlign="left"
+          paddingSize="m"
+          image={
+            image && (
+              <EuiImage
+                data-test-subj="LandingImageCard-image"
+                role="presentation"
+                size={CARD_WIDTH}
+                alt={title}
+                src={image}
+              />
+            )
+          }
+          title={
+            <PrimaryEuiTitle size="xs">
+              <FlexTitle>
+                <TitleText>{title}</TitleText>
+                {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
+              </FlexTitle>
+            </PrimaryEuiTitle>
+          }
+          description={<LandingCardDescription>{description}</LandingCardDescription>}
+          onClick={() => {
+            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
+          }}
+        />
+      </LandingImageCardItem>
+    ))}
   </EuiFlexGroup>
 ));
 
