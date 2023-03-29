@@ -87,5 +87,6 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/monaco",
     "@kbn/repo-info",
+    "@kbn/ml-route-utils",
   ],
 }
