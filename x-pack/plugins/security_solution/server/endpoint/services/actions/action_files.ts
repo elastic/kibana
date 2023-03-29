@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
@@ -14,6 +14,7 @@ import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBo
 import type { File } from '@kbn/files-plugin/common';
 import { v4 as uuidV4 } from 'uuid';
 import type stream from 'stream';
+import { createHash } from 'crypto';
 import type { FileUploadMetadata, UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
@@ -131,7 +132,7 @@ export const getFileInfo = async (
       size,
       actionId,
       agentId,
-      created: new Date(uploadStart || created).toISOString(),
+      created: new Date(uploadStart || created || Date.now()).toISOString(),
       status: fileHasChunks ? status : 'DELETED',
     };
   } catch (error) {
@@ -209,7 +210,40 @@ export const createNewFile = async (
     },
   });
 
-  await file.uploadContent(fileStream);
+  const readStream = new ActionFileStream(fileStream);
 
-  return file;
+  await file.uploadContent(readStream);
+
+  const fileHash = readStream.getFileHash();
+
+  logger.info(`hash: ${fileHash} ${fileInfo.filename}`);
+
+  return file.update({ meta: { sha256: fileHash } });
 };
+
+class ActionFileStream extends Readable {
+  private readonly hash = createHash('sha256');
+  private hashDigest: string = '';
+
+  constructor(private readonly fileStream: Readable) {
+    super();
+  }
+
+  _read(size: number) {
+    const chunk = this.fileStream.read(size);
+
+    if (chunk !== null) {
+      this.hash.update(chunk);
+    }
+
+    this.push(chunk);
+  }
+
+  getFileHash(): string {
+    if (!this.hashDigest) {
+      this.hashDigest = this.hash.digest('hex');
+    }
+
+    return this.hashDigest;
+  }
+}
