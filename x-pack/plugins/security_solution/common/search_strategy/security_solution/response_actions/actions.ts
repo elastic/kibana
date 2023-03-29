@@ -30,8 +30,8 @@ export interface ActionRequestOptions extends RequestOptionsPaginated {
   };
 }
 
-export interface ActionRequestStrategyResponse<T> extends IEsSearchResponse {
-  edges: ResultEdges<T>;
+export interface ActionRequestStrategyResponse extends IEsSearchResponse {
+  edges: ResultEdges;
   inspect?: Maybe<Inspect>;
 }
 

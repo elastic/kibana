@@ -98,7 +98,9 @@ import type {
 } from './first_last_seen';
 import type {
   ActionRequestOptions,
+  ActionRequestStrategyResponse,
   ActionResponsesRequestOptions,
+  ActionResponsesRequestStrategyResponse,
   ResponseActionsQueries,
 } from './response_actions';
 
@@ -198,6 +200,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UsersRiskScoreStrategyResponse
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreStrategyResponse
+  : T extends ResponseActionsQueries.actions
+  ? ActionRequestStrategyResponse
+  : T extends ResponseActionsQueries.results
+  ? ActionResponsesRequestStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts

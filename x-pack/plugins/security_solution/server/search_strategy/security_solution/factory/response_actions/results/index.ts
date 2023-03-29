@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { LogsEndpointActionResponse } from '../../../../../../common/endpoint/types';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type {
   ActionResponsesRequestOptions,
@@ -20,10 +19,7 @@ export const actionResults: SecuritySolutionFactory<ResponseActionsQueries.resul
   buildDsl: (options: ActionResponsesRequestOptions) => {
     return buildActionResultsQuery(options);
   },
-  parse: async (
-    options,
-    response: ActionResponsesRequestStrategyResponse<LogsEndpointActionResponse>
-  ): Promise<ActionResponsesRequestStrategyResponse<LogsEndpointActionResponse>> => {
+  parse: async (options, response): Promise<ActionResponsesRequestStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionResultsQuery(options))],
     };

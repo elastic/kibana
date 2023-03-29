@@ -7,9 +7,10 @@
 
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { LogsEndpointActionResponse } from '../../../endpoint/types';
 import type { Direction, Inspect, Maybe, RequestBasicOptions } from './types';
 
-export type ResultEdges<T> = estypes.SearchResponse<T>['hits']['hits'];
+export type ResultEdges = estypes.SearchResponse<unknown>['hits']['hits'];
 
 export interface PaginationInputPaginated {
   /** The activePage parameter defines the page of results you want to fetch */
@@ -33,10 +34,10 @@ export interface ActionResponsesRequestOptions extends RequestOptionsPaginated {
   };
 }
 
-export interface ActionResponsesRequestStrategyResponse<T>
+export interface ActionResponsesRequestStrategyResponse
   extends IKibanaSearchResponse<
     estypes.SearchResponse<
-      T,
+      LogsEndpointActionResponse,
       {
         aggs: {
           responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {
@@ -52,6 +53,6 @@ export interface ActionResponsesRequestStrategyResponse<T>
       }
     >
   > {
-  edges: ResultEdges<T>;
+  edges: ResultEdges;
   inspect?: Maybe<Inspect>;
 }

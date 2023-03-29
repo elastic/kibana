@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LogsEndpointAction } from '../../../../../../common/endpoint/types';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
@@ -27,8 +27,8 @@ export const allActions: SecuritySolutionFactory<ResponseActionsQueries.actions>
   },
   parse: async (
     options: ActionRequestOptions,
-    response: ActionRequestStrategyResponse<LogsEndpointAction>
-  ): Promise<ActionRequestStrategyResponse<LogsEndpointAction>> => {
+    response: IEsSearchResponse
+  ): Promise<ActionRequestStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionsQuery(options))],
     };

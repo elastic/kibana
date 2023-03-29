@@ -18,19 +18,12 @@ import type {
   ActionResponsesRequestStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/response_actions';
 import { ResponseActionsQueries } from '../../../../common/search_strategy/security_solution/response_actions';
-import type {
-  LogsEndpointAction,
-  LogsEndpointActionResponse,
-} from '../../../../common/endpoint/types';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   EndpointAutomatedActionListRequestQuery,
   EndpointAutomatedActionResponseRequestQuery,
 } from '../../../../common/endpoint/schema/automated_actions';
-import type {
-  LogOsqueryAction,
-  PaginationInputPaginated,
-} from '../../../../common/search_strategy/security_solution/response_actions/actions';
+import type { PaginationInputPaginated } from '../../../../common/search_strategy/security_solution/response_actions/actions';
 
 interface GetAutomatedActionsListOptions {
   skip?: boolean;
@@ -47,10 +40,7 @@ export const useGetAutomatedActionList = (
     ['get-automated-action-list', { alertIds }],
     async () => {
       const responseData = await lastValueFrom(
-        data.search.search<
-          ActionRequestOptions,
-          ActionRequestStrategyResponse<LogsEndpointAction | LogOsqueryAction>
-        >(
+        data.search.search<ActionRequestOptions, ActionRequestStrategyResponse>(
           {
             alertIds,
             sort: {
@@ -87,12 +77,8 @@ export const useGetAutomatedActionResponseList = (
     ['allResponsesResults', { actionId }],
     async () => {
       const responseData = await lastValueFrom(
-        // .search<any, any>(
         data.search
-          .search<
-            ActionResponsesRequestOptions,
-            ActionResponsesRequestStrategyResponse<LogsEndpointActionResponse>
-          >(
+          .search<ActionResponsesRequestOptions, ActionResponsesRequestStrategyResponse>(
             {
               actionId,
               expiration,
@@ -111,7 +97,7 @@ export const useGetAutomatedActionResponseList = (
             mergeMap((val) => {
               const responded =
                 val.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-              // const pending = agent - responded;
+              // TODO const pending = agent - responded;
               const pending = 1 - responded;
 
               const expired = !expiration ? true : new Date(expiration) < new Date();
