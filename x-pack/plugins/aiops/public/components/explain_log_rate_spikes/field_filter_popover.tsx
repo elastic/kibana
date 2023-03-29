@@ -25,6 +25,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { FieldFilterApplyButton } from './field_filter_apply_button';
+
 interface FieldFilterPopoverProps {
   disabled?: boolean;
   disabledApplyButton?: boolean;
@@ -78,6 +80,8 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
       previousSkippedFields.filter((d) => uniqueFieldNames.includes(d))
     );
   }, [uniqueFieldNames]);
+
+  const selectedFieldCount = uniqueFieldNames.length - skippedFields.length;
 
   return (
     <EuiPopover
@@ -164,21 +168,22 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
             </>
           )}
           <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
+            <FieldFilterApplyButton
               onClick={() => {
                 onChange(skippedFields);
                 setFieldSearchText('');
                 setIsFieldSelectionPopoverOpen(false);
                 closePopover();
               }}
-              disabled={disabledApplyButton}
-            >
-              <FormattedMessage
-                id="xpack.aiops.explainLogRateSpikesPage.applyFieldFilterLabel"
-                defaultMessage="Apply"
-              />
-            </EuiButton>
+              disabled={disabledApplyButton || selectedFieldCount < 2}
+              tooltipContent={
+                selectedFieldCount < 2
+                  ? i18n.translate('xpack.aiops.analysis.fieldSelectorNotEnoughFieldsSelected', {
+                      defaultMessage: 'Grouping requires at least 2 fields to be selected.',
+                    })
+                  : undefined
+              }
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>

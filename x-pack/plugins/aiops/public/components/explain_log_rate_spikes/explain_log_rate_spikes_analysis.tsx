@@ -86,12 +86,13 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     WindowParameters | undefined
   >();
   const [groupResults, setGroupResults] = useState<boolean>(false);
+  const [groupSkipFields, setGroupSkipFields] = useState<string[]>([]);
   const [overrides, setOverrides] = useState<
     ApiExplainLogRateSpikes['body']['overrides'] | undefined
   >(undefined);
   const [shouldStart, setShouldStart] = useState(false);
 
-  const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
+  const onGroupResultsToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setGroupResults(e.target.checked);
 
     // When toggling the group switch, clear all row selections
@@ -99,11 +100,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   };
 
   const onFieldsFilterChange = (skippedFields: string[]) => {
+    setGroupSkipFields(skippedFields);
     setOverrides({
       loaded: 0,
       remainingFieldCandidates: [],
       significantTerms: data.significantTerms.filter((d) => !skippedFields.includes(d.fieldName)),
-      skipSignificantTermsHistograms: true,
+      regroupOnly: true,
     });
     startHandler(true, false);
   };
@@ -208,6 +210,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
+  // Disable the grouping switch toggle only if no groups were found,
+  // the toggle wasn't enabled already and no fields were selected to be skipped.
+  const disabledGroupResultsSwitch = !foundGroups && !groupResults && groupSkipFields.length === 0;
+
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
@@ -224,11 +230,11 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
               data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
                 groupResults ? ' checked' : ''
               }`}
-              disabled={!foundGroups}
+              disabled={disabledGroupResultsSwitch}
               showLabel={true}
               label={groupResultsMessage}
               checked={groupResults}
-              onChange={onSwitchToggle}
+              onChange={onGroupResultsToggle}
               compressed
             />
           </EuiFormRow>
@@ -309,7 +315,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           }
         />
       )}
-      {showSpikeAnalysisTable && groupResults && foundGroups ? (
+      {showSpikeAnalysisTable && groupResults ? (
         <SpikeAnalysisGroupsTable
           significantTerms={data.significantTerms}
           groupTableItems={groupTableItems}
@@ -317,7 +323,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           dataViewId={dataView.id}
         />
       ) : null}
-      {showSpikeAnalysisTable && (!groupResults || !foundGroups) ? (
+      {showSpikeAnalysisTable && !groupResults ? (
         <SpikeAnalysisTable
           significantTerms={data.significantTerms}
           loading={isRunning}

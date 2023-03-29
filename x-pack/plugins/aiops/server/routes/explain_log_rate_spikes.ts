@@ -33,6 +33,7 @@ import {
   pingAction,
   resetAllAction,
   resetErrorsAction,
+  resetGroupsAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
@@ -168,6 +169,11 @@ export const defineExplainLogRateSpikesRoute = (
           } else {
             logDebugMessage('Reset Errors.');
             push(resetErrorsAction());
+          }
+
+          if (request.body.overrides?.regroupOnly) {
+            logDebugMessage('Reset Groups.');
+            push(resetGroupsAction());
           }
 
           if (request.body.overrides?.loaded) {
@@ -563,7 +569,7 @@ export const defineExplainLogRateSpikesRoute = (
           if (
             significantTerms.length > 0 &&
             overallTimeSeries !== undefined &&
-            !request.body.overrides?.skipSignificantTermsHistograms
+            !request.body.overrides?.regroupOnly
           ) {
             const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
               if (shouldStop) {

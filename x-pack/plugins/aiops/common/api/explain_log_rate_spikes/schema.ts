@@ -31,7 +31,7 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
       remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
       // TODO Improve schema
       significantTerms: schema.maybe(schema.arrayOf(schema.any())),
-      skipSignificantTermsHistograms: schema.maybe(schema.boolean()),
+      regroupOnly: schema.maybe(schema.boolean()),
     })
   ),
 });
