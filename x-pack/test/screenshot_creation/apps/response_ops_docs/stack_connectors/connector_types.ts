@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
-  const es = getService('es');
   const testIndex = `test-index`;
   const indexDocument =
     `{\n` +
@@ -43,19 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('index connector screenshots', async () => {
-      await es.indices.create({
-        index: testIndex,
-        body: {
-          mappings: {
-            properties: {
-              date_updated: {
-                type: 'date',
-                format: 'epoch_millis',
-              },
-            },
-          },
-        },
-      });
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('index');
