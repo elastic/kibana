@@ -661,7 +661,8 @@ export const VisualizationWrapper = ({
 }) => {
   const context = useLensSelector(selectExecutionContext);
   // Used for reporting
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!errors?.length);
+  const [hasDynamicError, setHasDynamicError] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
   const searchContext: ExecutionContextSearch = useMemo(
     () => ({
@@ -676,6 +677,12 @@ export const VisualizationWrapper = ({
     [context]
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
+
+  useEffect(() => {
+    if (!isLoading) {
+      dispatchRenderComplete(nodeRef.current);
+    }
+  }, [isLoading, errors]);
 
   if (errors?.length) {
     const showExtraErrorsAction =
@@ -699,7 +706,15 @@ export const VisualizationWrapper = ({
     const [firstMessage, ...rest] = errors;
 
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup
+        data-shared-items-container
+        data-render-complete={true}
+        data-shared-item=""
+        data-render-error={i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
+          defaultMessage: ` {errors} {errors, plural, one {error} configuration {errors}}`,
+          values: { errors: errors.length },
+        })}
+      >
         <EuiFlexItem>
           <EuiEmptyPrompt
             actions={showExtraErrorsAction}
@@ -733,6 +748,13 @@ export const VisualizationWrapper = ({
       data-shared-items-container
       data-render-complete={!isLoading}
       data-shared-item=""
+      data-render-error={
+        hasDynamicError
+          ? i18n.translate('xpack.lens.editorFrame.dataFailure', {
+              defaultMessage: ` An error occurred when loading data.`,
+            })
+          : undefined
+      }
       ref={nodeRef}
     >
       <ExpressionRendererComponent
@@ -747,7 +769,6 @@ export const VisualizationWrapper = ({
         onRender$={() => {
           setIsLoading(false);
           onRender$();
-          dispatchRenderComplete(nodeRef.current);
         }}
         inspectorAdapters={lensInspector.adapters}
         executionContext={executionContext}
@@ -759,6 +780,8 @@ export const VisualizationWrapper = ({
             : errorMessage
             ? [errorMessage]
             : [];
+
+          setHasDynamicError(true);
 
           return (
             <EuiFlexGroup>
