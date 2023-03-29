@@ -15,6 +15,8 @@ import {
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
 
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { IBasePath } from '@kbn/core/server';
 import { Duration, toDurationUnit } from '../../../domain/models';
 import { DefaultSLIClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';
 import { computeBurnRate } from '../../../domain/services';
@@ -30,7 +32,11 @@ import {
 const SHORT_WINDOW = 'SHORT_WINDOW';
 const LONG_WINDOW = 'LONG_WINDOW';
 
-export const getRuleExecutor = (): LifecycleRuleExecutor<
+export const getRuleExecutor = ({
+  basePath,
+}: {
+  basePath: IBasePath;
+}): LifecycleRuleExecutor<
   BurnRateRuleParams,
   BurnRateRuleTypeState,
   BurnRateAlertState,
@@ -41,6 +47,7 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
     services,
     params,
     startedAt,
+    spaceId,
   }): ReturnType<
     ExecutorType<
       BurnRateRuleParams,
@@ -86,6 +93,12 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
       longWindowBurnRate >= params.burnRateThreshold &&
       shortWindowBurnRate >= params.burnRateThreshold;
 
+    const viewInAppUrl = addSpaceIdToPath(
+      basePath.publicBaseUrl,
+      spaceId,
+      `/app/observability/slos/${slo.id}`
+    );
+
     if (shouldAlert) {
       const reason = buildReason(
         longWindowDuration,
@@ -101,6 +114,9 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
         shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
         burnRateThreshold: params.burnRateThreshold,
         timestamp: startedAt.toISOString(),
+        viewInAppUrl,
+        sloId: slo.id,
+        sloName: slo.name,
       };
 
       const alert = alertWithLifecycle({
@@ -112,7 +128,7 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
         },
       });
 
-      alert.scheduleActions(FIRED_ACTION.id, context);
+      alert.scheduleActions(ALERT_ACTION.id, context);
       alert.replaceState({ alertState: AlertStates.ALERT });
     }
 
@@ -124,6 +140,9 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
         shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
         burnRateThreshold: params.burnRateThreshold,
         timestamp: startedAt.toISOString(),
+        viewInAppUrl,
+        sloId: slo.id,
+        sloName: slo.name,
       };
 
       recoveredAlert.setContext(context);
@@ -132,10 +151,10 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
     return { state: {} };
   };
 
-const FIRED_ACTION_ID = 'slo.burnRate.fired';
-export const FIRED_ACTION = {
-  id: FIRED_ACTION_ID,
-  name: i18n.translate('xpack.observability.slo.alerting.burnRate.fired', {
+const ALERT_ACTION_ID = 'slo.burnRate.alert';
+export const ALERT_ACTION = {
+  id: ALERT_ACTION_ID,
+  name: i18n.translate('xpack.observability.slo.alerting.burnRate.alertAction', {
     defaultMessage: 'Alert',
   }),
 };

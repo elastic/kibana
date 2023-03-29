@@ -5467,6 +5467,9 @@
               "benchmark_version": {
                 "type": "keyword"
               },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
               "passed_findings_count": {
                 "type": "long"
               },
@@ -5489,6 +5492,9 @@
           "type": "array",
           "items": {
             "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
               "rule_id": {
                 "type": "keyword"
               },
