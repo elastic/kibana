@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { Direction, Inspect, Maybe, RequestBasicOptions, ResultEdges } from './types';
+
+export interface PaginationInputPaginated {
+  /** The activePage parameter defines the page of results you want to fetch */
+  activePage: number;
+  /** The cursorStart parameter defines the start of the results to be displayed */
+  cursorStart: number;
+  /** The querySize parameter is the number of items to be returned */
+  querySize: number;
+}
+
+export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
+  pagination: PaginationInputPaginated;
+}
+
+export interface ActionRequestOptions extends RequestOptionsPaginated {
+  alertIds: string[];
+  agentId?: string;
+  sort: {
+    direction: Direction;
+    field: string;
+  };
+}
+
+export interface ActionRequestStrategyResponse<T> extends IEsSearchResponse {
+  edges: ResultEdges<T>;
+  inspect?: Maybe<Inspect>;
+}
+
+export interface LogOsqueryAction {
+  '@timestamp': string;
+  action_id: string;
+  agent_ids: string[];
+  agents: string[];
+  alert_ids: string[];
+  expiration: string;
+  input_type: 'osquery';
+  queries: Array<{
+    action_id: string;
+    id: string;
+    query: string;
+    agents: string[];
+    ecs_mapping?: unknown;
+    version?: string;
+    platform?: string;
+    saved_query_id?: string;
+    expiration?: string;
+  }>;
+  type: ' "INPUT_ACTION';
+}

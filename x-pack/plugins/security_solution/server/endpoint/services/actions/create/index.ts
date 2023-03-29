@@ -99,11 +99,10 @@ export class ActionCreateService {
       return payload.parameters ?? undefined;
     };
 
-    console.log({ actionID });
     const doc = {
       '@timestamp': moment().toISOString(),
       agent: {
-        id: [],
+        id: agents,
       },
       EndpointActions: {
         action_id: actionID,
@@ -157,7 +156,7 @@ export class ActionCreateService {
     const fleetActionDoc = {
       ...doc.EndpointActions,
       '@timestamp': doc['@timestamp'],
-      agents: [],
+      agents,
       timeout: 300, // 5 minutes
       user_id: doc.user.id,
     };
@@ -196,9 +195,7 @@ export class ActionCreateService {
           esClient: this.esClient,
           doc: {
             '@timestamp': moment().toISOString(),
-            agent: {
-              id: [],
-            },
+            agent: doc.agent,
             EndpointActions: {
               action_id: doc.EndpointActions.action_id,
               completed_at: moment().toISOString(),

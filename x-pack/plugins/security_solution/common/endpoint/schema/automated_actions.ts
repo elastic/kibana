@@ -5,29 +5,33 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-export const AutomatedActionListRequestSchema = {
+const AutomatedActionListRequestSchema = {
   query: schema.object({
-    alertIds: schema.maybe(
-      schema.oneOf([
-        schema.arrayOf(schema.string({ minLength: 1 }), {
-          minSize: 1,
-          validate: (alertIds) => {
-            if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
-              return 'alertIds cannot contain empty strings';
-            }
-          },
-        }),
-        schema.string({
-          minLength: 1,
-          validate: (actionId) => {
-            if (!actionId.trim().length) {
-              return 'alertId cannot be an empty string';
-            }
-          },
-        }),
-      ])
-    ),
+    alertIds: schema.arrayOf(schema.string({ minLength: 1 }), {
+      minSize: 1,
+      validate: (alertIds) => {
+        if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
+          return 'alertIds cannot contain empty strings';
+        }
+      },
+    }),
   }),
 };
+
+export type EndpointAutomatedActionListRequestQuery = TypeOf<
+  typeof AutomatedActionListRequestSchema.query
+>;
+
+const AutomatedActionResponseRequestSchema = {
+  query: schema.object({
+    expiration: schema.string(),
+    actionId: schema.string(),
+  }),
+};
+
+export type EndpointAutomatedActionResponseRequestQuery = TypeOf<
+  typeof AutomatedActionResponseRequestSchema.query
+>;

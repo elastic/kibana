@@ -5,52 +5,62 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import { EuiComment, EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
+import React, { useLayoutEffect, useState } from 'react';
+import { FormattedRelative } from '@kbn/i18n-react';
+
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { CoreStart } from '@kbn/core/public';
-
-import { KibanaContextProvider } from '../../common/lib/kibana';
-
-import { queryClient } from '../../query_client';
-import { KibanaThemeProvider } from '../../shared_imports';
 import type { StartPlugins } from '../../types';
-import type { OsqueryActionResultsProps } from './types';
-import OsqueryResult from './osquery_result';
+import { queryClient } from '../../query_client';
+import { AlertAttachmentContext } from '../../common/contexts';
+import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
+import { ATTACHED_QUERY } from '../../agents/translations';
+import { useLiveQueryDetails } from '../../actions/use_live_query_details';
+import type { OsqueryActionResultProps } from './types';
 
-const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
-  ruleName,
-  actionItems,
-  ecsData,
-}) => (
-  <div data-test-subj={'osquery-results'}>
-    {actionItems?.map((item) => {
-      const actionId = item.fields?.action_id?.[0];
-      const queryId = item.fields?.['queries.action_id']?.[0];
-      const startDate = item.fields?.['@timestamp'][0];
+const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
+  ({ actionId, ruleName, startDate, ecsData }) => {
+    const [isLive, setIsLive] = useState(false);
+    const { data } = useLiveQueryDetails({
+      actionId,
+      isLive,
+    });
 
-      return (
-        <OsqueryResult
-          key={actionId}
-          actionId={actionId}
-          queryId={queryId}
-          startDate={startDate}
-          ruleName={ruleName}
-          ecsData={ecsData}
-        />
-      );
-    })}
-    <EuiSpacer size="s" />
-  </div>
+    useLayoutEffect(() => {
+      setIsLive(() => !(data?.status === 'completed'));
+    }, [data?.status]);
+
+    return (
+      <AlertAttachmentContext.Provider value={ecsData}>
+        <EuiSpacer size="s" />
+        <EuiComment
+          username={ruleName && ruleName[0]}
+          timestamp={<FormattedRelative value={startDate} />}
+          event={ATTACHED_QUERY}
+          data-test-subj={'osquery-results-comment'}
+        >
+          <PackQueriesStatusTable
+            actionId={actionId}
+            data={data?.queries}
+            startDate={data?.['@timestamp']}
+            expirationDate={data?.expiration}
+            agentIds={data?.agents}
+          />
+        </EuiComment>
+        <EuiSpacer size="s" />
+      </AlertAttachmentContext.Provider>
+    );
+  }
 );
 
-export const OsqueryActionResults = React.memo(OsqueryActionResultsComponent);
-
+export const OsqueryActionResult = React.memo(OsqueryResultComponent);
 type OsqueryActionResultsWrapperProps = {
   services: CoreStart & StartPlugins;
-} & OsqueryActionResultsProps;
+} & OsqueryActionResultProps;
 
-const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapperProps> = ({
+const OsqueryActionResultWrapperComponent: React.FC<OsqueryActionResultsWrapperProps> = ({
   services,
   ...restProps
 }) => (
@@ -58,14 +68,14 @@ const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapper
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <OsqueryActionResults {...restProps} />
+          <OsqueryActionResult {...restProps} />
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
   </KibanaThemeProvider>
 );
 
-const OsqueryActionResultsWrapper = React.memo(OsqueryActionResultsWrapperComponent);
+const OsqueryActionResultWrapper = React.memo(OsqueryActionResultWrapperComponent);
 
 // eslint-disable-next-line import/no-default-export
-export { OsqueryActionResultsWrapper as default };
+export { OsqueryActionResultWrapper as default };

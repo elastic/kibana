@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { LogsEndpointAction } from '../../../../../../common/endpoint/types';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import { buildActionsQuery } from './query.all_actions.dsl';
 import type { SecuritySolutionFactory } from '../../types';
-import type { ResponseActionsQueries } from '../../../../../../common/search_strategy/security_solution/response_actions';
+import type {
+  ActionRequestOptions,
+  ActionRequestStrategyResponse,
+  ResponseActionsQueries,
+} from '../../../../../../common/search_strategy/security_solution/response_actions';
 
 export const allActions: SecuritySolutionFactory<ResponseActionsQueries.actions> = {
-  buildDsl: (options: any) => {
-    // buildDsl: (options: ActionsRequestOptions) => {
+  buildDsl: (options: ActionRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -23,11 +26,9 @@ export const allActions: SecuritySolutionFactory<ResponseActionsQueries.actions>
     return buildActionsQuery(options);
   },
   parse: async (
-    options: any,
-    // options: ActionsRequestOptions,
-    response: IEsSearchResponse<object>
-  ): Promise<any> => {
-    // ): Promise<ActionsStrategyResponse> => {
+    options: ActionRequestOptions,
+    response: ActionRequestStrategyResponse<LogsEndpointAction>
+  ): Promise<ActionRequestStrategyResponse<LogsEndpointAction>> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionsQuery(options))],
     };

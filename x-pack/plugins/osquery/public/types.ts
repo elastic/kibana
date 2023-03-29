@@ -19,7 +19,7 @@ import type {
 import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type {
-  getLazyOsqueryResults,
+  getLazyOsqueryResult,
   getLazyLiveQueryField,
   getLazyOsqueryAction,
   getLazyOsqueryResponseActionTypeForm,
@@ -31,8 +31,7 @@ export interface OsqueryPluginSetup {}
 
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
-  OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
-  OsqueryResult: ReturnType<typeof getLazyOsqueryResults>;
+  OsqueryResult: ReturnType<typeof getLazyOsqueryResult>;
   LiveQueryField?: ReturnType<typeof getLazyLiveQueryField>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
   fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };

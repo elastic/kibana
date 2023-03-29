@@ -9,3 +9,9 @@ export enum ResponseActionsQueries {
   actions = 'responseActions',
   results = 'responseActionsResults',
 }
+
+export type { ActionRequestOptions, ActionRequestStrategyResponse } from './actions';
+export type {
+  ActionResponsesRequestOptions,
+  ActionResponsesRequestStrategyResponse,
+} from './response';

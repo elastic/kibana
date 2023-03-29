@@ -96,7 +96,11 @@ import type {
   FirstLastSeenRequestOptions,
   FirstLastSeenStrategyResponse,
 } from './first_last_seen';
-import type { ResponseActionsQueries } from './response_actions';
+import type {
+  ActionRequestOptions,
+  ActionResponsesRequestOptions,
+  ResponseActionsQueries,
+} from './response_actions';
 
 export * from './cti';
 export * from './hosts';
@@ -259,9 +263,9 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreRequestOptions
   : T extends ResponseActionsQueries.actions
-  ? any
+  ? ActionRequestOptions
   : T extends ResponseActionsQueries.results
-  ? any
+  ? ActionResponsesRequestOptions
   : never;
 
 export interface CommonFields {

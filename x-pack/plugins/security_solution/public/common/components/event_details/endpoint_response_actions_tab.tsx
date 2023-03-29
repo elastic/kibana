@@ -11,6 +11,7 @@ import { EuiComment, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { map } from 'lodash';
 import { FormattedRelative } from '@kbn/i18n-react';
+import type { LogsEndpointAction } from '../../../../common/endpoint/types';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
 import { useKibana } from '../../lib/kibana';
 import {
@@ -22,6 +23,7 @@ import * as i18n from './translations';
 
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -40,7 +42,7 @@ export const useEndpointResponseActionsTab = ({
     params: Record<string, unknown>;
   }>;
   ruleName?: string[];
-  alertIds?: string[];
+  alertIds: string[];
 }) => {
   const {
     services: { osquery },
@@ -49,7 +51,6 @@ export const useEndpointResponseActionsTab = ({
 
   const { data: automatedList, isFetched } = useGetAutomatedActionList({
     alertIds,
-    withRuleActions: true,
   });
 
   const { OsqueryResult } = osquery;
@@ -69,7 +70,7 @@ export const useEndpointResponseActionsTab = ({
 
   const renderItems = () => {
     return map(automatedList?.items, (item) => {
-      if (item.input_type === 'osquery') {
+      if (item && 'input_type' in item && item?.input_type === 'osquery') {
         const actionId = item.action_id;
         const queryId = item.queries[0].id;
         const startDate = item['@timestamp'];
@@ -85,30 +86,9 @@ export const useEndpointResponseActionsTab = ({
           />
         );
       }
-      if (item.EndpointActions.input_type === 'endpoint') {
-        console.log({ item });
+      if (item && 'EndpointActions' in item && item?.EndpointActions.input_type === 'endpoint') {
         return <EndpointResponseActionResults action={item} ruleName={ruleName?.[0]} />;
       }
-      // RESPONSES
-      // if (item.action_input_type === 'osquery') {
-      //   const actionId = item.action_id;
-      //   const queryId = item.action_data.id;
-      //   const startDate = item['@timestamp'];
-      //
-      //   return (
-      //     <OsqueryResult
-      //       key={actionId}
-      //       actionId={actionId}
-      //       queryId={queryId}
-      //       startDate={startDate}
-      //       ruleName={ruleName}
-      //       ecsData={ecsData}
-      //     />
-      //   );
-      // }
-      // if (item.action_input_type === 'endpoint') {
-      //   return <div>ENDPOINT ACTION: </div>;
-      // }
     });
   };
 
@@ -132,19 +112,45 @@ export const useEndpointResponseActionsTab = ({
   };
 };
 
-const EndpointResponseActionResults = ({ action, ruleName }) => {
+interface EndpointResponseActionResultsProps {
+  action: LogsEndpointAction;
+  ruleName?: string;
+}
+
+const EndpointResponseActionResults = ({
+  action,
+  ruleName,
+}: EndpointResponseActionResultsProps) => {
   const { action_id: actionId, expiration } = action.EndpointActions;
-  console.log({ action });
-  const response = useGetAutomatedActionResponseList({ actionId, expiration });
+  const { data: responseData } = useGetAutomatedActionResponseList({ actionId, expiration });
+
+  const eventText = useMemo(() => {
+    const command = action.EndpointActions.data.command;
+    if (command === 'isolate') {
+      return 'isolated the host';
+    }
+    if (command === 'unisolate') {
+      return 'released the host';
+    }
+    return `executed command ${command}`;
+  }, [action.EndpointActions.data.command]);
 
   return (
     <EuiComment
       username={ruleName}
       timestamp={<FormattedRelative value={action['@timestamp']} />}
-      event={`executed command ${action.EndpointActions?.data.command}`}
+      event={eventText}
       data-test-subj={'endpoint-results-comment'}
     >
-      <ActionsLogExpandedTray action={{ ...action.EndpointActions.data, ...response?.data }} />
+      <ActionsLogExpandedTray
+        action={
+          {
+            ...action.EndpointActions.data,
+            startedAt: action['@timestamp'],
+            ...responseData,
+          } as unknown as ActionDetails
+        }
+      />
     </EuiComment>
   );
 };

@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import type { LogsEndpointActionResponse } from '../../../../../../common/endpoint/types';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import type { ResponseActionsQueries } from '../../../../../../common/search_strategy/security_solution/response_actions';
+import type {
+  ActionResponsesRequestOptions,
+  ActionResponsesRequestStrategyResponse,
+  ResponseActionsQueries,
+} from '../../../../../../common/search_strategy/security_solution/response_actions';
 
 import { buildActionResultsQuery } from './query.action_results.dsl';
 import type { SecuritySolutionFactory } from '../../types';
 
 export const actionResults: SecuritySolutionFactory<ResponseActionsQueries.results> = {
-  buildDsl: (options: any) => {
-    // buildDsl: (options: ActionResultsRequestOptions) => {
-
+  buildDsl: (options: ActionResponsesRequestOptions) => {
     return buildActionResultsQuery(options);
   },
   parse: async (
     options,
-    response: any
-    // response: ActionResultsStrategyResponse
-  ): Promise<any> => {
-    // ): Promise<ActionResultsStrategyResponse> => {
+    response: ActionResponsesRequestStrategyResponse<LogsEndpointActionResponse>
+  ): Promise<ActionResponsesRequestStrategyResponse<LogsEndpointActionResponse>> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionResultsQuery(options))],
     };

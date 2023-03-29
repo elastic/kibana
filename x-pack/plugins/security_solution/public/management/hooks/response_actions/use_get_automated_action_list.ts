@@ -5,26 +5,34 @@
  * 2.0.
  */
 
-import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom, of } from 'rxjs';
 
 import { mergeMap } from 'rxjs/operators';
+import { Direction } from '../../../../common/types';
+
+import type {
+  ActionResponsesRequestOptions,
+  ActionRequestOptions,
+  ActionRequestStrategyResponse,
+  ActionResponsesRequestStrategyResponse,
+} from '../../../../common/search_strategy/security_solution/response_actions';
 import { ResponseActionsQueries } from '../../../../common/search_strategy/security_solution/response_actions';
-import type { ActionListApiResponse } from '../../../../common/endpoint/types';
+import type {
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
+} from '../../../../common/endpoint/types';
 import { useKibana } from '../../../common/lib/kibana';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type {
+  EndpointAutomatedActionListRequestQuery,
+  EndpointAutomatedActionResponseRequestQuery,
+} from '../../../../common/endpoint/schema/automated_actions';
+import type {
+  LogOsqueryAction,
+  PaginationInputPaginated,
+} from '../../../../common/search_strategy/security_solution/response_actions/actions';
 
-interface ErrorType {
-  statusCode: number;
-  message: string;
-}
-
-export const useGetAutomatedActionList = (
-  query: EndpointActionListRequestQuery,
-  options: UseQueryOptions<ActionListApiResponse, IHttpFetchError<ErrorType>> = {}
-): UseQueryResult<ActionListApiResponse, IHttpFetchError<ErrorType>> => {
+export const useGetAutomatedActionList = (query: EndpointAutomatedActionListRequestQuery) => {
   const { data } = useKibana().services;
 
   const { alertIds } = query;
@@ -32,12 +40,14 @@ export const useGetAutomatedActionList = (
     ['get-automated-action-list', { alertIds }],
     async () => {
       const responseData = await lastValueFrom(
-        data.search.search<any, any>(
-          // data.search.search<ResultsRequestOptions, ResultsStrategyResponse>(
+        data.search.search<
+          ActionRequestOptions,
+          ActionRequestStrategyResponse<LogsEndpointAction | LogOsqueryAction>
+        >(
           {
             alertIds,
             sort: {
-              direction: 'desc',
+              direction: Direction.desc,
               field: '@timestamp',
             },
             factoryQueryType: ResponseActionsQueries.actions,
@@ -51,38 +61,35 @@ export const useGetAutomatedActionList = (
 
       return {
         ...responseData,
-        items: responseData.edges.map((edge) => {
-          return edge._source;
-        }),
+        items: responseData.edges.map((edge) => edge._source),
       };
     },
     {
       keepPreviousData: true,
-
-      // refetchInterval: isLive ? 5000 : false;
     }
   );
 };
 
 export const useGetAutomatedActionResponseList = (
-  query: EndpointActionListRequestQuery,
-  options: UseQueryOptions<ActionListApiResponse, IHttpFetchError<ErrorType>> = {}
-): UseQueryResult<ActionListApiResponse, IHttpFetchError<ErrorType>> => {
+  query: EndpointAutomatedActionResponseRequestQuery
+) => {
   const { data } = useKibana().services;
   const { expiration, actionId } = query;
-  console.log({ query });
   return useQuery(
     ['allResponsesResults', { actionId }],
     async () => {
       const responseData = await lastValueFrom(
+        // .search<any, any>(
         data.search
-          .search<any, any>(
-            // data.search.search<ResultsRequestOptions, ResultsStrategyResponse>(
+          .search<
+            ActionResponsesRequestOptions,
+            ActionResponsesRequestStrategyResponse<LogsEndpointActionResponse>
+          >(
             {
               actionId,
               expiration,
               sort: {
-                direction: 'desc',
+                direction: Direction.desc,
                 field: '@timestamp',
               },
               factoryQueryType: ResponseActionsQueries.results,
@@ -94,18 +101,16 @@ export const useGetAutomatedActionResponseList = (
           )
           .pipe(
             mergeMap((val) => {
-              console.log({ val });
               const responded =
                 val.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
               // const pending = agent - responded;
               const pending = 1 - responded;
 
-              console.log({ responded, pending });
               const expired = !expiration ? true : new Date(expiration) < new Date();
               const isCompleted = expired || pending <= 0;
 
               return of({
-                edges: val.edges,
+                items: val.rawResponse.hits.hits,
                 action_id: actionId,
                 isCompleted,
                 expired,
@@ -113,37 +118,31 @@ export const useGetAutomatedActionResponseList = (
             })
           )
       );
-      console.log({ responseData });
 
-      const action = responseData.edges[0]._source;
+      const action = responseData.items[0]._source;
 
-      console.log({ action });
-      const actionRecord: ActionListApiResponse['data'][number] = {
+      return {
         id: actionId,
-        agents: [action.agent.id],
-        command: action.EndpointActions.data.command,
-        startedAt: action.EndpointActions.started_at,
+        agents: [action?.agent.id],
+        command: action?.EndpointActions.data.command,
+        startedAt: action?.EndpointActions.started_at,
         isCompleted: responseData.isCompleted,
-        completedAt: action.EndpointActions.completed_at,
+        completedAt: action?.EndpointActions.completed_at,
         isExpired: responseData.expired,
-        comment: action.EndpointActions.data.comment,
-        wasSuccessful: true,
-        // parameters: action.parameters,
-        // alertIds: action.alertIds,
-        // ruleId: action.ruleId,
-        // ruleName: action.ruleName,
+        comment: action?.EndpointActions.data.comment,
+        wasSuccessful: responseData.isCompleted,
+        parameters: action?.EndpointActions.data.parameters,
       };
-
-      return actionRecord;
     },
     {
       keepPreviousData: true,
-      // refetchInterval: isLive ? 5000 : false;
     }
   );
 };
-export const generateTablePaginationOptions = (activePage: number, limit: number): any => {
-  // ): PaginationInputPaginated => {
+export const generateTablePaginationOptions = (
+  activePage: number,
+  limit: number
+): PaginationInputPaginated => {
   const cursorStart = activePage * limit;
 
   return {

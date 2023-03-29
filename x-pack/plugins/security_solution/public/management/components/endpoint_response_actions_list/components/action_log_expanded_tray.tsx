@@ -89,7 +89,6 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
 
     const { command, isCompleted, isExpired, wasSuccessful } = action;
 
-    console.log({ isExpired });
     if (isExpired) {
       return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
     }

@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import type { ExpandedEventFieldsObject } from './types';
+import type { AlertRawEventData, ExpandedEventFieldsObject } from './types';
 import { useEndpointResponseActionsTab } from './endpoint_response_actions_tab';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
@@ -33,7 +33,6 @@ import {
   getTourAnchor,
   SecurityStepId,
 } from '../guided_onboarding_tour/tour_config';
-import type { AlertRawEventData } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
@@ -68,14 +67,13 @@ export type EventViewId =
   | EventsViewType.jsonView
   | EventsViewType.summaryView
   | EventsViewType.threatIntelView
-  | EventsViewType.osqueryView;
+  | EventsViewType.endpointView;
 
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
-  osqueryView = 'osquery-results-view',
   endpointView = 'endpoint-results-view',
 }
 

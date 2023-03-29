@@ -6,23 +6,21 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
-// import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
+import type { ActionResponsesRequestOptions } from '../../../../../../common/search_strategy/security_solution/response_actions';
 import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../../../common/endpoint/constants';
 
 export const buildActionResultsQuery = ({
   actionId,
   sort,
-  expiration,
-}: any): ISearchRequestParams => {
-  // }: ActionResultsRequestOptions): ISearchRequestParams => {
+}: ActionResponsesRequestOptions): ISearchRequestParams => {
   const dslQuery = {
     allow_no_indices: true,
     index: [ENDPOINT_ACTION_RESPONSES_INDEX],
     body: {
       size: 1,
       query: {
-        term: { action_id: '85207258-5641-4b33-8f8b-43cf13f6a8ca' },
-        // term: { action_id: actionId },
+        // term: { action_id: '0ee466f0-c0d9-4c9f-ad48-7b5cba3ed597' },
+        term: { action_id: actionId },
       },
       aggs: {
         aggs: {
@@ -34,8 +32,8 @@ export const buildActionResultsQuery = ({
                   must: [
                     {
                       match: {
-                        action_id: '85207258-5641-4b33-8f8b-43cf13f6a8ca',
-                        // action_id: actionId,
+                        // action_id: '0ee466f0-c0d9-4c9f-ad48-7b5cba3ed597',
+                        action_id: actionId,
                       },
                     },
                   ],
