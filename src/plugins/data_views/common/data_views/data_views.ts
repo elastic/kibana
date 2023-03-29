@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import { SavedObjectsClientCommon } from '../types';
@@ -727,16 +726,7 @@ export class DataViewsService {
     id: string,
     displayErrors: boolean = true
   ): Promise<DataView> => {
-    let savedObject: SavedObject<DataViewAttributes>;
-    try {
-      savedObject = await this.savedObjectsClient.get(id);
-    } catch (e) {
-      if (e.body?.statusCode === 404 || e.output?.statusCode === 404) {
-        throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
-      } else {
-        throw e;
-      }
-    }
+    const savedObject = await this.savedObjectsClient.get(id);
 
     return this.initFromSavedObject(savedObject, displayErrors);
   };
