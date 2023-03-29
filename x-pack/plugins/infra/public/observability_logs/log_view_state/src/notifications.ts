@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
+import { LogViewReference, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
 import { createNotificationChannel } from '../../xstate_helpers';
 import { LogViewContext, LogViewEvent } from './types';
 
 export type LogViewNotificationEvent =
   | {
       type: 'LOADING_LOG_VIEW_STARTED';
-      logViewId: string;
+      logViewReference: LogViewReference;
     }
   | {
       type: 'LOADING_LOG_VIEW_SUCCEEDED';
@@ -29,10 +29,10 @@ export const createLogViewNotificationChannel = () =>
 
 export const logViewNotificationEventSelectors = {
   loadingLogViewStarted: (context: LogViewContext) =>
-    'logViewId' in context
+    'logViewReference' in context
       ? ({
           type: 'LOADING_LOG_VIEW_STARTED',
-          logViewId: context.logViewId,
+          logViewReference: context.logViewReference,
         } as LogViewNotificationEvent)
       : undefined,
   loadingLogViewSucceeded: (context: LogViewContext) =>
