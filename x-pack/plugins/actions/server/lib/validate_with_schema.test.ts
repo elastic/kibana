@@ -35,6 +35,11 @@ test('should validate when there are no validators', () => {
     name: 'bar',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ any: schema.arrayOf(schema.string()) }) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
     executor,
   };
   const testValue = { any: ['old', 'thing'] };

@@ -180,6 +180,11 @@ describe('create()', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -213,6 +218,11 @@ describe('create()', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -254,6 +264,11 @@ describe('create()', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -293,6 +308,11 @@ describe('create()', () => {
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor,
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -346,6 +366,11 @@ describe('create()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -465,6 +490,13 @@ describe('create()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: {
+          schema: schema.object({ a: schema.boolean(), b: schema.boolean(), c: schema.boolean() }),
+        },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -600,6 +632,11 @@ describe('create()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor,
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
@@ -635,6 +672,11 @@ describe('create()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor,
     });
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
@@ -1731,6 +1773,11 @@ describe('update()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -1835,6 +1882,11 @@ describe('update()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -1908,6 +1960,11 @@ describe('update()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -2046,6 +2103,13 @@ describe('update()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: {
+          schema: schema.object({ a: schema.boolean(), b: schema.boolean(), c: schema.boolean() }),
+        },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -2127,6 +2191,11 @@ describe('update()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
       executor,
     });
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
@@ -2517,6 +2586,11 @@ describe('isActionTypeEnabled()', () => {
     name: 'Foo',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
     executor: jest.fn(),
   };
   beforeEach(() => {

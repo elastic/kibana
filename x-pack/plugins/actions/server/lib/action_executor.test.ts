@@ -77,6 +77,11 @@ test('successfully executes', async () => {
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.boolean() }) },
+      secrets: { schema: schema.object({ baz: schema.boolean() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -210,6 +215,11 @@ test('successfully executes when http_request source is specified', async () => 
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.boolean() }) },
+      secrets: { schema: schema.object({ baz: schema.boolean() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -348,6 +358,11 @@ test('successfully executes when saved_object source is specified', async () => 
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.boolean() }) },
+      secrets: { schema: schema.object({ baz: schema.boolean() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -489,6 +504,11 @@ test('successfully executes with preconfigured connector', async () => {
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.string() }) },
+      secrets: { schema: schema.object({ apiKey: schema.string() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
     executor: jest.fn(),
   };
 
@@ -605,6 +625,11 @@ test('successfully executes as a task', async () => {
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -649,6 +674,11 @@ test('provides empty config when config and / or secrets is empty', async () => 
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -666,7 +696,7 @@ test('provides empty config when config and / or secrets is empty', async () => 
 
   expect(actionType.executor).toHaveBeenCalledTimes(1);
   const executorCall = actionType.executor.mock.calls[0][0];
-  expect(executorCall.config).toMatchInlineSnapshot(`undefined`);
+  expect(executorCall.config).toMatchInlineSnapshot(`Object {}`);
 });
 
 test('throws an error when config is invalid', async () => {
@@ -790,6 +820,11 @@ test('throws an error if actionType is not enabled', async () => {
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -819,6 +854,11 @@ test('should not throws an error if actionType is preconfigured', async () => {
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.boolean() }) },
+      secrets: { schema: schema.object({ baz: schema.boolean() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -907,6 +947,11 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.string() }) },
+      secrets: { schema: schema.object({ apiKey: schema.string() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
     executor: jest.fn(),
   };
 
@@ -1233,6 +1278,11 @@ function setupActionExecutorMock() {
     name: 'Test',
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.boolean() }) },
+      secrets: { schema: schema.object({ baz: schema.boolean() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
     executor: jest.fn(),
   };
   const actionSavedObject = {
