@@ -19,7 +19,6 @@ export const buildActionResultsQuery = ({
     body: {
       size: 1,
       query: {
-        // term: { action_id: '0ee466f0-c0d9-4c9f-ad48-7b5cba3ed597' },
         term: { action_id: actionId },
       },
       aggs: {
@@ -32,7 +31,6 @@ export const buildActionResultsQuery = ({
                   must: [
                     {
                       match: {
-                        // action_id: '0ee466f0-c0d9-4c9f-ad48-7b5cba3ed597',
                         action_id: actionId,
                       },
                     },

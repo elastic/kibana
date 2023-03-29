@@ -11,7 +11,7 @@ import { EuiComment, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { map } from 'lodash';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { LogsEndpointAction } from '../../../../common/endpoint/types';
+import type { LogsEndpointAction, ActionDetails } from '../../../../common/endpoint/types';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
 import { useKibana } from '../../lib/kibana';
 import {
@@ -22,8 +22,7 @@ import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
-import type { ActionDetails } from '../../../../common/endpoint/types';
+import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -49,22 +48,20 @@ export const useEndpointResponseActionsTab = ({
   } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
-  const { data: automatedList, isFetched } = useGetAutomatedActionList({
-    alertIds,
-  });
+  const shouldEarlyReturn = !ecsData || !responseActionsEnabled || !responseActions;
+
+  const { data: automatedList, isFetched } = useGetAutomatedActionList(
+    {
+      alertIds,
+    },
+    { skip: shouldEarlyReturn }
+  );
 
   const { OsqueryResult } = osquery;
 
   const totalItemCount = useMemo(() => automatedList?.items?.length ?? 0, [automatedList]);
 
-  if (!responseActionsEnabled) {
-    return;
-  }
-
-  const endpointResponseActions = responseActions?.filter(
-    (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.ENDPOINT
-  );
-  if (!endpointResponseActions?.length) {
+  if (shouldEarlyReturn || !responseActions?.length) {
     return;
   }
 
@@ -117,6 +114,7 @@ interface EndpointResponseActionResultsProps {
   ruleName?: string;
 }
 
+// TODO add i18n an move outside of this file
 const EndpointResponseActionResults = ({
   action,
   ruleName,

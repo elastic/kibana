@@ -32,7 +32,14 @@ import type {
   PaginationInputPaginated,
 } from '../../../../common/search_strategy/security_solution/response_actions/actions';
 
-export const useGetAutomatedActionList = (query: EndpointAutomatedActionListRequestQuery) => {
+interface GetAutomatedActionsListOptions {
+  skip?: boolean;
+}
+
+export const useGetAutomatedActionList = (
+  query: EndpointAutomatedActionListRequestQuery,
+  { skip }: GetAutomatedActionsListOptions
+) => {
   const { data } = useKibana().services;
 
   const { alertIds } = query;
@@ -65,6 +72,7 @@ export const useGetAutomatedActionList = (query: EndpointAutomatedActionListRequ
       };
     },
     {
+      enabled: !skip,
       keepPreviousData: true,
     }
   );
@@ -131,7 +139,6 @@ export const useGetAutomatedActionResponseList = (
         isExpired: responseData.expired,
         comment: action?.EndpointActions.data.comment,
         wasSuccessful: responseData.isCompleted,
-        parameters: action?.EndpointActions.data.parameters,
       };
     },
     {
