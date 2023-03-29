@@ -186,6 +186,7 @@ paths:
                 - $ref: '#/components/schemas/update_connector_request_serverlog'
                 - $ref: '#/components/schemas/update_connector_request_servicenow'
                 - $ref: '#/components/schemas/update_connector_request_servicenow_itom'
+                - $ref: '#/components/schemas/update_connector_request_slack'
                 - $ref: '#/components/schemas/update_connector_request_swimlane'
             examples:
               updateIndexConnectorRequest:
@@ -1372,19 +1373,21 @@ components:
     secrets_properties_slack:
       title: Connector secrets properties for a Slack connector
       description: Defines secrets for connectors when type is `.slack`.
-      type: object
-      properties:
-        token:
-          type: string
-          description: Slack bot user OAuth token.
-        webhookUrl:
-          type: string
-          description: Slack webhook url.
       oneOf:
-        - required:
+        - type: object
+          required:
             - token
-        - required:
+          properties:
+            token:
+              type: string
+              description: The Slack bot user OAuth token.
+        - type: object
+          required:
             - webhookUrl
+          properties:
+            webhookUrl:
+              type: string
+              description: The Slack webhook url.
     create_connector_request_slack:
       title: Create Slack connector request
       description: The Slack connector uses Slack Incoming Webhooks.
@@ -2417,6 +2420,23 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
+    update_connector_request_slack:
+      title: Update Slack connector request
+      type: object
+      required:
+        - name
+        - secrets
+      properties:
+        name:
+          type: string
+          description: The display name for the connector.
+        config:
+          type: string
+          enum:
+            - web_api
+            - webhook
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_slack'
     update_connector_request_swimlane:
       title: Update Swimlane connector request
       type: object
