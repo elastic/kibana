@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiLoadingSpinner,
-  EuiTableActionsColumnType,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
