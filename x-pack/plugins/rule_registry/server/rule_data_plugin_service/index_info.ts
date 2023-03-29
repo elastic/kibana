@@ -114,7 +114,7 @@ export class IndexInfo {
    *   - include nested registration contexts eagerly
    *   - e.g. if baseName='.alerts-observability', include '.alerts-observability.apm'
    *
-   * @example '.alerts-security.alerts-default*', '.alerts-security.alerts*'
+   * @example '.alerts-security.alerts-default', '.alerts-security.alerts*'
    */
   public getPatternForReading(namespace?: string): string {
     return namespace ? `${joinWithDash(this.baseName, namespace)}` : `${this.baseName}*`;
