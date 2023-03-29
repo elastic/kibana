@@ -89,7 +89,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
   }
 }
 
-const getFileEntities = async (
+export const getFileEntities = async (
   caseIds: string[],
   fileService: FileServiceStart
 ): Promise<OwnerEntity[]> => {
@@ -102,7 +102,7 @@ const getFileEntities = async (
     const files = await fileService.find({
       perPage: MAX_DOCS_PER_PAGE,
       meta: {
-        caseId: ids,
+        caseIds: ids,
       },
     });
 
