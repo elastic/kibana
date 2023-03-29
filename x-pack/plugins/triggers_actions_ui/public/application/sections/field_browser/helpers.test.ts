@@ -9,13 +9,21 @@ import { mockBrowserFields } from './mock';
 
 import {
   categoryHasFields,
+  getDescription,
   getFieldCount,
   filterBrowserFieldsByFieldName,
   filterSelectedBrowserFields,
 } from './helpers';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { EcsFlat } from '@kbn/ecs';
 
 describe('helpers', () => {
+  describe('getDescription', () => {
+    test('it returns description for given name', () => {
+      const description = getDescription('host.hostname', EcsFlat);
+      expect(description).toMatchSnapshot();
+    });
+  });
   describe('categoryHasFields', () => {
     test('it returns false if the category fields property is undefined', () => {
       expect(categoryHasFields({})).toBe(false);
