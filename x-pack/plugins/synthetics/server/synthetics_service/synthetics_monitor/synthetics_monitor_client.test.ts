@@ -181,6 +181,9 @@ describe('SyntheticsMonitorClient', () => {
       {
         monitor,
         configId: id,
+        params: {
+          username: 'elastic',
+        },
       },
     ]);
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
