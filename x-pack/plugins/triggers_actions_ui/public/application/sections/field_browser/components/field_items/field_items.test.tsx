@@ -29,7 +29,7 @@ describe('field_items', () => {
       expect(fieldItems[0]).toEqual({
         name: timestampFieldId,
         description: timestampField.description,
-        category: '@timestamp',
+        category: 'base',
         selected: false,
         type: timestampField.type,
         example: timestampField.example,
@@ -112,7 +112,7 @@ describe('field_items', () => {
       expect(fieldItems[0]).toEqual({
         name: timestampFieldId,
         description: timestampField.description,
-        category: '@timestamp',
+        category: 'base',
         selected: false,
         type: timestampField.type,
         example: timestampField.example,
@@ -147,7 +147,7 @@ describe('field_items', () => {
       expect(fieldItems[0]).toEqual({
         name: '-',
         description: '',
-        category: '-',
+        category: 'base',
         selected: false,
         type: timestampField.type,
         example: timestampField.example,
