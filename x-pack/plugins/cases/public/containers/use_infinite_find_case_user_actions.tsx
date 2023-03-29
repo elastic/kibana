@@ -41,7 +41,7 @@ export const useInfiniteFindCaseUserActions = (
         if (lastPage.page < lastPageNumber - 1) {
           return lastPage.page + 1;
         }
-        return false;
+        return undefined;
       },
     }
   );

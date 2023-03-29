@@ -157,7 +157,6 @@ describe('useUserActionsPagination', () => {
     useInfiniteFindCaseUserActionsMock.mockReturnValue({
       ...defaultInfiniteUseFindCaseUserActions,
       data: {
-        perPageParams: undefined,
         pages: { total: 25, perPage: 10, page: 1, userActions: [] },
       },
     });

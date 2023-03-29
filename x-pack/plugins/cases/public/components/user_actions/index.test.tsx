@@ -380,7 +380,7 @@ describe(`UserActions`, () => {
       jest.clearAllMocks();
     });
 
-    it('Loading spinner when user actions loading and displays fullName/username', () => {
+    it('Loading spinner when user actions loading', () => {
       useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
       useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
       appMockRender.render(

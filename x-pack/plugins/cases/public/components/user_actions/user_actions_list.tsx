@@ -12,7 +12,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import type { CaseUserActions } from '../../containers/types';
-import type { AddCommentMarkdown, UserActionBuilderArgs, UserActionTreeProps } from './types';
+import type { UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { isUserActionTypeSupported } from './helpers';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { builderMap } from './builder';
@@ -81,7 +81,7 @@ export type UserActionListProps = Omit<
     caseUserActions: CaseUserActions[];
     loadingAlertData: boolean;
     manualAlertsData: Record<string, unknown>;
-    bottomActions?: AddCommentMarkdown[];
+    bottomActions?: EuiCommentProps[];
     isExpandable?: boolean;
   };
 
@@ -100,7 +100,7 @@ export const UserActionsList = React.memo(
     manualAlertsData,
     commentRefs,
     handleManageQuote,
-    bottomActions,
+    bottomActions = [],
     isExpandable = false,
   }: UserActionListProps) => {
     const {

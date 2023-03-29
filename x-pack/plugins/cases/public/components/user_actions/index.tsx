@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiPanel, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 import { css } from '@emotion/react';
 
 import { AddComment } from '../add_comment';
@@ -25,9 +25,62 @@ import { useUserActionsPagination } from './use_user_actions_pagination';
 import { useLastPageUserActions } from './use_user_actions_last_page';
 import { ShowMoreButton } from './show_more_button';
 
-const BottomUserActionsListWrapper = styled(EuiFlexItem)`
-  padding-top: 16px;
-`;
+const getIconsCss = (
+  showBottomList: boolean,
+  hasNextPage: boolean | undefined,
+  euiTheme: EuiThemeComputed<{}>
+): string => {
+  const customSize = hasNextPage
+    ? {
+        showMoreSectionSize: euiTheme.size.xxxl,
+        marginTopShowMoreSectionSize: euiTheme.size.xxl,
+        marginBottomShowMoreSectionSize: euiTheme.size.xxl,
+      }
+    : {
+        showMoreSectionSize: euiTheme.size.s,
+        marginTopShowMoreSectionSize: euiTheme.size.m,
+        marginBottomShowMoreSectionSize: euiTheme.size.m,
+      };
+
+  const blockSize = `${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
+  ${customSize.marginBottomShowMoreSectionSize}`;
+  return `
+          ${
+            showBottomList
+              ? `.commentList--hasShowMore
+            [class*='euiTimelineItem-center']:last-child:not(:only-child)
+            > [class*='euiTimelineItemIcon-']::before {
+            block-size: calc(
+              100% + ${blockSize}
+            );
+          }`
+              : ''
+          }
+          ${
+            showBottomList
+              ? `.commentList--hasShowMore
+            [class*='euiTimelineItem-center']:first-child
+            > [class*='euiTimelineItemIcon-']::before {
+            inset-block-start: 0%;
+            block-size: calc(
+              100% + ${blockSize}
+            );
+          }`
+              : ''
+          }
+          ${
+            showBottomList
+              ? `.commentList--hasShowMore
+              [class*='euiTimelineItem-']
+              > [class*='euiTimelineItemIcon-']::before {
+              block-size: calc(
+                100% + ${blockSize}
+              );
+              }`
+              : ''
+          }
+        `;
+};
 
 export const UserActions = React.memo((props: UserActionTreeProps) => {
   const {
@@ -52,6 +105,8 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     caseId: caseData.id,
   });
 
+  const { euiTheme } = useEuiTheme();
+
   const { isLoadingLastPageUserActions, lastPageUserActions } = useLastPageUserActions({
     userActivityQueryParams,
     caseId: caseData.id,
@@ -67,7 +122,8 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const { permissions } = useCasesContext();
 
-  const showCommentEditor = permissions.create && userActivityQueryParams.type !== 'action'; // add-comment markdown is not visible in History filter
+  // add-comment markdown is not visible in History filter
+  const showCommentEditor = permissions.create && userActivityQueryParams.type !== 'action';
 
   const {
     commentRefs,
@@ -114,20 +170,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     }
   }, [fetchNextPage]);
 
-  const { euiTheme } = useEuiTheme();
-
-  const customSize = hasNextPage
-    ? {
-        showMoreSectionSize: euiTheme.size.xxxl,
-        marginTopShowMoreSectionSize: euiTheme.size.xl,
-        marginBottomShowMoreSectionSize: euiTheme.size.xl,
-      }
-    : {
-        showMoreSectionSize: euiTheme.size.s,
-        marginTopShowMoreSectionSize: euiTheme.size.s,
-        marginBottomShowMoreSectionSize: euiTheme.size.s,
-      };
-
   return (
     <EuiSkeletonText
       lines={8}
@@ -138,41 +180,9 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           : isLoadingInfiniteUserActions
       }
     >
-      <EuiPanel
-        color="plain"
-        hasShadow={false}
+      <EuiFlexItem
         css={css`
-          ${showBottomList
-            ? `.commentList--hasShowMore
-            [class*='euiTimelineItem-center']:last-child:not(:only-child)
-            > [class*='euiTimelineItemIcon-']::before {
-            block-size: calc(
-              100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
-                ${customSize.marginBottomShowMoreSectionSize}
-            );
-          }`
-            : ''}
-          ${showBottomList
-            ? `.commentList--hasShowMore
-            [class*='euiTimelineItem-center']:first-child
-            > [class*='euiTimelineItemIcon-']::before {
-            inset-block-start: 0%;
-            block-size: calc(
-              100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
-                ${customSize.marginBottomShowMoreSectionSize}
-            );
-          }`
-            : ''}
-          ${showBottomList
-            ? `.commentList--hasShowMore
-              [class*='euiTimelineItem-']
-              > [class*='euiTimelineItemIcon-']::before {
-              block-size: calc(
-                100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
-                  ${customSize.marginBottomShowMoreSectionSize}
-              );
-              }`
-            : ''}
+          ${getIconsCss(showBottomList, hasNextPage, euiTheme)}
         `}
       >
         <UserActionsList
@@ -182,12 +192,12 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           manualAlertsData={manualAlertsData}
           commentRefs={commentRefs}
           handleManageQuote={handleManageQuote}
-          bottomActions={lastPage === 0 || lastPage === 1 ? bottomActions : []}
+          bottomActions={lastPage <= 1 ? bottomActions : []}
           isExpandable
         />
         {hasNextPage && <ShowMoreButton onShowMoreClick={handleShowMore} />}
         {lastPageUserActions?.length ? (
-          <BottomUserActionsListWrapper>
+          <EuiFlexItem>
             <UserActionsList
               {...props}
               caseUserActions={lastPageUserActions}
@@ -197,9 +207,9 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
               commentRefs={commentRefs}
               handleManageQuote={handleManageQuote}
             />
-          </BottomUserActionsListWrapper>
+          </EuiFlexItem>
         ) : null}
-      </EuiPanel>
+      </EuiFlexItem>
     </EuiSkeletonText>
   );
 });

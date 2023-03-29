@@ -167,8 +167,8 @@ export const findCaseUserActions = async (
 ): Promise<FindCaseUserActions> => {
   const query = {
     types: params.type !== 'all' ? [params.type] : [],
-    sortOrder: params.sortOrder ?? 'asc',
-    page: params.page ?? 1,
+    sortOrder: params.sortOrder,
+    page: params.page,
     perPage: params.perPage,
   };
 

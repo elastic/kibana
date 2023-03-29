@@ -79,6 +79,16 @@ describe(`UserActionsList`, () => {
     });
   });
 
+  it('renders user actions correctly', async () => {
+    appMockRender.render(<UserActionsList {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId(`description-create-action-${caseUserActions[0].id}`));
+      expect(screen.getByTestId(`comment-create-action-${caseUserActions[1].commentId}`));
+      expect(screen.getByTestId(`description-update-action-${caseUserActions[2].id}`));
+    });
+  });
+
   it('renders bottom actions correctly', async () => {
     const userName = 'Username';
     const sample = 'This is an add comment bottom actions';

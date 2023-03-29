@@ -297,7 +297,25 @@ describe.skip('Case View Page activity tab', () => {
     it('should show comment filter as active', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
+      const lastPageForComment = Math.ceil(
+        userActionsStats.totalComments / userActivityQueryParams.perPage
+      );
+
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
+
+      await waitFor(() => {
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, type: 'user' },
+          true
+        );
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, type: 'user', page: lastPageForComment },
+          false
+        );
+      });
 
       await waitFor(() => {
         expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
@@ -309,7 +327,25 @@ describe.skip('Case View Page activity tab', () => {
     it('should show history filter as active', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
+      const lastPageForHistory = Math.ceil(
+        userActionsStats.totalOtherActions / userActivityQueryParams.perPage
+      );
+
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
+
+      await waitFor(() => {
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, type: 'action' },
+          true
+        );
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, type: 'action', page: lastPageForHistory },
+          true
+        );
+      });
 
       await waitFor(() => {
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);

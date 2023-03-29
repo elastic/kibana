@@ -28,7 +28,7 @@ export const ShowMoreButton = React.memo<ShowMoreButtonProps>(({ onShowMoreClick
       css={css`
         display: flex;
         justify-content: center;
-        margin-block: ${euiTheme.size.base};
+        margin-block: ${euiTheme.size.xl};
         margin-inline-start: ${euiTheme.size.xxxl};
       `}
     >

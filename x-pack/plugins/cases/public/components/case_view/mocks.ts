@@ -112,7 +112,6 @@ export const defaultInfiniteUseFindCaseUserActions = {
     pages: [
       { total: 4, perPage: 10, page: 1, userActions: [...caseUserActions, getAlertUserAction()] },
     ],
-    perPageParams: [undefined],
   },
   isLoading: false,
   isFetching: false,

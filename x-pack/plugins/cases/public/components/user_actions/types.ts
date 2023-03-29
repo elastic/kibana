@@ -43,14 +43,6 @@ export interface UserActionTreeProps {
   userActionsStats: CaseUserActionsStats;
 }
 
-export interface AddCommentMarkdown {
-  username: React.ReactNode;
-  'data-test-subj': string;
-  timelineAvatar: React.ReactNode | null | undefined;
-  className: string;
-  children: React.ReactNode;
-}
-
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
 export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, UnsupportedUserActionTypes>;
 
