@@ -22,6 +22,7 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { firstValueFrom } from 'rxjs';
+import { getGroupByTerms } from '../../../../../common/utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import {
   ENVIRONMENT_NOT_DEFINED,
@@ -169,17 +170,7 @@ export function registerTransactionDurationRuleType({
                     missing: ENVIRONMENT_NOT_DEFINED.value,
                   },
                   { field: TRANSACTION_TYPE },
-                  ...(ruleParams.groupBy ? [ruleParams.groupBy] : [])
-                    .flat()
-                    .map((group) => {
-                      return {
-                        field: group,
-                        missing: group
-                          .replaceAll('.', '_')
-                          .toUpperCase()
-                          .concat('_NOT_DEFINED'),
-                      };
-                    }),
+                  ...getGroupByTerms(ruleParams),
                 ],
                 size: 1000,
                 ...getMultiTermsSortOrder(ruleParams.aggregationType),
@@ -189,7 +180,9 @@ export function registerTransactionDurationRuleType({
                   aggregationType: ruleParams.aggregationType,
                   transactionDurationField: field,
                 }),
-                ...getServiceGroupFieldsAgg({ groupBy: ruleParams.groupBy }),
+                ...getServiceGroupFieldsAgg({
+                  groupByOpts: ruleParams.groupBy,
+                }),
               },
             },
           },

@@ -75,7 +75,7 @@ describe('getSourceFieldsAgg', () => {
 
   it('should create an agg for specific source fields and fields from group-by', () => {
     const agg = getServiceGroupFieldsAgg({
-      groupBy: ['service.node.name', 'service.version'],
+      groupByOpts: ['service.node.name', 'service.version'],
     });
     expect(agg).toMatchInlineSnapshot(`
       Object {
