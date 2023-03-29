@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export * from './source_id';
+import React from 'react';
+
+const LazyAlertDropdown = React.lazy(() => import('./alert_dropdown'));
+
+export const LazyAlertDropdownWrapper = () => (
+  <React.Suspense fallback={<div />}>
+    <LazyAlertDropdown />
+  </React.Suspense>
+);
