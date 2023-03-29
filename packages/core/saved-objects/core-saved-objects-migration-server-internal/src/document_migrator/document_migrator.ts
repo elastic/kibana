@@ -41,7 +41,6 @@
  * given an empty migrationVersion property {} if no such property exists.
  */
 
-import _ from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type {

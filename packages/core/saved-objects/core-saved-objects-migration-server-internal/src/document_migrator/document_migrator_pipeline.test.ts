@@ -8,10 +8,7 @@
 
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import {
-  modelVersionVirtualMajor,
-  modelVersionToVirtualVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { Transform, TransformType, TypeTransforms, TransformFn } from './types';
 import { DocumentMigratorPipeline } from './document_migrator_pipeline';
 
