@@ -76,9 +76,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('slack-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
-
-    after(async () => {
-      await es.indices.delete({ index: testIndex });
-    });
   });
 }
