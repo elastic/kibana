@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -59,9 +59,19 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   const lastSavedId = select((state) => state.componentState.lastSavedId);
   const lastSavedTitle = select((state) => state.explicitInput.title);
 
+  const isMounted = useRef(false);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const onTitleDuplicate = () => {
+    if (!isMounted.current) return;
     setIsTitleDuplicate(true);
     setIsTitleDuplicateConfirmed(true);
+    setIsApplying(false);
   };
 
   const onApply = async () => {
@@ -78,7 +88,6 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
       dispatch(setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState }));
       onClose();
     }
-    setIsApplying(false);
   };
 
   const updateDashboardSetting = useCallback(
@@ -319,10 +328,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="cancelCustomizeDashboardButton"
-              onClick={() => onClose()}
-            >
+            <EuiButtonEmpty data-test-subj="cancelCustomizeDashboardButton" onClick={onClose}>
               <FormattedMessage
                 id="dashboard.embeddableApi.showSettings.flyout.cancelButtonTitle"
                 defaultMessage="Cancel"
