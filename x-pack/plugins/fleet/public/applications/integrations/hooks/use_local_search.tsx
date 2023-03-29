@@ -11,7 +11,7 @@ import { useRef } from 'react';
 import type { IntegrationCardItem } from '../../../../common/types/models';
 
 export const searchIdField = 'id';
-export const fieldsToSearch = ['name', 'title'];
+export const fieldsToSearch = ['name', 'title', 'description'];
 
 export function useLocalSearch(packageList: IntegrationCardItem[]) {
   const localSearchRef = useRef<LocalSearch>(new LocalSearch(searchIdField));
