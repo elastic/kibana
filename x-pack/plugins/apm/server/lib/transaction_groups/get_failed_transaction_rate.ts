@@ -12,12 +12,10 @@ import {
 } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import {
-  EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { EventOutcome } from '../../../common/event_outcome';
 import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -67,11 +65,6 @@ export async function getFailedTransactionRate({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    {
-      terms: {
-        [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
-      },
-    },
     { terms: { [TRANSACTION_TYPE]: transactionTypes } },
     ...termQuery(TRANSACTION_NAME, transactionName),
     ...rangeQuery(startWithOffset, endWithOffset),
