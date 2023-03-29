@@ -7,13 +7,14 @@
  */
 import { useEffect } from 'react';
 import { History } from 'history';
-import { DiscoverStateContainer } from '../services/discover_state';
 export function useUrl({
   history,
-  stateContainer,
+  savedSearchId,
+  onNewUrl,
 }: {
   history: History;
-  stateContainer: DiscoverStateContainer;
+  savedSearchId: string | undefined;
+  onNewUrl: () => void;
 }) {
   /**
    * Url / Routing logic
@@ -23,11 +24,10 @@ export function useUrl({
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(async ({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/' && !stateContainer.savedSearchState.getState().id) {
-        await stateContainer.actions.loadSavedSearch();
-        stateContainer.actions.fetchData(true);
+      if (!search && !hash && pathname === '/' && !savedSearchId) {
+        onNewUrl();
       }
     });
     return () => unlistenHistoryBasePath();
-  }, [history, stateContainer]);
+  }, [history, savedSearchId, onNewUrl]);
 }

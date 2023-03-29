@@ -16,6 +16,7 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
@@ -194,22 +195,13 @@ export function DiscoverMainRoute(props: Props) {
     [loadSavedSearch]
   );
 
+  // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
-    // initial search + triggered when id changes
     loadSavedSearch();
   }, [loadSavedSearch, id]);
 
-  useEffect(() => {
-    // this listener is waiting for such a path http://localhost:5601/app/discover#/
-    // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
-    // to reload the page in a right way
-    const unlistenHistoryBasePath = history.listen(async ({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/' && !stateContainer.savedSearchState.getState().id) {
-        await loadSavedSearch();
-      }
-    });
-    return () => unlistenHistoryBasePath();
-  }, [history, stateContainer, loadSavedSearch]);
+  // secondary fetch: in case URL is set to `/`, used to reset the 'new' state
+  useUrl({ history, savedSearchId: id, onNewUrl: () => loadSavedSearch() });
 
   if (showNoDataPage) {
     const analyticsServices = {

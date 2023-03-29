@@ -8,7 +8,6 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { useUrl } from './use_url';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import {
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
@@ -17,18 +16,17 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 function prepareTest(savedSearch: SavedSearch, path: string) {
   const { history } = createSearchSessionMock();
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.savedSearchState.set(savedSearch);
-  stateContainer.actions.loadSavedSearch = jest.fn();
+  const onNewUrl = jest.fn();
 
   renderHook(() =>
     useUrl({
       history,
-      stateContainer,
+      savedSearchId: savedSearch.id,
+      onNewUrl,
     })
   );
   history.push(path);
-  return { load: stateContainer.actions.loadSavedSearch };
+  return { load: onNewUrl };
 }
 describe('test useUrl when the url is changed to /', () => {
   test('loadSavedSearch is not triggered when the url is e.g. /new', () => {
