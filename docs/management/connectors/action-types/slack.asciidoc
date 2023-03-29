@@ -20,10 +20,8 @@ image::management/connectors/images/slack-connector.png[Slack connector]
 [[slack-connector-configuration]]
 ==== Connector configuration
 
-Slack connectors have the following configuration properties:
-
-Name::      The name of the connector.
-Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messaging/webhooks#getting_started[Slack Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+Slack connectors have a name and either a webhook URL or an API token.
+To set up your Slack account and obtain these values, go to <<configuring-slack>>.
 
 [float]
 [[preconfigured-slack-configuration]]
@@ -31,10 +29,8 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
 
 If you are running {kib} on-prem, you can define connectors by
 adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
 
-Connector using Webhook
-
+.Example Slack connector with webhook
 [source,text]
 --
 xpack.actions.preconfigured:
@@ -44,11 +40,11 @@ xpack.actions.preconfigured:
     config:
       type: 'webhook'
     secrets:
-      webhookUrl: 'https://hooks.slack.com/services/xxxx/xxxx/xxxx'
+      webhookUrl: 'https://hooks.slack.com/services/xxxx/xxxx/xxxx' <1>
 --
+<1> To obtain this value, go to <<configuring-slack-webhook>>.
 
-Connector using Web API
-
+.Example Slack connector with web API
 [source,text]
 --
 xpack.actions.preconfigured:
@@ -58,17 +54,9 @@ xpack.actions.preconfigured:
     config:
       type: 'web_api'
     secrets:
-      token: 'xoxb-xxxx-xxxx-xxxx'
+      token: 'xoxb-xxxx-xxxx-xxxx' <1>
 --
-
-Config defines information for the connector type:
-
-`type`:: A string that takes values `'web_api'` or `'webhook'`, which depends on a chosen slack connector type.
-
-Secrets defines sensitive information for the connector type.
-
-`webhookUrl`:: A string that corresponds to *Webhook URL*.
-`token`:: A string that corresponds to *Bot token* for respective Slack App.
+<1> To obtain this value, go to <<configuring-slack-web-api>>.
 
 [float]
 [[slack-action-configuration]]
@@ -91,21 +79,27 @@ Message::   The message	text, converted to the `text` field in the Webhook JSON 
 Use the <<action-settings,Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
+[[configuring-slack]]
+=== Configure a Slack account
+
+Before you can create a Slack connector, you must configure your account and obtain the necessary URL or token.
+
+[float]
 [[configuring-slack-webhook]]
 ==== Configure a Slack account with Webhook
 
 . Log in to http://slack.com[slack.com] as a team administrator.
 . Follow first 3 paragraphs of https://api.slack.com/messaging/webhooks.
-. Copy the generated Webhook URL so you can paste it into your Slack connector form.
+. Copy the generated webhook URL so you can paste it into your Slack connector form.
+. If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname from the URL is added to the allowed hosts.
 
 [float]
 [[configuring-slack-web-api]]
 ==== Configure a Slack account with Web API
 
-. Create Slack App: https://api.slack.com/authentication/basics#creating
-. Add scope: `channels:read`, `groups:read`, `chat:write` and `chat:write.public` as it is explained here: https://api.slack.com/authentication/basics#scopes
-. Installing the app to a workspace: https://api.slack.com/authentication/basics#installing.
-. Copy `Bot User OAuth Token` so you can paste it into your Slack connector form.
-. If you need to send messages to a private channel you need to write `/invite @App_name` in it. 
+. Create a Slack app. Refer to https://api.slack.com/authentication/basics#creating.
+. Add scope: `channels:read`, `groups:read`, `chat:write` and `chat:write.public`. Refer to https://api.slack.com/authentication/basics#scopes.
+. Install the app to a workspace. Refer to https://api.slack.com/authentication/basics#installing.
+. Copy the `Bot User OAuth Token` so you can paste it into your Slack connector form.
+. If you need to send messages to a private channel, you need to write `/invite @App_name` in it.
   Putting "@" triggers Slack to start auto-suggesting, which is why it then becomes easy to find your app name in the list.
-
