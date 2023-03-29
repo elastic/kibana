@@ -32,6 +32,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
+    beforeEach(async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await filterBar.ensureFieldEditorModalIsClosed();
       await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -40,10 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 22, 2015 @ 00:00:00.000',
         'Sep 23, 2015 @ 00:00:00.000'
       );
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     const addSearchEmbeddableToDashboard = async () => {
@@ -83,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should control columns correctly', async () => {
+      await addSearchEmbeddableToDashboard();
       await PageObjects.dashboard.switchToEditMode();
 
       const cell = await dataGrid.getCellElement(0, 2);
@@ -99,6 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render duplicate saved search embeddables', async () => {
+      await addSearchEmbeddableToDashboard();
       await addSearchEmbeddableToDashboard();
       const [firstGridCell, secondGridCell] = await dataGrid.getAllCellElements();
       const firstGridCellContent = await firstGridCell.getVisibleText();
