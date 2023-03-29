@@ -18,17 +18,19 @@ describe('Versioned route', () => {
   let responseFactory: jest.Mocked<KibanaResponseFactory>;
   const handlerFn: RequestHandler = async (ctx, req, res) => res.ok({ body: { foo: 1 } });
   beforeEach(() => {
-    responseFactory = { custom: jest.fn(), ok: jest.fn() } as any;
-    responseFactory.custom.mockImplementation(({ body, statusCode }) => ({
-      options: {},
-      status: statusCode,
-      payload: body,
-    }));
-    responseFactory.ok.mockImplementation(({ body } = {}) => ({
-      options: {},
-      status: 200,
-      payload: body,
-    }));
+    responseFactory = {
+      custom: jest.fn(({ body, statusCode }) => ({
+        options: {},
+        status: statusCode,
+        payload: body,
+      })),
+      badRequest: jest.fn(({ body }) => ({ status: 400, payload: body, options: {} })),
+      ok: jest.fn(({ body } = {}) => ({
+        options: {},
+        status: 200,
+        payload: body,
+      })),
+    } as any;
     router = createRouter();
   });
 
@@ -170,11 +172,13 @@ describe('Versioned route', () => {
         } as any,
         responseFactory
       )
-    ).resolves.toEqual({
-      options: {},
-      payload: 'No version "999" available for [post] [/test/{id}]. Available versions are: "none"',
-      status: 406,
-    });
+    ).resolves.toEqual(
+      expect.objectContaining({
+        payload:
+          'No version "999" available for [post] [/test/{id}]. Available versions are: "none"',
+        status: 406,
+      })
+    );
   });
 
   it('returns the expected output if no version was provided to versioned route', async () => {
