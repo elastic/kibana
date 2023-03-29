@@ -89,22 +89,22 @@ export const useOsqueryTab = ({
     skip: shouldEarlyReturn,
   });
 
-  if (shouldEarlyReturn) {
-    return;
-  }
-
-  const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
-  ) as ExpandedEventFieldsObject;
+  const expandedEventFieldsObject = rawEventData
+    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
+    : undefined;
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
-  const osqueryResponseActions = responseActions?.filter(
-    (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
+  const osqueryResponseActions = useMemo(
+    () =>
+      responseActions?.filter(
+        (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
+      ),
+    [responseActions]
   );
 
-  if (!osqueryResponseActions?.length) {
+  if (!osqueryResponseActions?.length || shouldEarlyReturn) {
     return;
   }
 

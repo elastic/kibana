@@ -44,21 +44,24 @@ export const useEndpointResponseActionsTab = ({
 
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
 
-  if (!rawEventData || !responseActionsEnabled) {
-    return;
-  }
+  const expandedEventFieldsObject = rawEventData
+    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
+    : undefined;
 
-  const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
-  ) as ExpandedEventFieldsObject;
-
-  const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-
-  const endpointResponseActions = responseActions?.filter(
-    (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.ENDPOINT
+  const responseActions = useMemo(
+    () => expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions,
+    [expandedEventFieldsObject]
   );
-  if (!endpointResponseActions?.length) {
+
+  const endpointResponseActions = useMemo(
+    () =>
+      responseActions?.filter(
+        (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.ENDPOINT
+      ),
+    [responseActions]
+  );
+
+  if (!endpointResponseActions?.length || !rawEventData || !responseActionsEnabled) {
     return;
   }
 
