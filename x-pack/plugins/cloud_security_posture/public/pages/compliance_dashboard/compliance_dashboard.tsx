@@ -185,6 +185,8 @@ export const ComplianceDashboard = () => {
     getSetupStatus.data?.indicesDetails[0].status === 'not-empty';
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
+  const isKspmInstalled = getSetupStatus.data?.kspm?.status !== 'not-installed';
+  const isCspmInstalled = getSetupStatus.data?.cspm?.status !== 'not-installed';
 
   const getCspmDashboardData = useCspmStatsApi({
     enabled: hasFindingsCspm,
@@ -243,8 +245,10 @@ export const ComplianceDashboard = () => {
         onClick: () => setSelectedTab(CSPM_POLICY_TEMPLATE),
         content: (
           <>
-            {hasFindingsCspm ? (
-              <CloudPosturePage query={getCspmDashboardData}>
+            {hasFindingsCspm || !isCspmInstalled ? (
+              <CloudPosturePage
+                query={getCspmDashboardData.data ? getCspmDashboardData : undefined}
+              >
                 <div data-test-subj={CLOUD_DASHBOARD_CONTAINER}>
                   <IntegrationPostureDashboard
                     dashboardType={CSPM_POLICY_TEMPLATE}
@@ -254,8 +258,8 @@ export const ComplianceDashboard = () => {
                       cspmIntegrationLink
                     )}
                     isIntegrationInstalled={
-                      getSetupStatus.data?.cspm?.status !== 'unprivileged' &&
-                      getSetupStatus.data?.cspm?.status !== 'not-installed'
+                      getSetupStatus.data?.cspm?.status !== 'not-installed' &&
+                      getSetupStatus.data?.cspm?.status !== 'unprivileged'
                     }
                   />
                 </div>
@@ -274,8 +278,10 @@ export const ComplianceDashboard = () => {
         onClick: () => setSelectedTab(KSPM_POLICY_TEMPLATE),
         content: (
           <>
-            {hasFindingsKspm ? (
-              <CloudPosturePage query={getKspmDashboardData}>
+            {hasFindingsKspm || !isKspmInstalled ? (
+              <CloudPosturePage
+                query={getCspmDashboardData.data ? getCspmDashboardData : undefined}
+              >
                 <div data-test-subj={KUBERNETES_DASHBOARD_CONTAINER}>
                   <IntegrationPostureDashboard
                     dashboardType={KSPM_POLICY_TEMPLATE}
@@ -285,8 +291,8 @@ export const ComplianceDashboard = () => {
                       kspmIntegrationLink
                     )}
                     isIntegrationInstalled={
-                      getSetupStatus.data?.kspm?.status !== 'unprivileged' &&
-                      getSetupStatus.data?.kspm?.status !== 'not-installed'
+                      getSetupStatus.data?.kspm?.status !== 'not-installed' &&
+                      getSetupStatus.data?.kspm?.status !== 'unprivileged'
                     }
                   />
                 </div>
@@ -308,32 +314,46 @@ export const ComplianceDashboard = () => {
       selectedTab,
       hasFindingsKspm,
       hasFindingsCspm,
+      isKspmInstalled,
+      isCspmInstalled,
     ]
   );
 
   return (
-    <CloudPosturePage query={selectedTab === 'cspm' ? getCspmDashboardData : getKspmDashboardData}>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <CloudPosturePageTitle
-            title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
-              defaultMessage: 'Cloud Security Posture',
-            })}
-          />
-        }
-        tabs={tabs.map(({ content, ...rest }) => rest)}
-      />
-      <EuiSpacer />
-      <div
-        data-test-subj={DASHBOARD_CONTAINER}
-        css={css`
-          margin-left: auto;
-          margin-right: auto;
-          height: 100%;
-        `}
-      >
-        {tabs.find((t) => t.isSelected)?.content}
+    <CloudPosturePage
+      query={
+        selectedTab === 'cspm'
+          ? getCspmDashboardData.data
+            ? getCspmDashboardData
+            : undefined
+          : getKspmDashboardData.data
+          ? getKspmDashboardData
+          : undefined
+      }
+    >
+      <div>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <CloudPosturePageTitle
+              title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
+                defaultMessage: 'Cloud Security Posture',
+              })}
+            />
+          }
+          tabs={tabs.map(({ content, ...rest }) => rest)}
+        />
+        <EuiSpacer />
+        <div
+          data-test-subj={DASHBOARD_CONTAINER}
+          css={css`
+            margin-left: auto;
+            margin-right: auto;
+            height: 100%;
+          `}
+        >
+          {tabs.find((t) => t.isSelected)?.content}
+        </div>
       </div>
     </CloudPosturePage>
   );
