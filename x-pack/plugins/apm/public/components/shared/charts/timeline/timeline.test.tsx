@@ -46,20 +46,20 @@ describe('Timeline', () => {
           offset: 100000,
           type: 'agentMark',
           verticalLine: true,
-        } as AgentMark,
+        },
         {
           id: 'domInteractive',
           offset: 110000,
           type: 'agentMark',
           verticalLine: true,
-        } as AgentMark,
+        },
         {
           id: 'domComplete',
           offset: 190000,
           type: 'agentMark',
           verticalLine: true,
-        } as AgentMark,
-      ],
+        },
+      ] as AgentMark[],
     };
 
     const wrapper = mountWithTheme(<Timeline {...props} />);
