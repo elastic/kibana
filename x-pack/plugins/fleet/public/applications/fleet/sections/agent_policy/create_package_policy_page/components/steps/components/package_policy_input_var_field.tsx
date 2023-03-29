@@ -170,7 +170,6 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             <EuiSelect
               options={optionsWithPlaceholder}
               value={value}
-              isInvalid={isInvalid}
               onChange={(e) => onChange(e.target.value)}
               onBlur={() => setIsDirty(true)}
             />
