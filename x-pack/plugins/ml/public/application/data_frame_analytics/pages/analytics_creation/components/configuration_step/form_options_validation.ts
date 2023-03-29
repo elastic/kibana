@@ -19,10 +19,9 @@ export const CATEGORICAL_TYPES = new Set(['ip', 'keyword']);
 export const shouldAddAsDepVarOption = (
   fieldId: string,
   fieldType: ES_FIELD_TYPES | estypes.MappingRuntimeField['type'],
-  counter: boolean,
   jobType: AnalyticsJobType
 ) => {
-  if (fieldId === EVENT_RATE_FIELD_ID || counter === true) return false;
+  if (fieldId === EVENT_RATE_FIELD_ID) return false;
 
   const isBasicNumerical = BASIC_NUMERICAL_TYPES.has(fieldType as ES_FIELD_TYPES);
 

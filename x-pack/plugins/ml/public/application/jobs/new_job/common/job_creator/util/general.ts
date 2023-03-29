@@ -90,7 +90,7 @@ export function getRichDetectors(
 export function createFieldOptions(fields: Field[], additionalFields: Field[]) {
   return [
     ...fields
-      .filter((f) => f.id !== EVENT_RATE_FIELD_ID && f.counter !== true)
+      .filter((f) => f.id !== EVENT_RATE_FIELD_ID)
       .map((f) => ({
         label: f.name,
         field: f,

@@ -104,7 +104,7 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
   const runtimeOptions: RuntimeOption[] = [];
   Object.keys(runtimeMappings).forEach((id) => {
     const field = runtimeMappings[id];
-    if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, false, jobType)) {
+    if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, jobType)) {
       runtimeOptions.push({
         label: id,
         field: { id, type: field.type as RuntimeMappingFieldType },
@@ -224,7 +224,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
         let resetDependentVariable = true;
         for (const field of fields) {
-          if (shouldAddAsDepVarOption(field.id, field.type, field.counter, jobType)) {
+          if (shouldAddAsDepVarOption(field.id, field.type, jobType)) {
             depVarOptions.push({
               label: field.id,
               field,
