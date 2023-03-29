@@ -1,8 +1,5 @@
 {
   "searchable_snapshots.cache_stats": {
-    "url_params": {
-      "master_timeout": ""
-    },
     "methods": [
       "GET"
     ],
@@ -10,6 +7,6 @@
       "_searchable_snapshots/cache/stats",
       "_searchable_snapshots/{nodes}/cache/stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-api-cache-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html"
   }
 }

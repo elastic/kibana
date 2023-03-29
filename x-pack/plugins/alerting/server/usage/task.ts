@@ -6,11 +6,11 @@
  */
 
 import { Logger, CoreSetup } from '@kbn/core/server';
-import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
 
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
@@ -23,6 +23,7 @@ import {
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
 export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
+export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
 export function initializeAlertingTelemetry(
   logger: Logger,
@@ -69,6 +70,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
       taskType: TELEMETRY_TASK_TYPE,
       state: {},
       params: {},
+      schedule: SCHEDULE,
     });
   } catch (e) {
     logger.debug(`Error scheduling task, received ${e.message}`);
@@ -189,7 +191,9 @@ export function telemetryTaskRunner(
                   percentile_num_alerts_by_type_per_day:
                     dailyExecutionCounts.alertsPercentilesByType,
                 },
-                runAt: getNextMidnight(),
+                // Useful for setting a schedule for the old tasks that don't have one
+                // or to update the schedule if ever the frequency changes in code
+                schedule: SCHEDULE,
               };
             }
           )
@@ -197,14 +201,12 @@ export function telemetryTaskRunner(
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
               state: {},
-              runAt: getNextMidnight(),
+              // Useful for setting a schedule for the old tasks that don't have one
+              // or to update the schedule if ever the frequency changes in code
+              schedule: SCHEDULE,
             };
           });
       },
     };
   };
-}
-
-function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
 }

@@ -41,7 +41,7 @@ import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_st
 import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { makePublicExecutionContext } from '../../../util';
+import { mergeExecutionContext } from '../execution_context_utils';
 
 export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
@@ -62,6 +62,7 @@ export interface IESSource extends IVectorSource {
     timeFilters,
     searchSessionId,
     inspectorAdapters,
+    executionContext,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -71,6 +72,7 @@ export interface IESSource extends IVectorSource {
     timeFilters: TimeRange;
     searchSessionId?: string;
     inspectorAdapters: Adapters;
+    executionContext: KibanaExecutionContext;
   }): Promise<object>;
 }
 
@@ -310,7 +312,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
-          executionContext: makePublicExecutionContext('es_source:bounds'),
+          executionContext: mergeExecutionContext(
+            { description: 'es_source:bounds' },
+            boundsFilters.executionContext
+          ),
         })
       );
 
@@ -451,6 +456,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     timeFilters,
     searchSessionId,
     inspectorAdapters,
+    executionContext,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -460,6 +466,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     timeFilters: TimeRange;
     searchSessionId?: string;
     inspectorAdapters: Adapters;
+    executionContext: KibanaExecutionContext;
   }): Promise<object> {
     const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
@@ -506,7 +513,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         }
       ),
       searchSessionId,
-      executionContext: makePublicExecutionContext('es_source:style_meta'),
+      executionContext: mergeExecutionContext(
+        { description: 'es_source:style_meta' },
+        executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 

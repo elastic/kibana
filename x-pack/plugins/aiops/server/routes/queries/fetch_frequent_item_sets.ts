@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { uniq, uniqWith, pick, isEqual } from 'lodash';
+import { uniq, pick, isEqual } from 'lodash';
+import { group } from 'd3-array';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -15,8 +16,6 @@ import { type SignificantTerm, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { SignificantTermDuplicateGroup, ItemsetResult } from '../../../common/types';
-
-const FREQUENT_ITEM_SETS_FIELDS_LIMIT = 15;
 
 interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
@@ -30,10 +29,6 @@ interface RandomSamplerAggregation {
 
 function isRandomSamplerAggregation(arg: unknown): arg is RandomSamplerAggregation {
   return isPopulatedObject(arg, ['sample']);
-}
-
-export function dropDuplicates(cps: SignificantTerm[], uniqueFields: Array<keyof SignificantTerm>) {
-  return uniqWith(cps, (a, b) => isEqual(pick(a, uniqueFields), pick(b, uniqueFields)));
 }
 
 export function groupDuplicates(
@@ -59,6 +54,20 @@ export function groupDuplicates(
   return groups;
 }
 
+export function getShouldClauses(significantTerms: SignificantTerm[]) {
+  return Array.from(
+    group(significantTerms, ({ fieldName }) => fieldName),
+    ([field, values]) => ({ terms: { [field]: values.map((d) => d.fieldValue) } })
+  );
+}
+
+export function getFrequentItemSetsAggFields(significantTerms: SignificantTerm[]) {
+  return Array.from(
+    group(significantTerms, ({ fieldName }) => fieldName),
+    ([field, values]) => ({ field, include: values.map((d) => d.fieldValue) })
+  );
+}
+
 export async function fetchFrequentItemSets(
   client: ElasticsearchClient,
   index: string,
@@ -78,14 +87,6 @@ export async function fetchFrequentItemSets(
     return (a.pValue ?? 0) - (b.pValue ?? 0);
   });
 
-  // Get up to 15 unique fields from significant terms with retained order
-  const fields = sortedSignificantTerms.reduce<string[]>((p, c) => {
-    if (p.length < FREQUENT_ITEM_SETS_FIELDS_LIMIT && !p.some((d) => d === c.fieldName)) {
-      p.push(c.fieldName);
-    }
-    return p;
-  }, []);
-
   const query = {
     bool: {
       minimum_should_match: 2,
@@ -100,15 +101,9 @@ export async function fetchFrequentItemSets(
           },
         },
       ],
-      should: sortedSignificantTerms.map((t) => {
-        return { term: { [t.fieldName]: t.fieldValue } };
-      }),
+      should: getShouldClauses(sortedSignificantTerms),
     },
   };
-
-  const aggFields = fields.map((field) => ({
-    field,
-  }));
 
   const frequentItemSetsAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     fi: {
@@ -116,8 +111,8 @@ export async function fetchFrequentItemSets(
       frequent_item_sets: {
         minimum_set_size: 2,
         size: 200,
-        minimum_support: 0.1,
-        fields: aggFields,
+        minimum_support: 0.001,
+        fields: getFrequentItemSetsAggFields(sortedSignificantTerms),
       },
     },
   };
