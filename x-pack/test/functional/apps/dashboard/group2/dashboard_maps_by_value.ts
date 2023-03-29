@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await dashboardPanelActions.clickEdit();
     await PageObjects.maps.clickAddLayer();
     await PageObjects.maps.selectLayerGroupCard();
-    
+
     await testSubjects.click('importFileButton');
 
     if (saveToLibrary) {
