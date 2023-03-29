@@ -11,7 +11,11 @@ import { screen, waitFor } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
 
 import { constructFileKindIdByOwner } from '../../../common/constants';
-import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
+import {
+  createAppMockRenderer,
+  mockedTestProvidersOwner,
+  mockedFilesClient,
+} from '../../common/mock';
 import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
 
@@ -24,12 +28,10 @@ describe('FilePreview', () => {
   });
 
   it('FilePreview rendered correctly', async () => {
-    const mockGetDownloadRef = jest.fn();
-
     appMockRender.render(<FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />);
 
     await waitFor(() =>
-      expect(mockGetDownloadRef).toBeCalledWith({
+      expect(mockedFilesClient.getDownloadHref).toHaveBeenCalledWith({
         id: basicFileMock.id,
         fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
       })

@@ -7,9 +7,10 @@
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import * as i18n from './translations';
-
 import type { CommentRequestExternalReferenceType } from '../../../common/api';
+
+import { FileAttachmentMetadataRt } from '../../../common/api';
+import * as i18n from './translations';
 
 export const isImage = (file: FileJSON) => file.mimeType?.startsWith('image/');
 
@@ -27,21 +28,11 @@ export const parseMimeType = (mimeType: string | undefined) => {
   return result[0].charAt(0).toUpperCase() + result[0].slice(1);
 };
 
-const isFileMetadata = (file: object): boolean => {
-  return (
-    Object.hasOwn(file, 'name') &&
-    Object.hasOwn(file, 'mimeType') &&
-    Object.hasOwn(file, 'extension') &&
-    Object.hasOwn(file, 'created')
-  );
-};
-
 export const isValidFileExternalReferenceMetadata = (
   externalReferenceMetadata: CommentRequestExternalReferenceType['externalReferenceMetadata']
 ): boolean => {
   return (
-    Array.isArray(externalReferenceMetadata?.files) &&
-    externalReferenceMetadata?.files?.length === 1 &&
-    isFileMetadata(externalReferenceMetadata.files[0] as object)
+    FileAttachmentMetadataRt.is(externalReferenceMetadata) &&
+    externalReferenceMetadata?.files?.length >= 1
   );
 };
