@@ -145,7 +145,7 @@ const useRuleSnoozeColumn = ({
           />
         );
       },
-      width: '130px',
+      width: '100px',
       sortable: false,
     }),
     [hasCRUDPermissions]
