@@ -87,23 +87,21 @@ describe('IndexPatterns', () => {
         attributes: object.attributes,
       };
     });
-    savedObjectsClient.update = jest
-      .fn()
-      .mockImplementation(async (type, id, body, { version }) => {
-        if (object.version !== version) {
-          throw new Object({
-            res: {
-              status: 409,
-            },
-          });
-        }
-        object.attributes.title = body.title;
-        object.version += 'a';
-        return {
-          id: object.id,
-          version: object.version,
-        };
-      });
+    savedObjectsClient.update = jest.fn().mockImplementation(async (id, body, { version }) => {
+      if (object.version !== version) {
+        throw new Object({
+          res: {
+            status: 409,
+          },
+        });
+      }
+      object.attributes.title = body.title;
+      object.version += 'a';
+      return {
+        id: object.id,
+        version: object.version,
+      };
+    });
 
     apiClient = createFieldsFetcher();
 
@@ -449,13 +447,13 @@ describe('IndexPatterns', () => {
     dataView.setFieldFormat('field', { id: 'formatId' });
     await indexPatterns.updateSavedObject(dataView);
     let lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
-    let [, , attrs] = lastCall;
+    let [, attrs] = lastCall;
     expect(attrs).toHaveProperty('fieldFormatMap');
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{\\"field\\":{\\"id\\":\\"formatId\\"}}"`);
     dataView.deleteFieldFormat('field');
     await indexPatterns.updateSavedObject(dataView);
     lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
-    [, , attrs] = lastCall;
+    [, attrs] = lastCall;
 
     // https://github.com/elastic/kibana/issues/134873: must keep an empty object and not delete it
     expect(attrs).toHaveProperty('fieldFormatMap');
@@ -554,7 +552,7 @@ describe('IndexPatterns', () => {
 
       savedObjectsClient.get = jest
         .fn()
-        .mockImplementation((type: string, id: string) =>
+        .mockImplementation((id: string) =>
           Promise.resolve({ id, version: 'a', attributes: { title: 'title' } })
         );
 
@@ -586,7 +584,7 @@ describe('IndexPatterns', () => {
 
       savedObjectsClient.get = jest
         .fn()
-        .mockImplementation((type: string, id: string) =>
+        .mockImplementation((id: string) =>
           Promise.resolve({ id, version: 'a', attributes: { title: '1' } })
         );
 

@@ -727,10 +727,15 @@ export class DataViewsService {
     id: string,
     displayErrors: boolean = true
   ): Promise<DataView> => {
-    const savedObject = await this.savedObjectsClient.get(id);
-
-    if (!savedObject.version) {
-      throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
+    let savedObject: SavedObject<DataViewAttributes>;
+    try {
+      savedObject = await this.savedObjectsClient.get(id);
+    } catch (e) {
+      if (e.body.statusCode === 404) {
+        throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
+      } else {
+        throw e;
+      }
     }
 
     return this.initFromSavedObject(savedObject, displayErrors);
