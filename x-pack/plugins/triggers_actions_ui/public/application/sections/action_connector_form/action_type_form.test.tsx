@@ -376,6 +376,7 @@ function getActionTypeForm({
   onDeleteAction,
   onConnectorSelected,
   setActionFrequencyProperty,
+  setActionAlertsFilterProperty,
   hasSummary = true,
   messageVariables = { context: [], state: [], params: [] },
 }: {
@@ -389,6 +390,7 @@ function getActionTypeForm({
   onDeleteAction?: () => void;
   onConnectorSelected?: (id: string) => void;
   setActionFrequencyProperty?: () => void;
+  setActionAlertsFilterProperty?: () => void;
   hasSummary?: boolean;
   messageVariables?: ActionVariables;
 }) {
@@ -469,6 +471,7 @@ function getActionTypeForm({
       defaultActionGroupId={defaultActionGroupId ?? 'default'}
       setActionParamsProperty={jest.fn()}
       setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
+      setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? jest.fn()}
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
       actionTypeRegistry={actionTypeRegistry}
