@@ -156,8 +156,14 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             />
           );
         case 'select':
+          const placeholderText = i18n.translate(
+            'xpack.fleet.packagePolicyField.selectPlaceholder',
+            {
+              defaultMessage: 'Select an option',
+            }
+          );
           const optionsWithPlaceholder = [
-            { value: '', text: 'Select an option', disabled: true },
+            { value: '', text: placeholderText, disabled: true },
             ...(options || []),
           ];
           return (
