@@ -9,6 +9,7 @@ import { useState, useMemo } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PersistedLogViewReference } from '../../../../../../common/log_views';
+import { ExecutionTimeRange } from '../../../../../types';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
@@ -23,11 +24,16 @@ interface Options {
   logViewReference: PersistedLogViewReference;
   ruleParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
+  executionTimeRange?: ExecutionTimeRange;
 }
 
-export const useChartPreviewData = ({ logViewReference, ruleParams, buckets }: Options) => {
+export const useChartPreviewData = ({
+  logViewReference,
+  ruleParams,
+  buckets,
+  executionTimeRange,
+}: Options) => {
   const { http } = useKibana().services;
-
   const [chartPreviewData, setChartPreviewData] = useState<
     GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series']
   >([]);
@@ -37,7 +43,13 @@ export const useChartPreviewData = ({ logViewReference, ruleParams, buckets }: O
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         setHasError(false);
-        return await callGetChartPreviewDataAPI(logViewReference, http!.fetch, ruleParams, buckets);
+        return await callGetChartPreviewDataAPI(
+          logViewReference,
+          http!.fetch,
+          ruleParams,
+          buckets,
+          executionTimeRange
+        );
       },
       onResolve: ({ data: { series } }) => {
         setHasError(false);
@@ -67,7 +79,8 @@ export const callGetChartPreviewDataAPI = async (
   logViewReference: PersistedLogViewReference,
   fetch: HttpHandler,
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
-  buckets: number
+  buckets: number,
+  executionTimeRange?: ExecutionTimeRange
 ) => {
   const response = await fetch(LOG_ALERTS_CHART_PREVIEW_DATA_PATH, {
     method: 'POST',
@@ -77,6 +90,7 @@ export const callGetChartPreviewDataAPI = async (
           logView: logViewReference,
           alertParams,
           buckets,
+          executionTimeRange,
         },
       })
     ),
