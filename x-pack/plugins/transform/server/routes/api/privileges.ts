@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getPrivilegesAndCapabilities } from '../../../common/privilege/has_privilege_factory';
 import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/constants';
 import { Privileges } from '../../../common/types/privileges';
 
@@ -38,40 +39,26 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
           },
         });
 
-      // Find missing cluster privileges and set overall app privileges
-      privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
-      privilegesResult.hasAllPrivileges = hasAllPrivileges;
-
       // Get all index privileges the user has
       const { indices } = await esClient.asCurrentUser.security.getUserPrivileges();
 
       // Check if they have all the required index privileges for at least one index
-      const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {
-        if (privileges.includes('all')) {
-          return true;
-        }
+      const hasOneIndexWithAllPrivileges =
+        indices.find(({ privileges }: { privileges: string[] }) => {
+          if (privileges.includes('all')) {
+            return true;
+          }
 
-        const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every((privilege) =>
-          privileges.includes(privilege)
-        );
+          const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every((privilege) =>
+            privileges.includes(privilege)
+          );
 
-        return indexHasAllPrivileges;
+          return indexHasAllPrivileges;
+        }) !== undefined;
+
+      return res.ok({
+        body: getPrivilegesAndCapabilities(cluster, hasOneIndexWithAllPrivileges, hasAllPrivileges),
       });
-
-      // If they don't, return list of required index privileges
-      if (!oneIndexWithAllPrivileges) {
-        privilegesResult.missingPrivileges.index = [...APP_INDEX_PRIVILEGES];
-      }
-
-      return res.ok({ body: privilegesResult });
     })
   );
 }
-
-const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
-  Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
-    if (!privilegesObject[privilegeName]) {
-      privileges.push(privilegeName);
-    }
-    return privileges;
-  }, []);

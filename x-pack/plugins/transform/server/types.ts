@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { IRouter, CoreSetup } from '@kbn/core/server';
-import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { IRouter, CoreSetup } from '@kbn/core/server';
+import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { License } from './services';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { License } from './services';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -23,6 +24,7 @@ export interface PluginSetupDependencies {
 export interface PluginStartDependencies {
   dataViews: DataViewsServerPluginStart;
   fieldFormats: FieldFormatsStart;
+  security: SecurityPluginStart;
 }
 
 export interface RouteDependencies {
