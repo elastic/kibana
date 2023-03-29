@@ -17,7 +17,7 @@ import { LeftPanelProvider } from './left/context';
 // TODO these should be replaced by a more dynamic solution
 //  see https://github.com/elastic/security-team/issues/6247
 export const RIGHT_SECTION_WIDTH = 500;
-export const LEFT_SECTION_WIDTH = 500;
+export const LEFT_SECTION_WIDTH = 1000;
 
 /**
  * List of all panels that will be used within the document details expandable flyout.

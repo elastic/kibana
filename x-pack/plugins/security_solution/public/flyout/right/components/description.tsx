@@ -46,6 +46,8 @@ export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
     return null;
   }
 
+  const hasRuleDescription = ruleDescription && ruleDescription.length > 0;
+
   // TODO look into hiding the expand/collapse button if the description is short
   //  see https://github.com/elastic/security-team/issues/6248
 
@@ -71,9 +73,9 @@ export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
               `}
             `}
           >
-            {ruleDescription && ruleDescription.length > 0 ? ruleDescription : '-'}
+            {hasRuleDescription ? ruleDescription : '-'}
           </EuiFlexItem>
-          {ruleDescription && ruleDescription.length > 0 ? (
+          {hasRuleDescription ? (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
