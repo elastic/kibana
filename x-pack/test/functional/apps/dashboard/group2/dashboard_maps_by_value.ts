@@ -76,7 +76,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.dashboard.clickNewDashboard();
   }
 
-  describe('dashboard maps by value', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/135293
+  // FLAKY: https://github.com/elastic/kibana/issues/153959
+  describe.skip('dashboard maps by value', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
