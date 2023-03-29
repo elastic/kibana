@@ -49,7 +49,7 @@ const LogsHistoryChart = ({
             <h2>
               {getSourceFromGroupBy()}
               &nbsp;
-              {i18n.translate('xpack.infra.logs.chartHistory.chartTitle', {
+              {i18n.translate('xpack.infra.logs.alertDetails.chartHistory.chartTitle', {
                 defaultMessage: 'logs threshold alerts history',
               })}
             </h2>
@@ -57,7 +57,7 @@ const LogsHistoryChart = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.infra.logs.chartHistory.last30days', {
+            {i18n.translate('xpack.infra.logs.alertDetails.chartHistory.last30days', {
               defaultMessage: 'Last 30 days',
             })}
           </EuiText>
@@ -76,7 +76,7 @@ const LogsHistoryChart = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.infra.logs.chartHistory.alertsTriggered', {
+                {i18n.translate('xpack.infra.logs.alertDetails.chartHistory.alertsTriggered', {
                   defaultMessage: 'Alerts triggered',
                 })}
               </EuiText>
@@ -101,7 +101,7 @@ const LogsHistoryChart = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.infra.logs.chartHistory.avgTimeToRecover', {
+              {i18n.translate('xpack.infra.logs.alertDetails.chartHistory.avgTimeToRecover', {
                 defaultMessage: 'Avg time to recover',
               })}
             </EuiText>

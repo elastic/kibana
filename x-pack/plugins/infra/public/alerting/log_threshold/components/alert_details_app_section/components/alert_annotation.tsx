@@ -20,7 +20,7 @@ export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
         {
           dataValue: alertStarted,
           header: moment(alertStarted).format('HH:mm:ss'),
-          details: i18n.translate('xpack.infra.logs.chart.alertDetails.alertStarted', {
+          details: i18n.translate('xpack.infra.logs.alertDetails.chartAnnotation.alertStarted', {
             defaultMessage: 'Alert started',
           }),
         },
