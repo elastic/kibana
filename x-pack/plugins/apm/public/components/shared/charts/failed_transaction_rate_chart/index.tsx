@@ -77,7 +77,7 @@ export function FailedTransactionRateChart({
     start,
     end,
     numBuckets: 100,
-    kuery: '',
+    kuery,
     type: ApmDocumentType.ServiceTransactionMetric,
   });
 
