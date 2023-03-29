@@ -17,7 +17,7 @@ export function ServiceMaxGroupsMessage({
 }) {
   return (
     <FormattedMessage
-      defaultMessage="Number of service metrics groups that have been instrumented has reached the current max. capacity that can be handled by the APM server. There are at least {serviceOverflowCount, plural, one {1 service metric group} other {# service metric groups}} in this list which {serviceOverflowCount, plural, one {is} other {are}} bucketed under a common bucket present at the top of the list."
+      defaultMessage="The APM server has reached the current maximum number of instrumented service metric groups that it can handle. There {serviceOverflowCount, plural, one {is} other {are}} at least {serviceOverflowCount, plural, one {1 service metric group} other {# service metric groups}} bucketed under a common bucket at the top of this list."
       id="xpack.apm.serviceDetail.maxGroups.message"
       values={{
         serviceOverflowCount,
