@@ -25,13 +25,25 @@ const getPlatformIcon = (platform: Platform): string | null => {
   }
 };
 
-export const PlatformIcon = memo<{
+export interface PlatformIconProps {
   platform: Platform;
   size?: EuiIconProps['size'];
-}>(({ platform, size = 'xl' }) => {
-  const platformIcon = useMemo(() => getPlatformIcon(platform), [platform]);
+  'data-test-subj'?: string;
+}
 
-  return <EuiIcon type={!platformIcon ? 'empty' : platformIcon} title={platform} size={size} />;
-});
+export const PlatformIcon = memo<PlatformIconProps>(
+  ({ platform, size = 'xl', 'data-test-subj': dataTestSubj }) => {
+    const platformIcon = useMemo(() => getPlatformIcon(platform), [platform]);
+
+    return (
+      <EuiIcon
+        type={!platformIcon ? 'empty' : platformIcon}
+        title={platform}
+        size={size}
+        data-test-subj={dataTestSubj}
+      />
+    );
+  }
+);
 
 PlatformIcon.displayName = 'PlatformIcon';
