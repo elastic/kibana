@@ -256,14 +256,14 @@ The 8.5.0 release contains a fix to a potential security vulnerability. For more
 
 // tag::known-issue-153175[]
 [discrete]
-.Unable to load *{stack-manage-app}* > *{rules-ui}* due to corrupted rule definitions
+.Unable to load *{stack-manage-app}* > *{rac-ui}* due to corrupted rule definitions
 [%collapsible]
 ====
 *Details* +
 Releases 8.5 and 8.6 have a bug that corrupts rules when you update API keys or manage snooze schedules. In particular, it affects tracking containment rules and {es} query rules with KQL or Lucene query types. Releases 8.7 and beyond do not include this bug (fixed in {kibana-pull}153370[#153370]).
 
 *Impact* +
-This known issue causes "unable to load rules" messages to occur in *{stack-manage-app}* > *{rules-ui}*. To temporarily work around the problem, copy the rule content (params, name, tags, actions) for the problematic rules, delete the rules, then recreate them. For more details, refer to <<rule-type-es-query-issues,{es} query rules>> and <<geo-alerting-issues,Tracking containment rules>>.
+This known issue causes "unable to load rules" messages to occur in *{stack-manage-app}* > *{rac-ui}*. To temporarily work around the problem, copy the rule content (params, name, tags, actions) for the problematic rules, delete the rules, then recreate them. For more details, refer to <<rule-type-es-query-issues,{es} query rules>> and <<geo-alerting-issues,Tracking containment rules>>.
 ====
 // end::known-issue-153175[]
 

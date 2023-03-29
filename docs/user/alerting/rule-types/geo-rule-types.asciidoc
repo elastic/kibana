@@ -64,9 +64,9 @@ image::user/alerting/images/alert-types-tracking-containment-action-options.png[
 
 // The following content is reused in other rule types
 // tag::known-issue-load-rules[]
-There is a known issue in 8.5 and 8.6 that results in corruption of the rule definition when you update API keys or add or remove snooze schedules in *{stack-manage-app}* > *{rules-ui}*. 
+There is a known issue in 8.5 and 8.6 that results in corruption of the rule definition when you update API keys or add or remove snooze schedules in *{stack-manage-app}* > *{rac-ui}*. 
 In particular, this bug affects {es} query rules with the KQL or Lucene query type and tracking containment rules.
-As a result of this bug, an "Unable to load rules" error occurs in *{rules-ui}*.
+As a result of this bug, an "Unable to load rules" error occurs in *{rac-ui}*.
 
 The long-term solution is to migrate to the latest release; 8.7 and later releases contain the fix for this bug.
 If you encounter this bug in {minor-version}, you can recover access to your rules in {kib} by using APIs to delete and recreate them:
@@ -109,7 +109,7 @@ GET .kibana*/_search
 DELETE kbn:/api/alerting/rule/<rule_id>
 ----
 --
-. Recreate the rules. For example, use *{stack-manage-app}* > *{rules-ui}* or the <<create-rule-api,create rule API>> with the property values obtained from your query output.
+. Recreate the rules. For example, use *{stack-manage-app}* > *{rac-ui}* or the <<create-rule-api,create rule API>> with the property values obtained from your query output.
 
 NOTE: If you update the API keys or add or remove snooze schedules again, the problem will re-occur until you upgrade to a release that contains the fix.
 
