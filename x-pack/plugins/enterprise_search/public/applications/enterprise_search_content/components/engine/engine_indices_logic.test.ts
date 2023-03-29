@@ -7,10 +7,7 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import {
-  EnterpriseSearchEngineDetails,
-  EnterpriseSearchEngineIndex,
-} from '../../../../../common/types/engines';
+import { EnterpriseSearchEngineDetails } from '../../../../../common/types/engines';
 import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
 
 import { EngineIndicesLogic, EngineIndicesLogicValues } from './engine_indices_logic';
@@ -34,7 +31,7 @@ const mockEngineData: EnterpriseSearchEngineDetails = {
       health: 'yellow',
       name: 'search-002',
     },
-  ] as EnterpriseSearchEngineIndex[],
+  ],
   name: DEFAULT_VALUES.engineName,
   updated_at_millis: 1679501369566,
 };

@@ -17,7 +17,7 @@ describe('fetchIndicesStats lib function', () => {
     },
     asInternalUser: {},
   };
-  const indicesNames = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
+  const indices = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
   const indicesStats = {
     indices: {
       'test-index-name-1': {
@@ -84,11 +84,11 @@ describe('fetchIndicesStats lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indicesStats);
 
     await expect(
-      fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indicesNames)
+      fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indices)
     ).resolves.toEqual(fetchIndicesStatsResponse);
 
     expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-      index: indicesNames.join(),
+      index: indices,
       metric: ['docs'],
     });
   });
