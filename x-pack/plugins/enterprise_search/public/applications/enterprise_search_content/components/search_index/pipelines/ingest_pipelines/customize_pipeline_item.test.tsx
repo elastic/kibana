@@ -12,7 +12,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCallOut, EuiText, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+
+import { LicensingCallout } from '../../../shared/licensing_callout/licensing_callout';
 
 import {
   CustomizeIngestPipelineItem,
@@ -36,16 +38,19 @@ describe('CustomizeIngestPipelineItem', () => {
     jest.clearAllMocks();
     setMockValues({ ...DEFAULT_VALUES });
   });
-  it('gates cta without license', () => {
+  it('renders delete cta when you have a custom pipeline', () => {
     setMockValues({
       ...DEFAULT_VALUES,
-      hasPlatinumLicense: false,
-      isCloud: false,
+      hasIndexIngestionPipeline: true,
     });
-    const wrapper = shallow(<CustomizeIngestPipelineItem />);
-    expect(wrapper.find(EuiText)).toHaveLength(1);
 
-    expect(wrapper.find(EuiText).children().text()).toContain('With a platinum license');
+    const wrapper = shallow(<CustomizeIngestPipelineItem />);
+    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
+    expect(wrapper.find(EuiButtonEmpty).render().text()).toBe('Delete custom pipeline');
+  });
+  it('returns null if you do not have a custom pipeline', () => {
+    const wrapper = shallow(<CustomizeIngestPipelineItem />);
+    expect(wrapper.isEmptyRender()).toBe(true);
   });
 });
 
@@ -61,7 +66,7 @@ describe('CopyAndCustomizePipelinePanel', () => {
     expect(wrapper.find(EuiButton)).toHaveLength(1);
     expect(wrapper.find(EuiButton).render().text()).toBe('Copy and customize');
   });
-  it('returns null if gated', () => {
+  it('returns LicensingCallout if gated', () => {
     setMockValues({
       ...DEFAULT_VALUES,
       hasPlatinumLicense: false,
@@ -69,7 +74,7 @@ describe('CopyAndCustomizePipelinePanel', () => {
     });
 
     const wrapper = shallow(<CopyAndCustomizePipelinePanel />);
-    expect(wrapper.isEmptyRender()).toBe(true);
+    expect(wrapper.find(LicensingCallout)).toHaveLength(1);
   });
   it('returns null if you have a custom pipeline', () => {
     setMockValues({

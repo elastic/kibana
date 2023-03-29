@@ -16,7 +16,6 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -31,35 +30,25 @@ import { LicensingLogic } from '../../../../../shared/licensing';
 import { CreateCustomPipelineApiLogic } from '../../../../api/index/create_custom_pipeline_api_logic';
 
 import { RevertConnectorPipelineApilogic } from '../../../../api/pipelines/revert_connector_pipeline_api_logic';
+import {
+  LicensingCallout,
+  LICENSING_FEATURE,
+} from '../../../shared/licensing_callout/licensing_callout';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { PipelinesLogic } from '../pipelines_logic';
 
 export const CustomizeIngestPipelineItem: React.FC = () => {
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
-  const { isCloud } = useValues(KibanaLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { isDeleteModalOpen, hasIndexIngestionPipeline } = useValues(PipelinesLogic);
   const { closeDeleteModal, openDeleteModal } = useActions(PipelinesLogic);
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const { status: revertStatus } = useValues(RevertConnectorPipelineApilogic);
-  const isGated = !isCloud && !hasPlatinumLicense;
 
-  if (!isGated && !hasIndexIngestionPipeline) return null;
+  if (!hasIndexIngestionPipeline) return null;
 
   return (
     <>
-      {isGated && (
-        <EuiText color="subdued" size="s" grow={false}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.index.pipelines.copyAndCustomize.platinumText',
-            {
-              defaultMessage:
-                'With a platinum license, you can create an index-specific version of this configuration and modify it for your use case.',
-            }
-          )}
-        </EuiText>
-      )}
       <EuiFlexGroup justifyContent="flexEnd">
         {isDeleteModalOpen && (
           <EuiConfirmModal
@@ -119,7 +108,15 @@ export const CopyAndCustomizePipelinePanel: React.FC = () => {
 
   const isGated = !isCloud && !hasPlatinumLicense;
 
-  if (isGated || hasIndexIngestionPipeline) return null;
+  if (hasIndexIngestionPipeline) return null;
+  if (isGated) {
+    return (
+      <>
+        <LicensingCallout feature={LICENSING_FEATURE.PIPELINES} />
+        <EuiSpacer />
+      </>
+    );
+  }
   return (
     <>
       <EuiCallOut
