@@ -156,8 +156,18 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             />
           );
         case 'select':
+          const optionsWithPlaceholder = [
+            { value: '', text: 'Select an option', disabled: true },
+            ...(options || []),
+          ];
           return (
-            <EuiSelect options={options} value={value} onChange={(e) => onChange(e.target.value)} />
+            <EuiSelect
+              options={optionsWithPlaceholder}
+              value={value}
+              isInvalid={isInvalid}
+              onChange={(e) => onChange(e.target.value)}
+              onBlur={() => setIsDirty(true)}
+            />
           );
         default:
           return (
