@@ -61,7 +61,7 @@ export async function indexHostsAndAlerts(
   DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
-  const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
+  const epmEndpointPackage = await getPackageInfo(kbnClient, 'endpoint');
   const response: IndexedHostsAndAlertsResponse = {
     hosts: [],
     policyResponses: [],
@@ -121,22 +121,23 @@ export async function indexHostsAndAlerts(
   return response;
 }
 
-export const getEndpointPackageInfo = async (
-  kbnClient: KbnClient
+export const getPackageInfo = async (
+  kbnClient: KbnClient,
+  packageName: string
 ): Promise<GetInfoResponse['item']> => {
-  const path = epmRouteService.getInfoPath('endpoint');
-  const endpointPackage = (
+  const path = epmRouteService.getInfoPath(packageName);
+  const packageInfo = (
     (await kbnClient.request({
       path,
       method: 'GET',
     })) as AxiosResponse<GetInfoResponse>
   ).data.item;
 
-  if (!endpointPackage) {
-    throw new Error('EPM Endpoint package was not found!');
+  if (!packageInfo) {
+    throw new Error(`EPM ${packageName} package was not found!`);
   }
 
-  return endpointPackage;
+  return packageInfo;
 };
 
 export type DeleteIndexedHostsAndAlertsResponse = DeleteIndexedEndpointHostsResponse;
