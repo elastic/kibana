@@ -20,6 +20,7 @@ import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -62,6 +63,7 @@ import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_typ
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
+  exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -132,6 +134,19 @@ export class UptimePlugin
     plugins.share.url.locators.create(editMonitorNavigatorParams);
 
     plugins.observability.dashboard.register({
+      appName: 'uptime',
+      hasData: async () => {
+        const dataHelper = await getUptimeDataHelper();
+        const status = await dataHelper.indexStatus();
+        return { hasData: status.indexExists, indices: status.indices };
+      },
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getUptimeDataHelper();
+        return await dataHelper.overviewData(params);
+      },
+    });
+
+    plugins.exploratoryView.register({
       appName: 'uptime',
       hasData: async () => {
         const dataHelper = await getUptimeDataHelper();
