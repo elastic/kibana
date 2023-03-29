@@ -123,7 +123,7 @@ const useRuleSnoozeColumn = ({
   return useMemo(
     () => ({
       field: 'snooze',
-      name: i18n.COLUMN_SNOOZING,
+      name: i18n.COLUMN_SNOOZE,
       render: (_, rule: ExtendedRule) => {
         if (!rule.snoozeSettings) {
           return <EuiLoadingSpinner size="s" />;
