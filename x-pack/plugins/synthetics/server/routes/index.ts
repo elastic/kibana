@@ -6,7 +6,6 @@
  */
 
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
-import { createJourneyRoute } from './pings/journeys';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
