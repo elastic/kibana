@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const security = getService('security');
+  const browser = getService('browser');
 
   describe('lens reporting', () => {
     before(async () => {
@@ -116,6 +117,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('shareReportingAdvancedOptionsButton');
         await testSubjects.existOrFail('shareReportingCopyURL');
         expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('Copy POST URL');
+      });
+
+      it('should produce a valid URL for reporting', async () => {
+        await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.reporting.getReportURL(60000);
+        // navigate to the reporting page
+        await PageObjects.common.navigateToUrl('management', '/insightsAndAlerting');
+        await testSubjects.click('reporting');
+        // find the latest Lens report
+        await testSubjects.click('reportJobRow > euiCollapsedItemActionsButton');
+        // click on Open in Kibana and check that all is ok
+        await testSubjects.click('reportOpenInKibanaApp');
+
+        const [reportingWindowHandler, lensWindowHandle] = await browser.getAllWindowHandles();
+        await browser.switchToWindow(lensWindowHandle);
+        // verify some configuration
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+          'Average of bytes'
+        );
+        await browser.closeCurrentWindow();
+        await browser.switchToWindow(reportingWindowHandler);
       });
     }
   });
