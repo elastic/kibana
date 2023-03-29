@@ -17,7 +17,7 @@ import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
-import { DashboardRenderer } from '../../components/dashboard_renderer';
+import { DashboardRenderer } from '../../../common/components/dashboards/dashboard_renderer';
 import { StatusPropmpt } from '../../components/status_prompt';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -88,7 +88,7 @@ const DashboardViewComponent: React.FC = () => {
             query={query}
             filters={filters}
             canReadDashboard={canReadDashboard}
-            id={`dashboard-${savedObjectId}`}
+            id={`dashboard-view-${savedObjectId}`}
             onDashboardContainerLoaded={onDashboardContainerLoaded}
             savedObjectId={savedObjectId}
             timeRange={timeRange}

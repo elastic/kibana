@@ -10,8 +10,9 @@ import { LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
-import { InputsModelId } from '../../common/store/inputs/constants';
-import { useRefetch } from '../hooks/use_refetch';
+import { useDispatch } from 'react-redux';
+import { InputsModelId } from '../../store/inputs/constants';
+import { inputsActions } from '../../store/inputs';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -37,6 +38,7 @@ const DashboardRendererComponent = ({
     toStr?: string | undefined;
   };
 }) => {
+  const dispatch = useDispatch();
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
 
   const getCreationOptions = useCallback(
@@ -46,11 +48,25 @@ const DashboardRendererComponent = ({
       }),
     [filters, query, timeRange]
   );
-  useRefetch({
-    inputId,
-    id,
-    container: dashboardContainer,
-  });
+
+  const refetchByForceRefresh = useCallback(() => {
+    dashboardContainer?.forceRefresh();
+  }, [dashboardContainer]);
+
+  useEffect(() => {
+    dispatch(
+      inputsActions.setQuery({
+        inputId,
+        id,
+        refetch: refetchByForceRefresh,
+        loading: false,
+        inspect: null,
+      })
+    );
+    return () => {
+      dispatch(inputsActions.deleteOneQuery({ inputId, id }));
+    };
+  }, [dispatch, id, inputId, refetchByForceRefresh]);
 
   useEffect(() => {
     dashboardContainer?.updateInput({ timeRange, query, filters });

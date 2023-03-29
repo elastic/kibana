@@ -6,7 +6,7 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../common/mock';
+import { TestProviders } from '../../mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
 jest.mock('@kbn/dashboard-plugin/public', () => {
