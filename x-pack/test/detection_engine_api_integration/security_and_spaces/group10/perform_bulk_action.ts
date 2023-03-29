@@ -428,7 +428,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(rulesResponse.total).to.eql(2);
     });
 
-    it('should duplicate rule with a legacy action and migrate new rules action', async () => {
+    it('should duplicate rule with a legacy action', async () => {
       const ruleId = 'ruleId';
       const [connector, ruleToDuplicate] = await Promise.all([
         supertest
@@ -465,10 +465,6 @@ export default ({ getService }: FtrProviderContext): void => {
       // Check that the duplicated rule is returned with the response
       expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
 
-      // legacy sidecar action should be gone
-      const sidecarActionsPostResults = await getLegacyActionSO(es);
-      expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
-
       // Check that the updates have been persisted
       const { body: rulesResponse } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
@@ -478,6 +474,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(rulesResponse.total).to.eql(2);
 
       rulesResponse.data.forEach((rule: RuleResponse) => {
+        const uuid = rule.actions[0].uuid;
         expect(rule.actions).to.eql([
           {
             action_type_id: '.slack',
@@ -487,7 +484,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
-            uuid: rule.actions[0].uuid,
+            ...(uuid ? { uuid } : {}),
           },
         ]);
       });
