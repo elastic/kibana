@@ -20,8 +20,8 @@ const LogsHistoryChart = ({ rule, alert }: { rule: Rule<PartialRuleParams>; aler
   const criteria = rule.params.criteria[0];
   const dateNow = Date.now();
   const dateLast30Days = Number(moment(dateNow).subtract(30, 'days').format('x'));
-  
-  const ruleGroupBy =  rule.params.groupBy
+
+  const ruleGroupBy = rule.params.groupBy;
   return (
     <>
       <EuiPanel hasBorder={true}>
