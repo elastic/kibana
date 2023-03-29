@@ -943,7 +943,8 @@
     "xstate": "^4.35.2",
     "xterm": "^5.0.0",
     "yauzl": "^2.10.0",
-    "yazl": "^2.5.1"
+    "yazl": "^2.5.1",
+    "zx": "^7.2.1"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",

@@ -60,6 +60,11 @@ function registerAlertingTelemetryTask(
         taskManager.index
       ),
     },
+    [`${TELEMETRY_TASK_TYPE}_ng`]: {
+      title: 'Alerting usage fetch task - next generation',
+      timeout: '5m',
+      createTaskRunner: telemetryTaskRunnerNG(logger),
+    },
   });
 }
 
@@ -75,6 +80,33 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   } catch (e) {
     logger.debug(`Error scheduling task, received ${e.message}`);
   }
+
+  try {
+    await taskManager.ensureScheduled({
+      id: `${TASK_ID}_ng`,
+      taskType: `${TELEMETRY_TASK_TYPE}_ng`,
+      state: {},
+      params: {},
+      schedule: { interval: '10s' },
+    });
+  } catch (e) {
+    logger.debug(`Error scheduling task ng, received ${e.message}`);
+  }
+}
+
+export function telemetryTaskRunnerNG(logger: Logger) {
+  return ({ taskInstance }: RunContext) => {
+    let { state } = taskInstance;
+    return {
+      async run() {
+        if (!state) state = {};
+        if (!state.count) state.count = 0;
+        state.count++;
+        logger.info(`running ${taskInstance.taskType}: ${state.count}`);
+        return { state };
+      },
+    };
+  };
 }
 
 export function telemetryTaskRunner(

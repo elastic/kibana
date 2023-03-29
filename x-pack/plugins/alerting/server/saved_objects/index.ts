@@ -29,7 +29,10 @@ import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 // decryption failures during migration.
 export const AlertAttributesExcludedFromAAD = [
   'scheduledTaskId',
-  'muteAll',
+  // _zdu: make `muteAll` part of AAD - but don't modify it during the test!
+  ...(false ? ['muteAll'] : []), // false for original behavior, true to make it AAD
+  // _zdu: make `name` excluded from AAD - but don't modify it during the test!
+  ...(true ? ['name'] : []), // false for original behavior, true to make it AAD
   'mutedInstanceIds',
   'updatedBy',
   'updatedAt',
@@ -50,7 +53,8 @@ export const AlertAttributesExcludedFromAAD = [
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
 export type AlertAttributesExcludedFromAADType =
   | 'scheduledTaskId'
-  | 'muteAll'
+  // _zdu: make `muteAll` part of AAD - but don't modify it during the test!
+  // | 'muteAll'
   | 'mutedInstanceIds'
   | 'updatedBy'
   | 'updatedAt'

@@ -146,6 +146,9 @@ export function getRuleType(
     } = options;
     const { alertFactory, scopedClusterClient } = services;
 
+    // _zdu: instrument index threshold to log a line when it runs
+    logger.info(`index threshold running rule ${ruleId} - ${name}`);
+
     const alertLimit = alertFactory.alertLimit.getValue();
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);

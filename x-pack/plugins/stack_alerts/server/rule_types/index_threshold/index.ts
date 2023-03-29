@@ -21,4 +21,12 @@ interface RegisterParams {
 export function register(params: RegisterParams) {
   const { data, alerting } = params;
   alerting.registerType(getRuleType(data));
+
+  // _zdu: register the Jr version
+  if (true) {
+    const ruleType = getRuleType(data);
+    ruleType.id = `${ruleType.id}-Jr`;
+    ruleType.name = `${ruleType.name}-Jr`;
+    alerting.registerType(ruleType);
+  }
 }
