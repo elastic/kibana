@@ -607,10 +607,7 @@ export class LensPlugin {
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
-          suggestions: (
-            context: VisualizeFieldContext | VisualizeEditorContext,
-            dataView: DataView
-          ) => {
+          suggestions: (context, dataView) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,

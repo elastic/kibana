@@ -63,7 +63,11 @@ export const suggestionsApi = ({
   });
   if (!suggestions.length) return [];
   const activeVisualization = suggestions[0];
-  // compute the rest suggestions depending on the active one
+  // remove the lnsMetric check when new metric is on GA and hide will be false
+  if (activeVisualization.visualizationId !== 'lnsMetric' && activeVisualization.hide) {
+    return [];
+  }
+  // compute the rest suggestions depending on the active one and filter out the lnsLegacyMetric
   const newSuggestions = getSuggestions({
     datasourceMap,
     datasourceStates: {
@@ -76,7 +80,7 @@ export const suggestionsApi = ({
     activeVisualization: visualizationMap[activeVisualization.visualizationId],
     visualizationState: activeVisualization.visualizationState,
     dataViews,
-  });
+  }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
 
   return [activeVisualization, ...newSuggestions];
 };

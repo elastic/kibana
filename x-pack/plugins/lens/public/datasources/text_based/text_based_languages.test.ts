@@ -450,7 +450,7 @@ describe('Textbased Data Source', () => {
       });
 
       expect(suggestions[0].table).toEqual({
-        changeType: 'initial',
+        changeType: 'extended',
         columns: [
           {
             columnId: 'newid',

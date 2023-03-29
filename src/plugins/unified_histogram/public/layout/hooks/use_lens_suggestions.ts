@@ -36,21 +36,18 @@ export const useLensSuggestions = ({
       contextualFields: columns,
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
-    const lensSuggestions = isPlainRecord ? lensSuggestionsApi(context, dataView) : undefined;
-    const firstSuggestion = lensSuggestions?.length ? lensSuggestions[0] : undefined;
-    const restSuggestions = lensSuggestions?.filter((sug) => {
-      return !sug.hide && sug.visualizationId !== 'lnsLegacyMetric';
-    });
-    const firstSuggestionExists = restSuggestions?.find(
+    const allSuggestions = isPlainRecord ? lensSuggestionsApi(context, dataView) : undefined;
+    const firstSuggestion = allSuggestions?.length ? allSuggestions[0] : undefined;
+    const firstSuggestionExists = allSuggestions?.find(
       (sug) => sug.title === firstSuggestion?.title
     );
     if (firstSuggestion && !firstSuggestionExists) {
-      restSuggestions?.push(firstSuggestion);
+      allSuggestions?.push(firstSuggestion);
     }
-    return { firstSuggestion, restSuggestions };
+    return { firstSuggestion, allSuggestions };
   }, [columns, dataView, isPlainRecord, lensSuggestionsApi, query]);
 
-  const [allSuggestions, setAllSuggestions] = useState(suggestions.restSuggestions);
+  const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
   const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
 
@@ -58,7 +55,7 @@ export const useLensSuggestions = ({
     const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
 
     if (!isEqual(suggestionDeps.current, newSuggestionsDeps)) {
-      setAllSuggestions(suggestions.restSuggestions);
+      setAllSuggestions(suggestions.allSuggestions);
       onSuggestionChange?.(suggestions.firstSuggestion);
 
       suggestionDeps.current = newSuggestionsDeps;
@@ -69,15 +66,13 @@ export const useLensSuggestions = ({
     onSuggestionChange,
     query,
     suggestions.firstSuggestion,
-    suggestions.restSuggestions,
+    suggestions.allSuggestions,
   ]);
 
   return {
     allSuggestions,
     currentSuggestion,
-    suggestionUnsupported:
-      isPlainRecord &&
-      (!currentSuggestion || currentSuggestion?.visualizationId === 'lnsDatatable'),
+    suggestionUnsupported: isPlainRecord && !currentSuggestion,
   };
 };
 
