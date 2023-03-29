@@ -16,6 +16,8 @@ export const DASHBOARD_COUNTER_CARDS = {
   RESOURCES_EVALUATED: 'dashboard-counter-card-resources-evaluated',
   FAILING_FINDINGS: 'dashboard-counter-card-failing-findings',
 };
+export const DASHBOARD_TABLE_HEADER_SCORE_TEST_ID = 'csp:dashboard-sections-table-header-score';
+export const DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID = 'csp:dashboard-sections-table-column-score';
 
 export const DASHBOARD_COMPLIANCE_SCORE_CHART = {
   COMPLIANCE_SCORE: 'dashboard-summary-section-compliance-score',

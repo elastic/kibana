@@ -31,7 +31,7 @@ import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section'
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
-} from '../../findings/test_subjects';
+} from '../test_subjects';
 
 const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
 
@@ -194,7 +194,13 @@ export const BenchmarksSection = ({
               }
               viewAllButtonTitle={i18n.translate(
                 'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
-                { defaultMessage: 'View all failed findings for this cluster' }
+                {
+                  defaultMessage: 'View all failed findings for this {postureAsset}',
+                  values: {
+                    postureAsset:
+                      dashboardType === CSPM_POLICY_TEMPLATE ? 'cloud account' : 'cluster',
+                  },
+                }
               )}
               onViewAllClick={() => navToFailedFindingsByCluster(cluster)}
             />

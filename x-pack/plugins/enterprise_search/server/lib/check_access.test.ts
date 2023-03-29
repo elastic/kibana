@@ -47,7 +47,10 @@ describe('checkAccess', () => {
   const mockSpaces = spacesMock.createStart();
   const mockDependencies = {
     request: { auth: { isAuthenticated: true } },
-    config: { host: 'http://localhost:3002' },
+    config: {
+      canDeployEntSearch: true,
+      host: 'http://localhost:3002',
+    },
     security: mockSecurity,
     spaces: mockSpaces,
   } as any;

@@ -6,20 +6,25 @@
  */
 
 import {
-  ALERT_DETAILS_FLYOUT_HEADER_TITLE,
-  ALERT_DETAILS_FLYOUT_JSON_TAB,
-  ALERT_DETAILS_FLYOUT_JSON_TAB_CONTENT,
-  ALERT_DETAILS_FLYOUT_OVERVIEW_TAB,
-  ALERT_DETAILS_FLYOUT_OVERVIEW_TAB_CONTENT,
-  ALERT_DETAILS_FLYOUT_TABLE_TAB,
-  ALERT_DETAILS_FLYOUT_TABLE_TAB_CONTENT,
-} from '../../../screens/alert_details_expandable_flyout';
+  DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
+  DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW,
+} from '../../../screens/document_expandable_flyout';
 import {
+  collapseDocumentDetailsExpandableFlyoutLeftSection,
+  expandDocumentDetailsExpandableFlyoutLeftSection,
   expandFirstAlertExpandableFlyout,
   openJsonTab,
   openOverviewTab,
   openTableTab,
-} from '../../../tasks/alert_details_expandable_flyout';
+  scrollWithinDocumentDetailsExpandableFlyoutRightSection,
+} from '../../../tasks/document_expandable_flyout';
 import { cleanKibana } from '../../../tasks/common';
 import { login, visit } from '../../../tasks/login';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -40,25 +45,44 @@ describe.skip('Alert details expandable flyout right panel', { testIsolation: fa
   });
 
   it('should display title in the header', () => {
-    cy.get(ALERT_DETAILS_FLYOUT_HEADER_TITLE)
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', 'Title');
+  });
+
+  it('should toggle expand detail button in the header', () => {
+    expandDocumentDetailsExpandableFlyoutLeftSection();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON)
       .should('be.visible')
-      .and('have.text', 'Alert details');
+      .and('have.text', 'Collapse alert details');
+
+    collapseDocumentDetailsExpandableFlyoutLeftSection();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON)
+      .should('be.visible')
+      .and('have.text', 'Expand alert details');
   });
 
   it('should display 3 tabs in the right section', () => {
-    cy.get(ALERT_DETAILS_FLYOUT_OVERVIEW_TAB).should('be.visible').and('have.text', 'Overview');
-    cy.get(ALERT_DETAILS_FLYOUT_TABLE_TAB).should('be.visible').and('have.text', 'Table');
-    cy.get(ALERT_DETAILS_FLYOUT_JSON_TAB).should('be.visible').and('have.text', 'JSON');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).should('be.visible').and('have.text', 'Overview');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('be.visible').and('have.text', 'Table');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).should('be.visible').and('have.text', 'JSON');
   });
 
   it('should display tab content when switching tabs in the right section', () => {
     openOverviewTab();
-    cy.get(ALERT_DETAILS_FLYOUT_OVERVIEW_TAB_CONTENT).should('be.visible');
+    // we shouldn't need to test anything here as it's covered with the new overview_tab file
 
     openTableTab();
-    cy.get(ALERT_DETAILS_FLYOUT_TABLE_TAB_CONTENT).should('be.visible');
+    // the table component is rendered within a dom element with overflow, so Cypress isn't finding it
+    // this next line is a hack that scrolls to a specific element in the table to ensure Cypress finds it
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW).scrollIntoView();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT).should('be.visible');
+
+    // scroll back up to the top to open the json tab
+    cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).scrollIntoView();
 
     openJsonTab();
-    cy.get(ALERT_DETAILS_FLYOUT_JSON_TAB_CONTENT).should('be.visible');
+    // the json component is rendered within a dom element with overflow, so Cypress isn't finding it
+    // this next line is a hack that vertically scrolls down to ensure Cypress finds it
+    scrollWithinDocumentDetailsExpandableFlyoutRightSection(0, 6500);
+    cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT).should('be.visible');
   });
 });

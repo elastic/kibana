@@ -6,6 +6,6 @@
     "patterns": [
       "_eql/search/status/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-async-eql-status-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/eql-search-api.html"
   }
 }

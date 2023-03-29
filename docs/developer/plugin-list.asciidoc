@@ -434,6 +434,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |undefined
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/asset_manager/README.md[assetManager]
+|This plugin provides access to the asset data stored in assets-* indices, primarily
+for inventory and topology purposes.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
 |Allow to add a header banner that will be displayed on every page of the Kibana application
 
@@ -488,7 +493,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/custom_branding/README.md[customBranding]
 |This is a plugin to configure custom branding.
-This plugin is currently under active development; do not use.
+Plugin server-side only. Plugin has three main functions:
 
 
 |<<dashboard-enhanced-plugin>>

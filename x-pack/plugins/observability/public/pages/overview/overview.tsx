@@ -22,7 +22,8 @@ import { HeaderMenu } from './components/header_menu';
 import { Resources } from './components/resources';
 import { NewsFeed } from './components/news_feed';
 import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
-import { observabilityAlertFeatureIds, paths } from '../../config';
+import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
+import { paths } from '../../config/paths';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useFetcher } from '../../hooks/use_fetcher';
@@ -35,7 +36,7 @@ import { getNewsFeed } from '../../services/get_news_feed';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../constants';
+import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useOverviewMetrics } from './helpers/use_overview_metrics';
 import { SectionContainer } from '../../components/app/section';
@@ -117,7 +118,7 @@ export function OverviewPage() {
     [bucketSize, relativeEnd, relativeStart]
   );
 
-  const chartThemes = {
+  const chartProps = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
@@ -206,11 +207,11 @@ export function OverviewPage() {
               features={{ alerts: { sync: false } }}
             >
               <AlertSummaryWidget
+                chartProps={chartProps}
                 featureIds={observabilityAlertFeatureIds}
                 filter={esQuery}
                 fullSize
                 timeRange={alertSummaryTimeRange}
-                chartThemes={chartThemes}
               />
               <AlertsStateTable
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}

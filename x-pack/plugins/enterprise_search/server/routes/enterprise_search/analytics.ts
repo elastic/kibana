@@ -16,10 +16,7 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { addAnalyticsCollection } from '../../lib/analytics/add_analytics_collection';
 import { analyticsEventsIndexExists } from '../../lib/analytics/analytics_events_index_exists';
 import { deleteAnalyticsCollectionById } from '../../lib/analytics/delete_analytics_collection';
-import {
-  fetchAnalyticsCollectionById,
-  fetchAnalyticsCollections,
-} from '../../lib/analytics/fetch_analytics_collection';
+import { fetchAnalyticsCollections } from '../../lib/analytics/fetch_analytics_collection';
 import { fetchAnalyticsCollectionDataViewId } from '../../lib/analytics/fetch_analytics_collection_data_view_id';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
@@ -64,10 +61,10 @@ export function registerAnalyticsRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/analytics/collections/{id}',
+      path: '/internal/enterprise_search/analytics/collections/{name}',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          name: schema.string(),
         }),
       },
     },
@@ -75,13 +72,9 @@ export function registerAnalyticsRoutes({
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const collection = await fetchAnalyticsCollectionById(client, request.params.id);
+        const collections = await fetchAnalyticsCollections(client, request.params.name);
 
-        if (!collection) {
-          throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
-        }
-
-        return response.ok({ body: collection });
+        return response.ok({ body: collections[0] });
       } catch (error) {
         if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND) {
           return createIndexNotFoundError(error, response);
@@ -114,7 +107,7 @@ export function registerAnalyticsRoutes({
         const body = await addAnalyticsCollection(
           elasticsearchClient,
           dataViewsService,
-          request.body
+          request.body.name
         );
         return response.ok({ body });
       } catch (error) {
@@ -139,17 +132,17 @@ export function registerAnalyticsRoutes({
 
   router.delete(
     {
-      path: '/internal/enterprise_search/analytics/collections/{id}',
+      path: '/internal/enterprise_search/analytics/collections/{name}',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          name: schema.string(),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        await deleteAnalyticsCollectionById(client, request.params.id);
+        await deleteAnalyticsCollectionById(client, request.params.name);
         return response.ok();
       } catch (error) {
         if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND) {
@@ -162,17 +155,17 @@ export function registerAnalyticsRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/analytics/events/{id}/exists',
+      path: '/internal/enterprise_search/analytics/events/{name}/exists',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          name: schema.string(),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
-      const eventsIndexExists = await analyticsEventsIndexExists(client, request.params.id);
+      const eventsIndexExists = await analyticsEventsIndexExists(client, request.params.name);
 
       if (!eventsIndexExists) {
         return response.ok({ body: { exists: false } });
@@ -184,10 +177,10 @@ export function registerAnalyticsRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/analytics/collections/{id}/data_view_id',
+      path: '/internal/enterprise_search/analytics/collections/{name}/data_view_id',
       validate: {
         params: schema.object({
-          id: schema.string(),
+          name: schema.string(),
         }),
       },
     },
@@ -204,7 +197,7 @@ export function registerAnalyticsRoutes({
         const dataViewId = await fetchAnalyticsCollectionDataViewId(
           elasticsearchClient,
           dataViewsService,
-          request.params.id
+          request.params.name
         );
 
         return response.ok({ body: dataViewId });

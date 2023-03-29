@@ -146,7 +146,7 @@ export const GettingStarted = () => {
   if (isError) {
     return (
       <KibanaPageTemplate.EmptyPrompt
-        iconType="alert"
+        iconType="warning"
         color="danger"
         title={
           <h2>
