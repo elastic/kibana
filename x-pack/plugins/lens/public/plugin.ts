@@ -16,7 +16,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -44,6 +44,7 @@ import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
+  VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import {
   VISUALIZE_EDITOR_TRIGGER,
@@ -89,6 +90,8 @@ import type {
   VisualizationType,
   EditorFrameSetup,
   LensTopNavMenuEntryGenerator,
+  VisualizeEditorContext,
+  Suggestion,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
@@ -232,8 +235,14 @@ export interface LensPublicStart {
   stateHelperApi: () => Promise<{
     formula: FormulaPublicApi;
     chartInfo: ChartInfoApi;
+    suggestions: LensSuggestionsApi;
   }>;
 }
+
+export type LensSuggestionsApi = (
+  context: VisualizeFieldContext | VisualizeEditorContext,
+  dataViews: DataView
+) => Suggestion[] | undefined;
 
 export class LensPlugin {
   private datatableVisualization: DatatableVisualizationType | undefined;
@@ -585,13 +594,30 @@ export class LensPlugin {
       },
 
       stateHelperApi: async () => {
-        const { createFormulaPublicApi, createChartInfoApi } = await import('./async_services');
+        const { createFormulaPublicApi, createChartInfoApi, suggestionsApi } = await import(
+          './async_services'
+        );
         if (!this.editorFrameService) {
           await this.initDependenciesForApi();
         }
+        const [visualizationMap, datasourceMap] = await Promise.all([
+          this.editorFrameService!.loadVisualizations(),
+          this.editorFrameService!.loadDatasources(),
+        ]);
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
+          suggestions: (
+            context: VisualizeFieldContext | VisualizeEditorContext,
+            dataView: DataView
+          ) => {
+            return suggestionsApi({
+              datasourceMap,
+              visualizationMap,
+              context,
+              dataView,
+            });
+          },
         };
       },
     };

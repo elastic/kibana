@@ -10,6 +10,7 @@ import { getLensAttributes } from './get_lens_attributes';
 import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { currentSuggestionMock } from '../../__mocks__/suggestions';
 
 describe('getLensAttributes', () => {
   const dataView: DataView = dataViewWithTimefieldMock;
@@ -45,7 +46,15 @@ describe('getLensAttributes', () => {
   it('should return correct attributes', () => {
     const breakdownField: DataViewField | undefined = undefined;
     expect(
-      getLensAttributes({ title: 'test', filters, query, dataView, timeInterval, breakdownField })
+      getLensAttributes({
+        title: 'test',
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField,
+        suggestion: undefined,
+      })
     ).toMatchInlineSnapshot(`
       Object {
         "references": Array [
@@ -185,7 +194,15 @@ describe('getLensAttributes', () => {
       (f) => f.name === 'extension'
     );
     expect(
-      getLensAttributes({ title: 'test', filters, query, dataView, timeInterval, breakdownField })
+      getLensAttributes({
+        title: 'test',
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField,
+        suggestion: undefined,
+      })
     ).toMatchInlineSnapshot(`
       Object {
         "references": Array [
@@ -343,7 +360,15 @@ describe('getLensAttributes', () => {
       (f) => f.name === 'scripted'
     );
     expect(
-      getLensAttributes({ title: 'test', filters, query, dataView, timeInterval, breakdownField })
+      getLensAttributes({
+        title: 'test',
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField,
+        suggestion: undefined,
+      })
     ).toMatchInlineSnapshot(`
       Object {
         "references": Array [
@@ -474,6 +499,211 @@ describe('getLensAttributes', () => {
         },
         "title": "test",
         "visualizationType": "lnsXY",
+      }
+    `);
+  });
+
+  it('should return correct attributes for text based languages', () => {
+    expect(
+      getLensAttributes({
+        title: 'test',
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField: undefined,
+        suggestion: currentSuggestionMock,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "references": Array [
+          Object {
+            "id": "index-pattern-with-timefield-id",
+            "name": "indexpattern-datasource-current-indexpattern",
+            "type": "index-pattern",
+          },
+          Object {
+            "id": "index-pattern-with-timefield-id",
+            "name": "indexpattern-datasource-layer-unifiedHistogram",
+            "type": "index-pattern",
+          },
+        ],
+        "state": Object {
+          "datasourceStates": Object {
+            "textBased": Object {
+              "fieldList": Array [],
+              "indexPatternRefs": Array [],
+              "initialContext": Object {
+                "contextualFields": Array [
+                  "Dest",
+                  "AvgTicketPrice",
+                ],
+                "dataViewSpec": Object {
+                  "allowNoIndex": false,
+                  "fields": Object {
+                    "AvgTicketPrice": Object {
+                      "aggregatable": true,
+                      "count": 0,
+                      "esTypes": Array [
+                        "float",
+                      ],
+                      "format": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.[00]",
+                        },
+                      },
+                      "isMapped": true,
+                      "name": "AvgTicketPrice",
+                      "readFromDocValues": true,
+                      "scripted": false,
+                      "searchable": true,
+                      "shortDotsEnable": false,
+                      "type": "number",
+                    },
+                    "Dest": Object {
+                      "aggregatable": true,
+                      "count": 0,
+                      "esTypes": Array [
+                        "keyword",
+                      ],
+                      "format": Object {
+                        "id": "string",
+                      },
+                      "isMapped": true,
+                      "name": "Dest",
+                      "readFromDocValues": true,
+                      "scripted": false,
+                      "searchable": true,
+                      "shortDotsEnable": false,
+                      "type": "string",
+                    },
+                    "timestamp": Object {
+                      "aggregatable": true,
+                      "count": 0,
+                      "esTypes": Array [
+                        "date",
+                      ],
+                      "format": Object {
+                        "id": "date",
+                      },
+                      "isMapped": true,
+                      "name": "timestamp",
+                      "readFromDocValues": true,
+                      "scripted": false,
+                      "searchable": true,
+                      "shortDotsEnable": false,
+                      "type": "date",
+                    },
+                  },
+                  "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "name": "Kibana Sample Data Flights",
+                  "sourceFilters": Array [],
+                  "timeFieldName": "timestamp",
+                  "title": "kibana_sample_data_flights",
+                  "version": "WzM1ODA3LDFd",
+                },
+                "fieldName": "",
+                "query": Object {
+                  "sql": "SELECT Dest, AvgTicketPrice FROM \\"kibana_sample_data_flights\\"",
+                },
+              },
+              "layers": Object {
+                "46aa21fa-b747-4543-bf90-0b40007c546d": Object {
+                  "allColumns": Array [
+                    Object {
+                      "columnId": "81e332d6-ee37-42a8-a646-cea4fc75d2d3",
+                      "fieldName": "Dest",
+                      "meta": Object {
+                        "type": "string",
+                      },
+                    },
+                    Object {
+                      "columnId": "5b9b8b76-0836-4a12-b9c0-980c9900502f",
+                      "fieldName": "AvgTicketPrice",
+                      "meta": Object {
+                        "type": "number",
+                      },
+                    },
+                  ],
+                  "columns": Array [
+                    Object {
+                      "columnId": "81e332d6-ee37-42a8-a646-cea4fc75d2d3",
+                      "fieldName": "Dest",
+                      "meta": Object {
+                        "type": "string",
+                      },
+                    },
+                    Object {
+                      "columnId": "5b9b8b76-0836-4a12-b9c0-980c9900502f",
+                      "fieldName": "AvgTicketPrice",
+                      "meta": Object {
+                        "type": "number",
+                      },
+                    },
+                  ],
+                  "index": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "query": Object {
+                    "sql": "SELECT Dest, AvgTicketPrice FROM \\"kibana_sample_data_flights\\"",
+                  },
+                  "timeField": "timestamp",
+                },
+              },
+            },
+          },
+          "filters": Array [
+            Object {
+              "$state": Object {
+                "store": "appState",
+              },
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "index-pattern-with-timefield-id",
+                "key": "extension",
+                "negate": false,
+                "params": Object {
+                  "query": "js",
+                },
+                "type": "phrase",
+              },
+              "query": Object {
+                "match": Object {
+                  "extension": Object {
+                    "query": "js",
+                    "type": "phrase",
+                  },
+                },
+              },
+            },
+          ],
+          "query": Object {
+            "language": "kuery",
+            "query": "extension : css",
+          },
+          "visualization": Object {
+            "gridConfig": Object {
+              "isCellLabelVisible": false,
+              "isXAxisLabelVisible": true,
+              "isXAxisTitleVisible": false,
+              "isYAxisLabelVisible": true,
+              "isYAxisTitleVisible": false,
+              "type": "heatmap_grid",
+            },
+            "layerId": "46aa21fa-b747-4543-bf90-0b40007c546d",
+            "layerType": "data",
+            "legend": Object {
+              "isVisible": true,
+              "position": "right",
+              "type": "heatmap_legend",
+            },
+            "shape": "heatmap",
+            "valueAccessor": "5b9b8b76-0836-4a12-b9c0-980c9900502f",
+            "xAccessor": "81e332d6-ee37-42a8-a646-cea4fc75d2d3",
+          },
+        },
+        "title": "test",
+        "visualizationType": "lnsHeatmap",
       }
     `);
   });
