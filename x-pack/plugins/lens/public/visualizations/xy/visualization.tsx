@@ -689,7 +689,18 @@ export const getXyVisualization = ({
     );
   },
   getAddLayerButtonComponent: (props) => {
-    return <AddLayerButton {...props} eventAnnotationService={eventAnnotationService} />;
+    return (
+      <AddLayerButton
+        {...props}
+        eventAnnotationService={eventAnnotationService}
+        onAddLayerFromAnnotationGroup={async (loadedGroupInfo) => {
+          if (loadedGroupInfo.dataViewSpec) {
+            await props.addIndexPatternFromDataViewSpec(loadedGroupInfo.dataViewSpec);
+          }
+          props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
+        }}
+      />
+    );
   },
   toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(

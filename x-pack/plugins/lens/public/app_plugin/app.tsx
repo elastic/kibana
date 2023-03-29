@@ -433,7 +433,6 @@ export function App({
         dataViews,
         uiActions,
         core: { http, notifications, uiSettings },
-        data,
         contextDataViewSpec: (initialContext as VisualizeFieldContext | undefined)?.dataViewSpec,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatch(updateIndexPatterns(newIndexPatternsState));
@@ -448,7 +447,7 @@ export function App({
           }
         },
       }),
-    [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
+    [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
   const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {

@@ -13,6 +13,7 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
 import { AddLayerFunction, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
@@ -216,6 +217,7 @@ export function LayerPanels(
         id: indexPatternId,
         cache: props.framePublicAPI.dataViews.indexPatterns,
       });
+
       dispatchLens(
         changeIndexPattern({
           indexPatternId,
@@ -319,6 +321,11 @@ export function LayerPanels(
           visualizationState: visualization.state,
           layersMeta: props.framePublicAPI,
           addLayer,
+          addIndexPatternFromDataViewSpec: (spec: DataViewSpec) =>
+            props.indexPatternService.addIndexPatternFromDataViewSpec(
+              spec,
+              props.framePublicAPI.dataViews.indexPatterns
+            ),
         })}
     </EuiForm>
   );

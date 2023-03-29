@@ -1239,6 +1239,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     visualizationState: T;
     addLayer: AddLayerFunction;
     layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+    addIndexPatternFromDataViewSpec: (spec: DataViewSpec) => Promise<void>;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers

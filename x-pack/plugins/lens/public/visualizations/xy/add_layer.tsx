@@ -27,7 +27,8 @@ import type { ExtraAppendLayerArg } from './visualization';
 interface AddLayerButtonProps {
   visualization: Visualization;
   visualizationState: unknown;
-  addLayer: AddLayerFunction<ExtraAppendLayerArg>;
+  addLayer: AddLayerFunction;
+  onAddLayerFromAnnotationGroup: (arg: ExtraAppendLayerArg) => void;
   layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
   eventAnnotationService: EventAnnotationServiceType;
 }
@@ -37,6 +38,7 @@ export function AddLayerButton({
   visualization,
   visualizationState,
   addLayer,
+  onAddLayerFromAnnotationGroup,
   layersMeta,
   eventAnnotationService,
 }: AddLayerButtonProps) {
@@ -211,9 +213,7 @@ export function AddLayerButton({
           isLoadLibraryVisible={isLoadLibraryVisible}
           setLoadLibraryFlyoutVisible={setLoadLibraryFlyoutVisible}
           eventAnnotationService={eventAnnotationService}
-          addLayer={(loadedGroupInfo) => {
-            addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
-          }}
+          addLayer={onAddLayerFromAnnotationGroup}
         />
       )}
     </>

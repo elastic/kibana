@@ -8,7 +8,6 @@
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
@@ -21,7 +20,6 @@ import { generateId } from '../id_generator';
 
 export interface IndexPatternServiceProps {
   core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
-  data: DataPublicPluginStart;
   dataViews: DataViewsContract;
   uiActions: UiActionsStart;
   contextDataViewSpec?: DataViewSpec;
@@ -54,10 +52,16 @@ export interface IndexPatternServiceAPI {
     cache: IndexPatternMap;
     onIndexPatternRefresh?: () => void;
   }) => Promise<IndexPatternMap>;
+
   /**
-   * Load indexPatternRefs with title and ids
+   * Takes a data view spec and creates the both the data view and the Lens index pattern
+   * and adds everything to the caches.
    */
-  loadIndexPatternRefs: (options: { isFullEditor: boolean }) => Promise<IndexPatternRef[]>;
+  addIndexPatternFromDataViewSpec: (
+    spec: DataViewSpec,
+    cache: IndexPatternMap | undefined
+  ) => Promise<void>;
+
   /**
    * Ensure an indexPattern is loaded in the cache, usually used in conjuction with a indexPattern change action.
    */
@@ -81,16 +85,15 @@ export interface IndexPatternServiceAPI {
   ) => void;
 }
 
-export function createIndexPatternService({
+export const createIndexPatternService = ({
   core,
   dataViews,
-  data,
   updateIndexPatterns,
   replaceIndexPattern,
   uiActions,
   contextDataViewSpec,
-}: IndexPatternServiceProps): IndexPatternServiceAPI {
-  const onChangeError = (err: Error) =>
+}: IndexPatternServiceProps): IndexPatternServiceAPI => {
+  const showLoadingDataViewError = (err: Error) =>
     core.notifications.toasts.addError(err, {
       title: i18n.translate('xpack.lens.indexPattern.dataViewLoadError', {
         defaultMessage: 'Error loading data view',
@@ -102,6 +105,48 @@ export function createIndexPatternService({
       return loadIndexPatterns({
         dataViews,
         ...args,
+      });
+    },
+    addIndexPatternFromDataViewSpec: async (
+      spec: DataViewSpec,
+      cache: IndexPatternMap | undefined
+    ) => {
+      // TODO - extract this routine into a function and unit test?
+      if (!spec.id) {
+        showLoadingDataViewError(
+          new Error(
+            i18n.translate('xpack.lens.indexPattern.noIdError', {
+              defaultMessage: 'Tried to use data view spec without an ID',
+            })
+          )
+        );
+        return;
+      }
+      const dataView = await dataViews.create(spec);
+      const indexPatterns = await ensureIndexPattern({
+        id: dataView.id!,
+        onError: showLoadingDataViewError,
+        dataViews,
+        cache,
+      });
+
+      if (!indexPatterns) {
+        return;
+      }
+
+      const refs = await loadIndexPatternRefs(dataViews);
+
+      const newIndexPattern = indexPatterns[dataView.id!];
+
+      const newRef: IndexPatternRef = {
+        id: newIndexPattern.id!,
+        name: newIndexPattern.name,
+        title: newIndexPattern.title,
+      };
+
+      updateIndexPatterns({
+        indexPatterns,
+        indexPatternRefs: [...refs, newRef],
       });
     },
     replaceDataViewId: async (dataView: DataView) => {
@@ -131,9 +176,7 @@ export function createIndexPatternService({
       } as ActionExecutionContext);
     },
     ensureIndexPattern: (args) =>
-      ensureIndexPattern({ onError: onChangeError, dataViews, ...args }),
-    loadIndexPatternRefs: async ({ isFullEditor }) =>
-      isFullEditor ? loadIndexPatternRefs(dataViews) : [],
+      ensureIndexPattern({ onError: showLoadingDataViewError, dataViews, ...args }),
     getDefaultIndex: () => core.uiSettings.get('defaultIndex'),
   };
-}
+};
