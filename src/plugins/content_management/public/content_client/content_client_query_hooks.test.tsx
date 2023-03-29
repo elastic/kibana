@@ -20,7 +20,7 @@ const setup = () => {
   const contentTypeRegistry = new ContentTypeRegistry();
   contentTypeRegistry.register({
     id: 'testType',
-    version: { latest: 'v2' },
+    version: { latest: 2 },
   });
   const contentClient = new ContentClient(() => crudClient, contentTypeRegistry);
 
@@ -38,7 +38,7 @@ const setup = () => {
 describe('useGetContentQuery', () => {
   test('should call rpcClient.get with input and resolve with output', async () => {
     const { crudClient, Wrapper } = setup();
-    const input: GetIn = { id: 'test', contentTypeId: 'testType', version: 'v2' };
+    const input: GetIn = { id: 'test', contentTypeId: 'testType', version: 2 };
     const output = { test: 'test' };
     crudClient.get.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useGetContentQuery(input), { wrapper: Wrapper });
@@ -50,7 +50,7 @@ describe('useGetContentQuery', () => {
 describe('useSearchContentQuery', () => {
   test('should call rpcClient.search with input and resolve with output', async () => {
     const { crudClient, Wrapper } = setup();
-    const input: SearchIn = { contentTypeId: 'testType', query: {}, version: 'v2' };
+    const input: SearchIn = { contentTypeId: 'testType', query: {}, version: 2 };
     const output = { hits: [{ id: 'test' }] };
     crudClient.search.mockResolvedValueOnce(output);
     const { result, waitFor } = renderHook(() => useSearchContentQuery(input), {

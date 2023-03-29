@@ -35,6 +35,7 @@ const getMockLensAttributes = () =>
     dataView: dataViewWithTimefieldMock,
     timeInterval: 'auto',
     breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+    suggestion: undefined,
   });
 
 function mountComponent() {

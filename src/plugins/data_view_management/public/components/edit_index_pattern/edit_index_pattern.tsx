@@ -249,7 +249,7 @@ export const EditIndexPattern = withRouter(
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />
-              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="alert">
+              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="warning">
                 <p>{mappingConflictLabel}</p>
               </EuiCallOut>
             </>

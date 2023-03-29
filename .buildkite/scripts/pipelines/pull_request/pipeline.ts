@@ -116,6 +116,13 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/profiling/])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/profiling_cypress.yml'));
+    }
+
+    if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/fleet/, /^x-pack\/test\/fleet_cypress/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -134,10 +141,15 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/observability_plugin.yml'));
     }
 
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/exploratory_view/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
+    }
+
     if (
       await doAnyChangesMatch([
         /^x-pack\/plugins\/synthetics/,
         /^x-pack\/plugins\/observability\/public\/components\/shared\/exploratory_view/,
+        /^x-pack\/plugins\/exploratory_view/,
       ])
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
@@ -147,6 +159,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
       await doAnyChangesMatch([
         /^x-pack\/plugins\/ux/,
         /^x-pack\/plugins\/observability\/public\/components\/shared\/exploratory_view/,
+        /^x-pack\/plugins\/exploratory_view/,
       ])
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));

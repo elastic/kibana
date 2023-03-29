@@ -59,6 +59,7 @@ export function FilterValuesList({
   return (
     <Wrapper>
       <EuiFieldSearch
+        data-test-subj="o11yFilterValuesListFieldSearch"
         fullWidth
         isLoading={loading}
         value={query}

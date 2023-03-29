@@ -208,7 +208,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+          ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -216,7 +216,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
+          ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
@@ -238,7 +238,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+              ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -246,7 +246,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
+              ", \"indexPatterns\" | \"filters\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -359,7 +359,15 @@
             "label": "props",
             "description": [],
             "signature": [
-              "{ placeholder?: string | undefined; query?: ",
+              "{ indexPatterns?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined; placeholder?: string | undefined; query?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -377,15 +385,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; dataTestSubj?: string | undefined; isLoading?: boolean | undefined; indexPatterns?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[] | undefined; isDisabled?: boolean | undefined; timeHistory?: ",
+              "[] | undefined; dataTestSubj?: string | undefined; isLoading?: boolean | undefined; isDisabled?: boolean | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",

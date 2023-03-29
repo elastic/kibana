@@ -496,7 +496,7 @@ const EditRulePageComponent: FC = () => {
                         </EuiButton>
                       </HeaderPage>
                       {invalidSteps.length > 0 && (
-                        <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
+                        <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">
                           <FormattedMessage
                             id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
                             defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"

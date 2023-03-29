@@ -25,7 +25,7 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="warning" />
+              <EuiIcon type="warning" color="warning" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTextColor color="default">

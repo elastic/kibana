@@ -10,38 +10,24 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiCode,
-  EuiCallOut,
-  EuiLink,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiFormRow,
-  EuiFieldText,
-  EuiFieldPassword,
   EuiSpacer,
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { usePolicyConfigContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
-import { ZipUrlTLSFields } from './zip_url_tls_fields';
 import { ConfigKey, MonacoEditorLangId, Validation } from '../types';
-import { getDocLinks } from '../../../../kibana_services';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
   SCRIPT_RECORDER = 'syntheticsBrowserScriptRecorderConfig',
-  ZIP = 'syntheticsBrowserZipURLConfig',
 }
 
 interface SourceConfig {
-  zipUrl: string;
-  proxyUrl: string;
-  folder: string;
-  username: string;
-  password: string;
   inlineScript: string;
   params: string;
   isGeneratedScript?: boolean;
@@ -56,11 +42,6 @@ export interface Props {
 }
 
 export const defaultValues = {
-  zipUrl: '',
-  proxyUrl: '',
-  folder: '',
-  username: '',
-  password: '',
   inlineScript: '',
   params: '',
   isGeneratedScript: false,
@@ -81,7 +62,6 @@ export const SourceField = ({
   defaultConfig = defaultValues,
   validate,
 }: Props) => {
-  const { isZipUrlSourceEnabled } = usePolicyConfigContext();
   const [sourceType, setSourceType] = useState<SourceType>(getDefaultTab(defaultConfig));
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
 
@@ -93,18 +73,6 @@ export const SourceField = ({
     validate?.[ConfigKey.SOURCE_INLINE]?.({
       [ConfigKey.SOURCE_INLINE]: config.inlineScript,
     }) ?? false;
-
-  const isZipUrlInvalid =
-    validate?.[ConfigKey.SOURCE_ZIP_URL]?.({
-      [ConfigKey.SOURCE_ZIP_URL]: config.zipUrl,
-    }) ?? false;
-
-  const zipUrlLabel = (
-    <FormattedMessage
-      id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.label"
-      defaultMessage="Zip URL"
-    />
-  );
 
   const params = (
     <EuiFormRow
@@ -142,8 +110,7 @@ export const SourceField = ({
     </EuiFormRow>
   );
 
-  const zipUrlSourceTabId = 'syntheticsBrowserZipURLConfig';
-  const allTabs = [
+  const tabs = [
     {
       id: 'syntheticsBrowserInlineConfig',
       name: (
@@ -240,174 +207,7 @@ export const SourceField = ({
         </>
       ),
     },
-    {
-      id: zipUrlSourceTabId,
-      name: zipUrlLabel,
-      'data-test-subj': `syntheticsSourceTab__zipUrl`,
-      content: (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.deprecation.title"
-                defaultMessage="Zip URL is deprecated"
-              />
-            }
-            size="s"
-            color="warning"
-          >
-            <FormattedMessage
-              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.deprecation.content"
-              defaultMessage="Zip URL is deprecated and will be removed in a future version. Use project monitors instead to create monitors from a remote repository and to migrate existing Zip URL monitors. {link}"
-              values={{
-                link: (
-                  <EuiLink
-                    target="_blank"
-                    href={getDocLinks()?.links?.observability?.syntheticsProjectMonitors}
-                    external
-                  >
-                    <FormattedMessage
-                      id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.zipUrl.deprecation.link"
-                      defaultMessage="Learn more"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-          <EuiFormRow
-            label={zipUrlLabel}
-            isInvalid={isZipUrlInvalid}
-            error={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.error"
-                defaultMessage="Zip URL is required"
-              />
-            }
-            helpText={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.helpText"
-                defaultMessage="Location of the synthetics project repository zip file."
-              />
-            }
-          >
-            <EuiFieldText
-              onChange={({ target: { value } }) =>
-                setConfig((prevConfig) => ({ ...prevConfig, zipUrl: value }))
-              }
-              onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_URL)}
-              value={config.zipUrl}
-              data-test-subj="syntheticsBrowserZipUrl"
-            />
-          </EuiFormRow>
-          <ZipUrlTLSFields />
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.brower.proxyURL.label"
-                defaultMessage="Proxy Zip URL"
-              />
-            }
-            labelAppend={<OptionalLabel />}
-            helpText={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.http.helpText"
-                defaultMessage="HTTP proxy for Zip URL."
-              />
-            }
-          >
-            <EuiFieldText
-              onChange={({ target: { value } }) =>
-                setConfig((prevConfig) => ({ ...prevConfig, proxyUrl: value }))
-              }
-              onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_PROXY_URL)}
-              value={config.proxyUrl}
-              data-test-subj="syntheticsBrowserZipUrlProxy"
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlFolder.label"
-                defaultMessage="Folder"
-              />
-            }
-            labelAppend={<OptionalLabel />}
-            helpText={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlFolder.helpText"
-                defaultMessage="Relative directory path where the synthetic journey files are located in the repository."
-              />
-            }
-          >
-            <EuiFieldText
-              onChange={({ target: { value } }) =>
-                setConfig((prevConfig) => ({ ...prevConfig, folder: value }))
-              }
-              onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_FOLDER)}
-              value={config.folder}
-              data-test-subj="syntheticsBrowserZipUrlFolder"
-            />
-          </EuiFormRow>
-          {params}
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlUsername.label"
-                defaultMessage="Zip URL Username"
-              />
-            }
-            labelAppend={<OptionalLabel />}
-            helpText={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlUsername.helpText"
-                defaultMessage="The username for authenticating with the zip endpoint."
-              />
-            }
-          >
-            <EuiFieldText
-              onChange={({ target: { value } }) =>
-                setConfig((prevConfig) => ({ ...prevConfig, username: value }))
-              }
-              onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_USERNAME)}
-              value={config.username}
-              data-test-subj="syntheticsBrowserZipUrlUsername"
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlPassword.abel"
-                defaultMessage="Zip URL Password"
-              />
-            }
-            labelAppend={<OptionalLabel />}
-            helpText={
-              <FormattedMessage
-                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlPassword.helpText"
-                defaultMessage="The password for authenticating with the zip endpoint."
-              />
-            }
-          >
-            <EuiFieldPassword
-              onChange={({ target: { value } }) =>
-                setConfig((prevConfig) => ({ ...prevConfig, password: value }))
-              }
-              onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_PASSWORD)}
-              value={config.password}
-              data-test-subj="syntheticsBrowserZipUrlPassword"
-            />
-          </EuiFormRow>
-        </>
-      ),
-    },
   ];
-
-  const tabs = isZipUrlSourceEnabled
-    ? allTabs
-    : allTabs.filter((tab: EuiTabbedContentTab) => tab.id !== zipUrlSourceTabId);
 
   return (
     <EuiTabbedContent

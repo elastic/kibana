@@ -51,7 +51,7 @@ export function StepFieldTrend({
       selectedMetricField: field,
       time: getLast48Intervals(activeStep),
       seriesType: 'area',
-      dataType: 'synthetics',
+      dataType: 'uptime',
       reportDefinitions: {
         'monitor.name': [activeStep.monitor.name!],
         'synthetics.step.name.keyword': [activeStep.synthetics.step?.name!],
@@ -73,7 +73,13 @@ export function StepFieldTrend({
       <EmbeddableExpView
         title={title}
         appendTitle={
-          <EuiButton iconType={'visArea'} href={href} target="_blank" size="s">
+          <EuiButton
+            data-test-subj="syntheticsStepFieldTrendButton"
+            iconType={'visArea'}
+            href={href}
+            target="_blank"
+            size="s"
+          >
             {EXPLORE_LABEL}
           </EuiButton>
         }

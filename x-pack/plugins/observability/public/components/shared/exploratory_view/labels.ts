@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 export enum DataTypes {
   SYNTHETICS = 'synthetics',
+  UPTIME = 'uptime',
   UX = 'ux',
   MOBILE = 'mobile',
   METRICS = 'infra_metrics',
@@ -26,6 +27,10 @@ export const DataTypesLabels: Record<string, string> = {
       defaultMessage: 'Synthetics monitoring',
     }
   ),
+
+  [DataTypes.UPTIME]: i18n.translate('xpack.observability.overview.exploratoryView.uptimeLabel', {
+    defaultMessage: 'Uptime',
+  }),
 
   [DataTypes.METRICS]: i18n.translate('xpack.observability.overview.exploratoryView.metricsLabel', {
     defaultMessage: 'Metrics',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Version } from '../../common';
+import type { Version } from '@kbn/object-versioning';
 import type { CrudClient } from '../crud_client';
 
 /**

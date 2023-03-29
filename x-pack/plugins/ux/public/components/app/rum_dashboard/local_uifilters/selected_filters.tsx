@@ -79,6 +79,7 @@ export function SelectedFilters({
 
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="uxSelectedFiltersClearFiltersButton"
           size="xs"
           iconType="cross"
           onClick={clearValues}

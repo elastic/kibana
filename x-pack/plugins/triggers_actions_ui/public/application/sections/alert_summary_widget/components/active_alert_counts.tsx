@@ -27,7 +27,7 @@ export const ActiveAlertCounts = ({ activeAlertCount }: Props) => {
           {!!activeAlertCount && (
             <>
               &nbsp;
-              <EuiIcon type="alert" ascent={10} />
+              <EuiIcon type="warning" ascent={10} />
             </>
           )}
         </h3>

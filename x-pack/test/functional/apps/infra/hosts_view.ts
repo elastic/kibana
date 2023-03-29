@@ -196,6 +196,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Metrics Tab', () => {
+        before(async () => {
+          browser.scrollTop();
+          await pageObjects.infraHostsView.visitMetricsTab();
+        });
+
         it('should load 8 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
           expect(metricCharts.length).to.equal(8);
@@ -217,6 +222,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const COLUMNS = 5;
 
         before(async () => {
+          browser.scrollTop();
           await pageObjects.infraHostsView.visitAlertTab();
         });
 
@@ -232,6 +238,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         describe('#FilterButtonGroup', () => {
+          it('can be filtered to only show "all" alerts using the filter button', async () => {
+            await pageObjects.infraHostsView.setAlertStatusFilter();
+            await retry.try(async () => {
+              const tableRows = await observability.alerts.common.getTableCellsInRows();
+              expect(tableRows.length).to.be(ALL_ALERTS);
+            });
+          });
+
           it('can be filtered to only show "active" alerts using the filter button', async () => {
             await pageObjects.infraHostsView.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
             await retry.try(async () => {
@@ -247,14 +261,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(tableRows.length).to.be(RECOVERED_ALERTS);
             });
           });
-
-          it('can be filtered to only show "all" alerts using the filter button', async () => {
-            await pageObjects.infraHostsView.setAlertStatusFilter();
-            await retry.try(async () => {
-              const tableRows = await observability.alerts.common.getTableCellsInRows();
-              expect(tableRows.length).to.be(ALL_ALERTS);
-            });
-          });
         });
 
         describe('#AlertsTable', () => {
@@ -263,6 +269,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should renders the correct number of cells', async () => {
+            await pageObjects.infraHostsView.setAlertStatusFilter();
             await retry.try(async () => {
               const cells = await observability.alerts.common.getTableCells();
               expect(cells.length).to.be(ALL_ALERTS * COLUMNS);

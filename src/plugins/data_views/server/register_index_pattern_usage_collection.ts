@@ -8,8 +8,13 @@
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { StartServicesAccessor } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
-import { DataViewsContract } from '../common';
+import { SavedObjectsClient, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
+import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  DataViewAttributes,
+  FieldSpec,
+  RuntimeField,
+} from '../common';
 import { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from './types';
 
 interface CountSummary {
@@ -17,6 +22,8 @@ interface CountSummary {
   max?: number;
   avg?: number;
 }
+
+type DataViewFieldAttrs = Pick<DataViewAttributes, 'fields' | 'runtimeFieldMap'>;
 
 interface IndexPatternUsage {
   indexPatternsCount: number;
@@ -57,9 +64,7 @@ export const updateMax = (currentMax: number | undefined, newVal: number): numbe
   }
 };
 
-export async function getIndexPatternTelemetry(indexPatterns: DataViewsContract) {
-  const ids = await indexPatterns.getIds();
-
+export async function getIndexPatternTelemetry(savedObjectsService: SavedObjectsClient) {
   const countSummaryDefaults: CountSummary = {
     min: undefined,
     max: undefined,
@@ -67,7 +72,7 @@ export async function getIndexPatternTelemetry(indexPatterns: DataViewsContract)
   };
 
   const results = {
-    indexPatternsCount: ids.length,
+    indexPatternsCount: 0,
     indexPatternsWithScriptedFieldCount: 0,
     indexPatternsWithRuntimeFieldCount: 0,
     scriptedFieldCount: 0,
@@ -80,60 +85,73 @@ export async function getIndexPatternTelemetry(indexPatterns: DataViewsContract)
     },
   };
 
-  await ids.reduce(async (col, id) => {
-    await col;
-    const ip = await indexPatterns.get(id);
+  const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+    type: DATA_VIEW_SAVED_OBJECT_TYPE,
+    perPage: 1000,
+    fields: ['fields', 'runtimeFieldMap'],
+  };
 
-    const scriptedFields = ip.getScriptedFields();
-    const runtimeFields = ip.fields.filter((fld) => !!fld.runtimeField);
+  const finder = savedObjectsService.createPointInTimeFinder<DataViewFieldAttrs>(findOptions);
 
-    if (scriptedFields.length > 0) {
-      // increment counts
-      results.indexPatternsWithScriptedFieldCount++;
-      results.scriptedFieldCount += scriptedFields.length;
+  for await (const response of finder.find()) {
+    const { saved_objects: savedObjects, total } = response;
+    results.indexPatternsCount = total;
 
-      // calc LoC
-      results.perIndexPattern.scriptedFieldLineCount = minMaxAvgLoC(
-        scriptedFields.map((fld) => fld.script || '')
-      );
-
-      // calc field counts
-      results.perIndexPattern.scriptedFieldCount.min = updateMin(
-        results.perIndexPattern.scriptedFieldCount.min,
-        scriptedFields.length
-      );
-      results.perIndexPattern.scriptedFieldCount.max = updateMax(
-        results.perIndexPattern.scriptedFieldCount.max,
-        scriptedFields.length
-      );
-      results.perIndexPattern.scriptedFieldCount.avg =
-        results.scriptedFieldCount / results.indexPatternsWithScriptedFieldCount;
-    }
-
-    if (runtimeFields.length > 0) {
-      // increment counts
-      results.indexPatternsWithRuntimeFieldCount++;
-      results.runtimeFieldCount += runtimeFields.length;
+    savedObjects.forEach((obj) => {
+      const fields = obj.attributes?.fields ? JSON.parse(obj.attributes.fields) || [] : [];
+      const runtimeFieldsMap = obj.attributes?.runtimeFieldMap
+        ? JSON.parse(obj.attributes.runtimeFieldMap) || {}
+        : {};
+      const scriptedFields: FieldSpec[] = fields.filter((fld: FieldSpec) => !!fld.script);
+      const runtimeFields: RuntimeField[] = Object.values(runtimeFieldsMap);
 
       // calc LoC
-      const runtimeFieldScripts = runtimeFields.map(
-        (fld) => fld.runtimeField?.script?.source || ''
-      );
-      results.perIndexPattern.runtimeFieldLineCount = minMaxAvgLoC(runtimeFieldScripts);
+      if (scriptedFields.length > 0) {
+        // increment counts
+        results.indexPatternsWithScriptedFieldCount++;
+        results.scriptedFieldCount += scriptedFields.length;
 
-      // calc field counts
-      results.perIndexPattern.runtimeFieldCount.min = updateMin(
-        results.perIndexPattern.runtimeFieldCount.min,
-        runtimeFields.length
-      );
-      results.perIndexPattern.runtimeFieldCount.max = updateMax(
-        results.perIndexPattern.runtimeFieldCount.max,
-        runtimeFields.length
-      );
-      results.perIndexPattern.runtimeFieldCount.avg =
-        results.runtimeFieldCount / results.indexPatternsWithRuntimeFieldCount;
-    }
-  }, Promise.resolve());
+        // calc LoC
+        results.perIndexPattern.scriptedFieldLineCount = minMaxAvgLoC(
+          scriptedFields.map((fld) => fld.script || '')
+        );
+
+        // calc field counts
+        results.perIndexPattern.scriptedFieldCount.min = updateMin(
+          results.perIndexPattern.scriptedFieldCount.min,
+          scriptedFields.length
+        );
+        results.perIndexPattern.scriptedFieldCount.max = updateMax(
+          results.perIndexPattern.scriptedFieldCount.max,
+          scriptedFields.length
+        );
+        results.perIndexPattern.scriptedFieldCount.avg =
+          results.scriptedFieldCount / results.indexPatternsWithScriptedFieldCount;
+      }
+
+      if (runtimeFields.length > 0) {
+        // increment counts
+        results.indexPatternsWithRuntimeFieldCount++;
+        results.runtimeFieldCount += runtimeFields.length;
+
+        // calc LoC
+        const runtimeFieldScripts = runtimeFields.map((fld) => fld.script?.source || '');
+        results.perIndexPattern.runtimeFieldLineCount = minMaxAvgLoC(runtimeFieldScripts);
+
+        // calc field counts
+        results.perIndexPattern.runtimeFieldCount.min = updateMin(
+          results.perIndexPattern.runtimeFieldCount.min,
+          runtimeFields.length
+        );
+        results.perIndexPattern.runtimeFieldCount.max = updateMax(
+          results.perIndexPattern.runtimeFieldCount.max,
+          runtimeFields.length
+        );
+        results.perIndexPattern.runtimeFieldCount.avg =
+          results.runtimeFieldCount / results.indexPatternsWithRuntimeFieldCount;
+      }
+    });
+  }
 
   return results;
 }
@@ -153,14 +171,10 @@ export function registerIndexPatternsUsageCollector(
     type: 'index-patterns',
     isReady: () => true,
     fetch: async () => {
-      const [{ savedObjects, elasticsearch }, , { dataViewsServiceFactory }] =
-        await getStartServices();
-      const indexPatternService = await dataViewsServiceFactory(
-        new SavedObjectsClient(savedObjects.createInternalRepository()),
-        elasticsearch.client.asInternalUser
-      );
+      const [{ savedObjects }] = await getStartServices();
 
-      return await getIndexPatternTelemetry(indexPatternService);
+      const savedObjectsService = new SavedObjectsClient(savedObjects.createInternalRepository());
+      return await getIndexPatternTelemetry(savedObjectsService);
     },
     schema: {
       indexPatternsCount: { type: 'long' },

@@ -71,7 +71,12 @@ export const ManagementSettings = () => {
             <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
             <EuiText size="s">
               {GET_API_KEY_LABEL_DESCRIPTION} {!canSaveIntegrations ? `${API_KEY_DISCLAIMER} ` : ''}
-              <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
+              <EuiLink
+                data-test-subj="syntheticsManagementSettingsLink"
+                href={syntheticsTestRunDocsLink}
+                external
+                target="_blank"
+              >
                 {LEARN_MORE_LABEL}
               </EuiLink>
             </EuiText>
@@ -82,7 +87,12 @@ export const ManagementSettings = () => {
             <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
             <EuiText size="s">
               {GET_API_KEY_REDUCED_PERMISSIONS_LABEL}{' '}
-              <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
+              <EuiLink
+                data-test-subj="syntheticsManagementSettingsLink"
+                href={syntheticsTestRunDocsLink}
+                external
+                target="_blank"
+              >
                 {LEARN_MORE_LABEL}
               </EuiLink>
             </EuiText>
