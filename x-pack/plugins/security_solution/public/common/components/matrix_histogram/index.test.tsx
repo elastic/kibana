@@ -16,6 +16,9 @@ import { TestProviders } from '../../mock';
 import { mockRuntimeMappings } from '../../containers/source/mock';
 import { dnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 jest.mock('../../containers/query_toggle');
 
@@ -30,6 +33,11 @@ jest.mock('../charts/barchart', () => ({
 jest.mock('../../containers/matrix_histogram');
 
 jest.mock('../visualization_actions/actions');
+jest.mock('../visualization_actions/visualization_embeddable');
+
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
 
 jest.mock('./utils', () => ({
   getBarchartConfigs: jest.fn(),
@@ -37,6 +45,7 @@ jest.mock('./utils', () => ({
 }));
 
 const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -74,8 +83,16 @@ describe('Matrix Histogram Component', () => {
   const mockUseMatrix = useMatrixHistogramCombined as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const mockSetToggle = jest.fn();
+  const getMockUseIsExperimentalFeatureEnabled =
+    (mockMapping?: Partial<ExperimentalFeatures>) =>
+    (flag: keyof typeof allowedExperimentalValues) =>
+      mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      getMockUseIsExperimentalFeatureEnabled({ chartEmbeddablesEnabled: false })
+    );
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
     mockUseMatrix.mockReturnValue([
       false,
@@ -246,6 +263,33 @@ describe('Matrix Histogram Component', () => {
       });
 
       expect(mockUseMatrix.mock.calls[0][0].skip).toEqual(true);
+    });
+  });
+
+  describe('when the chartEmbeddablesEnabled experimental feature flag is enabled', () => {
+    beforeEach(() => {
+      const mockMapping: Partial<ExperimentalFeatures> = {
+        chartEmbeddablesEnabled: true,
+      };
+
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        getMockUseIsExperimentalFeatureEnabled(mockMapping)
+      );
+
+      wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
+        wrappingComponent: TestProviders,
+      });
+    });
+    test('it should not render VisualizationActions', () => {
+      expect(wrapper.find(`[data-test-subj="visualizationActions"]`).exists()).toEqual(false);
+    });
+
+    test('it should not fetch Matrix Histogram data', () => {
+      expect(mockUseMatrix.mock.calls[0][0].skip).toEqual(true);
+    });
+
+    test('it should render Lens Embeddable', () => {
+      expect(wrapper.find(`[data-test-subj="visualization-embeddable"]`).exists()).toEqual(true);
     });
   });
 });

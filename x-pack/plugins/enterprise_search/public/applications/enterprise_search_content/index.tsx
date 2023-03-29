@@ -39,7 +39,7 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   const showView = () => {
-    if (!config.host) {
+    if (!config.host && config.canDeployEntSearch) {
       return <EnterpriseSearchContentUnconfigured />;
     } else if (incompatibleVersions) {
       return (

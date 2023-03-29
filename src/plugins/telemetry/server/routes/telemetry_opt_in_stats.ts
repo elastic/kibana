@@ -14,6 +14,7 @@ import type {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { v2 } from '../../common/types';
 import { EncryptedTelemetryPayload, UnencryptedTelemetryPayload } from '../../common/types';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
@@ -90,7 +91,8 @@ export function registerTelemetryOptInStatsRoutes(
           newOptInStatus,
           statsGetterConfig
         );
-        return res.ok({ body: optInStatus });
+        const body: v2.OptInStatsResponse = optInStatus;
+        return res.ok({ body });
       } catch (err) {
         return res.ok({ body: [] });
       }

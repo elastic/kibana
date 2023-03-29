@@ -226,12 +226,17 @@ export const useField = ({
         </>
       );
       return (
-        <EuiToolTip position="bottom" content={tooltipContent}>
+        <EuiToolTip
+          data-test-subj="mappingConflictsTooltip"
+          position="bottom"
+          content={tooltipContent}
+        >
           <>
             {label}
             <EuiIcon
+              data-test-subj="mappingConflictsWarningIcon"
               tabIndex={0}
-              type="alert"
+              type="warning"
               title={i18n.FIELD_CONFLICT_INDICES_WARNING_TITLE}
               size="s"
               css={{ marginLeft: `${sPaddingSize}` }}

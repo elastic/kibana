@@ -23,10 +23,10 @@ export interface Props {
   data: Data[];
   chart: ChartType;
   state: State;
-  loading: boolean;
+  isLoading: boolean;
 }
 
-export function SloSparkline({ chart, data, id, loading, state }: Props) {
+export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
   const charts = useKibana().services.charts;
   const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -36,7 +36,7 @@ export function SloSparkline({ chart, data, id, loading, state }: Props) {
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
-  if (loading) {
+  if (isLoading) {
     return <EuiLoadingChart size="m" mono />;
   }
 

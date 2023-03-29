@@ -45,7 +45,8 @@ export const configureClient = (
     ConnectionPool: ClusterConnectionPool,
   });
 
-  instrumentEsQueryAndDeprecationLogger({ logger, client, type });
+  const { apisToRedactInLogs = [] } = config;
+  instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
   return client;
 };

@@ -145,6 +145,7 @@ export class KibanaMigrator implements IKibanaMigrator {
 
   private runMigrationZdt(): Promise<MigrationResult[]> {
     return runZeroDowntimeMigration({
+      kibanaVersion: this.kibanaVersion,
       kibanaIndexPrefix: this.kibanaIndex,
       typeRegistry: this.typeRegistry,
       logger: this.log,

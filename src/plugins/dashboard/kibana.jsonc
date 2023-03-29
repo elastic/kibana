@@ -16,6 +16,8 @@
       "inspector",
       "navigation",
       "savedObjects",
+      "savedObjectsFinder",
+      "savedObjectsManagement",
       "share",
       "screenshotMode",
       "uiActions",

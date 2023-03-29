@@ -126,6 +126,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
+                revision: 0,
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });

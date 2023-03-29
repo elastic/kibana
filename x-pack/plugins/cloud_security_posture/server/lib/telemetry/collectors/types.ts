@@ -41,6 +41,7 @@ export interface CspmAccountsStats {
   benchmark_id: string;
   benchmark_name: string;
   benchmark_version: string;
+  kubernetes_version: string | null;
   passed_findings_count: number;
   failed_findings_count: number;
   agents_count: number;
@@ -48,6 +49,7 @@ export interface CspmAccountsStats {
   pods_count: number;
 }
 export interface CspmRulesStats {
+  account_id: string;
   rule_id: string;
   rule_name: string;
   rule_section: string;

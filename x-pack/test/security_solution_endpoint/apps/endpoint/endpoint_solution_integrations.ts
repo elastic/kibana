@@ -9,8 +9,8 @@ import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/com
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
+import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { IndexedEndpointRuleAlerts } from '../../../security_solution_ftr/services/detections';
 
 /**
  * Test suite is meant to cover usages of endpoint functionality or access to endpoint
@@ -24,7 +24,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'timeline']);
 
-  describe('App level Endpoint functionality', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/153855
+  describe.skip('App level Endpoint functionality', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
     let indexedAlerts: IndexedEndpointRuleAlerts;
     let endpointAgentId: string;

@@ -11,7 +11,6 @@ import { TableId } from '../../common/types';
 import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 import { routes } from './routes';
 import type { SecuritySubPlugin } from '../app/types';
-import { getAllGroupsInStorage } from '../timelines/containers/local_storage/groups';
 
 export const DETECTIONS_TABLE_IDS: TableIdLiteral[] = [
   TableId.alertsOnRuleDetailsPage,
@@ -25,9 +24,6 @@ export class Detections {
     return {
       storageDataTables: {
         tableById: getDataTablesInStorageByIds(storage, DETECTIONS_TABLE_IDS),
-      },
-      groups: {
-        groupById: getAllGroupsInStorage(storage),
       },
       routes,
     };

@@ -55,3 +55,4 @@ export { StatusAll } from './ui/types';
 
 export { getCreateConnectorUrl, getAllConnectorsUrl } from './utils/connectors_api';
 export { createUICapabilities } from './utils/capabilities';
+export { getApiTags } from './utils/api_tags';

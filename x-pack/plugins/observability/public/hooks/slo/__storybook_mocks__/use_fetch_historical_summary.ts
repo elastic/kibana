@@ -20,6 +20,8 @@ export const useFetchHistoricalSummary = ({
 
   return {
     isLoading: false,
+    isInitialLoading: false,
+    isRefetching: false,
     isSuccess: false,
     isError: false,
     sloHistoricalSummaryResponse: data,

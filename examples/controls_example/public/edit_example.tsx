@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { pickBy } from 'lodash';
 import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
@@ -19,8 +21,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
+import {
+  LazyControlGroupRenderer,
+  ControlGroupContainer,
+  ControlGroupInput,
+} from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { ACTION_EDIT_CONTROL, ACTION_DELETE_CONTROL } from '@kbn/controls-plugin/public';
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
@@ -30,6 +37,27 @@ export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const [toggleIconIdToSelectedMapIcon, setToggleIconIdToSelectedMapIcon] = useState<{
+    [id: string]: boolean;
+  }>({});
+
+  function onChangeIconsMultiIcons(optionId: string) {
+    const newToggleIconIdToSelectedMapIcon = {
+      ...toggleIconIdToSelectedMapIcon,
+      ...{
+        [optionId]: !toggleIconIdToSelectedMapIcon[optionId],
+      },
+    };
+
+    if (controlGroup) {
+      const disabledActions: string[] = Object.keys(
+        pickBy(newToggleIconIdToSelectedMapIcon, (value) => value)
+      );
+      controlGroup.updateInput({ disabledActions });
+    }
+
+    setToggleIconIdToSelectedMapIcon(newToggleIconIdToSelectedMapIcon);
+  }
 
   async function onSave() {
     setIsSaving(true);
@@ -48,16 +76,20 @@ export const EditExample = () => {
     // simulated async load await
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    let input = {};
+    let input: Partial<ControlGroupInput> = {};
     const inputAsString = localStorage.getItem(INPUT_KEY);
     if (inputAsString) {
       try {
         input = JSON.parse(inputAsString);
+        const disabledActions = input.disabledActions ?? [];
+        setToggleIconIdToSelectedMapIcon({
+          [ACTION_EDIT_CONTROL]: disabledActions.includes(ACTION_EDIT_CONTROL),
+          [ACTION_DELETE_CONTROL]: disabledActions.includes(ACTION_DELETE_CONTROL),
+        });
       } catch (e) {
         // ignore parse errors
       }
     }
-
     setIsLoading(false);
     return input;
   }
@@ -72,7 +104,7 @@ export const EditExample = () => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="primary"
@@ -85,11 +117,32 @@ export const EditExample = () => {
               Add control
             </EuiButtonEmpty>
           </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiButtonGroup
+              legend="Text style"
+              buttonSize="m"
+              options={[
+                {
+                  id: ACTION_EDIT_CONTROL,
+                  label: 'Disable edit action',
+                  value: ACTION_EDIT_CONTROL,
+                },
+                {
+                  id: ACTION_DELETE_CONTROL,
+                  label: 'Disable delete action',
+                  value: ACTION_DELETE_CONTROL,
+                },
+              ]}
+              idToSelectedMap={toggleIconIdToSelectedMapIcon}
+              type="multi"
+              onChange={(id: string) => onChangeIconsMultiIcons(id)}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              fill
               color="primary"
               isDisabled={controlGroup === undefined || isSaving}
-              fill
               onClick={onSave}
               isLoading={isSaving}
             >

@@ -9,5 +9,5 @@ import type { Type } from '@kbn/config-schema';
 
 export interface ProcedureSchemas {
   in: Type<any> | false;
-  out: Type<any> | false;
+  out?: Type<any> | false;
 }

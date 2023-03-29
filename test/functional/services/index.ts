@@ -55,6 +55,7 @@ import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleService } from './menu_toggle';
 import { MonacoEditorService } from './monaco_editor';
 import { UsageCollectionService } from './usage_collection';
+import { SavedObjectsFinderService } from './saved_objects_finder';
 
 export const services = {
   ...commonServiceProviders,
@@ -100,4 +101,5 @@ export const services = {
   menuToggle: MenuToggleService,
   retryOnStale: RetryOnStaleProvider,
   usageCollection: UsageCollectionService,
+  savedObjectsFinder: SavedObjectsFinderService,
 };

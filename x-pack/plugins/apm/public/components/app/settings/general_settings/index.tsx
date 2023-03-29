@@ -84,6 +84,7 @@ export function GeneralSettings() {
             values={{
               link: (
                 <EuiLink
+                  data-test-subj="apmGeneralSettingsKibanaAdvancedSettingsLink"
                   href={application.getUrlForApp('management', {
                     path: `/kibana/settings?query=category:(observability)`,
                   })}

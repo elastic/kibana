@@ -8,15 +8,13 @@ import React, { ReactElement } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useErrorFailedTests } from '../hooks/use_last_error_state';
 import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
+import { useFindMyKillerState } from '../hooks/use_find_my_killer_state';
 
 export const ResolvedAt: React.FC = () => {
-  const { failedTests } = useErrorFailedTests();
+  const { killerState } = useFindMyKillerState();
 
-  const state = failedTests?.[0]?.state;
-
-  let endsAt: string | ReactElement = useFormatTestRunAt(state?.ends ?? '');
+  let endsAt: string | ReactElement = useFormatTestRunAt(killerState?.timestamp);
 
   if (!endsAt) {
     endsAt = 'N/A';

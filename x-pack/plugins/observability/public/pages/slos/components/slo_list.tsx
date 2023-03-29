@@ -18,7 +18,11 @@ import {
 } from './slo_list_search_filter_sort_bar';
 import { SloListItems } from './slo_list_items';
 
-export function SloList() {
+export interface Props {
+  autoRefresh: boolean;
+}
+
+export function SloList({ autoRefresh }: Props) {
   const [activePage, setActivePage] = useState(0);
 
   const [query, setQuery] = useState('');
@@ -30,6 +34,7 @@ export function SloList() {
     name: query,
     sortBy: sort,
     indicatorTypes: indicatorTypeFilter,
+    shouldRefetch: autoRefresh,
   });
 
   const { results = [], total = 0, perPage = 0 } = sloList || {};

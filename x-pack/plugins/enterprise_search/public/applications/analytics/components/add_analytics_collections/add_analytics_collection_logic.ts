@@ -92,7 +92,7 @@ export const AddAnalyticsCollectionLogic = kea<
         actions.setInputError(error?.body?.message || null);
       }
     },
-    apiSuccess: async ({ name, id }) => {
+    apiSuccess: async ({ name }) => {
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.action.successMessage', {
           defaultMessage: "Successfully added collection '{name}'",
@@ -103,7 +103,7 @@ export const AddAnalyticsCollectionLogic = kea<
       );
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(COLLECTION_VIEW_PATH, {
-          id,
+          name,
           section: 'events',
         })
       );

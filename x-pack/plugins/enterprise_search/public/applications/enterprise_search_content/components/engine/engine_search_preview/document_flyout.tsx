@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+
+import { useValues } from 'kea';
 
 import {
   EuiBasicTableColumn,
@@ -21,38 +23,53 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { FieldIcon } from '../field_icon';
+
+import { addTypeToResults, ConvertedResultWithType, convertResults } from './convert_results';
 import { useSelectedDocument } from './document_context';
+import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
 
 export const DocumentFlyout: React.FC = () => {
+  const { fieldTypesByIndex } = useValues(EngineSearchPreviewLogic);
   const { selectedDocument, setSelectedDocument } = useSelectedDocument();
+
+  const index = selectedDocument?._meta.rawHit._index;
+
+  const [id, items] = useMemo((): [string | null, ConvertedResultWithType[]] => {
+    const fieldTypes = fieldTypesByIndex[index];
+    if (!selectedDocument || !fieldTypes) return [null, []];
+    const {
+      _meta: { id: encodedId },
+      id: _id,
+      ...otherFields
+    } = selectedDocument;
+    const [, parsedId] = JSON.parse(atob(encodedId));
+    const fields = {
+      ...Object.fromEntries(
+        Object.entries(otherFields).map(([key, { raw: value }]) => [key, value])
+      ),
+      id: parsedId,
+    };
+    return [parsedId, addTypeToResults(convertResults(fields), fieldTypes)];
+  }, [fieldTypesByIndex, index, selectedDocument]);
 
   if (selectedDocument === null) return null;
 
-  const {
-    _meta: { id: encodedId },
-    id: _id,
-    ...otherFields
-  } = selectedDocument;
-  const [, id] = JSON.parse(atob(encodedId));
-
-  const fields = [
-    { key: 'id', value: id },
-    ...Object.entries(otherFields).map(([key, { raw: value }]) => ({ key, value })),
-  ];
-
-  const columns: Array<EuiBasicTableColumn<{ key: string; value: string }>> = [
+  const columns: Array<EuiBasicTableColumn<ConvertedResultWithType>> = [
     {
-      field: 'key',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.engine.searchPreview.documentFlyout.fieldLabel',
         { defaultMessage: 'Field' }
       ),
-      render: (key: string) => (
-        <EuiText>
-          <EuiTextColor color="subdued">
-            <code>{key}</code>
-          </EuiTextColor>
-        </EuiText>
+      render: ({ field: key, type }: ConvertedResultWithType) => (
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <FieldIcon type={type} />
+          <EuiText>
+            <EuiTextColor color="subdued">
+              <code>{key}</code>
+            </EuiTextColor>
+          </EuiText>
+        </EuiFlexGroup>
       ),
       truncateText: false,
     },
@@ -62,9 +79,9 @@ export const DocumentFlyout: React.FC = () => {
         'xpack.enterpriseSearch.content.engine.searchPreview.documentFlyout.valueLabel',
         { defaultMessage: 'Value' }
       ),
-      render: (key: string) => (
+      render: (value: string) => (
         <EuiText>
-          <code>{key}</code>
+          <code>{value}</code>
         </EuiText>
       ),
       truncateText: false,
@@ -88,13 +105,13 @@ export const DocumentFlyout: React.FC = () => {
             <FormattedMessage
               id="xpack.enterpriseSearch.content.engine.searchPreivew.documentFlyout.fieldCount"
               defaultMessage="{fieldCount} {fieldCount, plural, one {Field} other {Fields}}"
-              values={{ fieldCount: fields.length }}
+              values={{ fieldCount: items.length }}
             />
           </EuiTextColor>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiInMemoryTable columns={columns} items={fields} />
+        <EuiInMemoryTable columns={columns} items={items} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

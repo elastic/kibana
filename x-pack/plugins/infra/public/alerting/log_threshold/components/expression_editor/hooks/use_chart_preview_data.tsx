@@ -8,6 +8,7 @@
 import { useState, useMemo } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ExecutionTimeRange } from '../../../../../types';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
@@ -22,11 +23,16 @@ interface Options {
   sourceId: string;
   ruleParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
+  executionTimeRange?: ExecutionTimeRange;
 }
 
-export const useChartPreviewData = ({ sourceId, ruleParams, buckets }: Options) => {
+export const useChartPreviewData = ({
+  sourceId,
+  ruleParams,
+  buckets,
+  executionTimeRange,
+}: Options) => {
   const { http } = useKibana().services;
-
   const [chartPreviewData, setChartPreviewData] = useState<
     GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series']
   >([]);
@@ -36,7 +42,13 @@ export const useChartPreviewData = ({ sourceId, ruleParams, buckets }: Options) 
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         setHasError(false);
-        return await callGetChartPreviewDataAPI(sourceId, http!.fetch, ruleParams, buckets);
+        return await callGetChartPreviewDataAPI(
+          sourceId,
+          http!.fetch,
+          ruleParams,
+          buckets,
+          executionTimeRange
+        );
       },
       onResolve: ({ data: { series } }) => {
         setHasError(false);
@@ -66,16 +78,18 @@ export const callGetChartPreviewDataAPI = async (
   sourceId: string,
   fetch: HttpHandler,
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
-  buckets: number
+  buckets: number,
+  executionTimeRange?: ExecutionTimeRange
 ) => {
   const response = await fetch(LOG_ALERTS_CHART_PREVIEW_DATA_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getLogAlertsChartPreviewDataRequestPayloadRT.encode({
         data: {
-          sourceId,
+          logView: { type: 'log-view-reference', logViewId: sourceId },
           alertParams,
           buckets,
+          executionTimeRange,
         },
       })
     ),
