@@ -1,6 +1,11 @@
 .dashboardTopNav {
-  position: fixed;
+  width: 100%;
+  position: sticky;
   z-index: $euiZLevel2;
   background: $euiPageBackgroundColor;
-  width: 100%;
+
+  top: $kbnHeaderOffset;
+  &.dashboardTopNav-fullscreenMode {
+    top: 0;
+  }
 }
