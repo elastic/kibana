@@ -10,8 +10,50 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 export const isCounterTimeSeriesMetricField = (field: DataViewField) =>
   field.timeSeriesMetric === 'counter';
 
+export const isGaugeTimeSeriesMetricField = (field: DataViewField) =>
+  field.timeSeriesMetric === 'gauge';
+
 const SUPPORTED_AGGS = {
-  COUNTER: new Set(['count', 'min', 'max']),
+  COUNTER: new Set([
+    'count',
+    'histogram',
+    'variable_width_histogram',
+    'rate',
+    'min',
+    'max',
+    'top_metrics',
+    'range',
+  ]),
+  GAUGE: new Set([
+    'count',
+    'max',
+    'top_metrics',
+    'missing',
+    'date_histogram',
+    'sum',
+    'rate',
+    'boxplot',
+    'value_count',
+    'avg',
+    'percentiles',
+    'cardinality',
+    'histogram',
+    'variable_width_histogram',
+    'frequent_item_sets',
+    'min',
+    'stats',
+    'diversified_sampler',
+    'percentile_ranks',
+    'median_absolute_deviation',
+    'multi_terms',
+    'auto_date_histogram',
+    'rare_terms',
+    'range',
+    'extended_stats',
+    'date_range',
+    'terms',
+    'significant_terms',
+  ]),
   AGGREGATABLE: new Set(['count', 'cardinality', 'percentiles', 'stats', 'terms']),
   DEFAULT: new Set<string>(),
 };
@@ -24,6 +66,14 @@ export const getSupportedAggs = (field: DataViewField) => {
   if (isCounterTimeSeriesMetricField(field)) {
     return SUPPORTED_AGGS.COUNTER;
   }
+  if (isGaugeTimeSeriesMetricField(field)) {
+    return SUPPORTED_AGGS.GAUGE;
+  }
+
+  if (isCounterTimeSeriesMetricField(field)) {
+    return SUPPORTED_AGGS.COUNTER;
+  }
+
   if (field.aggregatable) {
     return SUPPORTED_AGGS.AGGREGATABLE;
   }

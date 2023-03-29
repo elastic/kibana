@@ -193,7 +193,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: i18n.translate('xpack.dataVisualizer.dataGrid.typeColumnName', {
           defaultMessage: 'Type',
         }),
-        render: (fieldType: SupportedFieldType, item) => {
+        render: (fieldType: SupportedFieldType, item: DataVisualizerTableItem) => {
           return <FieldTypeIcon type={item.secondaryType ?? fieldType} tooltipEnabled={true} />;
         },
         width: dimensions.type,

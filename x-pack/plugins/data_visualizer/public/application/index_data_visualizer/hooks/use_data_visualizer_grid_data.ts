@@ -17,6 +17,7 @@ import type { SamplingOption } from '@kbn/discover-plugin/public/application/mai
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { getFieldType } from '@kbn/unified-field-list-plugin/public';
+import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
@@ -266,11 +267,8 @@ export const useDataVisualizerGridData = (
     const existMetricFields = metricConfigs
       .map((config) => {
         return {
-          fieldName: config.fieldName,
-          type: config.type,
+          ...config,
           cardinality: config.stats?.cardinality,
-          existsInDocs: config.existsInDocs,
-          supportedAggs: config.supportedAggs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -280,11 +278,8 @@ export const useDataVisualizerGridData = (
     const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
       .map((config) => {
         return {
-          fieldName: config.fieldName,
-          type: config.type,
+          ...config,
           cardinality: config.stats?.cardinality,
-          existsInDocs: config.existsInDocs,
-          supportedAggs: config.supportedAggs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -494,22 +489,11 @@ export const useDataVisualizerGridData = (
       const fieldStats = strategyResponse.fieldStats;
       let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
 
-      if (visibleFieldTypes && visibleFieldTypes.length > 0) {
-        combinedConfigs = combinedConfigs.filter(
-          (config) =>
-            visibleFieldTypes.findIndex(
-              (field) => field === config.secondaryType || field === config.type
-            ) > -1
-        );
-      }
-      if (visibleFieldNames && visibleFieldNames.length > 0) {
-        combinedConfigs = combinedConfigs.filter(
-          (config) =>
-            visibleFieldNames.findIndex(
-              (field) => field === config.secondaryType || field === config.type
-            ) > -1
-        );
-      }
+      combinedConfigs = filterFields(
+        combinedConfigs,
+        visibleFieldNames,
+        visibleFieldTypes
+      ).filteredFields;
 
       if (fieldStats) {
         combinedConfigs = combinedConfigs.map((c) => {

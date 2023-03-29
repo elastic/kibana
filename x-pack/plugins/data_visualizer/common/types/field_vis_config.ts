@@ -40,6 +40,7 @@ export interface FileBasedFieldVisConfig {
   type: SupportedFieldType;
   fieldName?: string;
   displayName?: string;
+  secondaryType?: string;
   stats?: FieldVisStats;
   format?: string;
 }
