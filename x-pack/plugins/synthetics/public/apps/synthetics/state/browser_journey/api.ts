@@ -17,7 +17,7 @@ import {
   Ping,
   PingType,
 } from '../../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
@@ -25,7 +25,7 @@ export interface FetchJourneyStepsParams {
 }
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
-  return apiService.post<ScreenshotBlockDoc[]>(API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
+  return apiService.post<ScreenshotBlockDoc[]>(SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
     hashes: params,
   });
 }
@@ -45,7 +45,11 @@ export async function fetchJourneysFailedSteps({
 }: {
   checkGroups: string[];
 }): Promise<FailedStepsApiResponse> {
-  return apiService.get(API_URLS.JOURNEY_FAILED_STEPS, { checkGroups }, FailedStepsApiResponseType);
+  return apiService.get(
+    SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
+    { checkGroups },
+    FailedStepsApiResponseType
+  );
 }
 
 export async function fetchLastSuccessfulCheck({
@@ -60,7 +64,7 @@ export async function fetchLastSuccessfulCheck({
   location?: string;
 }): Promise<Ping> {
   return await apiService.get(
-    API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
+    SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
     {
       monitorId,
       timestamp,
