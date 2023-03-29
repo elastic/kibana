@@ -44,7 +44,9 @@ export interface DetailPanelProcess {
   start: string;
   end: string;
   exitCode: string;
+  userId: string;
   userName: string;
+  groupId: string;
   groupName: string;
   args: string;
   executable: string[][];
@@ -63,7 +65,9 @@ export interface DetailPanelProcessLeader {
   start: string;
   end: string;
   exitCode: string;
+  userId: string;
   userName: string;
+  groupId: string;
   groupName: string;
   workingDirectory: string;
   interactive: string;

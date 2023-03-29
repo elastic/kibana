@@ -38,8 +38,12 @@ export const registerObservabilityRuleTypes = (
     defaultActionMessage: i18n.translate(
       'xpack.observability.slo.rules.burnRate.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{rule.name\\}\\} is firing:
-- Reason: \\{\\{context.reason\\}\\}`,
+        defaultMessage: `The rule \\{\\{rule.name\\}\\} for the SLO '\\{\\{context.sloName\\}\\}' is firing:
+- Reason: \\{\\{context.reason\\}\\}
+- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
+- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
+- The burn rate threshold is set to \\{\\{context.burnRateThreshold\\}\\}
+- View in the SLO details page: \\{\\{context.viewInAppUrl\\}\\}`,
       }
     ),
   });

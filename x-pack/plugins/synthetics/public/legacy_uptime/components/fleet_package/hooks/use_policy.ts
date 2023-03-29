@@ -33,7 +33,6 @@ export const defaultConfig: PolicyConfig = DEFAULT_FIELDS;
 export const usePolicy = (fleetPolicyName: string = '') => {
   const {
     isTLSEnabled,
-    isZipUrlTLSEnabled,
     name: monitorName, // the monitor name can come from two different places, either from fleet or from uptime
     locations,
     namespace,
@@ -50,9 +49,8 @@ export const usePolicy = (fleetPolicyName: string = '') => {
   const metadata = useMemo(
     () => ({
       is_tls_enabled: isTLSEnabled,
-      is_zip_url_tls_enabled: isZipUrlTLSEnabled,
     }),
-    [isTLSEnabled, isZipUrlTLSEnabled]
+    [isTLSEnabled]
   );
 
   /* TODO add locations to policy config for synthetics service */
