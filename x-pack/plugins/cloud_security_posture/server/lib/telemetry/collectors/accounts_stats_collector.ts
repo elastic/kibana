@@ -5,11 +5,13 @@
  * 2.0.
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/core/server';
+import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketBase,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { getCspStatus } from '../../../routes/status/status';
+import { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type { CspmAccountsStats } from './types';
@@ -231,6 +233,8 @@ const getCspmAccountsStats = (
 
 export const getAccountsStats = async (
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  coreServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   logger: Logger
 ): Promise<CspmAccountsStats[]> => {
   try {
@@ -246,6 +250,21 @@ export const getAccountsStats = async (
       const cspmAccountsStats = accountsStatsResponse.aggregations
         ? getCspmAccountsStats(accountsStatsResponse.aggregations, logger)
         : [];
+      const [, cspServerPluginStartDeps] = await coreServices;
+
+      const cspContext = {
+        // user: null,
+        logger,
+        esClient,
+        soClient,
+        agentPolicyService: cspServerPluginStartDeps.fleet.agentPolicyService,
+        agentService: cspServerPluginStartDeps.fleet.agentService,
+        packagePolicyService: cspServerPluginStartDeps.fleet.packagePolicyService,
+        packageService: cspServerPluginStartDeps.fleet.packageService,
+        isPluginInitialized,
+      };
+
+      const status = await getCspStatus(cspContext);
 
       return cspmAccountsStats;
     }

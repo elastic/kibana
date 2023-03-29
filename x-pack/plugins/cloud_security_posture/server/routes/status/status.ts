@@ -116,7 +116,7 @@ const assertResponse = (resp: CspSetupStatus, logger: CspApiRequestHandlerContex
   }
 };
 
-const getCspStatus = async ({
+export const getCspStatus = async ({
   logger,
   esClient,
   soClient,
