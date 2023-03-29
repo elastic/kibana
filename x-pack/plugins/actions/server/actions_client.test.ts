@@ -416,6 +416,7 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
+        secrets: { schema: schema.object({}) },
         params: { schema: schema.object({}) },
         config: {
           schema: schema.object({
@@ -440,11 +441,8 @@ describe('create()', () => {
   });
 
   test('validates connector: config and secrets', async () => {
-    const connectorValidator = ({}, secrets: { param1: '1' }) => {
-      if (secrets.param1 == null) {
-        return '[param1] is required';
-      }
-      return null;
+    const connectorValidator = () => {
+      return '[param1] is required';
     };
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -452,6 +450,8 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({ param1: schema.string() }) },
         params: { schema: schema.object({}) },
         connector: connectorValidator,
       },
@@ -463,7 +463,7 @@ describe('create()', () => {
           name: 'my name',
           actionTypeId: 'my-action-type',
           config: {},
-          secrets: {},
+          secrets: { param1: '1' },
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -2034,6 +2034,7 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
+        secrets: { schema: schema.object({}) },
         params: { schema: schema.object({}) },
         config: {
           schema: schema.object({
@@ -2072,6 +2073,8 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
         params: { schema: schema.object({}) },
         connector: () => {
           return '[param1] is required';

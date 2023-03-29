@@ -18,6 +18,7 @@ describe('transform connector for export', () => {
     supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
     validate: {
+      config: { schema: schema.object({}) },
       params: { schema: schema.object({}) },
       secrets: {
         schema: {
@@ -247,6 +248,7 @@ describe('transform connector for export', () => {
     actionTypeRegistry.get.mockReturnValue({
       ...connectorType,
       validate: {
+        config: { schema: schema.object({}) },
         params: { schema: schema.object({}) },
         secrets: {
           schema: {
