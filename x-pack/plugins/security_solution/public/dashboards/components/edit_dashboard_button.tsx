@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import React from 'react';
 import type { Query, Filter } from '@kbn/es-query';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useDashboardAppLink } from '../hooks/use_dashboard_app_link';
-import {
-  EDIT_DASHBOARD_BUTTON_TITLE,
-  RESTORE_URL_ERROR_TITLE,
-  SAVE_STATE_IN_URL_ERROR_TITLE,
-} from '../pages/details/translations';
+import { EDIT_DASHBOARD_BUTTON_TITLE } from '../pages/details/translations';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { LinkButton } from '../../common/components/links';
 
@@ -41,30 +34,9 @@ const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> 
   showWriteControls,
   timeRange,
 }) => {
-  const history = useHistory();
   const {
     services: { uiSettings },
   } = useKibana();
-
-  const toasts = useAppToasts();
-  const kbnUrlStateStorage = useMemo(
-    () =>
-      createKbnUrlStateStorage({
-        history,
-        useHash: uiSettings.get('state:storeInSessionStorage'),
-        onGetError: (error: Error) => {
-          toasts.addError(error, {
-            title: RESTORE_URL_ERROR_TITLE,
-          });
-        },
-        onSetError: (error: Error) => {
-          toasts.addError(error, {
-            title: SAVE_STATE_IN_URL_ERROR_TITLE,
-          });
-        },
-      }),
-    [toasts, history, uiSettings]
-  );
 
   const editDashboardUrl = useDashboardAppLink({
     query,
@@ -72,7 +44,6 @@ const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> 
     timeRange,
     uiSettings,
     savedObjectId,
-    kbnUrlStateStorage,
   });
 
   return showWriteControls && dashboardExists ? (

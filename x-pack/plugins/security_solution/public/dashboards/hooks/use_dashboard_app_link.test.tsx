@@ -110,7 +110,7 @@ describe('useDashboardAppLink', () => {
     });
     const { result } = renderHook(() => useDashboardAppLink(testProps), { wrapper: TestProviders });
     expect(result.current).toMatchInlineSnapshot(
-      `"/app/dashboards#/view/e2937420-c8ba-11ed-a7eb-3d08ee4d53cb?_g=(filters:!(),query:(language:kuery,query:'@timestamp:%20*'),time:(from:now%2Fd,to:now%2Fd))"`
+      `"/app/dashboards#/view/e2937420-c8ba-11ed-a7eb-3d08ee4d53cb?_g=(filters:!(),query:(language:kuery,query:'@timestamp%20:%20*'),time:(from:now%2Fd,to:now%2Fd))"`
     );
   });
 

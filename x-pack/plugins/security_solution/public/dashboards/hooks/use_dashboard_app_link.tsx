@@ -6,15 +6,11 @@
  */
 
 import { createDashboardEditUrl, DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import type { QueryState } from '@kbn/data-plugin/public';
-import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import { useAppUrl } from '../../common/lib/kibana';
-import { globalUrlParamSelectors } from '../../common/store/global_url_param';
-import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
@@ -29,7 +25,6 @@ export interface UseDashboardAppLinkProps {
   };
   uiSettings: IUiSettingsClient;
   savedObjectId: string | undefined;
-  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export const useDashboardAppLink = ({
@@ -38,14 +33,10 @@ export const useDashboardAppLink = ({
   timeRange: { from, fromStr, to, toStr },
   uiSettings,
   savedObjectId,
-  kbnUrlStateStorage,
 }: UseDashboardAppLinkProps) => {
   const { getAppUrl } = useAppUrl();
-  const urlState = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
   const useHash = uiSettings.get('state:storeInSessionStorage');
-  const [dashboardAppGlobalState, setDashboardAppGlobalState] = useState<QueryState>(
-    kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) ?? ({} as QueryState)
-  );
+
   let editDashboardUrl = useMemo(
     () =>
       getAppUrl({
@@ -55,35 +46,15 @@ export const useDashboardAppLink = ({
     [getAppUrl, savedObjectId]
   );
 
-  useEffect(() => {
-    /** Dashboard app puts all the url states under _g key
-     *  Converting the url states form SecuritySolution to this format
-     *  by set and get from kbnUrlStateStorage
-     *  so we can maintain the states in Dashboard app
-     * */
-    const setUrl = async () => {
-      await kbnUrlStateStorage.set<QueryState>(
-        GLOBAL_STATE_STORAGE_KEY,
-        {
-          time: { from: fromStr ?? from, to: toStr ?? to },
-          filters,
-          query,
-        },
-        { replace: true }
-      );
-    };
-    setUrl();
-    setDashboardAppGlobalState(
-      kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) ?? ({} as QueryState)
-    );
-  }, [filters, from, fromStr, kbnUrlStateStorage, query, to, toStr, urlState]);
-
-  editDashboardUrl = setStateToKbnUrl<QueryState>(
+  editDashboardUrl = setStateToKbnUrl(
     GLOBAL_STATE_STORAGE_KEY,
-    dashboardAppGlobalState,
-    { useHash },
+    {
+      time: { from: fromStr ?? from, to: toStr ?? to },
+      filters,
+      query,
+    },
+    { useHash, storeInHashQuery: true },
     editDashboardUrl
   );
-
   return editDashboardUrl;
 };

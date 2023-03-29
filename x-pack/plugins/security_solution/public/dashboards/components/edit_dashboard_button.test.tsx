@@ -12,12 +12,6 @@ import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mo
 import { TestProviders } from '../../common/mock/test_providers';
 import { EditDashboardButton } from './edit_dashboard_button';
 
-jest.mock('../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: jest
-    .fn()
-    .mockReturnValue({ addError: jest.fn(), addSuccess: jest.fn(), addWarning: jest.fn() }),
-}));
-
 jest.mock('../../common/lib/kibana/kibana_react', () => {
   return {
     useKibana: jest.fn(),
