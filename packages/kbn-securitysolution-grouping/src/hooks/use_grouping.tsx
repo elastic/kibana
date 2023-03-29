@@ -12,7 +12,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
 import { GroupingProps, GroupSelectorProps, isNoneGroup } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
-import { groupActions, groupByIdSelector } from './state';
+import { groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
 import { defaultGroup, GroupOption, GroupsPagingSettingsById } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
@@ -97,15 +97,6 @@ export const useGrouping = <T,>({
     [groupingId, groupingState]
   );
 
-  const resetPagination = useCallback(() => {
-    console.log('packages: resetPagination', { groupingId, selectedGroups });
-    selectedGroups.forEach((selectedGroup) => {
-      dispatch(
-        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroup })
-      );
-    });
-  }, [groupingId, selectedGroups]);
-
   const groupSelector = useGetGroupSelector({
     defaultGroupingOptions,
     dispatch,
@@ -135,6 +126,7 @@ export const useGrouping = <T,>({
           groupSelector={groupSelector}
           pagination={pagination}
           tracker={tracker}
+          dispatch={dispatch}
         />
       ),
     [componentProps, groupSelector, groupingId, pagination, tracker]
@@ -146,8 +138,14 @@ export const useGrouping = <T,>({
       groupSelector,
       selectedGroups,
       pagination: pagination.pagingSettings,
-      resetPagination,
+      resetPagination: pagination.resetPagination,
     }),
-    [getGrouping, groupSelector, pagination.pagingSettings, resetPagination, selectedGroups]
+    [
+      getGrouping,
+      groupSelector,
+      pagination.pagingSettings,
+      pagination.resetPagination,
+      selectedGroups,
+    ]
   );
 };

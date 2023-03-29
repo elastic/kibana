@@ -88,39 +88,45 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
 
   const getGroupSelector = groupSelectors.getGroupSelector();
 
-  const groupSelectord = useSelector((state: State) => getGroupSelector(state));
+  const groupSelectorInRedux = useSelector((state: State) => getGroupSelector(state));
   const selectorOptions = useRef<GroupOption[]>([]);
 
   useEffect(() => {
     if (
       isNoneGroup(selectedGroups) &&
-      (groupSelectord == null || !isEqual(selectorOptions.current, groupSelector.props.options))
+      (groupSelectorInRedux == null ||
+        !isEqual(selectorOptions.current, groupSelector.props.options))
     ) {
       selectorOptions.current = groupSelector.props.options;
       dispatch(updateGroupSelector({ groupSelector }));
-    } else if (!isNoneGroup(selectedGroups) && groupSelectord !== null) {
+    } else if (!isNoneGroup(selectedGroups) && groupSelectorInRedux !== null) {
       dispatch(updateGroupSelector({ groupSelector: null }));
     }
-  }, [dispatch, groupSelector, groupSelectord, selectedGroups]);
-
-  const lastFilters = useRef<{ [key: number]: unknown }>({});
+  }, [dispatch, groupSelector, groupSelectorInRedux, selectedGroups]);
 
   const getAdditionalFilters = useCallback(
     (level: number, parentGroupingFilter?: Filter[]) => {
-      const filters = {
-        defaultFilters: props.defaultFilters,
-        globalFilters: props.globalFilters,
-        globalQuery: props.globalQuery,
-      };
-
-      const currentLevel = lastFilters.current[level];
-      if (currentLevel == null) {
-        lastFilters.current[level] = filters;
-      } else if (!isEqual(currentLevel, filters)) {
-        // if any filter changes other than parentGroupingFilter, reset pagination
-        resetPagination();
-        lastFilters.current[level] = filters;
-      }
+      // const filters = {
+      //   defaultFilters: props.defaultFilters,
+      //   globalFilters: props.globalFilters,
+      //   globalQuery: props.globalQuery,
+      //   parentGroupingFilter,
+      // };
+      // console.log('getAdditionalFilters', {
+      //   lastFilters: lastFilters.current,
+      //   filters,
+      // });
+      // const currentLevel = lastFilters.current[level];
+      //
+      // if (currentLevel == null) {
+      //   console.log('currentLevel null');
+      //   lastFilters.current[level] = filters;
+      // } else if (!isEqual(currentLevel, filters)) {
+      //   console.log('reset pagination');
+      //   // if any filter changes, reset pagination
+      //   resetPagination();
+      //   lastFilters.current[level] = filters;
+      // }
 
       try {
         return [
@@ -134,7 +140,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
         return [];
       }
     },
-    [props.defaultFilters, props.globalFilters, props.globalQuery, resetPagination]
+    [props.defaultFilters, props.globalFilters, props.globalQuery]
   );
 
   const getQueryGroups = useCallback(
@@ -183,15 +189,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
         />
       );
     },
-    [
-      getAdditionalFilters,
-      getGrouping,
-      getQueryGroups,
-      pagination,
-      props,
-      resetPagination,
-      selectedGroups,
-    ]
+    [getAdditionalFilters, getGrouping, getQueryGroups, props, resetPagination, selectedGroups]
   );
 
   if (isEmpty(selectedPatterns)) {

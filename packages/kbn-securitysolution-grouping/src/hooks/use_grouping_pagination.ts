@@ -8,7 +8,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { groupActions, groupByIdSelector } from './state';
-import { Action, defaultGroup, GroupMap } from './types';
+import { Action, defaultGroup, GroupMap, GroupsPagingSettingsById } from './types';
 
 export interface UseGroupingPaginationArgs {
   dispatch: React.Dispatch<Action>;
@@ -16,13 +16,32 @@ export interface UseGroupingPaginationArgs {
   groupingState: GroupMap;
 }
 
+interface GroupingPagination {
+  itemsPerPageOptions: number[];
+  onChangeItemsPerPage: (newItemsPerPage: number, selectedGroup: string) => void;
+  onChangePage: (newActivePage: number, selectedGroup: string) => void;
+  pagingSettings: GroupsPagingSettingsById;
+  resetPagination: () => void;
+}
+
 export const useGroupingPagination = ({
   groupingId,
   groupingState,
   dispatch,
-}: UseGroupingPaginationArgs) => {
-  const { pagingSettings } =
-    groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
+}: UseGroupingPaginationArgs): GroupingPagination => {
+  const { activeGroups: selectedGroups, pagingSettings } = useMemo(
+    () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
+    [groupingId, groupingState]
+  );
+
+  const resetPagination = useCallback(() => {
+    console.log('packages: resetPagination', { groupingId, selectedGroups });
+    selectedGroups.forEach((selectedGroup) => {
+      dispatch(
+        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroup })
+      );
+    });
+  }, [dispatch, groupingId, selectedGroups]);
 
   const setGroupsActivePage = useCallback(
     (newActivePage: number, selectedGroup: string) => {
@@ -52,11 +71,12 @@ export const useGroupingPagination = ({
 
   return useMemo(
     () => ({
-      pagingSettings,
+      itemsPerPageOptions: [10, 25, 50, 100],
       onChangeItemsPerPage: setGroupsItemsPerPage,
       onChangePage: setGroupsActivePage,
-      itemsPerPageOptions: [10, 25, 50, 100],
+      pagingSettings,
+      resetPagination,
     }),
-    [pagingSettings, setGroupsActivePage, setGroupsItemsPerPage]
+    [pagingSettings, resetPagination, setGroupsActivePage, setGroupsItemsPerPage]
   );
 };

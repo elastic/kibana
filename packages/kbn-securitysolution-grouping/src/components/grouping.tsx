@@ -16,6 +16,7 @@ import {
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { groupActions } from '../hooks/state';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter } from './accordion_panel/helpers';
 import { GroupPanel } from './accordion_panel';
@@ -26,10 +27,11 @@ import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupPanelRenderer, RawBucket } from './types';
 import { GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
-import { GroupsPagingSettingsById } from '../hooks/types';
+import { Action, GroupsPagingSettingsById } from '../hooks/types';
 
 export interface GroupingProps<T> {
   data?: GroupingAggregation<T>;
+  dispatch: React.Dispatch<Action>;
   groupingId: string;
   groupPanelRenderer?: GroupPanelRenderer<T>;
   groupingLevel?: number;
@@ -58,6 +60,7 @@ export interface GroupingProps<T> {
 
 const GroupingComponent = <T,>({
   data,
+  dispatch,
   groupPanelRenderer,
   groupSelector,
   groupStatsRenderer,
@@ -115,6 +118,18 @@ const GroupingComponent = <T,>({
               }
               isLoading={isLoading}
               onToggleGroup={(isOpen) => {
+                if (isOpen) {
+                  // set group page to 0 when opened
+                  console.log(`set ${selectedGroup} group to 0`);
+                  dispatch(
+                    groupActions.updateGroupActivePage({
+                      id: groupingId,
+                      activePage: 0,
+                      selectedGroup,
+                    })
+                  );
+                }
+
                 // built-in telemetry: UI-counter
                 tracker?.(
                   METRIC_TYPE.CLICK,
