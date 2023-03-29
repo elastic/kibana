@@ -136,31 +136,30 @@ describe('AddFile', () => {
     userEvent.click(await screen.findByTestId('testOnDone'));
 
     await waitFor(() =>
-      expect(createAttachmentsMock).toBeCalledWith(
-        expect.objectContaining({
-          caseId: 'foobar',
-          caseOwner: mockedTestProvidersOwner[0],
-          data: [
-            {
-              externalReferenceAttachmentTypeId: '.files',
-              externalReferenceId: mockedExternalReferenceId,
-              externalReferenceMetadata: {
-                files: [
-                  {
-                    createdAt: '2020-02-19T23:06:33.798Z',
-                    extension: 'png',
-                    mimeType: 'image/png',
-                    name: 'my-super-cool-screenshot',
-                  },
-                ],
-              },
-              externalReferenceStorage: { soType: 'file', type: 'savedObject' },
-              type: 'externalReference',
+      expect(createAttachmentsMock).toBeCalledWith({
+        caseId: 'foobar',
+        caseOwner: mockedTestProvidersOwner[0],
+        data: [
+          {
+            externalReferenceAttachmentTypeId: '.files',
+            externalReferenceId: mockedExternalReferenceId,
+            externalReferenceMetadata: {
+              files: [
+                {
+                  created: '2020-02-19T23:06:33.798Z',
+                  extension: 'png',
+                  mimeType: 'image/png',
+                  name: 'my-super-cool-screenshot',
+                },
+              ],
             },
-          ],
-          throwOnError: true,
-        })
-      )
+            externalReferenceStorage: { soType: 'file', type: 'savedObject' },
+            type: 'externalReference',
+          },
+        ],
+        throwOnError: true,
+        updateCase: expect.any(Function),
+      })
     );
 
     await waitFor(() =>

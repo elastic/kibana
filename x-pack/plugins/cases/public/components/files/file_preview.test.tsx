@@ -26,13 +26,7 @@ describe('FilePreview', () => {
   it('FilePreview rendered correctly', async () => {
     const mockGetDownloadRef = jest.fn();
 
-    appMockRender.render(
-      <FilePreview
-        closePreview={jest.fn()}
-        selectedFile={basicFileMock}
-        getDownloadHref={mockGetDownloadRef}
-      />
-    );
+    appMockRender.render(<FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />);
 
     await waitFor(() =>
       expect(mockGetDownloadRef).toBeCalledWith({

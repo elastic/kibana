@@ -78,3 +78,15 @@ export const SHOWING_FILES = (totalFiles: number) =>
     values: { totalFiles },
     defaultMessage: 'Showing {totalFiles} {totalFiles, plural, =1 {file} other {files}}',
   });
+
+export const ADDED = i18n.translate('xpack.cases.caseView.files.added', {
+  defaultMessage: 'added ',
+});
+
+export const ADDED_UNKNOWN_FILE = i18n.translate('xpack.cases.caseView.files.addedUnknownFile', {
+  defaultMessage: 'added an unknown file',
+});
+
+export const DOWNLOAD = i18n.translate('xpack.cases.caseView.files.download', {
+  defaultMessage: 'download',
+});

@@ -13,7 +13,7 @@ export const FileAttachmentMetadataRt = rt.type({
       name: rt.string,
       extension: rt.string,
       mimeType: rt.string,
-      createdAt: rt.string,
+      created: rt.string,
     })
   ),
 });

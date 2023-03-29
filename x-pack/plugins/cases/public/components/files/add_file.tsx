@@ -83,7 +83,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
                     name: file.fileJSON.name,
                     extension: file.fileJSON.extension ?? '',
                     mimeType: file.fileJSON.mimeType ?? '',
-                    createdAt: file.fileJSON.created,
+                    created: file.fileJSON.created,
                   },
                 ],
               },

@@ -10,38 +10,25 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import { EuiLink, EuiButtonIcon } from '@elastic/eui';
-
-import type { Owner } from '../../../common/constants/types';
-
-import { constructFileKindIdByOwner } from '../../../common/constants';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
-import { isImage, parseMimeType } from './utils';
+import { parseMimeType } from './utils';
+import { FileNameLink } from './file_name_link';
+import { FileDownloadButtonIcon } from './file_download_button_icon';
 
 export interface FilesTableColumnsProps {
   showPreview: (file: FileJSON) => void;
-  getDownloadHref: (args: Pick<FileJSON<unknown>, 'id' | 'fileKind'>) => string;
 }
 
 export const useFilesTableColumns = ({
   showPreview,
-  getDownloadHref,
 }: FilesTableColumnsProps): Array<EuiBasicTableColumn<FileJSON>> => {
-  const { owner } = useCasesContext();
-
   return [
     {
       name: i18n.NAME,
       'data-test-subj': 'cases-files-table-filename',
-      render: (attachment: FileJSON) => {
-        const fileName = `${attachment.name}.${attachment.extension}`;
-        if (isImage(attachment)) {
-          return <EuiLink onClick={() => showPreview(attachment)}>{fileName}</EuiLink>;
-        } else {
-          return <span title={i18n.NO_PREVIEW}>{fileName}</span>;
-        }
-      },
+      render: (file: FileJSON) => (
+        <FileNameLink file={file} showPreview={() => showPreview(file)} />
+      ),
       width: '60%',
     },
     {
@@ -65,19 +52,7 @@ export const useFilesTableColumns = ({
           name: 'Download',
           isPrimary: true,
           description: i18n.DOWNLOAD_FILE,
-          render: (attachment: FileJSON) => {
-            return (
-              <EuiButtonIcon
-                iconType={'download'}
-                aria-label={'download'}
-                href={getDownloadHref({
-                  fileKind: constructFileKindIdByOwner(owner[0] as Owner),
-                  id: attachment.id,
-                })}
-                data-test-subj={'cases-files-table-action-download'}
-              />
-            );
-          },
+          render: (file: FileJSON) => <FileDownloadButtonIcon fileId={file.id} />,
         },
         {
           name: 'Delete',

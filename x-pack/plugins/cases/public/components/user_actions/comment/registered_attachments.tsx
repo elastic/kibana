@@ -15,7 +15,10 @@ import React, { Suspense } from 'react';
 import { memoize } from 'lodash';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner } from '@elastic/eui';
-import type { AttachmentType } from '../../../client/attachment_framework/types';
+import type {
+  AttachmentType,
+  ExternalReferenceAttachmentViewProps,
+} from '../../../client/attachment_framework/types';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { CommentResponse } from '../../../../common/api';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
@@ -41,11 +44,13 @@ type BuilderArgs<C, R> = Pick<
  * Provides a render function for attachment type
  */
 const getAttachmentRenderer = memoize((attachmentType: AttachmentType<unknown>) => {
-  const attachmentViewObject = attachmentType.getAttachmentViewObject();
-
   let AttachmentElement: React.ReactElement;
 
   const renderCallback = (props: object) => {
+    const attachmentViewObject = attachmentType.getAttachmentViewObject(
+      props as ExternalReferenceAttachmentViewProps
+    );
+
     if (!attachmentViewObject.children) return;
 
     if (!AttachmentElement) {
@@ -106,11 +111,13 @@ export const createRegisteredAttachmentUserActionBuilder = <
     const attachmentType = registry.get(attachmentTypeId);
     const renderer = getAttachmentRenderer(attachmentType);
 
-    const attachmentViewObject = attachmentType.getAttachmentViewObject();
     const props = {
       ...getAttachmentViewProps(),
       caseData: { id: caseData.id, title: caseData.title },
     };
+    const attachmentViewObject = attachmentType.getAttachmentViewObject(
+      props as ExternalReferenceAttachmentViewProps
+    );
 
     return [
       {
@@ -125,10 +132,12 @@ export const createRegisteredAttachmentUserActionBuilder = <
         actions: (
           <UserActionContentToolbar id={comment.id}>
             {attachmentViewObject.actions}
-            <RegisteredAttachmentsPropertyActions
-              isLoading={isLoading}
-              onDelete={() => handleDeleteComment(comment.id)}
-            />
+            {!attachmentViewObject.hideDefaultActions && (
+              <RegisteredAttachmentsPropertyActions
+                isLoading={isLoading}
+                onDelete={() => handleDeleteComment(comment.id)}
+              />
+            )}
           </UserActionContentToolbar>
         ),
         children: renderer(props),
