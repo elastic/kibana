@@ -423,6 +423,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               (stat) => stat.serviceNodeName === 'go-instance-a'
             );
 
+            expect(goAStats).to.not.be(undefined);
             expect(goAStats?.memoryUsage).to.be(undefined);
             expect(goAStats?.cpuUsage).to.be(undefined);
           });
