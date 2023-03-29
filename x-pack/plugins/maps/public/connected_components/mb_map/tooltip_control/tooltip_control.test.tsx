@@ -101,6 +101,7 @@ const defaultProps = {
   hasLockedTooltips: false,
   filterModeActive: false,
   drawModeActive: false,
+  executionContext: {},
 };
 
 const hoverTooltipState = {
