@@ -54,6 +54,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           is_preconfigured: true,
           is_deprecated: false,
           referenced_by_count: 0,
+          config: {
+            index: 'kibana-alert-history-default',
+          },
         },
         {
           id: createdAction.id,
@@ -74,6 +77,11 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: '.index',
           name: 'preconfigured_es_index_action',
           referenced_by_count: 0,
+          config: {
+            executionTimeField: 'timestamp',
+            index: 'functional-test-actions-index-preconfigured',
+            refresh: true,
+          },
         },
         {
           connector_type_id: '.servicenow',
@@ -82,6 +90,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           is_preconfigured: true,
           name: 'ServiceNow#xyz',
           referenced_by_count: 0,
+          config: {
+            apiUrl: 'https://ven04334.service-now.com',
+            usesTableApi: true,
+          },
         },
         {
           connector_type_id: '.servicenow',
@@ -90,6 +102,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           is_deprecated: true,
           name: 'ServiceNow#xyz',
           referenced_by_count: 0,
+          config: {
+            apiUrl: 'https://ven04334.service-now.com',
+          },
         },
         {
           id: 'my-slack1',
@@ -98,6 +113,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: '.slack',
           name: 'Slack#xyz',
           referenced_by_count: 0,
+          config: {},
         },
         {
           id: 'custom-system-abc-connector',
@@ -106,6 +122,11 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: 'system-abc-action-type',
           name: 'SystemABC',
           referenced_by_count: 0,
+          config: {
+            listOfThings: ['a', 'b', 'c', 'd'],
+            xyzConfig1: 'value1',
+            xyzConfig2: 'value2',
+          },
         },
         {
           id: 'preconfigured.test.index-record',
@@ -114,6 +135,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: 'test.index-record',
           name: 'Test:_Preconfigured_Index_Record',
           referenced_by_count: 0,
+          config: {
+            unencrypted: 'ignored-but-required',
+          },
         },
         {
           id: 'my-test-email',
@@ -122,6 +146,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: '.email',
           name: 'TestEmail#xyz',
           referenced_by_count: 0,
+          config: {
+            from: 'me@test.com',
+            service: '__json',
+          },
         },
       ]);
     });
@@ -161,6 +189,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           is_preconfigured: true,
           is_deprecated: false,
           referenced_by_count: 0,
+          config: {
+            index: 'kibana-alert-history-default',
+          },
         },
         {
           id: 'preconfigured-es-index-action',
@@ -169,6 +200,11 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: '.index',
           name: 'preconfigured_es_index_action',
           referenced_by_count: 0,
+          config: {
+            executionTimeField: 'timestamp',
+            index: 'functional-test-actions-index-preconfigured',
+            refresh: true,
+          },
         },
         {
           connector_type_id: '.servicenow',
@@ -177,6 +213,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           is_preconfigured: true,
           name: 'ServiceNow#xyz',
           referenced_by_count: 0,
+          config: {
+            apiUrl: 'https://ven04334.service-now.com',
+            usesTableApi: true,
+          },
         },
         {
           connector_type_id: '.servicenow',
@@ -185,6 +225,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           is_deprecated: true,
           name: 'ServiceNow#xyz',
           referenced_by_count: 0,
+          config: {
+            apiUrl: 'https://ven04334.service-now.com',
+          },
         },
         {
           id: 'my-slack1',
@@ -193,6 +236,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: '.slack',
           name: 'Slack#xyz',
           referenced_by_count: 0,
+          config: {},
         },
         {
           id: 'custom-system-abc-connector',
@@ -201,6 +245,11 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: 'system-abc-action-type',
           name: 'SystemABC',
           referenced_by_count: 0,
+          config: {
+            listOfThings: ['a', 'b', 'c', 'd'],
+            xyzConfig1: 'value1',
+            xyzConfig2: 'value2',
+          },
         },
         {
           id: 'preconfigured.test.index-record',
@@ -209,6 +258,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: 'test.index-record',
           name: 'Test:_Preconfigured_Index_Record',
           referenced_by_count: 0,
+          config: {
+            unencrypted: 'ignored-but-required',
+          },
         },
         {
           id: 'my-test-email',
@@ -217,6 +269,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           connector_type_id: '.email',
           name: 'TestEmail#xyz',
           referenced_by_count: 0,
+          config: {
+            from: 'me@test.com',
+            service: '__json',
+          },
         },
       ]);
     });
@@ -257,6 +313,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             isPreconfigured: true,
             isDeprecated: false,
             referencedByCount: 0,
+            config: {
+              index: 'kibana-alert-history-default',
+            },
           },
           {
             id: createdAction.id,
@@ -277,6 +336,11 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             actionTypeId: '.index',
             name: 'preconfigured_es_index_action',
             referencedByCount: 0,
+            config: {
+              executionTimeField: 'timestamp',
+              index: 'functional-test-actions-index-preconfigured',
+              refresh: true,
+            },
           },
           {
             actionTypeId: '.servicenow',
@@ -285,6 +349,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             isPreconfigured: true,
             name: 'ServiceNow#xyz',
             referencedByCount: 0,
+            config: {
+              apiUrl: 'https://ven04334.service-now.com',
+              usesTableApi: true,
+            },
           },
           {
             actionTypeId: '.servicenow',
@@ -293,6 +361,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             isDeprecated: true,
             name: 'ServiceNow#xyz',
             referencedByCount: 0,
+            config: {
+              apiUrl: 'https://ven04334.service-now.com',
+            },
           },
           {
             id: 'my-slack1',
@@ -301,6 +372,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             actionTypeId: '.slack',
             name: 'Slack#xyz',
             referencedByCount: 0,
+            config: {},
           },
           {
             id: 'custom-system-abc-connector',
@@ -309,6 +381,11 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             actionTypeId: 'system-abc-action-type',
             name: 'SystemABC',
             referencedByCount: 0,
+            config: {
+              listOfThings: ['a', 'b', 'c', 'd'],
+              xyzConfig1: 'value1',
+              xyzConfig2: 'value2',
+            },
           },
           {
             id: 'preconfigured.test.index-record',
@@ -317,6 +394,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             actionTypeId: 'test.index-record',
             name: 'Test:_Preconfigured_Index_Record',
             referencedByCount: 0,
+            config: {
+              unencrypted: 'ignored-but-required',
+            },
           },
           {
             id: 'my-test-email',
@@ -325,6 +405,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             actionTypeId: '.email',
             name: 'TestEmail#xyz',
             referencedByCount: 0,
+            config: {
+              from: 'me@test.com',
+              service: '__json',
+            },
           },
         ]);
       });
