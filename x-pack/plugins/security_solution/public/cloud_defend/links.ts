@@ -12,6 +12,7 @@ import type { LinkItem } from '../common/links/types';
 import { IconCloudDefend } from '../management/icons/cloud_defend';
 
 const commonLinkProperties: Partial<LinkItem> = {
+  isBeta: true,
   hideTimeline: true,
   capabilities: [`${SERVER_APP_ID}.show`],
 };

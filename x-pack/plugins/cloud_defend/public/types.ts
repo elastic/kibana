@@ -63,16 +63,14 @@ export type SelectorType = 'file' | 'process';
 export type SelectorConditionType = 'stringArray' | 'flag' | 'boolean';
 
 export type SelectorCondition =
+  | 'containerImageFullName'
   | 'containerImageName'
   | 'containerImageTag'
-  | 'fullContainerImageName'
-  | 'orchestratorClusterId'
-  | 'orchestratorClusterName'
-  | 'orchestratorNamespace'
-  | 'orchestratorResourceLabel'
-  | 'orchestratorResourceName'
-  | 'orchestratorResourceType'
-  | 'orchestratorType'
+  | 'kubernetesClusterId'
+  | 'kubernetesClusterName'
+  | 'kubernetesNamespace'
+  | 'kubernetesResourceLabel'
+  | 'kubernetesResourceName'
   | 'targetFilePath'
   | 'ignoreVolumeFiles'
   | 'ignoreVolumeMounts'
@@ -101,19 +99,17 @@ export type SelectorConditionsMapProps = {
 
 // used to determine UX control and allowed values for each condition
 export const SelectorConditionsMap: SelectorConditionsMapProps = {
-  containerImageName: { type: 'stringArray', not: ['fullContainerImageName'] },
-  containerImageTag: { type: 'stringArray' },
-  fullContainerImageName: {
+  containerImageFullName: {
     type: 'stringArray',
     not: ['containerImageName'],
   },
-  orchestratorClusterId: { type: 'stringArray' },
-  orchestratorClusterName: { type: 'stringArray' },
-  orchestratorNamespace: { type: 'stringArray' },
-  orchestratorResourceLabel: { type: 'stringArray' },
-  orchestratorResourceName: { type: 'stringArray' },
-  orchestratorResourceType: { type: 'stringArray', values: ['node', 'pod'] },
-  orchestratorType: { type: 'stringArray', values: ['kubernetes'] },
+  containerImageName: { type: 'stringArray', not: ['containerImageFullName'] },
+  containerImageTag: { type: 'stringArray' },
+  kubernetesClusterId: { type: 'stringArray' },
+  kubernetesClusterName: { type: 'stringArray' },
+  kubernetesNamespace: { type: 'stringArray' },
+  kubernetesResourceLabel: { type: 'stringArray' },
+  kubernetesResourceName: { type: 'stringArray' },
   operation: {
     type: 'stringArray',
     values: {
@@ -138,13 +134,11 @@ export interface Selector {
   operation?: string[];
   containerImageName?: string[];
   containerImageTag?: string[];
-  orchestratorClusterId?: string[];
-  orchestratorClusterName?: string[];
-  orchestratorNamespace?: string[];
-  orchestratorResourceLabel?: string[];
-  orchestratorResourceName?: string[];
-  orchestratorResourceType?: string[];
-  orchestratorType?: string[];
+  kubernetesClusterId?: string[];
+  kubernetesClusterName?: string[];
+  kubernetesNamespace?: string[];
+  kubernetesResourceLabel?: string[];
+  kubernetesResourceName?: string[];
 
   // selector properties
   targetFilePath?: string[];

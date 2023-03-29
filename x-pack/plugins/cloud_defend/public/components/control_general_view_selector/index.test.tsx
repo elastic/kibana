@@ -109,7 +109,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const conditions = getSelectorConditions('file');
     expect(options).toHaveLength(conditions.length - 1); // -1 since operation is already present
 
-    await waitFor(() => userEvent.click(options[0])); // add first option "containerImageName"
+    await waitFor(() => userEvent.click(options[1])); // add second option "containerImageName"
 
     // rerender and check that containerImageName is not in the list anymore
     const updatedSelector: Selector = { ...onChange.mock.calls[0][0] };
