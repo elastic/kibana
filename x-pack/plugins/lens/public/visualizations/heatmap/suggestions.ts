@@ -8,6 +8,7 @@
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
@@ -127,7 +128,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
         defaultMessage: 'Heat map',
       }),
       hide,
-      previewIcon: 'empty',
+      previewIcon: IconChartHeatmap,
       score: Number(score.toFixed(1)),
     },
   ];

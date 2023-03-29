@@ -102,7 +102,7 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();
-    createRule({ ...getNewRule(), rule_id: 'custom_rule_filters' });
+    createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
     visit(ALERTS_URL);
     waitForAlerts();
     waitForPageFilters();

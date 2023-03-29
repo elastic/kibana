@@ -8,9 +8,8 @@
 import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { OUTPUT_MESSAGES } from '../translations';
+import { OUTPUT_MESSAGES, EXECUTE_FILE_LINK_TITLE } from '../translations';
 import { getUiCommand } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
@@ -18,10 +17,7 @@ import { ExecuteActionHostResponseOutput } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
-const EXECUTE_FILE_LINK_TITLE = i18n.translate(
-  'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
-  { defaultMessage: 'Click here to download full output' }
-);
+
 const emptyValue = getEmptyValue();
 
 const customDescriptionListCss = css`
@@ -83,8 +79,11 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const { canWriteFileOperations, canWriteExecuteOperations } =
-      useUserPrivileges().endpointPrivileges;
+    const {
+      canWriteFileOperations,
+      canReadActionsLogManagement,
+      canAccessEndpointActionsLogManagement,
+    } = useUserPrivileges().endpointPrivileges;
 
     const { command, isCompleted, isExpired, wasSuccessful } = action;
 
@@ -124,7 +123,9 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
                 <ResponseActionFileDownloadLink
                   action={action}
                   buttonTitle={EXECUTE_FILE_LINK_TITLE}
-                  canAccessFileDownloadLink={canWriteExecuteOperations}
+                  canAccessFileDownloadLink={
+                    canAccessEndpointActionsLogManagement || canReadActionsLogManagement
+                  }
                   data-test-subj={getTestId('getExecuteLink')}
                   textSize="xs"
                 />
@@ -188,7 +189,7 @@ export const ActionsLogExpandedTray = memo<{
         },
         {
           title: OUTPUT_MESSAGES.expandSection.parameters,
-          description: parametersList ? parametersList : emptyValue,
+          description: parametersList ? parametersList.join(', ') : emptyValue,
         },
         {
           title: OUTPUT_MESSAGES.expandSection.comment,

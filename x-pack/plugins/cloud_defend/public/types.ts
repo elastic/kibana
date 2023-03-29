@@ -15,6 +15,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CloudDefendRouterProps } from './application/router';
 import type { CloudDefendPageId } from './common/navigation/types';
+import * as i18n from './components/control_general_view/translations';
 
 /**
  * cloud_defend plugin types
@@ -83,6 +84,8 @@ export type SelectorCondition =
 
 export interface SelectorConditionOptions {
   type: SelectorConditionType;
+  pattern?: string;
+  patternError?: string;
   selectorType?: SelectorType;
   not?: SelectorCondition[];
   values?:
@@ -101,15 +104,26 @@ export type SelectorConditionsMapProps = {
 export const SelectorConditionsMap: SelectorConditionsMapProps = {
   containerImageFullName: {
     type: 'stringArray',
+    pattern:
+      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$',
+    patternError: i18n.errorInvalidFullContainerImageName,
     not: ['containerImageName'],
   },
-  containerImageName: { type: 'stringArray', not: ['containerImageFullName'] },
+  containerImageName: {
+    type: 'stringArray',
+    pattern: '^[a-z0-9]+$',
+    not: ['containerImageFullName'],
+  },
   containerImageTag: { type: 'stringArray' },
   kubernetesClusterId: { type: 'stringArray' },
   kubernetesClusterName: { type: 'stringArray' },
   kubernetesNamespace: { type: 'stringArray' },
-  kubernetesResourceLabel: { type: 'stringArray' },
   kubernetesResourceName: { type: 'stringArray' },
+  kubernetesResourceLabel: {
+    type: 'stringArray',
+    pattern: '^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$',
+    patternError: i18n.errorInvalidResourceLabel,
+  },
   operation: {
     type: 'stringArray',
     values: {

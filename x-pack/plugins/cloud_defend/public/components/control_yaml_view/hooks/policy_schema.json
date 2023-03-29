@@ -148,7 +148,8 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
           }
         },
         "kubernetesResourceName": {
@@ -300,7 +301,8 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
           }
         },
         "kubernetesResourceName": {
@@ -325,13 +327,6 @@
           }
         },
         "processName": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string"
-          }
-        },
-        "processUserName": {
           "type": "array",
           "minItems": 1,
           "items": {
