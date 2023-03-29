@@ -19,6 +19,8 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
 import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
+import { AnalyticsCollectionToolbar } from './analytics_collection_toolbar/analytics_collection_toolbar';
+import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
@@ -30,7 +32,9 @@ export const collectionViewBreadcrumbs = [
 
 export const AnalyticsCollectionView: React.FC = () => {
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);
+  const { setTimeRange } = useActions(AnalyticsCollectionToolbarLogic);
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
+  const { timeRange, searchSessionId } = useValues(AnalyticsCollectionToolbarLogic);
   const { name, section } = useParams<{ name: string; section: string }>();
 
   useEffect(() => {
@@ -48,16 +52,16 @@ export const AnalyticsCollectionView: React.FC = () => {
         pageTitle: i18n.translate('xpack.enterpriseSearch.analytics.collectionsView.title', {
           defaultMessage: 'Overview',
         }),
+        rightSideItems: [<AnalyticsCollectionToolbar />],
       }}
     >
       {analyticsCollection ? (
         <AnalyticsCollectionChartWithLens
           id={'analytics-collection-chart-' + analyticsCollection.name}
           dataViewQuery={analyticsCollection.events_datastream}
-          timeRange={{
-            from: 'now-90d',
-            to: 'now',
-          }}
+          timeRange={timeRange}
+          setTimeRange={setTimeRange}
+          searchSessionId={searchSessionId}
         />
       ) : (
         <EuiEmptyPrompt
