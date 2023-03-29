@@ -8,7 +8,6 @@
 
 import { memoize } from 'lodash';
 
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { pluginServices } from '../../services';
@@ -53,7 +52,7 @@ const getDataControlField = (
     const compatibleControlTypes = [];
     for (const factory of controlFactories) {
       if (factory.isFieldCompatible && factory.isFieldCompatible(field)) {
-        compatibleControlTypes.push((factory as EmbeddableFactory).type);
+        compatibleControlTypes.push(factory.type);
       }
     }
     resolve({ field, compatibleControlTypes });

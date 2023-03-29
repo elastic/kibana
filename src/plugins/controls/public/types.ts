@@ -49,7 +49,8 @@ export type ControlEmbeddable<
 /**
  * Control embeddable editor types
  */
-export interface IEditableControlFactory<T extends ControlInput = ControlInput> {
+export interface IEditableControlFactory<T extends ControlInput = ControlInput>
+  extends Pick<EmbeddableFactory, 'type'> {
   controlEditorOptionsComponent?: (props: ControlEditorProps<T>) => JSX.Element;
   presaveTransformFunction?: (
     newState: Partial<T>,
