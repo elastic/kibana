@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-// export * from './exploratory_view';
-export * from './step_duration.journey';
-// export * from './single_metric.journey';
+import React from 'react';
+
+const LazyAlertDropdown = React.lazy(() => import('./alert_dropdown'));
+
+export const LazyAlertDropdownWrapper = () => (
+  <React.Suspense fallback={<div />}>
+    <LazyAlertDropdown />
+  </React.Suspense>
+);
