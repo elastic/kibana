@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './log_threshold_rule_type';
-export { LazyAlertDropdownWrapper } from './components/lazy_alert_dropdown';
+const DEFAULT_LOG_VIEW_ID = 'default';
+export const DEFAULT_LOG_VIEW = {
+  type: 'log-view-reference' as const,
+  logViewId: DEFAULT_LOG_VIEW_ID,
+};
