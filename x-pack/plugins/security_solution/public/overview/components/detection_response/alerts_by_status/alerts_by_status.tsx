@@ -16,7 +16,6 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import type { ShapeTreeNode } from '@elastic/charts';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
 
@@ -213,8 +212,8 @@ export const AlertsByStatus = ({
 
   const totalAlertsCount = isDonutChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
 
-  const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
-    return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
+  const fillColor: FillColor = useCallback((dataName) => {
+    return chartConfigs.find((cfg) => cfg.label === dataName)?.color ?? emptyDonutColor;
   }, []);
 
   return (
