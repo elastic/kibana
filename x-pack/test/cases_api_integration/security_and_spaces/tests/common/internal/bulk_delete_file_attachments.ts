@@ -19,7 +19,7 @@ import {
   createFile,
   deleteAllCaseItems,
   deleteAllFiles,
-  deleteFileAttachments,
+  bulkDeleteFileAttachments,
   getComment,
   listFiles,
 } from '../../../../common/lib/api';
@@ -45,9 +45,10 @@ import { roles as api_int_roles } from '../../../../../api_integration/apis/case
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
-  describe('delete_file_attachments', () => {
+  describe('bulk_delete_file_attachments', () => {
     // we need api_int_users and roles because they have authorization for the actual plugins (not the fixtures). This
     // is needed because the fixture plugins are not registered as file kinds
     before(async () => {
@@ -73,7 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('fails to delete a file when the file does not exist', async () => {
-        await deleteFileAttachments({
+        await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
           fileIds: ['abc'],
@@ -81,24 +82,30 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('fails to delete a file when the owner is not within the metadata', async () => {
-        const create = await createFile({
-          supertest,
-          params: {
-            name: 'testfile',
-            kind: SECURITY_SOLUTION_FILE_KIND,
-            mimeType: 'text/plain',
-            meta: {
-              caseId: postedCase.id,
-              // missing the owner here
-            },
-          },
-        });
-
-        await deleteFileAttachments({
+      it('returns a 400 when the fileIds is an empty array', async () => {
+        await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
-          fileIds: [create.file.id],
+          fileIds: [],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('returns a 400 when the a fileId is an empty string', async () => {
+        await bulkDeleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: ['abc', ''],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('returns a 400 when there are 501 ids being deleted', async () => {
+        const ids = Array.from(Array(501).keys()).map((item) => item.toString());
+        await bulkDeleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: ids,
           expectedHttpCode: 400,
         });
       });
@@ -116,29 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        await deleteFileAttachments({
-          supertest,
-          caseId: postedCase.id,
-          fileIds: [create.file.id],
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('fails to delete a file when the owner is not formatted as an array of strings', async () => {
-        const create = await createFile({
-          supertest,
-          params: {
-            name: 'testfile',
-            kind: SECURITY_SOLUTION_FILE_KIND,
-            mimeType: 'text/plain',
-            meta: {
-              caseId: postedCase.id,
-              owner: postedCase.owner,
-            },
-          },
-        });
-
-        await deleteFileAttachments({
+        await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
           fileIds: [create.file.id],
@@ -154,13 +139,57 @@ export default ({ getService }: FtrProviderContext): void => {
             kind: SECURITY_SOLUTION_FILE_KIND,
             mimeType: 'text/plain',
             meta: {
-              caseId: 'abc',
+              caseIds: ['abc'],
               owner: [postedCase.owner],
             },
           },
         });
 
-        await deleteFileAttachments({
+        await bulkDeleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: [create.file.id],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('fails to delete a file when the case id is not an array', async () => {
+        const create = await createFile({
+          supertest,
+          params: {
+            name: 'testfile',
+            kind: SECURITY_SOLUTION_FILE_KIND,
+            mimeType: 'text/plain',
+            meta: {
+              caseIds: postedCase.id,
+              owner: [postedCase.owner],
+            },
+          },
+        });
+
+        await bulkDeleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: [create.file.id],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('fails to delete a file when the case ids is an array of more than one item', async () => {
+        const create = await createFile({
+          supertest,
+          params: {
+            name: 'testfile',
+            kind: SECURITY_SOLUTION_FILE_KIND,
+            mimeType: 'text/plain',
+            meta: {
+              caseIds: [postedCase.id, postedCase.id],
+              owner: [postedCase.owner],
+            },
+          },
+        });
+
+        await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
           fileIds: [create.file.id],
@@ -177,8 +206,58 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
-      it('deletes a single file', async () => {
+      it('deletes a file when the owner is not formatted as an array of strings', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const create = await createFile({
+          supertest,
+          params: {
+            name: 'testfile',
+            kind: SECURITY_SOLUTION_FILE_KIND,
+            mimeType: 'text/plain',
+            meta: {
+              caseIds: [postedCase.id],
+              owner: postedCase.owner,
+            },
+          },
+        });
+
+        await bulkDeleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: [create.file.id],
+          expectedHttpCode: 204,
+        });
+      });
+
+      it('deletes a file when the owner is not within the metadata', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const create = await createFile({
+          supertest,
+          params: {
+            name: 'testfile',
+            kind: SECURITY_SOLUTION_FILE_KIND,
+            mimeType: 'text/plain',
+            meta: {
+              caseIds: [postedCase.id],
+            },
+          },
+        });
+
+        await bulkDeleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: [create.file.id],
+          expectedHttpCode: 204,
+        });
+      });
+
+      it('deletes a single file', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'securitySolution' })
+        );
 
         const { create } = await createAndUploadFile({
           supertest,
@@ -187,7 +266,7 @@ export default ({ getService }: FtrProviderContext): void => {
             kind: SECURITY_SOLUTION_FILE_KIND,
             mimeType: 'text/plain',
             meta: {
-              caseId: postedCase.id,
+              caseIds: [postedCase.id],
               owner: [postedCase.owner],
             },
           },
@@ -203,7 +282,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(filesBeforeDelete.total).to.be(1);
 
-        await deleteFileAttachments({
+        await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
           fileIds: [create.file.id],
@@ -230,7 +309,7 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: SECURITY_SOLUTION_FILE_KIND,
               mimeType: 'text/plain',
               meta: {
-                caseId: postedCase.id,
+                caseIds: [postedCase.id],
                 owner: [postedCase.owner],
               },
             },
@@ -243,7 +322,7 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: SECURITY_SOLUTION_FILE_KIND,
               mimeType: 'text/plain',
               meta: {
-                caseId: postedCase.id,
+                caseIds: [postedCase.id],
                 owner: [postedCase.owner],
               },
             },
@@ -260,7 +339,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(filesBeforeDelete.total).to.be(2);
 
-        await deleteFileAttachments({
+        await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
           fileIds: [fileInfo1.create.file.id, fileInfo2.create.file.id],
@@ -288,9 +367,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('deletes a single file', async () => {
         const postedCase = await createCase(
           supertest,
-          getPostCaseRequest({ owner: 'securitySolution' }),
-          200,
-          { user: superUser, space: 'space1' }
+          getPostCaseRequest({ owner: 'securitySolution' })
         );
 
         const { create } = await createAndUploadFile({
@@ -300,7 +377,7 @@ export default ({ getService }: FtrProviderContext): void => {
             kind: SECURITY_SOLUTION_FILE_KIND,
             mimeType: 'text/plain',
             meta: {
-              caseId: postedCase.id,
+              caseIds: [postedCase.id],
               owner: [postedCase.owner],
             },
           },
@@ -325,10 +402,9 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolution',
             }),
           ],
-          auth: { user: superUser, space: 'space1' },
         });
 
-        await deleteFileAttachments({
+        await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
           fileIds: [create.file.id],
@@ -355,8 +431,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(
           supertest,
           getPostCaseRequest({ owner: 'securitySolution' }),
-          200,
-          { user: superUser, space: 'space1' }
+          200
         );
 
         const [fileInfo1, fileInfo2] = await Promise.all([
@@ -367,12 +442,11 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: SECURITY_SOLUTION_FILE_KIND,
               mimeType: 'text/plain',
               meta: {
-                caseId: postedCase.id,
+                caseIds: [postedCase.id],
                 owner: [postedCase.owner],
               },
             },
             data: 'abc',
-            auth: { user: superUser, space: 'space1' },
           }),
           createAndUploadFile({
             supertest,
@@ -381,12 +455,11 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: SECURITY_SOLUTION_FILE_KIND,
               mimeType: 'text/plain',
               meta: {
-                caseId: postedCase.id,
+                caseIds: [postedCase.id],
                 owner: [postedCase.owner],
               },
             },
             data: 'abc',
-            auth: { user: superUser, space: 'space1' },
           }),
         ]);
 
@@ -395,7 +468,6 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             kind: SECURITY_SOLUTION_FILE_KIND,
           },
-          auth: { user: superUser, space: 'space1' },
         });
 
         expect(filesBeforeDelete.total).to.be(2);
@@ -413,14 +485,12 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolution',
             }),
           ],
-          auth: { user: superUser, space: 'space1' },
         });
 
-        await deleteFileAttachments({
+        await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
           fileIds: [fileInfo1.create.file.id, fileInfo2.create.file.id],
-          auth: { user: superUser, space: 'space1' },
         });
 
         const filesAfterDelete = await listFiles({
@@ -428,7 +498,6 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             kind: SECURITY_SOLUTION_FILE_KIND,
           },
-          auth: { user: superUser, space: 'space1' },
         });
 
         expect(filesAfterDelete.total).to.be(0);
@@ -437,7 +506,6 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           attachmentIds: [caseWithAttachments.comments![0].id, caseWithAttachments.comments![1].id],
           caseId: postedCase.id,
-          auth: { user: superUser, space: 'space1' },
         });
 
         expect(bulkGetAttachmentsResponse.attachments.length).to.be(0);
@@ -447,8 +515,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('rbac', () => {
-      const supertestWithoutAuth = getService('supertestWithoutAuth');
-
       after(async () => {
         await deleteAllFiles({
           supertest,
@@ -465,8 +531,10 @@ export default ({ getService }: FtrProviderContext): void => {
       ]) {
         it(`successfully deletes a file for user ${scenario.user.username} with owner ${scenario.owner} when an attachment does not exist`, async () => {
           const caseInfo = await createCase(
-            supertest,
-            getPostCaseRequest({ owner: scenario.owner })
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: scenario.owner }),
+            200,
+            { user: superUser, space: 'space1' }
           );
 
           const create = await createFile({
@@ -476,14 +544,14 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: constructFileKindIdByOwner(scenario.owner as Owner),
               mimeType: 'text/plain',
               meta: {
-                caseId: caseInfo.id,
+                caseIds: [caseInfo.id],
                 owner: [scenario.owner],
               },
             },
             auth: { user: superUser, space: 'space1' },
           });
 
-          await deleteFileAttachments({
+          await bulkDeleteFileAttachments({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             fileIds: [create.file.id],
@@ -506,7 +574,7 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: constructFileKindIdByOwner(scenario.owner as Owner),
               mimeType: 'text/plain',
               meta: {
-                caseId: caseInfo.id,
+                caseIds: [caseInfo.id],
                 owner: [scenario.owner],
               },
             },
@@ -525,7 +593,7 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user: superUser, space: 'space1' },
           });
 
-          await deleteFileAttachments({
+          await bulkDeleteFileAttachments({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             fileIds: [create.file.id],
@@ -563,10 +631,15 @@ export default ({ getService }: FtrProviderContext): void => {
       ]) {
         // these tests should fail when checking if the user is authorized to delete a file with the file kind
         it(`returns a 403 for user ${scenario.user.username} when attempting to delete a file with owner ${scenario.owner} that does not have an attachment`, async () => {
-          const postedSecCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-            user: superUser,
-            space: 'space1',
-          });
+          const postedSecCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: scenario.owner }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          );
 
           const create = await createFile({
             supertest: supertestWithoutAuth,
@@ -575,14 +648,14 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: constructFileKindIdByOwner(scenario.owner as Owner),
               mimeType: 'text/plain',
               meta: {
-                caseId: postedSecCase.id,
+                caseIds: [postedSecCase.id],
                 owner: [scenario.owner],
               },
             },
             auth: { user: superUser, space: 'space1' },
           });
 
-          await deleteFileAttachments({
+          await bulkDeleteFileAttachments({
             supertest: supertestWithoutAuth,
             caseId: postedSecCase.id,
             fileIds: [create.file.id],
@@ -649,7 +722,7 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: constructFileKindIdByOwner(scenario.fileOwner as Owner),
               mimeType: 'text/plain',
               meta: {
-                caseId: caseInfo.id,
+                caseIds: [caseInfo.id],
                 owner: [scenario.fileOwner],
               },
             },
@@ -668,7 +741,7 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user: superUser, space: 'space1' },
           });
 
-          await deleteFileAttachments({
+          await bulkDeleteFileAttachments({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             fileIds: [create.file.id],

@@ -13,7 +13,7 @@ import { createCaseError } from '../../../common/error';
 import { escapeHatch } from '../utils';
 import type { BulkDeleteFileAttachmentsRequest } from '../../../../common/api';
 
-export const deleteFileAttachments = createCasesRoute({
+export const bulkDeleteFileAttachments = createCasesRoute({
   method: 'post',
   path: INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   params: {
@@ -29,15 +29,15 @@ export const deleteFileAttachments = createCasesRoute({
 
       const requestBody = request.body as BulkDeleteFileAttachmentsRequest;
 
-      await client.attachments.deleteFileAttachments({
+      await client.attachments.bulkDeleteFileAttachments({
         caseId: request.params.case_id,
-        requestBody,
+        fileIds: requestBody.ids,
       });
 
       return response.noContent();
     } catch (error) {
       throw createCaseError({
-        message: `Failed to delete files in route case id: ${request.params.case_id} file ids: ${request.query.ids}: ${error}`,
+        message: `Failed to delete files in route case id: ${request.params.case_id}: ${error}`,
         error,
       });
     }

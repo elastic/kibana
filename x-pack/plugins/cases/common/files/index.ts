@@ -15,7 +15,7 @@ import type { HttpApiTagOperation, Owner } from '../constants/types';
  * metadata.
  */
 export const CaseFileMetadataForDeletionRt = rt.type({
-  caseId: rt.array(rt.string),
+  caseIds: rt.array(rt.string),
 });
 
 export type CaseFileMetadata = rt.TypeOf<typeof CaseFileMetadataForDeletionRt>;

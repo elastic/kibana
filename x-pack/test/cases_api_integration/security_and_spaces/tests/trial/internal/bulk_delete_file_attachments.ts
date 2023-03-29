@@ -15,7 +15,7 @@ import {
   createFile,
   deleteAllCaseItems,
   deleteAllFiles,
-  deleteFileAttachments,
+  bulkDeleteFileAttachments,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
@@ -63,8 +63,10 @@ export default ({ getService }: FtrProviderContext): void => {
       ]) {
         it(`successfully deletes a file for user ${scenario.user.username} with owner ${scenario.owner} when an attachment does not exist`, async () => {
           const caseInfo = await createCase(
-            supertest,
-            getPostCaseRequest({ owner: scenario.owner })
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: scenario.owner }),
+            200,
+            { user: superUser, space: 'space1' }
           );
 
           const create = await createFile({
@@ -74,14 +76,14 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: constructFileKindIdByOwner(scenario.owner as Owner),
               mimeType: 'text/plain',
               meta: {
-                caseId: caseInfo.id,
+                caseIds: [caseInfo.id],
                 owner: [scenario.owner],
               },
             },
             auth: { user: superUser, space: 'space1' },
           });
 
-          await deleteFileAttachments({
+          await bulkDeleteFileAttachments({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             fileIds: [create.file.id],
@@ -104,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: constructFileKindIdByOwner(scenario.owner as Owner),
               mimeType: 'text/plain',
               meta: {
-                caseId: caseInfo.id,
+                caseIds: [caseInfo.id],
                 owner: [scenario.owner],
               },
             },
@@ -123,7 +125,7 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user: superUser, space: 'space1' },
           });
 
-          await deleteFileAttachments({
+          await bulkDeleteFileAttachments({
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             fileIds: [create.file.id],

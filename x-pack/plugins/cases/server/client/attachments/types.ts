@@ -44,17 +44,15 @@ export interface DeleteAllArgs {
 /**
  * Parameters for deleting a file attachment.
  */
-export interface DeleteFileArgs {
+export interface BulkDeleteFileArgs {
   /**
    * The id of the case
    */
   caseId: string;
-  requestBody: {
-    /**
-     * The ids of the file saved objects
-     */
-    ids: string[];
-  };
+  /**
+   * The ids of the file saved objects
+   */
+  fileIds: string[];
 }
 
 /**
