@@ -39,13 +39,19 @@ export interface CreateMlInferencePipelineResponse {
 const isArgsWithPipelineParameters = (
   args: CreateMlInferencePipelineApiLogicArgs
 ): args is CreateMlInferencePipelineApiLogicArgsWithPipelineParameters => {
-  return typeof (args as CreateMlInferencePipelineApiLogicArgsWithPipelineParameters).modelId === 'string';
+  return (
+    typeof (args as CreateMlInferencePipelineApiLogicArgsWithPipelineParameters).modelId ===
+    'string'
+  );
 };
 
 const isArgsWithPipelineDefinition = (
   args: CreateMlInferencePipelineApiLogicArgs
 ): args is CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition => {
-  return typeof (args as CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition).pipelineDefinition === 'object';
+  return (
+    typeof (args as CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition)
+      .pipelineDefinition === 'object'
+  );
 };
 
 export const createMlInferencePipeline = async (
