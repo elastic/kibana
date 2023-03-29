@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiLoadingSpinner,
+  EuiTableActionsColumnType,
+} from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
@@ -22,7 +27,7 @@ import type {
 } from '../../../../../common/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { RuleSnoozeInfo } from '../../../../common/components/rule_snooze_info';
+import { RuleSnoozeBadge } from '../../../../common/components/rule_snooze_badge';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -38,16 +43,17 @@ import { RuleSwitch } from '../../../../detections/components/rules/rule_switch'
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
+import { useInvalidateFetchRulesSnoozeSettings } from '../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import type { Rule } from '../../../rule_management/logic';
 import { PopoverTooltip } from './popover_tooltip';
-import { useRulesTableContext } from './rules_table/rules_table_context';
+import { ExtendedRule, useRulesTableContext } from './rules_table/rules_table_context';
 import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from './ml_rule_warning_popover';
 
-export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
+export type TableColumn = EuiBasicTableColumn<ExtendedRule> | EuiTableActionsColumnType<Rule>;
 
 interface ColumnsProps {
   hasCRUDPermissions: boolean;
@@ -112,15 +118,36 @@ const useRuleSnoozeColumn = ({
 }: {
   hasCRUDPermissions: boolean;
 }): TableColumn => {
+  const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettings();
+
   return useMemo(
     () => ({
-      field: 'snooze_info',
+      field: 'snooze',
       name: i18n.COLUMN_SNOOZING,
-      render: (_, rule: Rule) => (
-        <RuleSnoozeInfo rule={rule} hasCRUDPermissions={hasCRUDPermissions} />
-      ),
+      render: (_, rule: ExtendedRule) => {
+        if (!rule.snoozeSettings) {
+          return <EuiLoadingSpinner size="s" />;
+        }
+
+        if (rule.snoozeSettings instanceof Error) {
+          return (
+            <EuiToolTip content={rule.snoozeSettings.message}>
+              <EuiButtonIcon size="s" iconType="bellSlash" color="accent" disabled />
+            </EuiToolTip>
+          );
+        }
+
+        return (
+          <RuleSnoozeBadge
+            snoozeSettings={rule.snoozeSettings}
+            hasCRUDPermissions={hasCRUDPermissions}
+            onChange={invalidateFetchRuleSnoozeSettings}
+          />
+        );
+      },
       width: '95px',
       sortable: false,
+      align: 'center',
     }),
     [hasCRUDPermissions]
   );

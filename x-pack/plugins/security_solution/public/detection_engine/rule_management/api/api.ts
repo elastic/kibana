@@ -21,6 +21,7 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
+  INTERNAL_ALERTING_FIND_RULES,
 } from '../../../../common/constants';
 
 import {
@@ -47,6 +48,7 @@ import type {
   CreateRulesProps,
   ExportDocumentsProps,
   FetchRuleProps,
+  FetchRuleSnoozingProps,
   FetchRulesProps,
   FetchRulesResponse,
   FindRulesReferencedByExceptionsProps,
@@ -56,6 +58,8 @@ import type {
   PrePackagedRulesStatusResponse,
   PreviewRulesProps,
   Rule,
+  RuleSnoozeSettings,
+  RulesSnoozeSettingsResponse,
   UpdateRulesProps,
 } from '../logic/types';
 import { convertRulesFilterToKQL } from '../logic/utils';
@@ -181,6 +185,28 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
   KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },
+    signal,
+  });
+
+/**
+ * Fetch rule snooze settings for each provided ruleId
+ *
+ * @param ids Rule IDs (not rule_id)
+ * @param signal to cancel request
+ *
+ * @returns An error if response is not OK
+ */
+export const fetchRulesSnoozeSettings = async ({
+  ids,
+  signal,
+}: FetchRuleSnoozingProps): Promise<RulesSnoozeSettingsResponse> =>
+  KibanaServices.get().http.fetch<RulesSnoozeSettingsResponse>(INTERNAL_ALERTING_FIND_RULES, {
+    method: 'GET',
+    query: {
+      filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
+      fields: ['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule'],
+      per_page: ids.length,
+    },
     signal,
   });
 

@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 
-import { RuleSnoozeInfo, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { RuleSnooze } from '@kbn/alerting-plugin/common';
+import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   RiskScore,
   RiskScoreMapping,
@@ -155,7 +156,6 @@ export const RuleSchema = t.intersection([
     updated_by: t.string,
     actions: RuleActionArray,
     throttle: t.union([RuleActionThrottle, t.null]),
-    snooze_info: RuleSnoozeInfo,
   }),
   t.partial({
     outcome: SavedObjectResolveOutcome,
@@ -218,6 +218,18 @@ export interface FetchRulesProps {
   signal?: AbortSignal;
 }
 
+export interface RuleSnoozeSettings {
+  id: string;
+  mute_all: boolean;
+  snooze_schedule?: RuleSnooze;
+  active_snoozes?: string[];
+  is_snoozed_until?: string;
+}
+
+export interface RulesSnoozeSettingsResponse {
+  data: RuleSnoozeSettings[];
+}
+
 export type SortingOptions = t.TypeOf<typeof SortingOptions>;
 export const SortingOptions = t.type({
   field: FindRulesSortField,
@@ -242,6 +254,11 @@ export interface FetchRulesResponse {
 
 export interface FetchRuleProps {
   id: string;
+  signal?: AbortSignal;
+}
+
+export interface FetchRuleSnoozingProps {
+  ids: string[];
   signal?: AbortSignal;
 }
 

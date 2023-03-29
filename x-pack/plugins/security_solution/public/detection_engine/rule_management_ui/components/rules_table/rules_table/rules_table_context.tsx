@@ -15,6 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -24,6 +25,7 @@ import type {
   FilterOptions,
   PaginationOptions,
   Rule,
+  RuleSnoozeSettings,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
@@ -36,12 +38,17 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
+import * as i18n from './translations';
+
+export interface ExtendedRule extends Rule {
+  snoozeSettings?: RuleSnoozeSettings | Error;
+}
 
 export interface RulesTableState {
   /**
    * Rules to display (sorted and paginated in case of in-memory)
    */
-  rules: Rule[];
+  rules: ExtendedRule[];
   /**
    * Currently selected table filter
    */
@@ -255,14 +262,14 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules
   const {
-    data: { rules, total } = { rules: [], total: 0 },
+    data: { rules, total },
     refetch,
     dataUpdatedAt,
     isFetched,
     isFetching,
     isLoading,
     isRefetching,
-  } = useFindRules(
+  } = useFindExtendedRules(
     {
       filterOptions,
       sortingOptions,
@@ -374,6 +381,52 @@ export const useRulesTableContext = (): RulesTableContextType => {
 
 export const useRulesTableContextOptional = (): RulesTableContextType | null =>
   useContext(RulesTableContext);
+
+interface ExtendedData {
+  rules: ExtendedRule[];
+  total: number;
+}
+
+function useFindExtendedRules(...params: Parameters<typeof useFindRules>) {
+  const { data: { rules, total } = { rules: [], total: 0 }, ...restResult } = useFindRules(
+    ...params
+  );
+
+  // Fetch rule snooze settings
+  const { data: rulesSnoozeSettings, isError: isSnoozeSettingsFetchingError } =
+    useFetchRulesSnoozeSettings(rules.map((x) => x.id));
+
+  const extendedData = useMemo<ExtendedData>(() => {
+    if (isSnoozeSettingsFetchingError) {
+      return {
+        rules: rules.map((r) => ({
+          ...r,
+          snoozeSettings: new Error(i18n.UNABLE_TO_FETCH_RULE_SNOOZE_SETTINGS),
+        })),
+        total,
+      };
+    }
+
+    if (!rulesSnoozeSettings) {
+      return { rules, total };
+    }
+
+    const rulesSnoozeSettingsMap = new Map(rulesSnoozeSettings?.map((x) => [x.id, x]));
+
+    return {
+      rules: rules.map((r) => ({
+        ...r,
+        snoozeSettings: rulesSnoozeSettingsMap.get(r.id),
+      })),
+      total,
+    };
+  }, [rules, total, rulesSnoozeSettings, isSnoozeSettingsFetchingError]);
+
+  return {
+    ...restResult,
+    data: extendedData,
+  };
+}
 
 function isDefaultState(
   filter: FilterOptions,
