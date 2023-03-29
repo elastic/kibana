@@ -145,9 +145,8 @@ const useRuleSnoozeColumn = ({
           />
         );
       },
-      width: '95px',
+      width: '130px',
       sortable: false,
-      align: 'center',
     }),
     [hasCRUDPermissions]
   );
@@ -365,8 +364,8 @@ export const useRulesColumns = ({
         width: '18%',
         truncateText: true,
       },
-      enabledColumn,
       snoozeColumn,
+      enabledColumn,
       ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
     [
