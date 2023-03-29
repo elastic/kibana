@@ -12433,7 +12433,6 @@
     "xpack.enterpriseSearch.content.index.filtering.priority": "规则优先级",
     "xpack.enterpriseSearch.content.index.filtering.rule": "规则",
     "xpack.enterpriseSearch.content.index.filtering.value": "值",
-    "xpack.enterpriseSearch.content.index.pipelines.copyAndCustomize.platinumText": "使用白金级许可证，您可以创建此配置的特定于索引的版本，并针对用例对其进行修改。",
     "xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.apiIndex": "这是一个基于 API 的索引。",
     "xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.cancelButtonLabel": "取消",
     "xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.closeButtonLabel": "关闭",
