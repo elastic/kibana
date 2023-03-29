@@ -49,10 +49,7 @@ spec:
       containers:
         - name: elastic-agent
           image: docker.elastic.co/beats/elastic-agent:VERSION
-          args: [
-            "-c", "/etc/elastic-agent/agent.yml",
-            "-e",
-          ]
+          args: ["-c", "/etc/elastic-agent/agent.yml", "-e"]
           env:
             # The basic authentication username used to connect to Elasticsearch
             # This user needs the privileges required to publish events to Elasticsearch.
@@ -73,8 +70,13 @@ spec:
               value: "/etc/elastic-agent"
           securityContext:
             runAsUser: 0
-            # Needed for 'Defend for containers' integration (cloud-defend)
-            #privileged: true
+            capabilities:
+              add:
+                # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+                # If you are not using this integration, then these capabilites can be removed.
+                - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+                - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+                - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for containers' to modify 'rlimit_memlock'
           resources:
             limits:
               memory: 700Mi
@@ -107,17 +109,8 @@ spec:
             - name: var-lib
               mountPath: /hostfs/var/lib
               readOnly: true
-            # Needed for 'Defend for containers' integration (cloud-defend)
-            #- name: boot
-            #  mountPath: /boot
-            #  readOnly: true
-            #- name: sys-kernel-debug
-            #  mountPath: /sys/kernel/debug
-            #- name: sys-fs-bpf
-            #  mountPath: /sys/fs/bpf
-            #- name: sys-kernel-security
-            #  mountPath: /sys/kernel/security
-            #  readOnly: true
+            - name: sys-kernel-debug
+              mountPath: /sys/kernel/debug
       volumes:
         - name: datastreams
           configMap:
@@ -148,18 +141,11 @@ spec:
           hostPath:
             path: /var/lib
         # Needed for 'Defend for containers' integration (cloud-defend)
-        #- name: boot
-        #  hostPath:
-        #    path: /boot
-        #- name: sys-kernel-debug
-        #  hostPath:
-        #    path: /sys/kernel/debug
-        #- name: sys-fs-bpf
-        #  hostPath:
-        #    path: /sys/fs/bpf
-        #- name: sys-kernel-security
-        #  hostPath:
-        #    path: /sys/kernel/security
+        # If you are not using this integration, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: sys-kernel-debug
+          hostPath:
+            path: /sys/kernel/debug
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -379,8 +365,13 @@ spec:
                   fieldPath: metadata.name
           securityContext:
             runAsUser: 0
-            # Needed for 'Defend for containers' integration (cloud-defend)
-            #privileged: true
+            capabilities:
+              add:
+                # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+                # If you are not using this integration, then these capabilites can be removed.
+                - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+                - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+                - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for Containers' to modify 'rlimit_memlock'
           resources:
             limits:
               memory: 700Mi
@@ -409,17 +400,8 @@ spec:
             - name: etc-mid
               mountPath: /etc/machine-id
               readOnly: true
-            # Needed for 'Defend for containers' integration (cloud-defend)
-            #- name: boot
-            #  mountPath: /boot
-            #  readOnly: true
-            #- name: sys-kernel-debug
-            #  mountPath: /sys/kernel/debug
-            #- name: sys-fs-bpf
-            #  mountPath: /sys/fs/bpf
-            #- name: sys-kernel-security
-            #  mountPath: /sys/kernel/security
-            #  readOnly: true
+            - name: sys-kernel-debug
+              mountPath: /sys/kernel/debug
       volumes:
         - name: proc
           hostPath:
@@ -449,18 +431,11 @@ spec:
             path: /etc/machine-id
             type: File
         # Needed for 'Defend for containers' integration (cloud-defend)
-        #- name: boot
-        #  hostPath:
-        #    path: /boot
-        #- name: sys-kernel-debug
-        #  hostPath:
-        #    path: /sys/kernel/debug
-        #- name: sys-fs-bpf
-        #  hostPath:
-        #    path: /sys/fs/bpf
-        #- name: sys-kernel-security
-        #  hostPath:
-        #    path: /sys/kernel/security
+        # If you are not using this integration, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: sys-kernel-debug
+          hostPath:
+            path: /sys/kernel/debug
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

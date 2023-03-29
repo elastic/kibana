@@ -47,8 +47,18 @@ import {
   ResetActionName,
   ResetActionModal,
 } from '../action_reset';
-import { useStartAction, StartActionName, StartActionModal } from '../action_start';
-import { StopActionName, useStopAction } from '../action_stop';
+import {
+  isStartActionDisabled,
+  useStartAction,
+  StartActionName,
+  StartActionModal,
+} from '../action_start';
+import {
+  isScheduleNowActionDisabled,
+  useScheduleNowAction,
+  ScheduleNowActionName,
+} from '../action_schedule_now';
+import { isStopActionDisabled, StopActionName, useStopAction } from '../action_stop';
 
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
@@ -100,6 +110,7 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkDeleteAction = useDeleteAction(false);
   const bulkResetAction = useResetAction(false);
   const bulkStopAction = useStopAction(false);
+  const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
 
   const { capabilities } = useContext(AuthorizationContext);
   const disabled =
@@ -171,8 +182,29 @@ export const TransformList: FC<TransformListProps> = ({
 
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty onClick={() => bulkStartAction.openModal(transformSelection)}>
+      <EuiButtonEmpty
+        onClick={() => bulkStartAction.openModal(transformSelection)}
+        disabled={isStartActionDisabled(
+          transformSelection,
+          capabilities.canStartStopTransform,
+          transformNodes
+        )}
+      >
         <StartActionName items={transformSelection} transformNodes={transformNodes} />
+      </EuiButtonEmpty>
+    </div>,
+    <div key="scheduleNowAction" className="transform__BulkActionItem">
+      <EuiButtonEmpty
+        onClick={() =>
+          bulkScheduleNowAction.scheduleNowTransforms(transformSelection.map((i) => ({ id: i.id })))
+        }
+        disabled={isScheduleNowActionDisabled(
+          transformSelection,
+          capabilities.canScheduleNowTransform,
+          transformNodes
+        )}
+      >
+        <ScheduleNowActionName items={transformSelection} transformNodes={transformNodes} />
       </EuiButtonEmpty>
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
@@ -180,6 +212,11 @@ export const TransformList: FC<TransformListProps> = ({
         onClick={() => {
           bulkStopAction.openModal(transformSelection);
         }}
+        disabled={isStopActionDisabled(
+          transformSelection,
+          capabilities.canStartStopTransform,
+          false
+        )}
       >
         <StopActionName items={transformSelection} />
       </EuiButtonEmpty>
@@ -189,6 +226,7 @@ export const TransformList: FC<TransformListProps> = ({
         onClick={() => {
           bulkResetAction.openModal(transformSelection);
         }}
+        disabled={isResetActionDisabled(transformSelection, false)}
       >
         <ResetActionName
           canResetTransform={capabilities.canResetTransform}
@@ -198,7 +236,10 @@ export const TransformList: FC<TransformListProps> = ({
       </EuiButtonEmpty>
     </div>,
     <div key="deleteAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty onClick={() => bulkDeleteAction.openModal(transformSelection)}>
+      <EuiButtonEmpty
+        onClick={() => bulkDeleteAction.openModal(transformSelection)}
+        disabled={isDeleteActionDisabled(transformSelection, false)}
+      >
         <DeleteActionName
           canDeleteTransform={capabilities.canDeleteTransform}
           disabled={isDeleteActionDisabled(transformSelection, false)}
