@@ -42,120 +42,118 @@ const LogsHistoryChart = ({
     }
   };
   return (
-    <>
-      <EuiPanel hasBorder={true}>
-        <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {getSourceFromGroupBy()}
-                &nbsp;
-                {i18n.translate('xpack.infra.logsChartHistory.chartTitle', {
-                  defaultMessage: 'logs threshold alerts history',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.infra.logsChartHistory.last30days', {
-                defaultMessage: 'Last 30 days',
+    <EuiPanel hasBorder={true} data-test-subj="logsHistoryChartAlertDetails">
+      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {getSourceFromGroupBy()}
+              &nbsp;
+              {i18n.translate('xpack.infra.logs.chartHistory.chartTitle', {
+                defaultMessage: 'logs threshold alerts history',
               })}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="l">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" direction="column">
-              <EuiFlexItem grow={false}>
-                <EuiText color="danger">
-                  <EuiTitle size="s">
-                    <h3>{triggeredAlertsData?.totalTriggeredAlerts || '-'}</h3>
-                  </EuiTitle>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  {i18n.translate('xpack.infra.logsChartHistory.alertsTriggered', {
-                    defaultMessage: 'Alerts triggered',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.infra.logs.chartHistory.last30days', {
+              defaultMessage: 'Last 30 days',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" direction="column">
             <EuiFlexItem grow={false}>
-              <EuiText>
+              <EuiText color="danger">
                 <EuiTitle size="s">
-                  <h3>
-                    {triggeredAlertsData?.avgTimeToRecoverUS
-                      ? convertTo({
-                          unit: 'minutes',
-                          microseconds: triggeredAlertsData?.avgTimeToRecoverUS,
-                          extended: true,
-                        }).formatted
-                      : '-'}
-                  </h3>
+                  <h3>{triggeredAlertsData?.totalTriggeredAlerts || '-'}</h3>
                 </EuiTitle>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.infra.logsChartHistory.avgTimeToRecover', {
-                  defaultMessage: 'Avg time to recover',
+                {i18n.translate('xpack.infra.logs.chartHistory.alertsTriggered', {
+                  defaultMessage: 'Alerts triggered',
                 })}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="xs" direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <EuiTitle size="s">
+                <h3>
+                  {triggeredAlertsData?.avgTimeToRecoverUS
+                    ? convertTo({
+                        unit: 'minutes',
+                        microseconds: triggeredAlertsData?.avgTimeToRecoverUS,
+                        extended: true,
+                      }).formatted
+                    : '-'}
+                </h3>
+              </EuiTitle>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.infra.logs.chartHistory.avgTimeToRecover', {
+                defaultMessage: 'Avg time to recover',
+              })}
+            </EuiText>
+          </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <CriterionPreview
-          annotations={[
-            <LineAnnotation
-              id="annotations"
-              key={'annotationsAlertHistory'}
-              domainType={AnnotationDomainType.XDomain}
-              dataValues={
-                triggeredAlertsData?.histogramTriggeredAlerts
-                  .filter((annotation) => annotation.doc_count > 0)
-                  .map((annotation) => {
-                    return {
-                      dataValue: annotation.key,
-                      header: String(annotation.doc_count),
-                      details: moment(annotation.key_as_string).format('yyyy-MM-DD'),
-                    };
-                  }) || []
-              }
-              style={{
-                line: {
-                  strokeWidth: 3,
-                  stroke: '#bd271e', // danger
-                  opacity: 1,
-                },
-              }}
-              marker={<EuiIcon type="warning" color="danger" />}
-              markerBody={(annotationData) => (
-                <>
-                  <EuiBadge color="danger">
-                    <EuiText size="xs" color="white">
-                      {annotationData.header}
-                    </EuiText>
-                  </EuiBadge>
-                  <EuiSpacer size="xs" />
-                </>
-              )}
-              markerPosition={Position.Top}
-            />,
-          ]}
-          ruleParams={rule.params}
-          sourceId={rule.params.logView.logViewId}
-          chartCriterion={criteria as PartialCriterion}
-          showThreshold={true}
-          executionTimeRange={{ gte: dateLast30Days, lte: dateNow }}
-        />
-      </EuiPanel>
-    </>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <CriterionPreview
+        annotations={[
+          <LineAnnotation
+            id="annotations"
+            key={'annotationsAlertHistory'}
+            domainType={AnnotationDomainType.XDomain}
+            dataValues={
+              triggeredAlertsData?.histogramTriggeredAlerts
+                .filter((annotation) => annotation.doc_count > 0)
+                .map((annotation) => {
+                  return {
+                    dataValue: annotation.key,
+                    header: String(annotation.doc_count),
+                    details: moment(annotation.key_as_string).format('yyyy-MM-DD'),
+                  };
+                }) || []
+            }
+            style={{
+              line: {
+                strokeWidth: 3,
+                stroke: '#bd271e', // danger
+                opacity: 1,
+              },
+            }}
+            marker={<EuiIcon type="warning" color="danger" />}
+            markerBody={(annotationData) => (
+              <>
+                <EuiBadge color="danger">
+                  <EuiText size="xs" color="white">
+                    {annotationData.header}
+                  </EuiText>
+                </EuiBadge>
+                <EuiSpacer size="xs" />
+              </>
+            )}
+            markerPosition={Position.Top}
+          />,
+        ]}
+        ruleParams={rule.params}
+        sourceId={rule.params.logView.logViewId}
+        chartCriterion={criteria as PartialCriterion}
+        showThreshold={true}
+        executionTimeRange={{ gte: dateLast30Days, lte: dateNow }}
+      />
+    </EuiPanel>
   );
 };
 // eslint-disable-next-line import/no-default-export
