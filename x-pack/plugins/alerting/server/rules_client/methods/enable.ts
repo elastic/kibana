@@ -83,6 +83,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   if (attributes.enabled === false) {
     const { legacyActions, legacyActionsReferences } = await migrateLegacyActions(context, {
       ruleId: id,
+      consumer: attributes.consumer,
     });
 
     const username = await context.getUserName();
@@ -113,7 +114,9 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     try {
       await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
         version,
-        references: [...references, ...legacyActionsReferences],
+        references: legacyActionsReferences.length
+          ? [...references, ...legacyActionsReferences]
+          : undefined,
       });
     } catch (e) {
       throw e;

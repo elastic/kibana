@@ -210,7 +210,7 @@ describe('delete()', () => {
     await rulesClient.delete({ id: '1' });
 
     expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-      rule: expect.objectContaining({ id: '1' }),
+      ruleId: '1',
     });
   });
 

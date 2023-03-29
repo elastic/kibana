@@ -63,7 +63,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     throw error;
   }
 
-  await migrateLegacyActions(context, { ruleId: id });
+  await migrateLegacyActions(context, { ruleId: id, consumer: attributes.consumer });
 
   context.auditLogger?.log(
     ruleAuditEvent({

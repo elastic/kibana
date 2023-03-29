@@ -2732,7 +2732,7 @@ describe('update()', () => {
     );
   });
 
-  test('should call migrateRuleHook', async () => {
+  test('should call migrateLegacyActions', async () => {
     actionsClient.getBulk.mockReset();
     actionsClient.isPreconfigured.mockReset();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -2771,7 +2771,7 @@ describe('update()', () => {
     });
 
     expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-      rule: expect.objectContaining({ id: '1' }),
+      ruleId: '1',
     });
   });
 });

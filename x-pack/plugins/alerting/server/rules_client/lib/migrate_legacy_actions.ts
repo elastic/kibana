@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash/fp';
-
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SavedObjectReference } from '@kbn/core/server';
 
 import type { RulesClientContext } from '..';
@@ -44,13 +44,13 @@ export interface LegacyIRuleActionsAttributes extends Record<string, unknown> {
 
 type MigrateLegacyActions = (
   context: RulesClientContext,
-  { ruleId }: { ruleId: string }
+  { ruleId }: { ruleId: string; consumer: string }
 ) => Promise<{ legacyActions: RawRuleAction[]; legacyActionsReferences: SavedObjectReference[] }>;
 
-export const migrateLegacyActions: MigrateLegacyActions = async (context, { ruleId }) => {
+export const migrateLegacyActions: MigrateLegacyActions = async (context, { ruleId, consumer }) => {
   const { unsecuredSavedObjectsClient } = context;
   try {
-    if (ruleId == null) {
+    if (ruleId == null || consumer !== AlertConsumers.SIEM) {
       return { legacyActions: [], legacyActionsReferences: [] };
     }
     /**

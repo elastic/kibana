@@ -435,6 +435,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
 
     const { legacyActions, legacyActionsReferences } = await migrateLegacyActions(context, {
       ruleId: rule.id,
+      consumer: rule.attributes.consumer,
     });
 
     if (legacyActions.length && legacyActionsReferences?.length) {

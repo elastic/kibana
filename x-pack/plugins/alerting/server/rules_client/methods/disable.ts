@@ -76,6 +76,7 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
   if (attributes.enabled === true) {
     const { legacyActions, legacyActionsReferences } = await migrateLegacyActions(context, {
       ruleId: id,
+      consumer: attributes.consumer,
     });
 
     await context.unsecuredSavedObjectsClient.update(
@@ -90,7 +91,12 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
         nextRun: null,
         actions: [...attributes.actions, ...legacyActions],
       }),
-      { version, references: [...references, ...legacyActionsReferences] }
+      {
+        version,
+        references: legacyActionsReferences.length
+          ? [...references, ...legacyActionsReferences]
+          : undefined,
+      }
     );
 
     // If the scheduledTaskId does not match the rule id, we should
