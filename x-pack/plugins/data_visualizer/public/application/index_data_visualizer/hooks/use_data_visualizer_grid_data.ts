@@ -16,6 +16,7 @@ import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { getFieldType } from '@kbn/unified-field-list-plugin/public';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
@@ -24,9 +25,9 @@ import type { MetricFieldsStats } from '../../common/components/stats_table/comp
 import { TimeBuckets } from '../../../../common/services/time_buckets';
 import type { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
-  SUPPORTED_FIELD_TYPES,
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
+  SUPPORTED_FIELD_TYPES,
 } from '../../../../common/constants';
 import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
@@ -374,6 +375,7 @@ export const useDataVisualizerGridData = (
         ...fieldData,
         fieldFormat: currentDataView.getFormatterForField(field),
         type: SUPPORTED_FIELD_TYPES.NUMBER,
+        secondaryType: getFieldType(field),
         loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
@@ -452,6 +454,7 @@ export const useDataVisualizerGridData = (
       const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
       const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
+        secondaryType: getFieldType(field),
         fieldFormat: currentDataView.getFormatterForField(field),
         aggregatable: field.aggregatable,
         loading: fieldData?.existsInDocs ?? true,
@@ -493,12 +496,18 @@ export const useDataVisualizerGridData = (
 
       if (visibleFieldTypes && visibleFieldTypes.length > 0) {
         combinedConfigs = combinedConfigs.filter(
-          (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
+          (config) =>
+            visibleFieldTypes.findIndex(
+              (field) => field === config.secondaryType || field === config.type
+            ) > -1
         );
       }
       if (visibleFieldNames && visibleFieldNames.length > 0) {
         combinedConfigs = combinedConfigs.filter(
-          (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
+          (config) =>
+            visibleFieldNames.findIndex(
+              (field) => field === config.secondaryType || field === config.type
+            ) > -1
         );
       }
 

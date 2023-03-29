@@ -28,11 +28,12 @@ export interface FieldVisConfig {
   existsInDocs: boolean;
   aggregatable: boolean;
   loading: boolean;
+  secondaryType: string;
   stats?: FieldVisStats;
   fieldFormat?: any;
   isUnsupportedType?: boolean;
   deletable?: boolean;
-  supportedAggs: SupportedAggs;
+  supportedAggs?: SupportedAggs;
 }
 
 export interface FileBasedFieldVisConfig {
