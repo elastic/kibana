@@ -10,6 +10,8 @@ import { Rule } from '@kbn/alerting-plugin/common';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { convertTo, TopAlert } from '@kbn/observability-plugin/public';
+import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
+import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { useFetchTriggeredAlertsHistory } from '../../../../../hooks/use_fetch_triggered_alert_history';
 import { type PartialCriterion } from '../../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../../expression_editor/criterion_preview_chart';
@@ -109,6 +111,43 @@ const LogsHistoryChart = ({
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <CriterionPreview
+          annotations={[
+            <LineAnnotation
+              id="annotations"
+              key={'annotationsAlertHistory'}
+              domainType={AnnotationDomainType.XDomain}
+              dataValues={
+                triggeredAlertsData?.histogramTriggeredAlerts
+                  .filter((annotation) => annotation.doc_count > 0)
+                  .map((annotation) => {
+                    return {
+                      dataValue: annotation.key,
+                      header: String(annotation.doc_count),
+                      details: moment(annotation.key_as_string).format('yyyy-MM-DD'),
+                    };
+                  }) || []
+              }
+              style={{
+                line: {
+                  strokeWidth: 3,
+                  stroke: '#bd271e', // danger
+                  opacity: 1,
+                },
+              }}
+              marker={<EuiIcon type="warning" color="danger" />}
+              markerBody={(annotationData) => (
+                <>
+                  <EuiBadge color="danger">
+                    <EuiText size="xs" color="white">
+                      {annotationData.header}
+                    </EuiText>
+                  </EuiBadge>
+                  <EuiSpacer size="xs" />
+                </>
+              )}
+              markerPosition={Position.Top}
+            />,
+          ]}
           ruleParams={rule.params}
           sourceId={rule.params.logView.logViewId}
           chartCriterion={criteria as PartialCriterion}
