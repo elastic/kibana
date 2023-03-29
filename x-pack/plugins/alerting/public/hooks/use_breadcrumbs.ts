@@ -10,7 +10,7 @@ import { ChromeBreadcrumb } from '@kbn/core/public';
 import { MouseEvent, useEffect } from 'react';
 import { useKibana } from '../utils/kibana_react';
 import { AlertingDeepLinkId, IAlertingDeepLinkId, useNavigation } from './use_navigation';
-import { APP_ID } from '../config/paths';
+import { APP_ID } from '../../common';
 
 const breadcrumbTitle: Record<IAlertingDeepLinkId, string> = {
   [AlertingDeepLinkId.maintenanceWindows]: i18n.translate(
