@@ -9,8 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { isEqual } from 'lodash/fp';
-import type { Filter, Query, BoolQuery } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import type {
   DynamicGroupingProps,
   GroupingAggregation,
@@ -79,7 +78,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   pagination,
   parentGroupingFilter,
   renderChildComponent,
-  resetPagination,
+  additionalFilters,
   runtimeMappings,
   selectedGroup,
   signalIndexName,
@@ -135,32 +134,19 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     startDate: from,
     endDate: to,
   });
-  const additionalFilters = useMemo(() => {
-    try {
-      return [
-        buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
-          ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
-          ...(defaultFilters ?? []),
-          ...(parentGroupingFilter ?? []),
-        ]),
-      ];
-    } catch (e) {
-      return [];
-    }
-  }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
-  const prevFilters = useRef<
-    Array<{
-      bool: BoolQuery;
-    }>
-  >([]);
-
-  useEffect(() => {
-    if (!isEqual(prevFilters.current, additionalFilters)) {
-      prevFilters.current = additionalFilters;
-      resetPagination();
-    }
-  }, [additionalFilters, resetPagination]);
+  // const prevFilters = useRef<
+  //   Array<{
+  //     bool: BoolQuery;
+  //   }>
+  // >([]);
+  //
+  // useEffect(() => {
+  //   if (!isEqual(prevFilters.current, additionalFilters)) {
+  //     prevFilters.current = additionalFilters;
+  //     resetPagination();
+  //   }
+  // }, [additionalFilters, resetPagination]);
 
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({

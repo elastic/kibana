@@ -132,7 +132,8 @@ export const useGrouping = <T,>({
   );
 
   const resetPagination = useCallback(() => {
-    selectedGroups.forEach((selectedGroup, i, arr) => {
+    console.log('packages: resetPagination', { groupingId, selectedGroups });
+    selectedGroups.forEach((selectedGroup) => {
       dispatch(
         groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroup })
       );

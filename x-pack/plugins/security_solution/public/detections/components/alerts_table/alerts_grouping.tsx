@@ -12,6 +12,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { GroupOption } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
+import { buildEsQuery } from '@kbn/es-query';
 import { updateGroupSelector } from '../../../common/store/grouping/actions';
 import type { TableIdLiteral } from '../../../../common/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
@@ -90,12 +91,26 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     }
   }, [dispatch, groupSelector, selectedGroups]);
 
-  useEffect(() => {
-    console.log('grouping mount');
-    return () => {
-      console.log('grouping unmount');
-    };
-  });
+  const getAdditionalFilters = useCallback(
+    (parentGroupingFilter?: Filter[]) => {
+      console.log('consumer: grouping additionalFilters');
+
+      try {
+        // resetPagination();
+        return [
+          buildEsQuery(undefined, props.globalQuery != null ? [props.globalQuery] : [], [
+            ...(props.globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
+            ...(props.defaultFilters ?? []),
+            ...(parentGroupingFilter ?? []),
+          ]),
+        ];
+      } catch (e) {
+        return [];
+      }
+    },
+    [props.defaultFilters, props.globalFilters, props.globalQuery]
+  );
+
   const getLevel = useCallback(
     (
       level: number,
@@ -103,6 +118,8 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       parentGroupingFilter?: Filter[],
       isRecursive = false
     ) => {
+      const additionalFilters = getAdditionalFilters(parentGroupingFilter);
+
       let rcc;
       if (level < selectedGroups.length - 1) {
         rcc = (groupingFilters: Filter[]) => {
@@ -126,7 +143,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           groupingLevel={level}
           pagination={pagination}
           resetPagination={resetPagination}
-          parentGroupingFilter={parentGroupingFilter}
+          additionalFilters={additionalFilters}
           renderChildComponent={rcc}
           selectedGroup={selectedGroup}
         />
