@@ -12,7 +12,7 @@ import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
-export type PostureTypes = 'cspm' | 'kspm' | 'all';
+export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
 /** number between 1-100 */
 export type Score = number;
 
@@ -85,6 +85,7 @@ export interface BaseCspSetupStatus {
   latestPackageVersion: string;
   cspm: BaseCspSetupBothPolicy;
   kspm: BaseCspSetupBothPolicy;
+  vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
 }
 
