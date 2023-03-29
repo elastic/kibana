@@ -25,6 +25,8 @@ import {
   CLOUD_DASHBOARD_CONTAINER,
   DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_CONTAINER,
+  KUBERNETES_DASHBOARD_TAB,
+  CLOUD_DASHBOARD_TAB,
 } from './test_subjects';
 import { useCspmStatsApi, useKspmStatsApi } from '../../common/api/use_stats_api';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
@@ -241,6 +243,7 @@ export const ComplianceDashboard = () => {
         label: i18n.translate('xpack.csp.dashboardTabs.cloudTab.tabTitle', {
           defaultMessage: 'Cloud',
         }),
+        'data-test-subj': CLOUD_DASHBOARD_TAB,
         isSelected: selectedTab === CSPM_POLICY_TEMPLATE,
         onClick: () => setSelectedTab(CSPM_POLICY_TEMPLATE),
         content: (
@@ -274,6 +277,7 @@ export const ComplianceDashboard = () => {
         label: i18n.translate('xpack.csp.dashboardTabs.kubernetesTab.tabTitle', {
           defaultMessage: 'Kubernetes',
         }),
+        'data-test-subj': KUBERNETES_DASHBOARD_TAB,
         isSelected: selectedTab === KSPM_POLICY_TEMPLATE,
         onClick: () => setSelectedTab(KSPM_POLICY_TEMPLATE),
         content: (
