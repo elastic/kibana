@@ -6,13 +6,13 @@
  */
 
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { IndexStatus } from '../../common/types';
+import { IndexStatus, PostureTypes } from '../../common/types';
 
 export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
   logger: Logger,
-  postureType: 'cspm' | 'kspm' | 'all' = 'all'
+  postureType: PostureTypes = 'all'
 ): Promise<IndexStatus> => {
   const query =
     postureType === 'all'
