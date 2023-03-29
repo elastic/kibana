@@ -54,5 +54,6 @@
     "@kbn/es-query",
     "@kbn/datemath",
     "@kbn/expressions-plugin",
+    "@kbn/react-field",
   ]
 }
