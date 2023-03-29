@@ -4101,6 +4101,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/exploratory-view-plugin@link:x-pack/plugins/exploratory_view":
+  version "0.0.0"
+  uid ""
+
 "@kbn/expression-error-plugin@link:src/plugins/expression_error":
   version "0.0.0"
   uid ""
@@ -10656,6 +10660,11 @@ axe-core@^4.2.0:
   version "4.3.5"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.3.5.tgz#78d6911ba317a8262bfee292aeafcc1e04b49cc5"
   integrity sha512-WKTW1+xAzhMS5dJsxWkliixlO/PqC4VhmO9T4juNYcaTg9jzWiJsou6m5pxWYGfigWbwzJWeFY6z47a+4neRXA==
+
+axe-core@^4.6.1:
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.6.1.tgz#79cccdee3e3ab61a8f42c458d4123a6768e6fbce"
+  integrity sha512-lCZN5XRuOnpG4bpMq8v0khrWtUOn+i8lZSb6wHZH56ZfbIEv6XwJV84AAueh9/zi7qPVJ/E4yz6fmsiyOmXR4w==
 
 axios@^0.21.1:
   version "0.21.4"
