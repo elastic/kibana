@@ -81,6 +81,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
+    "@kbn/exploratory-view-plugin",
   ],
   "exclude": [
     "target/**/*",
