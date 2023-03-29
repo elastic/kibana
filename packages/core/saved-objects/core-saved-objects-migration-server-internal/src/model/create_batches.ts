@@ -19,6 +19,7 @@ import type { TransformErrorObjects } from '../core';
 
 export type BulkIndexOperationTuple = [BulkOperationContainer, SavedObjectsRawDocSource];
 export type BulkOperation = BulkIndexOperationTuple | BulkOperationContainer;
+export type BulkOperationBatch = BulkOperation[];
 
 export interface CreateBatchesParams {
   documents: SavedObjectsRawDoc[];

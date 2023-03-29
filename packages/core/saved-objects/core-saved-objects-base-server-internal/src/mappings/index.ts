@@ -12,4 +12,5 @@ export type {
   IndexMappingMeta,
   IndexMapping,
   IndexTypesMap,
+  IndexMappingMigrationStateMeta,
 } from './types';

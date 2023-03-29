@@ -54,6 +54,9 @@ describe('migrationsStateActionMachine', () => {
       scrollDuration: '0s',
       skip: false,
       retryAttempts: 5,
+      zdt: {
+        metaPickupSyncDelaySec: 120,
+      },
     },
     typeRegistry,
     docLinks,

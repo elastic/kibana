@@ -46,9 +46,10 @@ import {
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
-import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON } from '../common/constants';
-
-export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
+import {
+  CLUSTER_SHARD_LIMIT_EXCEEDED_REASON,
+  FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
+} from '../common/constants';
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action

@@ -515,6 +515,9 @@ const mockOptions = () => {
       scrollDuration: '10m',
       skip: false,
       retryAttempts: 20,
+      zdt: {
+        metaPickupSyncDelaySec: 120,
+      },
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
