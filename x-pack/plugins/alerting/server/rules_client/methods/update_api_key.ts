@@ -88,7 +88,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
 
   const updateAttributes = updateMeta(context, {
     ...attributes,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username),
+    ...apiKeyAsAlertAttributes(createdAPIKey, username, false),
     updatedAt: new Date().toISOString(),
     updatedBy: username,
   });
