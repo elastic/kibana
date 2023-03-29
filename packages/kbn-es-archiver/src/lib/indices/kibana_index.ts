@@ -79,6 +79,7 @@ export async function migrateKibanaIndex(kbnClient: KbnClient) {
  * @returns boolean 'true' if the index is a Kibana saved object index.
  */
 function isKibanaIndex(index?: string): index is string {
+  // CHECKPOINT this method is affected by the .kibana split
   return Boolean(
     index &&
       (/^\.kibana(:?_\d*)?$/.test(index) ||

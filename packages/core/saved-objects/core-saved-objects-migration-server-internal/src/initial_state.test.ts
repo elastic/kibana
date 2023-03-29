@@ -229,6 +229,22 @@ describe('createInitialState', () => {
         "retryCount": 0,
         "retryDelay": 0,
         "targetIndexMappings": Object {
+          "_meta": Object {
+            "indexTypesMap": Object {
+              ".kibana": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              ".kibana_cases": Array [
+                "typeD",
+                "typeE",
+              ],
+              ".kibana_task_manager": Array [
+                "task",
+              ],
+            },
+          },
           "dynamic": "strict",
           "properties": Object {
             "my_type": Object {

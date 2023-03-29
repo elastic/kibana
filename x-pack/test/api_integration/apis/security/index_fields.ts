@@ -23,8 +23,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('GET /internal/security/fields/{query}', () => {
       it('should return a list of available index mapping fields', async () => {
+        // CHECKPOINT this test is affected by the .kibana split
         await supertest
-          .get('/internal/security/fields/.kibana')
+          .get('/internal/security/fields/.kibana,.kibana_ui,.kibana_cases')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200)

@@ -105,7 +105,12 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   };
 
-  const migratedIndex = `.kibana_${kibanaVersion}_001`;
+  // CHECKPOINT this test is affected by the .kibana split
+  const migratedIndex = [
+    `.kibana_${kibanaVersion}_001`,
+    `.kibana_cases_${kibanaVersion}_001`,
+    `.kibana_ui_${kibanaVersion}_001`,
+  ];
 
   beforeAll(async () => {
     await removeLogFile();
