@@ -53,11 +53,13 @@ export default ({ getService }: FtrProviderContext): void => {
     riskScore = 21,
     maxSignals = 100,
     query,
+    riskScoreOverride,
   }: {
     alerts?: number;
     riskScore?: number;
     maxSignals?: number;
     query: string;
+    riskScoreOverride?: string;
   }): Promise<void> => {
     const rule = getRuleForSignalTesting(['ecs_compliant']);
     const { id } = await createRule(supertest, log, {
@@ -65,6 +67,13 @@ export default ({ getService }: FtrProviderContext): void => {
       risk_score: riskScore,
       query,
       max_signals: maxSignals,
+      ...(riskScoreOverride
+        ? {
+            risk_score_mapping: [
+              { field: riskScoreOverride, operator: 'equals', value: '', risk_score: undefined },
+            ],
+          }
+        : {}),
     });
     await waitForRuleSuccessOrStatus(supertest, log, id);
     await waitForSignalsToBePresent(supertest, log, alerts, [id]);
@@ -168,6 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ]);
         });
+
         it('risk scores calculated for 2 alert with different host names', async () => {
           const documentId = uuidv4();
           await indexListOfDocuments([
@@ -306,6 +316,36 @@ export default ({ getService }: FtrProviderContext): void => {
               calculatedLevel: 'Critical',
               calculatedScore: 259.237584867298,
               calculatedScoreNorm: 99.24869252193645,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+          ]);
+        });
+      });
+
+      describe('risk score ordering', () => {
+        it('aggregates multiple scores such that the highest-risk scores contribute the majority of the score', async () => {
+          const documentId = uuidv4();
+          const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
+          await indexListOfDocuments(
+            Array(100)
+              .fill(doc)
+              .map((_doc, i) => ({ ...doc, 'event.risk_score': 100 - i }))
+          );
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${documentId}`,
+            alerts: 100,
+            riskScore: 100,
+            riskScoreOverride: 'event.risk_score',
+          });
+          const { scores } = await getRiskScores({ body: {} });
+
+          expect(removeFields(scores)).to.eql([
+            {
+              calculatedLevel: 'High',
+              calculatedScore: 225.1106801442913,
+              calculatedScoreNorm: 86.18326192354185,
               identifierField: 'host.name',
               identifierValue: 'host-1',
             },
