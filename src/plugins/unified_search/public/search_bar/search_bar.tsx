@@ -74,6 +74,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
+  // Execute whenever time range is updated.
   onTimeRangeChange?: (payload: { dateRange: TimeRange }) => void;
   // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
@@ -187,6 +188,11 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
       nextState.dateRangeTo = nextDateRange.dateRangeTo;
 
+      /**
+       * SecuritySolution relys on triggering an action to update the time range in its reducer.
+       * onTimeRangeChange here is to notify the new time range whever it is updated, so the consumer can persist the staus.
+       * https://github.com/elastic/kibana/pull/153040/files#r1149336889
+       */
       if (nextDateRange.dateRangeFrom && nextDateRange.dateRangeTo) {
         nextProps?.onTimeRangeChange?.({
           dateRange: {
