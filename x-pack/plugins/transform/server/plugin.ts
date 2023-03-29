@@ -41,9 +41,11 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   }
 
   setup(
-    { http, getStartServices }: CoreSetup<PluginStartDependencies>,
+    coreSetup: CoreSetup<PluginStartDependencies>,
     { licensing, features, alerting }: PluginSetupDependencies
   ): {} {
+    const { http, getStartServices } = coreSetup;
+
     const router = http.createRouter();
 
     setupCapabilities(coreSetup);
