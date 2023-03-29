@@ -47,7 +47,7 @@ import type {
 } from './apis';
 
 /**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
+ * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing plugin state.
  *
  * ## SavedObjectsClient errors
@@ -288,7 +288,7 @@ export interface SavedObjectsClientContract {
    *
    * @param type - the type of the object to remove references to
    * @param id - the ID of the object to remove references to
-   * @param options {@link SavedObjectsRemoveReferencesToOptions} - options for the remove references opertion
+   * @param options {@link SavedObjectsRemoveReferencesToOptions} - options for the remove references operation
    * @returns the {@link SavedObjectsRemoveReferencesToResponse}
    */
   removeReferencesTo(
@@ -377,7 +377,7 @@ export interface SavedObjectsClientContract {
    * ```
    *
    * @param findOptions {@link SavedObjectsCreatePointInTimeFinderOptions} - options for the create PIT finder operation
-   * @param dependencies {@link SavedObjectsCreatePointInTimeFinderDependencies} - dependencies for the create PIT fimder operation
+   * @param dependencies {@link SavedObjectsCreatePointInTimeFinderDependencies} - dependencies for the create PIT finder operation
    * @returns the created PIT finder
    */
   createPointInTimeFinder<T = unknown, A = unknown>(
@@ -414,7 +414,7 @@ export interface SavedObjectsClientContract {
   ): Promise<SavedObjectsUpdateObjectsSpacesResponse>;
 
   /**
-   * Returns namespace associated with the client, if any.
+   * Returns the namespace associated with the client. If the namespace is the default one, this method returns `undefined`.
    */
   getCurrentNamespace(): string | undefined;
 }

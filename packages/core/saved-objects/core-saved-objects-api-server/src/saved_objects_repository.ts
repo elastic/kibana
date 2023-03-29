@@ -539,7 +539,8 @@ export interface ISavedObjectsRepository {
    * consumer attempted to specify the namespace explicitly).
    *
    * If the spaces extension is *not* enabled, this function simply normalizes the specified namespace so that
-   * `'default'` can be used interchangeably with `undefined`.
+   * `'default'` can be used interchangeably with `undefined` i.e. the method always returns `undefined` for the default
+   * namespace.
    */
   getCurrentNamespace(namespace?: string): string | undefined;
 }

@@ -1071,7 +1071,7 @@ describe('CoreUsageStatsClient', () => {
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
-          // 'compatibilityModeEnabled.yes` and `compatibilityModeEnabled.no` when createNewCopies is true
+          // excludes 'compatibilityModeEnabled.yes` and `compatibilityModeEnabled.no` when createNewCopies is true
         ],
         incrementOptions
       );
