@@ -198,7 +198,7 @@ Review the following information about the {kib} 8.6.0 release.
 [%collapsible]
 ====
 *Details* +
-Releases 8.5 and 8.6 have a bug that corrupts rules when you update API keys or manage snooze schedules. In particular, it affects tracking containment rules and {es} query rules with KQL or Lucene query types. Releases 8.7 and beyond do not include this bug (fixed in https://github.com/elastic/kibana/pull/153370).
+Releases 8.5 and 8.6 have a bug that corrupts rules when you update API keys or manage snooze schedules. In particular, it affects tracking containment rules and {es} query rules with KQL or Lucene query types. Releases 8.7 and beyond do not include this bug (fixed in {kibana-pull}153370[#153370]).
 
 *Impact* +
 This known issue causes "unable to load rules" messages to occur in *{stack-manage-app}* > *{rules-ui}*. To temporarily work around the problem, copy the rule content (params, name, tags, actions) for the problematic rules, delete the rules, then recreate them. For more details, refer to <<rule-type-es-query-issues,{es} query rules>> and <<geo-alerting-issues,Tracking containment rules>>.
