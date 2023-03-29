@@ -579,7 +579,7 @@ function buildSuggestion({
     hide:
       hide ??
       // Only advertise very clear changes when XY chart is not active
-      ((!currentState && changeType !== 'unchanged' && changeType !== 'extended') ||
+      ((!currentState && !['unchanged', 'extended', 'initial'].includes(changeType)) ||
         // Don't advertise removing dimensions
         (currentState && changeType === 'reduced') ||
         // Don't advertise charts without y axis

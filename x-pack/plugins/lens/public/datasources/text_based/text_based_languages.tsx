@@ -138,7 +138,7 @@ export function getTextBasedDatasource({
             ...updatedState,
           },
           table: {
-            changeType: 'extended' as TableChangeType,
+            changeType: 'initial' as TableChangeType,
             isMultiRow: false,
             layerId: newLayerId,
             columns:
