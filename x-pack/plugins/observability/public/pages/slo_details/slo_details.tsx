@@ -22,10 +22,11 @@ import PageNotFound from '../404';
 import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
-import { convertSliApmParamsToApmAppDeeplinkUrl } from './helpers/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { paths } from '../../config/paths';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
+import { isApmIndicatorType } from '../../utils/slo/indicator';
+import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 
 export function SloDetailsPage() {
   const {
@@ -80,7 +81,7 @@ export function SloDetailsPage() {
         pageTitle: <HeaderTitle isLoading={isLoading} slo={slo} />,
         rightSideItems: [
           <HeaderControl isLoading={isLoading} slo={slo} />,
-          slo?.indicator.type.includes('apm') ? (
+          !!slo && isApmIndicatorType(slo.indicator.type) ? (
             <EuiButtonEmpty
               data-test-subj="sloDetailsExploreInApmButton"
               disabled={isLoading}
