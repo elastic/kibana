@@ -447,6 +447,7 @@ export class ActionsClient {
         name: preconfiguredAction.name,
         isPreconfigured: true,
         isDeprecated: isConnectorDeprecated(preconfiguredAction),
+        ...(preconfiguredAction.config ? { config: preconfiguredAction.config } : {}),
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
     return await injectExtraFindData(
