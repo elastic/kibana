@@ -107,15 +107,24 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.find('hostsView-flyout-tabs-metadata');
     },
 
+    async getMetadataTabName() {
+      const tabElement = await this.getMetadataTab();
+      const tabTitle = await tabElement.findByClassName('euiTab__content');
+      return await tabTitle.getVisibleText();
+    },
+
     async getProcessesTabContentTitle(index: number) {
       const processesListElements = await testSubjects.findAll('processes_summary_table_item');
       return await processesListElements[index].findByCssSelector('dt');
     },
 
-    async getMetadataTabName() {
-      const tabElement = await this.getMetadataTab();
-      const tabTitle = await tabElement.findByClassName('euiTab__content');
-      return await tabTitle.getVisibleText();
+    async getProcessesTabContentTotalValue() {
+      const processesListElements = await testSubjects.findAll('processes_summary_table_item');
+      return await processesListElements[0].findByCssSelector('dd');
+    },
+
+    getProcessesTable() {
+      return testSubjects.find('infraProcessesTable');
     },
 
     // Alerts Tab

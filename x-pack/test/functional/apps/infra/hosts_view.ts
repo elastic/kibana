@@ -14,6 +14,8 @@ import { DATES, HOSTS_LINK_LOCAL_STORAGE_KEY, HOSTS_VIEW_PATH } from './constant
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
+const START_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataStartDate);
+const END_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataEndDate);
 const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -153,8 +155,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('#Single host Flyout', () => {
-      const START_HOST_PROCESSES_DATE = moment.utc('2023-03-28T18:20:00.000Z');
-      const END_HOST_PROCESSES_DATE = moment.utc('2023-03-28T18:21:00.000Z');
       before(async () => {
         await Promise.all([
           await setHostViewEnabled(true),
@@ -198,6 +198,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const processValue = await processesTitleValue.getVisibleText();
             expect(processValue).to.eql(value);
           });
+        });
+
+        it('should render processes total value', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          const processesTotalValue =
+            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+          const processValue = await processesTotalValue.getVisibleText();
+          expect(processValue).to.eql(313);
+        });
+
+        it('should render processes table', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          await pageObjects.infraHostsView.getProcessesTable();
         });
       });
     });
