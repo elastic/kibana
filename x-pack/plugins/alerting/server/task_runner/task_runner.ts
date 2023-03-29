@@ -393,7 +393,6 @@ export class TaskRunner<
                 throttle,
                 notifyWhen,
                 muteAll,
-                revision,
                 snoozeSchedule,
               },
               logger: this.logger,

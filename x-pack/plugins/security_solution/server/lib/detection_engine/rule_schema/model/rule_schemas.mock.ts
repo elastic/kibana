@@ -217,7 +217,6 @@ export const getRuleConfigMock = (type: string = 'rule-type'): SanitizedRuleConf
   ruleTypeId: `${type}-id`,
   ruleTypeName: type,
   muteAll: false,
-  revision: 0,
   snoozeSchedule: [],
 });
 
