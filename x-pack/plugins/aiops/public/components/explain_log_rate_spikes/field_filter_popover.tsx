@@ -34,7 +34,8 @@ interface FieldFilterPopoverProps {
   onChange: (skippedFields: string[]) => void;
 }
 
-// This component is mostly inspired by EUI's Data Grid Column Selector (`src/components/datagrid/controls/column_selector.tsx`).
+// This component is mostly inspired by EUI's Data Grid Column Selector
+// https://github.com/elastic/eui/blob/main/src/components/datagrid/controls/column_selector.tsx
 export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
   disabled,
   disabledApplyButton,
@@ -42,7 +43,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
   onChange,
 }) => {
   const euiThemeContext = useEuiTheme();
-  // maxHeight: $euiDataGridPopoverMaxHeight
+  // Inspired by https://github.com/elastic/eui/blob/main/src/components/datagrid/controls/_data_grid_column_selector.scss
   const fieldSelectPopover = useMemo(
     () => css`
       ${euiYScrollWithShadows(euiThemeContext, {})}
