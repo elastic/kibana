@@ -33,7 +33,10 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
+import type {
+  EventAnnotationPluginStart,
+  EventAnnotationServiceType,
+} from '@kbn/event-annotation-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -149,6 +152,7 @@ export interface LensPluginStartDependencies {
   usageCollection?: UsageCollectionStart;
   docLinks: DocLinksStart;
   share?: SharePluginStart;
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
 export interface LensPublicSetup {

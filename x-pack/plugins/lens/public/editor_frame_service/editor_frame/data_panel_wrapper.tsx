@@ -45,9 +45,12 @@ interface DataPanelWrapperProps {
   core: DatasourceDataPanelProps['core'];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
-  plugins: { uiActions: UiActionsStart; dataViews: DataViewsPublicPluginStart };
+  plugins: {
+    uiActions: UiActionsStart;
+    dataViews: DataViewsPublicPluginStart;
+    eventAnnotationService: EventAnnotationServiceType;
+  };
   indexPatternService: IndexPatternServiceAPI;
-  eventAnnotationService: EventAnnotationServiceType;
   frame: FramePublicAPI;
 }
 
@@ -82,7 +85,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       initializeSources(
         {
           datasourceMap: props.datasourceMap,
-          eventAnnotationService: props.eventAnnotationService,
+          eventAnnotationService: props.plugins.eventAnnotationService,
           visualizationMap: props.visualizationMap,
           visualizationState,
           datasourceStates,
@@ -130,7 +133,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dispatchLens,
     props.plugins.dataViews,
     props.core.uiSettings,
-    props.eventAnnotationService,
+    props.plugins.eventAnnotationService,
   ]);
 
   const onChangeIndexPattern = useCallback(

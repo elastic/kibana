@@ -51,6 +51,7 @@ export interface EditorFrameStartPlugins {
   expressions: ExpressionsStart;
   charts: ChartsPluginSetup;
   dataViews: DataViewsPublicPluginStart;
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
 export interface EditorFramePlugins {
