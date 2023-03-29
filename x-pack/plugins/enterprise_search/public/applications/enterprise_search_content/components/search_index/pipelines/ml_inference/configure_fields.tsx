@@ -16,6 +16,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
+  EuiPanel,
   EuiSelect,
   EuiSpacer,
   EuiTitle,
@@ -29,7 +30,6 @@ import { docLinks } from '../../../../../shared/doc_links';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
-import { InferenceConfiguration } from './inference_config';
 import { MLInferenceLogic } from './ml_inference_logic';
 import { TargetFieldHelpText } from './target_field_help_text';
 
@@ -68,109 +68,115 @@ export const ConfigureFields: React.FC = () => {
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h4>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.title',
-            { defaultMessage: 'Select field mappings' }
-          )}
-        </h4>
-      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={3}>
+          <EuiTitle size="s">
+            <h4>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.title',
+                { defaultMessage: 'Select field mappings' }
+              )}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <EuiText color="subdued" size="s">
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description',
+                {
+                  defaultMessage:
+                    'Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.',
+                }
+              )}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiText color="subdued">
-        <p>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description',
-            {
-              defaultMessage:
-                'Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.',
-            }
-          )}
-        </p>
-      </EuiText>
-      <EuiSpacer />
-      <EuiForm component="form">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceFieldLabel',
-                {
-                  defaultMessage: 'Source field',
-                }
-              )}
-              error={emptySourceFields && <NoSourceFieldsError />}
-              isInvalid={emptySourceFields}
-            >
-              <EuiSelect
+      <EuiPanel hasBorder hasShadow={false}>
+        <EuiForm component="form">
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
                 fullWidth
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectSchemaField`}
-                disabled={inputsDisabled}
-                value={sourceField}
-                options={[
+                label={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceFieldLabel',
                   {
-                    disabled: true,
-                    text: i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.placeholder',
-                      { defaultMessage: 'Select a schema field' }
-                    ),
-                    value: '',
-                  },
-                  ...(sourceFields?.map((field) => ({
-                    text: field,
-                    value: field,
-                  })) ?? []),
-                ]}
-                onChange={(e) =>
-                  setInferencePipelineConfiguration({
-                    ...configuration,
-                    sourceField: e.target.value,
-                  })
+                    defaultMessage: 'Source field',
+                  }
+                )}
+                error={emptySourceFields && <NoSourceFieldsError />}
+                isInvalid={emptySourceFields}
+              >
+                <EuiSelect
+                  fullWidth
+                  data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectSchemaField`}
+                  disabled={inputsDisabled}
+                  value={sourceField}
+                  options={[
+                    {
+                      disabled: true,
+                      text: i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.placeholder',
+                        { defaultMessage: 'Select a schema field' }
+                      ),
+                      value: '',
+                    },
+                    ...(sourceFields?.map((field) => ({
+                      text: field,
+                      value: field,
+                    })) ?? []),
+                  ]}
+                  onChange={(e) =>
+                    setInferencePipelineConfiguration({
+                      ...configuration,
+                      sourceField: e.target.value,
+                    })
+                  }
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.label',
+                  {
+                    defaultMessage: 'Target field (optional)',
+                  }
+                )}
+                helpText={
+                  formErrors.destinationField === undefined &&
+                  configuration.existingPipeline !== true && (
+                    <TargetFieldHelpText
+                      pipelineName={pipelineName}
+                      targetField={destinationField}
+                      model={selectedModel}
+                    />
+                  )
                 }
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.label',
-                {
-                  defaultMessage: 'Target field (optional)',
-                }
-              )}
-              helpText={
-                formErrors.destinationField === undefined &&
-                configuration.existingPipeline !== true && (
-                  <TargetFieldHelpText
-                    pipelineName={pipelineName}
-                    targetField={destinationField}
-                    model={selectedModel}
-                  />
-                )
-              }
-              error={formErrors.destinationField}
-              isInvalid={formErrors.destinationField !== undefined}
-              fullWidth
-            >
-              <EuiFieldText
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-targetField`}
-                disabled={inputsDisabled}
-                placeholder="custom_field_name"
-                value={destinationField}
-                onChange={(e) =>
-                  setInferencePipelineConfiguration({
-                    ...configuration,
-                    destinationField: e.target.value,
-                  })
-                }
+                error={formErrors.destinationField}
+                isInvalid={formErrors.destinationField !== undefined}
                 fullWidth
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <InferenceConfiguration />
-      </EuiForm>
+              >
+                <EuiFieldText
+                  data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-targetField`}
+                  disabled={inputsDisabled}
+                  placeholder="custom_field_name"
+                  value={destinationField}
+                  onChange={(e) =>
+                    setInferencePipelineConfiguration({
+                      ...configuration,
+                      destinationField: e.target.value,
+                    })
+                  }
+                  fullWidth
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiForm>
+      </EuiPanel>
     </>
   );
 };
