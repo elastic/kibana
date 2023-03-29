@@ -37,7 +37,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   const useMargins = select((state) => state.explicitInput.useMargins);
   const expandedPanelId = select((state) => state.componentState.expandedPanelId);
 
-  // turn off panel transform animations for the first 50 ms so that the dashboard doesn't animate on its first render.
+  // turn off panel transform animations for the first 500ms so that the dashboard doesn't animate on its first render.
   const [animatePanelTransforms, setAnimatePanelTransforms] = useState(false);
   useEffectOnce(() => {
     setTimeout(() => setAnimatePanelTransforms(true), 500);
