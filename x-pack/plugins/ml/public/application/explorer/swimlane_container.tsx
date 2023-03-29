@@ -287,7 +287,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
     const theme: PartialTheme = {
       background: {
-        color: euiTheme.euiFormBackgroundColor,
+        color: euiTheme.euiPanelBackgroundColorModifiers.plain,
       },
       heatmap: {
         grid: {
