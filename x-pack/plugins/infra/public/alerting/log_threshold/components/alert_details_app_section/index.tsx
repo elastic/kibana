@@ -10,6 +10,7 @@ import moment from 'moment';
 import React from 'react';
 import { type PartialCriterion } from '../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
+import { AlertAnnotation } from './components/alert_annotation';
 import LogsHistoryChart from './components/logs_history_chart';
 import { AlertDetailsAppSectionProps } from './types';
 
@@ -46,6 +47,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               chartCriterion={chartCriterion}
               showThreshold={true}
               executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
+              annotations={[<AlertAnnotation alertStarted={alert.start} />]}
             />
           </EuiFlexItem>
         );
