@@ -9,6 +9,7 @@
 import type { UnifiedHistogramState } from '../services/state_service';
 
 export const breakdownFieldSelector = (state: UnifiedHistogramState) => state.breakdownField;
+export const columnsSelector = (state: UnifiedHistogramState) => state.columns;
 export const chartHiddenSelector = (state: UnifiedHistogramState) => state.chartHidden;
 export const dataViewSelector = (state: UnifiedHistogramState) => state.dataView;
 export const filtersSelector = (state: UnifiedHistogramState) => state.filters;
@@ -20,3 +21,4 @@ export const timeRangeSelector = (state: UnifiedHistogramState) => state.timeRan
 export const topPanelHeightSelector = (state: UnifiedHistogramState) => state.topPanelHeight;
 export const totalHitsResultSelector = (state: UnifiedHistogramState) => state.totalHitsResult;
 export const totalHitsStatusSelector = (state: UnifiedHistogramState) => state.totalHitsStatus;
+export const currentSuggestionSelector = (state: UnifiedHistogramState) => state.currentSuggestion;

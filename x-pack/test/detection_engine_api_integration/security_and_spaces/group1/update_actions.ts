@@ -18,7 +18,7 @@ import {
   removeServerGeneratedProperties,
   getRuleWithWebHookAction,
   getSimpleRuleOutputWithWebHookAction,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   createRule,
   getSimpleRule,
   updateRule,
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
+        await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
           meta: {}, // create a rule with the action attached and a meta field
         };
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
+        await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
       it('should not change properties of immutable rule when applying actions to it', async () => {
