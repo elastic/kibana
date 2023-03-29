@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const PageObjects = getPageObjects(['common', 'context']);
 
-  describe('context filters-woof', function contextSize() {
+  describe('context filters', function contextSize() {
     beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
