@@ -13,7 +13,7 @@ import { PromiseType } from 'utility-types';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 
 import { EsArchiver } from '@kbn/es-archiver';
-import { esArchiverUnload } from './tasks/es_archiver';
+import { esArchiverUnload } from '../tasks/es_archiver';
 import { TestReporter } from './test_reporter';
 
 export interface ArgParams {
