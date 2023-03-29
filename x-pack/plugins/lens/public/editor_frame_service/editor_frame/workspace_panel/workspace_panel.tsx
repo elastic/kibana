@@ -751,7 +751,7 @@ export const VisualizationWrapper = ({
       data-render-error={
         hasDynamicError
           ? i18n.translate('xpack.lens.editorFrame.dataFailure', {
-              defaultMessage: ` An error occurred when loading data.`,
+              defaultMessage: `An error occurred when loading data.`,
             })
           : undefined
       }
