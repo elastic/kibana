@@ -12,14 +12,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiCallOut, EuiButton } from '@elastic/eui';
 
 import { LicensingCallout } from '../../../shared/licensing_callout/licensing_callout';
 
-import {
-  CustomizeIngestPipelineItem,
-  CopyAndCustomizePipelinePanel,
-} from './customize_pipeline_item';
+import { CopyAndCustomizePipelinePanel } from './customize_pipeline_item';
 
 const DEFAULT_VALUES = {
   // LicensingLogic
@@ -32,27 +29,6 @@ const DEFAULT_VALUES = {
   // PipelineLogic
   hasIndexIngestionPipeline: false,
 };
-
-describe('CustomizeIngestPipelineItem', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    setMockValues({ ...DEFAULT_VALUES });
-  });
-  it('renders delete cta when you have a custom pipeline', () => {
-    setMockValues({
-      ...DEFAULT_VALUES,
-      hasIndexIngestionPipeline: true,
-    });
-
-    const wrapper = shallow(<CustomizeIngestPipelineItem />);
-    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
-    expect(wrapper.find(EuiButtonEmpty).render().text()).toBe('Delete custom pipeline');
-  });
-  it('returns null if you do not have a custom pipeline', () => {
-    const wrapper = shallow(<CustomizeIngestPipelineItem />);
-    expect(wrapper.isEmptyRender()).toBe(true);
-  });
-});
 
 describe('CopyAndCustomizePipelinePanel', () => {
   beforeEach(() => {

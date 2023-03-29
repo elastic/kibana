@@ -13,6 +13,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -24,6 +25,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { Status } from '../../../../../../common/types/api';
+import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
@@ -35,6 +38,7 @@ import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
 import { CopyAndCustomizePipelinePanel } from './ingest_pipelines/customize_pipeline_item';
 import { IngestPipelinesCard } from './ingest_pipelines/ingest_pipelines_card';
+import { ManageCustomPipelineActions } from './ingest_pipelines/manage_custom_pipeline_actions';
 import { AddInferencePipelineFlyout } from './ml_inference/add_inference_pipeline_flyout';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 import { PipelinesJSONConfigurations } from './pipelines_json_configurations';
@@ -46,10 +50,12 @@ export const SearchIndexPipelines: React.FC = () => {
     showAddMlInferencePipelineModal,
     hasIndexIngestionPipeline,
     index,
+    isDeleteModalOpen,
     pipelineName,
   } = useValues(PipelinesLogic);
-  const { closeAddMlInferencePipelineModal } = useActions(PipelinesLogic);
+  const { closeAddMlInferencePipelineModal, closeDeleteModal } = useActions(PipelinesLogic);
   const { indexName } = useValues(IndexNameLogic);
+  const { status: revertStatus } = useValues(RevertConnectorPipelineApilogic);
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
 
@@ -157,12 +163,19 @@ export const SearchIndexPipelines: React.FC = () => {
             iconType="logstashInput"
             action={
               hasIndexIngestionPipeline ? (
-                <EuiBadge color="success">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.customBadge',
-                    { defaultMessage: 'Custom' }
-                  )}
-                </EuiBadge>
+                <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="success">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.customBadge',
+                        { defaultMessage: 'Custom' }
+                      )}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ManageCustomPipelineActions />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ) : (
                 <EuiBadge>
                   {i18n.translate(
@@ -236,6 +249,37 @@ export const SearchIndexPipelines: React.FC = () => {
       <InferenceErrors />
       {showAddMlInferencePipelineModal && (
         <AddInferencePipelineFlyout onClose={closeAddMlInferencePipelineModal} />
+      )}
+      {isDeleteModalOpen && (
+        <EuiConfirmModal
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.index.pipelines.deleteModal.title',
+            {
+              defaultMessage: 'Delete custom pipeline',
+            }
+          )}
+          isLoading={revertStatus === Status.LOADING}
+          onCancel={closeDeleteModal}
+          onConfirm={() => revertPipeline({ indexName })}
+          cancelButtonText={CANCEL_BUTTON_LABEL}
+          confirmButtonText={i18n.translate(
+            'xpack.enterpriseSearch.content.index.pipelines.deleteModal.confirmButton',
+            {
+              defaultMessage: 'Delete pipeline',
+            }
+          )}
+          buttonColor="danger"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.index.pipelines.deleteModal.description',
+              {
+                defaultMessage:
+                  'This will delete any custom pipelines associated with this index, including machine learning inference pipelines. The index will revert to using the default ingest pipeline.',
+              }
+            )}
+          </p>
+        </EuiConfirmModal>
       )}
     </>
   );
