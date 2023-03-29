@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export const TASK_TYPE = 'cleanup_failed_action_executions';
-export const TASK_ID = `Actions-${TASK_TYPE}`;
+import { i18n } from '@kbn/i18n';
+
+export const CASES = i18n.translate('xpack.triggersActionsUI.cases.label', {
+  defaultMessage: 'Cases',
+});
