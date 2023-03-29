@@ -10,6 +10,7 @@ import moment from 'moment';
 import React from 'react';
 import { type PartialCriterion } from '../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
+import LogsHistoryChart from './components/logs_history_chart';
 import { AlertDetailsAppSectionProps } from './types';
 
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
@@ -34,13 +35,12 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
 
   return (
     // Create a chart per-criteria
-    <EuiFlexGroup>
-      {rule.params.criteria.map((criteria) => {
+    <EuiFlexGroup direction="column">
+      {rule.params.criteria.map((criteria, idx) => {
         const chartCriterion = criteria as PartialCriterion;
         return (
-          <EuiFlexItem>
+          <EuiFlexItem key={`${chartCriterion.field}${idx}`}>
             <CriterionPreview
-              key={chartCriterion.field}
               ruleParams={rule.params}
               sourceId={rule.params.logView.logViewId}
               chartCriterion={chartCriterion}
@@ -50,6 +50,12 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
           </EuiFlexItem>
         );
       })}
+      {/* For now we show the history chart only if we have one criteria */}
+      {rule.params.criteria.length === 1 && (
+        <EuiFlexItem>
+          <LogsHistoryChart alert={alert} rule={rule} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -9,19 +9,36 @@ import React from 'react';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TopAlert } from '@kbn/observability-plugin/public';
+import { convertTo, TopAlert } from '@kbn/observability-plugin/public';
+import { useFetchTriggeredAlertsHistory } from '../../../../../hooks/use_fetch_triggered_alert_history';
 import { type PartialCriterion } from '../../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../../expression_editor/criterion_preview_chart';
 import { PartialRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
 
-const LogsHistoryChart = ({ rule, alert }: { rule: Rule<PartialRuleParams>; alert: TopAlert }) => {
+const LogsHistoryChart = ({
+  rule,
+  alert,
+}: {
+  rule: Rule<PartialRuleParams>;
+  alert: TopAlert<Record<string, any>>;
+}) => {
   // Show the Logs History Chart ONLY if we have one criteria
   // So always pull the first criteria
   const criteria = rule.params.criteria[0];
   const dateNow = Date.now();
   const dateLast30Days = Number(moment(dateNow).subtract(30, 'days').format('x'));
-
-  const ruleGroupBy = rule.params.groupBy;
+  const { triggeredAlertsData } = useFetchTriggeredAlertsHistory({
+    features: 'logs',
+    ruleId: rule.id,
+  });
+  const getSourceFromGroupBy = () => {
+    const ruleGroupBy = rule.params.groupBy;
+    if (ruleGroupBy && ruleGroupBy.length > 0) {
+      // Use the first GroupBy as a source
+      const fieldName = String(ruleGroupBy[0]);
+      return alert.fields[fieldName];
+    }
+  };
   return (
     <>
       <EuiPanel hasBorder={true}>
@@ -29,9 +46,10 @@ const LogsHistoryChart = ({ rule, alert }: { rule: Rule<PartialRuleParams>; aler
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
-                {/* {serviceName} */}
+                {getSourceFromGroupBy()}
+                &nbsp;
                 {i18n.translate('xpack.infra.logsChartHistory.chartTitle', {
-                  defaultMessage: 'Logs alerts history',
+                  defaultMessage: 'logs threshold alerts history',
                 })}
               </h2>
             </EuiTitle>
@@ -51,7 +69,7 @@ const LogsHistoryChart = ({ rule, alert }: { rule: Rule<PartialRuleParams>; aler
               <EuiFlexItem grow={false}>
                 <EuiText color="danger">
                   <EuiTitle size="s">
-                    <h3>{}</h3>
+                    <h3>{triggeredAlertsData?.totalTriggeredAlerts || '-'}</h3>
                   </EuiTitle>
                 </EuiText>
               </EuiFlexItem>
@@ -69,13 +87,13 @@ const LogsHistoryChart = ({ rule, alert }: { rule: Rule<PartialRuleParams>; aler
               <EuiText>
                 <EuiTitle size="s">
                   <h3>
-                    {/* {triggeredAlertsData?.avgTimeToRecoverUS
-                        ? convertTo({
-                            unit: 'minutes',
-                            microseconds: triggeredAlertsData?.avgTimeToRecoverUS,
-                            extended: true,
-                          }).formatted
-                        : '-'} */}
+                    {triggeredAlertsData?.avgTimeToRecoverUS
+                      ? convertTo({
+                          unit: 'minutes',
+                          microseconds: triggeredAlertsData?.avgTimeToRecoverUS,
+                          extended: true,
+                        }).formatted
+                      : '-'}
                   </h3>
                 </EuiTitle>
               </EuiText>
