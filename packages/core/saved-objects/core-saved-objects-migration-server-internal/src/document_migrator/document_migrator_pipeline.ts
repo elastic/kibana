@@ -7,6 +7,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { cloneDeep } from 'lodash';
 import Semver from 'semver';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { ActiveMigrations, Transform, TransformType } from './types';
@@ -17,23 +18,40 @@ function isGreater(a?: string, b?: string) {
 }
 
 export class DocumentMigratorPipeline {
-  additionalDocs = [] as SavedObjectUnsanitizedDoc[];
+  public additionalDocs = [] as SavedObjectUnsanitizedDoc[];
+  public document: SavedObjectUnsanitizedDoc;
 
-  constructor(
-    public document: SavedObjectUnsanitizedDoc,
-    private migrations: ActiveMigrations,
-    private kibanaVersion: string,
-    private convertNamespaceTypes: boolean
-  ) {}
+  private originalDoc: SavedObjectUnsanitizedDoc;
+  private migrations: ActiveMigrations;
+  private kibanaVersion: string;
+  private convertNamespaceTypes: boolean;
+
+  constructor({
+    document,
+    migrations,
+    kibanaVersion,
+    convertNamespaceTypes,
+  }: {
+    document: SavedObjectUnsanitizedDoc;
+    migrations: ActiveMigrations;
+    kibanaVersion: string;
+    convertNamespaceTypes: boolean;
+  }) {
+    this.originalDoc = document;
+    this.document = cloneDeep(document);
+    this.migrations = migrations;
+    this.kibanaVersion = kibanaVersion;
+    this.convertNamespaceTypes = convertNamespaceTypes;
+  }
 
   protected *getPipeline(): Generator<Transform> {
     while (this.hasPendingTransforms()) {
-      const { type } = this.document;
+      const { type: previousType } = this.document;
 
       for (const transform of this.getPendingTransforms()) {
         yield transform;
 
-        if (type !== this.document.type) {
+        if (this.document.type !== previousType) {
           // In the initial implementation, all the transforms for the new type should be applied.
           // And at the same time, documents with `undefined` in `typeMigrationVersion` are treated as the most recent ones.
           // This is a workaround to get into the loop again and apply all the migrations for the new type.

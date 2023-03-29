@@ -23,6 +23,7 @@ describe('getModelVersionTransforms', () => {
     version,
     transformType: type,
     transform: expect.any(Function),
+    transformDown: expect.any(Function),
   });
 
   const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
@@ -123,65 +124,135 @@ describe('convertModelVersionTransformFn', () => {
     }));
   };
 
-  it('generates a transform function calling the model transform', () => {
-    const upTransform = createModelTransformFn();
-    const downTransform = createModelTransformFn();
+  describe('up transformation', () => {
+    it('generates a transform function calling the model transform', () => {
+      const upTransform = createModelTransformFn();
+      const downTransform = createModelTransformFn();
 
-    const definition: SavedObjectsModelVersion = {
-      modelChange: {
-        type: 'expansion',
-        transformation: { up: upTransform, down: downTransform },
-      },
-    };
+      const definition: SavedObjectsModelVersion = {
+        modelChange: {
+          type: 'expansion',
+          transformation: { up: upTransform, down: downTransform },
+        },
+      };
 
-    const transform = convertModelVersionTransformFn({
-      log,
-      modelVersion: 1,
-      virtualVersion: '10.1.0',
-      definition,
+      const transform = convertModelVersionTransformFn({
+        log,
+        modelVersion: 1,
+        virtualVersion: '10.1.0',
+        definition,
+        type: 'up',
+      });
+
+      expect(upTransform).not.toHaveBeenCalled();
+      expect(downTransform).not.toHaveBeenCalled();
+
+      const doc = createDoc();
+      const context = { log, modelVersion: 1 };
+
+      transform(doc);
+
+      expect(upTransform).toHaveBeenCalledTimes(1);
+      expect(downTransform).not.toHaveBeenCalled();
+      expect(upTransform).toHaveBeenCalledWith(doc, context);
     });
 
-    expect(upTransform).not.toHaveBeenCalled();
-    expect(downTransform).not.toHaveBeenCalled();
+    it('returns the document from the model transform', () => {
+      const upTransform = createModelTransformFn();
 
-    const doc = createDoc();
-    const context = { log, modelVersion: 1 };
+      const resultDoc = createDoc();
+      upTransform.mockImplementation((doc) => {
+        return { document: resultDoc };
+      });
 
-    transform(doc);
+      const definition: SavedObjectsModelVersion = {
+        modelChange: {
+          type: 'expansion',
+          transformation: { up: upTransform, down: jest.fn() },
+        },
+      };
 
-    expect(upTransform).toHaveBeenCalledTimes(1);
-    expect(downTransform).not.toHaveBeenCalled();
-    expect(upTransform).toHaveBeenCalledWith(doc, context);
+      const transform = convertModelVersionTransformFn({
+        log,
+        modelVersion: 1,
+        virtualVersion: '10.1.0',
+        definition,
+        type: 'up',
+      });
+
+      const doc = createDoc();
+
+      const result = transform(doc);
+      expect(result).toEqual({
+        transformedDoc: resultDoc,
+        additionalDocs: [],
+      });
+    });
   });
 
-  it('returns the document from the model transform', () => {
-    const upTransform = createModelTransformFn();
+  describe('down transformation', () => {
+    it('generates a transform function calling the model transform', () => {
+      const upTransform = createModelTransformFn();
+      const downTransform = createModelTransformFn();
 
-    const resultDoc = createDoc();
-    upTransform.mockImplementation((doc) => {
-      return { document: resultDoc };
+      const definition: SavedObjectsModelVersion = {
+        modelChange: {
+          type: 'expansion',
+          transformation: { up: upTransform, down: downTransform },
+        },
+      };
+
+      const transform = convertModelVersionTransformFn({
+        log,
+        modelVersion: 1,
+        virtualVersion: '10.1.0',
+        definition,
+        type: 'down',
+      });
+
+      expect(upTransform).not.toHaveBeenCalled();
+      expect(downTransform).not.toHaveBeenCalled();
+
+      const doc = createDoc();
+      const context = { log, modelVersion: 1 };
+
+      transform(doc);
+
+      expect(upTransform).not.toHaveBeenCalled();
+      expect(downTransform).toHaveBeenCalledTimes(1);
+      expect(downTransform).toHaveBeenCalledWith(doc, context);
     });
 
-    const definition: SavedObjectsModelVersion = {
-      modelChange: {
-        type: 'expansion',
-        transformation: { up: upTransform, down: jest.fn() },
-      },
-    };
+    it('returns the document from the model transform', () => {
+      const downTransform = createModelTransformFn();
 
-    const transform = convertModelVersionTransformFn({
-      log,
-      modelVersion: 1,
-      virtualVersion: '10.1.0',
-      definition,
-    });
+      const resultDoc = createDoc();
+      downTransform.mockImplementation((doc) => {
+        return { document: resultDoc };
+      });
 
-    const doc = createDoc();
+      const definition: SavedObjectsModelVersion = {
+        modelChange: {
+          type: 'expansion',
+          transformation: { up: jest.fn(), down: downTransform },
+        },
+      };
 
-    const result = transform(doc);
-    expect(result).toEqual({
-      transformedDoc: resultDoc,
-      additionalDocs: [],
+      const transform = convertModelVersionTransformFn({
+        log,
+        modelVersion: 1,
+        virtualVersion: '10.1.0',
+        definition,
+        type: 'down',
+      });
+
+      const doc = createDoc();
+
+      const result = transform(doc);
+      expect(result).toEqual({
+        transformedDoc: resultDoc,
+        additionalDocs: [],
+      });
     });
   });
 });

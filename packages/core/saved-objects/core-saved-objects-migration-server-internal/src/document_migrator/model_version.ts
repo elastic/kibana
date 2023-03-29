@@ -44,6 +44,14 @@ export const getModelVersionTransforms = ({
           modelVersion,
           virtualVersion,
           definition,
+          type: 'up',
+        }),
+        transformDown: convertModelVersionTransformFn({
+          log,
+          modelVersion,
+          virtualVersion,
+          definition,
+          type: 'down',
         }),
         transformType: TransformType.Migrate,
       };
@@ -56,11 +64,13 @@ export const convertModelVersionTransformFn = ({
   virtualVersion,
   modelVersion,
   definition,
+  type,
   log,
 }: {
   virtualVersion: string;
   modelVersion: number;
   definition: SavedObjectsModelVersion;
+  type: 'up' | 'down';
   log: Logger;
 }): TransformFn => {
   if (!definition.modelChange.transformation) {
@@ -70,7 +80,10 @@ export const convertModelVersionTransformFn = ({
     log,
     modelVersion,
   };
-  const modelTransformFn = definition.modelChange.transformation.up;
+  const modelTransformFn =
+    type === 'up'
+      ? definition.modelChange.transformation.up
+      : definition.modelChange.transformation.down;
 
   return function convertedTransform(doc: SavedObjectUnsanitizedDoc) {
     try {

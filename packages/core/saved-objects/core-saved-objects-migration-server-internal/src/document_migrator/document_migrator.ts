@@ -145,16 +145,12 @@ export class DocumentMigrator implements VersionedTransformer {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
 
-    // Clone the document to prevent accidental mutations on the original data
-    // Ex: Importing sample data that is cached at import level, migrations would
-    // execute on mutated data the second time.
-    const clonedDoc = _.cloneDeep(doc);
-    const pipeline = new DocumentMigratorPipeline(
-      clonedDoc,
-      this.migrations,
-      this.documentMigratorOptions.kibanaVersion,
-      convertNamespaceTypes
-    );
+    const pipeline = new DocumentMigratorPipeline({
+      document: doc,
+      migrations: this.migrations,
+      kibanaVersion: this.documentMigratorOptions.kibanaVersion,
+      convertNamespaceTypes,
+    });
     pipeline.run();
 
     const { document, additionalDocs } = pipeline;
