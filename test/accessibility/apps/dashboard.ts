@@ -109,12 +109,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Test full screen', async () => {
+    // https://github.com/elastic/kibana/issues/153597
+    it.skip('Test full screen', async () => {
       await PageObjects.dashboard.clickFullScreenMode();
       await a11y.testAppSnapshot();
     });
 
-    it('Exit out of full screen mode', async () => {
+    // https://github.com/elastic/kibana/issues/153597
+    it.skip('Exit out of full screen mode', async () => {
       await PageObjects.dashboard.exitFullScreenMode();
       await a11y.testAppSnapshot();
     });
