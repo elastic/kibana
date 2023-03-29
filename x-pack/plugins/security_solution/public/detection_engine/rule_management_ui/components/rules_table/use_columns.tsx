@@ -152,7 +152,7 @@ const useRuleSnoozeColumn = ({
       width: '100px',
       sortable: false,
     }),
-    [hasCRUDPermissions]
+    [hasCRUDPermissions, invalidateFetchRuleSnoozeSettings]
   );
 };
 
