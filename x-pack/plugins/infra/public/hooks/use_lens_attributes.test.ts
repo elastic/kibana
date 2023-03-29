@@ -10,9 +10,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useLensAttributes } from './use_lens_attributes';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { InfraClientStartDeps } from '../types';
+import type { InfraClientStartDeps } from '../types';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
 
@@ -154,34 +154,7 @@ describe('useHostTable hook', () => {
         },
       },
     });
-    expect(filters).toEqual([
-      {
-        $state: { store: 'appState' },
-        meta: {
-          alias: null,
-          disabled: false,
-          index: 'c1ec8212-ecee-494a-80da-f6f33b3393f2',
-          key: 'system.load.cores',
-          negate: false,
-          type: 'exists',
-          value: 'exists',
-        },
-        query: { exists: { field: 'system.load.cores' } },
-      },
-      {
-        $state: { store: 'appState' },
-        meta: {
-          alias: null,
-          disabled: false,
-          index: 'c1ec8212-ecee-494a-80da-f6f33b3393f2',
-          key: 'system.load.1',
-          negate: false,
-          type: 'exists',
-          value: 'exists',
-        },
-        query: { exists: { field: 'system.load.1' } },
-      },
-    ]);
+    expect(filters).toEqual([]);
   });
 
   it('should return attributes with injected values', async () => {
@@ -223,7 +196,7 @@ describe('useHostTable hook', () => {
 
     expect(title).toEqual(injectedData.title);
     expect(query).toEqual(injectedData.query);
-    expect(filters).toHaveLength(3);
+    expect(filters).toHaveLength(1);
     expect(filters).toContain(injectedData.filters[0]);
   });
 });

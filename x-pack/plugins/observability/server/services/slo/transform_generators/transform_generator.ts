@@ -36,7 +36,7 @@ export abstract class TransformGenerator {
     return `Rolled-up SLI data for SLO: ${slo.name}`;
   }
 
-  public buildCommonGroupBy(slo: SLO) {
+  public buildGroupBy(slo: SLO, sourceIndexTimestampField: string | undefined = '@timestamp') {
     let fixedInterval = '1m';
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       fixedInterval = slo.objective.timesliceWindow!.format();
@@ -53,20 +53,23 @@ export abstract class TransformGenerator {
           field: 'slo.revision',
         },
       },
-      // Field used in the destination index, using @timestamp as per mapping definition
+      // timestamp field defined in the destination index
       '@timestamp': {
         date_histogram: {
-          field: slo.settings.timestampField,
+          field: sourceIndexTimestampField, // timestamp field defined in the source index
           fixed_interval: fixedInterval,
         },
       },
     };
   }
 
-  public buildSettings(slo: SLO): TransformSettings {
+  public buildSettings(
+    slo: SLO,
+    sourceIndexTimestampField: string | undefined = '@timestamp'
+  ): TransformSettings {
     return {
       frequency: slo.settings.frequency.format(),
-      sync_field: slo.settings.timestampField,
+      sync_field: sourceIndexTimestampField, // timestamp field defined in the source index
       sync_delay: slo.settings.syncDelay.format(),
     };
   }

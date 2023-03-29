@@ -394,7 +394,7 @@ export const RulesList = ({
     if (lastRunOutcomeFilter) {
       updateFilters({ filter: 'ruleLastRunOutcomes', value: lastRunOutcomeFilter });
     }
-  }, [lastResponseFilter]);
+  }, [lastRunOutcomeFilter]);
 
   useEffect(() => {
     if (cloneRuleId.current) {

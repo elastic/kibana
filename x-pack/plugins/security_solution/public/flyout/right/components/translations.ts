@@ -16,3 +16,27 @@ export const COLLAPSE_DETAILS_BUTTON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.collapseDetailButton',
   { defaultMessage: 'Collapse alert details' }
 );
+
+export const DOCUMENT_DETAILS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.headerTitle',
+  { defaultMessage: 'Document details' }
+);
+
+export const SEVERITY_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.severityTitle',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const RISK_SCORE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.riskScoreTitle',
+  {
+    defaultMessage: 'Risk score',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.highlightedFieldsTitle',
+  { defaultMessage: 'Highlighted fields' }
+);

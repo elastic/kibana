@@ -6,10 +6,11 @@
  */
 
 import { GeoJsonProperties } from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Query } from '@kbn/data-plugin/common/query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { IField } from '../../fields/field';
-import { VectorJoinSourceRequestMeta } from '../../../../common/descriptor_types';
+import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ISource } from '../source';
@@ -19,7 +20,7 @@ export interface ITermJoinSource extends ISource {
   getTermField(): IField;
   getWhereQuery(): Query | undefined;
   getPropertiesMap(
-    searchFilters: VectorJoinSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,
@@ -34,6 +35,9 @@ export interface ITermJoinSource extends ISource {
 
   getId(): string;
   getRightFields(): IField[];
-  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]>;
   getFieldByName(fieldName: string): IField | null;
 }
