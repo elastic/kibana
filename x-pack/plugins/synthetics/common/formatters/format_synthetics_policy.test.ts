@@ -7,12 +7,14 @@
 import { ConfigKey, DataStream } from '../runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 
+const gParams = { proxyUrl: 'https://proxy.com' };
 describe('formatSyntheticsPolicy', () => {
   it('formats browser policy', () => {
     const { formattedPolicy } = formatSyntheticsPolicy(
       testNewPolicy,
       DataStream.BROWSER,
-      browserConfig
+      browserConfig,
+      gParams
     );
 
     expect(formattedPolicy).toEqual({
@@ -377,7 +379,8 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 params: {
                   type: 'yaml',
-                  value: '',
+                  value:
+                    '{"proxyUrl":"https://proxy.com/local","proxyUsername":"username","proxyPassword":"password"}',
                 },
                 playwright_options: {
                   type: 'yaml',
@@ -500,10 +503,15 @@ describe('formatSyntheticsPolicy', () => {
   });
 
   it.each([true, false])('formats http policy', (isTLSEnabled) => {
-    const { formattedPolicy } = formatSyntheticsPolicy(testNewPolicy, DataStream.HTTP, {
-      ...httpPolicy,
-      [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
-    });
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      testNewPolicy,
+      DataStream.HTTP,
+      {
+        ...httpPolicy,
+        [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
+      },
+      gParams
+    );
 
     expect(formattedPolicy).toEqual({
       enabled: true,
@@ -591,7 +599,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 proxy_url: {
                   type: 'text',
-                  value: '',
+                  value: 'https://proxy.com',
                 },
                 'response.include_body': {
                   type: 'text',
@@ -848,12 +856,9 @@ describe('formatSyntheticsPolicy', () => {
               vars: {
                 __ui: {
                   type: 'yaml',
-                  value:
-                    '{"script_source":{"is_generated_script":false,"file_name":""},"is_zip_url_tls_enabled":false,"is_tls_enabled":false}',
                 },
                 config_id: {
                   type: 'text',
-                  value: '00bb3ceb-a242-4c7a-8405-8da963661374',
                 },
                 enabled: {
                   type: 'bool',
@@ -861,23 +866,19 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 'filter_journeys.match': {
                   type: 'text',
-                  value: null,
                 },
                 'filter_journeys.tags': {
                   type: 'yaml',
-                  value: null,
                 },
                 id: {
                   type: 'text',
-                  value: '00bb3ceb-a242-4c7a-8405-8da963661374',
                 },
                 ignore_https_errors: {
                   type: 'bool',
-                  value: false,
                 },
                 location_name: {
                   type: 'text',
-                  value: 'Test private location 0',
+                  value: 'Fleet managed',
                 },
                 'monitor.project.id': {
                   type: 'text',
@@ -887,19 +888,15 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 name: {
                   type: 'text',
-                  value: 'Test HTTP Monitor 03',
                 },
                 origin: {
                   type: 'text',
-                  value: 'ui',
                 },
                 params: {
                   type: 'yaml',
-                  value: '',
                 },
                 playwright_options: {
                   type: 'yaml',
-                  value: '',
                 },
                 run_once: {
                   type: 'bool',
@@ -911,32 +908,24 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 screenshots: {
                   type: 'text',
-                  value: 'on',
                 },
                 'service.name': {
                   type: 'text',
-                  value: '',
                 },
                 'source.inline.script': {
                   type: 'yaml',
-                  value:
-                    '"step(\\"Visit /users api route\\", async () => {\\\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\\\n  expect(response.status()).toEqual(200);\\\\n});"',
                 },
                 'source.project.content': {
                   type: 'text',
-                  value: '',
                 },
                 'source.zip_url.folder': {
                   type: 'text',
-                  value: '',
                 },
                 'source.zip_url.password': {
                   type: 'password',
-                  value: '',
                 },
                 'source.zip_url.proxy_url': {
                   type: 'text',
-                  value: '',
                 },
                 'source.zip_url.ssl.certificate': {
                   type: 'yaml',
@@ -958,27 +947,21 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 'source.zip_url.url': {
                   type: 'text',
-                  value: '',
                 },
                 'source.zip_url.username': {
                   type: 'text',
-                  value: '',
                 },
                 synthetics_args: {
                   type: 'text',
-                  value: null,
                 },
                 tags: {
                   type: 'yaml',
-                  value: '["cookie-test","browser"]',
                 },
                 'throttling.config': {
                   type: 'text',
-                  value: '5d/3u/20l',
                 },
                 timeout: {
                   type: 'text',
-                  value: '16s',
                 },
                 type: {
                   type: 'text',
@@ -1232,7 +1215,8 @@ const browserConfig: any = {
     is_zip_url_tls_enabled: false,
     is_tls_enabled: false,
   },
-  params: '',
+  params:
+    '{"proxyUrl":"https://proxy.com/local","proxyUsername":"username","proxyPassword":"password"}',
   'url.port': null,
   'source.inline.script':
     'step("Visit /users api route", async () => {\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\n  expect(response.status()).toEqual(200);\\n});',
@@ -1295,7 +1279,7 @@ const httpPolicy: any = {
   max_redirects: '0',
   'url.port': null,
   password: 'changeme',
-  proxy_url: '',
+  proxy_url: '${proxyUrl}',
   'check.response.body.negative': [],
   'check.response.body.positive': [],
   'response.include_body': 'on_error',
@@ -1314,6 +1298,6 @@ const httpPolicy: any = {
   'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
   fields: { config_id: '51ccd9d9-fc3f-4718-ba9d-b6ef80e73fc5' },
   fields_under_root: true,
-  params: '',
+  params: '{"proxyUrl":"https://proxy.com"}',
   location_name: 'Test private location 0',
 };
