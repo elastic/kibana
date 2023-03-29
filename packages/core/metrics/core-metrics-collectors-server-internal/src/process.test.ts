@@ -7,6 +7,7 @@
  */
 
 import v8, { HeapInfo } from 'v8';
+import { mockEventLoopDelayMonitor, mockEventLoopUtilizationMonitor } from './process.test.mocks';
 import { ProcessMetricsCollector } from './process';
 
 describe('ProcessMetricsCollector', () => {
@@ -17,7 +18,7 @@ describe('ProcessMetricsCollector', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('#collect', () => {
@@ -29,9 +30,7 @@ describe('ProcessMetricsCollector', () => {
     });
 
     it('collects event loop delay', () => {
-      const mockEventLoopDelayMonitor = { collect: jest.fn().mockReturnValue({ mean: 13 }) };
-      // @ts-expect-error-next-line readonly private method.
-      collector.eventLoopDelayMonitor = mockEventLoopDelayMonitor;
+      mockEventLoopDelayMonitor.collect.mockReturnValueOnce({ mean: 13 });
       const metrics = collector.collect();
       expect(metrics).toHaveLength(1);
       expect(metrics[0].event_loop_delay).toBe(13);
@@ -40,9 +39,7 @@ describe('ProcessMetricsCollector', () => {
 
     it('collects event loop utilization', () => {
       const mockData = { active: 1, idle: 1, utilization: 1 };
-      const mockEventLoopUtilizationMonitor = { collect: jest.fn().mockReturnValue(mockData) };
-      // @ts-expect-error-next-line readonly private method.
-      collector.eventLoopUtilizationMonitor = mockEventLoopUtilizationMonitor;
+      mockEventLoopUtilizationMonitor.collect.mockReturnValueOnce(mockData);
       const metrics = collector.collect();
       expect(metrics).toHaveLength(1);
       expect(metrics[0].event_loop_utilization).toEqual(mockData);
@@ -91,17 +88,11 @@ describe('ProcessMetricsCollector', () => {
 
   describe('#reset', () => {
     it('resets event loop delay', () => {
-      const mockEventLoopDelayMonitor = { reset: jest.fn() };
-      // @ts-expect-error-next-line readonly private method.
-      collector.eventLoopDelayMonitor = mockEventLoopDelayMonitor;
       collector.reset();
       expect(mockEventLoopDelayMonitor.reset).toBeCalledTimes(1);
     });
 
     it('resets event loop utilization', () => {
-      const mockEventLoopUtilizationMonitor = { reset: jest.fn() };
-      // @ts-expect-error-next-line readonly private method.
-      collector.eventLoopUtilizationMonitor = mockEventLoopUtilizationMonitor;
       collector.reset();
       expect(mockEventLoopUtilizationMonitor.reset).toBeCalledTimes(1);
     });
