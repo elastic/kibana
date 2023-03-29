@@ -48,16 +48,32 @@ export const StateMachinePlayground = () => {
   return (
     <>
       {isLoading && 'Is loading'}
-      <EuiButton fill onClick={() => switchToInlineLogView()}>
+      <EuiButton
+        data-test-subj="infraStateMachinePlaygroundButton"
+        fill
+        onClick={() => switchToInlineLogView()}
+      >
         {'Switch to inline Log View'}
       </EuiButton>
-      <EuiButton fill onClick={() => persistInlineLogView()}>
+      <EuiButton
+        data-test-subj="infraStateMachinePlaygroundButton"
+        fill
+        onClick={() => persistInlineLogView()}
+      >
         {'Persist inline Log View'}
       </EuiButton>
-      <EuiButton fill onClick={() => revertToDefaultLogView()}>
+      <EuiButton
+        data-test-subj="infraStateMachinePlaygroundButton"
+        fill
+        onClick={() => revertToDefaultLogView()}
+      >
         {'Revert to default (persisted) Log View'}
       </EuiButton>
-      <EuiButton fill onClick={() => updateLogView()}>
+      <EuiButton
+        data-test-subj="infraStateMachinePlaygroundButton"
+        fill
+        onClick={() => updateLogView()}
+      >
         {'Update log view'}
       </EuiButton>
     </>
