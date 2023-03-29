@@ -731,7 +731,7 @@ export class DataViewsService {
     try {
       savedObject = await this.savedObjectsClient.get(id);
     } catch (e) {
-      if (e.body.statusCode === 404) {
+      if (e.body?.statusCode === 404 || e.output?.statusCode === 404) {
         throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
       } else {
         throw e;
