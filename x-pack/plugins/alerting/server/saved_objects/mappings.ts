@@ -111,7 +111,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
     },
     apiKeyCreatedByUser: {
-      type: 'keyword',
+      type: 'boolean',
     },
     throttle: {
       type: 'keyword',

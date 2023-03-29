@@ -91,6 +91,7 @@ describe('transform rule for export', () => {
           enabled: false,
           apiKey: null,
           apiKeyOwner: null,
+          apiKeyCreatedByUser: null,
           scheduledTaskId: null,
           legacyId: null,
           executionStatus: {
