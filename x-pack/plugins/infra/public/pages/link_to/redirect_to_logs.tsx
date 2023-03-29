@@ -8,27 +8,27 @@
 import React from 'react';
 import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
 import { flowRight } from 'lodash';
-import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { replaceLogPositionInQueryString } from '../../observability_logs/log_stream_position_state/src/url_state_storage_service';
 import { replaceLogFilterInQueryString } from '../../observability_logs/log_stream_query_state';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
+import { replaceLogViewInQueryString } from '../../observability_logs/log_view_state';
 
 type RedirectToLogsType = RouteComponentProps<{}>;
 
 interface RedirectToLogsProps extends RedirectToLogsType {
   match: RouteMatch<{
-    sourceId?: string;
+    logViewId?: string;
   }>;
 }
 
 export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
-  const sourceId = match.params.sourceId || 'default';
+  const logViewId = match.params.logViewId || 'default';
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
   const searchString = flowRight(
     replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time),
     replaceLogPositionInQueryString(time),
-    replaceSourceIdInQueryString(sourceId)
+    replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
   )('');
 
   return <Redirect to={`/stream?${searchString}`} />;
