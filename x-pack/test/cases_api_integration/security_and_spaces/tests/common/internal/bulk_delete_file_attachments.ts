@@ -781,7 +781,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: postedSecCase.id,
           fileIds: [create.file.id],
-          auth: { user: secAllSpace1User, space: 'space1' },
+          auth: { user: secAllSpace1User, space: 'space2' },
           expectedHttpCode: 403,
         });
       });
