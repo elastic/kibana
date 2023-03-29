@@ -176,7 +176,7 @@ export const useDashboardMenuItems = ({
 
       saveAs: {
         description: topNavStrings.saveAs.description,
-        disableButton: isSaveInProgress,
+        disableButton: isSaveInProgress || hasOverlays,
         id: 'save',
         emphasize: !Boolean(lastSavedId),
         testId: 'dashboardSaveMenuItem',
@@ -188,7 +188,7 @@ export const useDashboardMenuItems = ({
       switchToViewMode: {
         ...topNavStrings.switchToViewMode,
         id: 'cancel',
-        disableButton: isSaveInProgress || !lastSavedId,
+        disableButton: isSaveInProgress || !lastSavedId || hasOverlays,
         testId: 'dashboardViewOnlyMode',
         run: () => returnToViewMode(),
       } as TopNavMenuData,
@@ -197,7 +197,7 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.share,
         id: 'share',
         testId: 'shareTopNavButton',
-        disableButton: isSaveInProgress,
+        disableButton: isSaveInProgress || hasOverlays,
         run: showShare,
       } as TopNavMenuData,
 
@@ -205,7 +205,7 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.settings,
         id: 'settings',
         testId: 'dashboardSettingsButton',
-        disableButton: isSaveInProgress,
+        disableButton: isSaveInProgress || hasOverlays,
         run: () => dashboardContainer.showSettings(),
       } as TopNavMenuData,
 

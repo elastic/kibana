@@ -54,6 +54,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
 
   const [isTitleDuplicate, setIsTitleDuplicate] = useState(false);
   const [isTitleDuplicateConfirmed, setIsTitleDuplicateConfirmed] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
 
   const lastSavedId = select((state) => state.componentState.lastSavedId);
   const lastSavedTitle = select((state) => state.explicitInput.title);
@@ -61,6 +62,23 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   const onTitleDuplicate = () => {
     setIsTitleDuplicate(true);
     setIsTitleDuplicateConfirmed(true);
+  };
+
+  const onApply = async () => {
+    setIsApplying(true);
+    if (
+      await checkForDuplicateDashboardTitle({
+        title: dashboardSettingsState.title,
+        copyOnSave: false,
+        lastSavedTitle,
+        onTitleDuplicate,
+        isTitleDuplicateConfirmed,
+      })
+    ) {
+      dispatch(setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState }));
+      onClose();
+    }
+    setIsApplying(false);
   };
 
   const updateDashboardSetting = useCallback(
@@ -314,22 +332,10 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="applyCustomizeDashboardButton"
-              onClick={async () => {
-                if (
-                  await checkForDuplicateDashboardTitle({
-                    title: dashboardSettingsState.title,
-                    copyOnSave: false,
-                    lastSavedTitle,
-                    onTitleDuplicate,
-                    isTitleDuplicateConfirmed,
-                  })
-                ) {
-                  dispatch(setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState }));
-                  onClose();
-                }
-              }}
+              onClick={onApply}
               fill
               aria-describedby={isTitleDuplicate ? DUPLICATE_TITLE_CALLOUT_ID : undefined}
+              isLoading={isApplying}
             >
               {isTitleDuplicate ? (
                 <FormattedMessage

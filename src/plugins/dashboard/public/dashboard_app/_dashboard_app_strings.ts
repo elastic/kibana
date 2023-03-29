@@ -328,7 +328,7 @@ export const topNavStrings = {
       defaultMessage: 'settings',
     }),
     description: i18n.translate('dashboard.topNave.settingsConfigDescription', {
-      defaultMessage: 'Change settings for your dashboard',
+      defaultMessage: 'Open dashboard settings',
     }),
   },
   clone: {
