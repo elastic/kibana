@@ -57,6 +57,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/cases-plugin",
     "@kbn/shared-ux-prompt-not-found",
+    "@kbn/observability-alert-details",
   ],
   "exclude": ["target/**/*"]
 }
