@@ -54,8 +54,8 @@ export const AXE_OPTIONS = {
     bypass: {
       enabled: false, // disabled because it's too flaky
     },
-    'nested-interactive': {
-      enabled: false, // tracker here - https://github.com/elastic/kibana/issues/152494 disabled because we have too many failures on interactive controls
-    },
+    // 'nested-interactive': {
+    //   enabled: false, // tracker here - https://github.com/elastic/kibana/issues/152494 disabled because we have too many failures on interactive controls
+    // },
   },
 };
