@@ -46,7 +46,7 @@ async function updateWithOCC(
   const { savedObjectsClient, getModificationMetadata, logger } = context;
   const { id, title, enabled, duration, rRule } = params;
   const modificationMetadata = await getModificationMetadata();
-  const expirationDate = moment().add(1, 'year').toISOString();
+  const expirationDate = moment.utc().add(1, 'year').toISOString();
 
   try {
     const {

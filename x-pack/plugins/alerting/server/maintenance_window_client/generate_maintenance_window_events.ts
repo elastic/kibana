@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { RRule, Weekday } from 'rrule';
 import { parseByWeekday } from '../lib/rrule';
 import { RRuleParams } from '../../common';
+
+const utcToLocalUtc = (date: Date, tz: string) => {
+  const localTime = moment(date).tz(tz);
+  const localTimeInUTC = moment(localTime).tz('UTC', true);
+  return localTimeInUTC.utc().toDate();
+};
+
+const localUtcToUtc = (date: Date, tz: string) => {
+  const localTimeString = moment.utc(date).format('YYYY-MM-DD HH:mm:ss.SSS');
+  return moment.tz(localTimeString, tz).utc().toDate();
+};
 
 export interface GenerateMaintenanceWindowEventsParams {
   rRule: RRuleParams;
@@ -21,25 +32,30 @@ export const generateMaintenanceWindowEvents = ({
   expirationDate,
   duration,
 }: GenerateMaintenanceWindowEventsParams) => {
-  const { dtstart, until, wkst, byweekday } = rRule;
+  const { dtstart, until, wkst, byweekday, tzid, ...rest } = rRule;
+
+  const startDate = utcToLocalUtc(new Date(dtstart), tzid);
+  const endDate = utcToLocalUtc(new Date(expirationDate), tzid);
+
   const rRuleOptions = {
-    ...rRule,
-    dtstart: new Date(dtstart),
-    until: until ? new Date(until) : null,
+    ...rest,
+    dtstart: startDate,
+    until: until ? utcToLocalUtc(new Date(until), tzid) : null,
     wkst: wkst ? Weekday.fromStr(wkst) : null,
     byweekday: byweekday ? parseByWeekday(byweekday) : null,
   };
 
   try {
-    const startDate = new Date(dtstart);
-    const endDate = new Date(expirationDate);
     const recurrenceRule = new RRule(rRuleOptions);
     const occurrenceDates = recurrenceRule.between(startDate, endDate, true);
 
-    return occurrenceDates.map((date) => ({
-      gte: date.toISOString(),
-      lte: moment(date).add(duration, 'ms').toISOString(),
-    }));
+    return occurrenceDates.map((date) => {
+      const utcDate = localUtcToUtc(date, tzid);
+      return {
+        gte: utcDate.toISOString(),
+        lte: moment(utcDate).add(duration, 'ms').toISOString(),
+      };
+    });
   } catch (e) {
     throw new Error(`Failed to process RRule ${rRule}. Error: ${e}`);
   }

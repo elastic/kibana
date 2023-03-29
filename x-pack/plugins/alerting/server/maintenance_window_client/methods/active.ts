@@ -38,7 +38,7 @@ export async function active(
 
   const startDate = start ? new Date(start) : new Date();
   const duration = parseDuration(interval);
-  const endDate = moment(startDate).add(duration, 'ms').toDate();
+  const endDate = moment.utc(startDate).add(duration, 'ms').toDate();
 
   const startDateISO = startDate.toISOString();
   const endDateISO = endDate.toISOString();
@@ -84,7 +84,7 @@ export async function active(
       return bucket.doc_count > 0;
     });
   } catch (e) {
-    const errorMessage = `Failed to find active maintenance window by interval: ${interval} with start date: ${startDate}, Error: ${e}`;
+    const errorMessage = `Failed to find active maintenance window by interval: ${interval} with start date: ${startDate.toISOString()}, Error: ${e}`;
     logger.error(errorMessage);
   }
   return false;

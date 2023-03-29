@@ -32,7 +32,7 @@ export async function create(
   const { title, duration, rRule } = params;
 
   const id = SavedObjectsUtils.generateId();
-  const expirationDate = moment().add(1, 'year').toISOString();
+  const expirationDate = moment().utc().add(1, 'year').toISOString();
   const modificationMetadata = await getModificationMetadata();
 
   try {

@@ -261,7 +261,7 @@ describe('MaintenanceWindowClient - active', () => {
     });
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
-      'Failed to find active maintenance window by interval: 4d with start date: Sat Feb 25 2023 16:00:00 GMT-0800 (Pacific Standard Time), Error: something went wrong'
+      'Failed to find active maintenance window by interval: 4d with start date: 2023-02-26T00:00:00.000Z, Error: something went wrong'
     );
     expect(result).toEqual(false);
   });
