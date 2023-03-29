@@ -17,6 +17,7 @@ import {
   ExecuteActionHostResponseOutput,
   type ExecuteActionHostResponseOutputProps,
 } from './execute_action_host_response_output';
+import { getEmptyValue } from '@kbn/cases-plugin/public/components/empty_value';
 
 describe('When using the `ExecuteActionHostResponseOutput` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -67,7 +68,9 @@ describe('When using the `ExecuteActionHostResponseOutput` component', () => {
     const accordionOutputButton = Array.from(
       renderResult.getByTestId('test').querySelectorAll('.euiAccordion')
     )[0];
-    expect(accordionOutputButton.textContent).toContain('Execution output (truncated)—');
+    expect(accordionOutputButton.textContent).toContain(
+      `Execution output (truncated)${getEmptyValue()}`
+    );
   });
 
   it('should show `-` when no error content', async () => {
@@ -84,7 +87,9 @@ describe('When using the `ExecuteActionHostResponseOutput` component', () => {
     const accordionErrorButton = Array.from(
       renderResult.getByTestId('test').querySelectorAll('.euiAccordion')
     )[1];
-    expect(accordionErrorButton.textContent).toContain('Execution error (truncated)—');
+    expect(accordionErrorButton.textContent).toContain(
+      `Execution error (truncated)${getEmptyValue()}`
+    );
   });
 
   it('should show nothing when no output in action details', () => {

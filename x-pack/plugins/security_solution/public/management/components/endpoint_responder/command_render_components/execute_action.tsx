@@ -18,7 +18,6 @@ import { parsedExecuteTimeout } from '../lib/utils';
 import { ExecuteActionHostResponseOutput } from '../../endpoint_execute_action';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
 import { EXECUTE_FILE_LINK_TITLE } from '../../endpoint_response_actions_list/translations';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const ExecuteActionResult = memo<
   ActionRequestComponentProps<{
@@ -26,7 +25,6 @@ export const ExecuteActionResult = memo<
     timeout?: string;
   }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  const { canAccessResponseConsole } = useUserPrivileges().endpointPrivileges;
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
@@ -81,7 +79,7 @@ export const ExecuteActionResult = memo<
         <ResponseActionFileDownloadLink
           action={completedActionDetails}
           buttonTitle={EXECUTE_FILE_LINK_TITLE}
-          canAccessFileDownloadLink={canAccessResponseConsole}
+          canAccessFileDownloadLink={true}
           data-test-subj="consoleGetExecuteLink"
           textSize="s"
         />
