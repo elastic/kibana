@@ -55,18 +55,10 @@ export function createTaskPoller<T, H>({
   const hasCapacity = () => getCapacity() > 0;
   let running: boolean = false;
   let timeoutId: NodeJS.Timeout | null = null;
+  let hasSubscribed: boolean = false;
   let pollInterval = initialPollInterval;
   let pollIntervalDelay = 0;
   const subject = new Subject<Result<H, PollingError<T>>>();
-
-  pollInterval$.subscribe((interval) => {
-    pollInterval = interval;
-    logger.debug(`Task poller now using interval of ${interval}ms`);
-  });
-  pollIntervalDelay$.subscribe((delay) => {
-    pollIntervalDelay = delay;
-    logger.debug(`Task poller now delaying emission by ${delay}ms`);
-  });
 
   async function runCycle() {
     timeoutId = null;
@@ -94,12 +86,30 @@ export function createTaskPoller<T, H>({
     }
   }
 
+  function subscribe() {
+    if (hasSubscribed) {
+      return;
+    }
+    pollInterval$.subscribe((interval) => {
+      pollInterval = interval;
+      logger.debug(`Task poller now using interval of ${interval}ms`);
+    });
+    pollIntervalDelay$.subscribe((delay) => {
+      pollIntervalDelay = delay;
+      logger.debug(`Task poller now delaying emission by ${delay}ms`);
+    });
+    hasSubscribed = true;
+  }
+
   return {
     events$: subject,
     start: () => {
       if (!running) {
         running = true;
         runCycle();
+        // We need to subscribe shortly after start. Otherwise, the observables start emiting events
+        // too soon for the task run statistics module to capture.
+        setImmediate(() => subscribe());
       }
     },
     stop: () => {
