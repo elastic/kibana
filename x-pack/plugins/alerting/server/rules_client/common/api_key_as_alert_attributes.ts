@@ -11,7 +11,7 @@ import { CreateAPIKeyResult } from '../types';
 export function apiKeyAsAlertAttributes(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
-  createdByUser?: boolean
+  createdByUser: boolean
 ): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'> {
   return apiKey && apiKey.apiKeysEnabled
     ? {
@@ -22,5 +22,6 @@ export function apiKeyAsAlertAttributes(
     : {
         apiKeyOwner: null,
         apiKey: null,
+        apiKeyCreatedByUser: null,
       };
 }

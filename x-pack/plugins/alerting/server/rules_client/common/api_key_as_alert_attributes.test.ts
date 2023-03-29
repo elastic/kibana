@@ -19,12 +19,13 @@ describe('apiKeyAsAlertAttributes', () => {
             api_key: 'abc',
           },
         },
-        'test'
+        'test',
+        false
       )
     ).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
-      apiKeyCreatedByUser: undefined,
+      apiKeyCreatedByUser: false,
     });
   });
 
@@ -34,11 +35,13 @@ describe('apiKeyAsAlertAttributes', () => {
         {
           apiKeysEnabled: false,
         },
-        'test'
+        'test',
+        false
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: null,
+      apiKeyCreatedByUser: null,
     });
   });
 
