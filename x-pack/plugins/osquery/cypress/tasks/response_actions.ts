@@ -10,4 +10,4 @@ export const RESPONSE_ACTIONS_ITEM_1 = 'response-actions-list-item-1';
 export const RESPONSE_ACTIONS_ITEM_2 = 'response-actions-list-item-2';
 export const RESPONSE_ACTIONS_ITEM_3 = 'response-actions-list-item-3';
 
-export const OSQUERY_RESPONSE_ACTION_ADD_BUTTON = 'osquery-response-action-type-selection-option';
+export const OSQUERY_RESPONSE_ACTION_ADD_BUTTON = 'Osquery-response-action-type-selection-option';

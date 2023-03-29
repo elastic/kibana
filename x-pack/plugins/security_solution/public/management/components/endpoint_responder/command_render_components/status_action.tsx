@@ -168,6 +168,16 @@ export const EndpointStatusActionResult = memo<
       {
         title: (
           <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.platform', {
+              defaultMessage: 'Platform',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: <ConsoleCodeBlock>{endpointDetails.metadata.host.os.full}</ConsoleCodeBlock>,
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
             {i18n.translate('xpack.securitySolution.endpointResponseActions.status.version', {
               defaultMessage: 'Version',
             })}
@@ -192,6 +202,37 @@ export const EndpointStatusActionResult = memo<
       {
         title: (
           <ConsoleCodeBlock>
+            {i18n.translate(
+              'xpack.securitySolution.endpointResponseActions.status.appliedPolicyVersion',
+              {
+                defaultMessage: 'Policy version',
+              }
+            )}
+          </ConsoleCodeBlock>
+        ),
+        description: (
+          <ConsoleCodeBlock>
+            {`v${endpointDetails.metadata.Endpoint.policy.applied.endpoint_policy_version}`}
+          </ConsoleCodeBlock>
+        ),
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.policyName', {
+              defaultMessage: 'Policy name',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: (
+          <ConsoleCodeBlock>
+            {endpointDetails.metadata.Endpoint.policy.applied.name}
+          </ConsoleCodeBlock>
+        ),
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
             {i18n.translate('xpack.securitySolution.endpointResponseActions.status.lastActive', {
               defaultMessage: 'Last active',
             })}
@@ -205,7 +246,6 @@ export const EndpointStatusActionResult = memo<
                 { defaultMessage: 'Last active' }
               )}
               value={endpointDetails.metadata['@timestamp']}
-              className="eui-textTruncate"
             />
           </ConsoleCodeBlock>
         ),
