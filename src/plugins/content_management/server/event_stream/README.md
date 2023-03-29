@@ -25,7 +25,7 @@ interface. There are two `EventStreamClient` implementations:
 
 ### The `EsEventStreamClient` client
 
-`EsEventStreamClient` is used in production. I stores events in the
+`EsEventStreamClient` is used in production. It stores events in the
 `.kibana-event-stream` data stream. The data stream and index template are
 created during plugin initialization "start" life-cycle.
 
