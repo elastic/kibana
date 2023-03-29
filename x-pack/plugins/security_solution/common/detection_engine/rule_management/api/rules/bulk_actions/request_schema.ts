@@ -97,12 +97,14 @@ const BulkActionEditPayloadTimeline = t.type({
  */
 type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
 const NormalizedRuleAction = t.exact(
-  t.type({
-    group: RuleActionGroup,
-    id: RuleActionId,
-    params: RuleActionParams,
-    frequency: RuleActionFrequency,
-  })
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      params: RuleActionParams,
+    }),
+    t.partial({ frequency: RuleActionFrequency }),
+  ])
 );
 
 export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof BulkActionEditPayloadRuleActions>;
