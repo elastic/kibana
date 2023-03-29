@@ -98,7 +98,7 @@ export const getSupportedUrlParams = (params: {
   } = filteredParams;
 
   return {
-    packagePolicyId: packagePolicyId || '',
+    packagePolicyId: packagePolicyId || undefined,
     groupBy: groupBy as MonitorOverviewState['groupBy']['field'],
     groupOrderBy: groupOrderBy as MonitorOverviewState['groupBy']['order'],
     pagination,
