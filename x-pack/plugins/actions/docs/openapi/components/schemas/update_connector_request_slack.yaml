@@ -1,6 +1,7 @@
 title: Update Slack connector request
 type: object
 required:
+  - config
   - name
   - secrets
 properties:
@@ -8,6 +9,13 @@ properties:
     type: string
     description: The display name for the connector.
   config:
-    type: 'web_api' | 'webhook'
+    type: string
+    enum:
+      - web_api
+      - webhook
   secrets:
-    $ref: 'secrets_properties_slack.yaml'
+    type: object
+    description: The secrets object containing the necessary fields for authentication.
+    oneOf:
+      - $ref: 'secrets_properties_slack_web_api.yaml'
+      - $ref: 'secrets_properties_slack_webhook.yaml'
