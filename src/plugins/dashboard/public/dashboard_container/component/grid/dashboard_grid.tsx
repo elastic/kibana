@@ -52,9 +52,9 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       const panelA = panels[embeddableIdA];
       const panelB = panels[embeddableIdB];
 
-      // need to manually sort the layout because we want the panels to be collapsed from the left to the
-      // right when switching to the single column layout, but RGL sorts by ID which can cause unexpected
-      // behaviour between by-reference and by-value panels.
+      // need to manually sort the panels by position because we want the panels to be collapsed from the left to the
+      // right when switching to the single column layout, but RGL sorts by ID which can cause unexpected behaviour between
+      // by-reference and by-value panels + we want the HTML order to align with this in the multi-panel view
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;
       } else {
