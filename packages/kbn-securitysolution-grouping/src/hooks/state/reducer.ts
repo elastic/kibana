@@ -35,6 +35,16 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
             ...defaultGroup,
             ...groupsById[id],
             activeGroups,
+            pagingSettings: Object.keys(groupsById[id].pagingSettings).reduce(
+              (acc, group) => ({
+                ...acc,
+                [group]: {
+                  ...groupsById[id].pagingSettings[group],
+                  activePage: 0,
+                },
+              }),
+              {}
+            ),
           },
         },
       };

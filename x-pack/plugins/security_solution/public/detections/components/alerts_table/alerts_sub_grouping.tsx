@@ -6,15 +6,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { isEqual } from 'lodash/fp';
 import type { Filter, Query } from '@kbn/es-query';
-import type {
-  DynamicGroupingProps,
-  GroupingAggregation,
-  GroupsPagingSettingsById,
-} from '@kbn/securitysolution-grouping';
+import type { DynamicGroupingProps, GroupingAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { GroupingQuery } from '@kbn/securitysolution-grouping/src';
@@ -34,7 +29,7 @@ import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
-import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_settings';
+import { useGroupTakeActionsItems } from './grouping_settings';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 
@@ -51,11 +46,10 @@ interface OwnProps {
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;
-  pagination: GroupsPagingSettingsById;
   parentGroupingFilter?: Filter[];
+  queryGroups: GroupingQuery;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   resetPagination: () => void;
-  runtimeMappings: MappingRuntimeFields;
   selectedGroup: string;
   signalIndexName: string | null;
   tableId: TableIdLiteral;
@@ -75,11 +69,9 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   hasIndexMaintenance,
   hasIndexWrite,
   loading,
-  pagination,
   parentGroupingFilter,
+  queryGroups,
   renderChildComponent,
-  additionalFilters,
-  runtimeMappings,
   selectedGroup,
   signalIndexName,
   tableId,
@@ -89,8 +81,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     services: { uiSettings },
   } = useKibana();
   const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-
-  // const { pageSize, pageIndex } = useGroupPaging({ selectedGroup, groupingId: tableId });
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -134,31 +124,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     startDate: from,
     endDate: to,
   });
-
-  // const prevFilters = useRef<
-  //   Array<{
-  //     bool: BoolQuery;
-  //   }>
-  // >([]);
-  //
-  // useEffect(() => {
-  //   if (!isEqual(prevFilters.current, additionalFilters)) {
-  //     prevFilters.current = additionalFilters;
-  //     resetPagination();
-  //   }
-  // }, [additionalFilters, resetPagination]);
-
-  const queryGroups = useMemo(() => {
-    return getAlertsGroupingQuery({
-      additionalFilters,
-      selectedGroup,
-      from,
-      runtimeMappings,
-      to,
-      pageSize: pagination[selectedGroup] ? pagination[selectedGroup].itemsPerPage : 25,
-      pageIndex: pagination[selectedGroup] ? pagination[selectedGroup].activePage : 0,
-    });
-  }, [additionalFilters, selectedGroup, from, runtimeMappings, to, pagination]);
 
   const {
     data: alertsGroupsData,

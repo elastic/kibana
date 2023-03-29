@@ -7,19 +7,26 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
 import type { GroupOption } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import { buildEsQuery } from '@kbn/es-query';
+import { groupSelectors } from '../../../common/store/grouping';
+import type { State } from '../../../common/store';
 import { updateGroupSelector } from '../../../common/store/grouping/actions';
 import type { TableIdLiteral } from '../../../../common/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './grouping_settings';
+import {
+  getDefaultGroupingOptions,
+  renderGroupPanel,
+  getStats,
+  getAlertsGroupingQuery,
+} from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
@@ -79,24 +86,43 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     tracker: track,
   });
 
+  const getGroupSelector = groupSelectors.getGroupSelector();
+
+  const groupSelectord = useSelector((state: State) => getGroupSelector(state));
   const selectorOptions = useRef<GroupOption[]>([]);
 
   useEffect(() => {
     if (
       isNoneGroup(selectedGroups) &&
-      !isEqual(selectorOptions.current, groupSelector.props.options)
+      (groupSelectord == null || !isEqual(selectorOptions.current, groupSelector.props.options))
     ) {
       selectorOptions.current = groupSelector.props.options;
       dispatch(updateGroupSelector({ groupSelector }));
+    } else if (!isNoneGroup(selectedGroups) && groupSelectord !== null) {
+      dispatch(updateGroupSelector({ groupSelector: null }));
     }
-  }, [dispatch, groupSelector, selectedGroups]);
+  }, [dispatch, groupSelector, groupSelectord, selectedGroups]);
+
+  const lastFilters = useRef<{ [key: number]: unknown }>({});
 
   const getAdditionalFilters = useCallback(
-    (parentGroupingFilter?: Filter[]) => {
-      console.log('consumer: grouping additionalFilters');
+    (level: number, parentGroupingFilter?: Filter[]) => {
+      const filters = {
+        defaultFilters: props.defaultFilters,
+        globalFilters: props.globalFilters,
+        globalQuery: props.globalQuery,
+      };
+
+      const currentLevel = lastFilters.current[level];
+      if (currentLevel == null) {
+        lastFilters.current[level] = filters;
+      } else if (!isEqual(currentLevel, filters)) {
+        // if any filter changes other than parentGroupingFilter, reset pagination
+        resetPagination();
+        lastFilters.current[level] = filters;
+      }
 
       try {
-        // resetPagination();
         return [
           buildEsQuery(undefined, props.globalQuery != null ? [props.globalQuery] : [], [
             ...(props.globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
@@ -108,27 +134,36 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
         return [];
       }
     },
-    [props.defaultFilters, props.globalFilters, props.globalQuery]
+    [props.defaultFilters, props.globalFilters, props.globalQuery, resetPagination]
+  );
+
+  const getQueryGroups = useCallback(
+    (additionalFilters, selectedGroup) => {
+      return getAlertsGroupingQuery({
+        additionalFilters,
+        selectedGroup,
+        from: props.from,
+        runtimeMappings: props.runtimeMappings,
+        to: props.to,
+        pageSize: pagination[selectedGroup] ? pagination[selectedGroup].itemsPerPage : 25,
+        pageIndex: pagination[selectedGroup] ? pagination[selectedGroup].activePage : 0,
+      });
+    },
+    [props.from, props.runtimeMappings, props.to, pagination]
   );
 
   const getLevel = useCallback(
-    (
-      level: number,
-      selectedGroup: string,
-      parentGroupingFilter?: Filter[],
-      isRecursive = false
-    ) => {
-      const additionalFilters = getAdditionalFilters(parentGroupingFilter);
+    (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => {
+      const additionalFilters = getAdditionalFilters(level, parentGroupingFilter);
+      const queryGroups = getQueryGroups(additionalFilters, selectedGroup);
 
       let rcc;
       if (level < selectedGroups.length - 1) {
         rcc = (groupingFilters: Filter[]) => {
-          return getLevel(
-            level + 1,
-            selectedGroups[level + 1],
-            [...groupingFilters, ...(parentGroupingFilter ?? [])],
-            true
-          );
+          return getLevel(level + 1, selectedGroups[level + 1], [
+            ...groupingFilters,
+            ...(parentGroupingFilter ?? []),
+          ]);
         };
       } else {
         rcc = (groupingFilters: Filter[]) => {
@@ -141,15 +176,22 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           {...props}
           getGrouping={getGrouping}
           groupingLevel={level}
-          pagination={pagination}
           resetPagination={resetPagination}
-          additionalFilters={additionalFilters}
+          queryGroups={queryGroups}
           renderChildComponent={rcc}
           selectedGroup={selectedGroup}
         />
       );
     },
-    [getGrouping, pagination, props, resetPagination, selectedGroups]
+    [
+      getAdditionalFilters,
+      getGrouping,
+      getQueryGroups,
+      pagination,
+      props,
+      resetPagination,
+      selectedGroups,
+    ]
   );
 
   if (isEmpty(selectedPatterns)) {

@@ -97,6 +97,15 @@ export const useGrouping = <T,>({
     [groupingId, groupingState]
   );
 
+  const resetPagination = useCallback(() => {
+    console.log('packages: resetPagination', { groupingId, selectedGroups });
+    selectedGroups.forEach((selectedGroup) => {
+      dispatch(
+        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroup })
+      );
+    });
+  }, [groupingId, selectedGroups]);
+
   const groupSelector = useGetGroupSelector({
     defaultGroupingOptions,
     dispatch,
@@ -130,15 +139,6 @@ export const useGrouping = <T,>({
       ),
     [componentProps, groupSelector, groupingId, pagination, tracker]
   );
-
-  const resetPagination = useCallback(() => {
-    console.log('packages: resetPagination', { groupingId, selectedGroups });
-    selectedGroups.forEach((selectedGroup) => {
-      dispatch(
-        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroup })
-      );
-    });
-  }, [groupingId, selectedGroups]);
 
   return useMemo(
     () => ({
