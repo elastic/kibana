@@ -237,6 +237,7 @@ const subscriptionNotAllowedRenderer = () => (
 interface CloudPosturePageProps<TData, TError> {
   children: React.ReactNode;
   query?: UseQueryResult<TData, TError>;
+  hasFindings?: boolean;
   loadingRender?: () => React.ReactNode;
   errorRender?: (error: TError) => React.ReactNode;
   noDataRenderer?: () => React.ReactNode;
@@ -245,6 +246,7 @@ interface CloudPosturePageProps<TData, TError> {
 export const CloudPosturePage = <TData, TError>({
   children,
   query,
+  hasFindings = true,
   loadingRender = defaultLoadingRenderer,
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
@@ -282,6 +284,10 @@ export const CloudPosturePage = <TData, TError>({
       getSetupStatus.data?.indicesDetails[0].status === 'empty'
     ) {
       return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
+    }
+
+    if (!hasFindings) {
+      return children;
     }
 
     if (!query) {

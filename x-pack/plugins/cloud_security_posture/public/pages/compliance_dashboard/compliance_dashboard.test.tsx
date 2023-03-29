@@ -513,7 +513,7 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'indexed' },
           cspm: { status: 'not-installed' },
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -554,7 +554,7 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed' },
           kspm: { status: 'not-installed' },
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
