@@ -13,7 +13,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/alert_api';
-import { MAINTENANCE_WINDOWS_FEATURE_ID, Rule } from '../common';
+import { MAINTENANCE_WINDOWS_APP_ID, Rule } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -98,7 +98,7 @@ export class AlertingPublicPlugin
 
     if (config.enableMaintenanceWindows) {
       plugins.management.sections.section.insightsAndAlerting.registerApp({
-        id: MAINTENANCE_WINDOWS_FEATURE_ID,
+        id: MAINTENANCE_WINDOWS_APP_ID,
         title: i18n.translate('xpack.alerting.management.section.title', {
           defaultMessage: 'Maintenance Windows',
         }),

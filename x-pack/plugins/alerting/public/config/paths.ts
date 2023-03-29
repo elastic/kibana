@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export const MAINTENANCE_WINDOWS_APP_ID = 'maintenanceWindows';
-export const APP_ID = 'management';
-
 export const paths = {
   alerting: {
     maintenanceWindows: '/maintenanceWindows',

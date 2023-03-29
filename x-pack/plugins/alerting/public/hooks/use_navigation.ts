@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useKibana } from '../utils/kibana_react';
 import { paths } from '../config';
-import { APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../config/paths';
+import { APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../../common';
 
 export const AlertingDeepLinkId = {
   maintenanceWindows: 'maintenanceWindows',
