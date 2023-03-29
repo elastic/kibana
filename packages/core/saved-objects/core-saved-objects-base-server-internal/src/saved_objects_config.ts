@@ -32,6 +32,9 @@ const migrationSchema = schema.object({
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
   retryAttempts: schema.number({ defaultValue: 15 }),
+  zdt: schema.object({
+    metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 120 }),
+  }),
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
@@ -60,6 +63,7 @@ export const savedObjectsConfig: ServiceConfigDescriptor<SavedObjectsConfigType>
   path: 'savedObjects',
   schema: soSchema,
 };
+
 export class SavedObjectConfig {
   public maxImportPayloadBytes: number;
   public maxImportExportSize: number;

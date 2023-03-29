@@ -12,7 +12,6 @@ import { Logger } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { MappingProperty, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { fetchDoc } from '../../utils';
 import type { FilesMetrics, FileMetadata, Pagination } from '../../../../common';
 import type { FindFileArgs } from '../../../file_service';
 import type {
@@ -36,7 +35,7 @@ const fileMappings: MappingProperty = {
   },
 };
 
-interface FileDocument<M = unknown> {
+export interface FileDocument<M = unknown> {
   file: FileMetadata<M>;
 }
 
@@ -82,11 +81,36 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   }
 
   async get({ id }: GetArg): Promise<FileDescriptor<M>> {
-    const { _source: doc } =
-      (await fetchDoc<FileDocument<M>>(this.esClient, this.index, id, this.indexIsAlias)) ?? {};
+    const { esClient, index, indexIsAlias } = this;
+    let doc: FileDocument<M> | undefined;
+
+    if (indexIsAlias) {
+      doc = (
+        await esClient.search<FileDocument<M>>({
+          index,
+          body: {
+            size: 1,
+            query: {
+              term: {
+                _id: id,
+              },
+            },
+          },
+        })
+      ).hits.hits?.[0]?._source;
+    } else {
+      doc = (
+        await esClient.get<FileDocument<M>>({
+          index,
+          id,
+        })
+      )._source;
+    }
 
     if (!doc) {
-      this.logger.error(`File with id "${id}" not found`);
+      this.logger.error(
+        `File with id "${id}" not found in index ${indexIsAlias ? 'alias ' : ''}"${index}"`
+      );
       throw new Error('File not found');
     }
 
