@@ -55,7 +55,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
         id,
       });
     } catch (e) {
-      if (e.output?.statusCode === 404) {
+      if (e.body?.statusCode === 404) {
         throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
       } else {
         throw e;
