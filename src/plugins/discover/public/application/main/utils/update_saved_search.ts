@@ -8,6 +8,7 @@
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 
@@ -34,7 +35,7 @@ export function updateSavedSearch(
     savedSearch.searchSource
       .setField('index', dataView)
       .setField('query', state.query)
-      .setField('filter', state.filters);
+      .setField('filter', cloneDeep(state.filters));
   }
   savedSearch.columns = state.columns || [];
   savedSearch.sort = (state.sort as SortOrder[]) || [];

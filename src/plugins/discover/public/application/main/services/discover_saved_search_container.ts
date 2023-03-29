@@ -177,13 +177,6 @@ export function getSavedSearchContainer({
       !filterAndQuery
     );
 
-    nextSavedSearch.searchSource.setField('index', dataView);
-    if (nextState) {
-      nextSavedSearch.searchSource
-        .setField('query', nextState.query)
-        .setField('filter', nextState.filters);
-    }
-
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
     hasChanged$.next(hasChanged);
     savedSearchCurrent$.next(nextSavedSearch);
