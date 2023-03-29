@@ -149,6 +149,7 @@ interface FormatType extends SerializedFieldFormat<FieldFormatParams> {
 
 export type AppDataType =
   | 'synthetics'
+  | 'uptime'
   | 'ux'
   | 'infra_logs'
   | 'infra_metrics'
