@@ -38,6 +38,6 @@ describe('Threshold', () => {
 
   it('shows component', () => {
     const component = renderComponent();
-    expect(component.queryByTestId('threshold-90-93'));
+    expect(component.queryByTestId('threshold-90-93')).toBeTruthy();
   });
 });
