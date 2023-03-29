@@ -23,7 +23,11 @@ import type { ModelStage } from '../types';
 
 export const init: ModelStage<
   'INIT',
-  'CREATE_TARGET_INDEX' | 'UPDATE_INDEX_MAPPINGS' | 'UPDATE_ALIASES' | 'FATAL'
+  | 'CREATE_TARGET_INDEX'
+  | 'UPDATE_INDEX_MAPPINGS'
+  | 'UPDATE_ALIASES'
+  | 'INDEX_STATE_UPDATE_DONE'
+  | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     const left = res.left;
@@ -78,6 +82,15 @@ export const init: ModelStage<
   // cloning as we may be mutating it in later stages.
   const currentIndexMeta = cloneDeep(currentMappings._meta!);
 
+  const commonState = {
+    logs,
+    currentIndex,
+    currentIndexMeta,
+    aliases,
+    aliasActions,
+    previousMappings: currentMappings,
+  };
+
   switch (versionCheck.status) {
     // app version is greater than the index mapping version.
     // scenario of an upgrade: we need to update the mappings
@@ -90,13 +103,9 @@ export const init: ModelStage<
       return {
         ...state,
         controlState: 'UPDATE_INDEX_MAPPINGS',
-        logs,
-        currentIndex,
-        currentIndexMeta,
-        aliases,
-        aliasActions,
-        previousMappings: currentMappings,
+        ...commonState,
         additiveMappingChanges,
+        newIndexCreation: false,
       };
     // app version and index mapping version are the same.
     // either application upgrade without model change, or a simple reboot on the same version.
@@ -104,13 +113,9 @@ export const init: ModelStage<
     case 'equal':
       return {
         ...state,
-        controlState: 'UPDATE_ALIASES',
-        logs,
-        currentIndex,
-        currentIndexMeta,
-        aliases,
-        aliasActions,
-        previousMappings: currentMappings,
+        controlState: aliasActions.length ? 'UPDATE_ALIASES' : 'INDEX_STATE_UPDATE_DONE',
+        ...commonState,
+        newIndexCreation: false,
       };
     // app version is lower than the index mapping version.
     // likely a rollback scenario - unsupported for the initial implementation
