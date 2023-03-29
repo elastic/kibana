@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -59,32 +60,28 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   const lastSavedId = select((state) => state.componentState.lastSavedId);
   const lastSavedTitle = select((state) => state.explicitInput.title);
 
-  const isMounted = useRef(false);
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const isMounted = useMountedState();
 
   const onTitleDuplicate = () => {
-    if (!isMounted.current) return;
+    if (!isMounted()) return;
     setIsTitleDuplicate(true);
     setIsTitleDuplicateConfirmed(true);
-    setIsApplying(false);
   };
 
   const onApply = async () => {
     setIsApplying(true);
-    if (
-      await checkForDuplicateDashboardTitle({
-        title: dashboardSettingsState.title,
-        copyOnSave: false,
-        lastSavedTitle,
-        onTitleDuplicate,
-        isTitleDuplicateConfirmed,
-      })
-    ) {
+    const validTitle = await checkForDuplicateDashboardTitle({
+      title: dashboardSettingsState.title,
+      copyOnSave: false,
+      lastSavedTitle,
+      onTitleDuplicate,
+      isTitleDuplicateConfirmed,
+    });
+    setIsApplying(false);
+
+    if (!isMounted()) return;
+
+    if (validTitle) {
       dispatch(setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState }));
       onClose();
     }
