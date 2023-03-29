@@ -1,14 +1,13 @@
-[role="xpack"]
 [[geo-alerting]]
 === Tracking containment
 
-<<maps, Maps>> offers the Tracking containment rule type which runs an {es} query over indices to determine whether any
+<<maps,Maps>> offers the tracking containment rule type which runs an {es} query over indices to determine whether any
 documents are currently contained within any boundaries from the specified boundary index.
 In the event that an entity is contained within a boundary, an alert may be generated.
 
 [float]
 ==== Requirements
-To create a Tracking containment rule, the following requirements must be present:
+To create a tracking containment rule, the following requirements must be present:
 
 - *Tracks index or data view*: An index containing a `geo_point` field, `date` field,
 and some form of entity identifier. An entity identifier is a `keyword` or `number`
@@ -58,3 +57,60 @@ is no longer contained.
 
 [role="screenshot"]
 image::user/alerting/images/alert-types-tracking-containment-action-options.png[Five clauses define the condition to detect]
+
+[float]
+[[geo-alerting-issues]]
+==== Known issues
+
+// The following content is reused in other rule types
+// tag::known-issue-load-rules[]
+There is a known issue in 8.5 and 8.6 that results in corruption of the rule definition when you update API keys or add or remove snooze schedules in *{stack-manage-app}* > *{rules-ui}*. 
+In particular, this bug affects {es} query rules with the KQL or Lucene query type and tracking containment rules.
+As a result of this bug, an "Unable to load rules" error occurs in *{rules-ui}*.
+
+The long-term solution is to migrate to the latest release; 8.7 and later releases contain the fix for this bug.
+If you encounter this bug in {minor-version}, you can recover access to your rules in {kib} by using APIs to delete and recreate them:
+
+. Find the affected rules. For example, run the following query in *{dev-tools-app}*:
++
+--
+[source,console]
+----
+GET .kibana*/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "terms": {
+            "alert.alertTypeId": [
+              ".es-query",
+              ".geo-containment"
+            ]
+          }
+        }
+      ],
+      "must_not": {
+        "exists": {
+          "field": "references"
+        }
+      }
+    }
+  }
+}
+----
+--
+. Make a copy of the query output, since you will use it to recreate the rules.
+. Delete the affected rules. For example, run the following query in *{dev-tools-app}*, replacing `<rule_id>` with the appropriate rule identifiers:
++
+--
+[source,console]
+----
+DELETE kbn:/api/alerting/rule/<rule_id>
+----
+--
+. Recreate the rules. For example, use *{stack-manage-app}* > *{rules-ui}* or the <<create-rule-api,create rule API>> with the property values obtained from your query output.
+
+NOTE: If you update the API keys or add or remove snooze schedules again, the problem will re-occur until you upgrade to a release that contains the fix.
+
+// end::known-issue-load-rules[]
