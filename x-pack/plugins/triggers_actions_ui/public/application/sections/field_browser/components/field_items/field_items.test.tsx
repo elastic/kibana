@@ -346,7 +346,6 @@ describe('field_items', () => {
 
       const columns = getFieldColumns({
         ...getFieldColumnsParams,
-        showDescriptionColumn: false,
       });
 
       const { getByText } = render(
