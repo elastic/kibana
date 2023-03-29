@@ -28,10 +28,8 @@ export interface AnalyticsCollectionToolbarLogicValues {
   // kea forbid to set undefined as a value
   _searchSessionId: string | null;
   dataViewId: string | null;
-  getSearchSessionById(key: string): string | undefined;
   refreshInterval: RefreshInterval;
   searchSessionId: string | undefined;
-  searchSessionIds: { [key: string]: string | undefined };
   timeRange: TimeRange;
 }
 
@@ -73,7 +71,10 @@ export const AnalyticsCollectionToolbarLogic = kea<
   }),
   path: ['enterprise_search', 'analytics', 'collections', 'toolbar'],
   reducers: () => ({
-    _searchSessionId: ['', { setSearchSessionId: (state, { searchSessionId }) => searchSessionId }],
+    _searchSessionId: [
+      null,
+      { setSearchSessionId: (state, { searchSessionId }) => searchSessionId },
+    ],
     dataViewId: [null, { setDataViewId: (_, { id }) => id }],
     refreshInterval: [
       DEFAULT_REFRESH_INTERVAL,
