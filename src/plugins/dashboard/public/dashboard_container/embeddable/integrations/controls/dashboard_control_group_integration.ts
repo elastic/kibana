@@ -181,7 +181,7 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
         ),
         skip(1) // skip first filter output because it will have been applied in initialize
       )
-      .subscribe(() => this.updateInput({ lastReloadRequestTime: Date.now() }))
+      .subscribe(() => this.forceRefresh())
   );
 
   subscriptions.add(
@@ -193,7 +193,9 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
         )
       )
       .subscribe(({ timeslice }) => {
-        this.updateInput({ timeslice });
+        if (!_.isEqual(timeslice, this.getInputAsValueType().timeslice)) {
+          this.updateInput({ timeslice });
+        }
       })
   );
 
