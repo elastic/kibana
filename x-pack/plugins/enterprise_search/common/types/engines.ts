@@ -24,6 +24,7 @@ export interface EnterpriseSearchEngineDetails {
   name: string;
   updated_at_millis: number;
 }
+
 export interface EnterpriseSearchEngineIndex {
   count: number;
   health: HealthStatus | 'unknown';

@@ -6,8 +6,6 @@
  */
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { EnterpriseSearchEngineIndex } from '../../../common/types/engines';
-
 import { fetchIndicesStats } from './fetch_indices_stats';
 
 describe('fetchIndicesStats lib function', () => {
@@ -19,11 +17,7 @@ describe('fetchIndicesStats lib function', () => {
     },
     asInternalUser: {},
   };
-  const indicesNames = [
-    'test-index-name-1',
-    'test-index-name-2',
-    'test-index-name-3',
-  ] as unknown as EnterpriseSearchEngineIndex[];
+  const indicesNames = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
   const indicesStats = {
     indices: {
       'test-index-name-1': {
