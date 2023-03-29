@@ -45,6 +45,18 @@ export enum BulkActionEditType {
   'set_schedule' = 'set_schedule',
 }
 
+export type ThrottleForBulkActions = t.TypeOf<typeof ThrottleForBulkActions>;
+export const ThrottleForBulkActions = t.union([
+  t.literal('rule'),
+  TimeDuration({
+    allowedDurations: [
+      [1, 'h'],
+      [1, 'd'],
+      [7, 'd'],
+    ],
+  }),
+]);
+
 type BulkActionEditPayloadTags = t.TypeOf<typeof BulkActionEditPayloadTags>;
 const BulkActionEditPayloadTags = t.type({
   type: t.union([
@@ -99,9 +111,12 @@ export const BulkActionEditPayloadRuleActions = t.type({
     t.literal(BulkActionEditType.add_rule_actions),
     t.literal(BulkActionEditType.set_rule_actions),
   ]),
-  value: t.type({
-    actions: t.array(NormalizedRuleAction),
-  }),
+  value: t.intersection([
+    t.partial({ throttle: ThrottleForBulkActions }),
+    t.type({
+      actions: t.array(NormalizedRuleAction),
+    }),
+  ]),
 });
 
 type BulkActionEditPayloadSchedule = t.TypeOf<typeof BulkActionEditPayloadSchedule>;
