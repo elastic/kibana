@@ -24,8 +24,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FieldIcon } from '@kbn/react-field';
-
 import { SchemaField } from '../../../../../common/types/engines';
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -37,6 +35,7 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { EngineIndicesLogic } from './engine_indices_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
+import { FieldIcon } from './field_icon';
 
 const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaField }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
