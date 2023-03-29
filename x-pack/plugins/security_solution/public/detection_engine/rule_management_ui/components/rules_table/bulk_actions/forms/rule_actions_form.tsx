@@ -99,21 +99,6 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       return;
     }
 
-    const aaaaa = {
-      statusCode: 400,
-      error: 'Bad Request',
-      message:
-        '[request body]: \
-        Invalid value "edit" supplied to "action",\
-        Invalid value "add_rule_actions" supplied to "edit,type",\
-        Invalid value "{"actions":[{"id":"30020090-c98e-11ed-8047-1790dbc90385","group":"default","params":{"message":"asdasdasd","to":["asdasd@sdasdasd.com"],"subject":"asdasdasd"},"frequency":{"notifyWhen":"onThrottleInterval","throttle":"1m","summary":true}}]}" supplied to "edit,value",\
-        Invalid value "undefined" supplied to "edit,value,timeline_id",\
-        Invalid value "undefined" supplied to "edit,value,timeline_title",\
-        Invalid value "1m" supplied to "edit,value,actions,frequency,throttle",\
-        Invalid value "undefined" supplied to "edit,value,interval",\
-        Invalid value "undefined" supplied to "edit,value,lookback"',
-    };
-
     const { actions = [], overwrite: overwriteValue } = data;
     const editAction = overwriteValue
       ? BulkActionEditType.set_rule_actions

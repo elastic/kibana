@@ -72,6 +72,7 @@ export type ActionTypeFormProps = {
   hideNotifyWhen?: boolean;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
+  isSiem?: boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -113,6 +114,7 @@ export const ActionTypeForm = ({
   defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
+  isSiem,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -283,6 +285,7 @@ export const ActionTypeForm = ({
       )}
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+      isSiem={isSiem}
     />
   );
 

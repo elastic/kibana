@@ -22,7 +22,7 @@ import type { RuleAlertType } from '../../rule_schema';
 export const transformToFrequency = (throttle: string | null | undefined): RuleActionFrequency => {
   return {
     summary: true,
-    notifyWhen: transformToNotifyWhen(throttle) ?? 'onActionGroupChange',
+    notifyWhen: transformToNotifyWhen(throttle) ?? 'onActiveAlert',
     throttle: transformToAlertThrottle(throttle),
   };
 };
