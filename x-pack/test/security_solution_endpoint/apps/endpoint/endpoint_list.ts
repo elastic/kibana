@@ -81,7 +81,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return tableData;
   };
 
-  describe('endpoint list', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/153855
+  describe.skip('endpoint list', function () {
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
