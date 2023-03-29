@@ -13,7 +13,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { act } from 'react-dom/test-utils';
 
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiContextMenuItem, EuiSuperDatePicker } from '@elastic/eui';
 
 import { AnalyticsCollectionToolbar } from './analytics_collection_toolbar';
 
@@ -81,5 +81,13 @@ describe('AnalyticsCollectionToolbar', () => {
       handleRefresh();
     });
     expect(mockActions.onTimeRefresh).toHaveBeenCalled();
+  });
+
+  it('should correct link to explore in discover item', () => {
+    const exploreInDiscoverItem = wrapper.find(EuiContextMenuItem).at(2);
+
+    expect(exploreInDiscoverItem).toHaveLength(1);
+
+    expect(exploreInDiscoverItem.prop('href')).toBe("/app/discover#/?_a=(index:'data-view-test')");
   });
 });
