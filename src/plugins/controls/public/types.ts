@@ -55,7 +55,7 @@ export interface IEditableControlFactory<T extends ControlInput = ControlInput> 
     newState: Partial<T>,
     embeddable?: ControlEmbeddable<T>
   ) => Partial<T>;
-  isFieldCompatible?: (dataControlField: DataControlField) => void; // reducer
+  isFieldCompatible?: (field: DataViewField) => boolean;
 }
 
 export interface ControlEditorProps<T extends ControlInput = ControlInput> {
