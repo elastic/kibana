@@ -58,7 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await flyOutCancelButton.click();
     });
 
-
     it('slack connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
