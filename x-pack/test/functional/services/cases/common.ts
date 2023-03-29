@@ -197,6 +197,6 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await this.selectSeverity(CaseSeverity.CRITICAL);
 
       await header.waitUntilLoadingHasFinished();
-    }
+    },
   };
 }
