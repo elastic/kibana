@@ -32,7 +32,7 @@ export function RuleSnoozeBadge({
       snoozeSchedule: snoozeSettings.snooze_schedule,
       isEditable: hasCRUDPermissions,
     }),
-    [snoozeSettings]
+    [snoozeSettings, hasCRUDPermissions]
   );
 
   return <RulesListNotifyBadge rule={rule} isLoading={false} onRuleChanged={onChange} />;
