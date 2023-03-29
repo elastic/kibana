@@ -56,6 +56,7 @@ export function getLocatorParams(
     visualizationMap,
     visualization,
     adHocDataViews,
+    currentDoc,
   }: ShareableConfiguration
 ) {
   const references = extractReferencesFromState({
@@ -79,7 +80,7 @@ export function getLocatorParams(
   const serializableDatasourceStates = datasourceStates as LensAppState['datasourceStates'] &
     SerializableRecord;
 
-  return {
+  const snapshotParams = {
     filters,
     query,
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
@@ -90,6 +91,19 @@ export function getLocatorParams(
     references,
     dataViewSpecs: adHocDataViews,
   };
+
+  return {
+    shareURL: snapshotParams,
+    // for reporting use the shorten version when available
+    reporting: currentDoc?.savedObjectId
+      ? {
+          filters,
+          query,
+          resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+          savedObjectId: currentDoc?.savedObjectId,
+        }
+      : snapshotParams,
+  };
 }
 
 export async function getShareURL(
@@ -98,10 +112,13 @@ export async function getShareURL(
   configuration: ShareableConfiguration,
   shareUrlEnabled: boolean
 ) {
-  const locatorParams = getLocatorParams(services.data, configuration);
+  const { shareURL: locatorParams, reporting: reportingLocatorParams } = getLocatorParams(
+    services.data,
+    configuration
+  );
   return {
     shareableUrl: await (shareUrlEnabled ? shortUrlService(locatorParams) : undefined),
     savedObjectURL: getShareURLForSavedObject(services, configuration.currentDoc),
-    locatorParams,
+    reportingLocatorParams,
   };
 }
