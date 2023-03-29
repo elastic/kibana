@@ -74,7 +74,7 @@ async function saveDataSource({
     return nextSavedSearch;
   } catch (e) {
     onError(e);
-    return savedSearch;
+    throw e;
   }
 }
 
@@ -137,7 +137,7 @@ export async function onSaveSearch({
 
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
     try {
-      const response = await saveDataSource({
+      return await saveDataSource({
         saveOptions,
         services,
         navigateTo,
@@ -145,8 +145,6 @@ export async function onSaveSearch({
         state,
         navigateOrReloadSavedSearch,
       });
-      onSaveCb?.();
-      return response;
     } catch (e) {
       // If the save wasn't successful, put the original values back.
 
@@ -159,6 +157,7 @@ export async function onSaveSearch({
       }
       state.appState.resetInitialState();
     }
+    onSaveCb?.();
   };
 
   const saveModal = (
