@@ -5,20 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import Path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { Worker } from 'worker_threads';
 import { schema } from '@kbn/config-schema';
 import { IRouter, Logger, CoreSetup } from '@kbn/core/server';
-import {
-  deleteIndex,
-  createIndex,
-  bulkUpload,
-  createDataView,
-  findAndDeleteDataView,
-} from '../lib';
+import { initializeWorker, clearIndex } from '../workers/helper/worker_helper';
+import type { WorkerData } from '../workers/helper/worker_helper';
+import { deleteIndex, findAndDeleteDataView } from '../lib';
 import { getSavedObjectsClient } from './utils';
-import { WorkerData } from '../workers/generate_large_dataset';
 
 const largeDatasetIndexName = 'kibana_sample_data_large';
 const workerState = {} as Record<string, any>;
@@ -55,52 +48,25 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
         const format: string[] = [];
         fieldValues.forEach((el) => {
           format.push(`${el.name}:${el.type}`);
-          workerData.numberOfFields--;
+          workerData.numberOfFields!--;
         });
         workerData.additionalFormat = JSON.stringify(format);
       }
-      const worker = new Worker(Path.join(__dirname, '../workers/large_dataset_worker.js'), {
-        workerData,
-      });
-      workerState[id] = worker;
+      const { savedObjects } = await context.core;
+      const savedObjectsClient = await getSavedObjectsClient(context, ['index-pattern']);
+
       try {
-        await deleteIndex(esClient, largeDatasetIndexName);
-        await createIndex(esClient, largeDatasetIndexName);
-        let delay = 0;
-        let index = 0;
-        worker.on('message', async (message) => {
-          try {
-            if (message.status === 'GENERATED_ITEMS') {
-              const { items } = message;
-              logger.info('Received items from worker at index ' + index);
-              setTimeout(() => {
-                bulkUpload(esClient, largeDatasetIndexName, items);
-              }, delay);
-              // backoff, kinda
-              index++;
-              delay = index * 500;
-            } else if (message.status === 'DONE') {
-              const { savedObjects } = await context.core;
-              const savedObjectsClient = await getSavedObjectsClient(context, ['index-pattern']);
-              const result = await createDataView(
-                largeDatasetIndexName,
-                'Kibana Sample Data Large',
-                savedObjects,
-                savedObjectsClient
-              );
-              if (result.errors.length > 0) {
-                logger.error('Error occurred while creating a data view');
-              }
-            } else if (message.status === 'ERROR') {
-              logger.error('Error occurred while generating documents for ES');
-            }
-          } catch (e) {
-            logger.error('Error occurred while generating documents for ES');
-          }
-        });
-        worker.on('error', (message) => {
-          logger.error(message);
-        });
+        await clearIndex(esClient, largeDatasetIndexName);
+        const worker = await initializeWorker(
+          'large_dataset_worker',
+          workerData,
+          esClient,
+          savedObjects,
+          savedObjectsClient,
+          largeDatasetIndexName,
+          logger
+        );
+        workerState[id] = worker;
         worker.postMessage('start');
       } catch (e) {
         return res.customError({

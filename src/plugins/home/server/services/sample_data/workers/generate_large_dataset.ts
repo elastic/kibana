@@ -11,14 +11,9 @@ import { sample } from 'lodash';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { faker } from '@faker-js/faker';
 import { createLogger, LogLevel } from '../lib/util/create_logger';
+import { WorkerData } from './helper/worker_helper';
 
 const FIELD_TYPES = ['bool', 'str', 'int', 'ipv4', 'ts', 'text'];
-
-export interface WorkerData {
-  numberOfDocuments: number;
-  numberOfFields: number;
-  additionalFormat?: string;
-}
 
 const { numberOfDocuments, numberOfFields, additionalFormat } = workerData as WorkerData;
 const logger = createLogger(LogLevel.info);
@@ -128,7 +123,7 @@ const generateFormat = () => {
   // name, age and last_updated should be generated only once
   let format = 'name:str,age:int,last_updated:ts,ip:ipv4'.split(',');
   const fieldNames = new Set();
-  for (let i = 0; i <= numberOfFields; i++) {
+  for (let i = 0; i <= numberOfFields!; i++) {
     const fieldType = generateFieldType();
     let fieldName = generateFieldName();
     // this is to avoid generating two fields with the same name
@@ -157,10 +152,10 @@ const generateTestData = (format: string[], size: number) => {
 };
 
 const getSize = () => {
-  if (numberOfDocuments <= 100000 && numberOfFields < 100) {
+  if (numberOfDocuments <= 100000 && numberOfFields! < 100) {
     return 10000;
   }
-  if (numberOfDocuments <= 100000 && numberOfFields <= 200) {
+  if (numberOfDocuments <= 100000 && numberOfFields! <= 200) {
     return 5000;
   }
   return 1000;
