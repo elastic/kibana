@@ -193,7 +193,7 @@ describe('SyntheticsPrivateLocation', () => {
         __ui: {
           type: 'yaml',
           value:
-            '{"script_source":{"is_generated_script":false,"file_name":""},"is_zip_url_tls_enabled":false,"is_tls_enabled":true}',
+            '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":true}',
         },
         config_id: {
           type: 'text',
@@ -331,7 +331,6 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   playwright_options: '',
   __ui: {
     script_source: { is_generated_script: false, file_name: '' },
-    is_zip_url_tls_enabled: false,
     is_tls_enabled: true,
   },
   params: '',
@@ -339,11 +338,6 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   'source.inline.script':
     "step('Go to https://www.elastic.co/', async () => {\n  await page.goto('https://www.elastic.co/');\n});",
   'source.project.content': '',
-  'source.zip_url.url': '',
-  'source.zip_url.username': '',
-  'source.zip_url.password': '',
-  'source.zip_url.folder': '',
-  'source.zip_url.proxy_url': '',
   urls: 'https://www.elastic.co/',
   screenshots: 'on',
   synthetics_args: [],

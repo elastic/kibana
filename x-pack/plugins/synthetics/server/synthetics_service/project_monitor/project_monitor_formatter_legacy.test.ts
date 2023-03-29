@@ -514,7 +514,6 @@ const payloadData = [
   {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
     __ui: {
-      is_zip_url_tls_enabled: false,
       script_source: {
         file_name: '',
         is_generated_script: false,
@@ -576,7 +575,6 @@ const payloadData = [
   {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
     __ui: {
-      is_zip_url_tls_enabled: false,
       script_source: {
         file_name: '',
         is_generated_script: false,

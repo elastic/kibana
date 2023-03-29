@@ -27,7 +27,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   timeout: '16',
   name: 'Test',
   locations: [],
-  __ui: { is_tls_enabled: false, is_zip_url_tls_enabled: false },
+  __ui: { is_tls_enabled: false },
   urls: 'https://www.google.com',
   max_redirects: '0',
   password: '3z9SBOQWW5F0UrdqLVFqlF6z',
@@ -56,14 +56,8 @@ const testBrowserConfig: Partial<MonitorFields> = {
   locations: [],
   __ui: {
     script_source: { is_generated_script: false, file_name: '' },
-    is_zip_url_tls_enabled: false,
     is_tls_enabled: false,
   },
-  'source.zip_url.url': '',
-  'source.zip_url.username': '',
-  'source.zip_url.password': '',
-  'source.zip_url.folder': '',
-  'source.zip_url.proxy_url': '',
   'source.inline.script':
     "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
   params: '{"a":"param"}',

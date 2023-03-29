@@ -185,8 +185,7 @@ export const getTestProjectSyntheticsPolicy = (
           },
           vars: {
             __ui: {
-              value:
-                '{"script_source":{"is_generated_script":false,"file_name":""},"is_zip_url_tls_enabled":false}',
+              value: '{"script_source":{"is_generated_script":false,"file_name":""}}',
               type: 'yaml',
             },
             enabled: { value: true, type: 'bool' },
@@ -237,7 +236,6 @@ export const getTestProjectSyntheticsPolicy = (
           compiled_stream: {
             __ui: {
               script_source: { is_generated_script: false, file_name: '' },
-              is_zip_url_tls_enabled: false,
             },
             type: 'browser',
             name: 'check if title is present',

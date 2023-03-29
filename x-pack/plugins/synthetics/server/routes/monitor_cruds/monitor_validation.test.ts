@@ -81,7 +81,6 @@ describe('validateMonitor', () => {
     };
     testMetaData = {
       is_tls_enabled: false,
-      is_zip_url_tls_enabled: false,
       script_source: {
         is_generated_script: false,
         file_name: 'test-file.name',
@@ -158,15 +157,6 @@ describe('validateMonitor', () => {
       [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
     };
 
-    testZipUrlTLSFields = {
-      [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: 'test',
-      [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: 'test',
-      [ConfigKey.ZIP_URL_TLS_KEY]: 'key',
-      [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: 'passphrase',
-      [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: VerificationMode.STRICT,
-      [ConfigKey.ZIP_URL_TLS_VERSION]: [TLSVersion.ONE_ONE, TLSVersion.ONE_TWO],
-    };
-
     testBrowserSimpleFields = {
       ...testZipUrlTLSFields,
       ...testCommonFields,
@@ -177,11 +167,6 @@ describe('validateMonitor', () => {
       [ConfigKey.METADATA]: testMetaData,
       [ConfigKey.SOURCE_INLINE]: '',
       [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
-      [ConfigKey.SOURCE_ZIP_URL]: '',
-      [ConfigKey.SOURCE_ZIP_FOLDER]: '',
-      [ConfigKey.SOURCE_ZIP_USERNAME]: 'test-username',
-      [ConfigKey.SOURCE_ZIP_PASSWORD]: 'password',
-      [ConfigKey.SOURCE_ZIP_PROXY_URL]: 'http://proxy-url.com',
       [ConfigKey.PARAMS]: '',
       [ConfigKey.URLS]: null,
       [ConfigKey.PORT]: null,
@@ -408,7 +393,6 @@ function getJsonPayload() {
     '  "timeout": "3m",' +
     '  "__ui": {' +
     '    "is_tls_enabled": false,' +
-    '    "is_zip_url_tls_enabled": false,' +
     '    "script_source": {' +
     '      "is_generated_script": false,' +
     '      "file_name": "test-file.name"' +

@@ -160,7 +160,7 @@ export const getTestBrowserSyntheticsPolicy = ({
           vars: {
             __ui: {
               value:
-                '{"script_source":{"is_generated_script":false,"file_name":""},"is_zip_url_tls_enabled":false,"is_tls_enabled":false}',
+                '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":false}',
               type: 'yaml',
             },
             enabled: { value: true, type: 'bool' },
@@ -170,10 +170,6 @@ export const getTestBrowserSyntheticsPolicy = ({
             'service.name': { value: '', type: 'text' },
             timeout: { value: '16s', type: 'text' },
             tags: { value: '["cookie-test","browser"]', type: 'yaml' },
-            'source.zip_url.url': { value: '', type: 'text' },
-            'source.zip_url.username': { value: '', type: 'text' },
-            'source.zip_url.folder': { value: '', type: 'text' },
-            'source.zip_url.password': { value: '', type: 'password' },
             'source.inline.script': {
               value:
                 '"step(\\"Visit /users api route\\", async () => {\\\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\\\n  expect(response.status()).toEqual(200);\\\\n});"',
@@ -207,7 +203,6 @@ export const getTestBrowserSyntheticsPolicy = ({
           compiled_stream: {
             __ui: {
               script_source: { is_generated_script: false, file_name: '' },
-              is_zip_url_tls_enabled: false,
               is_tls_enabled: false,
             },
             type: 'browser',
