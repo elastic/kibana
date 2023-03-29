@@ -30,6 +30,8 @@ const getFileClient = (esClient: ElasticsearchClient, logger: Logger): FileClien
     elasticsearchClient: esClient,
     logger,
     indexIsAlias: true,
+    // FIXME:PT Value should be retrieved from the plugin server side config and should match value used in HTTP route registration
+    maxSizeBytes: 26214400,
   });
 };
 
