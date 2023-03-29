@@ -7,6 +7,8 @@
 
 import React, { useMemo } from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -21,14 +23,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConvertedResult, convertResults } from './convert_results';
+import { FieldIcon } from '../field_icon';
+
+import { addTypeToResults, ConvertedResultWithType, convertResults } from './convert_results';
 import { useSelectedDocument } from './document_context';
+import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
 
 export const DocumentFlyout: React.FC = () => {
+  const { fieldTypesByIndex } = useValues(EngineSearchPreviewLogic);
   const { selectedDocument, setSelectedDocument } = useSelectedDocument();
 
-  const [id, items] = useMemo((): [string | null, ConvertedResult[]] => {
-    if (!selectedDocument) return [null, []];
+  const index = selectedDocument?._meta.rawHit._index;
+
+  const [id, items] = useMemo((): [string | null, ConvertedResultWithType[]] => {
+    const fieldTypes = fieldTypesByIndex[index];
+    if (!selectedDocument || !fieldTypes) return [null, []];
     const {
       _meta: { id: encodedId },
       id: _id,
@@ -41,24 +50,26 @@ export const DocumentFlyout: React.FC = () => {
       ),
       id: parsedId,
     };
-    return [parsedId, convertResults(fields)];
-  }, [selectedDocument]);
+    return [parsedId, addTypeToResults(convertResults(fields), fieldTypes)];
+  }, [fieldTypesByIndex, index, selectedDocument]);
 
   if (selectedDocument === null) return null;
 
-  const columns: Array<EuiBasicTableColumn<ConvertedResult>> = [
+  const columns: Array<EuiBasicTableColumn<ConvertedResultWithType>> = [
     {
-      field: 'field',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.engine.searchPreview.documentFlyout.fieldLabel',
         { defaultMessage: 'Field' }
       ),
-      render: (key: string) => (
-        <EuiText>
-          <EuiTextColor color="subdued">
-            <code>{key}</code>
-          </EuiTextColor>
-        </EuiText>
+      render: ({ field: key, type }: ConvertedResultWithType) => (
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <FieldIcon type={type} />
+          <EuiText>
+            <EuiTextColor color="subdued">
+              <code>{key}</code>
+            </EuiTextColor>
+          </EuiText>
+        </EuiFlexGroup>
       ),
       truncateText: false,
     },

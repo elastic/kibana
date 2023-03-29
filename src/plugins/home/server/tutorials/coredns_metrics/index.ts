@@ -56,6 +56,6 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['security', 'network', 'web'],
+    integrationBrowserCategories: ['observability'],
   };
 }
