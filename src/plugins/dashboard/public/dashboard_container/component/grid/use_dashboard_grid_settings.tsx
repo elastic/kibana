@@ -14,7 +14,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container_context';
 
-export const useDashboardGridSettings = () => {
+export const useDashboardGridSettings = (panelsInOrder: string[]) => {
   const { useEmbeddableSelector: select } = useDashboardContainerContext();
   const { euiTheme } = useEuiTheme();
 
@@ -23,20 +23,9 @@ export const useDashboardGridSettings = () => {
 
   const layouts = useMemo(() => {
     return {
-      lg: Object.values(panels)
-        .map((panel) => panel.gridData)
-        .sort((panelA, panelB) => {
-          // need to manually sort the layout because we want the panels to be collapsed from the left to the
-          // right when switching to the single column layout, but RGL sorts by ID which can cause unexpected
-          // behaviour between by-reference and by-value panels.
-          if (panelA.y === panelB.y) {
-            return panelA.x - panelB.x;
-          } else {
-            return panelA.y - panelB.y;
-          }
-        }),
+      lg: panelsInOrder.map((embeddableId) => panels[embeddableId].gridData),
     };
-  }, [panels]);
+  }, [panels, panelsInOrder]);
 
   const breakpoints = useMemo(
     () => ({ lg: euiTheme.breakpoint.m, ...(viewMode === ViewMode.VIEW ? { sm: 0 } : {}) }),

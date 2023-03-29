@@ -32,7 +32,6 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
     useEmbeddableDispatch,
   } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
-
   const panels = select((state) => state.explicitInput.panels);
   const viewMode = select((state) => state.explicitInput.viewMode);
   const useMargins = select((state) => state.explicitInput.useMargins);
@@ -48,8 +47,24 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
     panelCount: Object.keys(panels).length,
   });
 
+  const panelsInOrder: string[] = useMemo(() => {
+    return Object.keys(panels).sort((embeddableIdA, embeddableIdB) => {
+      const panelA = panels[embeddableIdA];
+      const panelB = panels[embeddableIdB];
+
+      // need to manually sort the layout because we want the panels to be collapsed from the left to the
+      // right when switching to the single column layout, but RGL sorts by ID which can cause unexpected
+      // behaviour between by-reference and by-value panels.
+      if (panelA.gridData.y === panelB.gridData.y) {
+        return panelA.gridData.x - panelB.gridData.x;
+      } else {
+        return panelA.gridData.y - panelB.gridData.y;
+      }
+    });
+  }, [panels]);
+
   const panelComponents = useMemo(() => {
-    return Object.keys(panels).map((embeddableId, index) => {
+    return panelsInOrder.map((embeddableId, index) => {
       const type = panels[embeddableId].type;
       return (
         <DashboardGridItem
@@ -63,7 +78,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         />
       );
     });
-  }, [expandedPanelId, onPanelStatusChange, panels]);
+  }, [expandedPanelId, onPanelStatusChange, panels, panelsInOrder]);
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {
@@ -92,7 +107,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
 
-  const { layouts, breakpoints, columns } = useDashboardGridSettings();
+  const { layouts, breakpoints, columns } = useDashboardGridSettings(panelsInOrder);
 
   // in print mode, dashboard layout is not controlled by React Grid Layout
   if (viewMode === ViewMode.PRINT) {
