@@ -23,6 +23,8 @@ export * from './rule_notify_when_type';
 export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
+export * from './rrule_type';
+export * from './maintenance_window';
 export * from './default_rule_aggregation';
 export * from './rule_tags_aggregation';
 

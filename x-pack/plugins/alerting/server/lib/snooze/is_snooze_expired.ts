@@ -7,7 +7,8 @@
 
 import { RRule, Weekday } from 'rrule';
 import { RuleSnoozeSchedule } from '../../types';
-import { isSnoozeActive, parseByWeekday } from './is_snooze_active';
+import { isSnoozeActive } from './is_snooze_active';
+import { parseByWeekday } from '../rrule';
 
 export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
   if (isSnoozeActive(snooze)) {
