@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
+
+import { euiTextTruncate } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 export const AnalyticsCollectionCardStyles = (euiTheme: EuiThemeComputed) => ({
@@ -48,9 +51,7 @@ export const AnalyticsCollectionCardStyles = (euiTheme: EuiThemeComputed) => ({
     position: 'relative' as 'relative',
     zIndex: 1,
   },
-  title: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap' as 'nowrap',
-  },
+  title: css`
+    ${euiTextTruncate()}
+  `,
 });
