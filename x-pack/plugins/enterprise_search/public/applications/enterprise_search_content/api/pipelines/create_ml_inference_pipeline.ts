@@ -37,15 +37,15 @@ export interface CreateMlInferencePipelineResponse {
 }
 
 const isArgsWithPipelineParameters = (
-  args: any
+  args: CreateMlInferencePipelineApiLogicArgs
 ): args is CreateMlInferencePipelineApiLogicArgsWithPipelineParameters => {
-  return typeof args.modelId === 'string';
+  return typeof (args as CreateMlInferencePipelineApiLogicArgsWithPipelineParameters).modelId === 'string';
 };
 
 const isArgsWithPipelineDefinition = (
-  args: any
+  args: CreateMlInferencePipelineApiLogicArgs
 ): args is CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition => {
-  return typeof args.pipelineDefinition === 'object';
+  return typeof (args as CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition).pipelineDefinition === 'object';
 };
 
 export const createMlInferencePipeline = async (

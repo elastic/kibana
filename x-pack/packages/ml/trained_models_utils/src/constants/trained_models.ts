@@ -28,6 +28,7 @@ export const SUPPORTED_PYTORCH_TASKS = {
   ZERO_SHOT_CLASSIFICATION: 'zero_shot_classification',
   TEXT_CLASSIFICATION: 'text_classification',
   TEXT_EMBEDDING: 'text_embedding',
+  TEXT_EXPANSION: 'text_expansion',
   FILL_MASK: 'fill_mask',
   TEXT_EXPANSION: 'text_expansion',
 } as const;
