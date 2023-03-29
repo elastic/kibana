@@ -2075,7 +2075,28 @@
         "title": "Connector secrets properties for a Slack connector",
         "description": "Defines secrets for connectors when type is `.slack`.",
         "type": "object",
-        "additionalProperties": true
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Slack bot user OAuth token."
+          },
+          "webhookUrl": {
+            "type": "string",
+            "description": "Slack webhook url."
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "token"
+            ]
+          },
+          {
+            "required": [
+              "webhookUrl"
+            ]
+          }
+        ]
       },
       "create_connector_request_slack": {
         "title": "Create Slack connector request",

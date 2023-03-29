@@ -8,6 +8,9 @@ properties:
     type: string
     description: The display name for the connector.
   config:
-    type: 'web_api' | 'webhook'
+    type: string
+    enum: 
+      - 'web_api'
+      - 'webhook'
   secrets:
     $ref: 'secrets_properties_slack.yaml'
