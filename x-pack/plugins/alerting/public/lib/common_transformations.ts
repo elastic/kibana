@@ -131,7 +131,6 @@ export function transformRule(input: ApiRule): Rule {
     updatedAt: new Date(updatedAt),
     apiKey,
     apiKeyOwner,
-    apiKeyCreatedByUser,
     notifyWhen,
     muteAll,
     mutedInstanceIds,
@@ -142,6 +141,8 @@ export function transformRule(input: ApiRule): Rule {
     ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     ...(monitoring ? { monitoring: transformMonitoring(monitoring) } : {}),
     ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
+    ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
+
     ...rest,
   };
 }
