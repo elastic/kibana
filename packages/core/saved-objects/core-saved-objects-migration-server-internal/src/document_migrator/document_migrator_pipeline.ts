@@ -12,13 +12,11 @@ import Semver from 'semver';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { ActiveMigrations, Transform, TransformType } from './types';
 import { maxVersion } from './utils';
+import { coreVersionTransformTypes, applyVersion } from './pipeline_utils';
 
 function isGreater(a?: string, b?: string) {
   return !!a && (!b || Semver.gt(a, b));
 }
-
-/* transform types using `coreMigrationVersion` and not `typeMigrationVersion` */
-const coreVersionTransformTypes = [TransformType.Core, TransformType.Reference];
 
 export class DocumentMigratorPipeline {
   public additionalDocs = [] as SavedObjectUnsanitizedDoc[];
@@ -179,15 +177,6 @@ export class DocumentMigratorPipeline {
     }
   }
 
-  private bumpVersion({ transformType, version }: Transform) {
-    this.document = {
-      ...this.document,
-      ...(coreVersionTransformTypes.includes(transformType)
-        ? { coreMigrationVersion: maxVersion(this.document.coreMigrationVersion, version) }
-        : { typeMigrationVersion: maxVersion(this.document.typeMigrationVersion, version) }),
-    };
-  }
-
   private ensureVersion({
     coreMigrationVersion: currentCoreMigrationVersion,
     typeMigrationVersion: currentTypeMigrationVersion,
@@ -217,7 +206,7 @@ export class DocumentMigratorPipeline {
       this.additionalDocs.push(...additionalDocs.map((document) => this.ensureVersion(document)));
 
       this.assertUpgrade(transform, previousVersion);
-      this.bumpVersion(transform);
+      this.document = applyVersion({ document: this.document, transform });
     }
 
     this.assertCompatibility();

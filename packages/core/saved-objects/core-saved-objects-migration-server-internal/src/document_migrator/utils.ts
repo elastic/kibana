@@ -94,3 +94,14 @@ export function maxVersion(a?: string, b?: string) {
 
   return Semver.gt(a, b) ? a : b;
 }
+
+export function minVersion(a?: string, b?: string) {
+  if (!a) {
+    return b;
+  }
+  if (!b) {
+    return a;
+  }
+
+  return Semver.lt(a, b) ? a : b;
+}
