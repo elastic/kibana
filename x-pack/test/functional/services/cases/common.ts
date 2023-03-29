@@ -121,5 +121,82 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
       await header.waitUntilLoadingHasFinished();
     },
+
+    async generateUserActions() {
+      await this.selectSeverity(CaseSeverity.LOW);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.MEDIUM);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('editable-title-edit-icon');
+      await testSubjects.setValue('editable-title-input-field', 'Edited title');
+      await testSubjects.click('editable-title-submit-btn');
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.HIGH);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.CRITICAL);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.LOW);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.MEDIUM);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.HIGH);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.CRITICAL);
+
+      await header.waitUntilLoadingHasFinished();
+
+      const commentArea = await find.byCssSelector(
+        '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+      );
+      await commentArea.focus();
+      await commentArea.type('New comment');
+      await testSubjects.click('submit-comment');
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.LOW);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.MEDIUM);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.HIGH);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await this.selectSeverity(CaseSeverity.CRITICAL);
+
+      await header.waitUntilLoadingHasFinished();
+    }
   };
 }

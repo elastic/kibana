@@ -423,82 +423,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows more actions on button click', async () => {
-        await cases.common.selectSeverity(CaseSeverity.LOW);
+        await cases.common.generateUserActions();
 
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await testSubjects.click('editable-title-edit-icon');
-        await testSubjects.setValue('editable-title-input-field', 'Edited title');
-        await testSubjects.click('editable-title-submit-btn');
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.HIGH);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.CRITICAL);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.LOW);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.HIGH);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.CRITICAL);
-
-        await header.waitUntilLoadingHasFinished();
-
-        const commentArea = await find.byCssSelector(
-          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-        );
-        await commentArea.focus();
-        await commentArea.type('New comment');
-        await testSubjects.click('submit-comment');
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.LOW);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.HIGH);
-
-        await header.waitUntilLoadingHasFinished();
-
-        await cases.common.selectSeverity(CaseSeverity.CRITICAL);
-
-        await header.waitUntilLoadingHasFinished();
-
-        expect(testSubjects.existOrFail('show-more-user-actions'));
+        expect(testSubjects.existOrFail('cases-show-more-user-actions'));
 
         const userActionsLists = await find.allByCssSelector(
           '[data-test-subj="user-actions-list"]'
@@ -509,7 +436,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'severity-update-action'
         );
 
-        testSubjects.click('show-more-user-actions');
+        testSubjects.click('cases-show-more-user-actions');
 
         const lastActionList = await userActionsLists[1].findAllByClassName('euiComment');
 
