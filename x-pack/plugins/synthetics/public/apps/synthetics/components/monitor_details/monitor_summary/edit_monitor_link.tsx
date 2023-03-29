@@ -35,7 +35,13 @@ export const EditMonitorLink = () => {
       canEditSynthetics={canEditSynthetics}
       canUpdatePrivateMonitor={canUpdatePrivateMonitor}
     >
-      <EuiButton fill iconType="pencil" iconSide="left" {...linkProps}>
+      <EuiButton
+        data-test-subj="syntheticsEditMonitorLinkButton"
+        fill
+        iconType="pencil"
+        iconSide="left"
+        {...linkProps}
+      >
         {EDIT_MONITOR}
       </EuiButton>
     </NoPermissionsTooltip>

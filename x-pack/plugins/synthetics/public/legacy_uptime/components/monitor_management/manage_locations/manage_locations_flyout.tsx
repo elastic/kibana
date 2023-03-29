@@ -103,7 +103,12 @@ export const ManageLocationsFlyout = () => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="syntheticsManageLocationsFlyoutButton"
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+            >
               {CLOSE_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -127,7 +132,12 @@ export const ManageLocationsFlyout = () => {
   return (
     <div>
       {isEnabled && (
-        <EuiButtonEmpty onClick={() => setIsOpen(true)}>{PRIVATE_LOCATIONS}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="syntheticsManageLocationsFlyoutButton"
+          onClick={() => setIsOpen(true)}
+        >
+          {PRIVATE_LOCATIONS}
+        </EuiButtonEmpty>
       )}
       {isOpen && !isAddingNew ? flyout : null}
       {isAddingNew ? (

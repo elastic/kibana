@@ -15,8 +15,8 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
   SavedObjectUnsanitizedDoc,
+  ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import type { MigrateAndConvertFn } from '../document_migrator/document_migrator';
 import { TransformSavedObjectDocumentError } from '.';
 
@@ -65,7 +65,7 @@ export class CorruptSavedObjectError extends Error {
  * @returns {SavedObjectsRawDoc[]}
  */
 export async function migrateRawDocs(
-  serializer: SavedObjectsSerializer,
+  serializer: ISavedObjectsSerializer,
   migrateDoc: MigrateAndConvertFn,
   rawDocs: SavedObjectsRawDoc[]
 ): Promise<SavedObjectsRawDoc[]> {
@@ -86,7 +86,7 @@ export async function migrateRawDocs(
 }
 
 interface MigrateRawDocsSafelyDeps {
-  serializer: SavedObjectsSerializer;
+  serializer: ISavedObjectsSerializer;
   migrateDoc: MigrateAndConvertFn;
   rawDocs: SavedObjectsRawDoc[];
 }
@@ -181,7 +181,7 @@ function transformNonBlocking(
 async function migrateMapToRawDoc(
   migrateMethod: MigrateFn,
   savedObject: SavedObjectSanitizedDoc<unknown>,
-  serializer: SavedObjectsSerializer
+  serializer: ISavedObjectsSerializer
 ): Promise<SavedObjectsRawDoc[]> {
   return [...(await migrateMethod(savedObject))].map((attrs) =>
     serializer.savedObjectToRaw({
@@ -201,9 +201,11 @@ async function migrateMapToRawDoc(
 function convertToRawAddMigrationVersion(
   rawDoc: SavedObjectsRawDoc,
   options: { namespaceTreatment: 'lax' },
-  serializer: SavedObjectsSerializer
+  serializer: ISavedObjectsSerializer
 ): SavedObjectSanitizedDoc<unknown> {
   const savedObject = serializer.rawToSavedObject(rawDoc, options);
-  savedObject.migrationVersion = savedObject.migrationVersion || {};
+  if (!savedObject.migrationVersion && !savedObject.typeMigrationVersion) {
+    savedObject.typeMigrationVersion = '';
+  }
   return savedObject;
 }
