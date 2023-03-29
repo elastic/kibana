@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -25,6 +25,7 @@ import {
 import { paths } from '../../../config/paths';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
+import { useShowSections } from '../hooks/use_show_sections';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -55,28 +56,12 @@ export function SloEditForm({ slo }: Props) {
       watch,
     });
 
-  const [showObjectiveSection, setShowObjectiveSection] = useState<boolean>(isEditMode);
-  const [showDescriptionSection, setShowDescriptionSection] = useState<boolean>(isEditMode);
-  useEffect(() => {
-    if (!formState.isValidating && !showObjectiveSection && isIndicatorSectionValid) {
-      setShowObjectiveSection(true);
-    }
-
-    if (
-      !formState.isValidating &&
-      !showDescriptionSection &&
-      isIndicatorSectionValid &&
-      isObjectiveSectionValid
-    ) {
-      setShowDescriptionSection(true);
-    }
-  }, [
-    showObjectiveSection,
-    showDescriptionSection,
+  const { showDescriptionSection, showObjectiveSection } = useShowSections(
+    isEditMode,
+    formState.isValidating,
     isIndicatorSectionValid,
-    isObjectiveSectionValid,
-    formState,
-  ]);
+    isObjectiveSectionValid
+  );
 
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
