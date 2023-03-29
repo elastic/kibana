@@ -13,13 +13,14 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
+
 import {
   assertNotText,
-  assertText,
   byTestId,
+  assertText,
   waitForLoadingToFinish,
-} from '@kbn/observability-plugin/e2e/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+} from '../../../helpers/utils';
+import { recordVideo } from '../../../helpers/record_video';
 import { settingsPageProvider } from '../../../page_objects/uptime/settings';
 
 journey('DefaultEmailSettings', async ({ page, params }) => {
