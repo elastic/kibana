@@ -15,6 +15,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CloudDefendRouterProps } from './application/router';
 import type { CloudDefendPageId } from './common/navigation/types';
+import * as i18n from './components/control_general_view/translations';
 
 /**
  * cloud_defend plugin types
@@ -85,6 +86,8 @@ export type SelectorCondition =
 
 export interface SelectorConditionOptions {
   type: SelectorConditionType;
+  pattern?: string;
+  patternError?: string;
   selectorType?: SelectorType;
   not?: SelectorCondition[];
   values?:
@@ -101,16 +104,27 @@ export type SelectorConditionsMapProps = {
 
 // used to determine UX control and allowed values for each condition
 export const SelectorConditionsMap: SelectorConditionsMapProps = {
-  containerImageName: { type: 'stringArray', not: ['fullContainerImageName'] },
+  containerImageName: {
+    type: 'stringArray',
+    pattern: '^[a-z0-9]+$',
+    not: ['fullContainerImageName'],
+  },
   containerImageTag: { type: 'stringArray' },
   fullContainerImageName: {
     type: 'stringArray',
+    pattern:
+      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$',
+    patternError: i18n.errorInvalidFullContainerImageName,
     not: ['containerImageName'],
   },
   orchestratorClusterId: { type: 'stringArray' },
   orchestratorClusterName: { type: 'stringArray' },
   orchestratorNamespace: { type: 'stringArray' },
-  orchestratorResourceLabel: { type: 'stringArray' },
+  orchestratorResourceLabel: {
+    type: 'stringArray',
+    pattern: '^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$',
+    patternError: i18n.errorInvalidResourceLabel,
+  },
   orchestratorResourceName: { type: 'stringArray' },
   orchestratorResourceType: { type: 'stringArray', values: ['node', 'pod'] },
   orchestratorType: { type: 'stringArray', values: ['kubernetes'] },

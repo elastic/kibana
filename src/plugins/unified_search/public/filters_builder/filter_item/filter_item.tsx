@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import {
   EuiDraggable,
   EuiDroppable,
@@ -111,6 +111,9 @@ export function FilterItem({
       params = getFilterParams(filter);
     }
   }
+  const [multiValueFilterParams, setMultiValueFilterParams] = useState<
+    Array<Filter | boolean | string | number>
+  >([]);
 
   const onHandleField = useCallback(
     (selectedField: DataViewField) => {
@@ -134,6 +137,9 @@ export function FilterItem({
 
   const onHandleParamsChange = useCallback(
     (selectedParams: Filter['meta']['params']) => {
+      if (Array.isArray(selectedParams)) {
+        setMultiValueFilterParams(selectedParams);
+      }
       dispatch({
         type: 'updateFilter',
         payload: { dest: { path, index }, field, operator, params: selectedParams },
@@ -143,19 +149,27 @@ export function FilterItem({
   );
 
   const onHandleParamsUpdate = useCallback(
-    (value: Filter['meta']['params']) => {
-      const paramsValues = Array.isArray(params) ? params : [];
+    (value: Filter | boolean | string | number) => {
+      const paramsValues: Array<Filter | boolean | string | number> = Array.isArray(
+        multiValueFilterParams
+      )
+        ? multiValueFilterParams
+        : [];
+      if (value) {
+        paramsValues.push(value);
+        setMultiValueFilterParams(paramsValues);
+      }
       dispatch({
         type: 'updateFilter',
         payload: {
           dest: { path, index },
           field,
           operator,
-          params: [...paramsValues, value] as Filter['meta']['params'],
+          params: paramsValues as Filter['meta']['params'],
         },
       });
     },
-    [dispatch, path, index, field, operator, params]
+    [dispatch, path, index, field, operator, multiValueFilterParams]
   );
 
   const onRemoveFilter = useCallback(() => {
