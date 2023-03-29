@@ -27,7 +27,11 @@ import { validate } from './validate';
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 
 // This validation is a pass-through so that we can apply our version-specific validation later
-const passThroughValidation = { body: schema.any(), params: schema.any(), query: schema.any() };
+const passThroughValidation = {
+  body: schema.nullable(schema.any()),
+  params: schema.nullable(schema.any()),
+  query: schema.nullable(schema.any({ defaultValue: undefined })),
+};
 
 export class CoreVersionedRoute implements VersionedRoute {
   private readonly handlers = new Map<
@@ -118,8 +122,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         mutableCoreKibanaRequest.params = params;
         mutableCoreKibanaRequest.query = query;
       } catch (e) {
-        return res.custom({
-          statusCode: 400,
+        return res.badRequest({
           body: e.message,
         });
       }
