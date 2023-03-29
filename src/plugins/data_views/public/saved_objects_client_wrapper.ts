@@ -7,6 +7,7 @@
  */
 
 import { ContentClient } from '@kbn/content-management-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
@@ -47,10 +48,19 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
 
   async get(id: string) {
-    const response = await this.contentManagemntClient.get<DataViewGetIn, DataViewGetOut>({
-      contentTypeId: 'index-pattern',
-      id,
-    });
+    let response: DataViewGetOut;
+    try {
+      response = await this.contentManagemntClient.get<DataViewGetIn, DataViewGetOut>({
+        contentTypeId: 'index-pattern',
+        id,
+      });
+    } catch (e) {
+      if (e.output?.statusCode === 404) {
+        throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
+      } else {
+        throw e;
+      }
+    }
 
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
