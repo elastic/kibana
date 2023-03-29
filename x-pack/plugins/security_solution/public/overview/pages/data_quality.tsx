@@ -187,7 +187,7 @@ const DataQualityComponent: React.FC = () => {
   );
 
   const { cases } = useKibana().services;
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
     toastContent: i18n.ADD_TO_CASE_SUCCESS,
   });
   const openCreateCaseFlyout = useCallback(

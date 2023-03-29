@@ -72,12 +72,12 @@ export const DiscoverMainContent = ({
       gutterSize="none"
       responsive={false}
     >
-      {!isPlainRecord && (
-        <EuiFlexItem grow={false}>
-          <EuiHorizontalRule margin="none" />
+      <EuiFlexItem grow={false}>
+        <EuiHorizontalRule margin="none" />
+        {!isPlainRecord && (
           <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
-        </EuiFlexItem>
-      )}
+        )}
+      </EuiFlexItem>
       {dataState.error && (
         <ErrorCallout
           title={i18n.translate('discover.documentsErrorTitle', {
