@@ -132,7 +132,7 @@ const useRuleSnoozeColumn = ({
         if (rule.snoozeSettings instanceof Error) {
           return (
             <EuiToolTip content={rule.snoozeSettings.message}>
-              <EuiButtonIcon size="s" iconType="bellSlash" color="accent" disabled />
+              <EuiButtonIcon size="s" iconType="bellSlash" disabled />
             </EuiToolTip>
           );
         }
