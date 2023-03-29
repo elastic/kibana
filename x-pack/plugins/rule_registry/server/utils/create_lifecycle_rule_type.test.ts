@@ -256,6 +256,7 @@ describe('createLifecycleRuleTypeFactory', () => {
                 "threshold": 1,
               },
               "kibana.alert.rule.producer": "producer",
+              "kibana.alert.rule.revision": 0,
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
                 "tags",
@@ -292,6 +293,7 @@ describe('createLifecycleRuleTypeFactory', () => {
                 "threshold": 1,
               },
               "kibana.alert.rule.producer": "producer",
+              "kibana.alert.rule.revision": 0,
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
                 "tags",
