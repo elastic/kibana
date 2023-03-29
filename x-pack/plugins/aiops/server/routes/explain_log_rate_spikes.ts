@@ -78,8 +78,11 @@ export const defineExplainLogRateSpikesRoute = (
         return response.forbidden();
       }
 
-      const executionContext = await createExecutionContext(coreStart, request.route.path);
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
+      const [executionContext, contextCore] = await Promise.all([
+        createExecutionContext(coreStart, request.route.path),
+        context.core,
+      ]);
+      const client = contextCore.elasticsearch.client.asCurrentUser;
 
       return await coreStart.executionContext.withContext(executionContext, () => {
         let logMessageCounter = 1;
