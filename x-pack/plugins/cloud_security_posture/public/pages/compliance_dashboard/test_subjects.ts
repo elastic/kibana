@@ -18,4 +18,3 @@ export const DASHBOARD_TABLE_HEADER_SCORE_TEST_ID = 'csp:dashboard-sections-tabl
 export const DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID = 'csp:dashboard-sections-table-column-score';
 export const KUBERNETES_DASHBOARD_TAB = 'kubernetes-dashboard-tab';
 export const CLOUD_DASHBOARD_TAB = 'cloud-dashboard-tab';
-
