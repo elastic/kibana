@@ -90,6 +90,12 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     }
   }, [dispatch, groupSelector, selectedGroups]);
 
+  useEffect(() => {
+    console.log('grouping mount');
+    return () => {
+      console.log('grouping unmount');
+    };
+  });
   const getLevel = useCallback(
     (
       level: number,
