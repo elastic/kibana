@@ -115,12 +115,6 @@ const ConsoleWindow = styled.div`
       }
     }
   }
-
-  // ensures the last seen item in status result
-  // is aligned
-  .formatted_date_inline_tooltip {
-    display: inline;
-  }
 `;
 
 export const Console = memo<ConsoleProps>(
