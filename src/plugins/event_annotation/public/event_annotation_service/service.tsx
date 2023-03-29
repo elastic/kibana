@@ -10,9 +10,10 @@ import React from 'react';
 import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { CoreStart, SavedObjectsClientContract } from '@kbn/core/public';
+import { CoreStart, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import {
   EventAnnotationConfig,
   EventAnnotationGroupAttributes,
@@ -63,13 +64,23 @@ export function getEventAnnotationService(
     //   .filter(({ error }) => !error)
     //   .map((annotation) => annotation.attributes);
 
+    const adHocDataViewSpec = savedObject.attributes.dataViewSpec
+      ? DataViewPersistableStateService.inject(
+          savedObject.attributes.dataViewSpec,
+          savedObject.references
+        )
+      : undefined;
+
     return {
       title: savedObject.attributes.title,
       description: savedObject.attributes.description,
       tags: savedObject.attributes.tags,
       ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
-      indexPatternId: savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
+      indexPatternId: adHocDataViewSpec
+        ? adHocDataViewSpec.id!
+        : savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
       annotations: savedObject.attributes.annotations,
+      dataViewSpec: adHocDataViewSpec,
     };
   };
 
@@ -89,23 +100,46 @@ export function getEventAnnotationService(
   //   ]);
   // };
 
+  const extractDataViewInformation = (group: EventAnnotationGroupConfig) => {
+    let { dataViewSpec = null } = group;
+
+    let references: SavedObjectReference[];
+
+    if (dataViewSpec) {
+      if (!dataViewSpec.id)
+        throw new Error(
+          'tried to create annotation group with a data view spec that did not include an ID!'
+        );
+
+      const { state, references: refsFromDataView } =
+        DataViewPersistableStateService.extract(dataViewSpec);
+      dataViewSpec = state;
+      references = refsFromDataView;
+    } else {
+      references = [
+        {
+          type: 'index-pattern',
+          id: group.indexPatternId,
+          name: `event-annotation-group_dataView-ref-${group.indexPatternId}`,
+        },
+      ];
+    }
+
+    return { references, dataViewSpec };
+  };
+
   const createAnnotationGroup = async (
     group: EventAnnotationGroupConfig
   ): Promise<{ id: string }> => {
-    const { title, description, tags, ignoreGlobalFilters, indexPatternId, annotations } = group;
+    const { references, dataViewSpec } = extractDataViewInformation(group);
+    const { title, description, tags, ignoreGlobalFilters, annotations } = group;
 
     const groupSavedObjectId = (
       await client.create(
         EVENT_ANNOTATION_GROUP_TYPE,
-        { title, description, tags, ignoreGlobalFilters, annotations },
+        { title, description, tags, ignoreGlobalFilters, annotations, dataViewSpec },
         {
-          references: [
-            {
-              type: 'index-pattern',
-              id: indexPatternId,
-              name: `event-annotation-group_dataView-ref-${indexPatternId}`,
-            },
-          ],
+          references,
         }
       )
     ).id;
@@ -117,19 +151,15 @@ export function getEventAnnotationService(
     group: EventAnnotationGroupConfig,
     annotationGroupId: string
   ): Promise<void> => {
-    const { title, description, tags, ignoreGlobalFilters, indexPatternId, annotations } = group;
+    const { references, dataViewSpec } = extractDataViewInformation(group);
+    const { title, description, tags, ignoreGlobalFilters, annotations } = group;
+
     await client.update(
       EVENT_ANNOTATION_GROUP_TYPE,
       annotationGroupId,
-      { title, description, tags, ignoreGlobalFilters, annotations },
+      { title, description, tags, ignoreGlobalFilters, annotations, dataViewSpec },
       {
-        references: [
-          {
-            type: 'index-pattern',
-            id: indexPatternId,
-            name: `event-annotation-group_dataView-ref-${indexPatternId}`,
-          },
-        ],
+        references,
       }
     );
   };

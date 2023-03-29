@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaQueryOutput } from '@kbn/data-plugin/common';
+import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';
 import { AvailableAnnotationIcons } from './constants';
@@ -88,6 +88,7 @@ export interface EventAnnotationGroupAttributes {
   tags: string[];
   ignoreGlobalFilters: boolean;
   annotations: EventAnnotationConfig[];
+  dataViewSpec?: DataViewSpec;
 }
 
 export interface EventAnnotationGroupConfig {
@@ -97,6 +98,7 @@ export interface EventAnnotationGroupConfig {
   title: string;
   description: string;
   tags: string[];
+  dataViewSpec?: DataViewSpec;
 }
 
 export type EventAnnotationArgs =

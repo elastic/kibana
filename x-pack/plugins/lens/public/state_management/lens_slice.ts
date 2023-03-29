@@ -50,6 +50,7 @@ export const initialState: LensAppState = {
     indexPatternRefs: [],
     indexPatterns: {},
   },
+  annotationGroups: {},
 };
 
 export const getPreloadedState = ({

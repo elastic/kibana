@@ -19,6 +19,8 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 
 describe('annotation group save action', () => {
   describe('save modal', () => {
@@ -132,33 +134,41 @@ describe('annotation group save action', () => {
 
     const savedId = 'saved-id-123';
 
-    const getProps: () => Parameters<typeof onSave>[0] = () => ({
-      state: {
-        preferredSeriesType: 'area',
-        legend: { isVisible: true, position: 'bottom' },
-        layers: [{ layerId } as XYAnnotationLayerConfig],
-      } as XYState,
-      layer,
-      setState: jest.fn(),
-      eventAnnotationService: {
-        createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
-        updateAnnotationGroup: jest.fn(),
-        loadAnnotationGroup: jest.fn(),
-        toExpression: jest.fn(),
-        toFetchExpression: jest.fn(),
-        renderEventAnnotationGroupSavedObjectFinder: jest.fn(),
-      } as EventAnnotationServiceType,
-      toasts: toastsServiceMock.createStartContract(),
-      modalOnSaveProps: {
-        newTitle: 'my title',
-        newDescription: 'my description',
-        closeModal: jest.fn(),
-        newTags: ['my-tag'],
-        newCopyOnSave: false,
-        isTitleDuplicateConfirmed: false,
-        onTitleDuplicate: () => {},
-      },
-    });
+    const getProps: () => Parameters<typeof onSave>[0] = () => {
+      const dataViews = dataViewPluginMocks.createStartContract();
+      dataViews.get.mockResolvedValue({
+        isPersisted: () => true,
+      } as Partial<DataView> as DataView);
+
+      return {
+        state: {
+          preferredSeriesType: 'area',
+          legend: { isVisible: true, position: 'bottom' },
+          layers: [{ layerId } as XYAnnotationLayerConfig],
+        } as XYState,
+        layer,
+        setState: jest.fn(),
+        eventAnnotationService: {
+          createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
+          updateAnnotationGroup: jest.fn(),
+          loadAnnotationGroup: jest.fn(),
+          toExpression: jest.fn(),
+          toFetchExpression: jest.fn(),
+          renderEventAnnotationGroupSavedObjectFinder: jest.fn(),
+        } as EventAnnotationServiceType,
+        toasts: toastsServiceMock.createStartContract(),
+        modalOnSaveProps: {
+          newTitle: 'my title',
+          newDescription: 'my description',
+          closeModal: jest.fn(),
+          newTags: ['my-tag'],
+          newCopyOnSave: false,
+          isTitleDuplicateConfirmed: false,
+          onTitleDuplicate: () => {},
+        },
+        dataViews,
+      };
+    };
 
     let props: ReturnType<typeof getProps>;
     beforeEach(() => {
@@ -175,6 +185,35 @@ describe('annotation group save action', () => {
         title: props.modalOnSaveProps.newTitle,
         description: props.modalOnSaveProps.newDescription,
         tags: props.modalOnSaveProps.newTags,
+      });
+
+      expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
+
+      expect((props.setState as jest.Mock).mock.calls).toMatchSnapshot();
+
+      expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
+    });
+
+    test('successful initial save with ad-hoc data view', async () => {
+      const dataViewSpec = {
+        id: 'some-adhoc-data-view-id',
+      } as DataViewSpec;
+
+      (props.dataViews.get as jest.Mock).mockResolvedValueOnce({
+        isPersisted: () => false, // ad-hoc
+        toSpec: () => dataViewSpec,
+      } as Partial<DataView>);
+
+      await onSave(props);
+
+      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
+        annotations: props.layer.annotations,
+        indexPatternId: props.layer.indexPatternId,
+        ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
+        title: props.modalOnSaveProps.newTitle,
+        description: props.modalOnSaveProps.newDescription,
+        tags: props.modalOnSaveProps.newTags,
+        dataViewSpec,
       });
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();

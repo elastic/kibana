@@ -13,7 +13,8 @@
       "data",
     ],
     "requiredBundles": [
-      "savedObjectsFinder"
+      "savedObjectsFinder",
+      "dataViews"
     ],
     "extraPublicDirs": [
       "common"

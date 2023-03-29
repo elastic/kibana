@@ -123,6 +123,13 @@ export async function initializeDataViews(
       return [id, spec];
     })
   );
+
+  for (const group of Object.values(annotationGroups)) {
+    if (group.dataViewSpec?.id) {
+      adHocDataViews[group.dataViewSpec.id] = group.dataViewSpec;
+    }
+  }
+
   const { isFullEditor } = options ?? {};
 
   // make it explicit or TS will infer never[] and break few lines down

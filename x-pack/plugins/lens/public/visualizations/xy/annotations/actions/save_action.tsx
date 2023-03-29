@@ -19,6 +19,7 @@ import {
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { EuiIcon } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { LayerAction, StateSetter } from '../../../../types';
 import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
 import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
@@ -92,9 +93,12 @@ const saveAnnotationGroupToLibrary = async (
     newTags,
     newCopyOnSave,
   }: Pick<ModalOnSaveProps, 'newTitle' | 'newDescription' | 'newTags' | 'newCopyOnSave'>,
-  eventAnnotationService: EventAnnotationServiceType
+  eventAnnotationService: EventAnnotationServiceType,
+  dataViews: DataViewsContract
 ): Promise<{ id: string; config: EventAnnotationGroupConfig }> => {
   let savedId: string;
+
+  const dataView = await dataViews.get(layer.indexPatternId);
 
   const saveAsNew = !isByReferenceAnnotationsLayer(layer) || newCopyOnSave;
 
@@ -105,6 +109,7 @@ const saveAnnotationGroupToLibrary = async (
     title: newTitle,
     description: newDescription,
     tags: newTags,
+    dataViewSpec: dataView.isPersisted() ? undefined : dataView.toSpec(),
   };
 
   if (saveAsNew) {
@@ -127,6 +132,7 @@ export const onSave = async ({
   eventAnnotationService,
   toasts,
   modalOnSaveProps: { newTitle, newDescription, newTags, closeModal, newCopyOnSave },
+  dataViews,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -134,13 +140,15 @@ export const onSave = async ({
   eventAnnotationService: EventAnnotationServiceType;
   toasts: ToastsStart;
   modalOnSaveProps: ModalOnSaveProps;
+  dataViews: DataViewsContract;
 }) => {
   let savedInfo: Awaited<ReturnType<typeof saveAnnotationGroupToLibrary>>;
   try {
     savedInfo = await saveAnnotationGroupToLibrary(
       layer,
       { newTitle, newDescription, newTags, newCopyOnSave },
-      eventAnnotationService
+      eventAnnotationService,
+      dataViews
     );
   } catch (err) {
     toasts.addError(err, {
@@ -206,6 +214,7 @@ export const getSaveLayerAction = ({
   eventAnnotationService,
   toasts,
   savedObjectsTagging,
+  dataViews,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -213,6 +222,7 @@ export const getSaveLayerAction = ({
   eventAnnotationService: EventAnnotationServiceType;
   toasts: ToastsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
+  dataViews: DataViewsContract;
 }): LayerAction => {
   const neverSaved = !isByReferenceAnnotationsLayer(layer);
 
@@ -238,6 +248,7 @@ export const getSaveLayerAction = ({
                 eventAnnotationService,
                 toasts,
                 modalOnSaveProps: props,
+                dataViews,
               });
             }}
             title={neverSaved ? '' : layer.__lastSaved.title}

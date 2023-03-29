@@ -57,6 +57,17 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
       },
     ],
   } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
+  withAdHocDataView: {
+    attributes: {
+      title: 'groupTitle',
+      dataViewSpec: {
+        id: 'my-id',
+      },
+    } as Partial<EventAnnotationGroupAttributes>,
+    id: 'multiAnnotations',
+    type: 'event-annotation-group',
+    references: [],
+  } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
 };
 
 const annotationResolveMocks = {
@@ -124,7 +135,7 @@ describe('Event Annotation Service', () => {
       return annotationGroupResolveMocks.multiAnnotations;
     });
     (core.savedObjects.client.get as jest.Mock).mockImplementation((_type, id) => {
-      const typedId = id as 'multiAnnotations' | 'noAnnotations' | 'nonExistingGroup';
+      const typedId = id as keyof typeof annotationGroupResolveMocks;
       return annotationGroupResolveMocks[typedId];
     });
     (core.savedObjects.client.bulkCreate as jest.Mock).mockImplementation(() => {
@@ -459,6 +470,7 @@ describe('Event Annotation Service', () => {
         .toMatchInlineSnapshot(`
         Object {
           "annotations": Array [],
+          "dataViewSpec": undefined,
           "description": "",
           "ignoreGlobalFilters": false,
           "indexPatternId": "ipid",
@@ -471,6 +483,11 @@ describe('Event Annotation Service', () => {
       expect(
         await eventAnnotationService.loadAnnotationGroup('multiAnnotations')
       ).toMatchSnapshot();
+    });
+    it('populates id if group has ad-hoc data view', async () => {
+      const group = await eventAnnotationService.loadAnnotationGroup('withAdHocDataView');
+
+      expect(group.indexPatternId).toBe(group.dataViewSpec?.id);
     });
   });
   // describe.skip('deleteAnnotationGroup', () => {
@@ -503,6 +520,8 @@ describe('Event Annotation Service', () => {
           title: 'newGroupTitle',
           description: 'my description',
           tags: ['my', 'many', 'tags'],
+          ignoreGlobalFilters: false,
+          dataViewSpec: null,
           annotations,
         },
         {
@@ -533,7 +552,14 @@ describe('Event Annotation Service', () => {
       expect(core.savedObjects.client.update).toHaveBeenCalledWith(
         'event-annotation-group',
         'multiAnnotations',
-        { title: 'newTitle', description: '', tags: [], annotations: [] },
+        {
+          title: 'newTitle',
+          description: '',
+          tags: [],
+          annotations: [],
+          dataViewSpec: null,
+          ignoreGlobalFilters: false,
+        },
         {
           references: [
             {

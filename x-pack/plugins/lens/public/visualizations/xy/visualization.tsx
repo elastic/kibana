@@ -291,6 +291,7 @@ export const getXyVisualization = ({
           isSaveable,
           eventAnnotationService,
           savedObjectsTagging,
+          dataViews: data.dataViews,
         })
       );
     }
