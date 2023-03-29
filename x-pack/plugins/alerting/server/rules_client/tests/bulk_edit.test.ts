@@ -586,7 +586,7 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
-              apiKeyCreatedByUser: false,
+              apiKeyCreatedByUser: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
