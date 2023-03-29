@@ -16,6 +16,7 @@ import type {
   GetScoresResponse,
   IdentifierType,
   RiskScoreBucket,
+  RiskScoreWeight,
   SimpleRiskScore,
 } from './types';
 
@@ -53,17 +54,23 @@ const filterFromRange = (range: GetScoresParams['range']): QueryDslQueryContaine
   range: { '@timestamp': { lt: range.end, gte: range.start } },
 });
 
-const getRiskWeightForIdentifier = ({
+const isGlobalWeight = (weight: RiskScoreWeight): boolean => weight.type === 'global';
+
+const getGlobalIdentifierWeight = ({
   identifierType,
   weights,
 }: {
   identifierType: IdentifierType;
   weights: GetScoresParams['weights'];
 }): number | undefined => {
-  return weights?.[identifierType];
+  return weights?.find((weight) => isGlobalWeight(weight))?.[identifierType];
 };
 
-const buildReduceScript = ({ riskWeight }: { riskWeight?: number }): string => {
+const buildReduceScript = ({
+  globalIdentifierWeight,
+}: {
+  globalIdentifierWeight?: number;
+}): string => {
   return `
     Map results = new HashMap();
     List scores = [];
@@ -83,7 +90,7 @@ const buildReduceScript = ({ riskWeight }: { riskWeight?: number }): string => {
       total_score += scores[i] / Math.pow(i + 1, params.p);
     }
 
-    ${riskWeight != null ? `total_score *= ${riskWeight};` : ''}
+    ${globalIdentifierWeight != null ? `total_score *= ${globalIdentifierWeight};` : ''}
     double score_norm = 100 * total_score / params.risk_cap;
     results['score'] = total_score;
     results['normalized_score'] = score_norm;
@@ -113,7 +120,7 @@ const buildIdentifierTypeAggregation = (
   enrichInputs?: boolean,
   weights?: GetScoresParams['weights']
 ): SearchRequest['aggs'] => {
-  const riskWeight = getRiskWeightForIdentifier({ identifierType, weights });
+  const globalIdentifierWeight = getGlobalIdentifierWeight({ identifierType, weights });
   const identifierField = getFieldForIdentifierAgg(identifierType);
 
   return {
@@ -157,7 +164,7 @@ const buildIdentifierTypeAggregation = (
               p: 1.5,
               risk_cap: 261.2,
             },
-            reduce_script: buildReduceScript({ riskWeight }),
+            reduce_script: buildReduceScript({ globalIdentifierWeight }),
           },
         },
       },

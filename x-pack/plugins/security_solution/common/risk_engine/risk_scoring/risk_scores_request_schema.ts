@@ -20,9 +20,19 @@ export const riskScoresRequestSchema = t.exact(
       start: t.string,
       end: t.string,
     }),
-    weights: t.partial({
-      host: t.number,
-      user: t.number,
-    }),
+    weights: t.array(
+      t.intersection([
+        t.partial({
+          value: t.string,
+          host: t.number,
+          user: t.number,
+        }),
+        t.exact(
+          t.type({
+            type: t.string,
+          })
+        ),
+      ])
+    ),
   })
 );
