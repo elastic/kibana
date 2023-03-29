@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
+
 import { packagePolicyService } from '../..';
+import { auditLoggingService } from '../../audit_logging';
 
 import { removeInstallation } from './remove';
 
@@ -25,6 +28,7 @@ jest.mock('../..', () => {
 });
 jest.mock('../../audit_logging');
 
+const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 describe('removeInstallation', () => {
@@ -66,5 +70,21 @@ describe('removeInstallation', () => {
     ).rejects.toThrowError(
       `unable to remove package with existing package policy(s) in use by agent(s)`
     );
+  });
+
+  it('should call audit logger', async () => {
+    await removeInstallation({
+      savedObjectsClient: soClientMock,
+      pkgName: 'system',
+      pkgVersion: '1.0.0',
+      esClient: esClientMock,
+      force: true,
+    });
+
+    expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      action: 'delete',
+      id: 'system',
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
   });
 });

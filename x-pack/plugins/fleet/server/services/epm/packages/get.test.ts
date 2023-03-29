@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-jest.mock('../registry');
-
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -15,20 +13,24 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common/types';
 
-import * as Registry from '../registry';
-
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
-
 import { PackageNotFoundError } from '../../../errors';
 
 import { getSettings } from '../../settings';
+import { auditLoggingService } from '../../audit_logging';
+
+import * as Registry from '../registry';
 
 import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
+jest.mock('../registry');
+jest.mock('../../settings');
+jest.mock('../../audit_logging');
+
 const MockRegistry = jest.mocked(Registry);
 
-jest.mock('../../settings');
+const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 const mockGetSettings = getSettings as jest.Mock;
 mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
@@ -297,6 +299,45 @@ owner: elastic`,
         },
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
+    });
+
+    it('should call audit logger', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+            score: 0,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        id: 'elasticsearch',
+        attributes: {},
+        references: [],
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+
+      await getPackages({ savedObjectsClient: soClient });
+
+      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'get',
+        id: 'elasticsearch',
+        savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+      });
     });
   });
 

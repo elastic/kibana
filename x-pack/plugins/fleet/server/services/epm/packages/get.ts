@@ -118,7 +118,7 @@ export async function getPackages(
 
   for (const pkg of packageList) {
     auditLoggingService.writeCustomSoAuditLog({
-      action: 'find',
+      action: 'get',
       id: pkg.id,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
