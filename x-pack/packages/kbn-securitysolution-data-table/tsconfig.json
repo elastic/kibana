@@ -17,7 +17,6 @@
     "@kbn/i18n",
     "@kbn/ui-theme",
     "@kbn/kibana-react-plugin",
-    "@kbn/observability-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/i18n-react",
     "@kbn/ui-actions-plugin"
