@@ -817,7 +817,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
 
   const getSettingsResponse = { item: { prerelease_integrations_enabled: true } };
 
-  const getVerificationKeyIdResponse = { id: 'test-verification-key'};
+  const getVerificationKeyIdResponse = { id: 'test-verification-key' };
 
   const mockedApiInterface: MockedApi<EpmPackageDetailsResponseProvidersMock> = {
     waitForApi() {
