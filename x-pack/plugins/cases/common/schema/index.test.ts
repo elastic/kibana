@@ -9,7 +9,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 
 import { limitedArraySchema, NonEmptyString } from '.';
 
-describe('files', () => {
+describe('schema', () => {
   it('fails when given an empty string', () => {
     expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1).decode([''])))
       .toMatchInlineSnapshot(`
