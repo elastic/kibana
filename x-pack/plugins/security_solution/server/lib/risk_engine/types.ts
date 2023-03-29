@@ -10,6 +10,13 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export type IdentifierType = 'user' | 'host';
 
+export interface RiskScoreWeight {
+  type: string;
+  value?: string;
+  user?: number;
+  host?: number;
+}
+
 export interface GetScoresParams {
   debug?: boolean;
   index: string;
@@ -17,7 +24,7 @@ export interface GetScoresParams {
   identifierType?: IdentifierType;
   enrichInputs?: boolean;
   range: { start: string; end: string };
-  weights?: { user?: number; host?: number };
+  weights?: RiskScoreWeight[];
 }
 
 export interface GetScoresResponse {
@@ -56,17 +63,17 @@ export interface FullRiskScore extends BaseRiskScore {
 
 export interface CalculateRiskScoreAggregations {
   user?: {
-    after_key: { [key: string]: string };
+    after_key: { [identifierField: string]: string; category: string };
     buckets: RiskScoreBucket[];
   };
   host?: {
-    after_key: { [key: string]: string };
+    after_key: { [identifierField: string]: string; category: string };
     buckets: RiskScoreBucket[];
   };
 }
 
 export interface RiskScoreBucket {
-  key: { [key: string]: string };
+  key: { [identifierField: string]: string; category: string };
   doc_count: number;
   risk_details: {
     value: {

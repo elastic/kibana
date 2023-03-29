@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
     const { id } = await createRule(supertest, log, {
       ...rule,
       risk_score: riskScore,
-      query: query,
+      query,
       max_signals: maxSignals,
     });
     await waitForRuleSuccessOrStatus(supertest, log, id);
@@ -313,7 +313,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      context('with risk weights', () => {
+      context('with global risk weights', () => {
         it('weights host scores differently when host risk weight is configured', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
@@ -324,7 +324,9 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
             riskScore: 100,
           });
-          const { scores } = await getRiskScores({ body: { weights: { host: 0.5 } } });
+          const { scores } = await getRiskScores({
+            body: { weights: [{ type: 'global', host: 0.5 }] },
+          });
 
           expect(removeFields(scores)).to.eql([
             {
@@ -347,7 +349,9 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
             riskScore: 100,
           });
-          const { scores } = await getRiskScores({ body: { weights: { user: 0.7 } } });
+          const { scores } = await getRiskScores({
+            body: { weights: [{ type: 'global', user: 0.7 }] },
+          });
 
           expect(removeFields(scores)).to.eql([
             {
@@ -363,8 +367,8 @@ export default ({ getService }: FtrProviderContext): void => {
         it('weights entity scores differently when host and user risk weights are configured', async () => {
           const usersId = uuidv4();
           const hostsId = uuidv4();
-          const userDocs = buildDocument({ user: { name: 'user-1' } }, usersId);
-          const hostDocs = buildDocument({ host: { name: 'host-1' } }, usersId);
+          const userDocs = buildDocument({ 'user.name': 'user-1' }, usersId);
+          const hostDocs = buildDocument({ 'host.name': 'host-1' }, usersId);
           await indexListOfDocuments(Array(50).fill(userDocs).concat(Array(50).fill(hostDocs)));
 
           await createAndSyncRuleAndAlerts({
@@ -372,7 +376,9 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
             riskScore: 100,
           });
-          const { scores } = await getRiskScores({ body: { weights: { host: 0.4, user: 0.8 } } });
+          const { scores } = await getRiskScores({
+            body: { weights: [{ type: 'global', host: 0.4, user: 0.8 }] },
+          });
 
           expect(removeFields(scores)).to.eql([
             {
