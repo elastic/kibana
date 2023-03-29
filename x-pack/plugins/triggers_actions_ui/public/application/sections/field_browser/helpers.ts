@@ -157,6 +157,14 @@ export const getIconFromType = (type: string | null | undefined) => {
 
 export const getEmptyValue = () => '—';
 
+export const getCategory = (fieldName: string) => {
+  const fieldNameArray = fieldName?.split('.');
+  if (fieldNameArray?.length === 1) {
+    return 'base';
+  }
+  return fieldNameArray?.[0] ?? '(unknown)';
+};
+
 export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) =>
   ecsFlat[fieldName]?.description ?? '';
 

@@ -25,7 +25,13 @@ import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '
 import { FieldName } from '../field_name';
 import * as i18n from '../../translations';
 import { styles } from './field_items.style';
-import { getDescription, getEmptyValue, getExampleText, getIconFromType } from '../../helpers';
+import {
+  getCategory,
+  getDescription,
+  getEmptyValue,
+  getExampleText,
+  getIconFromType,
+} from '../../helpers';
 
 /**
  * Returns the field items of all categories selected
@@ -55,7 +61,7 @@ export const getFieldItemsData = ({
               type: field.type,
               description: getDescription(name, EcsFlat as Record<string, EcsMetadata>),
               example: field.example?.toString(),
-              category: name?.split('.')?.[0] ?? '(unknown)',
+              category: getCategory(name),
               selected: selectedFieldIds.has(name),
               isRuntime: !!field.runtimeField,
             };
