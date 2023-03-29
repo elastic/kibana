@@ -24,7 +24,6 @@ import type {
   KibanaResponseFactory,
   RequestHandler,
   RouteMethod,
-  ElasticsearchClient,
 } from '@kbn/core/server';
 import type {
   AgentService,
@@ -66,9 +65,9 @@ export type CspServerPluginStartServices = Promise<
 >;
 
 export interface CspApiRequestHandlerContext {
-  user?: ReturnType<SecurityPluginStart['authc']['getCurrentUser']>;
+  user: ReturnType<SecurityPluginStart['authc']['getCurrentUser']>;
   logger: Logger;
-  esClient: IScopedClusterClient | ElasticsearchClient;
+  esClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
   agentPolicyService: AgentPolicyServiceInterface;
   agentService: AgentService;

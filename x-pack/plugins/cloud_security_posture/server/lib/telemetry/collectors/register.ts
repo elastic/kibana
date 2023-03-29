@@ -34,13 +34,13 @@ export function registerCspmUsageCollector(
     },
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
       const [indicesStats, accountsStats, resourcesStats, rulesStats] = await Promise.all([
-        getIndicesStats(collectorFetchContext.esClient, logger),
-        getAccountsStats(
+        getIndicesStats(
           collectorFetchContext.esClient,
           collectorFetchContext.soClient,
           coreServices,
           logger
         ),
+        getAccountsStats(collectorFetchContext.esClient, logger),
         getResourcesStats(collectorFetchContext.esClient, logger),
         getRulesStats(collectorFetchContext.esClient, logger),
       ]);
