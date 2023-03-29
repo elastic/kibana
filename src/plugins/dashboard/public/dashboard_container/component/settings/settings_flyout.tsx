@@ -77,9 +77,10 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
       onTitleDuplicate,
       isTitleDuplicateConfirmed,
     });
-    setIsApplying(false);
 
     if (!isMounted()) return;
+
+    setIsApplying(false);
 
     if (validTitle) {
       dispatch(setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState }));
