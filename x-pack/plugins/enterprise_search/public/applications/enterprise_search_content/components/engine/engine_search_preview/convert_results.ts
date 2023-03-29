@@ -28,6 +28,10 @@ export interface ConvertedResult {
   value: string;
 }
 
+export interface ConvertedResultWithType extends ConvertedResult {
+  type: string;
+}
+
 export const convertResults = (result: Record<string, unknown>): ConvertedResult[] => {
   const flattenedResult = flattenObject(result);
   const unsortedFields = Object.entries(flattenedResult).map(
@@ -38,4 +42,14 @@ export const convertResults = (result: Record<string, unknown>): ConvertedResult
   );
   const sortedFields = unsortedFields.sort((a, b) => a.field.localeCompare(b.field));
   return sortedFields;
+};
+
+export const addTypeToResults = (
+  results: ConvertedResult[],
+  fieldTypes: Record<string, string>
+): ConvertedResultWithType[] => {
+  return results.map((result) => {
+    const type = fieldTypes[result.field];
+    return { ...result, type };
+  });
 };

@@ -12,7 +12,6 @@ import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../commo
 import {
   MapExtent,
   TableSourceDescriptor,
-  VectorJoinSourceRequestMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ITermJoinSource } from '../term_join_source';
@@ -60,7 +59,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   async getPropertiesMap(
-    searchFilters: VectorJoinSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void
@@ -189,7 +188,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   // Could be useful to implement, e.g. to preview raw csv data
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {

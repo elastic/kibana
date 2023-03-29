@@ -6,8 +6,8 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { byTestId, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { TIMEOUT_60_SEC, byTestId } from '../../../helpers/utils';
+import { recordVideo } from '../../../helpers/record_video';
 import { cleanTestMonitors } from '../../synthetics/services/add_monitor';
 import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
