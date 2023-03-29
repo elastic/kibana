@@ -44,7 +44,7 @@ export type FormConfig = MonitorFields & {
   [AlertConfigKey.STATUS_ENABLED]: boolean;
   [ConfigKey.LOCATIONS]: FormLocation[];
 
-  /* Dot notiation keys must have a type configuration both for their flattened and nested
+  /* Dot notation keys must have a type configuration both for their flattened and nested
    * variation in order for types to register for react hook form. For example, `AlertConfigKey.STATUS_ENABLED`
    * must be defined both as `alert.config.enabled: boolean` and `alert: { config: { enabled: boolean } }` */
   alert: {
