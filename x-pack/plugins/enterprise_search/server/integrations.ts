@@ -32,7 +32,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files and folders stored on Box with Workplace Search.',
       }
     ),
-    categories: ['file_storage'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'confluence_cloud',
@@ -49,7 +49,13 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your organizational content on Confluence Cloud with Workplace Search.',
       }
     ),
-    categories: ['productivity'],
+    categories: [
+      'enterprise_search',
+      'custom',
+      'workplace_search',
+      'content_source',
+      'connector_package',
+    ],
   },
   {
     id: 'confluence_server',
@@ -66,7 +72,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your organizational content on Confluence Server with Workplace Search.',
       }
     ),
-    categories: ['productivity'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'dropbox',
@@ -80,7 +86,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your files and folders stored on Dropbox with Workplace Search.',
       }
     ),
-    categories: ['file_storage'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'github',
@@ -93,7 +99,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your projects and repos on GitHub with Workplace Search.',
       }
     ),
-    categories: ['productivity'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'github_enterprise_server',
@@ -110,7 +116,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your projects and repos on GitHub Enterprise Server with Workplace Search.',
       }
     ),
-    categories: ['productivity'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'gmail',
@@ -123,7 +129,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your emails managed by Gmail with Workplace Search.',
       }
     ),
-    categories: ['communications'],
+    categories: ['enterprise_search', 'google_cloud', 'workplace_search', 'content_source'],
   },
   {
     id: 'google_drive',
@@ -136,7 +142,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your documents on Google Drive with Workplace Search.',
       }
     ),
-    categories: ['file_storage'],
+    categories: ['enterprise_search', 'google_cloud', 'workplace_search', 'content_source'],
   },
   {
     id: 'jira_cloud',
@@ -149,7 +155,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your project workflow on Jira Cloud with Workplace Search.',
       }
     ),
-    categories: ['productivity'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'jira_server',
@@ -162,7 +168,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your project workflow on Jira Server with Workplace Search.',
       }
     ),
-    categories: ['productivity'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'network_drive',
@@ -176,7 +182,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your files and folders stored on network drives with Workplace Search.',
       }
     ),
-    categories: ['file_storage'],
+    categories: ['enterprise_search', 'content_source', 'custom', 'workplace_search'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive/custom',
   },
   {
@@ -190,7 +196,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files stored on OneDrive with Workplace Search.',
       }
     ),
-    categories: ['file_storage'],
+    categories: ['enterprise_search', 'azure', 'workplace_search', 'content_source'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/one_drive',
   },
   {
@@ -204,7 +210,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your content on Salesforce with Workplace Search.',
       }
     ),
-    categories: ['productivity'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'salesforce_sandbox',
@@ -220,7 +226,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your content on Salesforce Sandbox with Workplace Search.',
       }
     ),
-    categories: ['productivity'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'servicenow',
@@ -233,7 +239,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your content on ServiceNow with Workplace Search.',
       }
     ),
-    categories: ['productivity'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'sharepoint_online',
@@ -249,7 +255,14 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files stored on SharePoint Online with Workplace Search.',
       }
     ),
-    categories: ['file_storage', 'microsoft_365'],
+    categories: [
+      'enterprise_search',
+      'azure',
+      'custom',
+      'workplace_search',
+      'content_source',
+      'connector_package',
+    ],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point',
   },
   {
@@ -267,7 +280,14 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your files stored on Microsoft SharePoint Server with Workplace Search.',
       }
     ),
-    categories: ['file_storage', 'microsoft_365'],
+    categories: [
+      'enterprise_search',
+      'azure',
+      'custom',
+      'workplace_search',
+      'content_source',
+      'connector_package',
+    ],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point_server/custom',
   },
   {
@@ -281,7 +301,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your messages on Slack with Workplace Search.',
       }
     ),
-    categories: ['communications'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
   {
     id: 'zendesk',
@@ -294,7 +314,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your tickets on Zendesk with Workplace Search.',
       }
     ),
-    categories: ['communications'],
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
   },
 ];
 
@@ -329,7 +349,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonDescription', {
         defaultMessage: 'Search over your JSON data with App Search.',
       }),
-      categories: ['upload_file'],
+      categories: ['enterprise_search', 'custom', 'app_search'],
       uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=json',
       icons: [
         {
@@ -351,7 +371,7 @@ export const registerEnterpriseSearchIntegrations = (
       description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
         defaultMessage: 'Add search to your website with the Enterprise Search web crawler.',
       }),
-      categories: ['enterprise_search', 'website_search', 'web', 'elastic_stack'],
+      categories: ['enterprise_search', 'app_search', 'web', 'elastic_stack', 'crawler'],
       uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=crawler',
       icons: [
         {
@@ -372,7 +392,7 @@ export const registerEnterpriseSearchIntegrations = (
     description: i18n.translate('xpack.enterpriseSearch.integrations.apiDescription', {
       defaultMessage: "Add search to your application with Elasticsearch's robust APIs.",
     }),
-    categories: ['enterprise_search', 'custom', 'elastic_stack'],
+    categories: ['enterprise_search', 'custom', 'elastic_stack', 'sdk_search', 'language_client'],
     uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=api',
     icons: [
       {
@@ -400,7 +420,7 @@ export const registerEnterpriseSearchIntegrations = (
             'Search over your data sources with a native Enterprise Search connector.',
         }
       ),
-      categories: ['elastic_stack', 'enterprise_search'],
+      categories: ['enterprise_search', 'custom', 'elastic_stack', 'connector', 'native_search'],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
       icons: [
@@ -424,7 +444,14 @@ export const registerEnterpriseSearchIntegrations = (
           defaultMessage: 'Search over your MongoDB content with Enterprise Search.',
         }
       ),
-      categories: ['datastore', 'enterprise_search'],
+      categories: [
+        'enterprise_search',
+        'datastore',
+        'elastic_stack',
+        'native_search',
+        'connector',
+        'connector_client',
+      ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
       icons: [
@@ -448,7 +475,14 @@ export const registerEnterpriseSearchIntegrations = (
           defaultMessage: 'Search over your MySQL content with Enterprise Search.',
         }
       ),
-      categories: ['datastore', 'enterprise_search'],
+      categories: [
+        'enterprise_search',
+        'datastore',
+        'elastic_stack',
+        'native_search',
+        'connector',
+        'connector_client',
+      ],
       uiInternalPath:
         '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
       icons: [
@@ -474,7 +508,7 @@ export const registerEnterpriseSearchIntegrations = (
           defaultMessage: 'Search over data stored on custom data sources with Enterprise Search.',
         }
       ),
-      categories: ['enterprise_search', 'custom', 'elastic_stack'],
+      categories: ['enterprise_search', 'custom', 'elastic_stack', 'connector_client'],
       uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
       icons: [
         {
@@ -561,7 +595,7 @@ export const registerEnterpriseSearchIntegrations = (
     });
 
     customIntegrations.registerCustomIntegration({
-      id: 'ms_sql',
+      id: 'network_drive_connector',
       title: i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.integrations.networkDriveName',
         {
@@ -574,7 +608,15 @@ export const registerEnterpriseSearchIntegrations = (
           defaultMessage: 'Search over your Network Drive content with Enterprise Search.',
         }
       ),
-      categories: ['enterprise_search', 'custom', 'elastic_stack', 'file_storage'],
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'workplace_search',
+        'connector',
+        'connector_client',
+        'connector_package',
+      ],
       uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
       icons: [
         {
