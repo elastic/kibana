@@ -42,6 +42,7 @@ import {
   getSummaryActionsFromTaskState,
   isActionOnInterval,
   isSummaryAction,
+  isSummaryActionOnInterval,
   isSummaryActionPerRuleRun,
   isSummaryActionThrottled,
 } from './rule_action_helper';
@@ -204,10 +205,6 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
         if (isSummaryAction(action) && summarizedAlerts) {
-          if (isSummaryActionPerRuleRun(action) && summarizedAlerts.all.count === 0) {
-            continue;
-          }
-
           const actionToRun = {
             ...action,
             params: injectActionParams({
@@ -494,18 +491,20 @@ export class ExecutionHandler<
           spaceId: this.taskInstance.params.spaceId,
           ruleId: this.taskInstance.params.alertId,
         });
-      }
-
-      if (summarizedAlerts !== null) {
-        this.logNumberOfFilteredAlerts({
-          numberOfAlerts: alertsArray.length,
-          numberOfSummarizedAlerts: summarizedAlerts.all.count,
-          action,
-        });
+        if (!isSummaryActionOnInterval(action)) {
+          this.logNumberOfFilteredAlerts({
+            numberOfAlerts: alertsArray.length,
+            numberOfSummarizedAlerts: summarizedAlerts.all.count,
+            action,
+          });
+        }
       }
 
       if (isSummaryAction(action)) {
-        if (summarizedAlerts !== null) {
+        if (summarizedAlerts) {
+          if (isSummaryActionPerRuleRun(action) && summarizedAlerts.all.count === 0) {
+            continue;
+          }
           executables.push({ action, summarizedAlerts });
         }
         continue;
@@ -586,7 +585,7 @@ export class ExecutionHandler<
     action: RuleAction;
     ruleId: string;
     spaceId: string;
-  }): Promise<CombinedSummarizedAlerts | null> {
+  }): Promise<CombinedSummarizedAlerts> {
     let options: GetSummarizedAlertsFnOpts = {
       ruleId,
       spaceId,

@@ -31,10 +31,11 @@ export const isSummaryActionPerRuleRun = (action: RuleAction) => {
   if (!action.frequency) {
     return false;
   }
-  return (
-    action.frequency.notifyWhen === RuleNotifyWhenTypeValues[1] &&
-    typeof action.frequency.throttle !== 'string'
-  );
+  return action.frequency.notifyWhen === RuleNotifyWhenTypeValues[1] && action.frequency.summary;
+};
+
+export const isSummaryActionOnInterval = (action: RuleAction) => {
+  return isActionOnInterval(action) && action.frequency?.summary;
 };
 
 export const isSummaryActionThrottled = ({
