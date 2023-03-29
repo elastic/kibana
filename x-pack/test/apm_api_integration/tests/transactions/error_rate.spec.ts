@@ -194,7 +194,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('returns the transaction error rate with comparison data per transaction name', () => {
       let errorRateResponse: ErrorRate;
-      let serviceTxMetricsErrorRateResponse: ErrorRate;
 
       before(async () => {
         const query = {
@@ -203,15 +202,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           offset: '7m',
         };
 
-        const [response, serviceTxResponse] = await Promise.all([
-          fetchErrorCharts({ query }),
-          fetchErrorCharts({
-            query: { ...query, documentType: ApmDocumentType.ServiceTransactionMetric },
-          }),
-        ]);
+        const response = await fetchErrorCharts({ query });
 
         errorRateResponse = response.body;
-        serviceTxMetricsErrorRateResponse = serviceTxResponse.body;
       });
 
       it('returns some data', () => {
