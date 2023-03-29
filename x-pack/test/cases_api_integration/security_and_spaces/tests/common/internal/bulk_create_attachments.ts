@@ -173,30 +173,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(secondFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
         });
 
-        it('should create a single file attachment with multiple file objects within it', async () => {
-          const postedCase = await createCase(supertest, getPostCaseRequest());
-
-          const files = [fileMetadata(), fileMetadata()];
-
-          const caseWithAttachments = await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [
-              getFilesAttachmentReq({
-                externalReferenceMetadata: {
-                  files,
-                },
-              }),
-            ],
-          });
-
-          const firstFileAttachment =
-            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
-
-          expect(caseWithAttachments.totalComment).to.be(1);
-          expect(firstFileAttachment.externalReferenceMetadata).to.eql({ files });
-        });
-
         it('should bulk create 100 file attachments', async () => {
           const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
 
@@ -240,6 +216,46 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('errors', () => {
       describe('files', () => {
+        it('400s when attempting to create 100 file attachments when a file associated to the case exists', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolution' }),
+            200,
+            { user: superUser, space: null }
+          );
+
+          // TODO: finish this once I have the changes from my other PR
+
+          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: fileRequests,
+            auth: { user: superUser, space: null },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when attempting to create a single file attachment with multiple file objects within it', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const files = [fileMetadata(), fileMetadata()];
+
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              getFilesAttachmentReq({
+                externalReferenceMetadata: {
+                  files,
+                },
+              }),
+            ],
+            expectedHttpCode: 400,
+          });
+        });
+
         it('400s when attaching a file with metadata that is missing the file field', async () => {
           const postedCase = await createCase(supertest, getPostCaseRequest());
 
