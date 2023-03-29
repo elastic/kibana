@@ -27,7 +27,8 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
-import { KueryBar } from '../../../shared/kuery_bar';
+import { UnifiedSearchBar } from '../../../shared/unified_search_bar';
+
 import * as urlHelpers from '../../../shared/links/url_helpers';
 import { SuggestionsSelect } from '../../../shared/suggestions_select';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
@@ -120,7 +121,11 @@ export function AgentExplorer() {
       </EuiFlexItem>
       <EuiSpacer />
       <EuiFlexItem grow={false}>
-        <KueryBar />
+        <UnifiedSearchBar
+          showDatePicker={false}
+          showSubmitButton={false}
+          isClearable={false}
+        />
       </EuiFlexItem>
       <EuiSpacer size="xs" />
       <EuiFlexItem>

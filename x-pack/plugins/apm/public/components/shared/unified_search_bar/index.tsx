@@ -31,7 +31,7 @@ function useKueryParams(defaultKuery?: string) {
     language: 'kuery',
   };
 }
-function useSearchBarPlaceholder(defaultPlaceholder?: string) {
+function useSearchBarPlaceholder(searchbarPlaceholder?: string) {
   const processorEvent = useProcessorEvent();
   const examples = {
     transaction: 'transaction.duration.us > 300000',
@@ -43,7 +43,7 @@ function useSearchBarPlaceholder(defaultPlaceholder?: string) {
   const example = examples[processorEvent || 'defaults'];
 
   return (
-    defaultPlaceholder ??
+    searchbarPlaceholder ??
     i18n.translate('xpack.apm.unifiedSearchBar.placeholder', {
       defaultMessage: `Search {event, select,
             transaction {transactions}
@@ -59,9 +59,18 @@ function useSearchBarPlaceholder(defaultPlaceholder?: string) {
   );
 }
 
-export function UnifiedSearchBar(props: {
+export function UnifiedSearchBar({
+  placeholder,
+  value,
+  showDatePicker = true,
+  showSubmitButton = true,
+  isClearable = true,
+}: {
   placeholder?: string;
   value?: string;
+  showDatePicker?: boolean;
+  showSubmitButton?: boolean;
+  isClearable?: boolean;
 }) {
   const {
     unifiedSearch: {
@@ -76,7 +85,7 @@ export function UnifiedSearchBar(props: {
     },
   } = services;
 
-  const urlQuery = useKueryParams(props.value);
+  const urlQuery = useKueryParams(value);
 
   const syncSearchBarWithUrl = useCallback(() => {
     if (urlQuery && !deepEqual(queryStringService.getQuery(), urlQuery)) {
@@ -94,7 +103,7 @@ export function UnifiedSearchBar(props: {
   const location = useLocation();
   const history = useHistory();
   const { dataView } = useApmDataView();
-  const placeholder = useSearchBarPlaceholder(props.placeholder);
+  const searchbarPlaceholder = useSearchBarPlaceholder(placeholder);
 
   const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
     const { dateRange, query } = payload;
@@ -118,16 +127,18 @@ export function UnifiedSearchBar(props: {
         defaultMessage: 'Service Transaction',
       })}
       iconType="search"
-      placeholder={placeholder}
+      placeholder={searchbarPlaceholder}
       useDefaultBehaviors={true}
       indexPatterns={dataView ? [dataView] : undefined}
       showQueryInput={true}
       showQueryMenu={false}
       showFilterBar={false}
-      showDatePicker={true}
+      showDatePicker={showDatePicker}
+      showSubmitButton={showSubmitButton}
       displayStyle="inPage"
       onQuerySubmit={handleSubmit}
-      isClearable={true}
+      isClearable={isClearable}
+      data-test-subj="apmUnifiedSearchBar"
     />
   );
 }
