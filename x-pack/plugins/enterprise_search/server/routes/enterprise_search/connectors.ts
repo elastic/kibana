@@ -99,7 +99,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/configuration',
       validate: {
-        body: schema.recordOf(schema.string(), schema.string()),
+        body: schema.recordOf(
+          schema.string(),
+          schema.oneOf([schema.string(), schema.number(), schema.boolean()])
+        ),
         params: schema.object({
           connectorId: schema.string(),
         }),
