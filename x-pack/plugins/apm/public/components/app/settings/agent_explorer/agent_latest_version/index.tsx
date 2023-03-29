@@ -30,7 +30,7 @@ export function AgentLatestVersion({
         'xpack.apm.agentExplorer.agentLatestVersion.airGappedMessage',
         {
           defaultMessage:
-            'Kibana server needs public access to internet in order to get latest {agentName} agent released version.',
+            'The latest {agentName} agent version could not be fetched from the repository. Please contact your administrator to check the server logs.',
           values: { agentName },
         }
       )}

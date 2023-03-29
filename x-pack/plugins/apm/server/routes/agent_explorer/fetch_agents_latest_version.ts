@@ -42,8 +42,8 @@ export const fetchAgentsLatestVersion = async (
   } catch (error) {
     const timedOut = error.name === 'AbortError';
     const message = timedOut
-      ? 'Failed to retrieve Agents latest versions due to timeout'
-      : `Failed to retrieve Agents latest versions, received error: ${error}`;
+      ? 'Failed to retrieve latest APM Agent versions due to a timeout'
+      : `Failed to retrieve latest APM Agent versions due to ${error}`;
     logger.warn(message);
 
     return {

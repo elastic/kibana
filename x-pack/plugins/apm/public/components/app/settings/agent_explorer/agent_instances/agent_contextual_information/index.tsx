@@ -44,7 +44,7 @@ const instancesLabel = i18n.translate(
 const latestVersionLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.latestVersionLabel',
   {
-    defaultMessage: 'Agent latest version',
+    defaultMessage: 'Latest agent version',
   }
 );
 

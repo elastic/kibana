@@ -171,7 +171,7 @@ export function getAgentsColumns({
           <>
             {i18n.translate(
               'xpack.apm.agentExplorerTable.agentLatestVersionColumnLabel',
-              { defaultMessage: 'Agent Latest Version' }
+              { defaultMessage: 'Latest Agent Version' }
             )}
             &nbsp;
             <EuiIcon
