@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { EuiSelectable, EuiSelectableOption, EuiSpacer } from '@elastic/eui';
+import { EuiSelectable, EuiSelectableOption, EuiSelectableProps, EuiSpacer } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { FieldTypeFilter } from './field_type_filter';
@@ -24,6 +24,7 @@ export interface FieldPickerProps {
   selectedFieldName?: string;
   filterPredicate?: (f: DataViewField) => boolean;
   onSelectField?: (selectedField: DataViewField) => void;
+  selectableProps?: Partial<EuiSelectableProps>;
 }
 
 export const FieldPicker = ({
@@ -31,6 +32,7 @@ export const FieldPicker = ({
   onSelectField,
   filterPredicate,
   selectedFieldName,
+  selectableProps,
 }: FieldPickerProps) => {
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [fieldSelectableOptions, setFieldSelectableOptions] = useState<EuiSelectableOption[]>([]);
@@ -91,6 +93,7 @@ export const FieldPicker = ({
 
   return (
     <EuiSelectable
+      {...selectableProps}
       emptyMessage={i18n.translate('presentationUtil.fieldPicker.noFieldsLabel', {
         defaultMessage: 'No matching fields',
       })}

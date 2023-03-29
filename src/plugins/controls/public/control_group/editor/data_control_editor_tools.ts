@@ -8,6 +8,7 @@
 
 import { memoize } from 'lodash';
 
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { pluginServices } from '../../services';
