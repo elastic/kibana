@@ -12,7 +12,7 @@ import {
   MlTrainedModelConfig,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+import { SUPPORTED_PYTORCH_TASKS, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 
 import {
   MlInferencePipeline,
@@ -21,9 +21,8 @@ import {
   InferencePipelineInferenceConfig,
 } from '../types/pipelines';
 
-// Getting an error importing this from @kbn/ml-plugin/common/constants/data_frame_analytics'
-// So defining it locally for now with a test to make sure it matches.
-export const BUILT_IN_MODEL_TAG = 'prepackaged';
+export const ELSER_TASK_TYPE = 'text_expansion';
+export const LANG_IDENT_MODEL_TYPE = 'lang_ident';
 
 export interface MlInferencePipelineParams {
   description?: string;
@@ -159,12 +158,12 @@ export const getRemoveProcessorForInferenceType = (
 export const getMlModelTypesForModelConfig = (trainedModel: MlTrainedModelConfig): string[] => {
   if (!trainedModel) return [];
 
-  const isBuiltIn = trainedModel.tags?.includes(BUILT_IN_MODEL_TAG);
+  const isBuiltIn = trainedModel.tags?.includes(TRAINED_MODEL_TYPE.LANG_IDENT);
 
   return [
     trainedModel.model_type,
     ...Object.keys(trainedModel.inference_config || {}),
-    ...(isBuiltIn ? [BUILT_IN_MODEL_TAG] : []),
+    ...(isBuiltIn ? [TRAINED_MODEL_TYPE.LANG_IDENT] : []),
   ].filter((type): type is string => type !== undefined);
 };
 
@@ -196,8 +195,13 @@ export const parseMlInferenceParametersFromPipeline = (
   };
 };
 
-export const parseModelStateFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) => {
-  switch (trainedModelStats?.deployment_stats?.state) {
+export const parseModelStateFromStats = (
+  model?: Partial<MlTrainedModelStats> & Partial<MlTrainedModelConfig>,
+  modelTypes?: string[]
+) => {
+  if (model?.model_type === LANG_IDENT_MODEL_TYPE || modelTypes?.includes(LANG_IDENT_MODEL_TYPE))
+    return TrainedModelState.Started;
+  switch (model?.deployment_stats?.state) {
     case 'started':
       return TrainedModelState.Started;
     case 'starting':
