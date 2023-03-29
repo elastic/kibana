@@ -706,6 +706,7 @@ test('throws an error when config is invalid', async () => {
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
+      params: { schema: schema.object({ foo: schema.boolean() }) },
       config: {
         schema: schema.object({
           param1: schema.string(),
@@ -742,6 +743,7 @@ test('throws an error when connector is invalid', async () => {
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
+      params: { schema: schema.object({ foo: schema.boolean() }) },
       connector: () => {
         return 'error';
       },

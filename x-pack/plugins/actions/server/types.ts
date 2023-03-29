@@ -128,7 +128,7 @@ export interface ActionType<
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   validate: {
-    params?: ValidatorType<Params>;
+    params: ValidatorType<Params>;
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;

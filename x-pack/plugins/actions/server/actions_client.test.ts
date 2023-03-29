@@ -416,6 +416,7 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
+        params: { schema: schema.object({}) },
         config: {
           schema: schema.object({
             param1: schema.string(),
@@ -451,6 +452,7 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
+        params: { schema: schema.object({}) },
         connector: connectorValidator,
       },
       executor,
@@ -2032,6 +2034,7 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
+        params: { schema: schema.object({}) },
         config: {
           schema: schema.object({
             param1: schema.string(),
@@ -2069,6 +2072,7 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       validate: {
+        params: { schema: schema.object({}) },
         connector: () => {
           return '[param1] is required';
         },
