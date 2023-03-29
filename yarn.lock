@@ -4561,6 +4561,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-route-utils@link:x-pack/packages/ml/route_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
   version "0.0.0"
   uid ""

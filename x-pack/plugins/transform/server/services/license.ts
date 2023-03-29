@@ -17,6 +17,7 @@ import {
 
 import { LicensingPluginSetup, LicenseType } from '@kbn/licensing-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import { createExecutionContext } from '@kbn/ml-route-utils';
 
 import { PLUGIN } from '../../common/constants';
 
@@ -92,7 +93,11 @@ export class License {
       response: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const licenseStatus = license.getStatus();
-      const executionContext = await createExecutionContext(license.coreStart, request.route.path);
+      const executionContext = createExecutionContext(
+        license.coreStart,
+        PLUGIN.ID,
+        request.route.path
+      );
 
       if (!licenseStatus.isValid) {
         return response.customError({
@@ -112,15 +117,4 @@ export class License {
   getStatus() {
     return this.licenseStatus;
   }
-}
-
-async function createExecutionContext(coreStart: CoreStart, id?: string) {
-  const labels = coreStart.executionContext.getAsLabels();
-  const page = labels.page as string;
-  return {
-    type: 'application',
-    name: PLUGIN.ID,
-    id: id ?? page,
-    page,
-  };
 }
