@@ -4101,6 +4101,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/exploratory-view-plugin@link:x-pack/plugins/exploratory_view":
+  version "0.0.0"
+  uid ""
+
 "@kbn/expression-error-plugin@link:src/plugins/expression_error":
   version "0.0.0"
   uid ""

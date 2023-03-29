@@ -25623,7 +25623,6 @@
     "xpack.observability.alertDetails.errorPromptTitle": "无法加载告警详情",
     "xpack.observability.alertDetails.viewRuleDetails": "查看规则详情",
     "xpack.observability.alerts.actions.addToCase": "添加到现有案例",
-    "xpack.observability.alerts.actions.addToCaseDisabled": "此选择不支持添加到案例",
     "xpack.observability.alerts.actions.addToNewCase": "添加到新案例",
     "xpack.observability.alerts.alertStatusFilter.active": "活动",
     "xpack.observability.alerts.alertStatusFilter.legend": "筛选依据",
