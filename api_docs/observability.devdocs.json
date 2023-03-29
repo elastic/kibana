@@ -4056,10 +4056,10 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityFetchDataResponse.synthetics",
+            "id": "def-public.ObservabilityFetchDataResponse.uptime",
             "type": "Object",
             "tags": [],
-            "label": "synthetics",
+            "label": "uptime",
             "description": [],
             "signature": [
               {
@@ -4170,10 +4170,10 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityHasDataResponse.synthetics",
+            "id": "def-public.ObservabilityHasDataResponse.uptime",
             "type": "Object",
             "tags": [],
-            "label": "synthetics",
+            "label": "uptime",
             "description": [],
             "signature": [
               {
@@ -5376,7 +5376,7 @@
             "label": "dataType",
             "description": [],
             "signature": [
-              "\"alerts\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"apm\" | \"mobile\""
+              "\"uptime\" | \"alerts\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"apm\" | \"mobile\""
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
@@ -6457,7 +6457,7 @@
         "label": "ObservabilityFetchDataPlugins",
         "description": [],
         "signature": [
-          "\"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"apm\""
+          "\"uptime\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"apm\""
         ],
         "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
         "deprecated": false,
