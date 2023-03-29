@@ -26,8 +26,12 @@ export interface CreateBatchesParams {
   corruptDocumentIds?: string[];
   transformErrors?: TransformErrorObjects[];
   maxBatchSizeBytes: number;
-  kibanaVersion: string;
-  indexTypesMap?: IndexTypesMap;
+  /** This map holds a list of temporary index names for each SO type, e.g.:
+   * 'cases': '.kibana_cases_8.8.0_reindex_temp'
+   * 'task': '.kibana_task_manager_8.8.0_reindex_temp'
+   * ...
+   */
+  typeIndexMap?: Record<string, string>;
 }
 
 export interface DocumentExceedsBatchSize {
@@ -35,6 +39,32 @@ export interface DocumentExceedsBatchSize {
   type: 'document_exceeds_batch_size_bytes';
   docSizeBytes: number;
   maxBatchSizeBytes: number;
+}
+
+/**
+ * Build a relationship of temporary index names for each SO type, e.g.:
+ *  'cases': '.kibana_cases_8.8.0_reindex_temp'
+ *  'task': '.kibana_task_manager_8.8.0_reindex_temp'
+ *   ...
+ *
+ * @param indexTypesMap information about which types are stored in each index
+ * @param kibanaVersion the target version of the indices
+ */
+export function buildTempIndexMap(
+  indexTypesMap: IndexTypesMap,
+  kibanaVersion: string
+): Record<string, string> {
+  return Object.entries(indexTypesMap || {}).reduce<Record<string, string>>(
+    (acc, [indexAlias, types]) => {
+      const tempIndex = getTempIndexName(indexAlias, kibanaVersion!);
+
+      types.forEach((type) => {
+        acc[type] = tempIndex;
+      });
+      return acc;
+    },
+    {}
+  );
 }
 
 /**
@@ -46,8 +76,7 @@ export function createBatches({
   corruptDocumentIds = [],
   transformErrors = [],
   maxBatchSizeBytes,
-  kibanaVersion,
-  indexTypesMap,
+  typeIndexMap,
 }: CreateBatchesParams): Either.Either<DocumentExceedsBatchSize, BulkOperation[][]> {
   /* To build up the NDJSON request body we construct an array of objects like:
    * [
@@ -73,21 +102,6 @@ export function createBatches({
     JSON.stringify(createBulkDeleteOperationBody('')),
     'utf8'
   );
-
-  // This map holds a list of temporary index names for each SO type, e.g.:
-  // 'cases': '.kibana_cases_8.8.0_reindex_temp'
-  // 'task': '.kibana_task_manager_8.8.0_reindex_temp'
-  // ...
-  const typeIndexMap: Record<string, string> = Object.entries(indexTypesMap || {}).reduce<
-    Record<string, string>
-  >((acc, [indexAlias, types]) => {
-    const tempIndex = getTempIndexName(indexAlias, kibanaVersion);
-
-    types.forEach((type) => {
-      acc[type] = tempIndex;
-    });
-    return acc;
-  }, {});
 
   const batches: BulkOperation[][] = [[]];
   let currBatch = 0;

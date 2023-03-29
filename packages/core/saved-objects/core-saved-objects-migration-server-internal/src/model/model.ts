@@ -44,7 +44,7 @@ import {
   buildRemoveAliasActions,
   MigrationType,
 } from './helpers';
-import { createBatches } from './create_batches';
+import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
 import {
   CLUSTER_SHARD_LIMIT_EXCEEDED_REASON,
@@ -941,8 +941,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         const batches = createBatches({
           documents,
           maxBatchSizeBytes: stateP.maxBatchSizeBytes,
-          indexTypesMap: stateP.indexTypesMap,
-          kibanaVersion: stateP.kibanaVersion,
+          typeIndexMap: buildTempIndexMap(stateP.indexTypesMap, stateP.kibanaVersion),
         });
         if (Either.isRight(batches)) {
           let corruptDocumentIds = stateP.corruptDocumentIds;
@@ -1214,7 +1213,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           corruptDocumentIds,
           transformErrors,
           maxBatchSizeBytes: stateP.maxBatchSizeBytes,
-          kibanaVersion: stateP.kibanaVersion,
         });
         if (Either.isRight(batches)) {
           return {

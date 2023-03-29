@@ -7,7 +7,7 @@
  */
 import * as Either from 'fp-ts/lib/Either';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { createBatches } from './create_batches';
+import { buildTempIndexMap, createBatches } from './create_batches';
 
 describe('createBatches', () => {
   const documentToOperation = (document: SavedObjectsRawDoc) => [
@@ -29,7 +29,6 @@ describe('createBatches', () => {
         createBatches({
           documents,
           maxBatchSizeBytes: DOCUMENT_SIZE_BYTES * 3,
-          kibanaVersion: '8.8.0',
         })
       ).toEqual(Either.right([documents.map(documentToOperation)]));
     });
@@ -45,7 +44,6 @@ describe('createBatches', () => {
         createBatches({
           documents,
           maxBatchSizeBytes: DOCUMENT_SIZE_BYTES * 2,
-          kibanaVersion: '8.8.0',
         })
       ).toEqual(
         Either.right([
@@ -57,9 +55,7 @@ describe('createBatches', () => {
     });
     it('creates a single empty batch if there are no documents', () => {
       const documents = [] as SavedObjectsRawDoc[];
-      expect(createBatches({ documents, maxBatchSizeBytes: 100, kibanaVersion: '8.8.0' })).toEqual(
-        Either.right([[]])
-      );
+      expect(createBatches({ documents, maxBatchSizeBytes: 100 })).toEqual(Either.right([[]]));
     });
     it('throws if any one document exceeds the maxBatchSizeBytes', () => {
       const documents = [
@@ -73,7 +69,7 @@ describe('createBatches', () => {
         },
         { _id: 'baz', _source: { type: 'dashboard', title: 'my saved object title ®' } },
       ];
-      expect(createBatches({ documents, maxBatchSizeBytes: 120, kibanaVersion: '8.8.0' })).toEqual(
+      expect(createBatches({ documents, maxBatchSizeBytes: 120 })).toEqual(
         Either.left({
           maxBatchSizeBytes: 120,
           docSizeBytes: 130,
@@ -84,7 +80,7 @@ describe('createBatches', () => {
     });
   });
 
-  describe('when indexTypesMap and kibanaVersion are provided', () => {
+  describe('when a type index map is provided', () => {
     it('creates batches that contain the target index information for each type', () => {
       const documents = [
         { _id: '', _source: { type: 'dashboard', title: 'my saved object title ¹' } },
@@ -97,11 +93,13 @@ describe('createBatches', () => {
         createBatches({
           documents,
           maxBatchSizeBytes: (DOCUMENT_SIZE_BYTES + 43) * 2, // add extra length for 'index' property
-          kibanaVersion: '8.8.0',
-          indexTypesMap: {
-            '.kibana': ['dashboard'],
-            '.kibana_cases': ['cases', 'cases-comments', 'cases-user-actions'],
-          },
+          typeIndexMap: buildTempIndexMap(
+            {
+              '.kibana': ['dashboard'],
+              '.kibana_cases': ['cases', 'cases-comments', 'cases-user-actions'],
+            },
+            '8.8.0'
+          ),
         })
       ).toEqual(
         Either.right([
