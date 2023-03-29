@@ -11,13 +11,18 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { OutputSOAttributes } from '../types';
 
+import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
+
 import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
+import { auditLoggingService } from './audit_logging';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
+jest.mock('./audit_logging');
 
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
@@ -183,6 +188,7 @@ describe('Output Service', () => {
     mockedAgentPolicyService.removeOutputFromAll.mockReset();
     mockedAppContextService.getInternalUserSOClient.mockReset();
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
+    mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
   });
   describe('create', () => {
     it('work with a predefined id', async () => {
@@ -499,6 +505,28 @@ describe('Output Service', () => {
         { data_output_id: 'output-test' },
         { force: true }
       );
+    });
+
+    it('should call audit logger', async () => {
+      const soClient = getMockedSoClient();
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: true,
+          name: 'Test',
+          type: 'elasticsearch',
+        },
+        { id: 'output-test' }
+      );
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'create',
+        id: outputIdToUuid('output-test'),
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
     });
   });
 
@@ -829,6 +857,20 @@ describe('Output Service', () => {
         'Logstash output cannot be used with Fleet Server integration in fleet server policy. Please create a new ElasticSearch output.'
       );
     });
+
+    it('should call audit logger', async () => {
+      const soClient = getMockedSoClient({ defaultOutputId: 'existing-es-output' });
+
+      await outputService.update(soClient, esClientMock, 'existing-es-output', {
+        hosts: ['new-host:443'],
+      });
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'update',
+        id: outputIdToUuid('existing-es-output'),
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    });
   });
 
   describe('delete', () => {
@@ -859,6 +901,17 @@ describe('Output Service', () => {
       expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalled();
       expect(soClient.delete).toBeCalled();
     });
+
+    it('should call audit logger', async () => {
+      const soClient = getMockedSoClient();
+      await outputService.delete(soClient, 'existing-es-output');
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'delete',
+        id: outputIdToUuid('existing-es-output'),
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    });
   });
 
   describe('get', () => {
@@ -869,6 +922,17 @@ describe('Output Service', () => {
       expect(soClient.get).toHaveBeenCalledWith('ingest-outputs', outputIdToUuid('output-test'));
 
       expect(output.id).toEqual('output-test');
+    });
+
+    it('should call audit logger', async () => {
+      const soClient = getMockedSoClient();
+      await outputService.get(soClient, 'existing-es-output');
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'get',
+        id: outputIdToUuid('existing-es-output'),
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
     });
   });
 
