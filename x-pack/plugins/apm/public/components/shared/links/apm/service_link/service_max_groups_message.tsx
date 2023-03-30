@@ -10,18 +10,11 @@ import React from 'react';
 
 export const OTHER_SERVICE_NAME = '_other';
 
-export function ServiceMaxGroupsMessage({
-  serviceOverflowCount = 0,
-}: {
-  serviceOverflowCount?: number;
-}) {
+export function ServiceMaxGroupsMessage() {
   return (
     <FormattedMessage
       defaultMessage="The APM server has reached the maximum capacity that it can currently handle in terms of showing individual services. Please consider scaling-up your APM server capacity and/or tuning the application instrumentation in order to view all of the data."
       id="xpack.apm.serviceDetail.maxGroups.message"
-      values={{
-        serviceOverflowCount,
-      }}
     />
   );
 }
