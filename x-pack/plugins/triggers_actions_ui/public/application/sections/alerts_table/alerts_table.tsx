@@ -18,6 +18,7 @@ import {
   EuiLoadingContent,
   EuiDataGridRefProps,
 } from '@elastic/eui';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
 import {
@@ -30,6 +31,7 @@ import { getToolbarVisibility } from './toolbar';
 import { InspectButtonContainer } from './toolbar/components/inspect';
 import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
+import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
@@ -76,7 +78,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     refresh: alertsRefresh,
     getInspectQuery,
   } = alertsData;
-  const { cases, isLoading: isLoadingCases } = props.casesData;
+  const queryClient = useQueryClient();
+  const { data: cases, isLoading: isLoadingCases } = props.cases;
 
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
@@ -94,14 +97,21 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     clearSelection,
   } = useBulkActions({
     alerts,
+    casesConfig: props.alertsTableConfiguration.cases,
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
+    refresh: alertsRefresh,
   });
 
-  const refresh = useCallback(() => {
+  const refreshData = useCallback(() => {
     alertsRefresh();
+    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.cases());
+  }, [alertsRefresh, queryClient]);
+
+  const refresh = useCallback(() => {
+    refreshData();
     clearSelection();
-  }, [alertsRefresh, clearSelection]);
+  }, [clearSelection, refreshData]);
 
   const {
     pagination,
