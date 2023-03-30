@@ -11,6 +11,11 @@ import type { EventStreamClient, EventStreamClientFactory, EventStreamLogger } f
 import { EsEventStreamClient } from './es_event_stream_client';
 
 export interface EsEventStreamClientFactoryDependencies {
+  /**
+   * The prefix used for index names. Usually `.kibana`, as Elasticsearch
+   * treats indices starting with the `.kibana*` prefix as a special indices
+   * that only Kibana should be allowed to access.
+   */
   baseName: string;
   kibanaVersion: string;
   logger: EventStreamLogger;
