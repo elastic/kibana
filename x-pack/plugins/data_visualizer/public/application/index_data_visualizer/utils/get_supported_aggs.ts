@@ -54,7 +54,7 @@ const SUPPORTED_AGGS = {
     'terms',
     'significant_terms',
   ]),
-  AGGREGATABLE: new Set(['count', 'cardinality', 'percentiles', 'stats', 'terms']),
+  AGGREGATABLE: new Set(['count', 'avg', 'cardinality', 'percentiles', 'stats', 'terms']),
   DEFAULT: new Set<string>(),
 };
 

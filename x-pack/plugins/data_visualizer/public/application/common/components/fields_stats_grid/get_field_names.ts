@@ -8,8 +8,12 @@
 import { difference } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { SupportedFieldType } from '../../../../../common/types';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
+
+export function getDataVisualizerFieldType(field: DataViewField) {}
+
 export function getFieldNames(results: FindFileStructureResponse) {
   const { mappings, field_stats: fieldStats, column_names: columnNames } = results;
 

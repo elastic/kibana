@@ -37,7 +37,7 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getFieldType } from '@kbn/unified-field-list-plugin/public';
+import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -216,7 +216,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     const indexedFieldTypes: string[] = [];
     dataViewFields.forEach((field) => {
       if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
-        const dataVisualizerType = getFieldType(field);
+        const dataVisualizerType = kbnTypeToSupportedType(field);
         if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
           indexedFieldTypes.push(dataVisualizerType);
         }

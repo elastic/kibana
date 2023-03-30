@@ -16,7 +16,6 @@ import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { getFieldType } from '@kbn/unified-field-list-plugin/public';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
@@ -31,7 +30,7 @@ import {
   SUPPORTED_FIELD_TYPES,
 } from '../../../../common/constants';
 import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
-import { kbnTypeToJobType } from '../../common/util/field_types_utils';
+import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
@@ -370,7 +369,7 @@ export const useDataVisualizerGridData = (
         ...fieldData,
         fieldFormat: currentDataView.getFormatterForField(field),
         type: SUPPORTED_FIELD_TYPES.NUMBER,
-        secondaryType: getFieldType(field),
+        secondaryType: kbnTypeToSupportedType(field),
         loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
@@ -449,7 +448,7 @@ export const useDataVisualizerGridData = (
       const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
       const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
-        secondaryType: getFieldType(field),
+        secondaryType: kbnTypeToSupportedType(field),
         fieldFormat: currentDataView.getFormatterForField(field),
         aggregatable: field.aggregatable,
         loading: fieldData?.existsInDocs ?? true,
@@ -458,7 +457,7 @@ export const useDataVisualizerGridData = (
 
       // Map the field type from the Kibana index pattern to the field type
       // used in the data visualizer.
-      const dataVisualizerType = kbnTypeToJobType(field);
+      const dataVisualizerType = kbnTypeToSupportedType(field) as SupportedFieldType;
       if (dataVisualizerType !== undefined) {
         nonMetricConfig.type = dataVisualizerType;
       } else {
