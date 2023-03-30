@@ -13,6 +13,9 @@ import type {
   MaybeImmutable,
   ResponseActionExecuteOutputContent,
 } from '../../../../common/endpoint/types';
+import { getEmptyValue } from '../../../common/components/empty_value';
+
+const emptyValue = getEmptyValue();
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
   output: {
@@ -53,7 +56,7 @@ interface ExecuteActionOutputProps {
 }
 
 const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
-  ({ content, initialIsOpen = false, isTruncated = false, textSize, type }) => {
+  ({ content = emptyValue, initialIsOpen = false, isTruncated = false, textSize, type }) => {
     const id = useGeneratedHtmlId({
       prefix: 'executeActionOutputAccordions',
       suffix: type,
@@ -103,6 +106,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
 
     return (
       <EuiFlexItem data-test-subj={dataTestSubj}>
+        <EuiSpacer size="m" />
         <ExecutionActionOutputAccordion
           content={outputContent.stdout}
           isTruncated={outputContent.stdout_truncated}
