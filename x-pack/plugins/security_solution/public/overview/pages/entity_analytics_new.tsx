@@ -70,6 +70,7 @@ const EntityAnalyticsPageNewComponent = () => {
   } = useKibana().services;
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
+  const [showModal, setShowModal] = useState(false);
 
   const toggleReasons = (row) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -124,7 +125,6 @@ const EntityAnalyticsPageNewComponent = () => {
   const [userRiskList, setUserRiskList] = useState([]);
   const [debugInfo, setDebugInfo] = useState(null);
   const [withDebug, setWithDebug] = useState(false);
-  const [showModal, setShowModal] = useState(false);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
@@ -158,7 +158,6 @@ const EntityAnalyticsPageNewComponent = () => {
         data.request
           ? {
               request: { body: data.request, index: [data.request.index] },
-              response: data.response,
             }
           : null
       );
@@ -356,9 +355,19 @@ const EntityAnalyticsPageNewComponent = () => {
                 <>
                   <EuiButtonEmpty
                     onClick={(e) => {
-                      writeInNewPage(debugInfo?.request);
+                      setShowModal(true);
                     }}
                   >
+                    {showModal && (
+                      <ModalInspectQuery
+                        closeModal={() => setShowModal(false)}
+                        data-test-subj="inspect-modal"
+                        // inputId={inputId}
+                        request={JSON.stringify(debugInfo?.request)}
+                        response={JSON.stringify({})}
+                        title={'Inspect query'}
+                      />
+                    )}
                     Show Request
                   </EuiButtonEmpty>
                   <EuiButtonEmpty
