@@ -15,7 +15,8 @@ import {
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import { DragContext } from '@kbn/dom-drag-drop';
+import { useCallback, useEffect, useRef, useMemo, useState, useContext } from 'react';
 import { distinctUntilChanged, filter, map, Observable, skip } from 'rxjs';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
@@ -188,6 +189,12 @@ export const useDiscoverHistogram = ({
       });
     }
   }, [totalHitsResult, totalHitsStatus, unifiedHistogram]);
+
+  const dragDropContext = useContext(DragContext);
+
+  useEffect(() => {
+    unifiedHistogram?.setDragDropContext(dragDropContext);
+  }, [unifiedHistogram, dragDropContext]);
 
   /**
    * Sync URL query params with Unified Histogram

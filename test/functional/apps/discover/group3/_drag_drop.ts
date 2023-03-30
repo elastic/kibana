@@ -48,13 +48,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '@timestamp, Document'
         );
 
-        await PageObjects.discover.dragFieldToTable('extension');
+        await PageObjects.discover.dragAndDropField('extension');
 
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
           '@timestamp, extension'
         );
 
-        await PageObjects.discover.dragFieldWithKeyboardToTable('@message');
+        await PageObjects.discover.dragAndDropFieldWithKeyboard('@message');
 
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
           '@timestamp, extension, @message'
@@ -65,6 +65,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(
           (await PageObjects.discover.getSidebarSectionFieldNames('selected')).join(', ')
         ).to.be('extension, @message');
+      });
+    });
+
+    describe('should set a breakdown field via drag and drop', function () {
+      it('should support dragging and dropping a field onto the chart', async function () {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+          '@timestamp, Document'
+        );
+
+        await PageObjects.discover.dragAndDropField('clientip', 'chart');
+
+        let list = await PageObjects.discover.getHistogramLegendList();
+        expect(list).to.eql(['Other', '243.158.217.196', '33.53.120.159', '179.219.108.141']);
+
+        await PageObjects.discover.dragAndDropFieldWithKeyboard('bytes', 'chart');
+
+        list = await PageObjects.discover.getHistogramLegendList();
+        expect(list).to.eql(['Other', '2,168', '1,810', '0']);
+
+        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+          '@timestamp, Document'
+        );
       });
     });
   });

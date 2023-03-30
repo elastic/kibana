@@ -14,6 +14,8 @@ import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput, LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { DragContextState } from '@kbn/dom-drag-drop';
+import { DropZone } from '../drop_zone';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
@@ -89,6 +91,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Current top panel height -- leave undefined to use the default
    */
   topPanelHeight?: number;
+  /**
+   * Drag & Drop context
+   */
+  dragDropContext?: DragContextState;
   /**
    * Append a custom element to the right of the hits count
    */
@@ -172,6 +178,7 @@ export const UnifiedHistogramLayout = ({
   breakdown,
   resizeRef,
   topPanelHeight,
+  dragDropContext,
   appendHitsCounter,
   disableAutoFetching,
   disableTriggers,
@@ -243,37 +250,44 @@ export const UnifiedHistogramLayout = ({
   return (
     <>
       <InPortal node={topPanelNode}>
-        <Chart
-          className={chartClassName}
-          services={services}
+        <DropZone
           dataView={dataView}
-          query={query}
-          filters={filters}
-          timeRange={timeRange}
-          request={request}
-          hits={hits}
-          currentSuggestion={currentSuggestion}
-          allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
-          chart={chart}
-          breakdown={breakdown}
-          appendHitsCounter={appendHitsCounter}
-          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
-          disableAutoFetching={disableAutoFetching}
-          disableTriggers={disableTriggers}
-          disabledActions={disabledActions}
-          input$={input$}
-          getRelativeTimeRange={getRelativeTimeRange}
-          onResetChartHeight={onResetChartHeight}
-          onChartHiddenChange={onChartHiddenChange}
-          onTimeIntervalChange={onTimeIntervalChange}
+          dragDropContext={dragDropContext}
           onBreakdownFieldChange={onBreakdownFieldChange}
-          onSuggestionChange={onSuggestionChange}
-          onTotalHitsChange={onTotalHitsChange}
-          onChartLoad={onChartLoad}
-          onFilter={onFilter}
-          onBrushEnd={onBrushEnd}
-        />
+        >
+          <Chart
+            className={chartClassName}
+            services={services}
+            dataView={dataView}
+            query={query}
+            filters={filters}
+            timeRange={timeRange}
+            request={request}
+            hits={hits}
+            currentSuggestion={currentSuggestion}
+            allSuggestions={allSuggestions}
+            isPlainRecord={isPlainRecord}
+            chart={chart}
+            breakdown={breakdown}
+            appendHitsCounter={appendHitsCounter}
+            appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
+            disableAutoFetching={disableAutoFetching}
+            disableTriggers={disableTriggers}
+            disabledActions={disabledActions}
+            input$={input$}
+            getRelativeTimeRange={getRelativeTimeRange}
+            onResetChartHeight={onResetChartHeight}
+            onChartHiddenChange={onChartHiddenChange}
+            onTimeIntervalChange={onTimeIntervalChange}
+            onBreakdownFieldChange={onBreakdownFieldChange}
+            onSuggestionChange={onSuggestionChange}
+            onTotalHitsChange={onTotalHitsChange}
+            onChartLoad={onChartLoad}
+            onFilter={onFilter}
+            onBrushEnd={onBrushEnd}
+          />
+        </DropZone>
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>
       <Panels

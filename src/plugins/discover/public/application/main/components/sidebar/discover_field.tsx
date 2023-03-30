@@ -349,7 +349,7 @@ function DiscoverFieldComponent({
           order={order}
           value={value}
           onDragStart={closePopover}
-          isDisabled={alwaysShowActionButton || groupName === FieldsGroupNames.SelectedFields}
+          isDisabled={alwaysShowActionButton}
           dataTestSubj={`dscFieldListPanelField-${field.name}`}
         >
           <FieldItemButton
