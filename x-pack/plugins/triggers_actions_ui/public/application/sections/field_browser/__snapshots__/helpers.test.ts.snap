@@ -1,6 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`helpers getDescription it returns description for given name 1`] = `
-"Hostname of the host.
-It normally contains what the \`hostname\` command returns on the host machine."
-`;

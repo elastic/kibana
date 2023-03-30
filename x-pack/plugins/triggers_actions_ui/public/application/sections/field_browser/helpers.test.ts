@@ -41,7 +41,10 @@ describe('helpers', () => {
   describe('getDescription', () => {
     test('it returns description for given name', () => {
       const description = getDescription('host.hostname', EcsFlat);
-      expect(description).toMatchSnapshot();
+      expect(description).toMatchInlineSnapshot(`
+        "Hostname of the host.
+        It normally contains what the \`hostname\` command returns on the host machine."
+      `);
     });
   });
 
