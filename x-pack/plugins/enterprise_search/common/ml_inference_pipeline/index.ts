@@ -35,6 +35,9 @@ export const SUPPORTED_PYTORCH_TASKS = {
   ZERO_SHOT_CLASSIFICATION: 'zero_shot_classification',
 } as const;
 
+export const ELSER_TASK_TYPE = 'text_expansion';
+export const LANG_IDENT_MODEL_TYPE = 'lang_ident';
+
 export interface MlInferencePipelineParams {
   description?: string;
   destinationField: string;
@@ -206,8 +209,13 @@ export const parseMlInferenceParametersFromPipeline = (
   };
 };
 
-export const parseModelStateFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) => {
-  switch (trainedModelStats?.deployment_stats?.state) {
+export const parseModelStateFromStats = (
+  model?: Partial<MlTrainedModelStats> & Partial<MlTrainedModelConfig>,
+  modelTypes?: string[]
+) => {
+  if (model?.model_type === LANG_IDENT_MODEL_TYPE || modelTypes?.includes(LANG_IDENT_MODEL_TYPE))
+    return TrainedModelState.Started;
+  switch (model?.deployment_stats?.state) {
     case 'started':
       return TrainedModelState.Started;
     case 'starting':
