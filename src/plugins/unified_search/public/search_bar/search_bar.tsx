@@ -189,9 +189,9 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       nextState.dateRangeTo = nextDateRange.dateRangeTo;
 
       /**
-       * Some applications do not rely on the _g url parameter to update the time. The onTimeRangeChange 
+       * Some applications do not rely on the _g url parameter to update the time. The onTimeRangeChange
        * callback can be used in these cases to notify the consumer for the time change.
-      */
+       */
       if (nextDateRange.dateRangeFrom && nextDateRange.dateRangeTo) {
         nextProps?.onTimeRangeChange?.({
           dateRange: {
