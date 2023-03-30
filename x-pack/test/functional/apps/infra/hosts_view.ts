@@ -304,11 +304,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should render the log entries for the hosts', async () => {
-          // TODO
-        });
+          const logEntries = await pageObjects.infraHostsView.getLogEntries();
 
-        it('should correctly render the log entries for the hosts', async () => {
-          // TODO
+          expect(logEntries.length).equal(200);
         });
       });
 

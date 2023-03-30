@@ -138,6 +138,12 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       logsTab.click();
     },
 
+    async getLogEntries() {
+      const container = await testSubjects.find('hostsView-logs');
+
+      return container.findAllByCssSelector('[data-test-subj*=streamEntry]');
+    },
+
     // Alerts Tab
     getAlertsTab() {
       return testSubjects.find('hostsView-tabs-alerts');
