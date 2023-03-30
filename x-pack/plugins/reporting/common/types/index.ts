@@ -7,8 +7,7 @@
 
 import { CsvMetrics } from '@kbn/reporting-common';
 import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import type { BaseParams, BaseParamsV2, BasePayloadV2 } from '@kbn/generate-csv';
-import { JobId, BasePayload } from './base';
+import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
 export type {
   JobParamsCsvFromSavedObject,
