@@ -8,10 +8,18 @@
 
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common/ast';
 import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
+import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
+import { EventAnnotationGroupContent } from '../../common/types';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 
 export interface EventAnnotationServiceType {
   loadAnnotationGroup: (savedObjectId: string) => Promise<EventAnnotationGroupConfig>;
+  findAnnotationGroupContent: (
+    searchTerm: string,
+    pageSize: number,
+    references?: SavedObjectsFindOptionsReference[],
+    referencesToExclude?: SavedObjectsFindOptionsReference[]
+  ) => Promise<{ total: number; hits: EventAnnotationGroupContent[] }>;
   // deleteAnnotationGroup: (savedObjectId: string) => Promise<void>;
   createAnnotationGroup: (group: EventAnnotationGroupConfig) => Promise<{ id: string }>;
   // updateAnnotations: (

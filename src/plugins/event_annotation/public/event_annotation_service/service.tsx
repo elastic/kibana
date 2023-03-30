@@ -10,10 +10,18 @@ import React from 'react';
 import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { CoreStart, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/public';
+import {
+  CoreStart,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+  SimpleSavedObject,
+} from '@kbn/core/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { EventAnnotationGroupContent } from '../../common/types';
 import {
   EventAnnotationConfig,
   EventAnnotationGroupAttributes,
@@ -40,6 +48,44 @@ export function getEventAnnotationService(
 ): EventAnnotationServiceType {
   const client: SavedObjectsClientContract = core.savedObjects.client;
 
+  const mapSavedObjectToGroupConfig = (
+    savedObject: SimpleSavedObject<EventAnnotationGroupAttributes>
+  ): EventAnnotationGroupConfig => {
+    const adHocDataViewSpec = savedObject.attributes.dataViewSpec
+      ? DataViewPersistableStateService.inject(
+          savedObject.attributes.dataViewSpec,
+          savedObject.references
+        )
+      : undefined;
+
+    return {
+      title: savedObject.attributes.title,
+      description: savedObject.attributes.description,
+      tags: savedObject.attributes.tags,
+      ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
+      indexPatternId: adHocDataViewSpec
+        ? adHocDataViewSpec.id!
+        : savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
+      annotations: savedObject.attributes.annotations,
+      dataViewSpec: adHocDataViewSpec,
+    };
+  };
+
+  const mapSavedObjectToGroupContent = (
+    savedObject: SimpleSavedObject<EventAnnotationGroupAttributes>
+  ): EventAnnotationGroupContent => {
+    return {
+      id: savedObject.id,
+      references: savedObject.references,
+      type: savedObject.type,
+      updatedAt: savedObject.updatedAt ? savedObject.updatedAt : '',
+      attributes: {
+        title: savedObject.attributes.title,
+        description: savedObject.attributes.description,
+      },
+    };
+  };
+
   const loadAnnotationGroup = async (
     savedObjectId: string
   ): Promise<EventAnnotationGroupConfig> => {
@@ -64,23 +110,33 @@ export function getEventAnnotationService(
     //   .filter(({ error }) => !error)
     //   .map((annotation) => annotation.attributes);
 
-    const adHocDataViewSpec = savedObject.attributes.dataViewSpec
-      ? DataViewPersistableStateService.inject(
-          savedObject.attributes.dataViewSpec,
-          savedObject.references
-        )
-      : undefined;
+    return mapSavedObjectToGroupConfig(savedObject);
+  };
+
+  const findAnnotationGroupContent = async (
+    searchTerm: string,
+    pageSize: number,
+    references?: SavedObjectsFindOptionsReference[],
+    referencesToExclude?: SavedObjectsFindOptionsReference[]
+  ): Promise<{ total: number; hits: EventAnnotationGroupContent[] }> => {
+    const searchOptions: SavedObjectsFindOptions = {
+      type: [EVENT_ANNOTATION_GROUP_TYPE],
+      searchFields: ['title^3', 'description'],
+      search: searchTerm ? `${searchTerm}*` : undefined,
+      perPage: pageSize,
+      page: 1,
+      defaultSearchOperator: 'AND' as const,
+      hasReference: references,
+      hasNoReference: referencesToExclude,
+    };
+
+    const { total, savedObjects } = await client.find<EventAnnotationGroupAttributes>(
+      searchOptions
+    );
 
     return {
-      title: savedObject.attributes.title,
-      description: savedObject.attributes.description,
-      tags: savedObject.attributes.tags,
-      ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
-      indexPatternId: adHocDataViewSpec
-        ? adHocDataViewSpec.id!
-        : savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
-      annotations: savedObject.attributes.annotations,
-      dataViewSpec: adHocDataViewSpec,
+      total,
+      hits: savedObjects.map(mapSavedObjectToGroupContent),
     };
   };
 
@@ -194,6 +250,7 @@ export function getEventAnnotationService(
 
   return {
     loadAnnotationGroup,
+    findAnnotationGroupContent,
     // updateAnnotations,
     updateAnnotationGroup,
     createAnnotationGroup,

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-browser';
 import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -138,6 +139,10 @@ describe('Event Annotation Service', () => {
       const typedId = id as keyof typeof annotationGroupResolveMocks;
       return annotationGroupResolveMocks[typedId];
     });
+    (core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      total: 10,
+      savedObjects: Object.values(annotationGroupResolveMocks),
+    } as Pick<SavedObjectsFindResponse<EventAnnotationGroupAttributes>, 'total' | 'savedObjects'>);
     (core.savedObjects.client.bulkCreate as jest.Mock).mockImplementation(() => {
       return annotationResolveMocks.multiAnnotations;
     });
@@ -488,6 +493,44 @@ describe('Event Annotation Service', () => {
       const group = await eventAnnotationService.loadAnnotationGroup('withAdHocDataView');
 
       expect(group.indexPatternId).toBe(group.dataViewSpec?.id);
+    });
+  });
+  describe('findAnnotationGroupContent', () => {
+    it('should retrieve saved objects and format them', async () => {
+      const searchTerm = 'my search';
+
+      const content = await eventAnnotationService.findAnnotationGroupContent(searchTerm, 20, [
+        { type: 'mytype', id: '1234' },
+      ]);
+
+      expect(content).toMatchSnapshot();
+
+      expect((core.savedObjects.client.find as jest.Mock).mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "defaultSearchOperator": "AND",
+              "hasNoReference": undefined,
+              "hasReference": Array [
+                Object {
+                  "id": "1234",
+                  "type": "mytype",
+                },
+              ],
+              "page": 1,
+              "perPage": 20,
+              "search": "my search*",
+              "searchFields": Array [
+                "title^3",
+                "description",
+              ],
+              "type": Array [
+                "event-annotation-group",
+              ],
+            },
+          ],
+        ]
+      `);
     });
   });
   // describe.skip('deleteAnnotationGroup', () => {

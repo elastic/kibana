@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import {
+  type Plugin,
+  type CoreSetup,
+  type CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  type AppMountParameters,
+} from '@kbn/core/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -18,10 +26,13 @@ import {
   eventAnnotationGroup,
 } from '../common';
 import { getFetchEventAnnotations } from './fetch_event_annotations';
+import type { EventAnnotationAppServices } from './render_app';
 
 export interface EventAnnotationStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   data: DataPublicPluginStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 interface SetupDependencies {
@@ -47,6 +58,39 @@ export class EventAnnotationPlugin
     dependencies.expressions.registerFunction(
       getFetchEventAnnotations({ getStartServices: core.getStartServices })
     );
+
+    core.application.register({
+      id: 'annotations',
+      title: 'Event Annotation Library',
+      order: 8000,
+      euiIconType: 'logoKibana',
+      defaultPath: '#/',
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+
+        const eventAnnotationService = await new EventAnnotationService(
+          coreStart,
+          pluginsStart.savedObjectsManagement
+        ).getService();
+
+        const services: EventAnnotationAppServices = {
+          core: coreStart,
+          history: params.history,
+          savedObjectsTagging: pluginsStart.savedObjectsTagging,
+          eventAnnotationService,
+          PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
+        };
+
+        const { renderApp } = await import('./render_app');
+
+        const unmount = renderApp(params, services);
+
+        return () => {
+          unmount();
+        };
+      },
+    });
   }
 
   public start(

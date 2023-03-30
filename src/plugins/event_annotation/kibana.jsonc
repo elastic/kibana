@@ -11,10 +11,15 @@
       "expressions",
       "savedObjectsManagement",
       "data",
+      "presentationUtil",
+    ],
+    "optionalPlugins": [
+      "savedObjectsTagging",
     ],
     "requiredBundles": [
       "savedObjectsFinder",
-      "dataViews"
+      "dataViews",
+      "kibanaReact"
     ],
     "extraPublicDirs": [
       "common"

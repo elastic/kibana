@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';
@@ -100,6 +101,8 @@ export interface EventAnnotationGroupConfig {
   tags: string[];
   dataViewSpec?: DataViewSpec;
 }
+
+export type EventAnnotationGroupContent = UserContentCommonSchema;
 
 export type EventAnnotationArgs =
   | ManualPointEventAnnotationArgs
