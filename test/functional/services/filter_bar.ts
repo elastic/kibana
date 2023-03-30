@@ -33,7 +33,7 @@ interface BasicFilter {
 
 interface FilterWithMultipleValues extends BasicFilter {
   operation: typeof Operation.IS_ONE_OF | typeof Operation.IS_NOT_ONE_OF;
-  value: string[];
+  value: string[] | string;
 }
 
 interface FilterWithRange extends BasicFilter {

@@ -17,7 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
   const retry = getService('retry');
   const esClient = getService('es');
   const unzipPromisify = promisify(unzip);
@@ -74,8 +73,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     for (const testData of getArtifactsListTestsData()) {
       describe(`When on the ${testData.title} entries list`, function () {
         before(async () => {
-          const endpointPackage = await policyTestResources.getEndpointPackage();
-          await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
           indexedData = await endpointTestResources.loadEndpointData();
           await browser.refresh();
           await pageObjects.artifactEntriesList.navigateToList(testData.urlPath);
