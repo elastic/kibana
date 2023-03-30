@@ -20,7 +20,7 @@ export const indexEndpointHosts = (
     count?: number;
   } = {}
 ): Cypress.Chainable<CyIndexEndpointHosts> => {
-  return cy.task('indexEndpointHosts', options).then((indexHosts) => {
+  return cy.task('indexEndpointHosts', options, { timeout: 120000 }).then((indexHosts) => {
     return {
       data: indexHosts,
       cleanup: () => {

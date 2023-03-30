@@ -10,6 +10,7 @@ import { URL } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const ONE_HOUR = 60 * 60 * 1000;
+const LOG_VIEW_REFERENCE = '(logViewId:default,type:log-view-reference)';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common']);
@@ -51,7 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(parsedUrl.searchParams.get('logPosition')).to.be(
           `(position:(tiebreaker:0,time:${timestamp}))`
         );
-        expect(parsedUrl.searchParams.get('sourceId')).to.be('default');
+        expect(parsedUrl.searchParams.get('logView')).to.be(LOG_VIEW_REFERENCE);
         expect(documentTitle).to.contain('Stream - Logs - Observability - Elastic');
       });
     });
