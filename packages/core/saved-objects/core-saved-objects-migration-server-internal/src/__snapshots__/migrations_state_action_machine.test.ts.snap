@@ -182,6 +182,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -388,6 +404,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -598,6 +630,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -812,6 +860,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -1063,6 +1127,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -1280,6 +1360,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",

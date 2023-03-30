@@ -105,7 +105,8 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
     // Since Space 2 was deleted, any multi-namespace objects that existed in that space
     // are updated to remove it, and of those, any that don't exist in any space are deleted.
     const multiNamespaceResponse = await es.search<Record<string, any>>({
-      index: '.kibana',
+      // CHECKPOINT this test is affected by the .kibana split
+      index: '.kibana,.kibana_ui,.kibana_cases',
       size: 100,
       body: { query: { terms: { type: ['sharedtype'] } } },
     });

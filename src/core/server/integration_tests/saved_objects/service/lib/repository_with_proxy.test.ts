@@ -18,6 +18,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
   declareGetRoute,
   declareDeleteRoute,
@@ -30,6 +31,7 @@ import {
   declarePostUpdateByQueryRoute,
   declarePassthroughRoute,
   setProxyInterrupt,
+  allCombinationsPermutations,
 } from './repository_with_proxy_utils';
 
 let esServer: TestElasticsearchUtils;
@@ -96,19 +98,29 @@ describe('404s from proxies', () => {
     });
 
     await hapiServer.register(h2o2);
+
     // register specific routes to modify the response and a catch-all to relay the request/response as-is
+    // CHECKPOINT this test is affected by the .kibana split
+    allCombinationsPermutations(
+      `.kibana_${pkg.version}`,
+      `.kibana_ui_${pkg.version}`,
+      `.kibana_cases_${pkg.version}`
+    )
+      .map((indices) => indices.join(','))
+      .forEach((kbnIndexPath) => {
+        declareGetRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declareDeleteRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declarePostUpdateRoute(hapiServer, esHostname, esPort, kbnIndexPath);
 
-    declareGetRoute(hapiServer, esHostname, esPort);
-    declareDeleteRoute(hapiServer, esHostname, esPort);
-    declarePostUpdateRoute(hapiServer, esHostname, esPort);
+        declareGetSearchRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declarePostSearchRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declarePostPitRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+      });
 
-    declareGetSearchRoute(hapiServer, esHostname, esPort);
-    declarePostSearchRoute(hapiServer, esHostname, esPort);
+    // register index-agnostic routes
     declarePostBulkRoute(hapiServer, esHostname, esPort);
     declarePostMgetRoute(hapiServer, esHostname, esPort);
-    declarePostPitRoute(hapiServer, esHostname, esPort);
-    declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort);
-
     declarePassthroughRoute(hapiServer, esHostname, esPort);
 
     await hapiServer.start();

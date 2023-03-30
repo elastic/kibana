@@ -62,6 +62,7 @@ export function disableLegacyUrlAliasesTestSuiteFactory(
       }
       const esResponse = await es.get<RawLegacyUrlAlias>(
         {
+          // CHECKPOINT this test is affected by the .kibana split, if we move the LEGACY_URL_ALIAS_TYPE this test MUST be updated
           index: '.kibana',
           id: `${LEGACY_URL_ALIAS_TYPE}:${targetSpace}:${targetType}:${sourceId}`,
         },

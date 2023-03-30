@@ -39,7 +39,8 @@ export function getTestScenariosForSpace(spaceId: string) {
 
 export function getAggregatedSpaceData(es: Client, objectTypes: string[]) {
   return es.search({
-    index: '.kibana',
+    // CHECKPOINT this test is affected by the .kibana split
+    index: '.kibana,.kibana_ui,.kibana_cases',
     body: {
       size: 0,
       runtime_mappings: {

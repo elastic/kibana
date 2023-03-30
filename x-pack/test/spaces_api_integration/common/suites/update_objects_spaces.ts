@@ -98,10 +98,12 @@ export function updateObjectsSpacesTestSuiteFactory(
             if (expectAliasDifference !== undefined) {
               // if we deleted an object that had an alias pointing to it, the alias should have been deleted as well
               if (!hasRefreshed) {
+                // CHECKPOINT this test is affected by the .kibana split, if we move the LEGACY_URL_ALIAS_TYPE this test MUST be updated
                 await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
                 hasRefreshed = true;
               }
               const searchResponse = await es.search({
+                // CHECKPOINT this test is affected by the .kibana split, if we move the LEGACY_URL_ALIAS_TYPE this test MUST be updated
                 index: '.kibana',
                 body: {
                   size: 0,
