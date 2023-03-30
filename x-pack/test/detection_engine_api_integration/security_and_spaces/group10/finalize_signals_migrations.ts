@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
@@ -178,6 +178,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const statusAfter: StatusResponse[] = bodyAfter.indices;
       expect(statusAfter.map((s) => s.index)).to.eql([
+        '.internal.alerts-security.alerts-default-000001',
         ...createdMigrations.map((c) => c.migration_index),
       ]);
       expect(statusAfter.map((s) => s.is_outdated)).to.eql([false, false]);

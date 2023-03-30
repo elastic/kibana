@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import {
   ALERT_RISK_SCORE,
   ALERT_RULE_PARAMETERS,
@@ -71,12 +71,17 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Query type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
+    });
+
+    afterEach(async () => {
+      await esDeleteAllIndices('.preview.alerts*');
     });
 
     after(async () => {
