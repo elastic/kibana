@@ -108,7 +108,7 @@ describe('SyntheticsPrivateLocation', () => {
 
     try {
       await syntheticsPrivateLocation.createMonitors(
-        [testConfig],
+        [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
         [mockPrivateLocation],
@@ -138,7 +138,7 @@ describe('SyntheticsPrivateLocation', () => {
 
     try {
       await syntheticsPrivateLocation.editMonitors(
-        [testConfig],
+        [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
         [mockPrivateLocation],
@@ -181,7 +181,12 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it('formats monitors stream properly', () => {
-    const test = formatSyntheticsPolicy(testMonitorPolicy, DataStream.BROWSER, dummyBrowserConfig);
+    const test = formatSyntheticsPolicy(
+      testMonitorPolicy,
+      DataStream.BROWSER,
+      dummyBrowserConfig,
+      {}
+    );
 
     expect(test.formattedPolicy.inputs[3].streams[1]).toStrictEqual({
       data_stream: {

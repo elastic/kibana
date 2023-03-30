@@ -9,7 +9,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { MonitorFields } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -38,17 +37,15 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
 
-    const errors = await syntheticsService.runOnceConfigs([
-      formatHeartbeatRequest({
-        // making it enabled, even if it's disabled in the UI
-        monitor: { ...validationResult.decodedMonitor, enabled: true },
-        monitorId,
-        heartbeatId: monitorId,
-        runOnce: true,
-        testRunId: monitorId,
-        params: paramsBySpace[spaceId],
-      }),
-    ]);
+    const errors = await syntheticsService.runOnceConfigs({
+      // making it enabled, even if it's disabled in the UI
+      monitor: { ...validationResult.decodedMonitor, enabled: true },
+      configId: monitorId,
+      heartbeatId: monitorId,
+      runOnce: true,
+      testRunId: monitorId,
+      params: paramsBySpace[spaceId],
+    });
 
     if (errors) {
       return { errors };
