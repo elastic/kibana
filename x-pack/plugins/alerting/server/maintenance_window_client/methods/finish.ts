@@ -8,66 +8,94 @@
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { generateMaintenanceWindowEvents } from '../generate_maintenance_window_events';
+import { getMaintenanceWindowDateAndStatus } from '../get_maintenance_window_date_and_status';
 import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
 import {
   MaintenanceWindowSOAttributes,
   MaintenanceWindow,
+  DateRange,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   MaintenanceWindowClientContext,
+  MaintenanceWindowStatus,
 } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 
-export interface ArchiveParams {
+export interface FinishParams {
   id: string;
-  archive: boolean;
 }
 
-const getArchivedExpirationDate = (shouldArchive: boolean) => {
-  if (shouldArchive) {
-    return new Date().toISOString();
-  }
-  return moment.utc().add(1, 'year').toISOString();
-};
-
-export async function archive(
+export async function finish(
   context: MaintenanceWindowClientContext,
-  params: ArchiveParams
+  params: FinishParams
 ): Promise<MaintenanceWindow> {
   return await retryIfConflicts(
     context.logger,
-    `maintenanceWindowClient.archive('${params.id})`,
+    `maintenanceWindowClient.finish('${params.id})`,
     async () => {
-      return await archiveWithOCC(context, params);
+      return await finishWithOCC(context, params);
     }
   );
 }
 
-async function archiveWithOCC(
+async function finishWithOCC(
   context: MaintenanceWindowClientContext,
-  params: ArchiveParams
+  params: FinishParams
 ): Promise<MaintenanceWindow> {
   const { savedObjectsClient, getModificationMetadata, logger } = context;
-  const { id, archive: shouldArchive } = params;
+  const { id } = params;
+
   const modificationMetadata = await getModificationMetadata();
-  const expirationDate = getArchivedExpirationDate(shouldArchive);
+  const now = new Date();
+  const expirationDate = moment.utc(now).add(1, 'year').toDate();
 
   try {
-    const { attributes, version } = await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
+    const {
+      attributes,
+      version,
+      id: fetchedId,
+    } = await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       id
     );
+
+    // Generate new events with new expiration date
     const events = generateMaintenanceWindowEvents({
       rRule: attributes.rRule,
       duration: attributes.duration,
+      expirationDate: expirationDate.toISOString(),
+    });
+
+    // Find the current event and status of the maintenance window
+    const { status, index } = getMaintenanceWindowDateAndStatus({
+      events,
+      dateToCompare: now,
       expirationDate,
     });
+
+    // Throw if the maintenance window is not running, or event doesn't exist
+    if (status !== MaintenanceWindowStatus.Running) {
+      throw Boom.badRequest('Cannot finish maintenance window that is not running');
+    }
+    if (typeof index !== 'number' || !events[index]) {
+      throw Boom.badRequest('Cannot find maintenance window event to finish');
+    }
+
+    // Update the running event to finish now
+    const eventToFinish: DateRange = {
+      gte: events[index].gte,
+      lte: now.toISOString(),
+    };
+
+    // Update the events with the new event
+    const eventsCopy = [...events];
+    eventsCopy[index] = eventToFinish;
+
     const result = await savedObjectsClient.update<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      id,
+      fetchedId,
       {
-        ...attributes,
-        events,
-        expirationDate,
+        events: eventsCopy,
+        expirationDate: expirationDate.toISOString(),
         ...modificationMetadata,
       },
       {
@@ -80,10 +108,10 @@ async function archiveWithOCC(
         ...attributes,
         ...result.attributes,
       },
-      id,
+      id: result.id,
     });
   } catch (e) {
-    const errorMessage = `Failed to archive maintenance window by id: ${id}, Error: ${e}`;
+    const errorMessage = `Failed to finish maintenance window by id: ${id}, Error: ${e}`;
     logger.error(errorMessage);
     throw Boom.boomify(e, { message: errorMessage });
   }

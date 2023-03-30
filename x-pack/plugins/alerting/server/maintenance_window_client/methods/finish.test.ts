@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 import { RRule } from 'rrule';
-import { update } from './update';
+import { finish } from './finish';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import {
@@ -19,19 +19,6 @@ import { getMockMaintenanceWindow } from './test_helpers';
 const savedObjectsClient = savedObjectsClientMock.create();
 
 const firstTimestamp = '2023-02-26T00:00:00.000Z';
-const secondTimestamp = '2023-03-26T00:00:00.000Z';
-
-const updatedAttributes = {
-  title: 'updated-title',
-  enabled: false,
-  duration: 2 * 60 * 60 * 1000,
-  rRule: {
-    tzid: 'CET',
-    dtstart: '2023-03-26T00:00:00.000Z',
-    freq: RRule.WEEKLY,
-    count: 2,
-  },
-};
 
 const updatedMetadata = {
   createdAt: '2023-03-26T00:00:00.000Z',
@@ -46,7 +33,7 @@ const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
   savedObjectsClient,
 };
 
-describe('MaintenanceWindowClient - update', () => {
+describe('MaintenanceWindowClient - finish', () => {
   beforeEach(() => {
     mockContext.getModificationMetadata.mockResolvedValueOnce(updatedMetadata);
   });
@@ -59,11 +46,17 @@ describe('MaintenanceWindowClient - update', () => {
     jest.useRealTimers();
   });
 
-  it('should call update with the correct parameters', async () => {
+  it('should finish the currently running maintenance window event', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
-
     const mockMaintenanceWindow = getMockMaintenanceWindow({
-      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+      duration: 60 * 60 * 1000, //
+      expirationDate: moment.utc().add(1, 'year').toISOString(),
+      rRule: {
+        tzid: 'UTC',
+        dtstart: moment().utc().toISOString(),
+        freq: RRule.WEEKLY,
+        count: 2,
+      },
     });
 
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -75,61 +68,62 @@ describe('MaintenanceWindowClient - update', () => {
     savedObjectsClient.update.mockResolvedValueOnce({
       attributes: {
         ...mockMaintenanceWindow,
-        ...updatedAttributes,
         ...updatedMetadata,
+        events: [
+          {
+            gte: '2023-02-26T00:00:00.000Z',
+            lte: '2023-02-26T00:30:00.000Z',
+          },
+          {
+            gte: '2023-03-05T00:00:00.000Z',
+            lte: '2023-03-05T01:00:00.000Z',
+          },
+        ],
       },
       id: 'test-id',
     } as unknown as SavedObjectsUpdateResponse);
 
-    jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
+    // Move 30 mins into the future
+    jest.useFakeTimers().setSystemTime(moment.utc(firstTimestamp).add(30, 'minute').toDate());
 
-    const result = await update(mockContext, {
-      id: 'test-id',
-      ...updatedAttributes,
-    });
-
-    expect(savedObjectsClient.get).toHaveBeenLastCalledWith(
-      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      'test-id'
-    );
-
+    const result = await finish(mockContext, { id: 'test-id' });
     expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       'test-id',
-      {
-        ...updatedAttributes,
+      expect.objectContaining({
+        expirationDate: moment.utc().add(1, 'year').toISOString(),
         events: [
           {
-            gte: '2023-03-26T00:00:00.000Z',
-            lte: '2023-03-26T02:00:00.000Z',
+            gte: '2023-02-26T00:00:00.000Z',
+            lte: '2023-02-26T00:30:00.000Z', // Second event ends 30 mins earlier, just like expected
           },
           {
-            gte: '2023-04-01T23:00:00.000Z',
-            lte: '2023-04-02T01:00:00.000Z',
+            gte: '2023-03-05T00:00:00.000Z',
+            lte: '2023-03-05T01:00:00.000Z',
           },
         ],
-        expirationDate: moment(new Date(secondTimestamp)).tz('UTC').add(1, 'year').toISOString(),
-        ...updatedMetadata,
-      },
-      { version: '123' }
+      }),
+      {
+        version: '123',
+      }
     );
 
-    // Only these 3 properties are worth asserting since the rest come from mocks
-    expect(result).toEqual(
-      expect.objectContaining({
-        id: 'test-id',
-        status: 'finished',
-        startDate: '2023-03-05T00:00:00.000Z',
-        endDate: '2023-03-05T01:00:00.000Z',
-      })
-    );
+    expect(result.status).toEqual('upcoming');
+    expect(result.startDate).toEqual('2023-03-05T00:00:00.000Z');
+    expect(result.endDate).toEqual('2023-03-05T01:00:00.000Z');
   });
 
-  it('should throw if updating a maintenance window that has expired', async () => {
+  it('should throw if trying to finish a maintenance window that is not running', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
-
     const mockMaintenanceWindow = getMockMaintenanceWindow({
-      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
+      duration: 60 * 60 * 1000, //
+      expirationDate: moment.utc().add(1, 'year').toISOString(),
+      rRule: {
+        tzid: 'UTC',
+        dtstart: moment().utc().toISOString(),
+        freq: RRule.WEEKLY,
+        count: 2,
+      },
     });
 
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -138,15 +132,15 @@ describe('MaintenanceWindowClient - update', () => {
       id: 'test-id',
     } as unknown as SavedObject);
 
+    // Move 2 hours into the future
+    jest.useFakeTimers().setSystemTime(moment.utc(firstTimestamp).add(2, 'hours').toDate());
+
     await expect(async () => {
-      await update(mockContext, {
-        id: 'test-id',
-        ...updatedAttributes,
-      });
+      await finish(mockContext, { id: 'test-id' });
     }).rejects.toThrowError();
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
-      'Failed to update maintenance window by id: test-id, Error: Error: Cannot edit archived maintenance windows'
+      'Failed to finish maintenance window by id: test-id, Error: Error: Cannot finish maintenance window that is not running'
     );
   });
 });

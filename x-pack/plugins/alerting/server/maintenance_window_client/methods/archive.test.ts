@@ -48,7 +48,6 @@ describe('MaintenanceWindowClient - archive', () => {
 
   it('should archive maintenance windows', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
-
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
     });
@@ -66,10 +65,11 @@ describe('MaintenanceWindowClient - archive', () => {
       },
     } as unknown as SavedObjectsUpdateResponse);
 
+    // Move to some time in the future
     jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
-
     await archive(mockContext, {
       id: 'test-id',
+      archive: true,
     });
 
     expect(savedObjectsClient.get).toHaveBeenLastCalledWith(
@@ -93,6 +93,62 @@ describe('MaintenanceWindowClient - archive', () => {
           },
         ],
         expirationDate: new Date().toISOString(),
+        ...updatedMetadata,
+      },
+      { version: '123' }
+    );
+  });
+
+  it('should unarchive maintenance window', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      attributes: {
+        ...mockMaintenanceWindow,
+        expirationDate: new Date().toISOString(),
+      },
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    savedObjectsClient.update.mockResolvedValueOnce({
+      attributes: {
+        ...mockMaintenanceWindow,
+        ...updatedMetadata,
+      },
+    } as unknown as SavedObjectsUpdateResponse);
+
+    // Move to some time in the future
+    jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
+    await archive(mockContext, {
+      id: 'test-id',
+      archive: false,
+    });
+
+    expect(savedObjectsClient.get).toHaveBeenLastCalledWith(
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      'test-id'
+    );
+
+    expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      'test-id',
+      {
+        ...mockMaintenanceWindow,
+        events: [
+          {
+            gte: '2023-02-26T00:00:00.000Z',
+            lte: '2023-02-26T01:00:00.000Z',
+          },
+          {
+            gte: '2023-03-05T00:00:00.000Z',
+            lte: '2023-03-05T01:00:00.000Z',
+          },
+        ],
+        expirationDate: moment.utc().add(1, 'year').toISOString(),
         ...updatedMetadata,
       },
       { version: '123' }

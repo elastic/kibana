@@ -8,11 +8,9 @@
 import { RRule } from 'rrule';
 import { MaintenanceWindowSOAttributes } from '../../../common';
 
-export const getMockMaintenanceWindow = ({
-  expirationDate,
-}: {
-  expirationDate: string;
-}): MaintenanceWindowSOAttributes => {
+export const getMockMaintenanceWindow = (
+  overwrites: Partial<MaintenanceWindowSOAttributes>
+): MaintenanceWindowSOAttributes => {
   return {
     title: 'test-title',
     duration: 60 * 60 * 1000,
@@ -33,10 +31,11 @@ export const getMockMaintenanceWindow = ({
         lte: '2023-03-05T01:00:00.000Z',
       },
     ],
-    expirationDate,
     createdAt: '2023-02-26T00:00:00.000Z',
     updatedAt: '2023-02-26T00:00:00.000Z',
     createdBy: 'test-user',
     updatedBy: 'test-user',
+    expirationDate: new Date().toISOString(),
+    ...overwrites,
   };
 };

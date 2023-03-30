@@ -17,6 +17,7 @@ export interface MaintenanceWindowDateAndStatus {
   startDate: string | null;
   endDate: string | null;
   status: MaintenanceWindowStatus;
+  index?: number;
 }
 
 // Returns the most recent/relevant event and the status for a maintenance window
@@ -38,13 +39,14 @@ export const getMaintenanceWindowDateAndStatus = ({
     };
   }
 
-  const { event, status } = findRecentEventWithStatus(events, dateToCompare);
+  const { event, status, index } = findRecentEventWithStatus(events, dateToCompare);
   // Past expiration, show the last event, but status is now archived
-  if (moment(expirationDate).isBefore(dateToCompare)) {
+  if (moment.utc(expirationDate).isBefore(dateToCompare)) {
     return {
       startDate: event.gte,
       endDate: event.lte,
       status: MaintenanceWindowStatus.Archived,
+      index,
     };
   }
 
@@ -52,6 +54,7 @@ export const getMaintenanceWindowDateAndStatus = ({
     startDate: event.gte,
     endDate: event.lte,
     status,
+    index,
   };
 };
 
@@ -81,10 +84,10 @@ export const findRecentEventWithStatus = (
 
 // Get the maintenance window status of any particular event relative to an arbitrary date
 const getEventStatus = (event: DateRange, dateToCompare: Date): MaintenanceWindowStatus => {
-  if (moment(event.gte).isAfter(dateToCompare)) {
+  if (moment.utc(event.gte).isAfter(dateToCompare)) {
     return MaintenanceWindowStatus.Upcoming;
   }
-  if (moment(event.lte).isBefore(dateToCompare)) {
+  if (moment.utc(event.lte).isSameOrBefore(dateToCompare)) {
     return MaintenanceWindowStatus.Finished;
   }
   return MaintenanceWindowStatus.Running;

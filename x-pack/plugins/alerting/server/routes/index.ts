@@ -50,8 +50,9 @@ import { createMaintenanceWindowRoute } from './create_maintenance_window';
 import { getMaintenanceWindowRoute } from './get_maintenance_window';
 import { updateMaintenanceWindowRoute } from './update_maintenance_window';
 import { deleteMaintenanceWindowRoute } from './delete_maintenance_window';
-import { findMaintenanceWindowRoute } from './find_maintenace_window';
+import { findMaintenanceWindowsRoute } from './find_maintenance_windows';
 import { archiveMaintenanceWindowRoute } from './archive_maintenance_window';
+import { finishMaintenanceWindowRoute } from './finish_maintenance_window';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -104,6 +105,7 @@ export function defineRoutes(opts: RouteOptions) {
   getMaintenanceWindowRoute(router, licenseState);
   updateMaintenanceWindowRoute(router, licenseState);
   deleteMaintenanceWindowRoute(router, licenseState);
-  findMaintenanceWindowRoute(router, licenseState);
+  findMaintenanceWindowsRoute(router, licenseState);
   archiveMaintenanceWindowRoute(router, licenseState);
+  finishMaintenanceWindowRoute(router, licenseState);
 }

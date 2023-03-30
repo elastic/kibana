@@ -20,10 +20,10 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 
 export interface UpdateParams {
   id: string;
-  title: string;
-  enabled: boolean;
-  duration: number;
-  rRule: RRuleParams;
+  title?: string;
+  enabled?: boolean;
+  duration?: number;
+  rRule?: RRuleParams;
 }
 
 export async function update(
@@ -52,25 +52,29 @@ async function updateWithOCC(
     const {
       attributes,
       version,
-      id: updatedId,
+      id: fetchedId,
     } = await savedObjectsClient.get<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       id
     );
 
-    if (moment(attributes.expirationDate).isBefore(new Date())) {
+    if (moment.utc(attributes.expirationDate).isBefore(new Date())) {
       throw Boom.badRequest('Cannot edit archived maintenance windows');
     }
 
-    const events = generateMaintenanceWindowEvents({ rRule, expirationDate, duration });
+    const events = generateMaintenanceWindowEvents({
+      rRule: rRule || attributes.rRule,
+      expirationDate: expirationDate || attributes.expirationDate,
+      duration: duration || attributes.duration,
+    });
 
     const result = await savedObjectsClient.update<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      updatedId,
+      fetchedId,
       {
         ...attributes,
         title,
-        enabled,
+        enabled: typeof enabled === 'boolean' ? enabled : attributes.enabled,
         expirationDate,
         duration,
         rRule,
@@ -87,7 +91,7 @@ async function updateWithOCC(
         ...attributes,
         ...result.attributes,
       },
-      id: updatedId,
+      id: result.id,
     });
   } catch (e) {
     const errorMessage = `Failed to update maintenance window by id: ${id}, Error: ${e}`;

@@ -13,6 +13,7 @@ import { find, FindParams, FindResult } from './methods/find';
 import { deleteMaintenanceWindow, DeleteParams } from './methods/delete';
 import { archive, ArchiveParams } from './methods/archive';
 import { active, ActiveParams } from './methods/active';
+import { finish, FinishParams } from './methods/finish';
 
 import {
   MaintenanceWindow,
@@ -65,5 +66,7 @@ export class MaintenanceWindowClient {
     deleteMaintenanceWindow(this.context, params);
   public archive = (params: ArchiveParams): Promise<MaintenanceWindow> =>
     archive(this.context, params);
+  public finish = (params: FinishParams): Promise<MaintenanceWindow> =>
+    finish(this.context, params);
   public active = (params: ActiveParams): Promise<boolean> => active(this.context, params);
 }

@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import moment from 'moment';
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function updateMaintenanceWindowTests({ getService }: FtrProviderContext) {
+export default function findMaintenanceWindowTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('archiveMaintenanceWindow', () => {
+  describe('finishMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createParams = {
       title: 'test-maintenance-window',
@@ -27,12 +25,13 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
         freq: 2, // weekly
       },
     };
-    after(() => objectRemover.removeAll());
+
+    afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle archive maintenance window request appropriately', async () => {
+        it('should handle finish maintenance window request appropriately', async () => {
           const { body: createdMaintenanceWindow } = await supertest
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
             .set('kbn-xsrf', 'foo')
@@ -46,15 +45,17 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
             true
           );
 
+          expect(createdMaintenanceWindow.status).to.eql('running');
+
           const response = await supertestWithoutAuth
             .post(
               `${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window/${
                 createdMaintenanceWindow.id
-              }/_archive`
+              }/_finish`
             )
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send({ archive: true });
+            .send();
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -71,12 +72,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(response.statusCode).to.eql(200);
-              expect(
-                moment
-                  .utc(createdMaintenanceWindow.expirationDate)
-                  .isAfter(response.body.expirationDate)
-              );
+              expect(response.body.status).to.eql('upcoming');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

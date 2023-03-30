@@ -22,23 +22,25 @@ const paramSchema = schema.object({
 });
 
 const bodySchema = schema.object({
-  title: schema.string(),
-  enabled: schema.boolean(),
-  duration: schema.number(),
-  r_rule: rRuleSchema,
+  title: schema.maybe(schema.string()),
+  enabled: schema.maybe(schema.boolean()),
+  duration: schema.maybe(schema.number()),
+  r_rule: schema.maybe(rRuleSchema),
 });
 
-type MaintenanceWindowUpdateBody = Omit<
-  MaintenanceWindowSOProperties,
-  'events' | 'expirationDate' | 'archived'
->;
+interface MaintenanceWindowUpdateBody {
+  title?: MaintenanceWindowSOProperties['title'];
+  enabled?: MaintenanceWindowSOProperties['enabled'];
+  duration?: MaintenanceWindowSOProperties['duration'];
+  rRule?: MaintenanceWindowSOProperties['rRule'];
+}
 
 const rewriteQueryReq: RewriteRequestCase<MaintenanceWindowUpdateBody> = ({
   r_rule: rRule,
   ...rest
 }) => ({
   ...rest,
-  rRule,
+  ...(rRule ? { rRule } : {}),
 });
 
 export const updateMaintenanceWindowRoute = (

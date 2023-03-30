@@ -60,7 +60,7 @@ describe('MaintenanceWindowClient - active', () => {
     } as unknown as SavedObjectsFindResponse);
 
     const startDate = new Date().toISOString();
-    const endDate = moment(startDate).add(1, 'h').toISOString();
+    const endDate = moment.utc(startDate).add(1, 'h').toISOString();
 
     const result = await active(mockContext, {
       start: startDate,
@@ -166,7 +166,7 @@ describe('MaintenanceWindowClient - active', () => {
     } as unknown as SavedObjectsFindResponse);
 
     const startDate = new Date().toISOString();
-    const endDate = moment(startDate).add(4, 'd').toISOString();
+    const endDate = moment.utc(startDate).add(4, 'd').toISOString();
 
     const result = await active(mockContext, {
       start: startDate,
