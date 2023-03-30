@@ -22,7 +22,7 @@ import type {
   Suggestion,
   DatasourceLayers,
 } from '../../types';
-import type { LayerType } from '../../../common';
+import type { LayerType } from '../../../common/types';
 import { getLayerType } from './config_panel/add_layer';
 import {
   LensDispatch,
