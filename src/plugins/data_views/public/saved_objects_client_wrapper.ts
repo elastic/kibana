@@ -65,7 +65,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
-    return response.savedObject;
+    return response.value.savedObject;
   }
 
   async getSavedSearch(id: string) {

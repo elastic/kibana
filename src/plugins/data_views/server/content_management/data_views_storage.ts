@@ -7,6 +7,8 @@
  */
 
 import type { ContentStorage, StorageContext } from '@kbn/content-management-plugin/server';
+import Boom from '@hapi/boom';
+import { cmServicesDefinition } from '../../common/content_management/cm_services';
 
 import type { DataViewAttributes } from '../../common';
 import type {
@@ -39,18 +41,38 @@ export class DataViewsStorage implements ContentStorage {
     const soClient = await savedObjectClientFromRequest(ctx);
 
     const {
+      utils: { getTransforms },
+      version: { request: requestVersion },
+    } = ctx;
+    const transforms = getTransforms(cmServicesDefinition, requestVersion);
+
+    const {
       saved_object: savedObject,
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
     } = await soClient.resolve<DataViewAttributes>(DataViewContentType, id);
 
-    return { savedObject, aliasPurpose, aliasTargetId, outcome };
+    const response: DataViewGetOut = {
+      savedObject,
+      aliasPurpose,
+      aliasTargetId,
+      outcome,
+    };
+
+    // todo all these transforms need types
+    const { value, error: resultValidationError } = transforms.get.out.result.down(response);
+
+    if (resultValidationError) {
+      throw Boom.badRequest(`Invalid payload. ${resultValidationError.message}`);
+    }
+
+    return { value, aliasPurpose, aliasTargetId, outcome };
   }
 
   async bulkGet(ctx: StorageContext, ids: string[], options: unknown): Promise<any> {
-    // TODO
-    return {};
+    // Not implemented. Data views does not use bulkGet
+    throw new Error(`[bulkGet] has not been implemented. See DataViewStorage class.`);
   }
 
   async create(
@@ -58,18 +80,19 @@ export class DataViewsStorage implements ContentStorage {
     data: DataViewCreateIn['data'],
     options: CreateOptions
   ): Promise<DataViewCreateOut> {
-    const { migrationVersion, coreMigrationVersion, references, overwrite, id } = options!;
+    const {
+      utils: { getTransforms },
+      version: { request: requestVersion },
+    } = ctx;
+    const transforms = getTransforms(cmServicesDefinition, requestVersion);
 
-    const createOptions = {
-      id,
-      overwrite,
-      migrationVersion,
-      coreMigrationVersion,
-      references,
-    };
+    const { value: dataToLatest, error: dataValidationError } = transforms.create.in.data.up(data);
+    if (dataValidationError) {
+      throw Boom.badRequest(`Invalid payload. ${dataValidationError.message}`);
+    }
 
     const soClient = await savedObjectClientFromRequest(ctx);
-    return soClient.create(DataViewContentType, data, createOptions);
+    return soClient.create(DataViewContentType, dataToLatest, options);
   }
 
   async update(

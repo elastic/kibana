@@ -22,8 +22,8 @@ import type {
   DeleteIn,
 } from '@kbn/content-management-plugin/common';
 
-import { DataViewAttributes } from '../types';
-import { DataViewContentType } from './constants';
+import { DataViewAttributes } from '../../types';
+import { DataViewContentType } from '../constants';
 
 interface Reference {
   type: string;
