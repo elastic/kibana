@@ -14,7 +14,7 @@ import type { LensAppServices } from './types';
 import type { Document } from '../persistence/saved_object_store';
 import type { DatasourceMap, VisualizationMap } from '../types';
 import { extractReferencesFromState, getResolvedDateRange } from '../utils';
-import { getEditPath } from '../../common';
+import { getEditPath } from '../../common/constants';
 
 interface ShareableConfiguration
   extends Pick<

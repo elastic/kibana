@@ -6,8 +6,13 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackagePolicyClient,
+  PackageService,
+} from '@kbn/fleet-plugin/server';
 import moment from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { schema } from '@kbn/config-schema';
@@ -40,6 +45,17 @@ import {
 import { checkIndexStatus } from '../../lib/check_index_status';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
+
+interface CspStatusDependencies {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  agentPolicyService: AgentPolicyServiceInterface;
+  agentService: AgentService;
+  packagePolicyService: PackagePolicyClient;
+  packageService: PackageService;
+  isPluginInitialized(): boolean;
+}
 
 const calculateDiffFromNowInMinutes = (date: string | number): number =>
   moment().diff(moment(date), 'minutes');
@@ -116,7 +132,7 @@ const assertResponse = (resp: CspSetupStatus, logger: CspApiRequestHandlerContex
   }
 };
 
-const getCspStatus = async ({
+export const getCspStatus = async ({
   logger,
   esClient,
   soClient,
@@ -125,7 +141,7 @@ const getCspStatus = async ({
   agentPolicyService,
   agentService,
   isPluginInitialized,
-}: CspApiRequestHandlerContext): Promise<CspSetupStatus> => {
+}: CspStatusDependencies): Promise<CspSetupStatus> => {
   const [
     findingsLatestIndexStatus,
     findingsIndexStatus,
@@ -145,30 +161,25 @@ const getCspStatus = async ({
     installedPackagePoliciesVulnMgmt,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
-    checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger),
-    checkIndexStatus(esClient.asCurrentUser, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
 
-    checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'cspm'),
-    checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger, 'cspm'),
-    checkIndexStatus(esClient.asCurrentUser, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'cspm'),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'cspm'),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'cspm'),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'cspm'),
 
-    checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'kspm'),
-    checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger, 'kspm'),
-    checkIndexStatus(esClient.asCurrentUser, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm'),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'kspm'),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'kspm'),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm'),
 
     checkIndexStatus(
-      esClient.asCurrentUser,
+      esClient,
       LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
       logger,
       VULN_MGMT_POLICY_TEMPLATE
     ),
-    checkIndexStatus(
-      esClient.asCurrentUser,
-      VULNERABILITIES_INDEX_PATTERN,
-      logger,
-      VULN_MGMT_POLICY_TEMPLATE
-    ),
+    checkIndexStatus(esClient, VULNERABILITIES_INDEX_PATTERN, logger, VULN_MGMT_POLICY_TEMPLATE),
 
     packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
     packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
@@ -342,7 +353,10 @@ export const defineGetCspStatusRoute = (router: CspRouter): void =>
             },
           });
         }
-        const status = await getCspStatus(cspContext);
+        const status = await getCspStatus({
+          ...cspContext,
+          esClient: cspContext.esClient.asInternalUser,
+        });
         return response.ok({
           body: status,
         });
