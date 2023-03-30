@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import {
   ALERT_RISK_SCORE,
   ALERT_RULE_PARAMETERS,
