@@ -19,11 +19,24 @@ import {
 import { uniqBy } from 'lodash/fp';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import type { BrowserFieldItem, FieldTableColumns, GetFieldTableColumns } from '../../types';
 import { FieldName } from '../field_name';
 import * as i18n from '../../translations';
 import { styles } from './field_items.style';
 import { getEmptyValue, getExampleText, getIconFromType } from '../../helpers';
+
+/**
+ * For the Cases field we want to change the
+ * name of the field from kibana.alert.case_ids to Cases.
+ */
+const getFieldItemName = (name: string): string => {
+  if (name === ALERT_CASE_IDS) {
+    return i18n.CASES;
+  }
+
+  return name;
+};
 
 /**
  * Returns the field items of all categories selected
@@ -52,6 +65,7 @@ export const getFieldItemsData = ({
             if (!showDescriptionColumn && !!field.description) {
               showDescriptionColumn = true;
             }
+
             return {
               name,
               type: field.type,
@@ -67,6 +81,7 @@ export const getFieldItemsData = ({
       return fieldItemsAcc;
     }, [])
   );
+
   return { fieldItems, showDescriptionColumn };
 };
 
@@ -94,7 +109,7 @@ const getDefaultFieldTableColumns = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <FieldName fieldId={name} highlight={highlight} />
+            <FieldName fieldId={getFieldItemName(name)} highlight={highlight} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
