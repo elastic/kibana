@@ -60,9 +60,13 @@ export function getSavedSearchObjectType(
         kibanaSavedObjectMeta: schema.object({
           searchSourceJSON: schema.string(),
         }),
-        sort: schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 }), {
-          defaultValue: [],
-        }),
+        sort: schema.oneOf(
+          [
+            schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 })),
+            schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 }),
+          ],
+          { defaultValue: [] }
+        ),
         title: schema.string({ defaultValue: '' }),
         grid: schema.object(
           {
