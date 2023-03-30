@@ -15,15 +15,17 @@ export interface TimeRange {
 
 export const getAlertTimeRange = (alertStart: string, alertEnd?: string): TimeRange => {
   const alertDuration = moment.duration(moment(alertEnd).diff(moment(alertStart)));
+  const now = moment().toISOString();
   const durationMs =
-    alertDuration.asMinutes() < 20
+    alertDuration.asMinutes() < 160
       ? moment.duration(20, 'minutes').asMilliseconds()
       : alertDuration.asMilliseconds() / 8;
 
   const from = moment(alertStart).subtract(durationMs, 'millisecond').toISOString();
-  const to = alertEnd
-    ? moment(alertEnd).add(durationMs, 'millisecond').toISOString()
-    : moment().toISOString();
+  const to =
+    alertEnd && moment(alertEnd).add(durationMs, 'millisecond').isBefore(now)
+      ? moment(alertEnd).add(durationMs, 'millisecond').toISOString()
+      : now;
 
   return {
     from,
