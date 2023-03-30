@@ -20,7 +20,7 @@ import {
 import { TransformSavedObjectDocumentError } from '../core';
 import { type Transform, type TransformFn, TransformType } from './types';
 
-export const noopTransform: TransformFn = (doc) => ({ transformedDoc: doc, additionalDocs: [] });
+const noopTransform: TransformFn = (doc) => ({ transformedDoc: doc, additionalDocs: [] });
 
 export const getModelVersionTransforms = ({
   typeDefinition,
