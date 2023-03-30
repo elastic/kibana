@@ -30,10 +30,9 @@ const loadFieldRegistryFromDataView = async (
   const controlFactories = getControlTypes().map(
     (controlType) => getControlFactory(controlType) as IEditableControlFactory
   );
-  const fields = dataView?.fields.getAll();
   const fieldRegistry: DataControlFieldRegistry = {};
   await Promise.all(
-    fields.map(async (field): Promise<void> => {
+    dataView.fields.getAll().map(async (field): Promise<void> => {
       const test = await getDataControlField(controlFactories, field);
       if (test.compatibleControlTypes.length > 0) {
         fieldRegistry[field.name] = test;
