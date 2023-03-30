@@ -22,7 +22,6 @@ import {
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_BUTTON,
-  ACTIONS_THROTTLE_INPUT,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   DEFINE_EDIT_BUTTON,
@@ -400,10 +399,6 @@ describe('Custom query rules', () => {
         }
 
         goToActionsStepTab();
-
-        cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
-
-        cy.get(ACTIONS_THROTTLE_INPUT).select('Weekly');
 
         addEmailConnectorAndRuleAction('test@example.com', 'Subject');
 

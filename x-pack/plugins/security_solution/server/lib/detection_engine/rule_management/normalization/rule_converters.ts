@@ -700,8 +700,8 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    actions,
     throttle,
+    actions,
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };
