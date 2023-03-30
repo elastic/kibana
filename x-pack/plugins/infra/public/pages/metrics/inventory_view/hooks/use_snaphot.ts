@@ -68,7 +68,7 @@ export function useSnapshot(
     dropPartialBuckets,
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest(
+  const { error, loading, response, makeRequest, resetRequestState } = useHTTPRequest(
     '/api/metrics/snapshot',
     'POST',
     JSON.stringify(payload),
@@ -79,12 +79,13 @@ export function useSnapshot(
   );
 
   useEffect(() => {
-    (async () => {
-      if (sendRequestImmediately) {
-        await makeRequest();
-      }
-    })();
-  }, [makeRequest, sendRequestImmediately, requestTs]);
+    if (sendRequestImmediately) {
+      makeRequest();
+    }
+    return () => {
+      resetRequestState();
+    };
+  }, [makeRequest, sendRequestImmediately, resetRequestState, requestTs]);
 
   return {
     error: (error && error.message) || null,

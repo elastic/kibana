@@ -34,7 +34,7 @@ interface Opts<H> {
  * @param opts
  * @prop {number} pollInterval - How often, in milliseconds, we will an event be emnitted, assuming there's capacity to do so
  * @prop {() => number} getCapacity - A function specifying whether there is capacity to emit new events
- * @prop {() => Promise<H>} work - The work we wish to execute in order to `poll`, this is the operation we're actually executing on request
+ * @prop {() => Promise<H>} work - The worker we wish to execute in order to `poll`
  *
  * @returns {Observable<Set<T>>} - An observable which emits an event whenever a polling event is due to take place, providing access to a singleton Set representing a queue
  *  of unique request argumets of type T.
