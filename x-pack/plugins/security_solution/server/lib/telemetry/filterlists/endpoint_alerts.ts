@@ -151,7 +151,6 @@ export const endpointAllowlistFields: AllowlistFields = {
   host: {
     architecture: true,
     id: true,
-    name: true,
     os: true,
   },
   package_version: true,
