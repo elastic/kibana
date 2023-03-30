@@ -120,13 +120,16 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
           })}
           value={fieldSearchText}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setFieldSearchText(e.currentTarget.value)}
-          data-test-subj="dataGridColumnSelectorSearch"
+          data-test-subj="aiopsFieldSelectorSearch"
         />
       </EuiPopoverTitle>
-      <div css={fieldSelectPopover}>
+      <div css={fieldSelectPopover} data-test-subj="aiopsFieldSelectorFieldNameList">
         {filteredUniqueFieldNames.map((fieldName) => (
           <div key={fieldName} css={{ padding: '4px' }}>
             <EuiSwitch
+              data-test-subj={`aiopsFieldSelectorFieldNameListItem${
+                !skippedFields.includes(fieldName) ? ' checked' : ''
+              }`}
               className="euiSwitch--mini"
               compressed
               label={fieldName}
@@ -145,7 +148,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
                   size="xs"
                   flush="left"
                   onClick={() => setFieldsFilter(filteredUniqueFieldNames, true)}
-                  data-test-subj="dataGridColumnSelectorShowAllButton"
+                  data-test-subj="aiopsFieldSelectorEnableAllSelectedButton"
                 >
                   <FormattedMessage
                     id="xpack.aiops.explainLogRateSpikesPage.enableAllSelected"
@@ -158,7 +161,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
                   size="xs"
                   flush="right"
                   onClick={() => setFieldsFilter(filteredUniqueFieldNames, false)}
-                  data-test-subj="dataGridColumnSelectorHideAllButton"
+                  data-test-subj="aiopsFieldSelectorDisableAllSelectedButton"
                 >
                   <FormattedMessage
                     id="xpack.aiops.explainLogRateSpikesPage.disableAllSelected"

@@ -162,6 +162,32 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(orderBy(analysisTable, ['fieldName', 'fieldValue'])).to.be.eql(
         orderBy(testData.expected.analysisTable, ['fieldName', 'fieldValue'])
       );
+
+      // Assert the field selector that allows to costumize grouping
+      await aiops.explainLogRateSpikesPage.assertFieldFilterPopoverButtonExists(false);
+      await aiops.explainLogRateSpikesPage.clickFieldFilterPopoverButton(true);
+      await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList(
+        testData.expected.fieldSelectorPopover
+      );
+
+      // Filter fields
+      await aiops.explainLogRateSpikesPage.setFieldSelectorSearch(testData.fieldSelectorSearch);
+      await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList([
+        testData.fieldSelectorSearch,
+      ]);
+      await aiops.explainLogRateSpikesPage.clickFieldSelectorDisableAllSelectedButton();
+      await aiops.explainLogRateSpikesPage.assertFieldFilterApplyButtonExists(
+        !testData.fieldSelectorApplyAvailable
+      );
+
+      if (testData.fieldSelectorApplyAvailable) {
+        await aiops.explainLogRateSpikesPage.clickFieldFilterApplyButton();
+        const filteredAnalysisGroupsTable =
+          await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
+        expect(orderBy(filteredAnalysisGroupsTable, 'group')).to.be.eql(
+          orderBy(testData.expected.filteredAnalysisGroupsTable, 'group')
+        );
+      }
     });
   }
 

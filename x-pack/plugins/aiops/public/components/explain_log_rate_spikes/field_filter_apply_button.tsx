@@ -23,7 +23,12 @@ export const FieldFilterApplyButton: FC<FieldFilterApplyButtonProps> = ({
   tooltipContent,
 }) => {
   const button = (
-    <EuiButton size="s" onClick={onClick} disabled={disabled}>
+    <EuiButton
+      data-test-subj={`aiopsFieldFilterApplyButton${disabled ? ' disabled' : ''}`}
+      size="s"
+      onClick={onClick}
+      disabled={disabled}
+    >
       <FormattedMessage
         id="xpack.aiops.explainLogRateSpikesPage.fieldFilterApplyButtonLabel"
         defaultMessage="Apply"
