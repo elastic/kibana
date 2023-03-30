@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.setQuery('bytes > 5000');
       await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('2,572 documents');
+      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('2572 documents');
       await queryBar.setQuery('this < is not : a valid > query');
       await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       await testSubjects.missingOrFail('embeddableError');
-      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('4633 documents');
     });
   });
 }
