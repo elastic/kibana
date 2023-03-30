@@ -86,7 +86,7 @@ export const getContent = (
       weight: 2,
     },
     {
-      id: 'synthetics',
+      id: 'uptime',
       title: i18n.translate('xpack.observability.statusVisualization.uptime.title', {
         defaultMessage: 'Uptime',
       }),

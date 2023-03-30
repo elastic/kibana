@@ -11,6 +11,7 @@ import {
   checkVersionCompatibilityMock,
   buildIndexMappingsMock,
   generateAdditiveMappingDiffMock,
+  getAliasActionsMock,
 } from './init.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { FetchIndexResponse } from '../../../actions';
@@ -49,6 +50,7 @@ describe('Stage: init', () => {
       status: 'equal',
     });
     generateAdditiveMappingDiffMock.mockReset().mockReturnValue({});
+    getAliasActionsMock.mockReset().mockReturnValue([]);
 
     context = createContextMock({ indexPrefix: '.kibana', types: ['foo', 'bar'] });
     context.typeRegistry.registerType({
@@ -65,7 +67,7 @@ describe('Stage: init', () => {
     });
   });
 
-  it('loops to INIT when cluster routing allocation is incompatible', () => {
+  it('INIT -> INIT when cluster routing allocation is incompatible', () => {
     const state = createState();
     const res: StateActionResponse<'INIT'> = Either.left({
       type: 'incompatible_cluster_routing_allocation',
@@ -124,7 +126,7 @@ describe('Stage: init', () => {
       });
     });
 
-    it('forwards to CREATE_TARGET_INDEX', () => {
+    it('INIT -> CREATE_TARGET_INDEX', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -164,7 +166,7 @@ describe('Stage: init', () => {
       });
     });
 
-    it('forwards to UPDATE_INDEX_MAPPINGS', () => {
+    it('INIT -> UPDATE_INDEX_MAPPINGS', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -182,6 +184,7 @@ describe('Stage: init', () => {
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
           additiveMappingChanges: { someToken: {} },
+          newIndexCreation: false,
         })
       );
     });
@@ -203,7 +206,7 @@ describe('Stage: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `equal`', () => {
-    it('forwards to UPDATE_ALIASES', () => {
+    it('INIT -> UPDATE_ALIASES if alias actions are not empty', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -211,6 +214,7 @@ describe('Stage: init', () => {
       checkVersionCompatibilityMock.mockReturnValue({
         status: 'equal',
       });
+      getAliasActionsMock.mockReturnValue([{ add: { index: '.kibana_1', alias: '.kibana' } }]);
 
       const newState = init(state, res, context);
 
@@ -219,6 +223,29 @@ describe('Stage: init', () => {
           controlState: 'UPDATE_ALIASES',
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
+          newIndexCreation: false,
+        })
+      );
+    });
+
+    it('INIT -> INDEX_STATE_UPDATE_DONE if alias actions are empty', () => {
+      const state = createState();
+      const fetchIndexResponse = createResponse();
+      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+
+      checkVersionCompatibilityMock.mockReturnValue({
+        status: 'equal',
+      });
+      getAliasActionsMock.mockReturnValue([]);
+
+      const newState = init(state, res, context);
+
+      expect(newState).toEqual(
+        expect.objectContaining({
+          controlState: 'INDEX_STATE_UPDATE_DONE',
+          currentIndex,
+          previousMappings: fetchIndexResponse[currentIndex].mappings,
+          newIndexCreation: false,
         })
       );
     });
@@ -240,7 +267,7 @@ describe('Stage: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `lesser`', () => {
-    it('forwards to FATAL', () => {
+    it('INIT -> FATAL', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -276,7 +303,7 @@ describe('Stage: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `conflict`', () => {
-    it('forwards to FATAL', () => {
+    it('INIT -> FATAL', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);

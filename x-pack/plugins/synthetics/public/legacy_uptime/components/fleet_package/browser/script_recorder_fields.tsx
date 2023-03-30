@@ -50,7 +50,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
         target="_blank"
       >
         <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.recorderLink"
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.recorderLink"
           defaultMessage="Download the Elastic Synthetics Recorder"
         />
       </EuiLink>
@@ -76,7 +76,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
                 iconSide="right"
               >
                 <FormattedMessage
-                  id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.showScriptLabel"
+                  id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.showScriptLabel"
                   defaultMessage="Show script"
                 />
               </EuiButton>
@@ -91,7 +91,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
                   color="danger"
                 >
                   <FormattedMessage
-                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.removeScriptLabel"
+                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.removeScriptLabel"
                     defaultMessage="Remove script"
                   />
                 </EuiButton>
