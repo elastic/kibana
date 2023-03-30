@@ -90,18 +90,7 @@ export class EsEventStreamClient implements EventStreamClient {
   }
 
   public async tail(limit: number = 100): Promise<EventStreamEvent[]> {
-    const esClient = await this.deps.esClient;
-    const res = await esClient.search<EsEventStreamEventDto>({
-      index: this.#names.dataStream,
-      query: {
-        match_all: {},
-      },
-      sort,
-      size: limit,
-    });
-    const events = res.hits.hits.map((hit) => dtoToEvent(hit._source!));
-
-    return events;
+    return (await this.filter({ limit })).events;
   }
 
   public async filter(
