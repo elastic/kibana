@@ -12,7 +12,7 @@ We currently support the following SLI:
 
 For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, a list of good status codes needs to be provided to discriminate the good and bad responses (events). The API supports an optional kql filter to further filter the apm data.
 
-The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query.
+The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom 'timestampField' can be provided to override the default @timestamp field.
 
 ## SLO configuration
 
@@ -43,7 +43,6 @@ If a **timeslices** budgeting method is used, we also need to define the **times
 
 The default settings should be sufficient for most users, but if needed, the following properties can be overwritten:
 
-- **timestampField**: The date time field to use from the source index
 - **syncDelay**: The ingest delay in the source data
 - **frequency**: How often do we query the source data
 
@@ -70,7 +69,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"]
+			"goodStatusCodes": ["2xx", "3xx", "4xx"],
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -105,7 +105,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"]
+			"goodStatusCodes": ["2xx", "3xx", "4xx"],
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -142,7 +143,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"]
+			"goodStatusCodes": ["2xx", "3xx", "4xx"],
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -181,7 +183,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold": 500000
+			"threshold": 500,
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -216,7 +219,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold": 500000
+			"threshold": 500,
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -253,7 +257,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold": 500000
+			"threshold": 500,
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -293,7 +298,8 @@ curl --request POST \
 			"index": "high-cardinality-data-fake_logs*",
 			"good": "latency < 300",
 			"total": "",
-			"filter": "labels.groupId: group-0"
+			"filter": "labels.groupId: group-0",
+			"timestampField": "custom_timestamp"
 		}
 	},
 	"timeWindow": {

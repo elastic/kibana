@@ -20,7 +20,8 @@
     "@kbn/i18n",
     "@kbn/core-http-browser",
     "@kbn/shared-ux-file-image",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/screenshot-mode-plugin"
   ],
   "exclude": [
     "target/**/*",

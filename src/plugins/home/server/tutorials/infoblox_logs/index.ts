@@ -56,6 +56,6 @@ export function infobloxLogsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['network'],
+    integrationBrowserCategories: ['network', 'security', 'dns_security'],
   };
 }

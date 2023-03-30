@@ -18,7 +18,9 @@ import {
   ScopedHistory,
   IUiSettingsClient,
 } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
@@ -36,7 +38,9 @@ interface KibanaLogicProps {
   productFeatures: ProductFeatures;
   // Kibana core
   capabilities: Capabilities;
+  data: DataPublicPluginStart;
   history: ScopedHistory;
+  lens: LensPublicStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -52,7 +56,9 @@ interface KibanaLogicProps {
 }
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
+  data: DataPublicPluginStart;
   isCloud: boolean;
+  lens: LensPublicStart;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
 }
 
@@ -64,8 +70,10 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
+    data: [props.data, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
+    lens: [props.lens, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };

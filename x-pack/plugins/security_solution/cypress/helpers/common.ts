@@ -16,4 +16,4 @@ export const getDataTestSubjectSelector = (dataTestSubjectValue: string) =>
  * Helper function to generate selector by class
  * @param className the value passed to class property of the DOM element
  */
-export const getClassSelector = (className: string) => `[.${className}]`;
+export const getClassSelector = (className: string) => `.${className}`;
