@@ -23,7 +23,7 @@ const DEFAULT_TIME_RANGE = {};
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
   derivedIndexPattern: DataViewBase,
-  source: MetricsSourceConfiguration | null,
+  source?: MetricsSourceConfiguration,
   filterQuery?: string,
   groupBy?: string | string[],
   timeRange: TimeRange = DEFAULT_TIME_RANGE

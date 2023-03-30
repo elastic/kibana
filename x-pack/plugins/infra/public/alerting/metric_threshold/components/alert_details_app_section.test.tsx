@@ -14,7 +14,7 @@ import {
   buildMetricThresholdAlert,
   buildMetricThresholdRule,
 } from '../mocks/metric_threshold_rule';
-import AlertDetailsAppSection from './alert_details_app_section';
+import { AlertDetailsAppSection } from './alert_details_app_section';
 import { ExpressionChart } from './expression_chart';
 
 jest.mock('@kbn/observability-alert-details', () => ({
@@ -32,8 +32,9 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
-jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
-  useSourceViaHttp: () => ({
+jest.mock('../../../containers/metrics_source/source', () => ({
+  withSourceProvider: () => jest.fn,
+  useSourceContext: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),

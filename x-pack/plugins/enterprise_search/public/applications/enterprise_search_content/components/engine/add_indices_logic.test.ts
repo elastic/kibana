@@ -82,10 +82,9 @@ describe('AddIndicesLogic', () => {
         jest.spyOn(AddIndicesLogic.actions, 'closeAddIndicesFlyout');
 
         AddIndicesLogic.actions.engineUpdated({
-          created: '1999-12-31T23:59:59Z',
           indices: [],
           name: 'engine-name',
-          updated: '1999-12-31T23:59:59Z',
+          updated_at_millis: 2202018295,
         });
 
         expect(AddIndicesLogic.actions.closeAddIndicesFlyout).toHaveBeenCalledTimes(1);

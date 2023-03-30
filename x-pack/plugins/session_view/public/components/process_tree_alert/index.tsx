@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -47,7 +46,6 @@ export const ProcessTreeAlert = ({
   const styles = useStyles({ isInvestigated, isSelected });
 
   const { event } = alert;
-
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
   const category = event?.category?.[0];
   const alertIconType = useMemo(() => {

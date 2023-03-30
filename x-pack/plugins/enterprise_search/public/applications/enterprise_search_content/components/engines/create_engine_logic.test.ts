@@ -64,10 +64,7 @@ describe('CreateEngineLogic', () => {
       jest.spyOn(CreateEngineLogic.actions, 'closeEngineCreate');
 
       CreateEngineApiLogic.actions.apiSuccess({
-        created: '',
-        indices: ['search-index-001'],
-        name: 'unit-test',
-        updated: '',
+        result: 'created',
       });
 
       expect(CreateEngineLogic.actions.fetchEngines).toHaveBeenCalledTimes(1);

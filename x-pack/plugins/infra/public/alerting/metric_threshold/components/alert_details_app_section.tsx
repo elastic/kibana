@@ -11,11 +11,11 @@ import { TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { AlertAnnotation, getAlertTimeRange } from '@kbn/observability-alert-details';
-import { MetricThresholdRuleTypeParams } from '..';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { ExpressionChart } from './expression_chart';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { MetricThresholdRuleTypeParams } from '..';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
@@ -36,14 +36,10 @@ interface AppSectionProps {
 }
 
 export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
-  const { http, notifications, uiSettings } = useKibanaContextForPlugin().services;
+  const { uiSettings } = useKibanaContextForPlugin().services;
+  const { source, createDerivedIndexPattern } = useSourceContext();
   const { euiTheme } = useEuiTheme();
 
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
-    sourceId: 'default',
-    fetch: http.fetch,
-    toastWarning: notifications.toasts.addWarning,
-  });
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
@@ -61,7 +57,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
-      {rule.params.criteria.map((criterion, i) => (
+      {rule.params.criteria.map((criterion) => (
         <EuiFlexItem key={generateUniqueKey(criterion)}>
           <EuiPanel hasBorder hasShadow={false}>
             <ExpressionChart
@@ -82,4 +78,4 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default AlertDetailsAppSection;
+export default withSourceProvider<AppSectionProps>(AlertDetailsAppSection)('default');
