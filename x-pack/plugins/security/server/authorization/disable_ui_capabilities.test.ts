@@ -64,7 +64,7 @@ const createMockUser = (user: Partial<AuthenticatedUser> = {}) =>
     username: 'mock_user',
     roles: [],
     ...user,
-} as AuthenticatedUser);
+  } as AuthenticatedUser);
 
 const kibanaFeature1 = new KibanaFeature({
   id: 'kibanaFeature1',
@@ -77,18 +77,18 @@ const kibanaFeature1 = new KibanaFeature({
       catalogue: ['foo'],
       savedObject: {
         all: ['foo'],
-        read: []
+        read: [],
       },
-      ui: ['save', 'show']
+      ui: ['save', 'show'],
     },
     read: {
       app: ['foo'],
       catalogue: ['foo'],
       savedObject: {
         all: [],
-        read: ['foo']
+        read: ['foo'],
       },
-      ui: ['show']
+      ui: ['show'],
     },
   },
 });
@@ -104,18 +104,18 @@ const kibanaFeature2 = new KibanaFeature({
       catalogue: ['foo'],
       savedObject: {
         all: ['foo'],
-        read: []
+        read: [],
       },
-      ui: ['save', 'show']
+      ui: ['save', 'show'],
     },
     read: {
       app: ['foo'],
       catalogue: ['foo'],
       savedObject: {
         all: [],
-        read: ['foo']
+        read: ['foo'],
       },
-      ui: ['show']
+      ui: ['show'],
     },
   },
 });
@@ -161,7 +161,7 @@ describe('usingPrivileges', () => {
       },
       optOutFeature: {
         foo: true,
-        bar: true
+        bar: true,
       },
       esManagementFeature: {
         foo: true,
@@ -189,15 +189,17 @@ describe('usingPrivileges', () => {
         foo: false,
         bar: false,
       },
-      optOutFeature: { // will not disbale features that opt out of Kibana security
+      optOutFeature: {
+        // will not disbale features that opt out of Kibana security
         foo: true,
-        bar: true
+        bar: true,
       },
       esManagementFeature: {
         foo: false,
         bar: false,
       },
-      unregisteredFeature: { // will not disble unregistered features
+      unregisteredFeature: {
+        // will not disble unregistered features
         foo: true,
         bar: true,
       },
@@ -211,13 +213,8 @@ describe('usingPrivileges', () => {
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
-        [
-          kibanaFeature2,
-          optOutKibanaFeature
-        ],
-        [
-          esManagementFeature
-        ],
+        [kibanaFeature2, optOutKibanaFeature],
+        [esManagementFeature],
         mockLoggers.get(),
         mockAuthz,
         createMockUser()
@@ -244,13 +241,8 @@ describe('usingPrivileges', () => {
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
-        [
-          kibanaFeature2,
-          optOutKibanaFeature
-        ],
-        [
-          esManagementFeature
-        ],
+        [kibanaFeature2, optOutKibanaFeature],
+        [esManagementFeature],
         mockLoggers.get(),
         mockAuthz,
         createMockUser()
@@ -385,11 +377,7 @@ describe('usingPrivileges', () => {
 
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
-      [
-        kibanaFeature1,
-        kibanaFeature2,
-        optOutKibanaFeature
-      ],
+      [kibanaFeature1, kibanaFeature2, optOutKibanaFeature],
       esFeatures,
       loggingSystemMock.create().get(),
       mockAuthz,
@@ -421,7 +409,7 @@ describe('usingPrivileges', () => {
         },
         optOutFeature: {
           foo: true,
-          bar: true
+          bar: true,
         },
         esFeature: {
           es_manage: true,
@@ -456,9 +444,10 @@ describe('usingPrivileges', () => {
         foo: true,
         bar: false,
       },
-      optOutFeature: { // these stay enabled because they opt out of Kibana security
+      optOutFeature: {
+        // these stay enabled because they opt out of Kibana security
         foo: true,
-        bar: true
+        bar: true,
       },
       esFeature: {
         es_manage: false,
@@ -501,11 +490,7 @@ describe('usingPrivileges', () => {
 
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
-      [
-        kibanaFeature1,
-        kibanaFeature2,
-        optOutKibanaFeature
-      ],
+      [kibanaFeature1, kibanaFeature2, optOutKibanaFeature],
       esFeatures,
       loggingSystemMock.create().get(),
       mockAuthz,
@@ -556,10 +541,7 @@ describe('all', () => {
 
     const { all } = disableUICapabilitiesFactory(
       mockRequest,
-      [
-        kibanaFeature1,
-        optOutKibanaFeature,
-      ],
+      [kibanaFeature1, optOutKibanaFeature],
       [
         new ElasticsearchFeature({
           id: 'esFeature1',
@@ -592,7 +574,8 @@ describe('all', () => {
           foo: true,
           bar: true,
         },
-        kibanaFeature2: { // there is no kibanaFeature2 registered
+        kibanaFeature2: {
+          // there is no kibanaFeature2 registered
           foo: true,
           bar: true,
         },
@@ -611,7 +594,7 @@ describe('all', () => {
     expect(result).toEqual({
       navLinks: {
         app1: false,
-        app2: true,  // does NOT disable because it is not a registered navlink
+        app2: true, // does NOT disable because it is not a registered navlink
       },
       management: {
         kibana: {
@@ -619,22 +602,27 @@ describe('all', () => {
         },
       },
       catalogue: {},
-      kibanaFeature1: { // registered kibana features with privileges get diabled
+      kibanaFeature1: {
+        // registered kibana features with privileges get diabled
         foo: false,
         bar: false,
       },
-      kibanaFeature2: { // does NOT disable because it is not a registered Kibana feature
+      kibanaFeature2: {
+        // does NOT disable because it is not a registered Kibana feature
         foo: true,
         bar: true,
       },
-      optOutFeature: { // does NOT disable because it opts out (does not define privileges)
+      optOutFeature: {
+        // does NOT disable because it opts out (does not define privileges)
         foo: true,
         bar: true,
       },
-      esFeature1: { // registered es features get diabled
+      esFeature1: {
+        // registered es features get diabled
         bar: false,
       },
-      esFeature2: { // does NOT disable because it is not a registered ES feature
+      esFeature2: {
+        // does NOT disable because it is not a registered ES feature
         bar: true,
       },
     });
