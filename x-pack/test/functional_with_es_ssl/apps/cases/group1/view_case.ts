@@ -421,28 +421,63 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(await actionList[0].getAttribute('data-test-subj')).contain('status-update-action');
       });
+    });
+
+    describe('pagination', async () => {
+      let createdCase: any;
+
+      before(async () => {
+        await cases.navigation.navigateToApp();
+        createdCase = await cases.api.createCase({ title: 'Pagination feature' });
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
 
       it('shows more actions on button click', async () => {
-        await cases.common.generateUserActions();
+        await cases.api.generateUserActions({
+          caseId: createdCase.id,
+          caseVersion: createdCase.version,
+          params: {
+            severity: CaseSeverity.MEDIUM,
+            status: CaseStatuses['in-progress'],
+            tags: ['one'],
+          },
+        });
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.click('case-refresh');
+
+        await cases.common.generateSeverityUserActions();
+
+        await cases.common.generateSeverityUserActions();
+
+        await cases.common.generateSeverityUserActions();
+
+        await cases.common.generateSeverityUserActions();
 
         expect(testSubjects.existOrFail('cases-show-more-user-actions'));
 
         const userActionsLists = await find.allByCssSelector(
           '[data-test-subj="user-actions-list"]'
         );
-        const firstActionList = await userActionsLists[0].findAllByClassName('euiComment');
 
-        expect(await firstActionList[0].getAttribute('data-test-subj')).contain(
-          'severity-update-action'
-        );
+        expect(userActionsLists).length(2);
+
+        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(10);
+
+        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
 
         testSubjects.click('cases-show-more-user-actions');
 
-        const lastActionList = await userActionsLists[1].findAllByClassName('euiComment');
+        await header.waitUntilLoadingHasFinished();
 
-        expect(await lastActionList[0].getAttribute('data-test-subj')).contain(
-          'create_case-create-action'
-        );
+        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(20);
       });
     });
 

@@ -6,7 +6,12 @@
  */
 
 import pMap from 'p-map';
-import { CasePostRequest, CaseResponse, CaseStatuses } from '@kbn/cases-plugin/common/api';
+import {
+  CasePostRequest,
+  CaseResponse,
+  CaseSeverity,
+  CaseStatuses,
+} from '@kbn/cases-plugin/common/api';
 import {
   createCase as createCaseAPI,
   deleteAllCaseItems,
@@ -97,6 +102,37 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
 
     async getCase({ caseId }: OmitSupertest<Parameters<typeof getCase>[0]>): Promise<CaseResponse> {
       return getCase({ supertest: kbnSupertest, caseId });
+    },
+
+    async generateUserActions({
+      caseId,
+      caseVersion,
+      params,
+    }: {
+      caseId: string;
+      caseVersion: string;
+      params: {
+        severity: CaseSeverity;
+        status: 'open' | 'in-progress' | 'closed';
+        tags: string[];
+      };
+    }) {
+      await updateCase({
+        supertest: kbnSupertest,
+        params: {
+          cases: [
+            {
+              id: caseId,
+              version: caseVersion,
+              title: 'title updated',
+              description: 'description updated',
+              severity: params.severity,
+              status: CaseStatuses[params.status],
+              tags: params.tags,
+            },
+          ],
+        },
+      });
     },
   };
 }

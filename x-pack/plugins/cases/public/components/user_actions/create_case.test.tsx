@@ -40,6 +40,6 @@ describe('createCaseUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText(`created case "a title"`)).toBeInTheDocument();
+    expect(screen.getByText('created case "a title"')).toBeInTheDocument();
   });
 });
