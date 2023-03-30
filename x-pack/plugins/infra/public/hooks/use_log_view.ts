@@ -7,62 +7,90 @@
 
 import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
-import { LogViewAttributes } from '../../common/log_views';
+import { LogViewAttributes, LogViewReference } from '../../common/log_views';
 import {
   createLogViewNotificationChannel,
   createLogViewStateMachine,
+  DEFAULT_LOG_VIEW,
 } from '../observability_logs/log_view_state';
 import type { ILogViewsClient } from '../services/log_views';
 import { isDevMode } from '../utils/dev_mode';
+import { useKbnUrlStateStorageFromRouterContext } from '../utils/kbn_url_state_context';
+import { useKibanaContextForPlugin } from './use_kibana';
 
 export const useLogView = ({
-  logViewId,
+  initialLogViewReference,
   logViews,
   useDevTools = isDevMode(),
 }: {
-  logViewId: string;
+  initialLogViewReference?: LogViewReference;
   logViews: ILogViewsClient;
   useDevTools?: boolean;
 }) => {
+  const {
+    services: {
+      notifications: { toasts: toastsService },
+    },
+  } = useKibanaContextForPlugin();
+
+  const urlStateStorage = useKbnUrlStateStorageFromRouterContext();
+
   const [logViewStateNotifications] = useState(() => createLogViewNotificationChannel());
 
   const logViewStateService = useInterpret(
     () =>
       createLogViewStateMachine({
         initialContext: {
-          logViewId,
+          logViewReference: initialLogViewReference ?? DEFAULT_LOG_VIEW,
         },
         logViews,
         notificationChannel: logViewStateNotifications,
+        toastsService,
+        urlStateStorage,
       }),
     {
       devTools: useDevTools,
     }
   );
 
-  useEffect(() => {
-    logViewStateService.send({
-      type: 'LOG_VIEW_ID_CHANGED',
-      logViewId,
-    });
-  }, [logViewId, logViewStateService]);
+  const changeLogViewReference = useCallback(
+    (logViewReference: LogViewReference) => {
+      logViewStateService.send({
+        type: 'LOG_VIEW_REFERENCE_CHANGED',
+        logViewReference,
+      });
+    },
+    [logViewStateService]
+  );
+
+  const logViewReference = useSelector(
+    logViewStateService,
+    (state) => state.context.logViewReference
+  );
 
   const logView = useSelector(logViewStateService, (state) =>
-    state.matches('resolving') || state.matches('checkingStatus') || state.matches('resolved')
+    state.matches('resolving') ||
+    state.matches('checkingStatus') ||
+    state.matches('resolvedPersistedLogView') ||
+    state.matches('resolvedInlineLogView')
       ? state.context.logView
       : undefined
   );
 
   const resolvedLogView = useSelector(logViewStateService, (state) =>
-    state.matches('checkingStatus') || state.matches('resolved')
+    state.matches('checkingStatus') ||
+    state.matches('resolvedPersistedLogView') ||
+    state.matches('resolvedInlineLogView')
       ? state.context.resolvedLogView
       : undefined
   );
 
   const logViewStatus = useSelector(logViewStateService, (state) =>
-    state.matches('resolved') ? state.context.status : undefined
+    state.matches('resolvedPersistedLogView') || state.matches('resolvedInlineLogView')
+      ? state.context.status
+      : undefined
   );
 
   const isLoadingLogView = useSelector(logViewStateService, (state) => state.matches('loading'));
@@ -91,6 +119,13 @@ export const useLogView = ({
     state.matches('checkingStatusFailed')
   );
 
+  const isPersistedLogView = useSelector(
+    logViewStateService,
+    (state) => state.context.logViewReference.type === 'log-view-reference'
+  );
+
+  const isInlineLogView = !isPersistedLogView;
+
   const latestLoadLogViewFailures = useSelector(logViewStateService, (state) =>
     state.matches('loadingFailed') ||
     state.matches('resolutionFailed') ||
@@ -118,7 +153,10 @@ export const useLogView = ({
 
       const doneState = await waitFor(
         logViewStateService,
-        (state) => state.matches('updatingFailed') || state.matches('resolved')
+        (state) =>
+          state.matches('updatingFailed') ||
+          state.matches('resolvedPersistedLogView') ||
+          state.matches('resolvedInlineLogView')
       );
 
       if (doneState.matches('updatingFailed')) {
@@ -128,8 +166,12 @@ export const useLogView = ({
     [logViewStateService]
   );
 
+  const revertToDefaultLogView = useCallback(() => {
+    changeLogViewReference(DEFAULT_LOG_VIEW);
+  }, [changeLogViewReference]);
+
   return {
-    // underlying state machine
+    // Underlying state machine
     logViewStateService,
     logViewStateNotifications,
 
@@ -147,17 +189,21 @@ export const useLogView = ({
     isLoadingLogViewStatus,
     isResolvingLogView,
 
-    // data
-    logViewId,
+    // Data
+    logViewReference,
     logView,
     resolvedLogView,
     logViewStatus,
     derivedDataView: resolvedLogView?.dataViewReference,
+    isInlineLogView,
+    isPersistedLogView,
 
-    // actions
+    // Actions
     load: retry,
     retry,
     update,
+    changeLogViewReference,
+    revertToDefaultLogView,
   };
 };
 

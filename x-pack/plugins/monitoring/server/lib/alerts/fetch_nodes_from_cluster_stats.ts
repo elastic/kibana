@@ -87,7 +87,7 @@ export async function fetchNodesFromClusterStats(
                   },
                 ],
                 _source: {
-                  includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.nodes'],
+                  includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.state.nodes'],
                 },
                 size: 2,
               },
@@ -117,14 +117,19 @@ export async function fetchNodesFromClusterStats(
   for (const clusterBucket of clusterBuckets) {
     const clusterUuid = clusterBucket.key;
     const hits = clusterBucket.top.hits.hits;
+    if (hits.length < 2) {
+      continue;
+    }
     const indexName = hits[0]._index;
     nodes.push({
       clusterUuid,
       recentNodes: formatNode(
-        hits[0]._source.cluster_state?.nodes || hits[0]._source.elasticsearch.cluster.stats.nodes
+        hits[0]._source.cluster_state?.nodes ||
+          hits[0]._source.elasticsearch.cluster.stats.state.nodes
       ),
       priorNodes: formatNode(
-        hits[1]._source.cluster_state?.nodes || hits[1]._source.elasticsearch.cluster.stats.nodes
+        hits[1]._source.cluster_state?.nodes ||
+          hits[1]._source.elasticsearch.cluster.stats.state.nodes
       ),
       ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
     });

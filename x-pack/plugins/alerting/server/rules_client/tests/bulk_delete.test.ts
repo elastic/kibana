@@ -141,8 +141,8 @@ describe('bulkDelete', () => {
       enabledRule1,
       enabledRule2,
     ]);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1']);
+    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -205,8 +205,8 @@ describe('bulkDelete', () => {
     const result = await rulesClient.bulkDeleteRules({ ids: ['id1', 'id2'] });
 
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(4);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1']);
+    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -263,8 +263,8 @@ describe('bulkDelete', () => {
     const result = await rulesClient.bulkDeleteRules({ ids: ['id1', 'id2'] });
 
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(2);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
@@ -321,7 +321,7 @@ describe('bulkDelete', () => {
           { id: 'id2', type: 'alert', success: true },
         ],
       });
-      taskManager.bulkRemoveIfExist.mockImplementation(async () => ({
+      taskManager.bulkRemove.mockImplementation(async () => ({
         statuses: [
           {
             id: 'id1',
@@ -349,7 +349,7 @@ describe('bulkDelete', () => {
           { id: 'id2', type: 'alert', success: true },
         ],
       });
-      taskManager.bulkRemoveIfExist.mockImplementation(() => {
+      taskManager.bulkRemove.mockImplementation(() => {
         throw new Error('UPS');
       });
 
@@ -357,7 +357,7 @@ describe('bulkDelete', () => {
 
       expect(logger.error).toBeCalledTimes(1);
       expect(logger.error).toBeCalledWith(
-        'Failure to delete schedules for underlying tasks: id1, id2. TaskManager bulkRemoveIfExist failed with Error: UPS'
+        'Failure to delete schedules for underlying tasks: id1, id2. TaskManager bulkRemove failed with Error: UPS'
       );
     });
 
@@ -369,7 +369,7 @@ describe('bulkDelete', () => {
           { id: 'id2', type: 'alert', success: true },
         ],
       });
-      taskManager.bulkRemoveIfExist.mockImplementation(async () => ({
+      taskManager.bulkRemove.mockImplementation(async () => ({
         statuses: [
           {
             id: 'id1',
