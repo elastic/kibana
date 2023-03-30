@@ -46,7 +46,7 @@ cd "${OUTPUT_DIR}/.."
 gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
 cd -
 
-if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-single-user-performance" ]; then
+if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
   echo "--- Promoting '${BUILD_ID}' dataset to LATEST"
   cd "${OUTPUT_DIR}/.."
   echo "${BUILD_ID}" > latest

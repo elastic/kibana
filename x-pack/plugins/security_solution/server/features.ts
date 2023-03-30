@@ -7,17 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { createUICapabilities } from '@kbn/cases-plugin/common';
+import {
+  createUICapabilities as createCasesUICapabilities,
+  getApiTags as getCasesApiTags,
+} from '@kbn/cases-plugin/common';
 
+import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
 import type { ConfigType } from './config';
 
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
-  const casesCapabilities = createUICapabilities();
+  const casesCapabilities = createCasesUICapabilities();
+  const casesApiTags = getCasesApiTags(APP_ID);
 
   return {
     id: CASES_FEATURE_ID,
@@ -31,7 +37,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
     cases: [APP_ID],
     privileges: {
       all: {
-        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+        api: casesApiTags.all,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -41,13 +47,13 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
           push: [APP_ID],
         },
         savedObject: {
-          all: [],
-          read: [],
+          all: [...filesSavedObjectTypes],
+          read: [...filesSavedObjectTypes],
         },
         ui: casesCapabilities.all,
       },
       read: {
-        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+        api: casesApiTags.read,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -55,7 +61,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         },
         savedObject: {
           all: [],
-          read: [],
+          read: [...filesSavedObjectTypes],
         },
         ui: casesCapabilities.read,
       },
@@ -70,7 +76,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
             groupType: 'independent',
             privileges: [
               {
-                api: [],
+                api: casesApiTags.delete,
                 id: 'cases_delete',
                 name: i18n.translate(
                   'xpack.securitySolution.featureRegistry.deleteSubFeatureDetails',
@@ -105,15 +111,21 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
   {
     requireAllSpaces: true,
     privilegesTooltip: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.actionsLogManagement.privilegesTooltip',
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
       {
-        defaultMessage: 'All Spaces is required for Actions Log Management access.',
+        defaultMessage: 'All Spaces is required for Response Actions History access.',
       }
     ),
     name: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.actionsLogManagement',
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory',
       {
-        defaultMessage: 'Actions Log Management',
+        defaultMessage: 'Response Actions History',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.description',
+      {
+        defaultMessage: 'Access the history of response actions performed on endpoints.',
       }
     ),
     privilegeGroups: [
@@ -157,6 +169,10 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.hostIsolation', {
       defaultMessage: 'Host Isolation',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.description',
+      { defaultMessage: 'Perform the "isolate" and "release" response actions.' }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -187,6 +203,12 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.processOperations', {
       defaultMessage: 'Process Operations',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.processOperations.description',
+      {
+        defaultMessage: 'Perform process-related response actions in the response console.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -214,9 +236,15 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
         defaultMessage: 'All Spaces is required for File Operations access.',
       }
     ),
-    name: i18n.translate('xpack.securitySolution.featureRegistr.subFeatures.fileOperations', {
+    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.fileOperations', {
       defaultMessage: 'File Operations',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.description',
+      {
+        defaultMessage: 'Perform file-related response actions in the response console.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -250,6 +278,13 @@ const subFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.endpointList', {
       defaultMessage: 'Endpoint List',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.endpointList.description',
+      {
+        defaultMessage:
+          'Displays all hosts running Elastic Defend and their relevant integration details.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -291,23 +326,36 @@ const subFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.trustedApplications', {
       defaultMessage: 'Trusted Applications',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.description',
+      {
+        defaultMessage:
+          'Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            api: [`${APP_ID}-writeTrustedApplications`, `${APP_ID}-readTrustedApplications`],
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeTrustedApplications`,
+              `${APP_ID}-readTrustedApplications`,
+            ],
             id: 'trusted_applications_all',
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeTrustedApplications', 'readTrustedApplications'],
           },
           {
-            api: [`${APP_ID}-readTrustedApplications`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
             id: 'trusted_applications_read',
             includeIn: 'none',
             name: 'Read',
@@ -335,12 +383,22 @@ const subFeatures: SubFeatureConfig[] = [
         defaultMessage: 'Host Isolation Exceptions',
       }
     ),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.description',
+      {
+        defaultMessage:
+          'Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
         privileges: [
           {
             api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
               `${APP_ID}-writeHostIsolationExceptions`,
               `${APP_ID}-readHostIsolationExceptions`,
             ],
@@ -348,13 +406,13 @@ const subFeatures: SubFeatureConfig[] = [
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
           },
           {
-            api: [`${APP_ID}-readHostIsolationExceptions`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
             id: 'host_isolation_exceptions_read',
             includeIn: 'none',
             name: 'Read',
@@ -379,23 +437,36 @@ const subFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.blockList', {
       defaultMessage: 'Blocklist',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.blockList.description',
+      {
+        defaultMessage:
+          'Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            api: [`${APP_ID}-writeBlocklist`, `${APP_ID}-readBlocklist`],
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeBlocklist`,
+              `${APP_ID}-readBlocklist`,
+            ],
             id: 'blocklist_all',
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeBlocklist', 'readBlocklist'],
           },
           {
-            api: [`${APP_ID}-readBlocklist`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
             id: 'blocklist_read',
             includeIn: 'none',
             name: 'Read',
@@ -420,23 +491,36 @@ const subFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.eventFilters', {
       defaultMessage: 'Event Filters',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.description',
+      {
+        defaultMessage:
+          'Filter out endpoint events that you do not need or want stored in Elasticsearch.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            api: [`${APP_ID}-writeEventFilters`, `${APP_ID}-readEventFilters`],
+            api: [
+              'lists-all',
+              'lists-read',
+              'lists-summary',
+              `${APP_ID}-writeEventFilters`,
+              `${APP_ID}-readEventFilters`,
+            ],
             id: 'event_filters_all',
             includeIn: 'none',
             name: 'All',
             savedObject: {
-              all: [],
+              all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
               read: [],
             },
             ui: ['writeEventFilters', 'readEventFilters'],
           },
           {
-            api: [`${APP_ID}-readEventFilters`],
+            api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
             id: 'event_filters_read',
             includeIn: 'none',
             name: 'Read',
@@ -459,8 +543,15 @@ const subFeatures: SubFeatureConfig[] = [
       }
     ),
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.policyManagement', {
-      defaultMessage: 'Policy Management',
+      defaultMessage: 'Elastic Defend Policy Management',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.description',
+      {
+        defaultMessage:
+          'Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -494,16 +585,67 @@ const subFeatures: SubFeatureConfig[] = [
   ...responseActionSubFeatures,
 ];
 
+// execute operations are not available in 8.7,
+// but will be available in 8.8
+const executeActionSubFeature: SubFeatureConfig = {
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for Execute Operations access.',
+    }
+  ),
+  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.executeOperations', {
+    defaultMessage: 'Execute Operations',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.description',
+    {
+      // TODO: Update this description before 8.8 FF
+      defaultMessage: 'Perform script execution on the endpoint.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeExecuteOperations`],
+          id: 'execute_operations_all',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeExecuteOperations'],
+        },
+      ],
+    },
+  ],
+};
+
 function getSubFeatures(experimentalFeatures: ConfigType['experimentalFeatures']) {
+  let filteredSubFeatures: SubFeatureConfig[] = [];
+
   if (experimentalFeatures.endpointRbacEnabled) {
-    return subFeatures;
+    filteredSubFeatures = subFeatures;
+  } else if (experimentalFeatures.endpointRbacV1Enabled) {
+    filteredSubFeatures = responseActionSubFeatures;
   }
 
-  if (experimentalFeatures.endpointRbacV1Enabled) {
-    return responseActionSubFeatures;
+  if (!experimentalFeatures.responseActionGetFileEnabled) {
+    filteredSubFeatures = filteredSubFeatures.filter((subFeat) => {
+      return subFeat.name !== 'File Operations';
+    });
   }
 
-  return [];
+  // behind FF (planned for 8.8)
+  if (experimentalFeatures.responseActionExecuteEnabled) {
+    filteredSubFeatures = [...filteredSubFeatures, executeActionSubFeature];
+  }
+
+  return filteredSubFeatures;
 }
 
 export const getKibanaPrivilegesFeaturePrivileges = (
@@ -539,7 +681,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         all: [
           'alert',
           'exception-list',
-          'exception-list-agnostic',
+          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
           CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
@@ -567,7 +709,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         all: [],
         read: [
           'exception-list',
-          'exception-list-agnostic',
+          EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
           DATA_VIEW_SAVED_OBJECT_TYPE,
           ...savedObjectTypes,
           CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,

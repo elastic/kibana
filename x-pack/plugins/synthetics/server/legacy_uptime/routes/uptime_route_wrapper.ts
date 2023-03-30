@@ -6,11 +6,9 @@
  */
 
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
+import { checkIndicesReadPrivileges } from '../../synthetics_service/authentication/check_has_privilege';
 import { UMKibanaRouteWrapper } from './types';
-import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
-
-import { API_URLS } from '../../../common/constants';
+import { isTestUser, UptimeEsClient } from '../lib/lib';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
@@ -23,46 +21,49 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
 
     server.authSavedObjectsClient = coreContext.savedObjects.client;
 
-    const isInspectorEnabled = await coreContext.uiSettings.client.get<boolean>(
-      enableInspectEsQueries
+    const uptimeEsClient = new UptimeEsClient(
+      coreContext.savedObjects.client,
+      esClient.asCurrentUser,
+      {
+        request,
+        uiSettings: coreContext.uiSettings,
+        isDev: Boolean(server.isDev && !isTestUser(server)),
+      }
     );
 
-    const uptimeEsClient = createUptimeESClient({
-      request,
-      savedObjectsClient: coreContext.savedObjects.client,
-      isInspectorEnabled,
-      esClient: esClient.asCurrentUser,
-    });
-
     server.uptimeEsClient = uptimeEsClient;
+    try {
+      const res = await uptimeRoute.handler({
+        uptimeEsClient,
+        savedObjectsClient: coreContext.savedObjects.client,
+        context,
+        request,
+        response,
+        server,
+      });
 
-    if (
-      (isInspectorEnabled || server.isDev) &&
-      server.config.service?.username !== 'localKibanaIntegrationTestsUser'
-    ) {
-      inspectableEsQueriesMap.set(request, []);
+      if (res instanceof KibanaResponse) {
+        return res;
+      }
+
+      return response.ok({
+        body: {
+          ...res,
+          ...(await uptimeEsClient.getInspectData(uptimeRoute.path)),
+        },
+      });
+    } catch (e) {
+      if (e.statusCode === 403) {
+        const privileges = await checkIndicesReadPrivileges(uptimeEsClient);
+        if (!privileges.has_all_requested) {
+          return response.forbidden({
+            body: {
+              message: `MissingIndicesPrivileges: You do not have permission to read from the ${uptimeEsClient.heartbeatIndices}  indices. Please contact your administrator.`,
+            },
+          });
+        }
+      }
+      throw e;
     }
-
-    const res = await uptimeRoute.handler({
-      uptimeEsClient,
-      savedObjectsClient: coreContext.savedObjects.client,
-      context,
-      request,
-      response,
-      server,
-    });
-
-    if (res instanceof KibanaResponse) {
-      return res;
-    }
-
-    return response.ok({
-      body: {
-        ...res,
-        ...((isInspectorEnabled || server.isDev) && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
-          ? { _inspect: inspectableEsQueriesMap.get(request) }
-          : {}),
-      },
-    });
   },
 });

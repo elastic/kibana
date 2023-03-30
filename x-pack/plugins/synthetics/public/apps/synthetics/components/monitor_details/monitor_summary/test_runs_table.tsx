@@ -5,41 +5,31 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { MouseEvent, useMemo, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiPanel, EuiText } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
-import { ConfigKey, DataStream, JourneyStep, Ping } from '../../../../../../common/runtime_types';
+import { TestRunsTableHeader } from './test_runs_table_header';
+import { MONITOR_TYPES } from '../../../../../../common/constants';
 import {
-  formatTestDuration,
-  formatTestRunAt,
-} from '../../../utils/monitor_test_result/test_time_formats';
-import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
-
+  getTestRunDetailRelativeLink,
+  TestDetailsLink,
+} from '../../common/links/test_details_link';
+import { ConfigKey, DataStream, Ping } from '../../../../../../common/runtime_types';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
-import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
-import { JourneyStepScreenshotContainer } from '../../common/monitor_test_result/journey_step_screenshot_container';
 
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
-import { useJourneySteps } from '../hooks/use_journey_steps';
+import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -47,14 +37,22 @@ interface TestRunsTableProps {
   from: string;
   to: string;
   paginable?: boolean;
+  showViewHistoryButton?: boolean;
 }
 
-export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps) => {
-  const { basePath } = useSyntheticsSettingsContext();
+export const TestRunsTable = ({
+  paginable = true,
+  from,
+  to,
+  showViewHistoryButton = true,
+}: TestRunsTableProps) => {
+  const history = useHistory();
+  const { monitorId } = useParams<{ monitorId: string }>();
   const [page, setPage] = useState({ index: 0, size: 10 });
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const {
     pings,
     total,
@@ -62,6 +60,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
   } = useMonitorPings({
     from,
     to,
+    lastRefresh,
     pageSize: page.size,
     pageIndex: page.index,
   });
@@ -71,6 +70,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
 
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
+  const selectedLocation = useSelectedLocation();
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
 
@@ -98,7 +98,13 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
             align: 'left',
             field: 'timestamp',
             name: SCREENSHOT_LABEL,
-            render: (_timestamp: string, item) => <JourneyScreenshot ping={item} />,
+            render: (timestamp: string, item) => (
+              <JourneyLastScreenshot
+                checkGroupId={item.monitor.check_group}
+                size={[100, 64]}
+                timestamp={timestamp}
+              />
+            ),
           },
         ]
       : []) as Array<EuiBasicTableColumn<Ping>>),
@@ -139,31 +145,40 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
     },
   ];
 
-  const historyIdParam = monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.ID];
+  const getRowProps = (item: Ping) => {
+    if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
+      return {};
+    }
+    return {
+      height: '85px',
+      'data-test-subj': `row-${item.monitor.check_group}`,
+      onClick: (evt: MouseEvent) => {
+        const targetElem = evt.target as HTMLElement;
+        // we dont want to capture image click event
+        if (
+          targetElem.tagName !== 'IMG' &&
+          targetElem.tagName !== 'path' &&
+          !targetElem.parentElement?.classList.contains('euiLink')
+        ) {
+          history.push(
+            getTestRunDetailRelativeLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
+          );
+        }
+      },
+    };
+  };
+
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{paginable || pings?.length < 10 ? TEST_RUNS : LAST_10_TEST_RUNS}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={true} />
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="list"
-            iconSide="left"
-            data-test-subj="monitorSummaryViewLastTestRun"
-            disabled={!historyIdParam}
-            href={`${basePath}/app/uptime/monitor/${btoa(historyIdParam ?? '')}`}
-          >
-            {i18n.translate('xpack.synthetics.monitorDetails.summary.viewHistory', {
-              defaultMessage: 'View History',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <TestRunsTableHeader
+        paginable={paginable}
+        showViewHistoryButton={showViewHistoryButton}
+        pings={pings}
+      />
       <EuiBasicTable
         compressed={false}
         loading={pingsLoading}
@@ -182,6 +197,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
         tableLayout={'auto'}
         sorting={sorting}
         onChange={handleTableChange}
+        rowProps={getRowProps}
         pagination={
           paginable
             ? {
@@ -197,68 +213,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
   );
 };
 
-const JourneyScreenshot = ({ ping }: { ping: Ping }) => {
-  const { data: stepsData, loading: stepsLoading } = useJourneySteps(ping?.monitor?.check_group);
-  const stepEnds: JourneyStep[] = (stepsData?.steps ?? []).filter(isStepEnd);
-  const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
-
-  const lastSignificantStep = useMemo(() => {
-    const copy = [...stepEnds];
-    // Sort desc by timestamp
-    copy.sort(
-      (stepA, stepB) =>
-        Number(new Date(stepB['@timestamp'])) - Number(new Date(stepA['@timestamp']))
-    );
-    return copy.find(
-      (stepEnd) => parseBadgeStatus(stepEnd?.synthetics?.step?.status ?? 'skipped') !== 'skipped'
-    );
-  }, [stepEnds]);
-
-  return (
-    <JourneyStepScreenshotContainer
-      checkGroup={lastSignificantStep?.monitor.check_group}
-      initialStepNo={lastSignificantStep?.synthetics?.step?.index}
-      stepStatus={lastSignificantStep?.synthetics.payload?.status}
-      allStepsLoaded={!stepsLoading}
-      stepLabels={stepLabels}
-      retryFetchOnRevisit={false}
-    />
-  );
-};
-
-const TestDetailsLink = ({
-  isBrowserMonitor,
-  timestamp,
-  ping,
-}: {
-  isBrowserMonitor: boolean;
-  timestamp: string;
-  ping: Ping;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const { basePath } = useSyntheticsSettingsContext();
-
-  const format = useKibanaDateFormat();
-  const timestampText = (
-    <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
-      {formatTestRunAt(timestamp, format)}
-    </EuiText>
-  );
-
-  return isBrowserMonitor ? (
-    <EuiLink href={`${basePath}/app/uptime/journey/${ping?.monitor?.check_group ?? ''}/steps`}>
-      {timestampText}
-    </EuiLink>
-  ) : (
-    timestampText
-  );
-};
-
-const TEST_RUNS = i18n.translate('xpack.synthetics.monitorDetails.summary.testRuns', {
-  defaultMessage: 'Test Runs',
-});
-
-const LAST_10_TEST_RUNS = i18n.translate(
+export const LAST_10_TEST_RUNS = i18n.translate(
   'xpack.synthetics.monitorDetails.summary.lastTenTestRuns',
   {
     defaultMessage: 'Last 10 Test Runs',

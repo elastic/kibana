@@ -27,6 +27,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
+
 import { Result } from '../../../../../shared/result/result';
 import { resultMetaData } from '../../../../../shared/result/result_metadata';
 
@@ -78,8 +80,24 @@ export const DocumentList: React.FC = () => {
       <EuiSpacer size="m" />
       <EuiText size="xs">
         <p>
-          Showing <strong>{results.length}</strong> of <strong>{meta.page.total_results}</strong>.
-          Search results maxed at 10.000 documents.
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.searchIndex.documents.documentList.description"
+            defaultMessage="Showing {results} of {total}.
+            Search results maxed at {maximum} documents."
+            values={{
+              maximum: <FormattedNumber value={10000} />,
+              results: (
+                <strong>
+                  <FormattedNumber value={results.length} />
+                </strong>
+              ),
+              total: (
+                <strong>
+                  <FormattedNumber value={meta.page.total_results} />
+                </strong>
+              ),
+            }}
+          />
         </p>
       </EuiText>
       {isLoading && <EuiProgress size="xs" color="primary" />}
@@ -187,16 +205,28 @@ export const DocumentList: React.FC = () => {
       </EuiFlexGroup>
 
       <EuiSpacer />
-      {meta.page.total_results === 10000 && (
-        <EuiCallOut size="s" title="Results are limited to 10.000 documents" iconType="search">
+      {meta.page.total_results > 9999 && (
+        <EuiCallOut
+          size="s"
+          title={
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.searchIndex.documents.documentList.resultLimitTitle"
+              defaultMessage="Results are limited to {number} documents"
+              values={{
+                number: <FormattedNumber value={10000} />,
+              }}
+            />
+          }
+          iconType="search"
+        >
           <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndex.documents.documentList.resultLimit',
-              {
-                defaultMessage:
-                  'Only the first 10,000 results are available for paging. Please use the search bar to filter down your results.',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.searchIndex.documents.documentList.resultLimit"
+              defaultMessage="Only the first {number} results are available for paging. Please use the search bar to filter down your results."
+              values={{
+                number: <FormattedNumber value={10000} />,
+              }}
+            />
           </p>
         </EuiCallOut>
       )}

@@ -24,9 +24,11 @@ export const useExceptionListHeader = ({
     setIsModalVisible(true);
   };
   const onSave = (newListDetails: ListDetails) => {
-    setIsModalVisible(false);
     setListDetails(newListDetails);
     if (typeof onEditListDetails === 'function') onEditListDetails(newListDetails);
+    setTimeout(() => {
+      setIsModalVisible(false);
+    }, 200);
   };
   const onCancel = () => {
     setIsModalVisible(false);

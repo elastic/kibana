@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 
 /**
  * A handler that will be executed before leaving the application, either when
@@ -17,9 +17,9 @@ import type { ButtonColor } from '@elastic/eui';
  *
  * See {@link AppMountParameters} for detailed usage examples.
  *
+ * @remarks prefer {@link ScopedHistory.block} instead
+ *
  * @public
- * @deprecated {@link AppMountParameters.onAppLeave} has been deprecated in favor of {@link ScopedHistory.block}
- * @removeBy 8.8.0
  */
 export type AppLeaveHandler = (
   factory: AppLeaveActionFactory,
@@ -61,7 +61,7 @@ export interface AppLeaveConfirmAction {
   text: string;
   title?: string;
   confirmButtonText?: string;
-  buttonColor?: ButtonColor;
+  buttonColor?: EuiButtonColor;
   callback?: () => void;
 }
 
@@ -95,7 +95,7 @@ export interface AppLeaveActionFactory {
     title?: string,
     callback?: () => void,
     confirmButtonText?: string,
-    buttonColor?: ButtonColor
+    buttonColor?: EuiButtonColor
   ): AppLeaveConfirmAction;
 
   /**

@@ -7,10 +7,16 @@
  */
 
 import { monaco } from '../../monaco_imports';
-import { PainlessCompletionResult, PainlessContext, PainlessAutocompleteField } from '../types';
+import type {
+  PainlessCompletionResult,
+  PainlessContext,
+  PainlessAutocompleteField,
+} from '../types';
+import type { BaseWorkerDefinition } from '../../types';
 
 import { getAutocompleteSuggestions, parseAndGetSyntaxErrors } from './lib';
-export class PainlessWorker {
+
+export class PainlessWorker implements BaseWorkerDefinition {
   private _ctx: monaco.worker.IWorkerContext;
 
   constructor(ctx: monaco.worker.IWorkerContext) {

@@ -89,10 +89,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await rules.common.defineIndexThresholdAlert(alertName);
 
-      await testSubjects.click('notifyWhenSelect');
-      await testSubjects.click('onThrottleInterval');
-      await testSubjects.setValue('throttleInput', '10');
-
       // filterKuery validation
       await testSubjects.setValue('filterKuery', 'group:');
       const filterKueryInput = await testSubjects.find('filterKuery');
@@ -104,10 +100,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
+      await testSubjects.click('webhookButton');
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         `alert '{{alertName}}' is active for group '{{context.group}}':
@@ -125,6 +125,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await messageTextArea.type(' some additional text ');
 
       await testSubjects.click('messageAddVariableButton');
+      await testSubjects.setValue('messageVariablesSelectableSearch', 'rule.id');
       await testSubjects.click('variableMenuButton-rule.id');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
@@ -158,6 +159,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
+      await testSubjects.click('webhookButton');
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
@@ -236,7 +238,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.setValue('intervalInput', '10');
+      await testSubjects.setValue('ruleNameInput', 'alertName');
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');

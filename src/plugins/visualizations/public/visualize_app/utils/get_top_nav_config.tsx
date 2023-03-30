@@ -15,7 +15,6 @@ import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -36,7 +35,6 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { NavigateToLensContext } from '../../../common';
 import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
@@ -67,7 +65,6 @@ export interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
-  editInLensConfig?: NavigateToLensContext | null;
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
@@ -99,7 +96,6 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
-    editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
     setNavigateToLens,
@@ -293,7 +289,6 @@ export const getTopNavConfig = (
               defaultMessage: 'Go to Lens with your current configuration',
             }),
             className: 'visNavItem__goToLens',
-            disableButton: !editInLensConfig,
             testId: 'visualizeEditInLensButton',
             ...(showBadge && {
               badge: {
@@ -308,14 +303,17 @@ export const getTopNavConfig = (
               if (eventEmitter && visInstance.vis.data.savedSearchId) {
                 eventEmitter.emit('unlinkFromSavedSearch', false);
               }
+              const navigateToLensConfig = await visInstance.vis.type.navigateToLens?.(
+                vis,
+                data.query.timefilter.timefilter
+              );
               const updatedWithMeta = {
-                ...editInLensConfig,
-                savedObjectId: visInstance.vis.id,
+                ...navigateToLensConfig,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,
               };
-              if (editInLensConfig) {
+              if (navigateToLensConfig) {
                 hideLensBadge();
                 setNavigateToLens(true);
                 getUiActions()
@@ -599,18 +597,7 @@ export const getTopNavConfig = (
                 );
               }
 
-              const WrapperComponent = ({ children }: { children?: React.ReactNode }) => {
-                const ContextProvider = !originatingApp
-                  ? presentationUtil.ContextProvider
-                  : React.Fragment;
-                return (
-                  <KibanaThemeProvider theme$={theme.theme$}>
-                    <ContextProvider>{children}</ContextProvider>
-                  </KibanaThemeProvider>
-                );
-              };
-
-              showSaveModal(saveModal, I18nContext, WrapperComponent);
+              showSaveModal(saveModal, presentationUtil.ContextProvider);
             },
           },
         ]

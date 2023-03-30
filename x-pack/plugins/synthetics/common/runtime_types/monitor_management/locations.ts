@@ -11,6 +11,7 @@ import { tEnum } from '../../utils/t_enum';
 
 export enum LocationStatus {
   GA = 'ga',
+  BETA = 'beta',
   EXPERIMENTAL = 'experimental',
 }
 
@@ -82,8 +83,8 @@ export const MonitorServiceLocationCodec = t.intersection([
     label: t.string,
     geo: LocationGeoCodec,
     url: t.string,
-    isInvalid: t.boolean,
     isServiceManaged: t.boolean,
+    status: t.string,
   }),
 ]);
 

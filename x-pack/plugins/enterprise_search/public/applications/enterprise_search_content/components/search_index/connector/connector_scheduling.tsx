@@ -21,12 +21,13 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { CronEditor, Frequency } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
 import { ConnectorIndex } from '../../../../../../common/types/indices';
+import { CronEditor } from '../../../../shared/cron_editor';
+import { Frequency } from '../../../../shared/cron_editor/types';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
@@ -127,7 +128,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           {ingestionStatus === IngestionStatus.ERROR ? (
             <EuiCallOut
               color="warning"
-              iconType="alert"
+              iconType="warning"
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.connectorScheduling.error.title',
                 { defaultMessage: 'Review your connector configuration for reported errors.' }
@@ -163,6 +164,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           <EuiFlexItem>
             <CronEditor
               data-telemetry-id="entSearchContent-connector-scheduling-editSchedule"
+              disabled={!scheduling.enabled}
               fieldToPreferredValueMap={fieldToPreferredValueMap}
               cronExpression={simpleCron.expression}
               frequency={simpleCron.frequency}

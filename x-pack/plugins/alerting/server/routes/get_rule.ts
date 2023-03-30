@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, RewriteResponseCase } from './lib';
+import { verifyAccessAndContext, RewriteResponseCase, rewriteRuleLastRun } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
@@ -37,6 +37,9 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   scheduledTaskId,
   snoozeSchedule,
   isSnoozedUntil,
+  lastRun,
+  nextRun,
+  viewInAppRelativeUrl,
   ...rest
 }) => ({
   ...rest,
@@ -57,12 +60,23 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
+  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid }) => ({
     group,
     id,
     params,
     connector_type_id: actionTypeId,
+    frequency: frequency
+      ? {
+          summary: frequency.summary,
+          notify_when: frequency.notifyWhen,
+          throttle: frequency.throttle,
+        }
+      : undefined,
+    ...(uuid && { uuid }),
   })),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
+  ...(viewInAppRelativeUrl ? { view_in_app_relative_url: viewInAppRelativeUrl } : {}),
 });
 
 interface BuildGetRulesRouteParams {

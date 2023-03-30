@@ -47,7 +47,7 @@ describe('ES deprecations table', () => {
     httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     testBed.component.update();
@@ -113,9 +113,7 @@ describe('ES deprecations table', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(['test_remote_cluster']);
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup, {
-          isReadOnlyMode: false,
-        });
+        testBed = await setupElasticsearchPage(httpSetup);
       });
 
       testBed.component.update();
@@ -221,9 +219,7 @@ describe('ES deprecations table', () => {
       });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup, {
-          isReadOnlyMode: false,
-        });
+        testBed = await setupElasticsearchPage(httpSetup);
       });
 
       testBed.component.update();
@@ -305,7 +301,7 @@ describe('ES deprecations table', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup);
       });
 
       testBed.component.update();

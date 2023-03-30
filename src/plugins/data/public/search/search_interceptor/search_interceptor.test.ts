@@ -23,11 +23,15 @@ import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
 import { UI_SETTINGS } from '../../../common';
 
-jest.mock('./utils', () => ({
-  createRequestHash: jest.fn().mockImplementation((input) => {
-    return Promise.resolve(JSON.stringify(input));
-  }),
-}));
+jest.mock('./utils', () => {
+  const originalModule = jest.requireActual('./utils');
+  return {
+    ...originalModule,
+    createRequestHash: jest.fn().mockImplementation((input) => {
+      return Promise.resolve(JSON.stringify(input));
+    }),
+  };
+});
 
 jest.mock('../errors/search_session_incomplete_warning', () => ({
   SearchSessionIncompleteWarning: jest.fn(),
@@ -44,7 +48,7 @@ let fetchMock: jest.Mock<any>;
 const flushPromises = () =>
   new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const timeTravel = async (msToRun = 0) => {
   await flushPromises();

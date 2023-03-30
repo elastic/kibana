@@ -11,7 +11,6 @@ import {
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ApmPluginRequestHandlerContext } from '../typings';
-import { Setup } from '../../lib/helpers/setup_request';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
@@ -25,7 +24,7 @@ import {
   TRANSACTION_SAMPLED,
   AGENT_NAME,
   INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -36,7 +35,6 @@ import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function getMainServiceStatistics({
-  setup,
   apmEventClient,
   context,
   indexLifecyclePhase,
@@ -46,7 +44,6 @@ async function getMainServiceStatistics({
   environment,
   kuery,
 }: {
-  setup: Setup;
   apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
@@ -57,7 +54,7 @@ async function getMainServiceStatistics({
   kuery: string;
 }) {
   const [{ indices: allIndicesStats }, response] = await Promise.all([
-    getTotalIndicesStats({ context, setup }),
+    getTotalIndicesStats({ context, apmEventClient }),
     apmEventClient.search('get_main_service_statistics', {
       apm: {
         events: [
@@ -175,8 +172,15 @@ async function getMainServiceStatistics({
   return serviceStats ?? [];
 }
 
+export type StorageExplorerServiceStatisticsResponse = Array<{
+  serviceName: string;
+  sampling: number;
+  environments: string[];
+  size: number;
+  agentName: AgentName;
+}>;
+
 export async function getServiceStatistics({
-  setup,
   apmEventClient,
   context,
   indexLifecyclePhase,
@@ -187,7 +191,6 @@ export async function getServiceStatistics({
   kuery,
   searchAggregatedTransactions,
 }: {
-  setup: Setup;
   apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
@@ -197,11 +200,10 @@ export async function getServiceStatistics({
   environment: string;
   kuery: string;
   searchAggregatedTransactions: boolean;
-}) {
+}): Promise<StorageExplorerServiceStatisticsResponse> {
   const [docCountPerProcessorEvent, totalTransactionsPerService] =
     await Promise.all([
       getMainServiceStatistics({
-        setup,
         apmEventClient,
         context,
         indexLifecyclePhase,

@@ -7,7 +7,7 @@
 
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { getThreatMappingMock } from '../../signals/threat_mapping/build_threat_mapping_filter.mock';
+import { getThreatMappingMock } from '../../rule_types/indicator_match/threat_mapping/build_threat_mapping_filter.mock';
 import type {
   BaseRuleParams,
   CompleteRule,
@@ -21,7 +21,7 @@ import type {
   ThresholdRuleParams,
 } from '..';
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
-import { sampleRuleGuid } from '../../signals/__mocks__/es_results';
+import { sampleRuleGuid } from '../../rule_types/__mocks__/es_results';
 
 const getBaseRuleParams = (): BaseRuleParams => {
   return {
@@ -125,6 +125,7 @@ export const getQueryRuleParams = (): QueryRuleParams => {
       },
     ],
     savedId: undefined,
+    alertSuppression: undefined,
     responseActions: undefined,
   };
 };
@@ -148,6 +149,7 @@ export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
     ],
     savedId: 'some-id',
     responseActions: undefined,
+    alertSuppression: undefined,
   };
 };
 
@@ -195,6 +197,7 @@ export const getThreatRuleParams = (): ThreatRuleParams => {
 };
 
 export const getRuleConfigMock = (type: string = 'rule-type'): SanitizedRuleConfig => ({
+  id: sampleRuleGuid,
   actions: [],
   enabled: true,
   name: 'rule-name',
@@ -212,6 +215,9 @@ export const getRuleConfigMock = (type: string = 'rule-type'): SanitizedRuleConf
   producer: 'sample producer',
   ruleTypeId: `${type}-id`,
   ruleTypeName: type,
+  muteAll: false,
+  revision: 0,
+  snoozeSchedule: [],
 });
 
 export const getCompleteRuleMock = <T extends RuleParams>(params: T): CompleteRule<T> => ({

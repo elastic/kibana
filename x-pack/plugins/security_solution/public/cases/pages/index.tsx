@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
+import { useTourContext } from '../../common/components/guided_onboarding_tour';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../common/components/guided_onboarding_tour/tour_config';
 import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
@@ -91,6 +96,16 @@ const CaseContainerComponent: React.FC = () => {
   }, [dispatch]);
 
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+  const { activeStep, endTourStep, isTourShown } = useTourContext();
+
+  const isTourActive = useMemo(
+    () => activeStep === AlertsCasesTourSteps.viewCase && isTourShown(SecurityStepId.alertsCases),
+    [activeStep, isTourShown]
+  );
+
+  useEffect(() => {
+    if (isTourActive) endTourStep(SecurityStepId.alertsCases);
+  }, [endTourStep, isTourActive]);
 
   return (
     <SecuritySolutionPageWrapper noPadding>

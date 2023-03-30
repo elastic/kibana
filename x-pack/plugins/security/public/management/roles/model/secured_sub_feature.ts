@@ -44,4 +44,8 @@ export class SecuredSubFeature extends SubFeature {
         .filter((privilege) => predicate(privilege, this));
     }
   }
+
+  public getDescription() {
+    return this.description;
+  }
 }

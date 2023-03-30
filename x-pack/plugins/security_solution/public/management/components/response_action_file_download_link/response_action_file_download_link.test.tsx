@@ -13,25 +13,18 @@ import type {
   ResponseActionGetFileParameters,
 } from '../../../../common/endpoint/types';
 import React from 'react';
-import type { ResponseActionFileDownloadLinkProps } from './response_action_file_download_link';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   FILE_NO_LONGER_AVAILABLE_MESSAGE,
   ResponseActionFileDownloadLink,
+  type ResponseActionFileDownloadLinkProps,
 } from './response_action_file_download_link';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
-import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { getDeferred } from '../../mocks/utils';
 import { waitFor } from '@testing-library/react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-jest.mock('../../../common/components/user_privileges');
-
 describe('When using the `ResponseActionFileDownloadLink` component', () => {
-  const useUserPrivilegesMock = _useUserPrivileges as jest.Mock<
-    ReturnType<typeof _useUserPrivileges>
-  >;
-
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let renderProps: ResponseActionFileDownloadLinkProps;
@@ -46,8 +39,9 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
       action: new EndpointActionGenerator('seed').generateActionDetails<
         ResponseActionGetFileOutputContent,
         ResponseActionGetFileParameters
-      >({ command: 'get-file', completedAt: new Date().toISOString() }),
+      >({ command: 'get-file' }),
       'data-test-subj': 'test',
+      canAccessFileDownloadLink: true,
     };
 
     render = () => {
@@ -56,18 +50,27 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     };
   });
 
-  it('should show download button if file is available', () => {
+  it('should show download button if file is available', async () => {
     render();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
 
     expect(renderResult.getByTestId('test-downloadButton')).not.toBeNull();
     expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
       '(ZIP file passcode: elastic)'
     );
+    expect(renderResult.getByTestId('test-fileDeleteMessage')).toHaveTextContent(
+      'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+    );
   });
 
-  it('should display custom button label', () => {
+  it('should display custom button label', async () => {
     renderProps.buttonTitle = 'hello';
     render();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
 
     expect(renderResult.getByTestId('test-downloadButton')).toHaveTextContent('hello');
   });
@@ -87,7 +90,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
-        path: '/api/endpoint/action/123/agent-a/file',
+        path: '/api/endpoint/action/123/file/123.agent-a',
       });
     });
 
@@ -143,18 +146,8 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     });
   });
 
-  it('should show nothing if user does not have authz', () => {
-    const privileges = useUserPrivilegesMock();
-
-    useUserPrivilegesMock.mockImplementationOnce(() => {
-      return {
-        ...privileges,
-        endpointPrivileges: {
-          ...privileges.endpointPrivileges,
-          canWriteFileOperations: false,
-        },
-      };
-    });
+  it('should show nothing if user does not have permission', () => {
+    renderProps.canAccessFileDownloadLink = false;
 
     render();
 

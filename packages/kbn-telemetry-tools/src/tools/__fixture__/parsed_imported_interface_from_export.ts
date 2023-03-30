@@ -11,7 +11,7 @@ import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedImportedInterfaceFromExport: ParsedUsageCollection[] = [
   [
-    'src/fixtures/telemetry_collectors/imported_interface_from_export/index.ts',
+    'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/imported_interface_from_export/index.ts',
     {
       collectorName: 'importing_from_export_collector',
       schema: {

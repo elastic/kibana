@@ -7,29 +7,15 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
-import { AnalyticsCollection } from '../../../common/types/analytics';
-
 import { ErrorCode } from '../../../common/types/error_codes';
-import { fetchIndices } from '../indices/fetch_indices';
 
-import { deleteAnalyticsCollectionByName } from './delete_analytics_collection';
-import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
-
-jest.mock('../indices/fetch_indices', () => ({
-  fetchIndices: jest.fn(),
-}));
-
-jest.mock('./fetch_analytics_collection', () => ({
-  fetchAnalyticsCollectionByName: jest.fn(),
-}));
+import { deleteAnalyticsCollectionById } from './delete_analytics_collection';
 
 describe('delete analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      delete: jest.fn(),
-      indices: {
-        delete: jest.fn(),
+      transport: {
+        request: jest.fn(),
       },
     },
     asInternalUser: {},
@@ -41,46 +27,32 @@ describe('delete analytics collection lib function', () => {
 
   describe('deleting analytics collections', () => {
     it('should delete an analytics collection', async () => {
-      (fetchAnalyticsCollectionByName as jest.Mock).mockImplementationOnce(() => {
-        return Promise.resolve({
-          event_retention_day_length: 180,
-          id: 'example-id',
-          name: 'example',
-        } as AnalyticsCollection);
-      });
-
       await expect(
-        deleteAnalyticsCollectionByName(mockClient as unknown as IScopedClusterClient, 'example')
+        deleteAnalyticsCollectionById(mockClient as unknown as IScopedClusterClient, 'example')
       ).resolves.toBeUndefined();
 
-      expect(mockClient.asCurrentUser.delete).toHaveBeenCalledWith({
-        id: 'example-id',
-        index: ANALYTICS_COLLECTIONS_INDEX,
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'DELETE',
+        path: '/_application/analytics/example',
       });
     });
 
     it('should throw an exception when analytics collection does not exist', async () => {
-      const indices = [
-        {
-          name: 'elastic_analytics-events-my-collection-12.12.12',
-        },
-        {
-          name: 'elastic_analytics-events-my-collection-13.12.12',
-        },
-      ];
-      (fetchIndices as jest.Mock).mockImplementationOnce(() => {
-        return Promise.resolve(indices);
-      });
-      (fetchAnalyticsCollectionByName as jest.Mock).mockImplementationOnce(() =>
-        Promise.resolve(undefined)
+      mockClient.asCurrentUser.transport.request.mockImplementation(() =>
+        Promise.reject({
+          meta: {
+            body: {
+              error: {
+                type: 'resource_not_found_exception',
+              },
+            },
+          },
+        })
       );
 
       await expect(
-        deleteAnalyticsCollectionByName(mockClient as unknown as IScopedClusterClient, 'example')
+        deleteAnalyticsCollectionById(mockClient as unknown as IScopedClusterClient, 'example')
       ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND));
-
-      expect(mockClient.asCurrentUser.delete).not.toHaveBeenCalled();
-      expect(mockClient.asCurrentUser.indices.delete).not.toBeCalled();
     });
   });
 });

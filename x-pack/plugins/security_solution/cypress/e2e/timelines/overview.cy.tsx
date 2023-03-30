@@ -34,10 +34,10 @@ describe('timeline overview search', () => {
     createTimeline(getTimeline());
 
     login();
-    visitWithoutDateRange(TIMELINES_URL);
   });
 
   beforeEach(() => {
+    visitWithoutDateRange(TIMELINES_URL);
     cy.get(TIMELINES_OVERVIEW_SEARCH).clear();
   });
 

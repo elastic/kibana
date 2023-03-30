@@ -12,9 +12,8 @@ import { TestProviders } from '../../../mock';
 import { ShowTopNButton } from './show_top_n';
 import { TimelineId } from '../../../../../common/types';
 
-jest.mock('../../visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../../visualization_actions/actions');
+jest.mock('../../visualization_actions/visualization_embeddable');
 
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
@@ -31,6 +30,14 @@ jest.mock('../../../lib/kibana', () => {
         },
       },
     }),
+  };
+});
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
   };
 });
 

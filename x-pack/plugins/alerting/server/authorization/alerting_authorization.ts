@@ -52,6 +52,8 @@ export enum WriteOperations {
   Snooze = 'snooze',
   BulkEdit = 'bulkEdit',
   BulkDelete = 'bulkDelete',
+  BulkEnable = 'bulkEnable',
+  BulkDisable = 'bulkDisable',
   Unsnooze = 'unsnooze',
 }
 
@@ -69,6 +71,7 @@ interface HasPrivileges {
 type AuthorizedConsumers = Record<string, HasPrivileges>;
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: AuthorizedConsumers;
+  hasGetSummarizedAlerts?: boolean;
 }
 
 type IsAuthorizedAtProducerLevel = boolean;

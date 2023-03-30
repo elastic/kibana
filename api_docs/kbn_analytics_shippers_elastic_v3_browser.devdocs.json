@@ -290,6 +290,24 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3BrowserShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nTriggers a flush of the internal queue to attempt to send any events held in the queue\nand resolves the returned promise once the queue is emptied."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
             "id": "def-common.ElasticV3BrowserShipper.shutdown",
             "type": "Function",
             "tags": [],

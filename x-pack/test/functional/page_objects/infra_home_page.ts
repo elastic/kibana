@@ -163,7 +163,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async closeTimeline() {
       await testSubjects.click('toggleTimelineButton');
-      await testSubjects.existOrFail('timelineContainerClosed');
+      const timelineSelectorsVisible = await Promise.all([
+        testSubjects.exists('timelineContainerClosed'),
+        testSubjects.exists('timelineContainerOpen'),
+      ]);
+
+      return timelineSelectorsVisible.every((visible) => !visible);
     },
 
     async openInvenotrySwitcher() {
@@ -211,6 +216,15 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraOps',
         `/explorer`,
+        undefined,
+        { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
+      );
+    },
+
+    async goToHostsView() {
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'infraOps',
+        `/hosts`,
         undefined,
         { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
       );
@@ -366,6 +380,20 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async ensureSuggestionsPanelVisible() {
       await testSubjects.find('infraSuggestionsPanel');
+    },
+
+    async ensureKubernetesTourIsVisible() {
+      const container = await testSubjects.find('infra-kubernetesTour-text');
+      const containerText = await container.getVisibleText();
+      return containerText;
+    },
+
+    async ensureKubernetesTourIsClosed() {
+      await testSubjects.missingOrFail('infra-kubernetesTour-text');
+    },
+
+    async clickDismissKubernetesTourButton() {
+      return await testSubjects.click('infra-kubernetesTour-dismiss');
     },
   };
 }

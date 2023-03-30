@@ -78,18 +78,16 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
   public render() {
     const { uiCapabilities } = this.props;
 
-    if (!uiCapabilities.spaces.manage) {
+    if (!uiCapabilities.spaces?.manage) {
       return (
         <EuiCallOut
           title={
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
-                defaultMessage="Insufficient Privileges"
-              />
-            </p>
+            <FormattedMessage
+              id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
+              defaultMessage="Insufficient Privileges"
+            />
           }
-          iconType="alert"
+          iconType="warning"
           color="danger"
           data-test-subj="userCannotManageSpacesCallout"
         >

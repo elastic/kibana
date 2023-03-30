@@ -8,25 +8,29 @@
 import React, { useMemo } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ResponseActionValidatorRef } from '../response_actions_form';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { ResponseActionFormField } from './osquery_response_action_form_field';
 import type { ArrayItem } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
 import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
+import { UseField } from '../../../shared_imports';
 
-interface IProps {
+interface OsqueryResponseActionProps {
   item: ArrayItem;
-  formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
-export const OsqueryResponseAction = React.memo((props: IProps) => {
+const GhostFormField = () => <></>;
+
+export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionProps) => {
   const { osquery, application } = useKibana().services;
   const OsqueryForm = useMemo(
     () => osquery?.OsqueryResponseActionTypeForm,
     [osquery?.OsqueryResponseActionTypeForm]
   );
+  const isMounted = useIsMounted();
 
   if (osquery) {
-    const { disabled, permissionDenied } = osquery?.fetchInstallationStatus();
+    const { disabled, permissionDenied } = osquery.fetchInstallationStatus();
     const disabledOsqueryPermission = !(
       application?.capabilities?.osquery?.writeLiveQueries ||
       (application?.capabilities?.osquery?.runSavedQueries &&
@@ -37,6 +41,7 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
     if (permissionDenied || disabledOsqueryPermission) {
       return (
         <>
+          <UseField path={`${props.item.path}.params`} component={GhostFormField} />
           <EuiEmptyPrompt
             title={<h2>{PERMISSION_DENIED}</h2>}
             titleSize="xs"
@@ -44,12 +49,10 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
             body={
               <p>
                 <FormattedMessage
-                  id="xpack.securitySolution.osquery.action.missingPrivilleges"
+                  id="xpack.securitySolution.osquery.action.missingPrivileges"
                   defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
                   values={{
-                    // TODO fix error
-                    // eslint-disable-next-line react/jsx-no-literals
-                    osquery: <EuiCode>osquery</EuiCode>,
+                    osquery: <EuiCode>{'osquery'}</EuiCode>,
                   }}
                 />
               </p>
@@ -61,16 +64,26 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
 
     if (disabled) {
       return (
-        <EuiEmptyPrompt
-          iconType="logoOsquery"
-          title={<h2>{SHORT_EMPTY_TITLE}</h2>}
-          titleSize="xs"
-          body={<p>{NOT_AVAILABLE}</p>}
-        />
+        <>
+          <UseField path={`${props.item.path}.params`} component={GhostFormField} />
+          <EuiEmptyPrompt
+            iconType="logoOsquery"
+            title={<h2>{SHORT_EMPTY_TITLE}</h2>}
+            titleSize="xs"
+            body={<p>{NOT_AVAILABLE}</p>}
+          />
+        </>
       );
     }
-    if (OsqueryForm) {
-      return <OsqueryForm {...props} />;
+
+    if (isMounted() && OsqueryForm) {
+      return (
+        <UseField
+          path={`${props.item.path}.params`}
+          component={ResponseActionFormField}
+          readDefaultValueOnForm={!props.item.isNew}
+        />
+      );
     }
   }
 

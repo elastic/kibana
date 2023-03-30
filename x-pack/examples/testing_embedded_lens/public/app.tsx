@@ -312,7 +312,7 @@ function getLensAttributesPartition(
     layers: [
       {
         primaryGroups: ['col1'],
-        metric: 'col2',
+        metrics: ['col2'],
         layerId: 'layer1',
         layerType: 'data',
         numberDisplay: 'percent',
@@ -697,7 +697,7 @@ export const App = (props: {
                       </EuiButton>
                     </EuiFlexItem>
                     {hasParsingErrorDebounced && currentSO.current !== currentValid && (
-                      <EuiCallOut title="Error" color="danger" iconType="alert">
+                      <EuiCallOut title="Error" color="danger" iconType="warning">
                         <p>Check the spec</p>
                       </EuiCallOut>
                     )}

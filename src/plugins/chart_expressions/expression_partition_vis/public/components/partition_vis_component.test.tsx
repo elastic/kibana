@@ -26,6 +26,7 @@ import {
 } from '../mocks';
 import { ChartTypes } from '../../common/types';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { cloneDeep } from 'lodash';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -76,6 +77,8 @@ describe('PartitionVisComponent', function () {
       syncColors: false,
       fireEvent: jest.fn(),
       renderComplete: jest.fn(),
+      interactive: true,
+      columnCellValueActions: [],
       services: {
         data: dataPluginMock.createStartContract(),
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -83,8 +86,24 @@ describe('PartitionVisComponent', function () {
     };
   });
 
+  afterEach(() => {
+    mockState.clear();
+    jest.clearAllMocks();
+  });
+
   it('should render correct structure for pie', function () {
     const component = shallow(<PartitionVisComponent {...wrapperProps} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render correct structure for multi-metric pie', function () {
+    const localParams = cloneDeep(wrapperProps.visParams);
+
+    localParams.dimensions.metrics = [...localParams.dimensions.metrics, 'col-3-1'];
+
+    localParams.metricsToLabels = { 'col-3-1': 'metric1 label', 'col-1-1': 'metric2 label' };
+
+    const component = shallow(<PartitionVisComponent {...wrapperProps} visParams={localParams} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -153,6 +172,16 @@ describe('PartitionVisComponent', function () {
     await act(async () => {
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
     });
+  });
+
+  it('should render legend actions when it is interactive', async () => {
+    const component = shallow(<PartitionVisComponent {...wrapperProps} interactive={true} />);
+    expect(component.find(Settings).prop('legendAction')).toBeDefined();
+  });
+
+  it('should not render legend actions when it is not interactive', async () => {
+    const component = shallow(<PartitionVisComponent {...wrapperProps} interactive={false} />);
+    expect(component.find(Settings).prop('legendAction')).toBeUndefined();
   });
 
   it('hides the legend if the legend toggle is clicked', async () => {

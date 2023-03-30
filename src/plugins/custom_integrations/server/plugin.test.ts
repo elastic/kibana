@@ -40,7 +40,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath: '/app/integrations/language_clients/javascript/overview',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
+          categories: ['elastic_stack', 'elasticsearch_sdk'],
         },
         {
           id: 'language_client.ruby',
@@ -48,11 +48,10 @@ describe('CustomIntegrationsPlugin', () => {
           description: 'Index data to Elasticsearch with the Ruby client.',
           type: 'ui_link',
           shipper: 'language_clients',
-          uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/ruby-api/branch/ruby_client.html',
+          uiInternalPath: '/app/integrations/language_clients/ruby/overview',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
+          categories: ['elastic_stack', 'elasticsearch_sdk'],
         },
         {
           id: 'language_client.go',
@@ -60,11 +59,10 @@ describe('CustomIntegrationsPlugin', () => {
           description: 'Index data to Elasticsearch with the Go client.',
           type: 'ui_link',
           shipper: 'language_clients',
-          uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/go-api/branch/overview.html',
+          uiInternalPath: '/app/integrations/language_clients/go/overview',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
+          categories: ['elastic_stack', 'elasticsearch_sdk'],
         },
         {
           id: 'language_client.dotnet',
@@ -72,11 +70,10 @@ describe('CustomIntegrationsPlugin', () => {
           description: 'Index data to Elasticsearch with the .NET client.',
           type: 'ui_link',
           shipper: 'language_clients',
-          uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/net-api/branch/index.html',
+          uiInternalPath: '/app/integrations/language_clients/dotnet/overview',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
+          categories: ['elastic_stack', 'elasticsearch_sdk'],
         },
         {
           id: 'language_client.php',
@@ -84,11 +81,10 @@ describe('CustomIntegrationsPlugin', () => {
           description: 'Index data to Elasticsearch with the PHP client.',
           type: 'ui_link',
           shipper: 'language_clients',
-          uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/php-api/branch/index.html',
+          uiInternalPath: '/app/integrations/language_clients/php/overview',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
+          categories: ['elastic_stack', 'elasticsearch_sdk'],
         },
         {
           id: 'language_client.perl',
@@ -100,7 +96,7 @@ describe('CustomIntegrationsPlugin', () => {
             'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/branch/index.html',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
+          categories: ['elastic_stack', 'elasticsearch_sdk'],
         },
         {
           id: 'language_client.python',
@@ -108,11 +104,10 @@ describe('CustomIntegrationsPlugin', () => {
           description: 'Index data to Elasticsearch with the Python client.',
           type: 'ui_link',
           shipper: 'language_clients',
-          uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/python-api/branch/index.html',
+          uiInternalPath: '/app/integrations/language_clients/python/overview',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
+          categories: ['elastic_stack', 'elasticsearch_sdk'],
         },
         {
           id: 'language_client.rust',
@@ -124,7 +119,7 @@ describe('CustomIntegrationsPlugin', () => {
             'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/branch/index.html',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
+          categories: ['elastic_stack', 'elasticsearch_sdk'],
         },
         {
           id: 'language_client.java',
@@ -132,11 +127,10 @@ describe('CustomIntegrationsPlugin', () => {
           description: 'Index data to Elasticsearch with the Java client.',
           type: 'ui_link',
           shipper: 'language_clients',
-          uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/branch/index.html',
+          uiInternalPath: '/app/integrations/language_clients/java/overview',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['elastic_stack', 'custom', 'language_client'],
+          categories: ['elastic_stack', 'elasticsearch_sdk'],
         },
         {
           id: 'placeholder.esf',
@@ -150,7 +144,7 @@ describe('CustomIntegrationsPlugin', () => {
             'https://serverlessrepo.aws.amazon.com/applications/eu-central-1/267093732750/elastic-serverless-forwarder',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
-          categories: ['aws', 'custom'],
+          categories: ['aws', 'observability'],
         },
       ]);
     });

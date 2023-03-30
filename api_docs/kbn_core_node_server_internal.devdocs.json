@@ -11,10 +11,54 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-node-server-internal",
-        "id": "def-server.PrebootDeps",
+        "id": "def-common.InternalNodeServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalNodeServiceStart",
+        "description": [],
+        "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server-internal",
+            "id": "def-common.InternalNodeServiceStart.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "\nThe Kibana process can take on specialised roles via the `node.roles` config.\n\nThe roles can be used by plugins to adjust their behavior based\non the way the Kibana process has been configured."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-node-server",
+                "scope": "common",
+                "docId": "kibKbnCoreNodeServerPluginApi",
+                "section": "def-common.NodeRoles",
+                "text": "NodeRoles"
+              }
+            ],
+            "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-node-server-internal",
+        "id": "def-common.PrebootDeps",
         "type": "Interface",
         "tags": [],
         "label": "PrebootDeps",
@@ -25,7 +69,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-server.PrebootDeps.loggingSystem",
+            "id": "def-common.PrebootDeps.loggingSystem",
             "type": "Object",
             "tags": [],
             "label": "loggingSystem",
@@ -41,72 +85,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-node-server-internal",
-        "id": "def-server.nodeConfig",
-        "type": "Object",
-        "tags": [],
-        "label": "nodeConfig",
-        "description": [],
-        "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-server.nodeConfig.path",
-            "type": "string",
-            "tags": [],
-            "label": "path",
-            "description": [],
-            "signature": [
-              "\"node\""
-            ],
-            "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-server.nodeConfig.schema",
-            "type": "Object",
-            "tags": [],
-            "label": "schema",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "server",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
-                "text": "ObjectType"
-              },
-              "<{ roles: ",
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "server",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
-                "text": "Type"
-              },
-              "<\"*\"[] | (\"ui\" | \"background_tasks\")[]>; }>"
-            ],
-            "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

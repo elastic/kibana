@@ -52,6 +52,7 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
+      mappings: { properties: [] },
     });
     expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
   });
@@ -64,6 +65,7 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
+      mappings: { properties: [] },
     });
     expect(template.composed_of).toStrictEqual([
       ...composedOfTemplates,
@@ -79,6 +81,7 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
+      mappings: { properties: [] },
     });
     expect(template.composed_of).toStrictEqual(FLEET_COMPONENT_TEMPLATES);
   });
@@ -92,6 +95,7 @@ describe('EPM template', () => {
       composedOfTemplates: [],
       templatePriority: 200,
       hidden: true,
+      mappings: { properties: [] },
     });
     expect(templateWithHidden.data_stream.hidden).toEqual(true);
 
@@ -100,6 +104,74 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
+      mappings: { properties: [] },
+    });
+    expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
+  });
+
+  it('adds index_template.data_stream.hidden field correctly', () => {
+    const templateIndexPattern = 'logs-nginx.access-abcd-*';
+
+    const templateWithGlobalAndDataStreamHidden = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      hidden: false,
+      mappings: { properties: [] },
+      registryElasticsearch: {
+        'index_template.data_stream': {
+          hidden: true,
+        },
+      },
+    });
+    expect(templateWithGlobalAndDataStreamHidden.data_stream.hidden).toEqual(true);
+
+    const templateWithDataStreamHidden = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      mappings: { properties: [] },
+      registryElasticsearch: {
+        'index_template.data_stream': {
+          hidden: true,
+        },
+      },
+    });
+    expect(templateWithDataStreamHidden.data_stream.hidden).toEqual(true);
+
+    const templateWithoutDataStreamHidden = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      hidden: true,
+      mappings: { properties: [] },
+    });
+    expect(templateWithoutDataStreamHidden.data_stream.hidden).toEqual(true);
+
+    const templateWithGlobalHiddenTrueAndDataStreamHiddenFalse = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      hidden: true,
+      mappings: { properties: [] },
+      registryElasticsearch: {
+        'index_template.data_stream': {
+          hidden: false,
+        },
+      },
+    });
+    expect(templateWithGlobalHiddenTrueAndDataStreamHiddenFalse.data_stream.hidden).toEqual(true);
+
+    const templateWithoutHidden = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      mappings: { properties: [] },
     });
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
   });
@@ -373,6 +445,27 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+  });
+
+  it('tests processing date field with format', () => {
+    const dateWithFormatYml = `
+- name: dateWithFormat
+  type: date
+  date_format: yyyy-MM-dd
+`;
+
+    const dateWithMapping = {
+      properties: {
+        dateWithFormat: {
+          type: 'date',
+          format: 'yyyy-MM-dd',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(dateWithFormatYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(dateWithMapping);
   });
 
   it('tests processing wildcard field with multi fields', () => {
@@ -709,7 +802,7 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
-  it('tests processing dimension field', () => {
+  it('tests processing dimension field on a keyword', () => {
     const literalYml = `
 - name: example.id
   type: keyword
@@ -729,11 +822,64 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, {
+      isIndexModeTimeSeries: true,
+    });
     expect(mappings).toEqual(expectedMapping);
   });
 
-  it('tests processing metric_type field', () => {
+  it('tests processing dimension field on an long', () => {
+    const literalYml = `
+- name: example.id
+  type: long
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              time_series_dimension: true,
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, {
+      isIndexModeTimeSeries: true,
+    });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing dimension field on an long without timeserie enabled', () => {
+    const literalYml = `
+- name: example.id
+  type: long
+  dimension: true
+  `;
+    const expectedMapping = {
+      properties: {
+        example: {
+          properties: {
+            id: {
+              type: 'long',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, {
+      isIndexModeTimeSeries: false,
+    });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field with index mode time series', () => {
     const literalYml = `
 - name: total.norm.pct
   type: scaled_float
@@ -751,7 +897,6 @@ describe('EPM template', () => {
                   scaling_factor: 1000,
                   type: 'scaled_float',
                   meta: {
-                    metric_type: 'gauge',
                     unit: 'percent',
                   },
                   time_series_metric: 'gauge',
@@ -764,7 +909,67 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields);
+    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field with index mode time series disabled', () => {
+    const literalYml = `
+- name: total.norm.pct
+  type: scaled_float
+  metric_type: gauge
+  unit: percent
+  format: percent
+`;
+    const expectedMapping = {
+      properties: {
+        total: {
+          properties: {
+            norm: {
+              properties: {
+                pct: {
+                  scaling_factor: 1000,
+                  type: 'scaled_float',
+                  meta: {
+                    unit: 'percent',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: false });
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing metric_type field with long field and index mode timeseries', () => {
+    const literalYml = `
+    - name: total
+      type: long
+      format: bytes
+      unit: byte
+      metric_type: gauge
+      description: |
+        Total swap memory.
+`;
+    const expectedMapping = {
+      properties: {
+        total: {
+          type: 'long',
+          meta: {
+            unit: 'byte',
+          },
+          time_series_metric: 'gauge',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(literalYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
     expect(mappings).toEqual(expectedMapping);
   });
 

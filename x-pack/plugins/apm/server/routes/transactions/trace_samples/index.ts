@@ -16,11 +16,20 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const TRACE_SAMPLES_SIZE = 500;
+
+export interface TransactionTraceSamplesResponse {
+  traceSamples: Array<{
+    score: number | null | undefined;
+    timestamp: string;
+    transactionId: string;
+    traceId: string;
+  }>;
+}
 
 export async function getTraceSamples({
   environment,
@@ -48,7 +57,7 @@ export async function getTraceSamples({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<TransactionTraceSamplesResponse> {
   return withApmSpan('get_trace_samples', async () => {
     const commonFilters = [
       { term: { [SERVICE_NAME]: serviceName } },

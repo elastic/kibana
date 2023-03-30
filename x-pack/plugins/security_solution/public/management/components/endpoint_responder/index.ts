@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';
-export { ActionLogButton } from './action_log_button';
+export { getEndpointConsoleCommands } from './lib/console_commands_definition';
+export { ActionLogButton } from './components/action_log_button';
+export { HeaderEndpointInfo } from './components/header_endpoint_info';
+export { OfflineCallout } from './components/offline_callout';

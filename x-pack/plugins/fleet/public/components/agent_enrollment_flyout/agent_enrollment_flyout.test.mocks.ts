@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
 jest.mock('../../hooks', () => {
   return {
     ...jest.requireActual('../../hooks'),
     useFleetStatus: jest.fn(),
+    useFleetServerStandalone: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
   };
 });
@@ -26,6 +31,11 @@ jest.mock('../../hooks/use_request', () => {
           },
         ],
       },
+    }),
+    useGetFleetProxies: jest.fn().mockReturnValue({
+      data: { items: [] },
+      isLoading: false,
+      isInitialRequest: false,
     }),
     useGetSettings: jest.fn().mockReturnValue({
       data: { item: { fleet_server_hosts: ['test'] } },
@@ -97,7 +107,7 @@ jest.mock('./steps', () => {
   };
 });
 
-jest.mock('../../services/has_fleet_server', () => {
+jest.mock('../../../common/services/agent_policies_helpers', () => {
   return {
     policyHasFleetServer: jest.fn().mockReturnValue(true),
   };

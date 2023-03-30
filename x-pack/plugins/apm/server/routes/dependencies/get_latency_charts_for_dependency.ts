@@ -13,7 +13,7 @@ import {
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -25,17 +25,7 @@ import {
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getLatencyChartsForDependency({
-  dependencyName,
-  spanName,
-  searchServiceDestinationMetrics,
-  apmEventClient,
-  start,
-  end,
-  environment,
-  kuery,
-  offset,
-}: {
+interface Options {
   dependencyName: string;
   spanName: string;
   searchServiceDestinationMetrics: boolean;
@@ -45,7 +35,19 @@ export async function getLatencyChartsForDependency({
   environment: string;
   kuery: string;
   offset?: string;
-}) {
+}
+
+async function getLatencyChartsForDependencyForTimeRange({
+  dependencyName,
+  spanName,
+  searchServiceDestinationMetrics,
+  apmEventClient,
+  start,
+  end,
+  environment,
+  kuery,
+  offset,
+}: Options) {
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -119,4 +121,49 @@ export async function getLatencyChartsForDependency({
       };
     }) ?? []
   );
+}
+
+export interface LatencyChartsDependencyResponse {
+  currentTimeseries: Array<{ x: number; y: number }>;
+  comparisonTimeseries: Array<{ x: number; y: number }> | null;
+}
+
+export async function getLatencyChartsForDependency({
+  apmEventClient,
+  dependencyName,
+  start,
+  end,
+  environment,
+  kuery,
+  searchServiceDestinationMetrics,
+  spanName,
+  offset,
+}: Options): Promise<LatencyChartsDependencyResponse> {
+  const [currentTimeseries, comparisonTimeseries] = await Promise.all([
+    getLatencyChartsForDependencyForTimeRange({
+      dependencyName,
+      spanName,
+      searchServiceDestinationMetrics,
+      apmEventClient,
+      start,
+      end,
+      kuery,
+      environment,
+    }),
+    offset
+      ? getLatencyChartsForDependencyForTimeRange({
+          dependencyName,
+          spanName,
+          searchServiceDestinationMetrics,
+          apmEventClient,
+          start,
+          end,
+          kuery,
+          environment,
+          offset,
+        })
+      : null,
+  ]);
+
+  return { currentTimeseries, comparisonTimeseries };
 }

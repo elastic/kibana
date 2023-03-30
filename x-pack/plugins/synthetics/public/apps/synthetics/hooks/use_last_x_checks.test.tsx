@@ -8,7 +8,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useLastXChecks } from './use_last_x_checks';
 import { WrappedHelper } from '../utils/testing';
-import * as searchHooks from '@kbn/observability-plugin/public/hooks/use_es_search';
+import * as searchHooks from './use_redux_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
 describe('useLastXChecks', () => {
@@ -29,12 +29,9 @@ describe('useLastXChecks', () => {
   });
 
   it('returns expected results', () => {
-    jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading: false,
-    });
+    jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: { hits: { hits: getMockHits() } },
+    } as any);
 
     const { result } = renderHook(
       () =>
@@ -84,13 +81,9 @@ describe('useLastXChecks', () => {
   });
 
   it('passes proper params', () => {
-    const loading = true;
-    const spy = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading,
-    });
+    const spy = jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: { hits: { hits: getMockHits() } },
+    } as any);
 
     const fields = ['monitor.summary'];
     const size = 30;
@@ -114,12 +107,9 @@ describe('useLastXChecks', () => {
   });
 
   it('returns loading properly', () => {
-    jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading: false,
-    });
+    jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: { hits: { hits: getMockHits() } },
+    } as any);
 
     const { result } = renderHook(
       () =>
@@ -135,10 +125,9 @@ describe('useLastXChecks', () => {
   });
 
   it('returns loading true when there is no data', () => {
-    jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: undefined as unknown as ReturnType<typeof searchHooks.useEsSearch>['data'],
-      loading: false,
-    });
+    jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: undefined,
+    } as any);
 
     const { result } = renderHook(
       () =>
@@ -153,51 +142,10 @@ describe('useLastXChecks', () => {
     expect(result.current.loading).toEqual(true);
   });
 
-  it('calls useEsSearch with empty index when locations have not loaded, to prevent calling twice', () => {
-    const loading = true;
-    const spy = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading,
-    });
-
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
-      return (
-        <WrappedHelper
-          state={{ serviceLocations: { locationsLoaded: false, loading: false, locations: [] } }}
-        >
-          {children}
-        </WrappedHelper>
-      );
-    };
-
-    renderHook(
-      () =>
-        useLastXChecks({
-          monitorId: 'mock-id',
-          locationId: 'loc',
-          size: 30,
-          fields: ['monitor.duration.us'],
-        }),
-      { wrapper: WrapperWithState }
-    );
-    expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(
-      expect.objectContaining({ index: '' }),
-      expect.anything(),
-      expect.anything()
-    );
-  });
-
   it('calls useEsSearch with correct index', () => {
-    const loading = true;
-    const spy = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading,
-    });
+    const spy = jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: { hits: { hits: getMockHits() } },
+    } as any);
 
     const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
       return (

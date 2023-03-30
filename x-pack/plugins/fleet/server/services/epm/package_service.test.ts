@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../routes/security');
+jest.mock('../security');
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 
@@ -92,7 +92,7 @@ function getTest(
         method: mocks.packageClient.fetchFindLatestPackage.bind(mocks.packageClient),
         args: ['package name'],
         spy: jest.spyOn(epmRegistry, 'fetchFindLatestPackageOrThrow'),
-        spyArgs: ['package name'],
+        spyArgs: ['package name', undefined],
         spyResponse: { name: 'fetchFindLatestPackage test' },
         expectedReturnValue: { name: 'fetchFindLatestPackage test' },
       };

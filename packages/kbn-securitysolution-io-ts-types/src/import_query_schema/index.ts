@@ -14,14 +14,18 @@ export const importQuerySchema = t.exact(
   t.partial({
     overwrite: DefaultStringBooleanFalse,
     overwrite_exceptions: DefaultStringBooleanFalse,
+    overwrite_action_connectors: DefaultStringBooleanFalse,
+    as_new_list: DefaultStringBooleanFalse,
   })
 );
 
 export type ImportQuerySchema = t.TypeOf<typeof importQuerySchema>;
 export type ImportQuerySchemaDecoded = Omit<
   ImportQuerySchema,
-  'overwrite' | 'overwrite_exceptions'
+  'overwrite' | 'overwrite_exceptions' | 'as_new_list' | 'overwrite_action_connectors'
 > & {
   overwrite: boolean;
   overwrite_exceptions: boolean;
+  overwrite_action_connectors: boolean;
+  as_new_list: boolean;
 };

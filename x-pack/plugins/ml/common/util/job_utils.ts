@@ -16,6 +16,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isDefined } from '@kbn/ml-is-defined';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
@@ -35,7 +36,6 @@ import { MLCATEGORY } from '../constants/field_types';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
-import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
   valid: boolean;
@@ -422,14 +422,6 @@ export function prefixDatafeedId(datafeedId: string, prefix: string): string {
 
 export function createDatafeedId(jobId: string) {
   return `datafeed-${jobId}`;
-}
-
-// Returns a name which is safe to use in elasticsearch aggregations for the supplied
-// field name. Aggregation names must be alpha-numeric and can only contain '_' and '-' characters,
-// so if the supplied field names contains disallowed characters, the provided index
-// identifier is used to return a safe 'dummy' name in the format 'field_index' e.g. field_0, field_1
-export function getSafeAggregationName(fieldName: string, index: number): string {
-  return fieldName.match(/^[a-zA-Z0-9-_.]+$/) ? fieldName : `field_${index}`;
 }
 
 export function uniqWithIsEqual<T extends any[]>(arr: T): T {

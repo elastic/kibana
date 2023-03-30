@@ -17,8 +17,8 @@ import {
 import type { LegacyNotificationAlertTypeDefinition } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationParams } from './legacy_types';
-import type { AlertAttributes } from '../../../signals/types';
-import { siemRuleActionGroups } from '../../../signals/siem_rule_action_groups';
+import type { AlertAttributes } from '../../../rule_types/types';
+import { siemRuleActionGroups } from '../../../rule_types/utils/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
 import { getSignals } from './get_signals';
@@ -50,7 +50,14 @@ export const legacyRulesNotificationAlertType = ({
   },
   minimumLicenseRequired: 'basic',
   isExportable: false,
-  async executor({ startedAt, previousStartedAt, alertId, services, params, spaceId }) {
+  async executor({
+    startedAt,
+    previousStartedAt,
+    rule: { id: ruleId },
+    services,
+    params,
+    spaceId,
+  }) {
     const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',
       params.ruleAlertId
@@ -60,7 +67,7 @@ export const legacyRulesNotificationAlertType = ({
       logger.error(
         [
           `Security Solution notification (Legacy) saved object for alert ${params.ruleAlertId} was not found with`,
-          `id: "${alertId}".`,
+          `id: "${ruleId}".`,
           `space id: "${spaceId}"`,
           'This indicates a dangling (Legacy) notification alert.',
           'You should delete this rule through "Kibana UI -> Stack Management -> Rules and Connectors" to remove this error message.',
@@ -118,7 +125,7 @@ export const legacyRulesNotificationAlertType = ({
     );
 
     if (signalsCount !== 0) {
-      const alertInstance = services.alertFactory.create(alertId);
+      const alertInstance = services.alertFactory.create(ruleId);
       scheduleNotificationActions({
         alertInstance,
         signalsCount,

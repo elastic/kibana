@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Readable } from 'stream';
+import type { FilesClient } from '../../../common/files_client';
 import { NoDownloadAvailableError } from '../../file/errors';
 import { FileNotFoundError } from '../../file_service/errors';
 import {
@@ -31,7 +32,7 @@ const rt = {
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, any>;
+export type Endpoint = CreateRouteDefinition<typeof rt, any, FilesClient['publicDownload']>;
 
 const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;

@@ -19,6 +19,7 @@ import { setupFleet } from './setup';
 
 jest.mock('./preconfiguration');
 jest.mock('./preconfiguration/outputs');
+jest.mock('./preconfiguration/fleet_proxies');
 jest.mock('./settings');
 jest.mock('./output');
 jest.mock('./download_source');
@@ -60,6 +61,7 @@ describe('setupFleet', () => {
     (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
 
     soClient.find.mockResolvedValue({ saved_objects: [] } as any);
+    soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
   });
 
   afterEach(async () => {

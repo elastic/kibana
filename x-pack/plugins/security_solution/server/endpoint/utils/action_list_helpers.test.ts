@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
@@ -337,7 +337,7 @@ describe('action helpers', () => {
       );
     });
     it('should query with actionIds and elasticAgentIds when provided', async () => {
-      const actionIds = [uuid.v4(), uuid.v4()];
+      const actionIds = [uuidv4(), uuidv4()];
       const elasticAgentIds = ['123', '456'];
       const esClient = mockScopedEsClient.asInternalUser;
       applyActionListEsSearchMock(esClient);

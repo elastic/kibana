@@ -62,7 +62,6 @@ export const JobsListPage: FC<{
     () => mlApiServicesProvider(new HttpService(coreStart.http)),
     [coreStart.http]
   );
-  const spacesEnabled = spacesApi !== undefined;
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
@@ -153,20 +152,18 @@ export const JobsListPage: FC<{
                 >
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false}>
-                      {spacesEnabled && (
-                        <>
-                          <EuiButtonEmpty
-                            onClick={() => setShowSyncFlyout(true)}
-                            data-test-subj="mlStackMgmtSyncButton"
-                          >
-                            {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                              defaultMessage: 'Synchronize saved objects',
-                            })}
-                          </EuiButtonEmpty>
-                          {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                          <EuiSpacer size="s" />
-                        </>
-                      )}
+                      <>
+                        <EuiButtonEmpty
+                          onClick={() => setShowSyncFlyout(true)}
+                          data-test-subj="mlStackMgmtSyncButton"
+                        >
+                          {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                            defaultMessage: 'Synchronize saved objects',
+                          })}
+                        </EuiButtonEmpty>
+                        {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                        <EuiSpacer size="s" />
+                      </>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <ExportJobsFlyout

@@ -45,6 +45,7 @@ export const useResponderActionItem = (
     if (isResponseActionsConsoleEnabled && !isAuthzLoading && canAccessResponseConsole && isAlert) {
       actions.push(
         <ResponderContextMenuItem
+          key="endpointResponseActions-action-item"
           endpointId={isEndpointAlert ? endpointId : ''}
           onClick={onClick}
         />

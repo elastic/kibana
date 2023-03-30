@@ -84,7 +84,7 @@ expect.extend({
                   next,
                   'Expected',
                   'Received',
-                  this.expand
+                  Boolean(this.expand)
                 )}`
             )
             .join(`\n\n`)}`;
@@ -148,7 +148,7 @@ expect.extend({
                   next,
                   'Expected',
                   'Received',
-                  this.expand
+                  Boolean(this.expand)
                 )}`
             )
             .join(`\n\n`)}`;

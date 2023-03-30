@@ -20,7 +20,7 @@ describe('Mappings editor: runtime fields', () => {
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -221,6 +221,7 @@ describe('Mappings editor: runtime fields', () => {
 
         await act(async () => {
           find('runtimeFieldEditor.saveFieldButton').simulate('click');
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         });
         component.update();
 

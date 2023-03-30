@@ -50,7 +50,7 @@ export interface CallWithRequestParams extends estypes.RequestBase {
   allow_no_indices?: boolean;
   size?: number;
   terminate_after?: number;
-  fields?: string | string[];
+  fields?: estypes.Fields;
   path?: string;
   query?: string | object;
   track_total_hits?: boolean | number;
@@ -90,11 +90,6 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
 
 export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatabaseResponse {
   responses: Array<InfraDatabaseSearchResponse<Hit, Aggregation>>;
-}
-
-export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
-  indices: string[];
-  fields: InfraFieldsResponse;
 }
 
 export interface InfraDatabaseGetIndicesAliasResponse {

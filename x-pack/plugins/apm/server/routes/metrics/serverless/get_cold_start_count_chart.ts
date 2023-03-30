@@ -13,7 +13,7 @@ import {
   FAAS_COLDSTART,
   FAAS_ID,
   METRICSET_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
 import { ChartBase } from '../types';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';

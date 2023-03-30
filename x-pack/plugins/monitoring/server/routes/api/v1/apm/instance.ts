@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
-import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 import {
   postApmInstanceRequestParamsRT,
   postApmInstanceRequestPayloadRT,
@@ -16,6 +14,7 @@ import { getApmInfo } from '../../../../lib/apm';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
+import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_instance';
 
@@ -35,7 +34,12 @@ export function apmInstanceRoute(server: MonitoringCore) {
       const config = server.config;
       const clusterUuid = req.params.clusterUuid;
       const ccs = req.payload.ccs;
-      const apmIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
+      const apmIndexPattern = getIndexPatterns({
+        ccs,
+        config,
+        moduleType: 'beats',
+        dataset: 'stats',
+      });
 
       const showCgroupMetrics = config.ui.container.apm.enabled;
       if (showCgroupMetrics) {

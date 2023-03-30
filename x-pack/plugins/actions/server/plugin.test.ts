@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { schema, ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -46,12 +46,6 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
-        cleanupFailedExecutionsTask: {
-          enabled: true,
-          cleanupInterval: schema.duration().validate('5m'),
-          idleInterval: schema.duration().validate('1h'),
-          pageSize: 100,
-        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -219,12 +213,6 @@ describe('Actions Plugin', () => {
           rejectUnauthorized: true,
           maxResponseContentLength: new ByteSizeValue(1000000),
           responseTimeout: moment.duration('60s'),
-          cleanupFailedExecutionsTask: {
-            enabled: true,
-            cleanupInterval: schema.duration().validate('5m'),
-            idleInterval: schema.duration().validate('1h'),
-            pageSize: 100,
-          },
           ...overrides,
         };
       }
@@ -280,12 +268,6 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
-        cleanupFailedExecutionsTask: {
-          enabled: true,
-          cleanupInterval: schema.duration().validate('5m'),
-          idleInterval: schema.duration().validate('1h'),
-          pageSize: 100,
-        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -302,6 +284,7 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        eventLog: eventLogMock.createStart(),
       };
     });
 
@@ -353,12 +336,6 @@ describe('Actions Plugin', () => {
           rejectUnauthorized: true,
           maxResponseContentLength: new ByteSizeValue(1000000),
           responseTimeout: moment.duration('60s'),
-          cleanupFailedExecutionsTask: {
-            enabled: true,
-            cleanupInterval: schema.duration().validate('5m'),
-            idleInterval: schema.duration().validate('1h'),
-            pageSize: 100,
-          },
           ...overrides,
         };
       }
@@ -380,6 +357,7 @@ describe('Actions Plugin', () => {
           licensing: licensingMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
         };
       }
 

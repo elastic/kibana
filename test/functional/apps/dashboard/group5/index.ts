@@ -11,38 +11,36 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
-  async function loadLogstash() {
-    await browser.setWindowSize(1200, 900);
-    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-  }
-
-  async function unloadLogstash() {
+  async function loadCurrentData() {
+    await browser.setWindowSize(1300, 900);
     await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
-  describe('dashboard app - group 5', function () {
-    // TODO: Remove when vislib is removed
-    // https://github.com/elastic/kibana/issues/56143
-    describe('old charts library', function () {
-      before(async () => {
-        await loadLogstash();
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': true,
-        });
-        await browser.refresh();
-      });
+  async function unloadCurrentData() {
+    await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
+  }
 
-      after(async () => {
-        await unloadLogstash();
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': false,
-        });
-        await browser.refresh();
-      });
+  describe('dashboard app - group 1', function () {
+    before(loadCurrentData);
+    after(unloadCurrentData);
 
-      loadTestFile(require.resolve('../group3/dashboard_state'));
-    });
+    // This has to be first since the other tests create some embeddables as side affects and our counting assumes
+    // a fresh index.
+    loadTestFile(require.resolve('./empty_dashboard'));
+    loadTestFile(require.resolve('./dashboard_options'));
+    loadTestFile(require.resolve('./data_shared_attributes'));
+    loadTestFile(require.resolve('./share'));
+    loadTestFile(require.resolve('./embed_mode'));
+    loadTestFile(require.resolve('./dashboard_back_button'));
+    loadTestFile(require.resolve('./dashboard_error_handling'));
+    loadTestFile(require.resolve('./legacy_urls'));
+    loadTestFile(require.resolve('./saved_search_embeddable'));
+
+    // Note: This one must be last because it unloads some data for one of its tests!
+    // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
+    // to improve efficiency...
+    loadTestFile(require.resolve('./dashboard_query_bar'));
   });
 }

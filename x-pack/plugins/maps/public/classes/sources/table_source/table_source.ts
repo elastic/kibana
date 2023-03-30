@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { GeoJsonProperties } from 'geojson';
 import type { Query } from '@kbn/data-plugin/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
   TableSourceDescriptor,
-  VectorJoinSourceRequestMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ITermJoinSource } from '../term_join_source';
@@ -38,7 +37,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       __rows: descriptor.__rows || [],
       __columns: descriptor.__columns || [],
       term: descriptor.term || '',
-      id: descriptor.id || uuid(),
+      id: descriptor.id || uuidv4(),
     };
   }
 
@@ -52,7 +51,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   async getDisplayName(): Promise<string> {
     // no need to localize. this is never rendered.
-    return `table source ${uuid()}`;
+    return `table source ${uuidv4()}`;
   }
 
   getSyncMeta(): null {
@@ -60,7 +59,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   async getPropertiesMap(
-    searchFilters: VectorJoinSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void
@@ -189,7 +188,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   // Could be useful to implement, e.g. to preview raw csv data
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {

@@ -25,7 +25,11 @@ import {
   DashboardReplacePanelService,
   DashboardExpectService,
   DashboardPanelActionsService,
+  DashboardCustomizePanelProvider,
+  DashboardBadgeActionsProvider,
   DashboardVisualizationsService,
+  DashboardDrilldownPanelActionsProvider,
+  DashboardDrilldownsManageProvider,
 } from './dashboard';
 import { DocTableService } from './doc_table';
 import { EmbeddingService } from './embedding';
@@ -50,6 +54,8 @@ import { SavedQueryManagementComponentService } from './saved_query_management_c
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleService } from './menu_toggle';
 import { MonacoEditorService } from './monaco_editor';
+import { UsageCollectionService } from './usage_collection';
+import { SavedObjectsFinderService } from './saved_objects_finder';
 
 export const services = {
   ...commonServiceProviders,
@@ -70,6 +76,10 @@ export const services = {
   dashboardAddPanel: DashboardAddPanelService,
   dashboardReplacePanel: DashboardReplacePanelService,
   dashboardPanelActions: DashboardPanelActionsService,
+  dashboardCustomizePanel: DashboardCustomizePanelProvider,
+  dashboardBadgeActions: DashboardBadgeActionsProvider,
+  dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
+  dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   flyout: FlyoutService,
   comboBox: ComboBoxService,
   dataGrid: DataGridService,
@@ -90,4 +100,6 @@ export const services = {
   monacoEditor: MonacoEditorService,
   menuToggle: MenuToggleService,
   retryOnStale: RetryOnStaleProvider,
+  usageCollection: UsageCollectionService,
+  savedObjectsFinder: SavedObjectsFinderService,
 };

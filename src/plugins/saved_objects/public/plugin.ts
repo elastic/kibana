@@ -18,6 +18,7 @@ import {
 } from './saved_object';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
+import { setStartServices } from './kibana_services';
 
 export interface SavedObjectSetup {
   registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;
@@ -63,6 +64,7 @@ export class SavedObjectsPublicPlugin
     };
   }
   public start(core: CoreStart, { data, dataViews }: SavedObjectsStartDeps) {
+    setStartServices(core);
     return {
       SavedObjectClass: createSavedObjectClass(
         {

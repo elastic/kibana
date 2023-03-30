@@ -46,6 +46,7 @@ export const moduleToSecurityJob = (
     awaitingNodeAssignment: false,
     jobTags: {},
     bucketSpanSeconds: 900,
+    customSettings: moduleJob.config.custom_settings,
   };
 };
 

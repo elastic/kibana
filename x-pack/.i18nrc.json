@@ -11,8 +11,11 @@
     "xpack.cases": "plugins/cases",
     "xpack.cloud": "plugins/cloud",
     "xpack.cloudChat": "plugins/cloud_integrations/cloud_chat",
+    "xpack.cloudDefend": "plugins/cloud_defend",
     "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
+    "xpack.cloudDataMigration": "plugins/cloud_integrations/cloud_data_migration",
     "xpack.csp": "plugins/cloud_security_posture",
+    "xpack.customBranding": "plugins/custom_branding",
     "xpack.dashboard": "plugins/dashboard_enhanced",
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
@@ -21,6 +24,7 @@
     "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
     "xpack.dataVisualizer": "plugins/data_visualizer",
+    "xpack.exploratoryView": "plugins/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": ["plugins/global_search"],
     "xpack.globalSearchBar": ["plugins/global_search_bar"],
@@ -41,7 +45,7 @@
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps"],
     "xpack.aiops": ["packages/ml/aiops_components", "plugins/aiops"],
-    "xpack.ml": ["plugins/ml"],
+    "xpack.ml": ["packages/ml/date_picker", "plugins/ml"],
     "xpack.monitoring": ["plugins/monitoring"],
     "xpack.osquery": ["plugins/osquery"],
     "xpack.painlessLab": "plugins/painless_lab",
@@ -74,8 +78,8 @@
   },
   "exclude": ["examples"],
   "translations": [
-    "plugins/translations/translations/zh-CN.json",
-    "plugins/translations/translations/ja-JP.json",
-    "plugins/translations/translations/fr-FR.json"
+    "@kbn/translations-plugin/translations/zh-CN.json",
+    "@kbn/translations-plugin/translations/ja-JP.json",
+    "@kbn/translations-plugin/translations/fr-FR.json"
   ]
 }

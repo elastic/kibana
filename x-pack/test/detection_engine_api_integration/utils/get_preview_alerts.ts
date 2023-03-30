@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
-import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/enrichments/types';
+import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
 import { refreshIndex } from './refresh_index';
 
 /**
@@ -20,10 +20,12 @@ export const getPreviewAlerts = async ({
   es,
   previewId,
   size,
+  sort,
 }: {
   es: Client;
   previewId: string;
   size?: number;
+  sort?: string[];
 }) => {
   const index = '.preview.alerts-security.alerts-*';
   await refreshIndex(es, index);
@@ -40,6 +42,7 @@ export const getPreviewAlerts = async ({
     index,
     size,
     query,
+    sort,
   });
   return result.hits.hits;
 };

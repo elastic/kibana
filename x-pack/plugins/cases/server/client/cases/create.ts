@@ -40,8 +40,7 @@ export const create = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
   const {
-    unsecuredSavedObjectsClient,
-    services: { caseService, userActionService, licensingService },
+    services: { caseService, userActionService, licensingService, notificationService },
     user,
     logger,
     authorization: auth,
@@ -103,9 +102,8 @@ export const create = async (
       refresh: false,
     });
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.create_case,
-      unsecuredSavedObjectsClient,
       caseId: newCase.id,
       user,
       payload: {
@@ -116,11 +114,22 @@ export const create = async (
       owner: newCase.attributes.owner,
     });
 
-    return CaseResponseRt.encode(
-      flattenCaseSavedObject({
-        savedObject: newCase,
-      })
-    );
+    const flattenedCase = flattenCaseSavedObject({
+      savedObject: newCase,
+    });
+
+    if (query.assignees && query.assignees.length !== 0) {
+      const assigneesWithoutCurrentUser = query.assignees.filter(
+        (assignee) => assignee.uid !== user.profile_uid
+      );
+
+      await notificationService.notifyAssignees({
+        assignees: assigneesWithoutCurrentUser,
+        theCase: newCase,
+      });
+    }
+
+    return CaseResponseRt.encode(flattenedCase);
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }

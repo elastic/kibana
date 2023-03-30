@@ -22,7 +22,7 @@ export const DiscoverError = ({ error }: { error: Error }) => {
   return (
     <EuiEmptyPrompt
       paddingSize="l"
-      iconType="alert"
+      iconType="warning"
       iconColor="danger"
       title={
         <h2>
@@ -34,10 +34,7 @@ export const DiscoverError = ({ error }: { error: Error }) => {
       body={<p>{error.message}</p>}
       actions={
         <EuiButton color="primary" fill onClick={goToMain}>
-          <FormattedMessage
-            id="discover.goToDiscoverMainViewButtonText"
-            defaultMessage="Go to Discover main view"
-          />
+          <FormattedMessage id="discover.goToDiscoverButtonText" defaultMessage="Go to Discover" />
         </EuiButton>
       }
     />

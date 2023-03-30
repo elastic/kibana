@@ -20,7 +20,7 @@ import {
   getValueInSeconds,
   getOptionalArrayField,
   getOptionalListField,
-  getMultipleUrlsOrHostsError,
+  getInvalidUrlsOrHostsError,
   getUnsupportedKeysError,
 } from './common_fields';
 
@@ -36,7 +36,7 @@ export const getNormalizeICMPFields = ({
   const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
-  const commonFields = getNormalizeCommonFields({
+  const { errors: commonErrors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
@@ -45,10 +45,13 @@ export const getNormalizeICMPFields = ({
     version,
   });
 
+  // Add common erros to errors arary
+  errors.push(...commonErrors);
+
   /* Check if monitor has multiple hosts */
   const hosts = getOptionalListField(monitor.hosts);
-  if (hosts.length > 1) {
-    errors.push(getMultipleUrlsOrHostsError(monitor, 'hosts', version));
+  if (hosts.length !== 1) {
+    errors.push(getInvalidUrlsOrHostsError(monitor, 'hosts', version));
   }
 
   if (unsupportedKeys.length) {

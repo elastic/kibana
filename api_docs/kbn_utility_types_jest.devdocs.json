@@ -13,24 +13,40 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/utility-types-jest",
-        "id": "def-server.DeeplyMockedKeys",
+        "id": "def-common.DeeplyMockedKeys",
         "type": "Type",
         "tags": [],
         "label": "DeeplyMockedKeys",
         "description": [],
         "signature": [
-          "{ [P in keyof T]: T[P] extends (...args: any[]) => any ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>> : ",
+          "{ [P in keyof T]: T[P] extends readonly any[] ? readonly ",
           {
             "pluginId": "@kbn/utility-types-jest",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesJestPluginApi",
-            "section": "def-server.DeeplyMockedKeys",
+            "section": "def-common.DeeplyMockedKeys",
             "text": "DeeplyMockedKeys"
           },
-          "<T[P]>; } & T"
+          "<T[P][0]>[] : T[P] extends (...args: any[]) => any ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>> : T[P] extends object ? ",
+          {
+            "pluginId": "@kbn/utility-types-jest",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesJestPluginApi",
+            "section": "def-common.DeeplyMockedKeys",
+            "text": "DeeplyMockedKeys"
+          },
+          "<T[P]> : T[P]; } & T"
         ],
         "path": "packages/kbn-utility-types-jest/index.ts",
         "deprecated": false,
@@ -39,7 +55,7 @@
       },
       {
         "parentPluginId": "@kbn/utility-types-jest",
-        "id": "def-server.MockedKeys",
+        "id": "def-common.MockedKeys",
         "type": "Type",
         "tags": [],
         "label": "MockedKeys",
@@ -53,14 +69,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

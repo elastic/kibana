@@ -9,7 +9,9 @@ import React from 'react';
 import moment from 'moment';
 import { screen } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
+// eslint-disable-next-line no-restricted-imports
 import * as reactRouterDom from 'react-router-dom';
+
 import { Ping } from '../../../../common/runtime_types';
 import { MonitorPageTitle, MonitorPageTitleContent } from './monitor_title';
 
@@ -42,6 +44,7 @@ describe('MonitorTitle component', () => {
       id: defaultMonitorId,
       status: 'up',
       type: 'http',
+      check_group: 'test-group',
     },
     url: {
       full: 'https://www.elastic.co/',
@@ -58,6 +61,7 @@ describe('MonitorTitle component', () => {
       id: 'browser',
       status: 'up',
       type: 'browser',
+      check_group: 'test-group',
     },
     url: {
       full: 'https://www.elastic.co/',

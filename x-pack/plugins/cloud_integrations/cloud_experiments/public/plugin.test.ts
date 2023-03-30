@@ -128,9 +128,9 @@ describe('Cloud Experiments public plugin', () => {
         });
 
         expect(metadataServiceSetupSpy).toHaveBeenCalledWith({
-          is_elastic_staff_owned: true,
+          isElasticStaff: true,
           kibanaVersion: 'version',
-          trial_end_date: '2020-10-01T14:13:12.000Z',
+          trialEndDate: '2020-10-01T14:13:12.000Z',
           userId: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
         });
       });
@@ -170,7 +170,7 @@ describe('Cloud Experiments public plugin', () => {
       );
     });
 
-    test('triggers a userMetadataUpdate for `has_data`', async () => {
+    test('triggers a userMetadataUpdate for `hasData`', async () => {
       plugin.setup(coreMock.createSetup(), {
         cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
       });
@@ -184,7 +184,7 @@ describe('Cloud Experiments public plugin', () => {
       // For some reason, fakeSchedulers is not working on browser-side tests :shrug:
       expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith(
         expect.objectContaining({
-          has_data: true,
+          hasData: true,
         })
       );
     });

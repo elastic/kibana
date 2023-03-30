@@ -679,7 +679,7 @@
         "label": "Warnings",
         "description": [],
         "signature": [
-          "({ warnings }: { warnings: React.ReactNode[]; }) => JSX.Element | null"
+          "({\n  warnings,\n  compressed = false,\n  'data-test-subj': dataTestSubj = 'chart-inline-warning-button',\n}: { warnings: React.ReactNode[]; compressed?: boolean | undefined; 'data-test-subj'?: string | undefined; }) => JSX.Element | null"
         ],
         "path": "src/plugins/charts/public/static/components/warnings.tsx",
         "deprecated": false,
@@ -690,7 +690,7 @@
             "id": "def-public.Warnings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ warnings }",
+            "label": "{\n  warnings,\n  compressed = false,\n  'data-test-subj': dataTestSubj = 'chart-inline-warning-button',\n}",
             "description": [],
             "path": "src/plugins/charts/public/static/components/warnings.tsx",
             "deprecated": false,
@@ -705,6 +705,34 @@
                 "description": [],
                 "signature": [
                   "React.ReactNode[]"
+                ],
+                "path": "src/plugins/charts/public/static/components/warnings.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.Warnings.$1.compressed",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "compressed",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/charts/public/static/components/warnings.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.Warnings.$1.datatestsubj",
+                "type": "string",
+                "tags": [],
+                "label": "'data-test-subj'",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "src/plugins/charts/public/static/components/warnings.tsx",
                 "deprecated": false,
@@ -1283,6 +1311,56 @@
       },
       {
         "parentPluginId": "charts",
+        "id": "def-public.MultiClickTriggerEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "MultiClickTriggerEvent",
+        "description": [],
+        "path": "src/plugins/charts/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.MultiClickTriggerEvent.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"multiFilter\""
+            ],
+            "path": "src/plugins/charts/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.MultiClickTriggerEvent.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "{ data: { table: Pick<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", \"rows\" | \"columns\">; column: number; value: any[]; }; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+            ],
+            "path": "src/plugins/charts/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-public.RawColorSchema",
         "type": "Interface",
         "tags": [],
@@ -1416,7 +1494,7 @@
         "tags": [],
         "label": "SystemPaletteArguments",
         "description": [],
-        "path": "src/plugins/charts/common/expressions/palette/system_palette.ts",
+        "path": "src/plugins/charts/common/expressions/palette/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1427,7 +1505,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/charts/common/expressions/palette/system_palette.ts",
+            "path": "src/plugins/charts/common/expressions/palette/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2526,7 +2604,7 @@
         "tags": [],
         "label": "SystemPaletteArguments",
         "description": [],
-        "path": "src/plugins/charts/common/expressions/palette/system_palette.ts",
+        "path": "src/plugins/charts/common/expressions/palette/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2537,7 +2615,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/charts/common/expressions/palette/system_palette.ts",
+            "path": "src/plugins/charts/common/expressions/palette/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2644,47 +2722,12 @@
         "signature": [
           "() => ",
           {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionFunctionDefinition",
-            "text": "ExpressionFunctionDefinition"
-          },
-          "<\"system_palette\", null, ",
-          {
             "pluginId": "charts",
             "scope": "common",
             "docId": "kibChartsPluginApi",
-            "section": "def-common.SystemPaletteArguments",
-            "text": "SystemPaletteArguments"
-          },
-          ", ",
-          "PaletteOutput",
-          "<{ [key: string]: unknown; }>, ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExecutionContext",
-            "text": "ExecutionContext"
-          },
-          "<",
-          {
-            "pluginId": "inspector",
-            "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          ">>"
+            "section": "def-common.SystemPaletteExpressionFunctionDefinition",
+            "text": "SystemPaletteExpressionFunctionDefinition"
+          }
         ],
         "path": "src/plugins/charts/common/expressions/palette/system_palette.ts",
         "deprecated": false,
@@ -3293,7 +3336,7 @@
         "tags": [],
         "label": "SystemPaletteArguments",
         "description": [],
-        "path": "src/plugins/charts/common/expressions/palette/system_palette.ts",
+        "path": "src/plugins/charts/common/expressions/palette/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3304,7 +3347,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/charts/common/expressions/palette/system_palette.ts",
+            "path": "src/plugins/charts/common/expressions/palette/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3450,6 +3493,62 @@
           "string[]"
         ],
         "path": "src/plugins/charts/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
+        "id": "def-common.SystemPaletteExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "SystemPaletteExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"system_palette\", null, ",
+          {
+            "pluginId": "charts",
+            "scope": "common",
+            "docId": "kibChartsPluginApi",
+            "section": "def-common.SystemPaletteArguments",
+            "text": "SystemPaletteArguments"
+          },
+          ", ",
+          "PaletteOutput",
+          "<{ [key: string]: unknown; }>, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/charts/common/expressions/palette/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

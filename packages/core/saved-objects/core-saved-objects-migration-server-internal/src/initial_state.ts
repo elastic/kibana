@@ -7,6 +7,7 @@
  */
 
 import * as Option from 'fp-ts/Option';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
@@ -23,6 +24,7 @@ import { excludeUnusedTypesQuery } from './core';
  */
 export const createInitialState = ({
   kibanaVersion,
+  waitForMigrationCompletion,
   targetMappings,
   preMigrationScript,
   migrationVersionPerType,
@@ -33,6 +35,7 @@ export const createInitialState = ({
   logger,
 }: {
   kibanaVersion: string;
+  waitForMigrationCompletion: boolean;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   migrationVersionPerType: SavedObjectsMigrationVersion;
@@ -42,12 +45,33 @@ export const createInitialState = ({
   docLinks: DocLinksServiceStart;
   logger: Logger;
 }): InitState => {
-  const outdatedDocumentsQuery = {
+  const outdatedDocumentsQuery: QueryDslQueryContainer = {
     bool: {
       should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
         bool: {
-          must: { term: { type } },
-          must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+          must: [
+            { term: { type } },
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: { exists: { field: 'migrationVersion' } },
+                      must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: [
+                        { exists: { field: 'migrationVersion' } },
+                        { term: { typeMigrationVersion: latestVersion } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
         },
       })),
     },
@@ -95,6 +119,7 @@ export const createInitialState = ({
 
   return {
     controlState: 'INIT',
+    waitForMigrationCompletion,
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,

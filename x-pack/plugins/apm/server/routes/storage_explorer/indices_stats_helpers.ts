@@ -6,17 +6,17 @@
  */
 import { uniq, values, sumBy } from 'lodash';
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { Setup } from '../../lib/helpers/setup_request';
 import { ApmPluginRequestHandlerContext } from '../typings';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTotalIndicesStats({
   context,
-  setup,
+  apmEventClient,
 }: {
   context: ApmPluginRequestHandlerContext;
-  setup: Setup;
+  apmEventClient: APMEventClient;
 }) {
-  const index = getApmIndicesCombined(setup);
+  const index = getApmIndicesCombined(apmEventClient);
   const esClient = (await context.core).elasticsearch.client;
   const totalStats = await esClient.asCurrentUser.indices.stats({ index });
   return totalStats;
@@ -61,12 +61,12 @@ export async function getApmDiskSpacedUsedPct(
 
 export async function getIndicesLifecycleStatus({
   context,
-  setup,
+  apmEventClient,
 }: {
   context: ApmPluginRequestHandlerContext;
-  setup: Setup;
+  apmEventClient: APMEventClient;
 }) {
-  const index = getApmIndicesCombined(setup);
+  const index = getApmIndicesCombined(apmEventClient);
   const esClient = (await context.core).elasticsearch.client;
   const { indices } = await esClient.asCurrentUser.ilm.explainLifecycle({
     index,
@@ -78,12 +78,12 @@ export async function getIndicesLifecycleStatus({
 
 export async function getIndicesInfo({
   context,
-  setup,
+  apmEventClient,
 }: {
   context: ApmPluginRequestHandlerContext;
-  setup: Setup;
+  apmEventClient: APMEventClient;
 }) {
-  const index = getApmIndicesCombined(setup);
+  const index = getApmIndicesCombined(apmEventClient);
   const esClient = (await context.core).elasticsearch.client;
   const indicesInfo = await esClient.asCurrentUser.indices.get({
     index,
@@ -98,10 +98,10 @@ export async function getIndicesInfo({
   return indicesInfo;
 }
 
-export function getApmIndicesCombined(setup: Setup) {
+export function getApmIndicesCombined(apmEventClient: APMEventClient) {
   const {
     indices: { transaction, span, metric, error },
-  } = setup;
+  } = apmEventClient;
 
   return uniq([transaction, span, metric, error]).join();
 }

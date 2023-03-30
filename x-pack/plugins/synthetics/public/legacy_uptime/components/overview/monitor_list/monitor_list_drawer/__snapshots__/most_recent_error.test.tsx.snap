@@ -6,7 +6,7 @@ exports[`MostRecentError component renders properly with mock data 1`] = `
   data-type="row"
 >
   <dt
-    class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
   >
     Most recent error (5 days ago)
   </dt>
@@ -15,6 +15,7 @@ exports[`MostRecentError component renders properly with mock data 1`] = `
   >
     <button
       class="euiLink emotion-euiLink-primary"
+      data-test-subj="syntheticsMonitorPageLinkLink"
       type="button"
     >
       <a

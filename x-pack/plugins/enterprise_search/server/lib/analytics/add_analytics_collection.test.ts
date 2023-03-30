@@ -6,30 +6,27 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 
-import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { addAnalyticsCollection } from './add_analytics_collection';
-import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
-import { setupAnalyticsCollectionIndex } from './setup_indices';
+import { fetchAnalyticsCollections } from './fetch_analytics_collection';
 
-jest.mock('./fetch_analytics_collection', () => ({ fetchAnalyticsCollectionByName: jest.fn() }));
-jest.mock('./setup_indices', () => ({
-  setupAnalyticsCollectionIndex: jest.fn(),
-}));
+jest.mock('./fetch_analytics_collection', () => ({ fetchAnalyticsCollections: jest.fn() }));
 
 describe('add analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      index: jest.fn(),
-      indices: {
-        create: jest.fn(),
-        exists: jest.fn(),
-        refresh: jest.fn(),
+      transport: {
+        request: jest.fn(),
       },
     },
     asInternalUser: {},
+  };
+
+  const mockDataViewsService = {
+    createAndSave: jest.fn(),
   };
 
   beforeEach(() => {
@@ -37,84 +34,65 @@ describe('add analytics collection lib function', () => {
   });
 
   it('should add analytics collection', async () => {
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
+    mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+      acknowledged: true,
+      name: `example`,
+    }));
 
-    await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'example',
-      })
-    ).resolves.toEqual({ event_retention_day_length: 180, id: 'fakeId', name: 'example' });
-
-    expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      document: {
-        event_retention_day_length: 180,
+    (fetchAnalyticsCollections as jest.Mock).mockImplementation(() => [
+      {
+        events_datastream: 'example-datastream',
         name: 'example',
       },
-      index: ANALYTICS_COLLECTIONS_INDEX,
-    });
-  });
-
-  it('should reject if index already exists', async () => {
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => true);
+    ]);
 
     await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'index_name',
+      addAnalyticsCollection(
+        mockClient as unknown as IScopedClusterClient,
+        mockDataViewsService as unknown as DataViewsService,
+        'example'
+      )
+    ).resolves.toEqual({
+      events_datastream: 'example-datastream',
+      name: 'example',
+    });
+
+    expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+      method: 'PUT',
+      path: '/_application/analytics/example',
+    });
+
+    expect(mockDataViewsService.createAndSave).toHaveBeenCalledWith(
+      {
+        allowNoIndex: true,
+        name: 'behavioral_analytics.events-example',
+        title: 'example-datastream',
+        timeFieldName: '@timestamp',
+      },
+      true
+    );
+  });
+
+  it('should reject if analytics collection already exists', async () => {
+    mockClient.asCurrentUser.transport.request.mockImplementation(() =>
+      Promise.reject({
+        meta: {
+          body: {
+            error: {
+              type: 'resource_already_exists_exception',
+            },
+          },
+        },
       })
+    );
+
+    await expect(
+      addAnalyticsCollection(
+        mockClient as unknown as IScopedClusterClient,
+        mockDataViewsService as unknown as DataViewsService,
+        'index_name'
+      )
     ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS));
-    expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
-  });
-
-  it('should reject if collection name is invalid', async () => {
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => false);
-
-    await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'index_name!',
-      })
-    ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_NAME_INVALID));
-    expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
-  });
-
-  it('should create index if no analytics collection index exists', async () => {
-    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
-
-    (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => undefined);
-
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-
-    await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'example',
-      })
-    ).resolves.toEqual({ event_retention_day_length: 180, id: 'fakeId', name: 'example' });
-
-    expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      document: {
-        event_retention_day_length: 180,
-        name: 'example',
-      },
-      index: ANALYTICS_COLLECTIONS_INDEX,
-    });
-
-    expect(setupAnalyticsCollectionIndex).toHaveBeenCalledWith(mockClient.asCurrentUser);
-  });
-
-  it('should not create index if status code is not 404', async () => {
-    mockClient.asCurrentUser.index.mockImplementationOnce(() => {
-      return Promise.reject({ statusCode: 500 });
-    });
-    mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
-    (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => false);
-    await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'example',
-      })
-    ).rejects.toEqual({ statusCode: 500 });
-    expect(setupAnalyticsCollectionIndex).not.toHaveBeenCalled();
-    expect(mockClient.asCurrentUser.index).toHaveBeenCalledTimes(1);
+    expect(mockDataViewsService.createAndSave).not.toHaveBeenCalled();
   });
 });

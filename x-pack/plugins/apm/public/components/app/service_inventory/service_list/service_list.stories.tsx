@@ -5,17 +5,16 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { ServiceList } from '.';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { ServiceList } from '.';
-import { items } from './__fixtures__/service_api_mock_data';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
+import { items, overflowItems } from './__fixtures__/service_api_mock_data';
 
 type Args = ComponentProps<typeof ServiceList>;
 
@@ -25,29 +24,24 @@ const coreMock = {
       return { fallBackToTransactions: false };
     },
   },
-  notifications: { toasts: { add: () => {} } },
-  uiSettings: { get: () => ({}) },
 } as unknown as CoreStart;
-
-const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const stories: Meta<Args> = {
   title: 'app/ServiceInventory/ServiceList',
   component: ServiceList,
   decorators: [
     (StoryComponent) => {
+      mockApmApiCallResponse(
+        'GET /internal/apm/fallback_to_transactions',
+        () => ({ fallbackToTransactions: false })
+      );
       return (
-        <KibanaReactContext.Provider>
-          <MemoryRouter
-            initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}
-          >
-            <MockApmPluginContextWrapper
-              value={{ core: coreMock } as unknown as ApmPluginContextValue}
-            >
-              <StoryComponent />
-            </MockApmPluginContextWrapper>
-          </MemoryRouter>
-        </KibanaReactContext.Provider>
+        <MockApmPluginStorybook
+          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
+          routePath="/services?rangeFrom=now-15m&rangeTo=now"
+        >
+          <StoryComponent />
+        </MockApmPluginStorybook>
       );
     },
   ],
@@ -90,4 +84,19 @@ WithHealthWarnings.args = {
     ...item,
     healthStatus: ServiceHealthStatus.warning,
   })),
+  sortFn: (sortItems) => sortItems,
+};
+
+export const WithOverflowBucket: Story<Args> = (args) => {
+  return <ServiceList {...args} />;
+};
+
+WithOverflowBucket.args = {
+  isLoading: false,
+  items: overflowItems,
+  displayHealthStatus: false,
+  initialSortField: ServiceInventoryFieldName.HealthStatus,
+  initialSortDirection: 'desc',
+  initialPageSize: 25,
+  sortFn: (sortItems) => sortItems,
 };

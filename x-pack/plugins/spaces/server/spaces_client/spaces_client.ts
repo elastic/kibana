@@ -8,19 +8,14 @@
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 
+import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
   SavedObject,
 } from '@kbn/core/server';
 
-import type {
-  GetAllSpacesOptions,
-  GetAllSpacesPurpose,
-  GetSpaceResult,
-  LegacyUrlAliasTarget,
-  Space,
-} from '../../common';
+import type { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult, Space } from '../../common';
 import { isReservedSpace } from '../../common';
 import type { ConfigType } from '../config';
 

@@ -75,6 +75,7 @@ describe('Enterprise Search Managed Indices', () => {
   const mockClient = {
     asCurrentUser: {
       ingest: {
+        getPipeline: jest.fn(),
         putPipeline: jest.fn(),
         simulate: jest.fn(),
       },
@@ -85,6 +86,9 @@ describe('Enterprise Search Managed Indices', () => {
     elasticsearch: { client: mockClient },
     savedObjects: { client: {} },
   };
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/errors', () => {
     beforeEach(() => {
@@ -265,7 +269,43 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter.shouldThrow(request);
     });
 
-    it('creates an ML inference pipeline', async () => {
+    it('responds with 400 BAD REQUEST with both source/target AND pipeline_definition', async () => {
+      await mockRouter.callRoute({
+        body: {
+          model_id: 'my-model-id',
+          pipeline_name: 'my-pipeline-name',
+          source_field: 'my-source-field',
+          destination_field: 'my-dest-field',
+          pipeline_definition: {
+            processors: [],
+          },
+        },
+        params: { indexName: 'my-index-name' },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 400,
+        })
+      );
+    });
+
+    it('responds with 400 BAD REQUEST with none of source/target/model OR pipeline_definition', async () => {
+      await mockRouter.callRoute({
+        body: {
+          pipeline_name: 'my-pipeline-name',
+        },
+        params: { indexName: 'my-index-name' },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 400,
+        })
+      );
+    });
+
+    it('creates an ML inference pipeline from model and source_field', async () => {
       (createAndReferenceMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
         return Promise.resolve({
           id: 'ml-inference-my-pipeline-name',
@@ -282,9 +322,51 @@ describe('Enterprise Search Managed Indices', () => {
       expect(createAndReferenceMlInferencePipeline).toHaveBeenCalledWith(
         'my-index-name',
         mockRequestBody.pipeline_name,
+        undefined,
         mockRequestBody.model_id,
         mockRequestBody.source_field,
         mockRequestBody.destination_field,
+        undefined,
+        mockClient.asCurrentUser
+      );
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          created: 'ml-inference-my-pipeline-name',
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+
+    it('creates an ML inference pipeline from pipeline definition', async () => {
+      (createAndReferenceMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+        return Promise.resolve({
+          id: 'ml-inference-my-pipeline-name',
+          created: true,
+          addedToParentPipeline: true,
+        });
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName: 'my-index-name' },
+        body: {
+          pipeline_name: 'my-pipeline-name',
+          pipeline_definition: {
+            processors: [],
+          },
+        },
+      });
+
+      expect(createAndReferenceMlInferencePipeline).toHaveBeenCalledWith(
+        'my-index-name',
+        mockRequestBody.pipeline_name,
+        {
+          processors: [],
+        },
+        undefined,
+        undefined,
+        undefined,
+        undefined,
         mockClient.asCurrentUser
       );
 
@@ -567,6 +649,132 @@ describe('Enterprise Search Managed Indices', () => {
       };
 
       (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      mockClient.asCurrentUser.ingest.simulate.mockImplementationOnce(() =>
+        Promise.resolve(simulateResponse)
+      );
+
+      await mockRouter.callRoute(request);
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: simulateResponse,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+  });
+
+  describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate/{pipelineName}', () => {
+    const pipelineBody = {
+      description: 'Some pipeline',
+      processors: [
+        {
+          set: {
+            field: 'some_field',
+            value: 'some value',
+          },
+        },
+      ],
+    };
+
+    const docs = [
+      {
+        _index: 'some-index',
+        _id: '1',
+        _source: {
+          my_field: 'my value',
+        },
+      },
+    ];
+    const indexName = 'my-index';
+    const pipelineName = 'my-pipeline';
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'post',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate/{pipelineName}',
+      });
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fails validation without index_name', () => {
+      const request = {
+        docs,
+        params: { pipelineName },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without pipelineName', () => {
+      const request = {
+        docs,
+        params: { indexName },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without docs', () => {
+      const request = {
+        docs: [],
+        params: { indexName, pipelineName },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('returns error if index does not exist', async () => {
+      const request = {
+        docs,
+        params: { indexName, pipelineName },
+      };
+
+      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(false));
+
+      await mockRouter.callRoute(request);
+
+      expect(indexOrAliasExists).toHaveBeenCalledWith(mockClient, indexName);
+      expect(mockRouter.response.ok).toHaveBeenCalledTimes(0);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns error if pipeline does not exist', async () => {
+      const request = {
+        docs,
+        params: { indexName, pipelineName },
+      };
+      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      mockClient.asCurrentUser.ingest.getPipeline.mockResolvedValue({});
+
+      await mockRouter.callRoute(request);
+
+      expect(mockClient.asCurrentUser.ingest.getPipeline).toHaveBeenCalledTimes(1);
+      expect(mockClient.asCurrentUser.ingest.getPipeline).toHaveBeenCalledWith({
+        id: pipelineName,
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledTimes(0);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
+
+    it('simulates pipeline', async () => {
+      const request = {
+        docs,
+        params: { indexName, pipelineName },
+      };
+
+      const simulateResponse = {
+        simulateKey: 'simulate value',
+      };
+
+      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      mockClient.asCurrentUser.ingest.getPipeline.mockResolvedValue({
+        [pipelineName]: pipelineBody,
+      });
       mockClient.asCurrentUser.ingest.simulate.mockImplementationOnce(() =>
         Promise.resolve(simulateResponse)
       );

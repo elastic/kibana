@@ -19,6 +19,15 @@ export const monitorDetailsSelector = (state: AppState, summary: any) => {
   return state.monitor.monitorDetailsList[summary.monitor_id];
 };
 
+export const deleteMonitorLoadingSelector = (state: AppState, id?: string) => {
+  if (!id) return (state.deleteMonitor.loading ?? []).length > 0;
+  return state.deleteMonitor.loading?.includes(id) ?? false;
+};
+
+export const deleteMonitorSuccessSelector = (state: AppState, id: string) => {
+  return state.deleteMonitor.deletedMonitorIds?.includes(id) ?? false;
+};
+
 export const monitorDetailsLoadingSelector = (state: AppState) => state.monitor.loading;
 
 export const monitorLocationsSelector = (state: AppState, monitorId: string) => {

@@ -12,7 +12,7 @@ import { getPrecisionErrorWarningMessages, cloneLayer } from './utils';
 import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../../types';
 import type { DocLinksStart } from '@kbn/core/public';
-import { EuiButton } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { TermsIndexPatternColumn } from './operations';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -121,7 +121,9 @@ describe('indexpattern_datasource utils', () => {
 
         expect(warningMessages).toHaveLength(1);
 
-        const instance = mountWithIntl(<div>{warningMessages[0]!}</div>);
+        expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
+
+        const instance = mountWithIntl(<div>{warningMessages[0].longMessage}</div>);
 
         const enableAccuracyButton = instance.find(enableAccuracyButtonSelector);
 
@@ -146,7 +148,9 @@ describe('indexpattern_datasource utils', () => {
 
         expect(warningMessages).toHaveLength(1);
 
-        const instance = shallow(<div>{warningMessages[0]!}</div>);
+        expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
+
+        const instance = shallow(<div>{warningMessages[0].longMessage}</div>);
 
         expect(instance.exists(enableAccuracyButtonSelector)).toBeFalsy();
 
@@ -185,9 +189,10 @@ describe('indexpattern_datasource utils', () => {
       );
 
       expect(warnings).toHaveLength(1);
-      const DummyComponent = () => <>{warnings[0]}</>;
+      expect({ ...warnings[0], longMessage: '' }).toMatchSnapshot();
+      const DummyComponent = () => <>{warnings[0].longMessage}</>;
       const warningUi = shallow(<DummyComponent />);
-      warningUi.find(EuiButton).simulate('click');
+      warningUi.find(EuiLink).simulate('click');
       const stateSetter = setState.mock.calls[0][0];
       const newState = stateSetter(state);
       expect(newState.layers.id.columns.col1.label).toEqual('Rare values of category');

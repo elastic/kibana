@@ -12,7 +12,7 @@ import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/selectors';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import { ConfigForm } from '../config_form';
 
 const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string }> = {
@@ -41,6 +41,7 @@ const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string 
 export const AntivirusRegistrationForm = memo(() => {
   const antivirusRegistrationEnabled = usePolicyDetailsSelector(isAntivirusRegistrationEnabled);
   const dispatch = useDispatch();
+  const showEditableFormFields = useShowEditableFormFields();
 
   const handleSwitchChange = useCallback(
     (event) =>
@@ -68,6 +69,7 @@ export const AntivirusRegistrationForm = memo(() => {
         label={TRANSLATIONS.label}
         checked={antivirusRegistrationEnabled}
         onChange={handleSwitchChange}
+        disabled={!showEditableFormFields}
       />
     </ConfigForm>
   );

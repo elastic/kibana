@@ -24,6 +24,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../../common/constants';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
 
 import {
   PREBUILT_RULES_STATUS_URL,
@@ -33,6 +34,7 @@ import {
   getPerformBulkActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/detection_engine/rule_management/mocks';
+
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
 import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
@@ -187,6 +189,12 @@ export const getPrepackagedRulesStatusRequest = () =>
   requestMock.create({
     method: 'get',
     path: PREBUILT_RULES_STATUS_URL,
+  });
+
+export const getRuleManagementFiltersRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: RULE_MANAGEMENT_FILTERS_URL,
   });
 
 export interface FindHit<T = RuleAlertType> {
@@ -367,6 +375,7 @@ export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> =
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 export const resolveRuleMock = <T extends RuleParams>(params: T): ResolvedSanitizedRule<T> => ({
@@ -544,6 +553,7 @@ export const legacyGetNotificationResult = ({
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 /**
@@ -592,6 +602,7 @@ export const legacyGetHourlyNotificationResult = (
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 /**
@@ -640,6 +651,7 @@ export const legacyGetDailyNotificationResult = (
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 /**
@@ -688,6 +700,7 @@ export const legacyGetWeeklyNotificationResult = (
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 });
 
 /**

@@ -17,7 +17,6 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { FieldSelect } from '../field_select';
-// @ts-expect-error
 import { ColorMapSelect } from './color_map_select';
 import { OtherCategoryColorPicker } from './other_category_color_picker';
 import {

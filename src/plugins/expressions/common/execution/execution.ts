@@ -10,16 +10,21 @@ import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
 import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
-import { keys, last, mapValues, reduce, zipObject } from 'lodash';
+import { keys, last as lastOf, mapValues, reduce, zipObject } from 'lodash';
 import {
   combineLatest,
   defer,
   from,
+  identity,
   isObservable,
+  last,
   of,
+  takeWhile,
   throwError,
+  timer,
   Observable,
   ReplaySubject,
+  Subscription,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
@@ -94,6 +99,61 @@ function markPartial<T>() {
       );
 
       subscriber.add(() => {
+        latest = undefined;
+      });
+    });
+}
+
+/**
+ * RxJS' `throttle` operator does not emit the last value immediately when the source observable is completed.
+ * Instead, it waits for the next throttle period to emit that.
+ * It might cause delays until we get the final value, even though it is already there.
+ * @see https://github.com/ReactiveX/rxjs/blob/master/src/internal/operators/throttle.ts#L121
+ */
+function throttle<T>(timeout: number) {
+  return (source: Observable<T>): Observable<T> =>
+    new Observable((subscriber) => {
+      let latest: T | undefined;
+      let hasValue = false;
+
+      const emit = () => {
+        if (hasValue) {
+          subscriber.next(latest);
+          hasValue = false;
+          latest = undefined;
+        }
+      };
+
+      let throttled: Subscription | undefined;
+      const timer$ = timer(0, timeout).pipe(
+        takeWhile(() => hasValue),
+        finalize(() => {
+          subscriber.remove(throttled!);
+          throttled = undefined;
+        })
+      );
+
+      subscriber.add(
+        source.subscribe({
+          next: (value) => {
+            latest = value;
+            hasValue = true;
+
+            if (!throttled) {
+              throttled = timer$.subscribe(emit);
+              subscriber.add(throttled);
+            }
+          },
+          error: (error) => subscriber.error(error),
+          complete: () => {
+            emit();
+            subscriber.complete();
+          },
+        })
+      );
+
+      subscriber.add(() => {
+        hasValue = false;
         latest = undefined;
       });
     });
@@ -235,7 +295,10 @@ export class Execution<
       switchMap((input) =>
         this.invokeChain<Output>(this.state.get().ast.chain, input).pipe(
           takeUntilAborted(this.abortController.signal),
-          markPartial()
+          markPartial(),
+          this.execution.params.partial && this.execution.params.throttle
+            ? throttle(this.execution.params.throttle)
+            : identity
         )
       ),
       catchError((error) => {
@@ -303,89 +366,85 @@ export class Execution<
       return of(input as ChainOutput);
     }
 
-    return of(input).pipe(
-      switchMap((currentInput) => {
-        const { function: fnName, arguments: fnArgs } = head;
-        const fn = getByAlias(this.state.get().functions, fnName, this.execution.params.namespace);
+    return defer(() => {
+      const { function: fnName, arguments: fnArgs } = head;
+      const fn = getByAlias(this.state.get().functions, fnName, this.execution.params.namespace);
 
-        if (!fn) {
-          throw createError({
-            name: 'fn not found',
-            message: i18n.translate('expressions.execution.functionNotFound', {
-              defaultMessage: `Function {fnName} could not be found.`,
-              values: {
-                fnName,
-              },
-            }),
-          });
-        }
-
-        if (fn.disabled) {
-          throw createError({
-            name: 'fn is disabled',
-            message: i18n.translate('expressions.execution.functionDisabled', {
-              defaultMessage: `Function {fnName} is disabled.`,
-              values: {
-                fnName,
-              },
-            }),
-          });
-        }
-
-        if (fn.deprecated) {
-          this.logger?.warn(`Function '${fnName}' is deprecated`);
-        }
-
-        if (this.execution.params.debug) {
-          head.debug = {
-            args: {},
-            duration: 0,
-            fn: fn.name,
-            input: currentInput,
-            success: true,
-          };
-        }
-
-        const timeStart = this.execution.params.debug ? now() : 0;
-
-        // `resolveArgs` returns an object because the arguments themselves might
-        // actually have `then` or `subscribe` methods which would be treated as a `Promise`
-        // or an `Observable` accordingly.
-        return this.resolveArgs(fn, currentInput, fnArgs).pipe(
-          switchMap((resolvedArgs) => {
-            const args$ = isExpressionValueError(resolvedArgs)
-              ? throwError(resolvedArgs.error)
-              : of(resolvedArgs);
-
-            return args$.pipe(
-              tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
-              switchMap((args) => this.invokeFunction(fn, currentInput, args)),
-              switchMap((output) =>
-                getType(output) === 'error' ? throwError(output) : of(output)
-              ),
-              tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
-              switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
-              catchError((rawError) => {
-                const error = createError(rawError);
-                error.error.message = `[${fnName}] > ${error.error.message}`;
-
-                if (this.execution.params.debug) {
-                  Object.assign(head.debug, { error, rawError, success: false });
-                }
-
-                return of(error);
-              })
-            );
+      if (!fn) {
+        throw createError({
+          name: 'fn not found',
+          message: i18n.translate('expressions.execution.functionNotFound', {
+            defaultMessage: `Function {fnName} could not be found.`,
+            values: {
+              fnName,
+            },
           }),
-          finalize(() => {
-            if (this.execution.params.debug) {
-              Object.assign(head.debug, { duration: now() - timeStart });
-            }
-          })
-        );
-      }),
-      catchError((error) => of(error))
-    );
+        });
+      }
+
+      if (fn.disabled) {
+        throw createError({
+          name: 'fn is disabled',
+          message: i18n.translate('expressions.execution.functionDisabled', {
+            defaultMessage: `Function {fnName} is disabled.`,
+            values: {
+              fnName,
+            },
+          }),
+        });
+      }
+
+      if (fn.deprecated) {
+        this.logger?.warn(`Function '${fnName}' is deprecated`);
+      }
+
+      if (this.execution.params.debug) {
+        head.debug = {
+          input,
+          args: {},
+          duration: 0,
+          fn: fn.name,
+          success: true,
+        };
+      }
+
+      const timeStart = this.execution.params.debug ? now() : 0;
+
+      // `resolveArgs` returns an object because the arguments themselves might
+      // actually have `then` or `subscribe` methods which would be treated as a `Promise`
+      // or an `Observable` accordingly.
+      return this.resolveArgs(fn, input, fnArgs).pipe(
+        switchMap((resolvedArgs) => {
+          const args$ = isExpressionValueError(resolvedArgs)
+            ? throwError(resolvedArgs.error)
+            : of(resolvedArgs);
+
+          return args$.pipe(
+            tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
+            switchMap((args) => this.invokeFunction(fn, input, args)),
+            this.execution.params.partial ? identity : last(),
+            switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
+            tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
+            switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
+            catchError((rawError) => {
+              const error = createError(rawError);
+              error.error.message = `[${fnName}] > ${error.error.message}`;
+
+              if (this.execution.params.debug) {
+                Object.assign(head.debug, { error, rawError, success: false });
+              }
+
+              return of(error);
+            })
+          );
+        }),
+        finalize(() => {
+          if (this.execution.params.debug) {
+            Object.assign(head.debug, { duration: now() - timeStart });
+          }
+        })
+      );
+    }).pipe(catchError((error) => of(error)));
   }
 
   invokeFunction<Fn extends ExpressionFunction>(
@@ -581,7 +640,7 @@ export class Execution<
               // function which would be treated as a promise
               zipObject(argNames, values as unknown[][]),
               // Just return the last unless the argument definition allows multiple
-              (argValues, argName) => (argDefs[argName].multi ? argValues : last(argValues))
+              (argValues, argName) => (argDefs[argName].multi ? argValues : lastOf(argValues))
             )
         )
       );

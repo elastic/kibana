@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
 
-import { useGetPackageInfoByKey, useGetFleetServerHosts, useLink } from '../../../../hooks';
+import {
+  useGetPackageInfoByKeyQuery,
+  useLink,
+  useFleetServerHostsForPolicy,
+} from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
@@ -50,8 +54,8 @@ const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep
 const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 
 export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
-  from,
   queryParamsPolicyId,
+  prerelease,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
   const { pkgkey, policyId, integration } = params;
@@ -65,19 +69,19 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setIsManaged(newIsManaged);
     setCurrentStep(0);
   };
-
+  const agentPolicyId = policyId || queryParamsPolicyId;
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, { prerelease, full: true });
 
   const {
     agentPolicy,
     enrollmentAPIKey,
     error: agentPolicyError,
     isLoading: isAgentPolicyLoading,
-  } = useGetAgentPolicyOrDefault(queryParamsPolicyId);
+  } = useGetAgentPolicyOrDefault(agentPolicyId);
 
   const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
 
@@ -92,23 +96,20 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setOnSplash(false);
   };
 
-  const fleetServerHostsRequest = useGetFleetServerHosts();
-  const fleetServerHosts =
-    fleetServerHostsRequest.data?.items?.filter((f) => true)?.[0]?.host_urls ?? [];
+  const { fleetServerHosts, fleetProxy, isLoadingInitialRequest } =
+    useFleetServerHostsForPolicy(agentPolicy);
 
   const cancelUrl = getHref('add_integration_to_policy', {
     pkgkey,
     useMultiPageLayout: false,
     ...(integration ? { integration } : {}),
-    ...(policyId ? { agentPolicyId: policyId } : {}),
+    ...(agentPolicyId ? { agentPolicyId } : {}),
   });
 
   if (onSplash || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
-        isLoading={
-          isPackageInfoLoading || fleetServerHostsRequest.isLoading || isAgentPolicyLoading
-        }
+        isLoading={isPackageInfoLoading || isLoadingInitialRequest || isAgentPolicyLoading}
         error={packageInfoError || agentPolicyError}
         integrationInfo={integrationInfo}
         packageInfo={packageInfo}
@@ -138,6 +139,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   return (
     <MultiPageStepsLayout
       fleetServerHosts={fleetServerHosts}
+      fleetProxy={fleetProxy}
       agentPolicy={agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}

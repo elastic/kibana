@@ -33,6 +33,7 @@ export interface UseHoverActionItemsProps {
   isAggregatable: boolean;
   handleHoverActionClicked: () => void;
   hideAddToTimeline: boolean;
+  hideFilters?: boolean;
   hideTopN: boolean;
   isCaseView: boolean;
   isObjectArray: boolean;
@@ -64,6 +65,7 @@ export const useHoverActionItems = ({
   fieldType,
   isAggregatable,
   handleHoverActionClicked,
+  hideFilters,
   hideTopN,
   hideAddToTimeline,
   isCaseView,
@@ -132,12 +134,18 @@ export const useHoverActionItems = ({
     OnAddToTimeline();
   }, [handleHoverActionClicked, OnAddToTimeline]);
 
-  /*
-   * In the case of `DisableOverflowButton`, we show filters only when topN is NOT opened. As after topN button is clicked, the chart panel replace current hover actions in the hover actions' popover, so we have to hide all the actions.
-   * in the case of `EnableOverflowButton`, we only need to hide all the items in the overflow popover as the chart's panel opens in the overflow popover, so non-overflowed actions are not affected.
-   */
-  const showFilters =
-    values != null && (enableOverflowButton || (!showTopN && !enableOverflowButton)) && !isCaseView;
+  const showFilters = useMemo(() => {
+    if (hideFilters) return false;
+    /*
+     * In the case of `DisableOverflowButton`, we show filters only when topN is NOT opened. As after topN button is clicked, the chart panel replace current hover actions in the hover actions' popover, so we have to hide all the actions.
+     * in the case of `EnableOverflowButton`, we only need to hide all the items in the overflow popover as the chart's panel opens in the overflow popover, so non-overflowed actions are not affected.
+     */
+    return (
+      values != null &&
+      (enableOverflowButton || (!showTopN && !enableOverflowButton)) &&
+      !isCaseView
+    );
+  }, [enableOverflowButton, hideFilters, isCaseView, showTopN, values]);
   const shouldDisableColumnToggle = (isObjectArray && field !== 'geo_point') || isCaseView;
 
   const showTopNBtn = useMemo(

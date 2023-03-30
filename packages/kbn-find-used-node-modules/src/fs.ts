@@ -7,12 +7,6 @@
  */
 
 import Fs from 'fs';
-import Fsp from 'fs/promises';
+import * as Rx from 'rxjs';
 
-export function readFileSync(path: string) {
-  return Fs.readFileSync(path, 'utf8');
-}
-
-export function readFile(path: string) {
-  return Fsp.readFile(path, 'utf8');
-}
+export const readFile$ = Rx.bindNodeCallback<[string, BufferEncoding], [string]>(Fs.readFile);

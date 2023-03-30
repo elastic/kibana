@@ -16,6 +16,7 @@ import {
   PrivateLocation,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
+import { mockEncryptedSO } from '../utils/mocks';
 
 describe('SyntheticsMonitorClient', () => {
   const mockEsClient = {
@@ -43,6 +44,7 @@ describe('SyntheticsMonitorClient', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
+    encryptedSavedObjects: mockEncryptedSO,
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -95,7 +97,12 @@ describe('SyntheticsMonitorClient', () => {
     id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
     fields: { config_id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d' },
     fields_under_root: true,
+    secrets: '{}',
   } as unknown as MonitorFields;
+
+  const previousMonitor: any = {
+    attributes: { ...monitor },
+  };
 
   it('should add a monitor', async () => {
     locations[1].isServiceManaged = false;
@@ -126,8 +133,10 @@ describe('SyntheticsMonitorClient', () => {
     await client.editMonitors(
       [
         {
-          monitor,
           id,
+          monitor,
+          previousMonitor,
+          decryptedPreviousMonitor: previousMonitor,
         },
       ],
       mockRequest,
@@ -140,11 +149,50 @@ describe('SyntheticsMonitorClient', () => {
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });
 
+  it('deletes a monitor from location, if location is removed from monitor', async () => {
+    locations[1].isServiceManaged = false;
+
+    const id = 'test-id-1';
+    const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
+    syntheticsService.editConfig = jest.fn();
+    client.privateLocationAPI.editMonitors = jest.fn();
+
+    monitor.locations = previousMonitor.attributes.locations.filter(
+      (loc: any) => loc.id !== locations[0].id
+    );
+
+    await client.editMonitors(
+      [
+        {
+          monitor,
+          id,
+          previousMonitor,
+          decryptedPreviousMonitor: previousMonitor,
+        },
+      ],
+      mockRequest,
+      savedObjectsClientMock,
+      privateLocations,
+      'test-space'
+    );
+
+    expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
+    expect(syntheticsService.editConfig).toHaveBeenCalledWith([
+      {
+        monitor,
+        configId: id,
+      },
+    ]);
+    expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
+    expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
+  });
+
   it('should delete a monitor', async () => {
     locations[1].isServiceManaged = false;
 
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.deleteMonitors = jest.fn();
+    syntheticsService.deleteConfigs = jest.fn();
 
     await client.deleteMonitors(
       [monitor as unknown as SyntheticsMonitorWithId],

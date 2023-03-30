@@ -31,6 +31,7 @@ import {
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
 
 import {
   ApplicationStart,
@@ -42,7 +43,6 @@ import {
   ToastsSetup,
 } from '@kbn/core/public';
 
-import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
@@ -60,7 +60,6 @@ import {
 import { SearchUsageCollector } from '../collectors';
 import {
   EsError,
-  getHttpError,
   isEsError,
   isPainlessError,
   PainlessError,
@@ -70,7 +69,7 @@ import {
 } from '../errors';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
-import { createRequestHash } from './utils';
+import { createRequestHash, getSearchErrorOverrideDisplay } from './utils';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchConfigSchema } from '../../../config';
 
@@ -195,8 +194,8 @@ export class SearchInterceptor {
       // The timeout error is shown any time a request times out, or once per session, if the request is part of a session.
       this.showTimeoutError(err, options?.sessionId);
       return err;
-    } else if (e instanceof AbortError) {
-      // In the case an application initiated abort, throw the existing AbortError.
+    } else if (e instanceof AbortError || e instanceof BfetchRequestError) {
+      // In the case an application initiated abort, throw the existing AbortError, same with BfetchRequestErrors
       return e;
     } else if (isEsError(e)) {
       if (isPainlessError(e)) {
@@ -518,19 +517,17 @@ export class SearchInterceptor {
     if (e instanceof AbortError || e instanceof SearchTimeoutError) {
       // The SearchTimeoutError is shown by the interceptor in getSearchError (regardless of how the app chooses to handle errors)
       return;
-    } else if (e instanceof EsError) {
+    }
+
+    const overrideDisplay = getSearchErrorOverrideDisplay({
+      error: e,
+      application: this.application,
+    });
+
+    if (overrideDisplay) {
       this.deps.toasts.addDanger({
-        title: i18n.translate('data.search.esErrorTitle', {
-          defaultMessage: 'Cannot retrieve search results',
-        }),
-        text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
-      });
-    } else if (e.constructor.name === 'HttpFetchError') {
-      this.deps.toasts.addDanger({
-        title: i18n.translate('data.search.httpErrorTitle', {
-          defaultMessage: 'Cannot retrieve your data',
-        }),
-        text: toMountPoint(getHttpError(e.message), { theme$: this.deps.theme.theme$ }),
+        title: overrideDisplay.title,
+        text: toMountPoint(overrideDisplay.body, { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {

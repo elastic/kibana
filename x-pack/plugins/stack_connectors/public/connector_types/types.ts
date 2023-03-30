@@ -60,15 +60,15 @@ export interface ServerLogActionParams {
   message: string;
 }
 
-export interface SlackActionParams {
-  message: string;
-}
-
 export interface TeamsActionParams {
   message: string;
 }
 
 export interface WebhookActionParams {
+  body?: string;
+}
+
+export interface TorqActionParams {
   body?: string;
 }
 
@@ -112,12 +112,6 @@ export type PagerDutyActionConnector = UserConfiguredActionConnector<
   PagerDutySecrets
 >;
 
-export interface SlackSecrets {
-  webhookUrl: string;
-}
-
-export type SlackActionConnector = UserConfiguredActionConnector<unknown, SlackSecrets>;
-
 export interface WebhookConfig {
   method: string;
   url: string;
@@ -131,6 +125,16 @@ export interface WebhookSecrets {
 }
 
 export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;
+
+export interface TorqConfig {
+  url: string;
+}
+
+export interface TorqSecrets {
+  token: string;
+}
+
+export type TorqActionConnector = UserConfiguredActionConnector<TorqConfig, TorqSecrets>;
 
 export enum XmattersSeverityOptions {
   CRITICAL = 'critical',

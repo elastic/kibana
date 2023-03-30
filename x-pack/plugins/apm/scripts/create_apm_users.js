@@ -13,8 +13,5 @@
  * Usage: node create-apm-users.js
  ******************************/
 
-// compile typescript on the fly
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
-
+require('@kbn/babel-register').install();
 require('./create_apm_users/create_apm_users_cli');

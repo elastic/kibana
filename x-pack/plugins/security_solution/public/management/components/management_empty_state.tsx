@@ -21,9 +21,11 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiLink,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -41,13 +43,35 @@ interface ManagementStep {
   children: JSX.Element;
 }
 
+const MissingFleetAccessInfo = React.memo(() => {
+  const { services } = useKibana();
+
+  return (
+    <EuiText size="s" color="subdued" data-test-subj="noFleetAccess">
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.onboarding.enableFleetAccess"
+        defaultMessage="Deploying Agents for the first time requires Fleet access. For more information, "
+      />
+      <EuiLink external href={`${services.docLinks.links.securitySolution.privileges}`}>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.onboarding.onboardingDocsLink"
+          defaultMessage="view the Elastic Security documentation"
+        />
+      </EuiLink>
+    </EuiText>
+  );
+});
+MissingFleetAccessInfo.displayName = 'MissingFleetAccessInfo';
+
 const PolicyEmptyState = React.memo<{
   loading: boolean;
-  onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
+  onActionClick?: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled?: boolean;
   policyEntryPoint?: boolean;
 }>(({ loading, onActionClick, actionDisabled, policyEntryPoint = false }) => {
   const docLinks = useKibana().services.docLinks;
+  const { canAccessFleet, loading: authzLoading } = useUserPrivileges().endpointPrivileges;
+
   return (
     <div data-test-subj="emptyPolicyTable">
       {loading ? (
@@ -101,24 +125,36 @@ const PolicyEmptyState = React.memo<{
                 />
               </EuiLink>
             </EuiText>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  iconType="plusInCircle"
-                  onClick={onActionClick}
-                  isDisabled={actionDisabled}
-                  data-test-subj="onboardingStartButton"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.actionButtonText"
-                    defaultMessage="Add Elastic Defend"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
+            {authzLoading && <EuiLoadingContent lines={1} />}
+
+            {!authzLoading && canAccessFleet && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      iconType="plusInCircle"
+                      onClick={onActionClick}
+                      isDisabled={actionDisabled}
+                      data-test-subj="onboardingStartButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policyList.actionButtonText"
+                        defaultMessage="Add Elastic Defend"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
+
+            {!authzLoading && !canAccessFleet && <MissingFleetAccessInfo />}
           </EuiFlexItem>
+
           <EuiFlexItem grow={2}>
             <EuiIcon type={onboardingLogo} size="original" style={MAX_SIZE_ONBOARDING_LOGO} />
           </EuiFlexItem>

@@ -7,7 +7,7 @@
 
 import type { Filter } from '@kbn/es-query';
 
-import { TableId, TimelineId } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import {
   alertEvents,
   allEvents,
@@ -18,11 +18,10 @@ import {
   rawEvents,
   removeIgnoredAlertFilters,
   shouldIgnoreAlertFilters,
+  detectionAlertsTables,
 } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-
-/** the following scopes are detection alert tables */
-const detectionAlertsTables = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
+import { TableId } from '../../../../common/types';
 
 /** the following scopes are NOT detection alert tables */
 const otherScopes = [
@@ -30,7 +29,6 @@ const otherScopes = [
   TableId.hostsPageSessions,
   TableId.networkPageEvents,
   TimelineId.active,
-  TimelineId.casePage,
   TimelineId.test,
   TableId.alternateTest,
   TableId.kubernetesPageSessions,

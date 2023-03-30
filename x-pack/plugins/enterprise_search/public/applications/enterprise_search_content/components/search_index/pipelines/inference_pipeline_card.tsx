@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
@@ -36,7 +35,9 @@ import { IndexNameLogic } from '../index_name_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
 
+import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
 import { TrainedModelHealth } from './ml_model_health';
+import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
@@ -129,19 +130,11 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <div>
-                      <EuiButtonEmpty
+                      <DeleteInferencePipelineButton
                         data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
-                        size="s"
-                        flush="both"
-                        iconType="trash"
-                        color="text"
                         onClick={showConfirmDeleteModal}
-                      >
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.inferencePipelineCard.action.delete',
-                          { defaultMessage: 'Delete pipeline' }
-                        )}
-                      </EuiButtonEmpty>
+                        pipeline={pipeline}
+                      />
                     </div>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -159,7 +152,10 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <TrainedModelHealth {...pipeline} />
+                  <TrainedModelHealth
+                    modelState={pipeline.modelState}
+                    modelStateReason={pipeline.modelStateReason}
+                  />
                 </EuiFlexItem>
                 {pipeline.modelState === TrainedModelState.NotDeployed && (
                   <EuiFlexItem grow={false} style={{ paddingRight: '1rem' }}>
@@ -184,7 +180,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
                       <span>
-                        <EuiBadge color="hollow">{modelType}</EuiBadge>
+                        <MLModelTypeBadge type={modelType} />
                       </span>
                     </EuiFlexItem>
                   </EuiFlexGroup>

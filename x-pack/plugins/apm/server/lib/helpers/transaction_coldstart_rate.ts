@@ -9,7 +9,7 @@ import type {
   AggregationOptionsByType,
   AggregationResultOf,
 } from '@kbn/es-types';
-import { FAAS_COLDSTART } from '../../../common/elasticsearch_fieldnames';
+import { FAAS_COLDSTART } from '../../../common/es_fields/apm';
 
 export const getColdstartAggregation = () => ({
   terms: {

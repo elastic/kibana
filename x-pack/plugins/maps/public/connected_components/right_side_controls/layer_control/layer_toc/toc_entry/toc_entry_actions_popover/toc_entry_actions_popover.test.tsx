@@ -50,6 +50,7 @@ const defaultProps = {
   openLayerSettings: () => {},
   numLayers: 2,
   showThisLayerOnly: () => {},
+  ungroupLayer: () => {},
 };
 
 describe('TOCEntryActionsPopover', () => {

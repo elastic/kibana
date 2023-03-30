@@ -6,21 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { isCombinedFilter, FilterItem } from '@kbn/es-query';
-
-export enum ConditionTypes {
-  OR = 'OR',
-  AND = 'AND',
-}
+import { type Filter, isCombinedFilter, CombinedFilter } from '@kbn/es-query';
 
 /**
- * Defines a conditional operation type (AND/OR) from the filter otherwise returns undefined.
- * @param {FilterItem} filter
+ * Defines a boolean relation type (AND/OR) from the filter otherwise returns undefined.
+ * @param {Filter} filter
  */
-export const getConditionalOperationType = (filter: FilterItem) => {
-  if (Array.isArray(filter)) {
-    return ConditionTypes.AND;
-  } else if (isCombinedFilter(filter)) {
-    return ConditionTypes.OR;
+export const getBooleanRelationType = (filter: Filter | CombinedFilter) => {
+  if (isCombinedFilter(filter)) {
+    return filter.meta.relation;
   }
 };

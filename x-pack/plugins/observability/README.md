@@ -13,16 +13,6 @@ xpack.ruleRegistry.write.enabled: true
 
 When this is set to `true`, your alerts should show on the alerts page.
 
-## SLOs
-
-
-If you have:
-
-```yaml
-xpack.observability.unsafe.slo.enabled: true
-```
-
-In your Kibana configuration, the SLO feature will be available.
 
 ## Shared navigation
 

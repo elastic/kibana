@@ -95,17 +95,6 @@ export function TableDimensionEditor(
 
   return (
     <>
-      {props.groupId === 'rows' && (
-        <CollapseSetting
-          value={column.collapseFn || ''}
-          onChange={(collapseFn) => {
-            setState({
-              ...state,
-              columns: updateColumnWith(state, accessor, { collapseFn }),
-            });
-          }}
-        />
-      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -354,6 +343,34 @@ export function TableDimensionEditor(
             }}
           />
         </EuiFormRow>
+      )}
+    </>
+  );
+}
+
+export function TableDimensionDataExtraEditor(
+  props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
+    paletteService: PaletteRegistry;
+  }
+) {
+  const { state, setState, accessor } = props;
+  const column = state.columns.find(({ columnId }) => accessor === columnId);
+
+  if (!column) return null;
+  if (column.isTransposed) return null;
+
+  return (
+    <>
+      {props.groupId === 'rows' && (
+        <CollapseSetting
+          value={column.collapseFn || ''}
+          onChange={(collapseFn) => {
+            setState({
+              ...state,
+              columns: updateColumnWith(state, accessor, { collapseFn }),
+            });
+          }}
+        />
       )}
     </>
   );

@@ -13,6 +13,8 @@ import type {
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
 import { RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
+import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
 import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
@@ -31,8 +33,10 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_metrics: infraMetricsFieldFormats,
   ux: rumFieldFormats,
   apm: apmFieldFormats,
+  uptime: syntheticsFieldFormats,
   synthetics: syntheticsFieldFormats,
   mobile: apmFieldFormats,
+  alerts: null,
 };
 
 const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: RuntimeField }> | null> = {
@@ -40,8 +44,10 @@ const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: Runtime
   infra_metrics: null,
   ux: null,
   apm: null,
+  uptime: syntheticsRuntimeFields,
   synthetics: syntheticsRuntimeFields,
   mobile: null,
+  alerts: null,
 };
 
 function getFieldFormatsForApp(app: AppDataType) {
@@ -50,24 +56,17 @@ function getFieldFormatsForApp(app: AppDataType) {
 
 export const dataViewList: Record<AppDataType, string> = {
   synthetics: 'synthetics_static_index_pattern_id',
+  uptime: 'uptime_static_index_pattern_id',
   apm: 'apm_static_index_pattern_id',
   ux: 'rum_static_index_pattern_id',
   infra_logs: 'infra_logs_static_index_pattern_id',
   infra_metrics: 'infra_metrics_static_index_pattern_id',
   mobile: 'mobile_static_index_pattern_id',
-};
-
-const appToPatternMap: Record<AppDataType, string> = {
-  synthetics: '(synthetics-data-view)*',
-  apm: 'apm-*',
-  ux: '(rum-data-view)*',
-  infra_logs: '(infra-logs-data-view)*',
-  infra_metrics: '(infra-metrics-data-view)*',
-  mobile: '(mobile-data-view)*',
+  alerts: 'alerts_static_index_pattern_id',
 };
 
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
-  return `${appToPatternMap?.[app] ?? app},${indices}`;
+  return `${indices}`;
 };
 
 const getAppDataViewId = (app: AppDataType, indices: string) => {
@@ -79,6 +78,11 @@ const getAppDataViewId = (app: AppDataType, indices: string) => {
 
 export async function getDataTypeIndices(dataType: AppDataType) {
   switch (dataType) {
+    case 'synthetics':
+      return {
+        hasData: true,
+        indices: 'synthetics-*',
+      };
     case 'mobile':
     case 'ux':
     case 'apm':
@@ -86,6 +90,11 @@ export async function getDataTypeIndices(dataType: AppDataType) {
       return {
         hasData: Boolean(resultApm?.hasData),
         indices: getApmDataViewTitle(resultApm?.indices),
+      };
+    case 'alerts':
+      return {
+        hasData: true,
+        indices: '.alerts-observability*',
       };
     default:
       const resultUx = await getDataHandler(dataType)?.hasData();
@@ -118,22 +127,55 @@ export class ObservabilityDataViews {
 
   async createDataView(app: AppDataType, indices: string) {
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
-    return await this.dataViews.create({
-      title: appIndicesPattern,
-      id: getAppDataViewId(app, indices),
-      timeFieldName: '@timestamp',
-      fieldFormats: this.getFieldFormats(app),
-    });
+
+    const { runtimeFields } = getFieldFormatsForApp(app);
+
+    const id = getAppDataViewId(app, indices);
+
+    try {
+      const dataView = await this.dataViews.create(
+        {
+          id,
+          title: appIndicesPattern,
+          timeFieldName: '@timestamp',
+          fieldFormats: this.getFieldFormats(app),
+          name: DataTypesLabels[app],
+          allowNoIndex: true,
+        },
+        false,
+        false
+      );
+
+      if (dataView.matchedIndices.length === 0) {
+        return;
+      }
+
+      if (runtimeFields !== null) {
+        runtimeFields.forEach(({ name, field }) => {
+          dataView.addRuntimeField(name, field);
+        });
+      }
+
+      return dataView;
+    } catch (e) {
+      if (e instanceof DataViewMissingIndices) {
+        this.dataViews.clearInstanceCache(id);
+      }
+    }
   }
 
   async createAndSavedDataView(app: AppDataType, indices: string) {
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
 
+    const dataViewId = getAppDataViewId(app, indices);
+
     return await this.dataViews.createAndSave({
       title: appIndicesPattern,
-      id: getAppDataViewId(app, indices),
+      id: dataViewId,
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
+      name: DataTypesLabels[app],
+      allowNoIndex: true,
     });
   }
   // we want to make sure field formats remain same
@@ -152,12 +194,17 @@ export class ObservabilityDataViews {
           }
         }
       });
+      let hasNewRuntimeField = false;
       if (runtimeFields !== null) {
+        const allRunTimeFields = dataView.getAllRuntimeFields();
         runtimeFields.forEach(({ name, field }) => {
-          dataView.addRuntimeField(name, field);
+          if (!allRunTimeFields[name]) {
+            hasNewRuntimeField = true;
+            dataView.addRuntimeField(name, field);
+          }
         });
       }
-      if (isParamsDifferent || runtimeFields !== null) {
+      if (isParamsDifferent || hasNewRuntimeField) {
         await this.dataViews?.updateSavedObject(dataView);
       }
     }
@@ -175,11 +222,14 @@ export class ObservabilityDataViews {
 
   async getDataView(app: AppDataType, indices?: string): Promise<DataView | undefined> {
     let appIndices = indices;
+    let hasData = false;
     if (!appIndices) {
-      appIndices = (await getDataTypeIndices(app)).indices;
+      const { indices: indicesT, hasData: hData } = await getDataTypeIndices(app);
+      hasData = hData;
+      appIndices = indicesT;
     }
 
-    if (appIndices) {
+    if (appIndices && (hasData || indices)) {
       try {
         const dataViewId = getAppDataViewId(app, appIndices);
         const dataViewTitle = getAppIndicesWithPattern(app, appIndices);

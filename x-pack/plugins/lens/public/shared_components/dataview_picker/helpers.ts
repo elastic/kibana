@@ -5,25 +5,17 @@
  * 2.0.
  */
 
+import { type ExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import { IndexPattern } from '../../types';
 
 /**
  * Checks if the provided field contains data (works for meta field)
  */
 export function fieldContainsData(
-  field: string,
+  fieldName: string,
   indexPattern: IndexPattern,
-  existingFields: Record<string, boolean>
+  hasFieldData: ExistingFieldsReader['hasFieldData']
 ) {
-  return (
-    indexPattern.getFieldByName(field)?.type === 'document' || fieldExists(existingFields, field)
-  );
-}
-
-/**
- * Performs an existence check on the existingFields data structure for the provided field.
- * Does not work for meta fields.
- */
-export function fieldExists(existingFields: Record<string, boolean>, fieldName: string) {
-  return existingFields[fieldName];
+  const field = indexPattern.getFieldByName(fieldName);
+  return field?.type === 'document' || hasFieldData(indexPattern.id, fieldName);
 }

@@ -9,12 +9,16 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
-import { SecurityStepId } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
+import {
+  AlertsCasesTourSteps,
+  sampleCase,
+  SecurityStepId,
+} from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { Ecs } from '../../../../../common/ecs';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 
 export interface UseAddToCaseActions {
@@ -25,6 +29,7 @@ export interface UseAddToCaseActions {
   onSuccess?: () => Promise<void>;
   isActiveTimelines: boolean;
   isInDetections: boolean;
+  refetch: (() => void) | undefined;
 }
 
 export const useAddToCaseActions = ({
@@ -35,6 +40,7 @@ export const useAddToCaseActions = ({
   onSuccess,
   isActiveTimelines,
   isInDetections,
+  refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
@@ -56,23 +62,45 @@ export const useAddToCaseActions = ({
       : [];
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
-  const { activeStep, endTourStep, incrementStep, isTourShown } = useTourContext();
+  const { activeStep, incrementStep, setStep, isTourShown } = useTourContext();
+
+  const onCaseSuccess = () => {
+    if (onSuccess) {
+      onSuccess();
+    }
+
+    if (refetch) {
+      refetch();
+    }
+  };
 
   const afterCaseCreated = useCallback(async () => {
     if (isTourShown(SecurityStepId.alertsCases)) {
-      endTourStep(SecurityStepId.alertsCases);
+      setStep(SecurityStepId.alertsCases, AlertsCasesTourSteps.viewCase);
     }
-  }, [endTourStep, isTourShown]);
+  }, [setStep, isTourShown]);
 
-  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+  const prefillCasesValue = useMemo(
+    () =>
+      isTourShown(SecurityStepId.alertsCases) &&
+      (activeStep === AlertsCasesTourSteps.addAlertToCase ||
+        activeStep === AlertsCasesTourSteps.createCase ||
+        activeStep === AlertsCasesTourSteps.submitCase)
+        ? { initialValue: sampleCase }
+        : {},
+    [activeStep, isTourShown]
+  );
+
+  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout({
     onClose: onMenuItemClick,
-    onSuccess,
+    onSuccess: onCaseSuccess,
     afterCaseCreated,
+    ...prefillCasesValue,
   });
 
-  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal({
     onClose: onMenuItemClick,
-    onRowClick: onSuccess,
+    onSuccess: onCaseSuccess,
   });
 
   const handleAddToNewCaseClick = useCallback(() => {
@@ -80,17 +108,18 @@ export const useAddToCaseActions = ({
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
-      ...(isTourShown(SecurityStepId.alertsCases) && activeStep === 4
+      // activeStep will be AlertsCasesTourSteps.addAlertToCase on first render because not yet incremented
+      // if the user closes the flyout without completing the form and comes back, we will be at step AlertsCasesTourSteps.createCase
+      ...(isTourShown(SecurityStepId.alertsCases)
         ? {
-            headerContent: (
-              // isTourAnchor=true no matter what in order to
-              // force active guide step outside of security solution (cases)
-              <GuidedOnboardingTourStep isTourAnchor step={5} stepId={SecurityStepId.alertsCases} />
-            ),
+            headerContent: <CasesTourSteps />,
           }
         : {}),
     });
-    if (isTourShown(SecurityStepId.alertsCases) && activeStep === 4) {
+    if (
+      isTourShown(SecurityStepId.alertsCases) &&
+      activeStep === AlertsCasesTourSteps.addAlertToCase
+    ) {
       incrementStep(SecurityStepId.alertsCases);
     }
   }, [onMenuItemClick, createCaseFlyout, caseAttachments, isTourShown, activeStep, incrementStep]);
@@ -113,6 +142,7 @@ export const useAddToCaseActions = ({
         <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="add-to-existing-case-action"
+          key="add-to-existing-case-action"
           onClick={handleAddToExistingCaseClick}
           size="s"
         >
@@ -122,6 +152,7 @@ export const useAddToCaseActions = ({
         <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="add-to-new-case-action"
+          key="add-to-new-case-action"
           onClick={handleAddToNewCaseClick}
           size="s"
         >
@@ -143,5 +174,6 @@ export const useAddToCaseActions = ({
 
   return {
     addToCaseActionItems,
+    handleAddToNewCaseClick,
   };
 };

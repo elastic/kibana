@@ -17,6 +17,7 @@ export const kpiDnsQueriesLensAttributes: LensAttributes = {
       accessor: '0374e520-eae0-4ac1-bcfe-37565e7fc9e3',
       layerType: 'data',
       colorMode: 'None',
+      autoScaleMetricAlignment: 'left',
     },
     query: {
       query: '',

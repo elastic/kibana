@@ -5,36 +5,38 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { ClusterStatus } from '../cluster_status';
-import { EuiMonitoringSSPTable } from '../../table';
-import { MetricCell, OfflineCell } from './cells';
-import { SetupModeBadge } from '../../setup_mode/badge';
 import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiButton,
+  EuiCallOut,
+  EuiHealth,
   EuiIcon,
   EuiLink,
-  EuiToolTip,
-  EuiSpacer,
   EuiPage,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
-  EuiCallOut,
-  EuiButton,
-  EuiText,
   EuiScreenReaderOnly,
-  EuiHealth,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ListingCallOut } from '../../setup_mode/listing_callout';
-import { AlertsStatus } from '../../../alerts/status';
-import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { get } from 'lodash';
+import React, { Fragment } from 'react';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeFeature } from '../../../../common/enums';
+import { AlertsStatus } from '../../../alerts/status';
+import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeBadge } from '../../setup_mode/badge';
+import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { EuiMonitoringSSPTable } from '../../table';
+import { ClusterStatus } from '../cluster_status';
+import { MetricCell, OfflineCell } from './cells';
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -173,6 +175,53 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
             {status}
           </EuiHealth>
         </EuiToolTip>
+      );
+    },
+  });
+
+  cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.rolesColumnTitle', {
+      defaultMessage: 'Roles',
+    }),
+    field: 'roles',
+    render: (roles) => {
+      if (!roles) {
+        return i18n.translate('xpack.monitoring.formatNumbers.notAvailableLabel', {
+          defaultMessage: 'N/A',
+        });
+      }
+
+      if (roles.length === 0) {
+        return (
+          <EuiBadge>
+            {i18n.translate('xpack.monitoring.elasticsearch.nodes.coordinatingNodeLabel', {
+              defaultMessage: 'coordinating only',
+            })}
+          </EuiBadge>
+        );
+      }
+
+      const head = roles.slice(0, 5);
+      const tail = roles.slice(5);
+      const hasMoreRoles = tail.length > 0;
+
+      return (
+        <EuiBadgeGroup gutterSize="xs">
+          {head.map((role) => (
+            <EuiBadge color={role === 'master' ? 'hollow' : 'default'}>{role}</EuiBadge>
+          ))}
+          {hasMoreRoles && (
+            <EuiToolTip
+              anchorProps={{
+                style: { lineHeight: '1' },
+              }}
+              position="bottom"
+              content={tail.join(', ')}
+            >
+              <EuiBadge>+{tail.length}</EuiBadge>
+            </EuiToolTip>
+          )}
+        </EuiBadgeGroup>
       );
     },
   });

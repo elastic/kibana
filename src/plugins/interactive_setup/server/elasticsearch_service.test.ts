@@ -86,7 +86,7 @@ describe('ElasticsearchService', () => {
     });
 
     describe('#connectionStatus$', () => {
-      beforeEach(() => jest.useFakeTimers('legacy'));
+      beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterEach(() => jest.useRealTimers());
 
       it('does not repeat ping request if have multiple subscriptions', async () => {

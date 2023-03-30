@@ -45,6 +45,9 @@ export class AnalyticsService {
     this.registerBrowserInfoAnalyticsContext();
     this.subscriptionsHandler.add(trackClicks(this.analyticsClient, core.env.mode.dev));
     this.subscriptionsHandler.add(trackViewportSize(this.analyticsClient));
+
+    // Register a flush method in the browser so CI can explicitly call it before closing the browser.
+    window.__kbnAnalytics = { flush: () => this.analyticsClient.flush() };
   }
 
   public setup({ injectedMetadata }: AnalyticsServiceSetupDeps): AnalyticsServiceSetup {
@@ -69,9 +72,9 @@ export class AnalyticsService {
     };
   }
 
-  public stop() {
+  public async stop() {
     this.subscriptionsHandler.unsubscribe();
-    this.analyticsClient.shutdown();
+    await this.analyticsClient.shutdown();
   }
 
   /**

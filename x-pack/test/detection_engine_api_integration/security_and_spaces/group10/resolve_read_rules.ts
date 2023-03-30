@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex } from '../../utils';
+import { createSignalsIndex, deleteAllRules, deleteSignalsIndex } from '../../utils';
 
 const spaceId = '714-space';
 
@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/resolve_read_rules/7_14'
         );

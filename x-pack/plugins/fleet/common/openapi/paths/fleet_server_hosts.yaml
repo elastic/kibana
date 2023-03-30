@@ -1,7 +1,7 @@
 get:
-  summary: Fleet Server Hosts - List
-  description: Return a list of Fleet server hosts
-  tags: []
+  summary: List Fleet Server hosts
+  tags:
+    - Fleet Server hosts
   responses:
     '200':
       description: OK
@@ -20,11 +20,13 @@ get:
                 type: integer
               perPage:
                 type: integer
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-fleet-server-hosts
 post:
-  summary: Fleet Server Hosts - Create
-  description: 'Create a new Fleet Server Host'
-  tags: []
+  summary: Create Fleet Server host
+  tags:
+    - Fleet Server hosts
   responses:
     '200':
       description: OK
@@ -35,6 +37,8 @@ post:
             properties:
               item:
                 $ref: ../components/schemas/fleet_server_host.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
   requestBody:
     content:
       application/json:

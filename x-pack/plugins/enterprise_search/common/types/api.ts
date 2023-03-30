@@ -14,7 +14,7 @@ import { ErrorCode } from './error_codes';
  * Each Status string corresponds to a possible status in a request's lifecycle
  */
 
-export const enum Status {
+export enum Status {
   IDLE,
   LOADING,
   SUCCESS,

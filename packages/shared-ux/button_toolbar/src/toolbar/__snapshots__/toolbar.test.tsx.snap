@@ -1,200 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<Toolbar /> is rendered 1`] = `
-<Toolbar
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
 >
-  <EuiFlexGroup
-    gutterSize="s"
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          class="eui-textTruncate"
+        >
+          Create chart
+        </span>
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <PrimaryButton
-            label="Create chart"
-            onClick={[Function]}
-          >
-            <EuiButton
-              color="primary"
-              fill={true}
-              iconSide="left"
-              onClick={[Function]}
-              size="m"
-            >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
-                color="primary"
-                disabled={false}
-                element="button"
-                fill={true}
-                iconSide="left"
-                isDisabled={false}
-                onClick={[Function]}
-                size="m"
-                type="button"
-              >
-                <button
-                  className="euiButton euiButton--primary euiButton--fill"
-                  disabled={false}
-                  onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
-                  type="button"
-                >
-                  <EuiButtonContentDeprecated
-                    className="euiButton__content"
-                    iconSide="left"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButton__content"
-                    >
-                      <span
-                        className="euiButton__text"
-                      >
-                        Create chart
-                      </span>
-                    </span>
-                  </EuiButtonContentDeprecated>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
-          </PrimaryButton>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="xs"
-            responsive={false}
-            wrap={true}
-          >
-            <div
-              className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
-            />
-          </EuiFlexGroup>
-        </div>
-      </EuiFlexItem>
-    </div>
-  </EuiFlexGroup>
-</Toolbar>
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-center-row"
+    />
+  </div>
+</div>
 `;

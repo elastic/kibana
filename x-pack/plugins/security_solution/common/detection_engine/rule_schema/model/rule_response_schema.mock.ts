@@ -31,6 +31,7 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   immutable: false,
   name: 'Query with a rule id',
   references: ['test 1', 'test 2'],
+  revision: 0,
   severity: 'high' as const,
   severity_mapping: [],
   updated_by: 'elastic_kibana',
@@ -75,6 +76,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRule 
   filters: undefined,
   saved_id: undefined,
   response_actions: undefined,
+  alert_suppression: undefined,
 });
 
 export const getSavedQuerySchemaMock = (anchorDate: string = ANCHOR_DATE): SavedQueryRule => ({
@@ -87,6 +89,7 @@ export const getSavedQuerySchemaMock = (anchorDate: string = ANCHOR_DATE): Saved
   data_view_id: undefined,
   filters: undefined,
   response_actions: undefined,
+  alert_suppression: undefined,
 });
 
 export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): MachineLearningRule => {

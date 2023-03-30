@@ -8,23 +8,20 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Query } from '@kbn/es-query';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { AggCardinality } from '@kbn/ml-agg-utils';
-import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import {
-  buildBaseFilterCriteria,
-  getSafeAggregationName,
-} from '../../../../../common/utils/query_utils';
+import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
-import { Aggs } from '../../../../../common/types/field_stats';
+import { Aggs, SamplingOption } from '../../../../../common/types/field_stats';
 
 export const checkAggregatableFieldsExistRequest = (
   dataViewTitle: string,
   query: Query['query'],
   aggregatableFields: string[],
-  samplerShardSize: number,
+  samplingOption: SamplingOption,
   timeFieldName: string | undefined,
   earliestMs?: number,
   latestMs?: number,
@@ -73,7 +70,9 @@ export const checkAggregatableFieldsExistRequest = (
         filter: filterCriteria,
       },
     },
-    ...(isPopulatedObject(aggs) ? { aggs: buildSamplerAggregation(aggs, samplerShardSize) } : {}),
+    ...(isPopulatedObject(aggs)
+      ? { aggs: buildAggregationWithSamplingOption(aggs, samplingOption) }
+      : {}),
     ...(isPopulatedObject(combinedRuntimeMappings)
       ? { runtime_mappings: combinedRuntimeMappings }
       : {}),
@@ -109,8 +108,6 @@ export function isNonAggregatableFieldOverallStats(
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: string[],
-  samplerShardSize: number,
-  totalCount: number,
   datafeedConfig?: estypes.MlDatafeed
 ) => {
   const stats = {
@@ -123,12 +120,17 @@ export const processAggregatableFieldsExistResponse = (
   responses.forEach(({ rawResponse: body, aggregatableFields: aggregatableFieldsChunk }) => {
     const aggregations = body.aggregations;
 
-    const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-    const sampleCount =
-      samplerShardSize > 0 ? get(aggregations, ['sample', 'doc_count'], 0) : totalCount;
+    const aggsPath = ['sample'];
+    const sampleCount = aggregations.sample.doc_count;
     aggregatableFieldsChunk.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
+      // Sampler agg will yield doc_count that's bigger than the actual # of sampled records
+      // because it uses the stored _doc_count if available
+      // https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-doc-count-field.html
+      // therefore we need to correct it by multiplying by the sampled probability
       const count = get(aggregations, [...aggsPath, `${safeFieldName}_count`, 'doc_count'], 0);
+      const multiplier =
+        count > sampleCount ? get(aggregations, [...aggsPath, 'probability'], 1) : 1;
       if (count > 0) {
         const cardinality = get(
           aggregations,
@@ -140,7 +142,7 @@ export const processAggregatableFieldsExistResponse = (
           existsInDocs: true,
           stats: {
             sampleCount,
-            count,
+            count: count * multiplier,
             cardinality,
           },
         });

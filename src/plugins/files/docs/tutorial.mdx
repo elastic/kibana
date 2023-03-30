@@ -53,7 +53,9 @@ Consumers of the file service are able to decide what metadata they want to asso
 
 ### How to set up files for your plugin
 
-All setup examples are based on the [`filesExample` plugin](https://github.com/elastic/kibana/blob/d431e87f7ff43833bff085e5bb5b2ab603bfa05d/examples/files_example/README.md).
+All setup examples are based on the [`filesExample` plugin](https://github.com/elastic/kibana/blob/b6693bd9260c1620ec5ad8f09141b534c3b02e81/examples/files_example/README.md).
+
+#### Prepare your plugin
 
 First add the  `files` plugin as a required dependency in your `kibana.json`:
 
@@ -61,7 +63,10 @@ First add the  `files` plugin as a required dependency in your `kibana.json`:
   "requiredPlugins": ["files"],
 ```
 <br />
-Next define your file kinds. Your plugin can have more than one file kind. Each file kind should represent a specific use case, for example: an image for user avatars.
+
+#### Declare your file kind
+
+Your plugin can have more than one file kind. Each file kind should represent a specific use case, for example: an image for user avatars.
 
 ```ts
 import { FileKind } from '@kbn/files-plugin/common';
@@ -89,23 +94,69 @@ export const exampleFileKind: FileKind = {
 
 In this example we have chosen to disallow metadata updates and file sharing endpoints. **Make sure that you only expose the actions you need over HTTP**.
 
+<DocCallOut title="Ensure users can access their files">
+  HTTP access tags (`access:myApp`) define a new permission for an HTTP endpoint. **Ensure that users have the permissions they need to access their files!** See `KibanaFeatureConfig` for more information.
+</DocCallOut>
+
+#### Register the file kind
+
 Now we are able to register this file kind with the file service:
 
 ```ts
-  // in your server-side plugin code
+  // in your server-side and client-side plugin code
   public setup(core: CoreSetup, { files }: {  files: FilesSetup }) {
     files.registerFileKind(exampleFileKind);
   }
 ```
 
-You are now able to access your files both from the server-side and the public-side of your plugin. For example, you can now list all of the files of a file kind by doing the following:
+#### Use the file client
+
+Let's use the file client now that we have all the boilerplate out of the way:
 
 ```ts
   // in your public code
-  const result = await files.filesClientFactory.asScoped(exampleFileKind.id).list();
+  const client = files.filesClientFactory.asScoped('filesExample'); // Create a file client that is scoped to "filesExample"
+  const result = await client.list();
 ```
 
-To create a new file from the browser you can do the following:
+**Note**: the server-side file client has unrestricted access to all files because it does
+not need to pass through HTTP API access control!
+
+Right now this list will be empty... How do we get our image avatars into the file service? By asking users!
+
+The file service provides a set of React UI components for you to leverage. Users can give you a new file (`UploadFile`) or select a from a set of files they have already uploaded (`FilePicker`).
+
+Let's go with the latter for now because users can pick from previously uploaded
+avatars or provide a new one.
+
+```tsx
+  const client = files.filesClientFactory.asUnscoped(); // Create a client not scoped to a file kind
+  ...
+  <FilesContext client={client}>
+    <FilePicker kind="filesExample" ... />
+  </FilesContext>
+  ...
+```
+
+You'll notice the `FilesContext` component was introduced here. This provides
+access to our registry of file kinds among other things so make sure your app is
+wrapped in this context.
+
+At this point you can use the public components provided by the file service
+to render an image in the browser:
+
+```tsx
+  const client = files.filesClientFactory.asUnscoped(); // Create a client not scoped to a file kind
+  ...
+  <Image src={client.getDownloadHref({ id: '<file-id>', kind: 'filesExample'  })} alt="..." />
+  ...
+```
+
+<DocCallOut title="File service React components">
+  To see the React components currently available in action run `yarn storybook files` and follow the prompts in the terminal.
+</DocCallOut>
+
+Alternatively, you can use the file client directly to create a new file from the browser:
 
 ```ts
   const { file } = await files.example.create({
@@ -122,23 +173,12 @@ To create a new file from the browser you can do the following:
   await files.example.upload({ id: file.id, body: blob });
 ```
 
-Now display your file to the world using the client side API:
+## Recap
 
-```tsx
-const { files: [file] } = await fileClient.find({ meta: { myValue: 'test' } });
+After completing this tutorial you should have successfully integrated your application
+with the file service:
 
-<img
-    alt={file.alt ?? 'unknown'}
-    src={fileClient.getDownloadHref(file)}
-/>
-```
-
-### Public components
-
-<DocCallOut title="Under construction 🚧" color="warning">
-  The file service will expose a number of front-end components to ensure that a consistent UX is provided for.
-
-  Consumers of the file service will have access to lower-level APIs but it is highly recommended to use the existing UI components or to first reach out to the App Services team before building your own UI, others could also benefit from any UI improvements!
-</DocCallOut>
-
-
+* Have a file kind setup for your use case
+* Use the file client on server or client side to interact with files
+* Leverage existing file service UI components to greatly reduce the amount
+  of code needed to integrate your solution and provide a consistent UX

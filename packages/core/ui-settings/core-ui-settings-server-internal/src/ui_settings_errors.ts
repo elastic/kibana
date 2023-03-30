@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line max-classes-per-file
 export class CannotOverrideError extends Error {
   public cause?: Error;
 
@@ -16,5 +17,13 @@ export class CannotOverrideError extends Error {
     // Set the prototype explicitly, see:
     // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
     Object.setPrototypeOf(this, CannotOverrideError.prototype);
+  }
+}
+
+export class SettingNotRegisteredError extends Error {
+  constructor(key: string) {
+    super(
+      `Global setting ${key} is not registered. Global settings need to be registered before they can be set`
+    );
   }
 }

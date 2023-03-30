@@ -10,9 +10,10 @@ import { isEqual } from 'lodash';
 import { Reducer } from 'react';
 import { RuleActionParam, IntervalSchedule } from '@kbn/alerting-plugin/common';
 import { Rule, RuleAction } from '../../../types';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export type InitialRule = Partial<Rule> &
-  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
+  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
 
 interface CommandType<
   T extends
@@ -22,6 +23,8 @@ interface CommandType<
     | 'setRuleParams'
     | 'setRuleActionParams'
     | 'setRuleActionProperty'
+    | 'setRuleActionFrequency'
+    | 'clearRuleActionParams'
 > {
   type: T;
 }
@@ -77,7 +80,15 @@ export type RuleReducerAction =
     }
   | {
       command: CommandType<'setRuleActionProperty'>;
-      payload: RuleActionPayload<keyof RuleAction>;
+      payload: Payload<string, RuleActionParam>;
+    }
+  | {
+      command: CommandType<'setRuleActionFrequency'>;
+      payload: Payload<string, RuleActionParam>;
+    }
+  | {
+      command: CommandType<'clearRuleActionParams'>;
+      payload: { index: number };
     };
 
 export type InitialRuleReducer = Reducer<{ rule: InitialRule }, RuleReducerAction>;
@@ -90,6 +101,26 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
   const { rule } = state;
 
   switch (action.command.type) {
+    case 'clearRuleActionParams': {
+      const { index } = action.payload;
+      if (index === undefined || rule.actions[index] == null) {
+        return state;
+      } else {
+        const oldAction = rule.actions.splice(index, 1)[0];
+        const updatedAction = {
+          ...oldAction,
+          params: {},
+        };
+        rule.actions.splice(index, 0, updatedAction);
+        return {
+          ...state,
+          rule: {
+            ...rule,
+            actions: [...rule.actions],
+          },
+        };
+      }
+    }
     case 'setRule': {
       const { key, value } = action.payload as Payload<'rule', RulePhase>;
       if (key === 'rule') {
@@ -166,6 +197,36 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
           ...oldAction,
           params: {
             ...oldAction.params,
+            [key]: value,
+          },
+        };
+        rule.actions.splice(index, 0, updatedAction);
+        return {
+          ...state,
+          rule: {
+            ...rule,
+            actions: [...rule.actions],
+          },
+        };
+      }
+    }
+    case 'setRuleActionFrequency': {
+      const { key, value, index } = action.payload as Payload<
+        keyof RuleAction,
+        SavedObjectAttribute
+      >;
+      if (
+        index === undefined ||
+        rule.actions[index] == null ||
+        (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
+      ) {
+        return state;
+      } else {
+        const oldAction = rule.actions.splice(index, 1)[0];
+        const updatedAction = {
+          ...oldAction,
+          frequency: {
+            ...(oldAction.frequency ?? DEFAULT_FREQUENCY),
             [key]: value,
           },
         };

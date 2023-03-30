@@ -6,9 +6,9 @@
  */
 import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import { StackTracesDisplayOption, TopNType } from '../../../common/stack_traces';
-import { groupSamplesByCategory, TopNResponse, TopNSubchart } from '../../../common/topn';
+import { groupSamplesByCategory, TopNResponse } from '../../../common/topn';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -20,6 +20,7 @@ import { useProfilingDependencies } from '../contexts/profiling_dependencies/use
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 import { StackedBarChart } from '../stacked_bar_chart';
 import { getStackTracesTabs } from './get_stack_traces_tabs';
+import { getTracesViewRouteParams } from './utils';
 
 export function StackTracesView() {
   const routePath = useProfilingRoutePath();
@@ -78,11 +79,14 @@ export function StackTracesView() {
     [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]
   );
 
-  const [highlightedSubchart, setHighlightedSubchart] = useState<TopNSubchart | undefined>(
-    undefined
-  );
-
   const { data } = state;
+
+  function onStackedBarClick(category: string) {
+    profilingRouter.push(
+      '/stacktraces/{topNType}',
+      getTracesViewRouteParams({ query, topNType: path.topNType, category })
+    );
+  }
 
   return (
     <ProfilingAppPageTemplate tabs={tabs}>
@@ -143,16 +147,8 @@ export function StackTracesView() {
                         },
                       });
                     }}
-                    onSampleClick={(sample) => {
-                      setHighlightedSubchart(
-                        data?.charts.find((subchart) => subchart.Category === sample.Category)
-                      );
-                    }}
-                    onSampleOut={() => {
-                      setHighlightedSubchart(undefined);
-                    }}
-                    highlightedSubchart={highlightedSubchart}
                     showFrames={topNType === TopNType.Traces}
+                    onClick={topNType === TopNType.Threads ? onStackedBarClick : undefined}
                   />
                 </AsyncComponent>
               </EuiFlexItem>
@@ -168,7 +164,7 @@ export function StackTracesView() {
             />
           </AsyncComponent>
         </EuiFlexItem>
-        {(data?.charts.length ?? 0) > limit ? (
+        {(data?.charts.length ?? 0) > limit && (
           <EuiFlexItem>
             <EuiButton
               onClick={() => {
@@ -186,7 +182,7 @@ export function StackTracesView() {
               })}
             </EuiButton>
           </EuiFlexItem>
-        ) : null}
+        )}
       </EuiFlexGroup>
     </ProfilingAppPageTemplate>
   );

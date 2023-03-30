@@ -106,9 +106,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
       it('submit page four and flyout', async () => {
-        // Commenting out this snapshot as this is reported. https://github.com/elastic/kibana/issues/134514
         await PageObjects.snapshotRestore.submitNewPolicy();
-        // await a11y.testAppSnapshot();
+        await a11y.testAppSnapshot();
       });
       it('policy table with data', async () => {
         await PageObjects.snapshotRestore.closeFlyout();

@@ -21,7 +21,9 @@ import type {
   DataPublicPluginStart,
   DataPublicPluginSetup,
 } from '@kbn/data-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
@@ -50,6 +52,8 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -69,6 +73,7 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
@@ -81,6 +86,7 @@ export interface ApmPluginSetupDeps {
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
+  charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   home: void;
@@ -91,12 +97,14 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
   fleet?: FleetStart;
+  fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   infra?: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
+  lens: LensPublicStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -171,6 +179,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                     matchPath(currentPath: string) {
                       return [
                         '/service-groups',
+                        '/mobile-services',
                         '/services',
                         '/service-map',
                       ].some((testPath) => currentPath.startsWith(testPath));
@@ -253,6 +262,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     plugins.observability.dashboard.register({
+      appName: 'apm',
+      hasData: async () => {
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.getHasData();
+      },
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getApmDataHelper();
+        return await dataHelper.fetchObservabilityOverviewPageData(params);
+      },
+    });
+
+    plugins.exploratoryView.register({
       appName: 'apm',
       hasData: async () => {
         const dataHelper = await getApmDataHelper();

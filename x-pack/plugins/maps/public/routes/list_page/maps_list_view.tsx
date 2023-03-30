@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { SavedObjectReference } from '@kbn/core/types';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
-import { goToSpecifiedPath } from '../../render_app';
 import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getCoreChrome,
-  getExecutionContext,
+  getExecutionContextService,
   getNavigateToApp,
   getSavedObjectsClient,
   getUiSettings,
@@ -65,7 +64,16 @@ const toTableListViewSavedObject = (
   };
 };
 
-async function findMaps(searchTerm: string, tagReferences?: SavedObjectsFindOptionsReference[]) {
+async function findMaps(
+  searchTerm: string,
+  {
+    references,
+    referencesToExclude,
+  }: {
+    references?: SavedObjectsFindOptionsReference[];
+    referencesToExclude?: SavedObjectsFindOptionsReference[];
+  } = {}
+) {
   const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
     type: MAP_SAVED_OBJECT_TYPE,
     search: searchTerm ? `${searchTerm}*` : undefined,
@@ -74,7 +82,8 @@ async function findMaps(searchTerm: string, tagReferences?: SavedObjectsFindOpti
     searchFields: ['title^3', 'description'],
     defaultSearchOperator: 'AND',
     fields: ['description', 'title'],
-    hasReference: tagReferences,
+    hasReference: references,
+    hasNoReference: referencesToExclude,
   });
 
   return {
@@ -90,11 +99,15 @@ async function deleteMaps(items: object[]) {
   await Promise.all(deletions);
 }
 
-export function MapsListView() {
-  getExecutionContext().set({
+interface Props {
+  history: ScopedHistory;
+}
+
+export function MapsListView(props: Props) {
+  getExecutionContextService().set({
     type: 'application',
+    name: APP_ID,
     page: 'list',
-    id: '',
   });
 
   const isReadOnly = !getMapsCapabilities().save;
@@ -121,7 +134,7 @@ export function MapsListView() {
         defaultMessage: 'maps',
       })}
       tableListTitle={getAppTitle()}
-      onClickTitle={({ id }) => goToSpecifiedPath(getEditPath(id))}
+      onClickTitle={({ id }) => props.history.push(getEditPath(id))}
     />
   );
 }

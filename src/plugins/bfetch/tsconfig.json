@@ -1,13 +1,18 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "index.ts"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/core-http-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

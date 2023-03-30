@@ -43,13 +43,13 @@ export const useMetricsTime = () => {
     defaultState: DEFAULT_URL_STATE,
     decodeUrlState,
     encodeUrlState,
-    urlStateKey: 'metricTime',
+    urlStateKey: '_a',
   });
 
   const [isAutoReloading, setAutoReload] = useState(urlState.autoReload || false);
   const [refreshInterval, setRefreshInterval] = useState(urlState.refreshInterval || 5000);
   const [lastRefresh, setLastRefresh] = useState<number>(moment().valueOf());
-  const [timeRange, setTimeRange] = useState(urlState.time || DEFAULT_TIMERANGE);
+  const [timeRange, setTimeRange] = useState({ ...DEFAULT_TIMERANGE, ...urlState.time });
 
   useEffect(() => {
     const newState = {
@@ -105,7 +105,7 @@ const decodeUrlState = (value: unknown) =>
 export const replaceMetricTimeInQueryString = (from: number, to: number) =>
   Number.isNaN(from) || Number.isNaN(to)
     ? (value: string) => value
-    : replaceStateKeyInQueryString<MetricsTimeUrlState>('metricTime', {
+    : replaceStateKeyInQueryString<MetricsTimeUrlState>('_a', {
         autoReload: false,
         time: {
           interval: '>=1m',

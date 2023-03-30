@@ -6,10 +6,7 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  TRACE_ID,
-  PARENT_ID,
-} from '../../../../common/elasticsearch_fieldnames';
+import { TRACE_ID, PARENT_ID } from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getRootTransactionByTraceId(

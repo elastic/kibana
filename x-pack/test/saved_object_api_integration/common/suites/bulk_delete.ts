@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { SuperTest } from 'supertest';
-import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface BulkDeleteTestDefinition extends TestDefinition {
   request: { type: string; id: string; force?: boolean };
@@ -46,7 +45,12 @@ export const TEST_CASES: Record<string, BulkDeleteTestCase> = Object.freeze({
  */
 const createRequest = ({ type, id, force }: BulkDeleteTestCase) => ({ type, id, force });
 
-export function bulkDeleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
+export function bulkDeleteTestSuiteFactory(context: FtrProviderContext) {
+  const esArchiver = context.getService('esArchiver');
+  const supertest = context.getService('supertestWithoutAuth');
+  const es = context.getService('es');
+  // const log = context.getService('log');
+
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_delete');
   const expectResponseBody =
     (testCase: BulkDeleteTestCase, statusCode: 200 | 403, user?: TestUser): ExpectResponseBody =>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { expect, Page } from '@elastic/synthetics';
+import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
 
 export function utilsPageProvider({ page }: { page: Page }) {
   return {
@@ -13,10 +14,7 @@ export function utilsPageProvider({ page }: { page: Page }) {
     },
 
     async waitForLoadingToFinish() {
-      while (true) {
-        if ((await page.$(this.byTestId('kbnLoadingMessage'))) === null) break;
-        await page.waitForTimeout(5 * 1000);
-      }
+      await waitForLoadingToFinish({ page });
     },
 
     async assertText({ text }: { text: string }) {

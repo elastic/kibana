@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import sinon from 'sinon';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { Readable } from 'stream';
 import {
   createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-} from '@kbn/core/test_helpers/kbn_server';
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import { ElasticsearchBlobStorageClient, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
 
@@ -22,7 +21,7 @@ describe('Elasticsearch blob storage', () => {
   let manageKbn: TestKibanaUtils;
   let esBlobStorage: ElasticsearchBlobStorageClient;
   let esClient: ElasticsearchClient;
-  const sandbox = sinon.createSandbox();
+  let esGetSpy: jest.SpyInstance;
 
   beforeAll(async () => {
     ElasticsearchBlobStorageClient.configureConcurrentUpload(Infinity);
@@ -48,12 +47,12 @@ describe('Elasticsearch blob storage', () => {
 
   beforeEach(() => {
     esBlobStorage = createEsBlobStorage();
-    sandbox.spy(esClient, 'get');
+    esGetSpy = jest.spyOn(esClient, 'get');
   });
 
   afterEach(async () => {
     await esClient.indices.delete({ index: BLOB_STORAGE_SYSTEM_INDEX_NAME });
-    sandbox.restore();
+    jest.clearAllMocks();
   });
 
   it('sets up a new blob storage index after first write', async () => {
@@ -70,7 +69,7 @@ describe('Elasticsearch blob storage', () => {
       chunks.push(chunk);
     }
     expect(chunks.join('')).toBe('upload this');
-    expect((esClient.get as sinon.SinonSpy).calledOnce).toBe(true);
+    expect(esGetSpy).toHaveBeenCalledTimes(1);
   });
 
   /**
@@ -86,8 +85,9 @@ describe('Elasticsearch blob storage', () => {
     }
     expect(chunks.join('')).toBe('upload this');
     // Called once because we should have found 'last: true'
-    expect((esClient.get as sinon.SinonSpy).calledOnce).toBe(true);
-    expect((esClient.get as sinon.SinonSpy).args[0]).toEqual([
+    expect(esGetSpy).toHaveBeenCalledTimes(1);
+    expect(esGetSpy).toHaveBeenNthCalledWith(
+      1,
       {
         id: id + '.0',
         index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
@@ -96,8 +96,8 @@ describe('Elasticsearch blob storage', () => {
       {
         headers: { accept: 'application/cbor' },
         asStream: true,
-      },
-    ]);
+      }
+    );
   });
 
   it('uploads and downloads a file of many chunks', async () => {
@@ -160,5 +160,17 @@ describe('Elasticsearch blob storage', () => {
       chunks.push(chunk);
     }
     expect(chunks.join('')).toEqual(fileBuffer.toString('utf-8'));
+  });
+
+  it('successfully uploads multiple files in parallel', async () => {
+    esBlobStorage = createEsBlobStorage({ chunkSize: '1024B' });
+    await expect(
+      Promise.all([
+        esBlobStorage.upload(Readable.from([Buffer.alloc(2048, 'a')])),
+        esBlobStorage.upload(Readable.from([Buffer.alloc(2048, 'a')])),
+        esBlobStorage.upload(Readable.from([Buffer.alloc(2048, 'a')])),
+        esBlobStorage.upload(Readable.from([Buffer.alloc(2048, 'a')])),
+      ])
+    ).resolves.toEqual(expect.any(Array));
   });
 });

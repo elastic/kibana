@@ -39,7 +39,7 @@ describe('prepareSearchParams', () => {
       dryRunResult,
     });
 
-    expect(result.ids).toEqual(['rule:1']);
+    expect(result).toEqual({ ids: ['rule:1'] });
   });
 
   test.each([
@@ -105,7 +105,7 @@ describe('prepareSearchParams', () => {
       });
 
       expect(mockConvertRulesFilterToKQL).toHaveBeenCalledWith(value);
-      expect(result.query).toEqual(expect.any(String));
+      expect(result).toEqual({ query: expect.any(String) });
     }
   );
 });

@@ -19,12 +19,15 @@ export interface ErrorFromPayload {
 }
 
 // interface of the API result
-interface Payload {
+export interface Payload {
   statusCode: number;
   content: string | Stream | ErrorFromPayload;
   contentType: string | null;
   headers: ResponseHeaders;
+  filename?: string;
 }
+
+export type PayloadCompleted = Payload & { filename: string };
 
 type TaskRunResult = Required<ReportApiJSON>['output'];
 
@@ -67,12 +70,12 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     const contentType = output.content_type ?? 'text/plain';
 
     return {
+      filename,
       content,
       statusCode: 200,
       contentType,
       headers: {
         ...headers,
-        'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Length': `${output.size ?? ''}`,
       },
     };

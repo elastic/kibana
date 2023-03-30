@@ -8,4 +8,4 @@
 
 export { encodePath } from './encode_path';
 export { toURL } from './to_url';
-export { streamToJSON } from './stream_to_json';
+export { sanitizeHostname } from './sanitize_hostname';

@@ -43,6 +43,12 @@ const expectedTransformResult = [
   { description: 'The space ID of the rule.', name: 'rule.spaceId' },
   { description: 'The tags of the rule.', name: 'rule.tags' },
   { description: 'The type of rule.', name: 'rule.type' },
+  {
+    description:
+      'The URL to the rule that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
+    name: 'rule.url',
+    usesPublicBaseUrl: true,
+  },
   { description: 'The date the rule scheduled the action.', name: 'date' },
   { description: 'The ID of the alert that scheduled actions for the rule.', name: 'alert.id' },
   {
@@ -57,6 +63,11 @@ const expectedTransformResult = [
     description:
       'The human readable name of the action group of the alert that scheduled actions for the rule.',
     name: 'alert.actionGroupName',
+  },
+  {
+    description:
+      'A flag on the alert that indicates whether the alert status is changing repeatedly.',
+    name: 'alert.flapping',
   },
   {
     description: 'The configured server.publicBaseUrl value or empty string if not configured.',
@@ -130,6 +141,79 @@ const expectedParamsTransformResult = (withBraces: boolean = false) => [
     description: 'fooP-description',
     name: 'params.fooP',
     ...(withBraces && { useWithTripleBracesInTemplates: true }),
+  },
+];
+
+const expectedSummaryTransformResult = [
+  {
+    description: 'The configured server.publicBaseUrl value or empty string if not configured.',
+    name: 'kibanaBaseUrl',
+  },
+  {
+    description: 'The date the rule scheduled the action.',
+    name: 'date',
+  },
+  {
+    description: 'The params of the rule.',
+    name: 'rule.params',
+  },
+  {
+    description: 'The ID of the rule.',
+    name: 'rule.id',
+  },
+  {
+    description: 'The name of the rule.',
+    name: 'rule.name',
+  },
+  {
+    description: 'The type of rule.',
+    name: 'rule.type',
+  },
+  {
+    description:
+      'The URL to the rule that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
+    name: 'rule.url',
+    usesPublicBaseUrl: true,
+  },
+  {
+    description: 'The tags of the rule.',
+    name: 'rule.tags',
+  },
+  {
+    description: 'The space ID of the rule.',
+    name: 'rule.spaceId',
+  },
+  {
+    description: 'The count of new alerts.',
+    name: 'alerts.new.count',
+  },
+  {
+    description: 'An array of objects for new alerts.',
+    name: 'alerts.new.data',
+  },
+  {
+    description: 'The count of ongoing alerts.',
+    name: 'alerts.ongoing.count',
+  },
+  {
+    description: 'An array of objects for ongoing alerts.',
+    name: 'alerts.ongoing.data',
+  },
+  {
+    description: 'The count of recovered alerts.',
+    name: 'alerts.recovered.count',
+  },
+  {
+    description: 'An array of objects for recovered alerts.',
+    name: 'alerts.recovered.data',
+  },
+  {
+    description: 'The count of all alerts.',
+    name: 'alerts.all.count',
+  },
+  {
+    description: 'An array of objects for all alerts.',
+    name: 'alerts.all.data',
   },
 ];
 
@@ -214,6 +298,12 @@ describe('transformActionVariables', () => {
       ...expectedContextTransformResult(),
       ...expectedParamsTransformResult(),
     ]);
+  });
+  test('should return correct variables when isAlertSummary = true', async () => {
+    const alertType = getAlertType({ context: [], state: [], params: [] });
+    expect(transformActionVariables(alertType.actionVariables, undefined, true)).toEqual(
+      expectedSummaryTransformResult
+    );
   });
 });
 

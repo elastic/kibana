@@ -9,7 +9,6 @@
 import React from 'react';
 import { OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   ViewMode,
@@ -39,61 +38,58 @@ interface ActionContext {
 
 export const ACTION_EDIT_BOOK = 'ACTION_EDIT_BOOK';
 
-export const createEditBookAction = (getStartServices: () => Promise<StartServices>) =>
-  createAction({
-    getDisplayName: () =>
-      i18n.translate('embeddableExamples.book.edit', { defaultMessage: 'Edit Book' }),
-    id: ACTION_EDIT_BOOK,
-    type: ACTION_EDIT_BOOK,
-    order: 100,
-    getIconType: () => 'documents',
-    isCompatible: async ({ embeddable }: ActionContext) => {
-      return (
-        embeddable.type === BOOK_EMBEDDABLE && embeddable.getInput().viewMode === ViewMode.EDIT
-      );
-    },
-    execute: async ({ embeddable }: ActionContext) => {
-      const { openModal, getAttributeService, savedObjectsClient } = await getStartServices();
-      const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT, {
-        saveMethod: async (attributes: BookSavedObjectAttributes, savedObjectId?: string) => {
-          if (savedObjectId) {
-            return savedObjectsClient.update(BOOK_EMBEDDABLE, savedObjectId, attributes);
-          }
-          return savedObjectsClient.create(BOOK_EMBEDDABLE, attributes);
-        },
-        checkForDuplicateTitle: (props: OnSaveProps) => {
-          return new Promise(() => {
-            return true;
-          });
-        },
-      });
-      const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
-        const newInput = await attributeService.wrapAttributes(
-          attributes,
-          useRefType,
-          embeddable.getExplicitInput()
-        );
-        if (!useRefType && (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId) {
-          // Set the saved object ID to null so that update input will remove the existing savedObjectId...
-          (newInput as BookByValueInput & { savedObjectId: unknown }).savedObjectId = null;
+export const createEditBookActionDefinition = (getStartServices: () => Promise<StartServices>) => ({
+  getDisplayName: () =>
+    i18n.translate('embeddableExamples.book.edit', { defaultMessage: 'Edit Book' }),
+  id: ACTION_EDIT_BOOK,
+  type: ACTION_EDIT_BOOK,
+  order: 100,
+  getIconType: () => 'documents',
+  isCompatible: async ({ embeddable }: ActionContext) => {
+    return embeddable.type === BOOK_EMBEDDABLE && embeddable.getInput().viewMode === ViewMode.EDIT;
+  },
+  execute: async ({ embeddable }: ActionContext) => {
+    const { openModal, getAttributeService, savedObjectsClient } = await getStartServices();
+    const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT, {
+      saveMethod: async (attributes: BookSavedObjectAttributes, savedObjectId?: string) => {
+        if (savedObjectId) {
+          return savedObjectsClient.update(BOOK_EMBEDDABLE, savedObjectId, attributes);
         }
-        embeddable.updateInput(newInput);
-        if (useRefType) {
-          // Ensures that any duplicate embeddables also register the changes. This mirrors the behavior of going back and forth between apps
-          embeddable.getRoot().reload();
-        }
-      };
-      const overlay = openModal(
-        toMountPoint(
-          <CreateEditBookComponent
-            savedObjectId={(embeddable.getInput() as BookByReferenceInput).savedObjectId}
-            attributes={embeddable.getOutput().attributes}
-            onSave={(attributes: BookSavedObjectAttributes, useRefType: boolean) => {
-              overlay.close();
-              onSave(attributes, useRefType);
-            }}
-          />
-        )
+        return savedObjectsClient.create(BOOK_EMBEDDABLE, attributes);
+      },
+      checkForDuplicateTitle: (props: OnSaveProps) => {
+        return new Promise(() => {
+          return true;
+        });
+      },
+    });
+    const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
+      const newInput = await attributeService.wrapAttributes(
+        attributes,
+        useRefType,
+        embeddable.getExplicitInput()
       );
-    },
-  });
+      if (!useRefType && (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId) {
+        // Set the saved object ID to null so that update input will remove the existing savedObjectId...
+        (newInput as BookByValueInput & { savedObjectId: unknown }).savedObjectId = null;
+      }
+      embeddable.updateInput(newInput);
+      if (useRefType) {
+        // Ensures that any duplicate embeddables also register the changes. This mirrors the behavior of going back and forth between apps
+        embeddable.getRoot().reload();
+      }
+    };
+    const overlay = openModal(
+      toMountPoint(
+        <CreateEditBookComponent
+          savedObjectId={(embeddable.getInput() as BookByReferenceInput).savedObjectId}
+          attributes={embeddable.getOutput().attributes}
+          onSave={(attributes: BookSavedObjectAttributes, useRefType: boolean) => {
+            overlay.close();
+            onSave(attributes, useRefType);
+          }}
+        />
+      )
+    );
+  },
+});

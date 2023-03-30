@@ -17,7 +17,7 @@ import {
 import { EuiText } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import {
   PROCESSOR_EVENT,
@@ -58,7 +58,7 @@ export function VisitorBreakdownChart({
 }: Props) {
   const kibana = useKibanaServices();
   const LensEmbeddableComponent = kibana.lens.EmbeddableComponent;
-  const [localDataViewId] = useState<string>(uuid.v4());
+  const [localDataViewId] = useState<string>(uuidv4());
 
   const lensAttributes = useMemo(
     () =>
@@ -105,7 +105,7 @@ const visConfig: PieVisualizationState = {
     {
       layerId: 'layer1',
       primaryGroups: ['col1'],
-      metric: 'col2',
+      metrics: ['col2'],
       categoryDisplay: 'default',
       legendDisplay: 'hide',
       numberDisplay: 'percent',

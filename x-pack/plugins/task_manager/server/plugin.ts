@@ -18,23 +18,22 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
-import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
-import { bulkRemoveIfExist } from './lib/bulk_remove_if_exist';
 import { setupSavedObjects } from './saved_objects';
 import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
-import { healthRoute } from './routes';
+import { backgroundTaskUtilizationRoute, healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask, ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
+import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 
 export interface TaskManagerSetupContract {
   /**
@@ -60,12 +59,11 @@ export type TaskManagerStartContract = Pick<
   | 'bulkDisable'
   | 'bulkSchedule'
 > &
-  Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove'> & {
+  Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
   } & {
-    bulkRemoveIfExist: (ids: string[]) => Promise<SavedObjectsBulkDeleteResponse | undefined>;
-  } & {
     supportsEphemeralTasks: () => boolean;
+    getRegisteredTypes: () => string[];
   };
 
 export class TaskManagerPlugin
@@ -83,6 +81,7 @@ export class TaskManagerPlugin
   private monitoringStats$ = new Subject<MonitoringStats>();
   private shouldRunBackgroundTasks: boolean;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private adHocTaskCounter: AdHocTaskCounter;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -91,6 +90,7 @@ export class TaskManagerPlugin
     this.definitions = new TaskTypeDictionary(this.logger);
     this.kibanaVersion = initContext.env.packageInfo.version;
     this.shouldRunBackgroundTasks = initContext.node.roles.backgroundTasks;
+    this.adHocTaskCounter = new AdHocTaskCounter();
   }
 
   public setup(
@@ -131,6 +131,19 @@ export class TaskManagerPlugin
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
+      docLinks: core.docLinks,
+    });
+    const monitoredUtilization$ = backgroundTaskUtilizationRoute({
+      router,
+      monitoringStats$: this.monitoringStats$,
+      logger: this.logger,
+      taskManagerId: this.taskManagerId,
+      config: this.config!,
+      usageCounter: this.usageCounter!,
+      kibanaVersion: this.kibanaVersion,
+      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      getClusterClient: () =>
+        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
     });
 
     core.status.derivedStatus$.subscribe((status) =>
@@ -154,6 +167,7 @@ export class TaskManagerPlugin
       registerTaskManagerUsageCollector(
         usageCollection,
         monitoredHealth$,
+        monitoredUtilization$,
         this.config.ephemeral_tasks.enabled,
         this.config.ephemeral_tasks.request_capacity,
         this.config.unsafe.exclude_task_types
@@ -183,6 +197,7 @@ export class TaskManagerPlugin
     savedObjects,
     elasticsearch,
     executionContext,
+    docLinks,
   }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
@@ -194,6 +209,7 @@ export class TaskManagerPlugin
       index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
+      adHocTaskCounter: this.adHocTaskCounter,
     });
 
     const managedConfiguration = createManagedConfiguration({
@@ -236,6 +252,7 @@ export class TaskManagerPlugin
       this.config!,
       managedConfiguration,
       this.logger,
+      this.adHocTaskCounter,
       this.taskPollingLifecycle,
       this.ephemeralTaskLifecycle
     ).subscribe((stat) => this.monitoringStats$.next(stat));
@@ -245,7 +262,6 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
-      definitions: this.definitions,
       taskManagerId: taskStore.taskManagerId,
     });
 
@@ -255,7 +271,7 @@ export class TaskManagerPlugin
         taskStore.aggregate(opts),
       get: (id: string) => taskStore.get(id),
       remove: (id: string) => taskStore.remove(id),
-      bulkRemoveIfExist: (ids: string[]) => bulkRemoveIfExist(taskStore, ids),
+      bulkRemove: (ids: string[]) => taskStore.bulkRemove(ids),
       removeIfExists: (id: string) => removeIfExists(taskStore, id),
       schedule: (...args) => taskScheduling.schedule(...args),
       bulkSchedule: (...args) => taskScheduling.bulkSchedule(...args),
@@ -267,6 +283,7 @@ export class TaskManagerPlugin
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () =>
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
+      getRegisteredTypes: () => this.definitions.getAllTypes(),
     };
   }
 

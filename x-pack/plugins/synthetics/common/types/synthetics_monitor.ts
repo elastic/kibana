@@ -6,7 +6,14 @@
  */
 
 import type { SimpleSavedObject } from '@kbn/core/public';
-import { EncryptedSyntheticsMonitor, SyntheticsMonitor } from '../runtime_types';
+import {
+  EncryptedSyntheticsMonitor,
+  Locations,
+  MonitorFields,
+  ServiceLocationErrors,
+  SyntheticsMonitor,
+  SyntheticsMonitorSchedule,
+} from '../runtime_types';
 
 export interface MonitorIdParam {
   monitorId: string;
@@ -23,4 +30,13 @@ export type DecryptedSyntheticsMonitorSavedObject = SimpleSavedObject<Synthetics
 export interface SyntheticsServiceAllowed {
   serviceAllowed: boolean;
   signupUrl: string;
+}
+
+export interface TestNowResponse {
+  schedule: SyntheticsMonitorSchedule;
+  locations: Locations;
+  errors?: ServiceLocationErrors;
+  testRunId: string;
+  configId: string;
+  monitor: MonitorFields;
 }

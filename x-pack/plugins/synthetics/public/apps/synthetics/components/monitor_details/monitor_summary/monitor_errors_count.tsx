@@ -6,39 +6,54 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { KpiWrapper } from './kpi_wrapper';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface MonitorErrorsCountProps {
   from: string;
   to: string;
+  monitorId: string[];
+  id: string;
 }
 
-export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
+export const MonitorErrorsCount = ({ monitorId, from, to, id }: MonitorErrorsCountProps) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const monitorId = useMonitorQueryId();
+  const selectedLocation = useSelectedLocation();
+
+  const time = useMemo(() => ({ from, to }), [from, to]);
+
+  if (!selectedLocation || !monitorId) {
+    return null;
+  }
 
   return (
-    <KpiWrapper>
-      <ExploratoryViewEmbeddable
-        align="left"
-        reportType={ReportTypes.SINGLE_METRIC}
-        attributes={[
-          {
-            time: props,
-            reportDefinitions: { config_id: [monitorId] },
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor_errors',
-            name: 'synthetics-series-1',
+    <ExploratoryViewEmbeddable
+      id={id}
+      align="left"
+      customHeight="70px"
+      reportType={ReportTypes.SINGLE_METRIC}
+      attributes={[
+        {
+          time,
+          reportDefinitions: {
+            'monitor.id': monitorId,
+            'observer.geo.name': [selectedLocation?.label],
           },
-        ]}
-      />
-    </KpiWrapper>
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor_errors',
+          name: ERRORS_LABEL,
+        },
+      ]}
+    />
   );
 };
+
+export const ERRORS_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.errors', {
+  defaultMessage: 'Errors',
+});

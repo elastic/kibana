@@ -32,14 +32,7 @@ export const CategorizationPerPartitionField: FC = () => {
 
   return (
     <Description>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel"
-            defaultMessage="Enable per-partition categorization"
-          />
-        }
-      >
+      <EuiFormRow>
         <CategorizationPerPartitionSwitch />
       </EuiFormRow>
 

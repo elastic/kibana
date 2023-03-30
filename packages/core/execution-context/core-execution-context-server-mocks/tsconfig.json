@@ -1,10 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -12,5 +9,13 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-execution-context-common",
+    "@kbn/core-execution-context-server",
+    "@kbn/core-execution-context-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

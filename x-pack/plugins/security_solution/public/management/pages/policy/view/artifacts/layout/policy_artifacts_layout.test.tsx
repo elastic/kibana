@@ -20,19 +20,26 @@ import type { ImmutableObject, PolicyData } from '../../../../../../../common/en
 import { parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from '../../tabs/event_filters_translations';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
-let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
+jest.mock('../../../../../../common/components/user_privileges');
+
+interface MockedAPIArgs {
+  query: { filter: string };
+}
+
+let render: (canWriteArtifact?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
 let mockedContext: AppContextTestRender;
 let renderResult: ReturnType<AppContextTestRender['render']>;
 let policyItem: ImmutableObject<PolicyData>;
 const generator = new EndpointDocGenerator();
 let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 let history: AppContextTestRender['history'];
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 const getEventFiltersLabels = () => ({
   ...POLICY_ARTIFACT_EVENT_FILTERS_LABELS,
@@ -46,6 +53,9 @@ const getEventFiltersLabels = () => ({
 });
 
 describe('Policy artifacts layout', () => {
+  const isFilteredByPolicyQuery = (args?: { query: { filter: string } }) =>
+    args && args.query.filter === parsePoliciesAndFilterToKql({ policies: [policyItem.id, 'all'] });
+
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
@@ -53,10 +63,12 @@ describe('Policy artifacts layout', () => {
     policyItem = generator.generatePolicyPackagePolicy();
     ({ history } = mockedContext);
 
-    getEndpointPrivilegesInitialStateMock({
-      canCreateArtifactsByPolicy: true,
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canCreateArtifactsByPolicy: true,
+      },
     });
-    render = async (externalPrivileges = true) => {
+    render = async (canWriteArtifact = true) => {
       await act(async () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsLayout
@@ -68,7 +80,7 @@ describe('Policy artifacts layout', () => {
             searchableFields={EVENT_FILTERS_SEARCHABLE_FIELDS}
             getArtifactPath={getEventFiltersListPath}
             getPolicyArtifactsPath={getPolicyEventFiltersPath}
-            externalPrivileges={externalPrivileges}
+            canWriteArtifact={canWriteArtifact}
           />
         );
         await waitFor(mockedApi.responseProvider.eventFiltersList);
@@ -104,18 +116,13 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should render layout with no assigned artifacts data when there are artifacts', async () => {
-    mockedApi.responseProvider.eventFiltersList.mockImplementation(
-      (args?: { query: { filter: string } }) => {
-        if (
-          !args ||
-          args.query.filter !== parsePoliciesAndFilterToKql({ policies: [policyItem.id, 'all'] })
-        ) {
-          return getFoundExceptionListItemSchemaMock(1);
-        } else {
-          return getFoundExceptionListItemSchemaMock(0);
-        }
+    mockedApi.responseProvider.eventFiltersList.mockImplementation((args?: MockedAPIArgs) => {
+      if (!isFilteredByPolicyQuery(args)) {
+        return getFoundExceptionListItemSchemaMock(1);
+      } else {
+        return getFoundExceptionListItemSchemaMock(0);
       }
-    );
+    });
 
     await render();
 
@@ -135,8 +142,10 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should hide `Assign artifacts to policy` on empty state with unassigned policies when downgraded to a gold or below license', async () => {
-    getEndpointPrivilegesInitialStateMock({
-      canCreateArtifactsByPolicy: false,
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canCreateArtifactsByPolicy: false,
+      },
     });
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(0)
@@ -148,8 +157,10 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should hide the `Assign artifacts to policy` button license is downgraded to gold or below', async () => {
-    getEndpointPrivilegesInitialStateMock({
-      canCreateArtifactsByPolicy: false,
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canCreateArtifactsByPolicy: false,
+      },
     });
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(5)
@@ -162,8 +173,10 @@ describe('Policy artifacts layout', () => {
   });
 
   it('should hide the `Assign artifacts` flyout when license is downgraded to gold or below', async () => {
-    getEndpointPrivilegesInitialStateMock({
-      canCreateArtifactsByPolicy: false,
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canCreateArtifactsByPolicy: false,
+      },
     });
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(2)
@@ -184,6 +197,27 @@ describe('Policy artifacts layout', () => {
       );
       await render(false);
       expect(renderResult.queryByTestId('artifacts-assign-button')).toBeNull();
+    });
+    it('should not display assign and manage artifacts buttons on empty state when there are artifacts', async () => {
+      mockedApi.responseProvider.eventFiltersList.mockImplementation((args?: MockedAPIArgs) => {
+        if (!isFilteredByPolicyQuery(args)) {
+          return getFoundExceptionListItemSchemaMock(1);
+        } else {
+          return getFoundExceptionListItemSchemaMock(0);
+        }
+      });
+      await render(false);
+      expect(await renderResult.findByTestId('policy-artifacts-empty-unassigned')).not.toBeNull();
+      expect(renderResult.queryByTestId('unassigned-assign-artifacts-button')).toBeNull();
+      expect(renderResult.queryByTestId('unassigned-manage-artifacts-button')).toBeNull();
+    });
+    it('should not display manage artifacts button on empty state when there are no artifacts', async () => {
+      mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+        getFoundExceptionListItemSchemaMock(0)
+      );
+      await render(false);
+      expect(await renderResult.findByTestId('policy-artifacts-empty-unexisting')).not.toBeNull();
+      expect(renderResult.queryByTestId('unexisting-manage-artifacts-button')).toBeNull();
     });
   });
 });

@@ -86,6 +86,7 @@ export const getOutputRuleAlertForRest = (): RuleResponse => ({
   type: 'query',
   note: '# Investigative notes',
   version: 1,
+  revision: 0,
   execution_summary: undefined,
   related_integrations: [],
   required_fields: [],
@@ -98,4 +99,5 @@ export const getOutputRuleAlertForRest = (): RuleResponse => ({
   timestamp_override_fallback_disabled: undefined,
   namespace: undefined,
   data_view_id: undefined,
+  alert_suppression: undefined,
 });

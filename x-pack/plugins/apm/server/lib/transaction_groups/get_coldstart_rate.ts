@@ -12,7 +12,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
@@ -123,6 +123,17 @@ export async function getColdstartRate({
   return { transactionColdstartRate, average };
 }
 
+export interface ColdstartRateResponse {
+  currentPeriod: {
+    transactionColdstartRate: Coordinate[];
+    average: number | null;
+  };
+  previousPeriod: {
+    transactionColdstartRate: Coordinate[];
+    average: number | null;
+  };
+}
+
 export async function getColdstartRatePeriods({
   environment,
   kuery,
@@ -145,7 +156,7 @@ export async function getColdstartRatePeriods({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<ColdstartRateResponse> {
   const commonProps = {
     environment,
     kuery,

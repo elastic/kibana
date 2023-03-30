@@ -91,6 +91,21 @@ describe('TelemetryEventsSender', () => {
             ruleset: 'Z',
             version: '100',
           },
+          dll: {
+            Ext: {
+              device: {
+                bus_type: 'FileBackedVirtual',
+                dos_name: 'D:',
+                file_system_type: 'CDFS',
+                nt_name: 'CdRom0',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                volume_device_type: 'CD-ROM File System',
+              },
+              relative_file_creation_time: 35588490.2737149,
+              relative_file_name_modify_time: 35588490.2424634,
+            },
+          },
           file: {
             extension: '.exe',
             size: 3,
@@ -99,6 +114,34 @@ describe('TelemetryEventsSender', () => {
             test: 'me',
             another: 'nope',
             pe: {
+              Ext: {
+                dotnet: true,
+                streams: [
+                  {
+                    name: '#~',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                  {
+                    name: '#Blob',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                ],
+                sections: [
+                  {
+                    name: '.reloc',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                ],
+              },
               original_file_name: 'malware.exe',
             },
             Ext: {
@@ -117,6 +160,8 @@ describe('TelemetryEventsSender', () => {
               header_bytes: 'data in here',
               quarantine_result: true,
               quarantine_message: 'this file is bad',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
               something_else: 'nope',
             },
           },
@@ -133,8 +178,35 @@ describe('TelemetryEventsSender', () => {
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
+              device: {
+                bus_type: 'FileBackedVirtual',
+                volume_device_type: 'CD-ROM File System',
+                dos_name: 'D:',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                nt_name: 'CdRom0',
+                file_system_type: 'CDFS',
+              },
+              effective_parent: {
+                name: 'file.exe',
+                pid: 6792,
+                entity_id: 'some_entity_id',
+                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe',
+              },
+              session_info: {
+                logon_type: 'Interactive',
+                client_address: '127.0.0.1',
+                id: 1,
+                authentication_package: 'NTLM',
+                relative_logon_time: 0.1,
+                relative_password_age: 2592000.123,
+                user_flags: ['LOGON_EXTRA_SIDS', 'LOGON_NTLMV2_ENABLED', 'LOGON_WINLOGON'],
+              },
             },
           },
           Responses: '{ "result": 0 }', // >= 7.15
@@ -226,6 +298,34 @@ describe('TelemetryEventsSender', () => {
             created: 0,
             path: 'X',
             pe: {
+              Ext: {
+                dotnet: true,
+                streams: [
+                  {
+                    name: '#~',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                  {
+                    name: '#Blob',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                ],
+                sections: [
+                  {
+                    name: '.reloc',
+                    hash: {
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
+                  },
+                ],
+              },
               original_file_name: 'malware.exe',
             },
             Ext: {
@@ -256,8 +356,35 @@ describe('TelemetryEventsSender', () => {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
+              device: {
+                bus_type: 'FileBackedVirtual',
+                volume_device_type: 'CD-ROM File System',
+                dos_name: 'D:',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                nt_name: 'CdRom0',
+                file_system_type: 'CDFS',
+              },
+              effective_parent: {
+                name: 'file.exe',
+                pid: 6792,
+                entity_id: 'some_entity_id',
+                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe',
+              },
+              session_info: {
+                logon_type: 'Interactive',
+                client_address: '127.0.0.1',
+                id: 1,
+                authentication_package: 'NTLM',
+                relative_logon_time: 0.1,
+                relative_password_age: 2592000.123,
+                user_flags: ['LOGON_EXTRA_SIDS', 'LOGON_NTLMV2_ENABLED', 'LOGON_WINLOGON'],
+              },
             },
           },
           Responses: '{ "result": 0 }',
@@ -274,6 +401,21 @@ describe('TelemetryEventsSender', () => {
             path: '/foo/bar',
             runatload: true,
             args: ['foo', 'bar'],
+          },
+          dll: {
+            Ext: {
+              relative_file_creation_time: 35588490.2737149,
+              relative_file_name_modify_time: 35588490.2424634,
+              device: {
+                bus_type: 'FileBackedVirtual',
+                volume_device_type: 'CD-ROM File System',
+                dos_name: 'D:',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                nt_name: 'CdRom0',
+                file_system_type: 'CDFS',
+              },
+            },
           },
         },
       ]);

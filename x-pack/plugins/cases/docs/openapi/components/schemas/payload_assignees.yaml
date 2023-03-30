@@ -1,9 +1,4 @@
 type: object
 properties:
   assignees:
-    type: array
-    items:
-      type: object
-      properties:
-        uid:
-          type: string
+    $ref: 'assignees.yaml'

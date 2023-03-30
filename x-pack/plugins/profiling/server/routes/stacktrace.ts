@@ -36,6 +36,9 @@ import { ProjectTimeQuery } from './query';
 
 const BASE64_FRAME_ID_LENGTH = 32;
 
+const CACHE_MAX_ITEMS = 100000;
+const CACHE_TTL_MILLISECONDS = 1000 * 60 * 5;
+
 export type EncodedStackTrace = DedotObject<{
   // This field is a base64-encoded byte string. The string represents a
   // serialized list of frame IDs in which the order of frames are
@@ -270,7 +273,79 @@ export async function mgetStackTraces({
   return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
 }
 
-const frameLRU = new LRUCache<StackFrameID, StackFrame>({ max: 100000 });
+const frameLRU = new LRUCache<StackFrameID, StackFrame>({
+  max: CACHE_MAX_ITEMS,
+  maxAge: CACHE_TTL_MILLISECONDS,
+});
+
+// clearStackFrameCache clears the entire cache and returns the number of deleted items
+export function clearStackFrameCache(): number {
+  const numDeleted = frameLRU.length;
+  frameLRU.reset();
+  return numDeleted;
+}
+
+export function updateStackFrameMap(
+  stackFrames: any,
+  stackFrameMap: Map<StackFrameID, StackFrame>,
+  stackFrameCache: LRUCache<StackFrameID, StackFrame>
+): number {
+  let found = 0;
+  for (const frame of stackFrames) {
+    if ('error' in frame) {
+      continue;
+    }
+    if (frame.found) {
+      found++;
+
+      const fileName = frame._source[ProfilingESField.StackframeFileName];
+      const functionName = frame._source[ProfilingESField.StackframeFunctionName];
+      const functionOffset = frame._source[ProfilingESField.StackframeFunctionOffset];
+      const lineNumber = frame._source[ProfilingESField.StackframeLineNumber];
+
+      let stackFrame;
+      if (Array.isArray(functionName)) {
+        // Each field in a stackframe is represented by an array. This is
+        // necessary to support inline frames.
+        //
+        // We only take the first available inline stackframe until the UI
+        // can support all of them.
+        stackFrame = {
+          FileName: fileName && fileName[0],
+          FunctionName: functionName && functionName[0],
+          FunctionOffset: functionOffset && functionOffset[0],
+          LineNumber: lineNumber && lineNumber[0],
+        };
+      } else {
+        if (fileName || functionName) {
+          stackFrame = {
+            FileName: fileName,
+            FunctionName: functionName,
+            FunctionOffset: functionOffset,
+            LineNumber: lineNumber,
+          };
+        } else {
+          // pre 8.7 format with synthetic source
+          const sf = frame._source.Stackframe;
+          stackFrame = {
+            FileName: sf?.file?.name,
+            FunctionName: sf?.function?.name,
+            FunctionOffset: sf?.function?.offset,
+            LineNumber: sf?.line?.number,
+          };
+        }
+      }
+
+      stackFrameMap.set(frame._id, stackFrame);
+      stackFrameCache.set(frame._id, stackFrame);
+      continue;
+    }
+
+    stackFrameMap.set(frame._id, emptyStackFrame);
+    stackFrameCache.set(frame._id, emptyStackFrame);
+  }
+  return found;
+}
 
 export async function mgetStackFrames({
   logger,
@@ -306,32 +381,8 @@ export async function mgetStackFrames({
     realtime: true,
   });
 
-  // Create a lookup map StackFrameID -> StackFrame.
-  let queryHits = 0;
   const t0 = Date.now();
-  const docs = resStackFrames.docs;
-  for (const frame of docs) {
-    if ('error' in frame) {
-      continue;
-    }
-    if (frame.found) {
-      queryHits++;
-      const stackFrame = {
-        FileName: frame._source!.Stackframe.file?.name,
-        FunctionName: frame._source!.Stackframe.function?.name,
-        FunctionOffset: frame._source!.Stackframe.function?.offset,
-        LineNumber: frame._source!.Stackframe.line?.number,
-        SourceType: frame._source!.Stackframe.source?.type,
-      };
-      stackFrames.set(frame._id, stackFrame);
-      frameLRU.set(frame._id, stackFrame);
-      continue;
-    }
-
-    stackFrames.set(frame._id, emptyStackFrame);
-    frameLRU.set(frame._id, emptyStackFrame);
-  }
-
+  const queryHits = updateStackFrameMap(resStackFrames.docs, stackFrames, frameLRU);
   logger.info(`processing data took ${Date.now() - t0} ms`);
 
   summarizeCacheAndQuery(logger, 'frames', cacheHits, cacheTotal, queryHits, stackFrameIDs.size);
@@ -339,7 +390,17 @@ export async function mgetStackFrames({
   return stackFrames;
 }
 
-const executableLRU = new LRUCache<FileID, Executable>({ max: 100000 });
+const executableLRU = new LRUCache<FileID, Executable>({
+  max: CACHE_MAX_ITEMS,
+  maxAge: CACHE_TTL_MILLISECONDS,
+});
+
+// clearExecutableCache clears the entire cache and returns the number of deleted items
+export function clearExecutableCache(): number {
+  const numDeleted = executableLRU.length;
+  executableLRU.reset();
+  return numDeleted;
+}
 
 export async function mgetExecutables({
   logger,

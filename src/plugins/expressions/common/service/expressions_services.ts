@@ -161,6 +161,18 @@ export interface ExpressionExecutionParams {
   executionContext?: KibanaExecutionContext;
 
   namespace?: string;
+
+  /**
+   * Toggles the partial results support.
+   * @default false
+   */
+  partial?: boolean;
+
+  /**
+   * Throttling of partial results in milliseconds. 0 is disabling the throttling.
+   * @deafult 0
+   */
+  throttle?: number;
 }
 
 /**

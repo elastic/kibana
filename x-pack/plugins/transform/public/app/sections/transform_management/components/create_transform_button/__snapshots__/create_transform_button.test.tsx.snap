@@ -8,11 +8,13 @@ exports[`Transform: Transform List <CreateTransformButton /> Minimal initializat
   position="top"
 >
   <EuiButton
+    color="primary"
     data-test-subj="transformButtonCreate"
     disabled={true}
     fill={true}
     iconType="plusInCircle"
     onClick={[MockFunction]}
+    size="m"
   >
     <FormattedMessage
       defaultMessage="Create a transform"

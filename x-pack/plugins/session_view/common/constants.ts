@@ -18,7 +18,10 @@ export const SECURITY_APP_ID = 'security';
 export const POLICIES_PAGE_PATH = '/administration/policy';
 
 // index patterns
-export const PROCESS_EVENTS_INDEX = '*:logs-endpoint.events.process*,logs-endpoint.events.process*'; // match on both cross cluster and local indices
+const ENDPOINT_PROCESS_EVENTS_INDEX =
+  '*:logs-endpoint.events.process*,logs-endpoint.events.process*';
+const CLOUD_DEFEND_PROCESS_EVENTS_INDEX = '*:logs-cloud_defend.process*,logs-cloud_defend.process*';
+export const PROCESS_EVENTS_INDEX = `${ENDPOINT_PROCESS_EVENTS_INDEX},${CLOUD_DEFEND_PROCESS_EVENTS_INDEX}`; // match on both cross cluster and local indices
 export const PREVIEW_ALERTS_INDEX = '.preview.alerts-security.alerts-default';
 
 // field properties
@@ -67,3 +70,10 @@ export const TTY_LINE_SPLITTER_REGEX = /(\r?\n|\r\n?|\x1b\[\d+;\d*[Hf]?)/gi;
 // when showing the count of alerts in details panel tab, if the number
 // exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  999+
 export const ALERT_COUNT_THRESHOLD = 999;
+export const ALERT_ICONS: { [key: string]: string } = {
+  process: 'gear',
+  file: 'document',
+  network: 'globe',
+};
+export const DEFAULT_ALERT_FILTER_VALUE = 'all';
+export const ALERT = 'alert';

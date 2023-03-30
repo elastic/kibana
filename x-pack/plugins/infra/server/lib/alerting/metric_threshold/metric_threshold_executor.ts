@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_ACTION_GROUP, ALERT_REASON } from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
@@ -16,6 +16,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
@@ -28,25 +29,43 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
+  AdditionalContext,
   getAlertDetailsUrl,
+  getContextForRecoveredAlerts,
   getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
+  hasAdditionalContext,
+  validGroupByForContext,
+  flattenAdditionalContext,
+  getGroupByObject,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
+import { MissingGroupsRecord } from './lib/check_missing_group';
+import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
-  missingGroups?: string[];
+  missingGroups?: Array<string | MissingGroupsRecord>;
   groupBy?: string | string[];
   filterQuery?: string;
 };
 export type MetricThresholdAlertState = AlertState; // no specific instace state used
 export type MetricThresholdAlertContext = AlertContext; // no specific instace state used
 
+export const FIRED_ACTIONS_ID = 'metrics.threshold.fired';
+export const WARNING_ACTIONS_ID = 'metrics.threshold.warning';
+export const NO_DATA_ACTIONS_ID = 'metrics.threshold.nodata';
+
+type MetricThresholdActionGroup =
+  | typeof FIRED_ACTIONS_ID
+  | typeof WARNING_ACTIONS_ID
+  | typeof NO_DATA_ACTIONS_ID
+  | typeof RecoveredActionGroup.id;
+
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
 >;
 
 type MetricThresholdAlert = Alert<
@@ -58,6 +77,8 @@ type MetricThresholdAlert = Alert<
 type MetricThresholdAlertFactory = (
   id: string,
   reason: string,
+  actionGroup: MetricThresholdActionGroup,
+  additionalContext?: AdditionalContext | null,
   threshold?: number | undefined,
   value?: number | undefined
 ) => MetricThresholdAlert;
@@ -72,20 +93,38 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   >(async function (options) {
     const startTime = Date.now();
 
-    const { services, params, state, startedAt, alertId, executionId, spaceId } = options;
+    const {
+      services,
+      params,
+      state,
+      startedAt,
+      executionId,
+      spaceId,
+      rule: { id: ruleId },
+    } = options;
 
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
-    const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
+    const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
+      alertId: ruleId,
+      executionId,
+    });
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertUuid } = services;
+    const { alertWithLifecycle, savedObjectsClient, getAlertUuid, getAlertByAlertUuid } = services;
 
-    const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
+    const alertFactory: MetricThresholdAlertFactory = (
+      id,
+      reason,
+      actionGroup,
+      additionalContext
+    ) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
+          [ALERT_ACTION_GROUP]: actionGroup,
+          ...flattenAdditionalContext(additionalContext),
         },
       });
 
@@ -106,9 +145,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       } catch (e) {
         logger.error(e.message);
         const timestamp = startedAt.toISOString();
-        const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
+        const actionGroupId = FIRED_ACTIONS_ID; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
+        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
         alert.scheduleActions(actionGroupId, {
@@ -123,10 +162,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
 
         return {
-          lastRunTimestamp: startedAt.valueOf(),
-          missingGroups: [],
-          groupBy: params.groupBy,
-          filterQuery: params.filterQuery,
+          state: {
+            lastRunTimestamp: startedAt.valueOf(),
+            missingGroups: [],
+            groupBy: params.groupBy,
+            filterQuery: params.filterQuery,
+          },
         };
       }
     }
@@ -144,7 +185,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const filterQueryIsSame = isEqual(state.filterQuery, params.filterQuery);
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
-      alertOnGroupDisappear && filterQueryIsSame && groupByIsSame ? state.missingGroups : [];
+      alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
+        ? state.missingGroups
+        : [];
 
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
@@ -155,7 +198,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       logger,
       state.lastRunTimestamp,
       { end: startedAt.valueOf() },
-      previousMissingGroups
+      convertStringsToMissingGroupsRecord(previousMissingGroups)
     );
 
     const resultGroupSet = new Set<string>();
@@ -165,8 +208,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
     }
 
+    const groupByKeysObjectMapping = getGroupByObject(params.groupBy, resultGroupSet);
     const groups = [...resultGroupSet];
-    const nextMissingGroups = new Set<string>();
+    const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
@@ -180,7 +224,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const isNoData = alertResults.some((result) => result[group]?.isNoData);
 
       if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
-        nextMissingGroups.add(group);
+        nextMissingGroups.add({ key: group, bucketKey: alertResults[0][group].bucketKey });
       }
 
       const nextState = isNoData
@@ -232,15 +276,26 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
       if (reason) {
         const timestamp = startedAt.toISOString();
-        const actionGroupId =
+        const actionGroupId: MetricThresholdActionGroup =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
             : nextState === AlertStates.NO_DATA
-            ? NO_DATA_ACTIONS.id
+            ? NO_DATA_ACTIONS_ID
             : nextState === AlertStates.WARNING
-            ? WARNING_ACTIONS.id
-            : FIRED_ACTIONS.id;
-        const alert = alertFactory(`${group}`, reason);
+            ? WARNING_ACTIONS_ID
+            : FIRED_ACTIONS_ID;
+
+        const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
+          ? alertResults && alertResults.length > 0
+            ? alertResults[0][group].context ?? {}
+            : {}
+          : {};
+
+        additionalContext.tags = Array.from(
+          new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
+        );
+
+        const alert = alertFactory(`${group}`, reason, actionGroupId, additionalContext);
         const alertUuid = getAlertUuid(group);
         scheduledActionsCount++;
 
@@ -248,6 +303,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[nextState],
           group,
+          groupByKeys: groupByKeysObjectMapping[group],
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           reason,
           threshold: mapToConditionsLookup(
@@ -260,6 +316,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             (result) => formatAlertResult(result[group]).currentValue
           ),
           viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
+          ...additionalContext,
         });
       }
     }
@@ -267,28 +324,47 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const { getRecoveredAlerts } = services.alertFactory.done();
     const recoveredAlerts = getRecoveredAlerts();
 
+    const groupByKeysObjectForRecovered = getGroupByObject(
+      params.groupBy,
+      new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.getId()))
+    );
+
     for (const alert of recoveredAlerts) {
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
+
+      const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+      const additionalContext = getContextForRecoveredAlerts(alertHits);
+      const originalActionGroup = getOriginalActionGroup(alertHits);
 
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
+        groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
         timestamp: startedAt.toISOString(),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
+
+        originalAlertState: translateActionGroupToAlertState(originalActionGroup),
+        originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS.id,
+        originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS.id,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        originalAlertStateWasNO_DATA: originalActionGroup === NO_DATA_ACTIONS.id,
+        ...additionalContext,
       });
     }
 
     const stopTime = Date.now();
     logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
     return {
-      lastRunTimestamp: startedAt.valueOf(),
-      missingGroups: [...nextMissingGroups],
-      groupBy: params.groupBy,
-      filterQuery: params.filterQuery,
+      state: {
+        lastRunTimestamp: startedAt.valueOf(),
+        missingGroups: [...nextMissingGroups],
+        groupBy: params.groupBy,
+        filterQuery: params.filterQuery,
+      },
     };
   });
 
@@ -311,6 +387,20 @@ export const NO_DATA_ACTIONS = {
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.nodata', {
     defaultMessage: 'No Data',
   }),
+};
+
+const translateActionGroupToAlertState = (
+  actionGroupId: string | undefined
+): string | undefined => {
+  if (actionGroupId === FIRED_ACTIONS.id) {
+    return stateToAlertMessage[AlertStates.ALERT];
+  }
+  if (actionGroupId === WARNING_ACTIONS.id) {
+    return stateToAlertMessage[AlertStates.WARNING];
+  }
+  if (actionGroupId === NO_DATA_ACTIONS.id) {
+    return stateToAlertMessage[AlertStates.NO_DATA];
+  }
 };
 
 const mapToConditionsLookup = (

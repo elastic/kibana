@@ -18,6 +18,7 @@ const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const RULE_ID_FIELD = 'rule.id';
+const SPACE_ID_FIELD = 'kibana.space_ids';
 const RULE_NAME_FIELD = 'rule.name';
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
@@ -410,6 +411,7 @@ export function getExecutionLogAggregation({
                         ERROR_MESSAGE_FIELD,
                         VERSION_FIELD,
                         RULE_ID_FIELD,
+                        SPACE_ID_FIELD,
                         RULE_NAME_FIELD,
                         ALERTING_OUTCOME_FIELD,
                       ],
@@ -494,8 +496,9 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
   const version = outcomeAndMessage.kibana?.version ?? '';
 
-  const ruleId = outcomeAndMessage.rule?.id ?? '';
-  const ruleName = outcomeAndMessage.rule?.name ?? '';
+  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
+  const spaceIds = outcomeAndMessage ? outcomeAndMessage?.kibana?.space_ids ?? [] : [];
+  const ruleName = outcomeAndMessage ? outcomeAndMessage.rule?.name ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -515,6 +518,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     timed_out: timedOut,
     rule_id: ruleId,
+    space_ids: spaceIds,
     rule_name: ruleName,
   };
 }

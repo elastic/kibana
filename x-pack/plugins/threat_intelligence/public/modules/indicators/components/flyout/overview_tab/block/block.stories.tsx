@@ -8,8 +8,9 @@
 import React from 'react';
 import { IndicatorsFiltersContext } from '../../../../containers/filters';
 import { StoryProvidersComponent } from '../../../../../../common/mocks/story_providers';
-import { generateMockIndicator } from '../../../../types';
+import { generateMockIndicator } from '../../../../../../../common/types/indicator';
 import { IndicatorBlock } from '.';
+import { IndicatorsFlyoutContext } from '../../context';
 
 export default {
   component: IndicatorBlock,
@@ -20,11 +21,33 @@ const mockIndicator = generateMockIndicator();
 
 export function Default() {
   const mockField = 'threat.indicator.ip';
+  const context = {
+    kqlBarIntegration: false,
+  };
 
   return (
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={{} as any}>
-        <IndicatorBlock indicator={mockIndicator} field={mockField} />
+        <IndicatorsFlyoutContext.Provider value={context}>
+          <IndicatorBlock indicator={mockIndicator} field={mockField} />
+        </IndicatorsFlyoutContext.Provider>
+      </IndicatorsFiltersContext.Provider>
+    </StoryProvidersComponent>
+  );
+}
+
+export function NoFilterButtons() {
+  const mockField = 'threat.indicator.ip';
+  const context = {
+    kqlBarIntegration: true,
+  };
+
+  return (
+    <StoryProvidersComponent>
+      <IndicatorsFiltersContext.Provider value={{} as any}>
+        <IndicatorsFlyoutContext.Provider value={context}>
+          <IndicatorBlock indicator={mockIndicator} field={mockField} />
+        </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>
     </StoryProvidersComponent>
   );

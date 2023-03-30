@@ -18,7 +18,11 @@ const mockClusterBuckets: ClusterBucket[] = [
             _id: '123',
             _index: '123',
             _source: {
-              cluster: { name: 'cluster_name' },
+              orchestrator: {
+                cluster: {
+                  name: 'cluster_name',
+                },
+              },
               rule: { benchmark: { name: 'CIS Kubernetes', id: 'cis_k8s' } },
               '@timestamp': '123',
             },
@@ -43,6 +47,9 @@ const mockClusterBuckets: ClusterBucket[] = [
           passed_findings: {
             doc_count: 3,
           },
+          score: {
+            value: 0.5,
+          },
         },
         {
           key: 'boo_type',
@@ -52,6 +59,9 @@ const mockClusterBuckets: ClusterBucket[] = [
           },
           passed_findings: {
             doc_count: 3,
+          },
+          score: {
+            value: 0.5,
           },
         },
       ],
@@ -66,10 +76,13 @@ describe('getClustersFromAggs', () => {
       {
         meta: {
           lastUpdate: '123',
-          clusterName: 'cluster_name',
           clusterId: 'cluster_id',
-          benchmarkName: 'CIS Kubernetes',
-          benchmarkId: 'cis_k8s',
+          assetIdentifierId: 'cluster_id',
+          benchmark: { name: 'CIS Kubernetes', id: 'cis_k8s' },
+          cloud: undefined,
+          cluster: {
+            name: 'cluster_name',
+          },
         },
         stats: {
           totalFindings: 12,
@@ -83,12 +96,14 @@ describe('getClustersFromAggs', () => {
             totalFindings: 6,
             totalFailed: 3,
             totalPassed: 3,
+            postureScore: 50.0,
           },
           {
             name: 'boo_type',
             totalFindings: 6,
             totalFailed: 3,
             totalPassed: 3,
+            postureScore: 50.0,
           },
         ],
       },

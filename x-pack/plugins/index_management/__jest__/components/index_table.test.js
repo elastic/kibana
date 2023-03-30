@@ -58,6 +58,14 @@ for (let i = 0; i < 105; i++) {
   });
 }
 
+const urlServiceMock = {
+  locators: {
+    get: () => ({
+      navigate: async () => {},
+    }),
+  },
+};
+
 let component = null;
 
 // Resolve outstanding API requests. See https://www.benmvp.com/blog/asynchronous-testing-with-enzyme-react-jest/
@@ -159,6 +167,7 @@ describe('index table', () => {
         executionContext: executionContextServiceMock.createStartContract(),
       },
       plugins: {},
+      url: urlServiceMock,
     };
 
     component = (
@@ -317,6 +326,7 @@ describe('index table', () => {
     indexNameLink.simulate('click');
     rendered.update();
     expect(findTestSubject(rendered, 'indexDetailFlyout').length).toBe(1);
+    expect(findTestSubject(rendered, 'indexDetailFlyoutDiscover').length).toBe(1);
   });
 
   test('should show the right context menu options when one index is selected and open', async () => {
@@ -421,13 +431,13 @@ describe('index table', () => {
     const rowIndex = 0;
     openMenuAndClickButton(rendered, rowIndex, 'forcemergeIndexMenuButton');
     snapshot(status(rendered, rowIndex));
-    expect(rendered.find('.euiModal').length).toBe(1);
+    expect(rendered.find('div.euiModal').length).toBe(1);
 
     let count = 0;
     store.subscribe(() => {
       if (count === 1) {
         snapshot(status(rendered, rowIndex));
-        expect(rendered.find('.euiModal').length).toBe(0);
+        expect(rendered.find('div.euiModal').length).toBe(0);
       }
       count++;
     });

@@ -16,6 +16,7 @@ export const kpiUniqueFlowIdsLensAttributes: LensAttributes = {
       layerId: '5d46d48f-6ce8-46be-a797-17ad50642564',
       accessor: 'a27f3503-9c73-4fc1-86bb-12461dae4b70',
       layerType: 'data',
+      autoScaleMetricAlignment: 'left',
     },
     query: {
       query: 'source.ip: * or destination.ip: * ',

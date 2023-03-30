@@ -7,7 +7,7 @@
  */
 
 import _, { get } from 'lodash';
-import { Subscription } from 'rxjs';
+import { Subscription, ReplaySubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
@@ -29,7 +29,6 @@ import {
   IContainer,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
-  ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import {
   ExpressionAstExpression,
@@ -127,6 +126,10 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
+  private expressionVariables: Record<string, unknown> | undefined;
+  private readonly expressionVariablesSubject = new ReplaySubject<
+    Record<string, unknown> | undefined
+  >(1);
 
   constructor(
     timefilter: TimefilterContract,
@@ -143,6 +146,7 @@ export class VisualizeEmbeddable
       initialInput,
       {
         defaultTitle: vis.title,
+        defaultDescription: vis.description,
         editPath,
         editApp: 'visualize',
         editUrl,
@@ -191,10 +195,6 @@ export class VisualizeEmbeddable
 
   public reportsEmbeddableLoad() {
     return true;
-  }
-
-  public getDescription() {
-    return this.vis.description;
   }
 
   public getVis() {
@@ -401,6 +401,25 @@ export class VisualizeEmbeddable
       this.abortController.abort();
     }
     this.renderComplete.dispatchError();
+
+    if (isFallbackDataView(this.vis.data.indexPattern)) {
+      error = new Error(
+        i18n.translate('visualizations.missedDataView.errorMessage', {
+          defaultMessage: `Could not find the {type}: {id}`,
+          values: {
+            id: this.vis.data.indexPattern.id ?? '-',
+            type: this.vis.data.savedSearchId
+              ? i18n.translate('visualizations.noSearch.label', {
+                  defaultMessage: 'search',
+                })
+              : i18n.translate('visualizations.noDataView.label', {
+                  defaultMessage: 'data view',
+                }),
+          },
+        })
+      );
+    }
+
     this.updateOutput({
       ...this.getOutput(),
       rendered: true,
@@ -449,22 +468,6 @@ export class VisualizeEmbeddable
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async (event) => {
-        // maps hack, remove once esaggs function is cleaned up and ready to accept variables
-        if (event.name === 'bounds') {
-          const agg = this.vis.data.aggs!.aggs.find((a: any) => {
-            return get(a, 'type.dslName') === 'geohash_grid';
-          });
-          if (
-            (agg && agg.params.precision !== event.data.precision) ||
-            (agg && !_.isEqual(agg.params.boundingBox, event.data.boundingBox))
-          ) {
-            agg.params.boundingBox = event.data.boundingBox;
-            agg.params.precision = event.data.precision;
-            this.reload();
-          }
-          return;
-        }
-
         if (!this.input.disableTriggers) {
           const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
           let context;
@@ -503,7 +506,7 @@ export class VisualizeEmbeddable
         const { error } = this.getOutput();
 
         if (error) {
-          render(this.catchError(error), this.domNode);
+          render(this.renderError(error), this.domNode);
         }
       })
     );
@@ -511,17 +514,16 @@ export class VisualizeEmbeddable
     await this.updateHandler();
   }
 
-  public catchError(error: ErrorLike | string) {
+  private renderError(error: ErrorLike | string) {
     if (isFallbackDataView(this.vis.data.indexPattern)) {
       return (
         <VisualizationMissedSavedObjectError
-          viewMode={this.input.viewMode ?? ViewMode.VIEW}
           renderMode={this.input.renderMode ?? 'view'}
           savedObjectMeta={{
-            savedObjectId: this.vis.data.indexPattern.id,
             savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
           }}
           application={getApplication()}
+          message={typeof error === 'string' ? error : error.message}
         />
       );
     }
@@ -564,6 +566,13 @@ export class VisualizeEmbeddable
   private async updateHandler() {
     const context = this.getExecutionContext();
 
+    this.expressionVariables = await this.vis.type.getExpressionVariables?.(
+      this.vis,
+      this.timefilter
+    );
+
+    this.expressionVariablesSubject.next(this.expressionVariables);
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
@@ -573,7 +582,7 @@ export class VisualizeEmbeddable
       },
       variables: {
         embeddableTitle: this.getTitle(),
-        ...(await this.vis.type.getExpressionVariables?.(this.vis, this.timefilter)),
+        ...this.expressionVariables,
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
@@ -618,6 +627,14 @@ export class VisualizeEmbeddable
 
   public supportedTriggers(): string[] {
     return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
+  }
+
+  public getExpressionVariables$() {
+    return this.expressionVariablesSubject.asObservable();
+  }
+
+  public getExpressionVariables() {
+    return this.expressionVariables;
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {

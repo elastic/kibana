@@ -33,8 +33,9 @@ jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () 
     children: (args: {
       anomaliesData: Anomalies;
       isLoadingAnomaliesData: boolean;
+      jobNameById: Record<string, string | undefined>;
     }) => React.ReactNode;
-  }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false }),
+  }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
 }));
 
 describe('Expandable Host Component', () => {

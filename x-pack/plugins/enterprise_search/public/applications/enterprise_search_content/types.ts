@@ -11,13 +11,14 @@ export interface Crawler {
   domains: [];
 }
 
-export const enum IngestionMethod {
+export enum IngestionMethod {
   CONNECTOR = 'connector',
   CRAWLER = 'crawler',
   API = 'api',
 }
 
-export const enum IngestionStatus {
+export enum IngestionStatus {
+  CONFIGURED,
   CONNECTED,
   ERROR,
   SYNC_ERROR,

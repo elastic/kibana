@@ -9,9 +9,9 @@ import { htmlIdGenerator, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
-import type { ExistingFieldsMap, IndexPattern } from '../../../../types';
+import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import type { IndexPattern } from '../../../../types';
 import {
-  fieldExists,
   FieldOption,
   FieldOptionValue,
   FieldPicker,
@@ -31,7 +31,6 @@ export interface FieldInputsProps {
   currentConfig: QueryPointEventAnnotationConfig;
   setConfig: (config: QueryPointEventAnnotationConfig) => void;
   indexPattern: IndexPattern;
-  existingFields: ExistingFieldsMap;
   invalidFields?: string[];
 }
 
@@ -51,9 +50,9 @@ export function TooltipSection({
   currentConfig,
   setConfig,
   indexPattern,
-  existingFields,
   invalidFields,
 }: FieldInputsProps) {
+  const { hasFieldData } = useExistingFieldsReader();
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) => {
       setConfig({
@@ -124,7 +123,6 @@ export function TooltipSection({
       </>
     );
   }
-  const currentExistingField = existingFields[indexPattern.title];
 
   const options = indexPattern.fields
     .filter(
@@ -140,7 +138,7 @@ export function TooltipSection({
             field: field.name,
             dataType: field.type,
           },
-          exists: fieldExists(currentExistingField, field.name),
+          exists: hasFieldData(indexPattern.id, field.name),
           compatible: true,
           'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
         } as FieldOption<FieldOptionValue>)

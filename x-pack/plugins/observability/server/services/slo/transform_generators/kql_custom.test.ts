@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createKQLCustomIndicator, createSLO } from '../fixtures/slo';
+import {
+  createKQLCustomIndicator,
+  createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+} from '../fixtures/slo';
 import { KQLCustomTransformGenerator } from './kql_custom';
 
 const generator = new KQLCustomTransformGenerator();
@@ -14,25 +18,25 @@ describe('KQL Custom Transform Generator', () => {
   describe('validation', () => {
     it('throws when the KQL numerator is invalid', () => {
       const anSLO = createSLO({
-        indicator: createKQLCustomIndicator({ numerator: '{ kql.query: invalid' }),
+        indicator: createKQLCustomIndicator({ good: '{ kql.query: invalid' }),
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
     });
     it('throws when the KQL denominator is invalid', () => {
       const anSLO = createSLO({
-        indicator: createKQLCustomIndicator({ denominator: '{ kql.query: invalid' }),
+        indicator: createKQLCustomIndicator({ total: '{ kql.query: invalid' }),
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
     });
     it('throws when the KQL query_filter is invalid', () => {
       const anSLO = createSLO({
-        indicator: createKQLCustomIndicator({ query_filter: '{ kql.query: invalid' }),
+        indicator: createKQLCustomIndicator({ filter: '{ kql.query: invalid' }),
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
     });
   });
 
-  it('returns the correct transform params with every specified indicator params', async () => {
+  it('returns the expected transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ indicator: createKQLCustomIndicator() });
     const transform = generator.getTransformParams(anSLO);
 
@@ -49,9 +53,21 @@ describe('KQL Custom Transform Generator', () => {
     });
   });
 
+  it('returns the expected transform params for timeslices slo', async () => {
+    const anSLO = createSLOWithTimeslicesBudgetingMethod({
+      indicator: createKQLCustomIndicator(),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform).toMatchSnapshot({
+      transform_id: expect.any(String),
+      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
+    });
+  });
+
   it('filters the source using the kql query', async () => {
     const anSLO = createSLO({
-      indicator: createKQLCustomIndicator({ query_filter: 'labels.groupId: group-4' }),
+      indicator: createKQLCustomIndicator({ filter: 'labels.groupId: group-4' }),
     });
     const transform = generator.getTransformParams(anSLO);
 
@@ -67,11 +83,23 @@ describe('KQL Custom Transform Generator', () => {
     expect(transform.source.index).toBe('my-own-index*');
   });
 
+  it('uses the provided timestampField', async () => {
+    const anSLO = createSLO({
+      indicator: createKQLCustomIndicator({
+        timestampField: 'my-date-field',
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.sync?.time?.field).toBe('my-date-field');
+    // @ts-ignore
+    expect(transform.pivot?.group_by['@timestamp'].date_histogram.field).toBe('my-date-field');
+  });
+
   it('aggregates using the numerator kql', async () => {
     const anSLO = createSLO({
       indicator: createKQLCustomIndicator({
-        numerator:
-          'latency < 400 and (http.status_code: 2xx or http.status_code: 3xx or http.status_code: 4xx)',
+        good: 'latency < 400 and (http.status_code: 2xx or http.status_code: 3xx or http.status_code: 4xx)',
       }),
     });
     const transform = generator.getTransformParams(anSLO);
@@ -82,7 +110,7 @@ describe('KQL Custom Transform Generator', () => {
   it('aggregates using the denominator kql', async () => {
     const anSLO = createSLO({
       indicator: createKQLCustomIndicator({
-        denominator: 'http.status_code: *',
+        total: 'http.status_code: *',
       }),
     });
     const transform = generator.getTransformParams(anSLO);

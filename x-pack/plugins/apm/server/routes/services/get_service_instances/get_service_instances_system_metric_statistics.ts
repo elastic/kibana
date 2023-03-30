@@ -15,11 +15,11 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
+import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   percentCgroupMemoryUsedScript,

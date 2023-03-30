@@ -19,6 +19,7 @@ export const itemTypeLiterals = schema.oneOf([
 ]);
 
 export const itemTypeSchema = schema.object({ jobType: itemTypeLiterals });
+export const jobTypeSchema = schema.object({ jobType: jobTypeLiterals });
 
 export const updateJobsSpaces = schema.object({
   jobType: jobTypeLiterals,

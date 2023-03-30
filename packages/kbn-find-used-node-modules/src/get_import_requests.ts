@@ -8,7 +8,6 @@
 
 import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
-// @ts-expect-error Not available with types
 import babelParserOptions from '@kbn/babel-preset/common_babel_parser_options';
 
 import { importVisitor } from './import_visitor';

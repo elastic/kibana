@@ -90,3 +90,4 @@ export function ExploratoryViewPage({
 
 // eslint-disable-next-line import/no-default-export
 export default ExploratoryViewPage;
+export { DataTypes } from './labels';

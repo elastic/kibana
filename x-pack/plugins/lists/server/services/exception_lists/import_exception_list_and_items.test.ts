@@ -56,6 +56,7 @@ describe('import_exception_list_and_items', () => {
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
       ]),
+      generateNewListId: false,
       maxExceptionsImportSize: 10000,
       overwrite: false,
     });
@@ -82,6 +83,7 @@ describe('import_exception_list_and_items', () => {
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
       ]),
+      generateNewListId: false,
       maxExceptionsImportSize: 10000,
       overwrite: false,
     });
@@ -102,6 +104,7 @@ describe('import_exception_list_and_items', () => {
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
       ]),
+      generateNewListId: false,
       maxExceptionsImportSize: 10000,
       overwrite: false,
     });

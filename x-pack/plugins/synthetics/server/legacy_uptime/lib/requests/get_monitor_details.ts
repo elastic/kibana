@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';

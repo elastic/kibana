@@ -7,6 +7,8 @@
 
 import { omit } from 'lodash';
 
+import { DATASET_VAR_NAME } from '../../../../../../common/constants';
+
 import { agentPolicyRouteService, packagePolicyRouteService } from '../../../services';
 import { generateInputId } from '../../../../../../common/services/simplified_package_policy_helper';
 import type {
@@ -105,7 +107,12 @@ function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {
   }
 
   return Object.entries(vars).reduce((acc, [varKey, varRecord]) => {
-    acc[varKey] = varRecord?.value;
+    // the dataset var uses an internal format before we send it
+    if (varKey === DATASET_VAR_NAME && varRecord?.value?.dataset) {
+      acc[varKey] = varRecord?.value.dataset;
+    } else {
+      acc[varKey] = varRecord?.value;
+    }
 
     return acc;
   }, {} as SimplifiedVars);

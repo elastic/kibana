@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { firstValueFrom } from 'rxjs';
+import {
+  formatDurationFromTimeUnitChar,
+  ProcessorEvent,
+  TimeUnitChar,
+} from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -14,50 +17,47 @@ import {
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { firstValueFrom } from 'rxjs';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
-import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
-import {
-  ApmRuleType,
-  APM_SERVER_FEATURE_ID,
-  RULE_TYPES_CONFIG,
-  formatErrorCountReason,
-} from '../../../../../common/rules/apm_rule_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
+import {
+  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
+  formatErrorCountReason,
+  RULE_TYPES_CONFIG,
+} from '../../../../../common/rules/apm_rule_types';
+import { errorCountParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import {
-  getServiceGroupFieldsAgg,
+  ApmRuleTypeAlertDefinition,
+  RegisterRuleDependencies,
+} from '../../register_apm_rule_types';
+import {
   getServiceGroupFields,
+  getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-
-const paramsSchema = schema.object({
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  serviceName: schema.maybe(schema.string()),
-  environment: schema.string(),
-});
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
 export function registerErrorCountRuleType({
   alerting,
+  basePath,
+  config$,
   logger,
   ruleDataClient,
-  config$,
-  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -70,29 +70,29 @@ export function registerErrorCountRuleType({
       name: ruleTypeConfig.name,
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-      validate: {
-        params: paramsSchema,
-      },
+      validate: { params: errorCountParamsSchema },
       actionVariables: {
         context: [
-          apmActionVariables.serviceName,
           apmActionVariables.environment,
-          apmActionVariables.threshold,
-          apmActionVariables.triggerValue,
           apmActionVariables.interval,
           apmActionVariables.reason,
+          apmActionVariables.serviceName,
+          apmActionVariables.threshold,
+          apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ services, params: ruleParams }) => {
+      executor: async ({ params: ruleParams, services, spaceId }) => {
         const config = await firstValueFrom(config$);
+
+        const { savedObjectsClient, scopedClusterClient } = services;
 
         const indices = await getApmIndices({
           config,
-          savedObjectsClient: services.savedObjectsClient,
+          savedObjectsClient,
         });
 
         const searchParams = {
@@ -138,7 +138,7 @@ export function registerErrorCountRuleType({
         };
 
         const response = await alertingEsClient({
-          scopedClusterClient: services.scopedClusterClient,
+          scopedClusterClient,
           params: searchParams,
         });
 
@@ -166,23 +166,24 @@ export function registerErrorCountRuleType({
               windowUnit: ruleParams.windowUnit,
             });
 
+            const id = [ApmRuleType.ErrorCount, serviceName, environment]
+              .filter((name) => name)
+              .join('_');
+
             const relativeViewInAppUrl = getAlertUrlErrorCount(
               serviceName,
               getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]
             );
 
-            const viewInAppUrl = basePath.publicBaseUrl
-              ? new URL(
-                  basePath.prepend(relativeViewInAppUrl),
-                  basePath.publicBaseUrl
-                ).toString()
-              : relativeViewInAppUrl;
+            const viewInAppUrl = addSpaceIdToPath(
+              basePath.publicBaseUrl,
+              spaceId,
+              relativeViewInAppUrl
+            );
 
             services
               .alertWithLifecycle({
-                id: [ApmRuleType.ErrorCount, serviceName, environment]
-                  .filter((name) => name)
-                  .join('_'),
+                id,
                 fields: {
                   [SERVICE_NAME]: serviceName,
                   ...getEnvironmentEsField(environment),
@@ -194,18 +195,22 @@ export function registerErrorCountRuleType({
                 },
               })
               .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-                serviceName,
                 environment: getEnvironmentLabel(environment),
+                interval: formatDurationFromTimeUnitChar(
+                  ruleParams.windowSize,
+                  ruleParams.windowUnit as TimeUnitChar
+                ),
+                reason: alertReason,
+                serviceName,
                 threshold: ruleParams.threshold,
                 triggerValue: errorCount,
-                interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
-                reason: alertReason,
                 viewInAppUrl,
               });
           });
 
-        return {};
+        return { state: {} };
       },
+      alerts: ApmRuleTypeAlertDefinition,
     })
   );
 }

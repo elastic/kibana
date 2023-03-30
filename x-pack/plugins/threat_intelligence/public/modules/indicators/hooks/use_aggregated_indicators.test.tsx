@@ -95,6 +95,11 @@ describe('useAggregatedIndicators()', () => {
         "isFetching": false,
         "isLoading": false,
         "onFieldChange": [Function],
+        "query": Object {
+          "id": "indicatorsBarchart",
+          "loading": false,
+          "refetch": [Function],
+        },
         "selectedField": "threat.feed.name",
         "series": Array [],
       }

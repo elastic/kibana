@@ -6,16 +6,10 @@
  */
 
 import React, { VFC } from 'react';
-import { EuiButtonEmpty, EuiContextMenuItem, EuiCopy } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiCopy } from '@elastic/eui';
+import { COPY_TITLE } from './translations';
 
 const COPY_ICON = 'copyClipboard';
-const COPY_TITLE = i18n.translate(
-  'xpack.threatIntelligence.indicators.table.copyToClipboardLabel',
-  {
-    defaultMessage: 'Copy to clipboard',
-  }
-);
 
 export interface CopyToClipboardProps {
   /**
@@ -77,6 +71,33 @@ export const CopyToClipboardContextMenu: VFC<CopyToClipboardProps> = ({
       >
         {COPY_TITLE}
       </EuiContextMenuItem>
+    )}
+  </EuiCopy>
+);
+
+/**
+ * Takes a string and copies it to the clipboard.
+ *
+ * This component renders an {@link EuiButtonIcon}.
+ *
+ * @returns An EuiCopy element
+ */
+export const CopyToClipboardButtonIcon: VFC<CopyToClipboardProps> = ({
+  value,
+  'data-test-subj': dataTestSub,
+}) => (
+  <EuiCopy textToCopy={value}>
+    {(copy) => (
+      <EuiButtonIcon
+        aria-label={COPY_TITLE}
+        iconType={COPY_ICON}
+        iconSize="s"
+        color="primary"
+        onClick={copy}
+        data-test-subj={dataTestSub}
+      >
+        {COPY_TITLE}
+      </EuiButtonIcon>
     )}
   </EuiCopy>
 );

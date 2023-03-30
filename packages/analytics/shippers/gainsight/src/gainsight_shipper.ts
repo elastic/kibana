@@ -94,6 +94,12 @@ export class GainsightShipper implements IShipper {
   }
 
   /**
+   * Flushes all internal queues of the shipper.
+   * It doesn't really do anything inside because this shipper doesn't hold any internal queues.
+   */
+  public async flush() {}
+
+  /**
    * Shuts down the shipper.
    * It doesn't really do anything inside because this shipper doesn't hold any internal queues.
    */

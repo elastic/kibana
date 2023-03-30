@@ -72,7 +72,7 @@ export const logEntriesSearchStrategyProvider = ({
         const request = decodeOrThrow(asyncRequestRT)(rawRequest);
 
         const resolvedLogView$ = defer(() =>
-          logViews.getScopedClient(dependencies.request).getResolvedLogView(request.params.sourceId)
+          logViews.getScopedClient(dependencies.request).getResolvedLogView(request.params.logView)
         ).pipe(take(1), shareReplay(1));
 
         const messageFormattingRules$ = defer(() =>

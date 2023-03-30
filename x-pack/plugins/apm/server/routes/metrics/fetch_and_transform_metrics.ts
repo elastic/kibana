@@ -22,7 +22,7 @@ import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../common/utils/environment_query';
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { ChartType, Coordinate, YUnit } from '../../../typings/timeseries';
 import { APMConfig } from '../..';
 
@@ -46,7 +46,7 @@ export type GenericMetricsRequest = APMEventESSearchRequest & {
   };
 };
 
-export type GenericMetricsChart = Awaited<FetchAndTransformMetrics>;
+export type GenericMetricsChart = FetchAndTransformMetrics;
 
 export interface FetchAndTransformMetrics {
   title: string;

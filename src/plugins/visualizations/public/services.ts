@@ -26,6 +26,8 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { TypesStart } from './vis_types';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
@@ -72,3 +74,9 @@ export const [getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spa
 
 export const [getSavedObjectTagging, setSavedObjectTagging] =
   createGetterSetter<SavedObjectTaggingOssPluginStart>('SavedObjectTagging', false);
+
+export const [getUsageCollection, setUsageCollection] =
+  createGetterSetter<UsageCollectionStart>('UsageCollection');
+
+export const [getSavedObjectsManagement, setSavedObjectsManagement] =
+  createGetterSetter<SavedObjectsManagementPluginStart>('SavedObjectsManagement');

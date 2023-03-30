@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -48,7 +48,7 @@ const createPointInTimeFinderMock = ({
 const createPointInTimeFinderClientMock = (): jest.Mocked<SavedObjectsPointInTimeFinderClient> => {
   return {
     find: jest.fn(),
-    openPointInTimeForType: jest.fn(),
+    openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
     closePointInTime: jest.fn(),
   };
 };

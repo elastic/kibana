@@ -26,7 +26,7 @@ Array [
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           403 Forbidden
         </dt>
@@ -36,7 +36,7 @@ Array [
           no access for you
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
         >
           500 Internal Server Error
         </dt>

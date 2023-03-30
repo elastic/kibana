@@ -10,6 +10,8 @@ import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-commo
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
+ * Options for the increment counter operation
+ *
  * @public
  */
 export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
@@ -19,8 +21,15 @@ export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
    * already exist. Existing fields will be left as-is and won't be incremented.
    */
   initialize?: boolean;
-  /** {@link SavedObjectsMigrationVersion} */
+  /**
+   * {@link SavedObjectsMigrationVersion}
+   * @deprecated
+   */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /**
+   * A semver value that is used when migrating documents between Kibana versions.
+   */
+  typeMigrationVersion?: string;
   /**
    * (default='wait_for') The Elasticsearch refresh setting for this
    * operation. See {@link MutatingOperationRefreshSetting}
@@ -33,6 +42,8 @@ export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
 }
 
 /**
+ * The field and increment details for the increment counter operation
+ *
  * @public
  */
 export interface SavedObjectsIncrementCounterField {

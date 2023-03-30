@@ -7,17 +7,14 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
 import {
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
+  type SavedObject,
   SavedObjectsErrorHelpers,
-  SavedObjectsUtils,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,
   encodeHitVersion,
@@ -72,7 +69,7 @@ export function getBulkOperationError(
   id: string,
   rawResponse: {
     status: number;
-    error?: { type: string; reason: string; index: string };
+    error?: { type: string; reason?: string; index: string };
     // Other fields are present on a bulk operation result but they are irrelevant for this function
   }
 ): Payload | undefined {
@@ -152,6 +149,7 @@ export function getSavedObjectFromSource<T>(
     references: doc._source.references || [],
     migrationVersion: doc._source.migrationVersion,
     coreMigrationVersion: doc._source.coreMigrationVersion,
+    typeMigrationVersion: doc._source.typeMigrationVersion,
   };
 }
 

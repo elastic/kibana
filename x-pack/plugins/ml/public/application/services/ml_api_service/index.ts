@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
+import { jsonSchemaProvider } from './json_schema';
 import { HttpService } from '../http_service';
 
 import { annotationsApiProvider } from './annotations';
@@ -55,6 +56,7 @@ export interface MlInfoResponse {
   };
   upgrade_mode: boolean;
   cloudId?: string;
+  isCloudTrial?: boolean;
 }
 
 export interface BucketSpanEstimatorResponse {
@@ -731,5 +733,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     savedObjects: savedObjectsApiProvider(httpService),
     trainedModels: trainedModelsApiProvider(httpService),
     notifications: notificationsProvider(httpService),
+    jsonSchema: jsonSchemaProvider(httpService),
   };
 }

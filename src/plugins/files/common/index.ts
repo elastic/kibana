@@ -11,6 +11,7 @@ export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME, ES_FIXED_SIZE_INDEX_BLOB_STORE } 
 export type {
   File,
   FileKind,
+  FileKindBrowser,
   FileJSON,
   FileShare,
   FileStatus,
@@ -22,10 +23,12 @@ export type {
   FileSavedObject,
   BaseFileMetadata,
   FileShareOptions,
-  FileImageMetadata,
   FileUnshareOptions,
   BlobStorageSettings,
   UpdatableFileMetadata,
   FileShareJSONWithToken,
   UpdatableFileShareMetadata,
 } from './types';
+
+import * as DefaultFileKind from './default_image_file_kind';
+export { DefaultFileKind };

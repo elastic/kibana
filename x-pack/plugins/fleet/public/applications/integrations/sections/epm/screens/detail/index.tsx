@@ -6,7 +6,9 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
+import { Redirect, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import styled from 'styled-components';
 import {
   EuiBadge,
@@ -17,6 +19,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -24,7 +27,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
-import { splitPkgKey } from '../../../../../../../common/services';
+import {
+  getPackageReleaseLabel,
+  isPackagePrerelease,
+  splitPkgKey,
+} from '../../../../../../../common/services';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
 import {
@@ -34,13 +41,14 @@ import {
   useBreadcrumbs,
   useStartServices,
   useAuthz,
-  usePermissionCheck,
+  usePermissionCheckQuery,
   useIntegrationsStateContext,
+  useGetSettingsQuery,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
 import {
-  useGetPackageInfoByKey,
+  useGetPackageInfoByKeyQuery,
   useLink,
   useAgentPolicyContext,
   useIsGuidedOnboardingActive,
@@ -57,7 +65,7 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { useIsFirstTimeAgentUser } from './hooks';
+import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
   IntegrationAgentPolicyCount,
@@ -107,18 +115,25 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
-  const { getHref } = useLink();
-  const canInstallPackages = useAuthz().integrations.installPackages;
-  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
-  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
-  const permissionCheck = usePermissionCheck();
-  const missingSecurityConfiguration =
-    !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
+  const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
+
+  const canInstallPackages = useAuthz().integrations.installPackages;
+  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
+
+  const {
+    data: permissionCheck,
+    error: permissionCheckError,
+    isLoading: isPermissionCheckLoading,
+  } = usePermissionCheckQuery();
+  const missingSecurityConfiguration =
+    !permissionCheck?.success && permissionCheckError === 'MISSING_SECURITY';
+  const userCanInstallPackages = canInstallPackages && permissionCheck?.success;
+
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
   const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
@@ -137,7 +152,7 @@ export function Detail() {
     if (packageInfo === null || !packageInfo.name) {
       return undefined;
     }
-    return getPackageInstallStatus(packageInfo.name).status;
+    return getPackageInstallStatus(packageInfo?.name)?.status;
   }, [packageInfo, getPackageInstallStatus]);
 
   const isInstalled = useMemo(
@@ -153,18 +168,55 @@ export function Detail() {
     packageInfo.savedObject &&
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+    boolean | undefined
+  >();
+
+  const { data: settings } = useGetSettingsQuery();
+
+  useEffect(() => {
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    setPrereleaseIntegrationsEnabled(isEnabled);
+  }, [settings?.item.prerelease_integrations_enabled]);
+
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
-    isInitialRequest: packageIsInitialRequest,
-    resendRequest: refreshPackageInfo,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+    refetch: refetchPackageInfo,
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, {
+    prerelease: prereleaseIntegrationsEnabled,
+  });
+
+  const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
+  const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
+
+  // fetch latest GA version (prerelease=false)
+  const { data: packageInfoLatestGAData } = useGetPackageInfoByKeyQuery(pkgName, '', {
+    prerelease: false,
+  });
+
+  useEffect(() => {
+    const pkg = packageInfoLatestGAData?.item;
+    const isGAVersion = pkg && !isPackagePrerelease(pkg.version);
+    if (isGAVersion) {
+      setLatestGAVersion(pkg.version);
+    }
+  }, [packageInfoLatestGAData?.item]);
+
+  // fetch latest Prerelease version (prerelease=true)
+  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(pkgName, '', {
+    prerelease: true,
+  });
+
+  useEffect(() => {
+    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
+  }, [packageInfoLatestPrereleaseData?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
-    useIsFirstTimeAgentUser();
+    useIsFirstTimeAgentUserQuery();
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
@@ -176,17 +228,14 @@ export function Detail() {
     }
     if (oldPackageInstallStatus === 'not_installed' && packageInstallStatus === 'installed') {
       setOldPackageStatus(packageInstallStatus);
-      refreshPackageInfo();
+      refetchPackageInfo();
     }
-  }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
+  }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
-  const isLoading =
-    (packageInfoLoading && !packageIsInitialRequest) ||
-    permissionCheck.isLoading ||
-    firstTimeUserLoading;
+  const isLoading = packageInfoLoading || isPermissionCheckLoading || firstTimeUserLoading;
 
   const showCustomTab =
-    useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
+    useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
@@ -272,7 +321,7 @@ export function Detail() {
                     </EuiFlexItem>
                     {packageInfo?.release && packageInfo.release !== 'ga' ? (
                       <EuiFlexItem grow={false}>
-                        <HeaderReleaseBadge release={packageInfo.release} />
+                        <HeaderReleaseBadge release={getPackageReleaseLabel(packageInfo.version)} />
                       </EuiFlexItem>
                     ) : null}
                   </EuiFlexGroup>
@@ -326,6 +375,46 @@ export function Detail() {
     ]
   );
 
+  const showVersionSelect = useMemo(
+    () =>
+      prereleaseIntegrationsEnabled &&
+      latestGAVersion &&
+      latestPrereleaseVersion &&
+      latestGAVersion !== latestPrereleaseVersion &&
+      (!packageInfo?.version ||
+        packageInfo.version === latestGAVersion ||
+        packageInfo.version === latestPrereleaseVersion),
+    [prereleaseIntegrationsEnabled, latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
+  );
+
+  const versionOptions = useMemo(
+    () => [
+      {
+        value: latestPrereleaseVersion,
+        text: latestPrereleaseVersion,
+      },
+      {
+        value: latestGAVersion,
+        text: latestGAVersion,
+      },
+    ],
+    [latestPrereleaseVersion, latestGAVersion]
+  );
+
+  const versionLabel = i18n.translate('xpack.fleet.epm.versionLabel', {
+    defaultMessage: 'Version',
+  });
+
+  const onVersionChange = useCallback(
+    (version: string, packageName: string) => {
+      const path = getPath('integration_details_overview', {
+        pkgkey: `${packageName}-${version}`,
+      });
+      history.push(path);
+    },
+    [getPath, history]
+  );
+
   const headerRightContent = useMemo(
     () =>
       packageInfo ? (
@@ -334,12 +423,24 @@ export function Detail() {
           <EuiFlexGroup justifyContent="flexEnd" direction="row">
             {[
               {
-                label: i18n.translate('xpack.fleet.epm.versionLabel', {
-                  defaultMessage: 'Version',
-                }),
+                label: showVersionSelect ? undefined : versionLabel,
                 content: (
                   <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>{packageInfo.version}</EuiFlexItem>
+                    <EuiFlexItem>
+                      {showVersionSelect ? (
+                        <EuiSelect
+                          data-test-subj="versionSelect"
+                          prepend={versionLabel}
+                          options={versionOptions}
+                          value={packageInfo.version}
+                          onChange={(event) =>
+                            onVersionChange(event.target.value, packageInfo.name)
+                          }
+                        />
+                      ) : (
+                        <div data-test-subj="versionText">{packageInfo.version}</div>
+                      )}
+                    </EuiFlexItem>
                     {updateAvailable ? (
                       <EuiFlexItem grow={false}>
                         <UpdateIcon />
@@ -416,6 +517,10 @@ export function Detail() {
       missingSecurityConfiguration,
       integrationInfo?.title,
       handleAddIntegrationPolicyClick,
+      onVersionChange,
+      showVersionSelect,
+      versionLabel,
+      versionOptions,
     ]
   );
 
@@ -598,14 +703,18 @@ export function Detail() {
               defaultMessage="Error loading integration details"
             />
           }
-          error={packageInfoError}
+          error={packageInfoError.message}
         />
       ) : isLoading || !packageInfo ? (
         <Loading />
       ) : (
         <Switch>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
-            <OverviewPage packageInfo={packageInfo} integrationInfo={integrationInfo} />
+            <OverviewPage
+              packageInfo={packageInfo}
+              integrationInfo={integrationInfo}
+              latestGAVersion={latestGAVersion}
+            />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
             <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />

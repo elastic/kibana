@@ -13,10 +13,7 @@ import { services } from './services';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const testEndpointsPlugin = resolve(
-    __dirname,
-    '../security_functional/fixtures/common/test_endpoints'
-  );
+  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
   const servers = {
     ...xPackAPITestsConfig.get('servers'),
@@ -30,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
   };
 
-  const auditLogPath = resolve(__dirname, './fixtures/audit/pki.log');
+  const auditLogPath = resolve(__dirname, './packages/helpers/audit/pki.log');
 
   return {
     testFiles: [require.resolve('./tests/pki')],
@@ -67,7 +64,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--server.ssl.certificate=${KBN_CERT_PATH}`,
         `--server.ssl.certificateAuthorities=${JSON.stringify([
           CA_CERT_PATH,
-          resolve(__dirname, './fixtures/pki/kibana_ca.crt'),
+          require.resolve('@kbn/security-api-integration-helpers/pki/kibana_ca.crt'),
         ])}`,
         `--server.ssl.clientAuthentication=required`,
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

@@ -12,11 +12,11 @@ import {
   isAnnotationsLayer,
   Layer,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
-import { getDataSourceInfo } from '../lib/datasource';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import {
   getConfigurationForTimeseries as getConfiguration,
@@ -40,100 +40,107 @@ const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<st
   return newLayers;
 };
 
+const invalidModelError = () => new Error('Invalid model');
+
 export const convertToLens: ConvertTsvbToLensVisualization = async ({ params: model }) => {
   const dataViews: DataViewsPublicPluginStart = getDataViewsStart();
-  const extendedLayers: Record<number, ExtendedLayer> = {};
-  const seriesNum = model.series.filter((series) => !series.hidden).length;
+  try {
+    const extendedLayers: Record<number, ExtendedLayer> = {};
+    const seriesNum = model.series.filter((series) => !series.hidden).length;
 
-  // handle multiple layers/series
-  for (const [layerIdx, series] of model.series.entries()) {
-    if (series.hidden) {
-      continue;
+    // handle multiple layers/series
+    for (const [layerIdx, series] of model.series.entries()) {
+      if (series.hidden) {
+        continue;
+      }
+
+      // not valid time shift
+      if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
+        throw invalidModelError();
+      }
+
+      if (!isValidMetrics(series.metrics, PANEL_TYPES.TIMESERIES)) {
+        throw invalidModelError();
+      }
+
+      const datasourceInfo = await extractOrGenerateDatasourceInfo(
+        model.index_pattern,
+        model.time_field,
+        Boolean(series.override_index_pattern),
+        series.series_index_pattern,
+        series.series_time_field,
+        dataViews
+      );
+      if (!datasourceInfo) {
+        throw invalidModelError();
+      }
+
+      const { indexPatternId, indexPattern, timeField } = datasourceInfo;
+
+      if (!timeField) {
+        throw invalidModelError();
+      }
+
+      const dateHistogramColumn = convertToDateHistogramColumn(model, series, indexPattern!, {
+        fieldName: timeField,
+        isSplit: false,
+      });
+      if (dateHistogramColumn === null) {
+        throw invalidModelError();
+      }
+      // handle multiple metrics
+      const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
+        isStaticValueColumnSupported: true,
+      });
+      if (metricsColumns === null) {
+        throw invalidModelError();
+      }
+
+      const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, true);
+      if (bucketsColumns === null) {
+        throw invalidModelError();
+      }
+
+      const isReferenceLine =
+        metricsColumns.length === 1 && metricsColumns[0].operationType === 'static_value';
+
+      // only static value without split is supported
+      if (isReferenceLine && bucketsColumns.length) {
+        throw invalidModelError();
+      }
+
+      const layerId = uuidv4();
+      extendedLayers[layerIdx] = {
+        indexPatternId,
+        layerId,
+        columns: isReferenceLine
+          ? [...metricsColumns]
+          : [...metricsColumns, dateHistogramColumn, ...bucketsColumns],
+        columnOrder: [],
+      };
     }
 
-    // not valid time shift
-    if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
-      return null;
+    const configLayers = await getLayers(extendedLayers, model, dataViews);
+    if (configLayers === null) {
+      throw invalidModelError();
     }
 
-    if (!isValidMetrics(series.metrics, PANEL_TYPES.TIMESERIES)) {
-      return null;
-    }
+    const configuration = getConfiguration(model, configLayers);
+    const layers = Object.values(excludeMetaFromLayers(extendedLayers));
+    const annotationIndexPatterns = configuration.layers.reduce<string[]>((acc, layer) => {
+      if (isAnnotationsLayer(layer)) {
+        return [...acc, layer.indexPatternId];
+      }
+      return acc;
+    }, []);
 
-    const datasourceInfo = await getDataSourceInfo(
-      model.index_pattern,
-      model.time_field,
-      Boolean(series.override_index_pattern),
-      series.series_index_pattern,
-      series.series_time_field,
-      dataViews
-    );
-    if (!datasourceInfo) {
-      return null;
-    }
-
-    const { indexPatternId, indexPattern, timeField } = datasourceInfo;
-    if (!timeField) {
-      return null;
-    }
-
-    const dateHistogramColumn = convertToDateHistogramColumn(model, series, indexPattern!, {
-      fieldName: timeField,
-      isSplit: false,
-    });
-    if (dateHistogramColumn === null) {
-      return null;
-    }
-    // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
-      isStaticValueColumnSupported: true,
-    });
-    if (metricsColumns === null) {
-      return null;
-    }
-
-    const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, true);
-    if (bucketsColumns === null) {
-      return null;
-    }
-
-    const isReferenceLine =
-      metricsColumns.length === 1 && metricsColumns[0].operationType === 'static_value';
-
-    // only static value without split is supported
-    if (isReferenceLine && bucketsColumns.length) {
-      return null;
-    }
-
-    const layerId = uuid();
-    extendedLayers[layerIdx] = {
-      indexPatternId,
-      layerId,
-      columns: isReferenceLine
-        ? [...metricsColumns]
-        : [...metricsColumns, dateHistogramColumn, ...bucketsColumns],
-      columnOrder: [],
+    return {
+      type: 'lnsXY',
+      layers,
+      configuration,
+      indexPatternIds: [...getIndexPatternIds(layers), ...annotationIndexPatterns],
     };
-  }
-
-  const configLayers = await getLayers(extendedLayers, model, dataViews);
-  if (configLayers === null) {
+  } catch (e) {
     return null;
   }
-
-  const configuration = getConfiguration(model, configLayers);
-  const layers = Object.values(excludeMetaFromLayers(extendedLayers));
-  const annotationIndexPatterns = configuration.layers.reduce<string[]>((acc, layer) => {
-    if (isAnnotationsLayer(layer)) {
-      return [...acc, layer.indexPatternId];
-    }
-    return acc;
-  }, []);
-
-  return {
-    type: 'lnsXY',
-    layers,
-    configuration,
-    indexPatternIds: [...getIndexPatternIds(layers), ...annotationIndexPatterns],
-  };
 };

@@ -71,6 +71,10 @@ const OBJECTS_TO_SHARE: Array<{
     spacesToAdd: [SPACE_2.id],
     objects: [{ type: 'sharedtype', id: 'default_and_space_2' }],
   },
+  {
+    spacesToAdd: [SPACE_1.id, SPACE_2.id],
+    objects: [{ type: 'resolvetype', id: 'conflict-newid' }],
+  },
 ];
 
 export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getService'>) {

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
-import { createConnector, createSlackConnectorAndObjectRemover, getConnectorByName } from './utils';
+import { createSlackConnectorAndObjectRemover, getConnectorByName } from './utils';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -138,7 +138,150 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
-        expect(await (await testSubjects.find('executeActionButton')).isEnabled()).to.be(false);
+        expect(await testSubjects.isEnabled('executeActionButton')).to.be(false);
+      });
+
+      describe('test page', () => {
+        let connectorId = '';
+
+        before(async () => {
+          const connectorName = generateUniqueKey();
+          const createdAction = await createOpsgenieConnector(connectorName);
+          connectorId = createdAction.id;
+          objectRemover.add(createdAction.id, 'action', 'actions');
+        });
+
+        beforeEach(async () => {
+          await testSubjects.click(`edit${connectorId}`);
+          await testSubjects.click('testConnectorTab');
+        });
+
+        afterEach(async () => {
+          await actions.common.cancelConnectorForm();
+        });
+
+        it('should show the sub action selector when in test mode', async () => {
+          await testSubjects.existOrFail('opsgenie-subActionSelect');
+        });
+
+        it('should preserve the alias when switching between create and close alert actions', async () => {
+          await testSubjects.setValue('aliasInput', 'new alias');
+          await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
+
+          expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.be(
+            'closeAlert'
+          );
+          expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be('new alias');
+        });
+
+        it('should not preserve the message when switching to close alert and back to create alert', async () => {
+          await testSubjects.setValue('messageInput', 'a message');
+          await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
+
+          await testSubjects.missingOrFail('messageInput');
+          await retry.waitFor('message input to be displayed', async () => {
+            await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
+            return await testSubjects.exists('messageInput');
+          });
+
+          expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('');
+        });
+
+        describe('createAlert', () => {
+          it('should show the additional options for creating an alert when clicking more options', async () => {
+            await testSubjects.click('opsgenie-display-more-options');
+
+            await testSubjects.existOrFail('entityInput');
+            await testSubjects.existOrFail('sourceInput');
+            await testSubjects.existOrFail('userInput');
+            await testSubjects.existOrFail('noteTextArea');
+          });
+
+          it('should show and then hide the additional form options for creating an alert when clicking the button twice', async () => {
+            await testSubjects.click('opsgenie-display-more-options');
+
+            await testSubjects.existOrFail('entityInput');
+
+            await testSubjects.click('opsgenie-display-more-options');
+            await testSubjects.missingOrFail('entityInput');
+          });
+
+          it('should populate the json editor with the message, description, and alias', async () => {
+            await testSubjects.setValue('messageInput', 'a message');
+            await testSubjects.setValue('descriptionTextArea', 'a description');
+            await testSubjects.setValue('aliasInput', 'an alias');
+            await testSubjects.setValue('opsgenie-prioritySelect', 'P5');
+            await testSubjects.setValue('opsgenie-tags', 'a tag');
+
+            await testSubjects.click('opsgenie-show-json-editor-toggle');
+
+            const parsedValue = await actions.opsgenie.getObjFromJsonEditor();
+            expect(parsedValue).to.eql({
+              message: 'a message',
+              description: 'a description',
+              alias: 'an alias',
+              priority: 'P5',
+              tags: ['a tag'],
+            });
+          });
+
+          it('should populate the form with the values from the json editor', async () => {
+            await testSubjects.click('opsgenie-show-json-editor-toggle');
+
+            await actions.opsgenie.setJsonEditor({
+              message: 'a message',
+              description: 'a description',
+              alias: 'an alias',
+              priority: 'P3',
+              tags: ['tag1'],
+            });
+            await testSubjects.click('opsgenie-show-json-editor-toggle');
+
+            expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('a message');
+            expect(await testSubjects.getAttribute('descriptionTextArea', 'value')).to.be(
+              'a description'
+            );
+            expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be('an alias');
+            expect(await testSubjects.getAttribute('opsgenie-prioritySelect', 'value')).to.eql(
+              'P3'
+            );
+            expect(await (await testSubjects.find('opsgenie-tags')).getVisibleText()).to.eql(
+              'tag1'
+            );
+          });
+
+          it('should disable the run button when the json editor validation fails', async () => {
+            await testSubjects.click('opsgenie-show-json-editor-toggle');
+
+            await actions.opsgenie.setJsonEditor({
+              message: '',
+            });
+
+            expect(await testSubjects.isEnabled('executeActionButton')).to.be(false);
+          });
+        });
+
+        describe('closeAlert', () => {
+          it('should show the additional options for closing an alert when clicking more options', async () => {
+            await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
+
+            await testSubjects.click('opsgenie-display-more-options');
+
+            await testSubjects.existOrFail('sourceInput');
+            await testSubjects.existOrFail('userInput');
+          });
+
+          it('should show and then hide the additional form options for closing an alert when clicking the button twice', async () => {
+            await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
+
+            await testSubjects.click('opsgenie-display-more-options');
+
+            await testSubjects.existOrFail('sourceInput');
+
+            await testSubjects.click('opsgenie-display-more-options');
+            await testSubjects.missingOrFail('sourceInput');
+          });
+        });
       });
     });
 
@@ -163,9 +306,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should default to the create alert action', async () => {
-        expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.eql(
-          'createAlert'
-        );
+        await testSubjects.existOrFail('messageInput');
 
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
       });
@@ -174,33 +315,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('addNewActionConnectorActionGroup-0');
         await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
 
-        expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.eql(
-          'closeAlert'
-        );
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
-      });
-
-      it('should preserve the alias when switching between create and close alert actions', async () => {
-        await testSubjects.setValue('aliasInput', 'new alias');
-        await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
-
-        expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.be(
-          'closeAlert'
-        );
-        expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be('new alias');
-      });
-
-      it('should not preserve the message when switching to close alert and back to create alert', async () => {
-        await testSubjects.setValue('messageInput', 'a message');
-        await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
-
+        await testSubjects.existOrFail('noteTextArea');
         await testSubjects.missingOrFail('messageInput');
-        await retry.waitFor('message input to be displayed', async () => {
-          await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
-          return await testSubjects.exists('messageInput');
-        });
-
-        expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('');
       });
 
       it('should not preserve the alias when switching run when to recover', async () => {
@@ -225,6 +342,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
       });
+
+      it('should show the message is required error when clicking the save button', async () => {
+        await testSubjects.click('saveRuleButton');
+        const messageError = await find.byClassName('euiFormErrorText');
+
+        expect(await messageError.getVisibleText()).to.eql('Message is required.');
+      });
     });
 
     const setupRule = async () => {
@@ -232,22 +356,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await rules.common.defineIndexThresholdAlert(alertName);
       });
-
-      await rules.common.setNotifyThrottleInput();
     };
 
     const selectOpsgenieConnectorInRuleAction = async (name: string) => {
       await testSubjects.click('.opsgenie-alerting-ActionTypeSelectOption');
       await testSubjects.selectValue('comboBoxInput', name);
+      await rules.common.setNotifyThrottleInput();
     };
 
     const createOpsgenieConnector = async (name: string) => {
-      return createConnector({
+      return actions.api.createConnector({
         name,
         config: { apiUrl: 'https//test.com' },
         secrets: { apiKey: '1234' },
         connectorTypeId: '.opsgenie',
-        supertest,
       });
     };
   });

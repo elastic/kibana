@@ -30,7 +30,8 @@ describe('Display not found page', () => {
     visit(TIMELINES_URL);
   });
 
-  it('navigates to the alerts page with incorrect link', () => {
+  // TODO: We need to determine what we want the behavior to be here
+  it.skip('navigates to the alerts page with incorrect link', () => {
     visit(`${ALERTS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });

@@ -14,7 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -373,7 +373,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['host.name'] });
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Low');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(20);

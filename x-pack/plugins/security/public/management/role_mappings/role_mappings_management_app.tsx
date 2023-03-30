@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Router, useParams } from 'react-router-dom';
+import { Router, useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   Breadcrumb,
@@ -20,6 +21,7 @@ import {
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
 import type { PluginStartDependencies } from '../../plugin';
+import { ReadonlyBadge } from '../badges/readonly_badge';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -82,6 +84,7 @@ export const roleMappingsManagementApp = Object.freeze({
                 notifications={core.notifications}
                 docLinks={core.docLinks}
                 history={history}
+                readOnly={!core.application.capabilities.role_mappings.save}
               />
             </Breadcrumb>
           );
@@ -92,6 +95,16 @@ export const roleMappingsManagementApp = Object.freeze({
             <core.i18n.Context>
               <KibanaThemeProvider theme$={theme$}>
                 <Router history={history}>
+                  <ReadonlyBadge
+                    data-test-subj="readOnlyBadge"
+                    featureId="role_mappings"
+                    tooltip={i18n.translate(
+                      'xpack.security.management.roleMappings.readonlyTooltip',
+                      {
+                        defaultMessage: 'Unable to create or edit role mappings',
+                      }
+                    )}
+                  />
                   <BreadcrumbsProvider
                     onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
                   >
@@ -104,6 +117,7 @@ export const roleMappingsManagementApp = Object.freeze({
                           docLinks={core.docLinks}
                           history={history}
                           navigateToApp={core.application.navigateToApp}
+                          readOnly={!core.application.capabilities.role_mappings.save}
                         />
                       </Route>
                       <Route path="/edit/:name?">

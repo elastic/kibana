@@ -36,6 +36,9 @@ const actionParams: FlyoutEditDrilldownParams = {
       application: {
         currentAppId$: new Subject(),
       },
+      theme: {
+        theme$: new Subject(),
+      },
     } as any,
     plugins: {
       uiActionsEnhanced: uiActions,

@@ -10,8 +10,8 @@ import type { Query } from '@kbn/data-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import {
-  fieldExists,
   FieldOption,
   FieldOptionValue,
   FieldPicker,
@@ -41,7 +41,7 @@ export const ConfigPanelQueryAnnotation = ({
   queryInputShouldOpen?: boolean;
 }) => {
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
-  const currentExistingFields = frame.dataViews.existingFields[currentIndexPattern.title];
+  const { hasFieldData } = useExistingFieldsReader();
   // list only date fields
   const options = currentIndexPattern.fields
     .filter((field) => field.type === 'date' && field.displayName)
@@ -53,7 +53,7 @@ export const ConfigPanelQueryAnnotation = ({
           field: field.name,
           dataType: field.type,
         },
-        exists: fieldExists(currentExistingFields, field.name),
+        exists: hasFieldData(currentIndexPattern.id, field.name),
         compatible: true,
         'data-test-subj': `lns-fieldOption-${field.name}`,
       } as FieldOption<FieldOptionValue>;

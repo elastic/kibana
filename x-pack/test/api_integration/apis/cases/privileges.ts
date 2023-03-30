@@ -16,7 +16,7 @@ import {
   deleteAllCaseItems,
   deleteCases,
   getCase,
-} from '../../../cases_api_integration/common/lib/utils';
+} from '../../../cases_api_integration/common/lib/api';
 import {
   casesAllUser,
   casesNoDeleteUser,

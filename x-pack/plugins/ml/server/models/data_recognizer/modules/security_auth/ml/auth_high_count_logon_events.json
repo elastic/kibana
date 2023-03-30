@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Authentication - Looks for an unusually large spike in successful authentication events. This can be due to password spraying, user enumeration, or brute force activity.",
   "groups": [
     "security",
@@ -25,6 +24,7 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-security-auth"
+    "created_by": "ml-module-security-auth",
+    "security_app_display_name": "Spike in Logon Events"
   }
 }

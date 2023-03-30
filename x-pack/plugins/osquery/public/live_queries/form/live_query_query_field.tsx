@@ -12,9 +12,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import type { LiveQueryFormFields } from '.';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
-import { MAX_QUERY_LENGTH } from '../../packs/queries/validations';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import type { SavedQueriesDropdownProps } from '../../saved_queries/saved_queries_dropdown';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
@@ -24,6 +24,9 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__button {
     color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
+  .euiAccordion__childWrapper {
+    -webkit-transition: none;
+  }
 `;
 
 const StyledEuiCodeBlock = styled(EuiCodeBlock)`
@@ -31,20 +34,20 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 `;
 
 export interface LiveQueryQueryFieldProps {
-  disabled?: boolean;
   handleSubmitForm?: () => void;
+  disabled?: boolean;
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   disabled,
   handleSubmitForm,
 }) => {
-  const { watch, resetField } = useFormContext();
-  const [advancedContentState, setAdvancedContentState] =
-    useState<EuiAccordionProps['forceState']>('closed');
+  const { formState, watch, resetField } = useFormContext<LiveQueryFormFields>();
+  const [advancedContentState, setAdvancedContentState] = useState<EuiAccordionProps['forceState']>(
+    () => (isEmpty(formState.defaultValues?.ecs_mapping) ? 'closed' : 'open')
+  );
   const permissions = useKibana().services.application.capabilities.osquery;
-  const queryType = watch('queryType', 'query');
-
+  const [queryType] = watch(['queryType']);
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -56,13 +59,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
           defaultMessage: 'Query is a required field',
         }),
         value: queryType !== 'pack',
-      },
-      maxLength: {
-        message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
-          defaultMessage: 'Query is too large (max {maxLength} characters)',
-          values: { maxLength: MAX_QUERY_LENGTH },
-        }),
-        value: MAX_QUERY_LENGTH,
       },
     },
     defaultValue: '',
@@ -101,8 +97,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     () =>
       !(
         permissions.writeLiveQueries ||
-        permissions.runSavedQueries ||
-        permissions.readSavedQueries
+        (permissions.runSavedQueries && permissions.readSavedQueries)
       ),
     [permissions.readSavedQueries, permissions.runSavedQueries, permissions.writeLiveQueries]
   );
@@ -158,6 +153,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
           forceState={advancedContentState}
           onToggle={handleToggle}
           buttonContent="Advanced"
+          data-test-subj="advanced-accordion-content"
         >
           <EuiSpacer size="xs" />
           <ECSMappingEditorField euiFieldProps={ecsFieldProps} />

@@ -17,10 +17,10 @@ Object {
             class="euiContextMenuItem__text"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive css-5zp1nn"
+              class="euiFlexGroup css-5zp1nn"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 data-test-subj="generateLinedRulesMenuItemsTestLeftIcon"
               >
                 <span
@@ -59,10 +59,10 @@ Object {
           class="euiContextMenuItem__text"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive css-5zp1nn"
+            class="euiFlexGroup css-5zp1nn"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
               data-test-subj="generateLinedRulesMenuItemsTestLeftIcon"
             >
               <span
@@ -158,7 +158,7 @@ Object {
             class="euiContextMenuItem__text"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive css-5zp1nn"
+              class="euiFlexGroup css-5zp1nn"
             >
               <div
                 class="euiFlexItem emotion-EuiFlexItem"
@@ -192,7 +192,7 @@ Object {
           class="euiContextMenuItem__text"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive css-5zp1nn"
+            class="euiFlexGroup css-5zp1nn"
           >
             <div
               class="euiFlexItem emotion-EuiFlexItem"

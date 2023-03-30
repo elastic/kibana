@@ -15,17 +15,17 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
       data-test-subj="exitFullScreenModeLogo"
     >
       <span
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+        class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
             data-euiicon-type="logoElastic"
           />
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
           data-test-subj="exitFullScreenModeText"
         >
           <div>
@@ -39,7 +39,7 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
             class="dshExitFullScreenButton__icon"

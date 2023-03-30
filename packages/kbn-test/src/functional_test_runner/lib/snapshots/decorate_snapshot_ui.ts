@@ -14,6 +14,7 @@ import {
 } from 'jest-snapshot';
 import path from 'path';
 import { once } from 'lodash';
+import type { SyncExpectationResult } from 'expect';
 import { Lifecycle } from '../lifecycle';
 import { Suite, Test } from '../../fake_mocha_types';
 
@@ -154,13 +155,14 @@ export function decorateSnapshotUi({
 function getSnapshotState(file: string, updateSnapshot: SnapshotUpdateState) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
-
+  const rootDir = path.join(dirname + `/__snapshots__/`);
   const snapshotState = new SnapshotState(
-    path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
+    path.join(rootDir, filename.replace(path.extname(filename), '.snap')),
     {
       updateSnapshot,
       prettierPath: require.resolve('prettier'),
       snapshotFormat: { escapeString: true, printBasicPrototype: true },
+      rootDir,
     }
   );
 
@@ -203,7 +205,7 @@ export function expectSnapshot(received: any) {
 
 function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) {
   const matcher = toMatchSnapshot.bind(snapshotContext as any);
-  const result = matcher(received);
+  const result = matcher(received) as SyncExpectationResult;
 
   if (!result.pass) {
     throw new Error(result.message());
@@ -217,7 +219,9 @@ function expectToMatchInlineSnapshot(
 ) {
   const matcher = toMatchInlineSnapshot.bind(snapshotContext as any);
 
-  const result = arguments.length === 2 ? matcher(received) : matcher(received, _actual);
+  const result = (
+    arguments.length === 2 ? matcher(received) : matcher(received, _actual)
+  ) as SyncExpectationResult;
 
   if (!result.pass) {
     throw new Error(result.message());

@@ -45,6 +45,13 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     defaultMessage: 'Metric visualization',
   }),
   args: {
+    autoScaleMetricAlignment: {
+      types: ['string'],
+      help: i18n.translate('expressionLegacyMetricVis.function.autoScaleMetricAlignment.help', {
+        defaultMessage: 'Metric alignment after scaled',
+      }),
+      required: false,
+    },
     percentageMode: {
       types: ['boolean'],
       default: false,
@@ -177,6 +184,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visType,
         visConfig: {
           metric: {
+            ...(args.autoScaleMetricAlignment
+              ? { autoScaleMetricAlignment: args.autoScaleMetricAlignment }
+              : {}),
             palette: args.palette?.params,
             percentageMode: args.percentageMode,
             metricColorMode: args.colorMode,

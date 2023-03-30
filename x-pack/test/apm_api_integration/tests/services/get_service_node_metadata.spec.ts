@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -28,6 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           kuery: '',
+          environment: 'production',
         },
       },
     });

@@ -15,7 +15,7 @@ import {
 
 import { expandFirstAlert } from '../../tasks/alerts';
 import { openJsonView, openTable } from '../../tasks/alerts_details';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -24,23 +24,24 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import { getUnmappedRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { pageSelector } from '../../screens/alerts_detection_rules';
+import { tablePageSelector } from '../../screens/table_pagination';
 
-describe('Alert details with unmapped fields', () => {
+describe('Alert details with unmapped fields', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
     login();
-    createCustomRuleEnabled(getUnmappedRule());
+    createRule(getUnmappedRule());
     visitWithoutDateRange(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlert();
   });
+
   after(() => {
     esArchiverUnload('unmapped_fields');
   });
 
-  it('Displays the unmapped field on the JSON view', () => {
+  it('should display the unmapped field on the JSON view', () => {
     const expectedUnmappedValue = 'This is the unmapped field';
 
     openJsonView();
@@ -51,24 +52,25 @@ describe('Alert details with unmapped fields', () => {
     });
   });
 
-  it('Displays the unmapped field on the table', () => {
-    const expectedUnmmappedField = {
+  it('should displays the unmapped field on the table', () => {
+    const expectedUnmappedField = {
       field: 'unmapped',
       text: 'This is the unmapped field',
     };
 
     openTable();
-    cy.get(ALERT_FLYOUT).find(pageSelector(4)).click({ force: true });
+    cy.get(ALERT_FLYOUT).find(tablePageSelector(6)).click({ force: true });
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
+      .last()
       .within(() => {
-        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.field);
-        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.text);
+        cy.get(CELL_TEXT).should('contain', expectedUnmappedField.field);
+        cy.get(CELL_TEXT).should('contain', expectedUnmappedField.text);
       });
   });
 
   // This test makes sure that the table does not overflow horizontally
-  it('Table does not scroll horizontally', () => {
+  it('table should not scroll horizontally', () => {
     openTable();
 
     cy.get(ALERT_FLYOUT)
@@ -78,10 +80,10 @@ describe('Alert details with unmapped fields', () => {
 
         // Due to the introduction of pagination on the table, a slight horizontal overflow has been introduced.
         // scroll ignores the `overflow-x:hidden` attribute and will still scroll the element if there is a hidden overflow
-        // Updated the below to equal 4 to account for this and keep a test to make sure it doesn't grow
+        // Updated the below to < 5 to account for this and keep a test to make sure it doesn't grow
         $tableContainer[0].scroll({ left: 1000 });
 
-        expect($tableContainer[0].scrollLeft).to.equal(4);
+        expect($tableContainer[0].scrollLeft).to.be.lessThan(5);
       });
   });
 });

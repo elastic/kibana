@@ -94,6 +94,7 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
       error: null,
       warning: null,
     },
+    revision: 0,
   },
   references: [],
 };
@@ -128,7 +129,7 @@ describe('getAlertSummary()', () => {
       .advanceTime(10000)
       .addExecute()
       .addRecoveredAlert('alert-previously-active')
-      .addActiveAlert('alert-currently-active', 'action group A')
+      .addActiveAlert('alert-currently-active', 'action group A', true)
       .getEvents();
     const eventsResult = {
       ...AlertSummaryFindEventsResult,
@@ -157,18 +158,21 @@ describe('getAlertSummary()', () => {
           "alert-currently-active": Object {
             "actionGroupId": "action group A",
             "activeStartDate": "2019-02-12T21:01:22.479Z",
+            "flapping": true,
             "muted": false,
             "status": "Active",
           },
           "alert-muted-no-activity": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": true,
             "status": "OK",
           },
           "alert-previously-active": Object {
             "actionGroupId": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
           },
@@ -219,6 +223,7 @@ describe('getAlertSummary()', () => {
         ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
+          "filter": "NOT event.action: execute-action AND event.provider: alerting",
           "page": 1,
           "per_page": 10000,
           "sort": Array [
@@ -261,6 +266,7 @@ describe('getAlertSummary()', () => {
         ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
+          "filter": "NOT event.action: execute-action AND event.provider: alerting",
           "page": 1,
           "per_page": 10000,
           "sort": Array [

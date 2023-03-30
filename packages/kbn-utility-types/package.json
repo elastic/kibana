@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "main": "target_node/index.js",
   "scripts": {
     "test": "../../node_modules/.bin/tsd src/tsd_tests"
-  },
-  "types": "./target_types/index.d.ts"
+  }
 }

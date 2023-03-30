@@ -12,6 +12,7 @@ import {
   FIELD_ORIGIN,
   ICON_SOURCE,
   LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
   DATA_MAPPING_FUNCTION,
@@ -33,6 +34,12 @@ export type LabelBorderSizeOptions = {
 
 export type LabelBorderSizeStylePropertyDescriptor = {
   options: LabelBorderSizeOptions;
+};
+
+export type LabelPositionStylePropertyDescriptor = {
+  options: {
+    position: LABEL_POSITIONS;
+  };
 };
 
 export type LabelZoomRangeStylePropertyDescriptor = {
@@ -216,6 +223,7 @@ export type VectorStylePropertiesDescriptor = {
   [VECTOR_STYLES.LABEL_SIZE]: SizeStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_BORDER_COLOR]: ColorStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_BORDER_SIZE]: LabelBorderSizeStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_POSITION]: LabelPositionStylePropertyDescriptor;
 };
 
 export type StyleDescriptor = {
@@ -274,6 +282,7 @@ export type EMSVectorTileStyleDescriptor = StyleDescriptor & {
 
 export type StylePropertyOptions =
   | LabelBorderSizeOptions
+  | LabelPositionStylePropertyDescriptor['options']
   | LabelZoomRangeStylePropertyDescriptor['options']
   | SymbolizeAsOptions
   | DynamicStylePropertyOptions

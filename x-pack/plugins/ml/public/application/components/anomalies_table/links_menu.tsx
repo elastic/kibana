@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
@@ -227,16 +227,18 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         // Start from the previous hour.
         earliestMoment.subtract(1, 'h');
       }
-      let latestMoment = moment(record.timestamp).add(record.bucket_span, 's');
+
+      const latestMoment = moment(record.timestamp).add(record.bucket_span, 's');
       if (props.isAggregatedData === true) {
-        latestMoment = moment(record.timestamp).endOf(interval);
         if (interval === 'hour') {
           // Show to the end of the next hour.
-          latestMoment.add(1, 'h'); // e.g. 2016-02-08T18:59:59.999Z
+          latestMoment.add(1, 'h');
         }
+        latestMoment.subtract(1, 'ms').endOf(interval); // e.g. 2016-02-08T18:59:59.999Z
       }
+
       const from = timeFormatter(earliestMoment.unix() * 1000); // e.g. 2016-02-08T16:00:00.000Z
-      const to = timeFormatter(latestMoment.unix() * 1000);
+      const to = timeFormatter(latestMoment.unix() * 1000); // e.g. 2016-02-08T18:59:59.000Z
 
       let kqlQuery = '';
 
@@ -253,11 +255,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       const url = await discoverLocator.getRedirectUrl({
         indexPatternId: dataViewId,
-        refreshInterval: {
-          display: 'Off',
-          pause: true,
-          value: 0,
-        },
         timeRange: {
           from,
           to,
@@ -271,7 +268,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           dataViewId === null
             ? []
             : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
-        sort: [['timestamp, asc']],
       });
 
       if (!unmounted) {
@@ -321,16 +317,16 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     }
 
     if (configuredUrlValue.includes('$latest$')) {
-      let latestMoment = moment(timestamp).add(record.bucket_span, 's');
+      const latestMoment = moment(timestamp).add(record.bucket_span, 's');
       if (timeRangeInterval !== null) {
         latestMoment.add(timeRangeInterval);
       } else {
         if (isAggregatedData === true) {
-          latestMoment = moment(timestamp).endOf(interval);
           if (interval === 'hour') {
             // Show to the end of the next hour.
             latestMoment.add(1, 'h'); // e.g. 2016-02-08T18:59:59.999Z
           }
+          latestMoment.subtract(1, 'ms').endOf(interval); // e.g. 2016-02-08T18:59:59.999Z
         }
       }
       record.latest = latestMoment.toISOString();
@@ -567,13 +563,15 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             },
           });
 
-          const appStateProps: RisonValue = {
+          const appStateProps = {
             index: dataViewId,
             filters: getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
+            ...(query !== null
+              ? {
+                  query,
+                }
+              : {}),
           };
-          if (query !== null) {
-            appStateProps.query = query;
-          }
           const _a = rison.encode(appStateProps);
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.

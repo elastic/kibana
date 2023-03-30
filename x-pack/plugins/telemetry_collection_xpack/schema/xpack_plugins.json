@@ -2781,6 +2781,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -2861,6 +2867,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -2949,6 +2961,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3029,6 +3047,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3117,6 +3141,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3197,6 +3227,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3285,6 +3321,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3365,6 +3407,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3453,6 +3501,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3537,6 +3591,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3617,6 +3677,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3876,16 +3942,6 @@
                 }
               }
             },
-            "sourcemap": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
             "onboarding": {
               "properties": {
                 "1d": {
@@ -4042,13 +4098,6 @@
                 }
               }
             },
-            "sourcemap": {
-              "properties": {
-                "ms": {
-                  "type": "long"
-                }
-              }
-            },
             "onboarding": {
               "properties": {
                 "ms": {
@@ -4071,6 +4120,72 @@
         },
         "indices": {
           "properties": {
+            "metric": {
+              "properties": {
+                "shards": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "all": {
+                  "properties": {
+                    "total": {
+                      "properties": {
+                        "docs": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "store": {
+                          "properties": {
+                            "size_in_bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "traces": {
+              "properties": {
+                "shards": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "all": {
+                  "properties": {
+                    "total": {
+                      "properties": {
+                        "docs": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "store": {
+                          "properties": {
+                            "size_in_bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
             "shards": {
               "properties": {
                 "total": {
@@ -4122,6 +4237,12 @@
               "service_id": {
                 "type": "keyword"
               },
+              "num_service_nodes": {
+                "type": "long"
+              },
+              "num_transaction_types": {
+                "type": "long"
+              },
               "timed_out": {
                 "type": "boolean"
               },
@@ -4167,6 +4288,9 @@
                     "type": "keyword"
                   },
                   "version": {
+                    "type": "keyword"
+                  },
+                  "activation_method": {
                     "type": "keyword"
                   }
                 }
@@ -4659,6 +4783,64 @@
                 "daily": {
                   "type": "long"
                 },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -4747,6 +4929,64 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4776,6 +5016,64 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4803,6 +5101,64 @@
                     },
                     "totalWithAtLeastOne": {
                       "type": "long"
+                    }
+                  }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }
@@ -4991,13 +5347,9 @@
           }
         },
         "flags": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "keyword",
-              "_meta": {
-                "description": "Flags received by the client"
-              }
-            }
+          "type": "pass_through",
+          "_meta": {
+            "description": "Flags received by the client"
           }
         },
         "flagNames": {
@@ -5061,6 +5413,120 @@
                 "last_doc_timestamp": {
                   "type": "date"
                 }
+              }
+            }
+          }
+        },
+        "resources_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "resource_type": {
+                "type": "keyword"
+              },
+              "resource_type_doc_count": {
+                "type": "long"
+              },
+              "resource_sub_type": {
+                "type": "keyword"
+              },
+              "resource_sub_type_doc_count": {
+                "type": "long"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "accounts_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "posture_score": {
+                "type": "long"
+              },
+              "latest_findings_doc_count": {
+                "type": "long"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              },
+              "agents_count": {
+                "type": "short"
+              },
+              "nodes_count": {
+                "type": "short"
+              },
+              "pods_count": {
+                "type": "short"
+              }
+            }
+          }
+        },
+        "rules_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "rule_id": {
+                "type": "keyword"
+              },
+              "rule_name": {
+                "type": "keyword"
+              },
+              "rule_section": {
+                "type": "keyword"
+              },
+              "rule_version": {
+                "type": "keyword"
+              },
+              "rule_number": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
               }
             }
           }
@@ -5151,6 +5617,18 @@
               "type": "long",
               "_meta": {
                 "description": "The total number of enrolled agents currently offline"
+              }
+            },
+            "inactive": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of of enrolled agents currently inactive"
+              }
+            },
+            "unenrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents currently unenrolled"
               }
             },
             "total_all_statuses": {
@@ -5262,18 +5740,6 @@
     },
     "maps": {
       "properties": {
-        "indexPatternsWithGeoFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithGeoPointFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithGeoShapeFieldCount": {
-          "type": "long"
-        },
-        "geoShapeAggLayersCount": {
-          "type": "long"
-        },
         "mapsTotalCount": {
           "type": "long"
         },
@@ -6645,6 +7111,109 @@
             }
           }
         },
+        "csv_v2": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "output_size": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
         "PNG": {
           "properties": {
             "available": {
@@ -7303,6 +7872,22 @@
                     }
                   }
                 },
+                "csv_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -7388,6 +7973,22 @@
                   }
                 },
                 "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_v2": {
                   "properties": {
                     "search": {
                       "type": "long"
@@ -7503,6 +8104,22 @@
                     }
                   }
                 },
+                "csv_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -7603,6 +8220,22 @@
                     }
                   }
                 },
+                "csv_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -7688,6 +8321,22 @@
                   }
                 },
                 "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_v2": {
                   "properties": {
                     "search": {
                       "type": "long"
@@ -7921,6 +8570,109 @@
               }
             },
             "csv_searchsource_immediate": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "output_size": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "csv_v2": {
               "properties": {
                 "available": {
                   "type": "boolean"
@@ -8681,6 +9433,22 @@
                         }
                       }
                     },
+                    "csv_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -8766,6 +9534,22 @@
                       }
                     },
                     "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_v2": {
                       "properties": {
                         "search": {
                           "type": "long"
@@ -8881,6 +9665,22 @@
                         }
                       }
                     },
+                    "csv_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -8981,6 +9781,22 @@
                         }
                       }
                     },
+                    "csv_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -9066,6 +9882,22 @@
                       }
                     },
                     "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_v2": {
                       "properties": {
                         "search": {
                           "type": "long"
@@ -9401,6 +10233,12 @@
           "type": "long",
           "_meta": {
             "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionConcurrentSessionsMaxSessions": {
+          "type": "long",
+          "_meta": {
+            "description": "The maximum number of the concurrent user sessions (0 if not configured)."
           }
         },
         "anonymousCredentialType": {
@@ -13014,6 +13852,143 @@
               }
             }
           }
+        },
+        "endpointMetrics": {
+          "properties": {
+            "unique_endpoint_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of active unique endpoints in last 24 hours"
+              }
+            }
+          }
+        },
+        "dashboardMetrics": {
+          "properties": {
+            "dashboard_tag": {
+              "properties": {
+                "created_at": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "The time the tab was created"
+                  }
+                },
+                "linked_dashboards_count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of associated dashboards"
+                  }
+                }
+              }
+            },
+            "dashboards": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "created_at": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The time the dashboard was created"
+                    }
+                  },
+                  "dashboard_id": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The dashboard saved object id"
+                    }
+                  },
+                  "error_message": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The relevant error message"
+                    }
+                  },
+                  "error_status_code": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The relevant error status code"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "slo": {
+      "properties": {
+        "slo": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of slos in the cluster"
+              }
+            },
+            "by_status": {
+              "properties": {
+                "enabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of enabled slos in the cluster"
+                  }
+                },
+                "disabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of disabled slos in the cluster"
+                  }
+                }
+              }
+            },
+            "by_sli_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by sli type in the cluster"
+                  }
+                }
+              }
+            },
+            "by_rolling_duration": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by rolling duration in the cluster"
+                  }
+                }
+              }
+            },
+            "by_calendar_aligned_duration": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by calendar aligned duration in the cluster"
+                  }
+                }
+              }
+            },
+            "by_budgeting_method": {
+              "properties": {
+                "occurrences": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by timeslices budgeting method in the cluster"
+                  }
+                },
+                "timeslices": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by occurrences budgeting method in the cluster"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -13335,6 +14310,29 @@
           }
         },
         "failed_tasks": {
+          "type": "long"
+        },
+        "recurring_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "adhoc_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "capacity": {
           "type": "long"
         }
       }

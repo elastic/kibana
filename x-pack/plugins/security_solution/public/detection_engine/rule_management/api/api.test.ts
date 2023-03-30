@@ -15,7 +15,10 @@ import {
   getUpdateRulesSchemaMock,
   getRulesSchemaMock,
 } from '../../../../common/detection_engine/rule_schema/mocks';
-
+import {
+  BulkActionType,
+  BulkActionEditType,
+} from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { rulesMock } from '../logic/mock';
 import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';
 
@@ -28,10 +31,10 @@ import {
   createPrepackagedRules,
   importRules,
   exportRules,
-  fetchTags,
   getPrePackagedRulesStatus,
   previewRule,
   findRuleExceptionReferences,
+  performBulkAction,
 } from './api';
 
 const abortCtrl = new AbortController();
@@ -284,7 +287,7 @@ describe('Detections Rules API', () => {
           tags: ['hello', 'world'],
         },
         sortingOptions: {
-          field: 'updated_at',
+          field: 'updatedAt',
           order: 'desc',
         },
         signal: abortCtrl.signal,
@@ -490,6 +493,7 @@ describe('Detections Rules API', () => {
         },
         query: {
           overwrite: false,
+          overwrite_action_connectors: false,
           overwrite_exceptions: false,
         },
       });
@@ -507,6 +511,7 @@ describe('Detections Rules API', () => {
         query: {
           overwrite: true,
           overwrite_exceptions: false,
+          overwrite_action_connectors: false,
         },
       });
     });
@@ -520,6 +525,10 @@ describe('Detections Rules API', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
       });
       const resp = await importRules({ fileToImport, signal: abortCtrl.signal });
       expect(resp).toEqual({
@@ -530,6 +539,10 @@ describe('Detections Rules API', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
       });
     });
   });
@@ -626,26 +639,6 @@ describe('Detections Rules API', () => {
     });
   });
 
-  describe('fetchTags', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(['some', 'tags']);
-    });
-
-    test('check parameter url when fetching tags', async () => {
-      await fetchTags({ signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/tags', {
-        signal: abortCtrl.signal,
-        method: 'GET',
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await fetchTags({ signal: abortCtrl.signal });
-      expect(resp).toEqual(['some', 'tags']);
-    });
-  });
-
   describe('getPrePackagedRulesStatus', () => {
     const prePackagedRulesStatus = {
       rules_custom_installed: 33,
@@ -699,6 +692,98 @@ describe('Detections Rules API', () => {
         method: 'GET',
         signal: abortCtrl.signal,
       });
+    });
+  });
+
+  describe('performBulkAction', () => {
+    const fetchMockResult = {};
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(fetchMockResult);
+    });
+
+    test('passes a query', async () => {
+      await performBulkAction({ bulkAction: { type: BulkActionType.enable, query: 'some query' } });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'enable',
+          query: 'some query',
+        }),
+        query: {
+          dry_run: false,
+        },
+      });
+    });
+
+    test('passes ids', async () => {
+      await performBulkAction({
+        bulkAction: { type: BulkActionType.disable, ids: ['ruleId1', 'ruleId2'] },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'disable',
+          ids: ['ruleId1', 'ruleId2'],
+        }),
+        query: {
+          dry_run: false,
+        },
+      });
+    });
+
+    test('passes edit payload', async () => {
+      await performBulkAction({
+        bulkAction: {
+          type: BulkActionType.edit,
+          ids: ['ruleId1'],
+          editPayload: [
+            { type: BulkActionEditType.add_index_patterns, value: ['some-index-pattern'] },
+          ],
+        },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'edit',
+          ids: ['ruleId1'],
+          edit: [{ type: 'add_index_patterns', value: ['some-index-pattern'] }],
+        }),
+        query: {
+          dry_run: false,
+        },
+      });
+    });
+
+    test('executes dry run', async () => {
+      await performBulkAction({
+        bulkAction: { type: BulkActionType.disable, query: 'some query' },
+        dryRun: true,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'disable',
+          query: 'some query',
+        }),
+        query: { dry_run: true },
+      });
+    });
+
+    test('returns result', async () => {
+      const result = await performBulkAction({
+        bulkAction: {
+          type: BulkActionType.disable,
+          query: 'some query',
+        },
+      });
+
+      expect(result).toBe(fetchMockResult);
     });
   });
 });

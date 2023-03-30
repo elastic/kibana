@@ -10,12 +10,12 @@ import expect from '@kbn/expect';
 import { promisify } from 'util';
 import httpProxy from 'http-proxy';
 import { KBN_KEY_PATH } from '@kbn/dev-utils';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
-} from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+} from '@kbn/actions-simulators-plugin/server/plugin';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function oAuthAccessTokenTest({ getService }: FtrProviderContext) {

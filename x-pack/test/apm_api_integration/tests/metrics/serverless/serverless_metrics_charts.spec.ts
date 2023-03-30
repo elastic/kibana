@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { generateData, config } from './generate_data';
 
@@ -35,6 +37,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: '',
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
+          documentType: ApmDocumentType.TransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
+          bucketSizeInSeconds: 60,
           ...(serverlessId ? { serverlessId } : {}),
         },
       },
@@ -177,7 +182,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
-        const expectedValue = (memoryTotal * billedDurationMs) / GBSeconds;
         let computeUsageMetric: typeof serverlessMetrics.charts[0] | undefined;
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
@@ -185,10 +189,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
         it('returns correct overall value', () => {
+          const expectedValue =
+            ((memoryTotal * billedDurationMs) / GBSeconds) * numberOfTransactionsCreated * 2;
           expect(computeUsageMetric?.series[0].overallValue).to.equal(expectedValue);
         });
 
         it('returns correct mean value', () => {
+          const expectedValue = ((memoryTotal * billedDurationMs) / GBSeconds) * 2;
           const meanValue = meanBy(
             computeUsageMetric?.series[0]?.data.filter((item) => item.y !== 0),
             'y'
@@ -298,7 +305,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
-        const expectedValue = (memoryTotal * billedDurationMs) / GBSeconds;
         let computeUsageMetric: typeof serverlessMetrics.charts[0] | undefined;
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
@@ -306,10 +312,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
         it('returns correct overall value', () => {
+          const expectedValue =
+            ((memoryTotal * billedDurationMs) / GBSeconds) * numberOfTransactionsCreated;
           expect(computeUsageMetric?.series[0].overallValue).to.equal(expectedValue);
         });
 
         it('returns correct mean value', () => {
+          const expectedValue = (memoryTotal * billedDurationMs) / GBSeconds;
           const meanValue = meanBy(
             computeUsageMetric?.series[0]?.data.filter((item) => item.y !== 0),
             'y'

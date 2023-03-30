@@ -11,9 +11,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { AddFromLibraryButton } from './add_from_library';
 
-describe('<ToolbarButton />', () => {
+describe('<AddFromLibraryButton />', () => {
   test('is rendered', () => {
     const component = mountWithIntl(<AddFromLibraryButton />);
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 });

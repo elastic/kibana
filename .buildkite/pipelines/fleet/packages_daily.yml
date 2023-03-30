@@ -7,21 +7,15 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/steps/build_kibana.sh
-    label: Build Kibana Distribution and Plugins
-    agents:
-      queue: c2-16
-    key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-    timeout_in_minutes: 60
-
-  - wait
-
   - command: .buildkite/scripts/steps/fleet/install_all_packages.sh
     label: Install All Packages
     agents:
       queue: n2-2
-    key: linting
+    env:
+      # ensure that the FTR logs all output for these tests
+      DISABLE_CI_LOG_OUTPUT_CAPTURE: 'true'
+      # disable downloading a kibana build, this step does not use it
+      KIBANA_BUILD_ID: 'false'
     timeout_in_minutes: 90
 
   - wait: ~

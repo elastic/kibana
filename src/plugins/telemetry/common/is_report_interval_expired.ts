@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPORT_INTERVAL_MS } from './constants';
+import { REPORT_INTERVAL_BUFFER_MS, REPORT_INTERVAL_MS } from './constants';
 
 /**
  * The report is considered expired if:
@@ -15,5 +15,9 @@ import { REPORT_INTERVAL_MS } from './constants';
  * @returns `true` if the report interval is considered expired
  */
 export function isReportIntervalExpired(lastReportAt: number | undefined) {
-  return !lastReportAt || isNaN(lastReportAt) || Date.now() - lastReportAt > REPORT_INTERVAL_MS;
+  return (
+    !lastReportAt ||
+    isNaN(lastReportAt) ||
+    Date.now() - lastReportAt > REPORT_INTERVAL_MS - REPORT_INTERVAL_BUFFER_MS
+  );
 }

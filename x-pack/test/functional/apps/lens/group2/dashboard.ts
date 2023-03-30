@@ -28,10 +28,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const panelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
+  const queryBar = getService('queryBar');
 
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
     await browser.getActions().move({ x, y, origin: el._webElement }).click().perform();
+  }
+
+  async function rightClickInChart(x: number, y: number) {
+    const el = await elasticChart.getCanvas();
+    await browser.getActions().move({ x, y, origin: el._webElement }).contextClick().perform();
   }
 
   describe('lens dashboard tests', () => {
@@ -70,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
       await retry.try(async () => {
-        await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        await clickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
         await testSubjects.existOrFail('applyFiltersPopoverButton', { timeout: 2500 });
       });
 
@@ -88,6 +94,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
       const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
       expect(hasIpFilter).to.be(true);
+    });
+
+    it('should be able to add filters by right clicking in XYChart', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
+      await find.clickByButtonText('lnsXYvis');
+      await dashboardAddPanel.closeAddPanel();
+      await PageObjects.lens.goToTimeRange();
+      await retry.try(async () => {
+        // show the tooltip actions
+        await rightClickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        await (await find.byCssSelector('.echTooltipActions__action')).click();
+        const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
+        expect(hasIpFilter).to.be(true);
+      });
     });
 
     // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
@@ -123,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'AL');
       expect(hasGeoDestFilter).to.be(true);
-      await filterBar.addFilter('geo.src', 'is', 'US');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
       await filterBar.toggleFilterPinned('geo.src');
     });
 
@@ -131,9 +154,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await filterBar.addFilter('geo.src', 'is', 'US');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
       await filterBar.toggleFilterPinned('geo.src');
-      await filterBar.addFilter('geo.dest', 'is', 'LS');
+      await filterBar.addFilter({ field: 'geo.dest', operation: 'is', value: 'LS' });
 
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -151,11 +174,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
       await find.clickByButtonText('lnsPieVis');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.closeAddPanel();
 
-      await panelActions.openContextMenu();
-      await panelActions.clickContextMenuMoreItem();
-      await testSubjects.existOrFail(ACTION_TEST_SUBJ);
+      await retry.try(async () => {
+        await panelActions.openContextMenu();
+        await panelActions.clickContextMenuMoreItem();
+        await testSubjects.existOrFail(ACTION_TEST_SUBJ);
+      });
     });
 
     it('should show all data from all layers in the inspector', async () => {
@@ -268,6 +294,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // remove the x dimension to trigger the validation error
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
       await PageObjects.lens.expectSaveAndReturnButtonDisabled();
+    });
+
+    it('should recover lens panel in an error state when fixing search query', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
+      await find.clickByButtonText('lnsXYvis');
+      await dashboardAddPanel.closeAddPanel();
+      await PageObjects.lens.goToTimeRange();
+      // type an invalid search query, hit refresh
+      await queryBar.setQuery('this is > not valid');
+      await queryBar.submitQuery();
+      // check the error state
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const errors = await testSubjects.findAll('embeddableStackError');
+      expect(errors.length).to.be(1);
+      // now remove the query
+      await queryBar.setQuery('');
+      await queryBar.submitQuery();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // check the success state
+      await PageObjects.dashboard.verifyNoRenderErrors();
     });
   });
 }

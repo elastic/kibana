@@ -5,22 +5,9 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+import type { ParsedCommandInput, ParsedCommandInterface } from './types';
 import type { CommandDefinition } from '..';
 
-export type PossibleArgDataTypes = string | boolean;
-
-export type ParsedArgData<T = PossibleArgDataTypes> = Array<
-  T extends PossibleArgDataTypes ? T : never
->;
-
-interface ParsedCommandInput<TArgs extends object = any> {
-  name: string;
-  args: {
-    [key in keyof TArgs]: ParsedArgData<Required<TArgs>[key]>;
-  };
-}
 const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
   const response: ParsedCommandInput = {
@@ -88,22 +75,6 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 
   return response;
 };
-
-export interface ParsedCommandInterface<TArgs extends object = any>
-  extends ParsedCommandInput<TArgs> {
-  input: string;
-
-  /**
-   * Checks if the given argument name was entered by the user
-   * @param argName
-   */
-  hasArg(argName: string): boolean;
-
-  /**
-   * if any argument was entered
-   */
-  hasArgs: boolean;
-}
 
 class ParsedCommand implements ParsedCommandInterface {
   public readonly name: string;

@@ -31,4 +31,5 @@ export const getImportExceptionsListItemSchemaDecodedMock = (
   namespace_type: 'single',
   os_types: [],
   tags: [],
+  expire_time: undefined,
 });

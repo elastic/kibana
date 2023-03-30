@@ -1,11 +1,12 @@
 title: Alert indices
 description: >
-  The alert index. It is required only when `type` is `alert`. If it is an
-  array, `alertId` must also be an array with the same length or number of
-  elements. This functionality is in technical preview and may be changed or
-  removed in a future release. Elastic will apply best effort to fix any issues,
-  but features in technical preview are not subject to the support SLA of
-  official GA features.
+  The alert indices. It is required only when `type` is `alert`.  If you are
+  adding multiple alerts to a case, use an array of strings; the position of
+  each index name in the array must match the position of the corresponding
+  alert identifier in the `alertId` array. This functionality is in technical
+  preview and may be changed or removed in a future release. Elastic will apply
+  best effort to fix any issues, but features in technical preview are not
+  subject to the support SLA of official GA features.
 oneOf:
   - type: string
   - type: array

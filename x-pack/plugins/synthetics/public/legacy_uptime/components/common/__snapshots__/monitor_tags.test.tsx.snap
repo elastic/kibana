@@ -2,126 +2,102 @@
 
 exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
 <div
-  class="euiBadgeGroup euiBadgeGroup--gutterExtraSmall"
+  class="euiBadgeGroup emotion-euiBadgeGroup-xs"
 >
-  <span
-    class="euiBadgeGroup__item"
+  <a
+    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    href="/?filters=[[\\"tags\\",[\\"red\\"]]]"
+    rel="noreferrer"
+    style="max-width:120px"
   >
-    <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"red\\"]]]"
-      rel="noreferrer"
-      style="max-width:120px"
+    <span
+      class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__text emotion-euiBadge__text-clickable"
       >
-        <span
-          class="euiBadge__text"
-        >
-          red
-        </span>
+        red
       </span>
-    </a>
-  </span>
-  <span
-    class="euiBadgeGroup__item"
+    </span>
+  </a>
+  <a
+    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    href="/?filters=[[\\"tags\\",[\\"green\\"]]]"
+    rel="noreferrer"
+    style="max-width:120px"
   >
-    <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"green\\"]]]"
-      rel="noreferrer"
-      style="max-width:120px"
+    <span
+      class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__text emotion-euiBadge__text-clickable"
       >
-        <span
-          class="euiBadge__text"
-        >
-          green
-        </span>
+        green
       </span>
-    </a>
-  </span>
-  <span
-    class="euiBadgeGroup__item"
+    </span>
+  </a>
+  <a
+    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    href="/?filters=[[\\"tags\\",[\\"blue\\"]]]"
+    rel="noreferrer"
+    style="max-width:120px"
   >
-    <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"blue\\"]]]"
-      rel="noreferrer"
-      style="max-width:120px"
+    <span
+      class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__text emotion-euiBadge__text-clickable"
       >
-        <span
-          class="euiBadge__text"
-        >
-          blue
-        </span>
+        blue
       </span>
-    </a>
-  </span>
-  <span
-    class="euiBadgeGroup__item"
+    </span>
+  </a>
+  <a
+    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    href="/?filters=[[\\"tags\\",[\\"black\\"]]]"
+    rel="noreferrer"
+    style="max-width:120px"
   >
-    <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"black\\"]]]"
-      rel="noreferrer"
-      style="max-width:120px"
+    <span
+      class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__text emotion-euiBadge__text-clickable"
       >
-        <span
-          class="euiBadge__text"
-        >
-          black
-        </span>
+        black
       </span>
-    </a>
-  </span>
-  <span
-    class="euiBadgeGroup__item"
+    </span>
+  </a>
+  <a
+    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    href="/?filters=[[\\"tags\\",[\\"purple\\"]]]"
+    rel="noreferrer"
+    style="max-width:120px"
   >
-    <a
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft eui-textTruncate"
-      href="/?filters=[[\\"tags\\",[\\"purple\\"]]]"
-      rel="noreferrer"
-      style="max-width:120px"
+    <span
+      class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__text emotion-euiBadge__text-clickable"
       >
-        <span
-          class="euiBadge__text"
-        >
-          purple
-        </span>
+        purple
       </span>
-    </a>
-  </span>
-  <span
-    class="euiBadgeGroup__item"
+    </span>
+  </a>
+  <button
+    aria-label="Click to view remaining tags"
+    class="euiBadge emotion-euiBadge-clickable-hollow"
   >
-    <button
-      aria-label="Click to view remaining tags"
-      class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft"
+    <span
+      class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__content"
+        class="euiBadge__text emotion-euiBadge__text-clickable"
       >
-        <span
-          class="euiBadge__text"
-        >
-          +1
-        </span>
+        +1
       </span>
-    </button>
-  </span>
+    </span>
+  </button>
 </div>
 `;
 

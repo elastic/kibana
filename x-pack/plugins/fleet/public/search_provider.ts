@@ -40,19 +40,45 @@ export const toSearchResult = (
   pkg: PackageListItem,
   application: ApplicationStart,
   basePath: IBasePath
-): GlobalSearchProviderResult => ({
-  id: pkg.name,
-  type: packageType,
-  title: pkg.title,
-  score: 80,
-  icon: getEuiIconType(pkg, basePath),
-  url: {
-    path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${
-      pagePathGetters.integration_details_overview({ pkgkey: pkg.name })[1]
-    }`,
-    prependBasePath: false,
-  },
-});
+): GlobalSearchProviderResult[] => {
+  const packageResult = {
+    id: pkg.name,
+    type: packageType,
+    title: pkg.title,
+    score: 80,
+    icon: getEuiIconType(pkg, basePath),
+    url: {
+      path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${
+        pagePathGetters.integration_details_overview({ pkgkey: pkg.name })[1]
+      }`,
+      prependBasePath: false,
+    },
+  };
+
+  const policyTemplateResults = pkg.policy_templates?.map<GlobalSearchProviderResult>(
+    (policyTemplate) => ({
+      id: policyTemplate.name,
+      type: packageType,
+      title: policyTemplate.title,
+      score: 80,
+      icon: getEuiIconType(pkg, basePath, policyTemplate),
+      url: {
+        path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${
+          pagePathGetters.integration_details_overview({
+            pkgkey: pkg.name,
+            integration: policyTemplate.name,
+          })[1]
+        }`,
+        prependBasePath: false,
+      },
+    })
+  );
+
+  return [
+    packageResult,
+    ...(policyTemplateResults && policyTemplateResults.length > 1 ? policyTemplateResults : []),
+  ];
+};
 
 export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResultProvider => {
   const coreStart$ = from(core.getStartServices()).pipe(
@@ -99,11 +125,13 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
             includeAllPackages
               ? (pkg) => toSearchResult(pkg, coreStart.application, coreStart.http.basePath)
               : (pkg) => {
-                  if (!term || !pkg.title.toLowerCase().includes(term)) {
+                  if (!term) {
                     return [];
                   }
 
-                  return toSearchResult(pkg, coreStart.application, coreStart.http.basePath);
+                  return toSearchResult(pkg, coreStart.application, coreStart.http.basePath).filter(
+                    (res) => term && res.title.toLowerCase().includes(term)
+                  );
                 }
           )
           .slice(0, maxResults);

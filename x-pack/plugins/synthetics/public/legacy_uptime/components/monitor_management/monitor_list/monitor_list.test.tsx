@@ -28,7 +28,9 @@ describe('<MonitorManagementList />', () => {
     monitors.push({
       id: `test-monitor-id-${i}`,
       updated_at: '123',
+      created_at: '123',
       attributes: {
+        config_id: `test-monitor-id-${i}`,
         name: `test-monitor-${i}`,
         enabled: true,
         schedule: {

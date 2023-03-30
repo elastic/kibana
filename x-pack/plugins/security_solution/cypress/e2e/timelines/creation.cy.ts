@@ -22,6 +22,7 @@ import {
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
   EDIT_TIMELINE_BTN,
   EDIT_TIMELINE_TOOLTIP,
+  TIMELINE_CORRELATION_INPUT,
 } from '../../screens/timeline';
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
@@ -41,14 +42,19 @@ import {
   goToQueryTab,
   pinFirstEvent,
   populateTimeline,
+  waitForTimelineChanges,
 } from '../../tasks/timeline';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
+import { EQL_QUERY_VALIDATION_ERROR } from '../../screens/create_new_rule';
 
 describe('Create a timeline from a template', () => {
   before(() => {
     deleteTimelines();
     createTimelineTemplate(getTimeline());
+  });
+
+  beforeEach(() => {
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
   });
 
@@ -67,15 +73,15 @@ describe('Create a timeline from a template', () => {
 describe('Timelines', (): void => {
   before(() => {
     cleanKibana();
-    login();
-    visit(OVERVIEW_URL);
   });
 
   describe('Toggle create timeline from plus icon', () => {
-    after(() => {
-      closeTimeline();
-    });
     context('Privileges: CRUD', () => {
+      before(() => {
+        login();
+        visit(OVERVIEW_URL);
+      });
+
       it('toggle create timeline ', () => {
         createNewTimeline();
         addNameAndDescriptionToTimeline(getTimeline());
@@ -88,6 +94,7 @@ describe('Timelines', (): void => {
         login(ROLES.reader);
         visit(OVERVIEW_URL, undefined, ROLES.reader);
       });
+
       it('should not be able to create/update timeline ', () => {
         createNewTimeline();
         cy.get(TIMELINE_PANEL).should('be.visible');
@@ -103,19 +110,15 @@ describe('Timelines', (): void => {
   });
 
   describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
-    after(() => {
-      closeTimeline();
-    });
-
     before(() => {
       login();
+    });
+
+    beforeEach(() => {
       visit(OVERVIEW_URL);
       openTimelineUsingToggle();
       addNameAndDescriptionToTimeline(getTimeline());
       populateTimeline();
-    });
-
-    beforeEach(() => {
       goToQueryTab();
     });
 
@@ -153,6 +156,68 @@ describe('Timelines', (): void => {
         .invoke('text')
         .then(parseInt)
         .should('be.gt', 0);
+    });
+
+    // Skipped in this PR until the underlying re-renders are fixed: https://github.com/elastic/kibana/pull/152284
+    describe.skip('correlation tab', () => {
+      it('should update timeline after adding eql', () => {
+        cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+        const eql = 'any where process.name == "zsh"';
+        addEqlToTimeline(eql);
+
+        cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
+
+        cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
+          .invoke('text')
+          .then(parseInt)
+          .should('be.gt', 0);
+      });
+
+      describe.skip('updates', () => {
+        const eql = 'any where process.name == "zsh"';
+        beforeEach(() => {
+          cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+          addEqlToTimeline(eql);
+          // TODO: It may need a further refactor to handle the frequency with which react calls this api
+          // Since it's based on real time text changes...and real time query validation
+          // there's almost no guarantee on the number of calls, so a cypress.wait may actually be more appropriate
+          cy.wait('@updateTimeline');
+          cy.wait('@updateTimeline');
+          cy.reload();
+          cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+          cy.get(TIMELINE_CORRELATION_INPUT).should('have.text', eql);
+        });
+
+        it('should update timeline after removing eql', () => {
+          cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+          cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+          waitForTimelineChanges();
+          cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}').clear();
+          // TODO: It may need a further refactor to handle the frequency with which react calls this api
+          // Since it's based on real time text changes...and real time query validation
+          // there's almost no guarantee on the number of calls, so a cypress.wait may actually be more appropriate
+          cy.wait('@updateTimeline');
+          cy.wait('@updateTimeline');
+          cy.wait('@updateTimeline');
+          cy.wait('@updateTimeline');
+          waitForTimelineChanges();
+          cy.reload();
+          cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+
+          cy.get(TIMELINE_CORRELATION_INPUT).should('have.text', '');
+        });
+
+        it('should NOT update timeline after adding wrong eql', () => {
+          cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+          const nonFunctionalEql = 'this is not valid eql';
+          addEqlToTimeline(nonFunctionalEql);
+          cy.get(EQL_QUERY_VALIDATION_ERROR).should('be.visible');
+          cy.reload();
+          cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+
+          cy.get(TIMELINE_CORRELATION_INPUT).should('have.text', eql);
+        });
+      });
     });
   });
 });

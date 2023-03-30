@@ -39,7 +39,8 @@ export function DependencyContents({
 
   const { query } = useAnyOfApmParams(
     '/service-map',
-    '/services/{serviceName}/service-map'
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
   );
 
   const { offset, comparisonEnabled } = query;
@@ -91,6 +92,7 @@ export function DependencyContents({
       <EuiFlexItem>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
         <EuiButton
+          data-test-subj="apmDependencyContentsDependencyDetailsButton"
           href={detailsUrl}
           fill={true}
           onClick={() => {

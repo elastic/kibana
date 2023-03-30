@@ -17,7 +17,6 @@ export const journey = new Journey({
 })
   .step('Go to Discover Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/discover`));
-
     await waitForChrome(page);
     await page.waitForSelector(subj('discoverDocTable'));
   })

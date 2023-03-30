@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
@@ -19,7 +19,6 @@ import {
 } from '../../../../../common/constants';
 
 import type { PatchRuleRequestBody } from '../../../../../common/detection_engine/rule_management';
-import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -54,7 +53,6 @@ import { assertUnreachable } from '../../../../../common/utility_types';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
-import { mergeRuleExecutionSummary } from '../../rule_monitoring';
 import type {
   InternalRuleCreate,
   RuleParams,
@@ -82,6 +80,8 @@ import {
   transformToAlertThrottle,
   transformToNotifyWhen,
 } from './rule_actions';
+import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
+import { createRuleExecutionSummary } from '../../rule_monitoring';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -137,6 +137,7 @@ export const typeSpecificSnakeToCamel = (
         filters: params.filters,
         savedId: params.saved_id,
         responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'saved_query': {
@@ -149,6 +150,7 @@ export const typeSpecificSnakeToCamel = (
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
         responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'threshold': {
@@ -243,6 +245,8 @@ const patchQueryParams = (
     responseActions:
       params.response_actions?.map(transformRuleToAlertResponseAction) ??
       existingRule.responseActions,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -261,6 +265,8 @@ const patchSavedQueryParams = (
     responseActions:
       params.response_actions?.map(transformRuleToAlertResponseAction) ??
       existingRule.responseActions,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -384,27 +390,6 @@ export const patchTypeSpecificSnakeToCamel = (
   }
 };
 
-const versionExcludedKeys = ['enabled', 'id', 'rule_id'];
-const incrementVersion = (nextParams: PatchRuleRequestBody, existingRule: RuleParams) => {
-  // The the version from nextParams if it's provided
-  if (nextParams.version) {
-    return nextParams.version;
-  }
-
-  // If the rule is immutable, keep the current version
-  if (existingRule.immutable) {
-    return existingRule.version;
-  }
-
-  // For custom rules, check modified params to deicide whether version increment is needed
-  for (const key in nextParams) {
-    if (!versionExcludedKeys.includes(key)) {
-      return existingRule.version + 1;
-    }
-  }
-  return existingRule.version;
-};
-
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
@@ -450,9 +435,7 @@ export const convertPatchAPIToInternalSchema = (
       references: nextParams.references ?? existingParams.references,
       namespace: nextParams.namespace ?? existingParams.namespace,
       note: nextParams.note ?? existingParams.note,
-      // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
-      // increment the version of mutable rules by 1.
-      version: incrementVersion(nextParams, existingParams),
+      version: nextParams.version ?? existingParams.version,
       exceptionsList: nextParams.exceptions_list ?? existingParams.exceptionsList,
       ...typeSpecificParams,
     },
@@ -462,10 +445,10 @@ export const convertPatchAPIToInternalSchema = (
       : existingRule.actions,
     throttle: nextParams.throttle
       ? transformToAlertThrottle(nextParams.throttle)
-      : existingRule.throttle,
+      : existingRule.throttle ?? null,
     notifyWhen: nextParams.throttle
       ? transformToNotifyWhen(nextParams.throttle)
-      : existingRule.notifyWhen,
+      : existingRule.notifyWhen ?? null,
   };
 };
 
@@ -480,7 +463,7 @@ export const convertCreateAPIToInternalSchema = (
   defaultEnabled = true
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
-  const newRuleId = input.rule_id ?? uuid.v4();
+  const newRuleId = input.rule_id ?? uuidv4();
   return {
     name: input.name,
     tags: input.tags ?? [],
@@ -572,6 +555,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         filters: params.filters,
         saved_id: params.savedId,
         response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'saved_query': {
@@ -584,6 +568,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         saved_id: params.savedId,
         data_view_id: params.dataViewId,
         response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'threshold': {
@@ -662,13 +647,9 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 
 export const internalRuleToAPIResponse = (
   rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
-  ruleExecutionSummary?: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRuleActions | null
 ): RuleResponse => {
-  const mergedExecutionSummary = mergeRuleExecutionSummary(
-    rule.executionStatus,
-    ruleExecutionSummary ?? null
-  );
+  const executionSummary = createRuleExecutionSummary(rule);
 
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
@@ -688,6 +669,7 @@ export const internalRuleToAPIResponse = (
     tags: rule.tags,
     interval: rule.schedule.interval,
     enabled: rule.enabled,
+    revision: rule.revision,
     // Security solution shared rule params
     ...commonParamsCamelToSnake(rule.params),
     // Type specific security solution rule params
@@ -696,6 +678,6 @@ export const internalRuleToAPIResponse = (
     throttle: transformFromAlertThrottle(rule, legacyRuleActions),
     actions: transformActions(rule.actions, legacyRuleActions),
     // Execution summary
-    execution_summary: mergedExecutionSummary ?? undefined,
+    execution_summary: executionSummary ?? undefined,
   };
 };

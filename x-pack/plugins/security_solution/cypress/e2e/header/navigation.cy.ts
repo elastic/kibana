@@ -77,12 +77,12 @@ import {
   THREAT_INTELLIGENCE_PAGE,
 } from '../../screens/kibana_navigation';
 
-before(() => {
-  login();
-});
-
 describe('top-level navigation common to all pages in the Security app', () => {
   before(() => {
+    login();
+  });
+
+  beforeEach(() => {
     visit(TIMELINES_URL);
   });
 
@@ -203,12 +203,11 @@ describe('top-level navigation common to all pages in the Security app', () => {
 });
 
 describe('Kibana navigation to all pages in the Security app ', () => {
-  before(() => {
-    visit(KIBANA_HOME);
-  });
   beforeEach(() => {
+    visit(KIBANA_HOME);
     openKibanaNavigation();
   });
+
   it('navigates to the Dashboards page', () => {
     navigateFromKibanaCollapsibleTo(DASHBOARDS_PAGE);
     cy.url().should('include', DASHBOARDS_URL);

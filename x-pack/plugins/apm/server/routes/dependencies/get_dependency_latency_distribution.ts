@@ -10,13 +10,18 @@ import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOverallLatencyDistribution } from '../latency_distribution/get_overall_latency_distribution';
 import { OverallLatencyDistributionResponse } from '../latency_distribution/types';
+
+export interface DependencyLatencyDistributionResponse {
+  allSpansDistribution: OverallLatencyDistributionResponse;
+  failedSpansDistribution: OverallLatencyDistributionResponse;
+}
 
 export async function getDependencyLatencyDistribution({
   apmEventClient,
@@ -36,10 +41,7 @@ export async function getDependencyLatencyDistribution({
   start: number;
   end: number;
   percentileThreshold: number;
-}): Promise<{
-  allSpansDistribution: OverallLatencyDistributionResponse;
-  failedSpansDistribution: OverallLatencyDistributionResponse;
-}> {
+}): Promise<DependencyLatencyDistributionResponse> {
   const commonParams = {
     chartType: LatencyDistributionChartType.dependencyLatency,
     apmEventClient,

@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -11,6 +9,10 @@
     "server/**/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/utility-types-jest",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

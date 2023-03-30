@@ -37,9 +37,9 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
     () =>
       stateParams.seriesParams.some(
         ({ type, data: { id: paramId } }) =>
-          type === ChartType.Histogram && aggs.aggs.find(({ id }) => id === paramId)?.enabled
+          type === ChartType.Histogram && aggs?.aggs.find(({ id }) => id === paramId)?.enabled
       ),
-    [stateParams.seriesParams, aggs.aggs]
+    [stateParams.seriesParams, aggs?.aggs]
   );
 
   const legendSize = stateParams.legendSize;
@@ -78,7 +78,7 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
           showAutoOption={hadAutoLegendSize}
         />
 
-        {vis.data.aggs!.aggs.some(
+        {vis.data?.aggs?.aggs.some(
           (agg) => agg.schema === 'segment' && agg.type.name === BUCKET_TYPES.DATE_HISTOGRAM
         ) ? (
           <SwitchOption

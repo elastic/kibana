@@ -22,6 +22,10 @@ The following {kib} spaces APIs are available:
 
 * <<spaces-api-disable-legacy-url-aliases, Disable legacy URL aliases API>> to disable legacy URL aliases if an error is encountered
 
+* <<spaces-api-update-objects-spaces, Update saved objects spaces API>> to update one or more saved objects to add and/or remove them from specified spaces
+
+* <<spaces-api-get-shareable-references, Get shareable references API>> to collect references and spaces context for saved objects
+
 include::spaces-management/post.asciidoc[]
 include::spaces-management/put.asciidoc[]
 include::spaces-management/get.asciidoc[]
@@ -30,3 +34,5 @@ include::spaces-management/delete.asciidoc[]
 include::spaces-management/copy_saved_objects.asciidoc[]
 include::spaces-management/resolve_copy_saved_objects_conflicts.asciidoc[]
 include::spaces-management/disable_legacy_url_aliases.asciidoc[]
+include::spaces-management/update_objects_spaces.asciidoc[]
+include::spaces-management/get_shareable_references.asciidoc[]

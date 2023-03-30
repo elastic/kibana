@@ -123,16 +123,16 @@ Object {
         "meta": Object {
           "alias": null,
           "disabled": false,
-          "key": "host.id",
+          "key": "user.name",
           "negate": false,
           "params": Object {
-            "query": "123",
+            "query": "elastic",
           },
           "type": "phrase",
         },
         "query": Object {
           "match_phrase": Object {
-            "host.id": "123",
+            "user.name": "elastic",
           },
         },
       },
@@ -160,6 +160,23 @@ Object {
           },
         },
       },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
     ],
     "query": Object {
       "language": "kql",
@@ -167,7 +184,7 @@ Object {
     },
     "visualization": Object {
       "axisTitlesVisibilitySettings": Object {
-        "x": true,
+        "x": false,
         "yLeft": false,
         "yRight": true,
       },

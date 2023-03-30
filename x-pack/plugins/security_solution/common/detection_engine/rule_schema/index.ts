@@ -14,6 +14,7 @@ export * from './model/common_attributes/timeline_template';
 
 export * from './model/specific_attributes/eql_attributes';
 export * from './model/specific_attributes/new_terms_attributes';
+export * from './model/specific_attributes/query_attributes';
 export * from './model/specific_attributes/threshold_attributes';
 
 export * from './model/rule_schemas';

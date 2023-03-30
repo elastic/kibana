@@ -32,13 +32,13 @@ jest.mock('./all_cases_selector_modal', () => {
   };
 });
 
+const onSuccess = jest.fn();
 const useCasesToastMock = useCasesToast as jest.Mock;
-
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
 const TestComponent: React.FC = () => {
-  const hook = useCasesAddToExistingCaseModal();
+  const hook = useCasesAddToExistingCaseModal({ onSuccess });
 
   const onClick = () => {
     hook.open({ attachments: [alertComment] });
@@ -81,12 +81,14 @@ describe('use cases add to existing case modal hook', () => {
   };
 
   const defaultParams = () => {
-    return { onRowClick: jest.fn() };
+    return { onSuccess };
   };
+
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     dispatch.mockReset();
     AllCasesSelectorModalMock.mockReset();
+    onSuccess.mockReset();
   });
 
   it('should throw if called outside of a cases context', () => {
@@ -166,7 +168,32 @@ describe('use cases add to existing case modal hook', () => {
     expect(mockedToastSuccess).toHaveBeenCalled();
   });
 
-  it('should not call createAttachments nor show toast success when  a case is not selected', async () => {
+  it('should call onSuccess when defined', async () => {
+    const mockBulkCreateAttachments = jest.fn();
+
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      createAttachments: mockBulkCreateAttachments,
+    });
+
+    const mockedToastSuccess = jest.fn();
+    useCasesToastMock.mockReturnValue({
+      showSuccessAttach: mockedToastSuccess,
+    });
+
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick({ id: 'test' } as Case);
+      return null;
+    });
+
+    const result = appMockRender.render(<TestComponent />);
+    userEvent.click(result.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalled();
+    });
+  });
+
+  it('should not call createAttachments nor show toast success when a case is not selected', async () => {
     const mockBulkCreateAttachments = jest.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
       createAttachments: mockBulkCreateAttachments,
@@ -178,11 +205,11 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick();
       return null;
     });
 
     const result = appMockRender.render(<TestComponent />);
+
     userEvent.click(result.getByTestId('open-modal'));
     // give a small delay for the reducer to run
 

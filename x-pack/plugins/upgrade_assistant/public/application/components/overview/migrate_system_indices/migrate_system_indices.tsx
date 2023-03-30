@@ -54,7 +54,7 @@ const i18nTexts = {
     return (
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.systemIndices.body"
-        defaultMessage="Prepare the system indices that store internal information for the upgrade. Any {hiddenIndicesLink} that need to be reindexed are shown in the next step."
+        defaultMessage="Prepare the system indices that store internal information for the upgrade. This is only required during major version upgrades. Any {hiddenIndicesLink} that need to be reindexed are shown in the next step."
         values={{
           hiddenIndicesLink: (
             <EuiLink external target="_blank" href={docLink}>
@@ -83,7 +83,7 @@ const i18nTexts = {
   noMigrationNeeded: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.noMigrationNeeded',
     {
-      defaultMessage: 'Migration complete',
+      defaultMessage: 'System indices migration not needed.',
     }
   ),
   viewSystemIndicesStatus: i18n.translate(
@@ -138,7 +138,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
       <EuiCallOut
         title={i18nTexts.loadingError}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="systemIndicesStatusErrorCallout"
       >
         <p>
@@ -181,7 +181,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
           <EuiCallOut
             size="s"
             color="danger"
-            iconType="alert"
+            iconType="warning"
             title={`${startMigrationStatus.error!.statusCode} - ${
               startMigrationStatus.error!.message
             }`}
@@ -196,7 +196,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
           <EuiCallOut
             size="s"
             color="danger"
-            iconType="alert"
+            iconType="warning"
             title={i18nTexts.migrationFailedTitle}
             data-test-subj="migrationFailedCallout"
           >
@@ -237,6 +237,7 @@ interface CustomProps {
 
 export const getMigrateSystemIndicesStep = ({
   isComplete,
+
   setIsComplete,
   docLinks,
 }: OverviewStepProps & CustomProps): EuiStepProps => {

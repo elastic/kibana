@@ -19,7 +19,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
   const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, colors, font } = euiTheme;
+    const { size, colors, font, border } = euiTheme;
 
     const getHighlightColors = () => {
       let bgColor = 'none';
@@ -69,12 +69,27 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       textTransform: 'capitalize',
     };
 
+    const processAlertDisplayContainer: CSSObject = {
+      display: 'flex',
+      alignItems: 'center',
+    };
+
     const alertName: CSSObject = {
       color: colors.title,
+      '& .alertCategoryDetailText': {
+        fontSize: size.m,
+      },
     };
 
     const actionBadge: CSSObject = {
       textTransform: 'capitalize',
+    };
+
+    const processPanel: CSSObject = {
+      marginLeft: '8px',
+      border: `${border.width.thin} solid ${colors.lightShade}`,
+      fontFamily: font.familyCode,
+      padding: `${size.xs} ${size.s}`,
     };
 
     return {
@@ -82,6 +97,8 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       alertStatus,
       alertName,
       actionBadge,
+      processPanel,
+      processAlertDisplayContainer,
     };
   }, [euiTheme, isInvestigated, isSelected, euiVars]);
 

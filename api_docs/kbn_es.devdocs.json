@@ -10,25 +10,32 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/es",
-        "id": "def-server.run",
+        "id": "def-common.run",
         "type": "Function",
         "tags": [],
         "label": "run",
         "description": [],
         "signature": [
-          "(defaults?: {}) => Promise<void>"
+          "(defaults: {}) => Promise<void>"
         ],
-        "path": "packages/kbn-es/src/cli.js",
+        "path": "packages/kbn-es/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/es",
-            "id": "def-server.run.$1",
+            "id": "def-common.run.$1",
             "type": "Object",
             "tags": [],
             "label": "defaults",
@@ -36,11 +43,13 @@
             "signature": [
               "{}"
             ],
-            "path": "packages/kbn-es/src/cli.js",
+            "path": "packages/kbn-es/src/cli.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -49,7 +58,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/es",
-        "id": "def-server.SYSTEM_INDICES_SUPERUSER",
+        "id": "def-common.SYSTEM_INDICES_SUPERUSER",
         "type": "string",
         "tags": [],
         "label": "SYSTEM_INDICES_SUPERUSER",
@@ -63,7 +72,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/es",
-        "id": "def-server.Cluster",
+        "id": "def-common.Cluster",
         "type": "Object",
         "tags": [],
         "label": "Cluster",
@@ -72,9 +81,9 @@
           "typeof ",
           {
             "pluginId": "@kbn/es",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnEsPluginApi",
-            "section": "def-server.Cluster",
+            "section": "def-common.Cluster",
             "text": "Cluster"
           }
         ],
@@ -84,13 +93,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

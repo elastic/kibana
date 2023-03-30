@@ -6,10 +6,11 @@
  */
 
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
-import { EuiBadge, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
   SecurityPageName,
@@ -43,20 +44,31 @@ import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
+import { MlRuleWarningPopover } from './ml_rule_warning_popover';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 interface ColumnsProps {
   hasCRUDPermissions: boolean;
+  isLoadingJobs: boolean;
+  mlJobs: SecurityJob[];
+  startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
 }
 
-const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => {
+interface ActionColumnsProps {
+  showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+}
+
+const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
 
   const loadingIds = useMemo(
-    () => (['disable', 'enable', 'edit'].includes(loadingRulesAction ?? '') ? loadingRuleIds : []),
+    () =>
+      ['disable', 'enable', 'edit', 'delete'].includes(loadingRulesAction ?? '')
+        ? loadingRuleIds
+        : [],
     [loadingRuleIds, loadingRulesAction]
   );
 
@@ -77,6 +89,7 @@ const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => 
           <RuleSwitch
             id={rule.id}
             enabled={rule.enabled}
+            startMlJobsIfNeeded={() => startMlJobs(rule.machine_learning_job_id)}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
               !hasCRUDPermissions ||
@@ -89,7 +102,7 @@ const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => 
       width: '95px',
       sortable: true,
     }),
-    [hasActionsPrivileges, hasMlPermissions, hasCRUDPermissions, loadingIds]
+    [hasMlPermissions, hasActionsPrivileges, hasCRUDPermissions, loadingIds, startMlJobs]
   );
 };
 
@@ -118,6 +131,44 @@ const useRuleNameColumn = (): TableColumn => {
       width: '38%',
     }),
     []
+  );
+};
+
+const useRuleExecutionStatusColumn = ({
+  sortable,
+  width,
+  isLoadingJobs,
+  mlJobs,
+}: {
+  sortable: boolean;
+  width: string;
+  isLoadingJobs: boolean;
+  mlJobs: SecurityJob[];
+}): TableColumn => {
+  return useMemo(
+    () => ({
+      field: 'execution_summary.last_execution.status',
+      name: i18n.COLUMN_LAST_RESPONSE,
+      render: (value: RuleExecutionSummary['last_execution']['status'] | undefined, item: Rule) => {
+        return (
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <RuleStatusBadge
+                status={value}
+                message={item.execution_summary?.last_execution.message}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MlRuleWarningPopover rule={item} loadingJobs={isLoadingJobs} jobs={mlJobs} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
+      sortable,
+      truncateText: true,
+      width,
+    }),
+    [isLoadingJobs, mlJobs, sortable, width]
   );
 };
 
@@ -165,18 +216,38 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
-const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
-  const actions = useRulesTableActions();
+const useActionsColumn = ({
+  showExceptionsDuplicateConfirmation,
+}: ActionColumnsProps): EuiTableActionsColumnType<Rule> => {
+  const actions = useRulesTableActions({ showExceptionsDuplicateConfirmation });
 
   return useMemo(() => ({ actions, width: '40px' }), [actions]);
 };
 
-export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
-  const actionsColumn = useActionsColumn();
-  const enabledColumn = useEnabledColumn({ hasCRUDPermissions });
+export interface UseColumnsProps extends ColumnsProps, ActionColumnsProps {}
+
+export const useRulesColumns = ({
+  hasCRUDPermissions,
+  isLoadingJobs,
+  mlJobs,
+  startMlJobs,
+  showExceptionsDuplicateConfirmation,
+}: UseColumnsProps): TableColumn[] => {
+  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
   const ruleNameColumn = useRuleNameColumn();
-  const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const enabledColumn = useEnabledColumn({
+    hasCRUDPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+  });
+  const executionStatusColumn = useRuleExecutionStatusColumn({
+    sortable: true,
+    width: '16%',
+    isLoadingJobs,
+    mlJobs,
+  });
 
   return useMemo(
     () => [
@@ -207,31 +278,26 @@ export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColu
         field: 'execution_summary.last_execution.date',
         name: i18n.COLUMN_LAST_COMPLETE_RUN,
         render: (value: RuleExecutionSummary['last_execution']['date'] | undefined) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <FormattedRelativePreferenceDate
-              tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
-              relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
-              value={value}
-              tooltipAnchorClassName="eui-textTruncate"
-            />
+          return (
+            <EuiFlexGroup data-test-subj="ruleLastRun">
+              {value == null ? (
+                getEmptyTagValue()
+              ) : (
+                <FormattedRelativePreferenceDate
+                  tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+                  relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+                  value={value}
+                  tooltipAnchorClassName="eui-textTruncate"
+                />
+              )}
+            </EuiFlexGroup>
           );
         },
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '16%',
       },
-      {
-        field: 'execution_summary.last_execution.status',
-        name: i18n.COLUMN_LAST_RESPONSE,
-        render: (value: RuleExecutionSummary['last_execution']['status'] | undefined) => (
-          <RuleStatusBadge status={value} />
-        ),
-        sortable: !!isInMemorySorting,
-        truncateText: true,
-        width: '16%',
-      },
+      executionStatusColumn,
       {
         field: 'updated_at',
         name: i18n.COLUMN_LAST_UPDATE,
@@ -251,43 +317,43 @@ export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColu
         width: '18%',
         truncateText: true,
       },
-      {
-        field: 'version',
-        name: i18n.COLUMN_VERSION,
-        render: (value: Rule['version']) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <EuiText data-test-subj="version" size="s">
-              {value}
-            </EuiText>
-          );
-        },
-        sortable: !!isInMemorySorting,
-        truncateText: true,
-        width: '65px',
-      },
       enabledColumn,
       ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
     [
       actionsColumn,
       enabledColumn,
+      executionStatusColumn,
       hasCRUDPermissions,
-      isInMemorySorting,
       ruleNameColumn,
       showRelatedIntegrations,
     ]
   );
 };
 
-export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
+export const useMonitoringColumns = ({
+  hasCRUDPermissions,
+  isLoadingJobs,
+  mlJobs,
+  startMlJobs,
+  showExceptionsDuplicateConfirmation,
+}: UseColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
-  const actionsColumn = useActionsColumn();
-  const enabledColumn = useEnabledColumn({ hasCRUDPermissions });
+  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
   const ruleNameColumn = useRuleNameColumn();
-  const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const enabledColumn = useEnabledColumn({
+    hasCRUDPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+  });
+  const executionStatusColumn = useRuleExecutionStatusColumn({
+    sortable: true,
+    width: '12%',
+    isLoadingJobs,
+    mlJobs,
+  });
 
   return useMemo(
     () => [
@@ -310,7 +376,7 @@ export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): Tabl
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '16%',
       },
@@ -327,7 +393,7 @@ export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): Tabl
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '14%',
       },
@@ -367,36 +433,31 @@ export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): Tabl
             {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '14%',
       },
-      {
-        field: 'execution_summary.last_execution.status',
-        name: i18n.COLUMN_LAST_RESPONSE,
-        render: (value: RuleExecutionSummary['last_execution']['status'] | undefined) => (
-          <RuleStatusBadge status={value} />
-        ),
-        sortable: !!isInMemorySorting,
-        truncateText: true,
-        width: '12%',
-      },
+      executionStatusColumn,
       {
         field: 'execution_summary.last_execution.date',
         name: i18n.COLUMN_LAST_COMPLETE_RUN,
         render: (value: RuleExecutionSummary['last_execution']['date'] | undefined) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <FormattedRelativePreferenceDate
-              tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
-              relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
-              value={value}
-              tooltipAnchorClassName="eui-textTruncate"
-            />
+          return (
+            <EuiFlexGroup data-test-subj="ruleLastRun">
+              {value == null ? (
+                getEmptyTagValue()
+              ) : (
+                <FormattedRelativePreferenceDate
+                  tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+                  relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+                  value={value}
+                  tooltipAnchorClassName="eui-textTruncate"
+                />
+              )}
+            </EuiFlexGroup>
           );
         },
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '16%',
       },
@@ -407,8 +468,8 @@ export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): Tabl
       actionsColumn,
       docLinks.links.siem.troubleshootGaps,
       enabledColumn,
+      executionStatusColumn,
       hasCRUDPermissions,
-      isInMemorySorting,
       ruleNameColumn,
       showRelatedIntegrations,
     ]

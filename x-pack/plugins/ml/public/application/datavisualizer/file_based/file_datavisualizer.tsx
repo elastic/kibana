@@ -13,7 +13,7 @@ import type {
   GetAdditionalLinksParams,
   GetAdditionalLinks,
 } from '@kbn/data-visualizer-plugin/public';
-import { useTimefilter } from '../../contexts/kibana';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
-  METRIC_JAVA_GC_COUNT,
-  METRIC_JAVA_GC_TIME,
-} from '../../../../../../common/elasticsearch_fieldnames';
+import { APMConfig } from '../../../../..';
 import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
-import { Setup } from '../../../../../lib/helpers/setup_request';
 import { ChartBase } from '../../../types';
 
-import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
+import {
+  fetchAndTransformGcMetrics,
+  TIME,
+  RATE,
+} from './fetch_and_transform_gc_metrics';
 
 describe('fetchAndTransformGcMetrics', () => {
   describe('given "jvm.gc.time"', () => {
@@ -50,21 +50,18 @@ describe('fetchAndTransformGcMetrics', () => {
           },
         },
       };
-      const setup = {
-        config: { 'xpack.gc.metricsInterval': 0 },
-      } as unknown as Setup;
+      const config = { 'xpack.gc.metricsInterval': 0 } as unknown as APMConfig;
       const apmEventClient = {
         search: () => Promise.resolve(response),
       } as unknown as APMEventClient;
-      const fieldName = METRIC_JAVA_GC_TIME;
 
       const { series } = await fetchAndTransformGcMetrics({
         chartBase,
         environment: 'test environment',
-        fieldName,
+        rateOrTime: TIME,
         kuery: '',
         operationName: 'test operation name',
-        config: setup.config,
+        config,
         apmEventClient,
         serviceName: 'test service name',
         start: 1633456140000,
@@ -113,21 +110,18 @@ describe('fetchAndTransformGcMetrics', () => {
           },
         },
       };
-      const setup = {
-        config: { 'xpack.gc.metricsInterval': 0 },
-      } as unknown as Setup;
+      const config = { 'xpack.gc.metricsInterval': 0 } as unknown as APMConfig;
       const apmEventClient = {
         search: () => Promise.resolve(response),
       } as unknown as APMEventClient;
-      const fieldName = METRIC_JAVA_GC_COUNT;
 
       const { series } = await fetchAndTransformGcMetrics({
         chartBase,
         environment: 'test environment',
-        fieldName,
+        rateOrTime: RATE,
         kuery: '',
         operationName: 'test operation name',
-        config: setup.config,
+        config,
         apmEventClient,
         serviceName: 'test service name',
         start: 1633456140000,

@@ -14,7 +14,7 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { type PluginName, PluginType } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { Logger } from '@kbn/logging';
@@ -551,7 +551,7 @@ test('`startPlugins` only starts plugins that were setup', async () => {
 
 describe('setup', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterAll(() => {
     jest.useRealTimers();
@@ -588,7 +588,7 @@ describe('setup', () => {
 
 describe('start', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterAll(() => {
     jest.useRealTimers();
@@ -747,7 +747,7 @@ describe('asynchronous plugins', () => {
 
 describe('stop', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

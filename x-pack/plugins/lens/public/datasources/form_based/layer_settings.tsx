@@ -42,7 +42,7 @@ export function LayerSettingsPanel({
           <p>
             <FormattedMessage
               id="xpack.lens.xyChart.randomSampling.help"
-              defaultMessage="Lower sampling percentages increase speed at the cost of accuracy. It is recommended that lower sampling percentages only be used for large datasets. {link}"
+              defaultMessage="Lower sampling percentages increase speed, but decrease accuracy. As a best practice, use lower sampling only for large datasets. {link}"
               values={{
                 link: (
                   <EuiLink

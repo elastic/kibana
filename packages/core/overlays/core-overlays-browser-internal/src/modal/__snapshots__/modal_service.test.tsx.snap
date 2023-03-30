@@ -94,12 +94,12 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
-    class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+    class="euiModal euiModal--confirmation emotion-euiModal-defaultMaxWidth-confirmation"
     tabindex="0"
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -110,62 +110,58 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
       />
     </button>
     <div
-      class="euiModal__flex"
+      class="euiModalBody emotion-euiModalBody"
     >
       <div
-        class="euiModalBody"
+        class="euiModalBody__overflow emotion-euiModalBody__overflow"
       >
         <div
-          class="euiModalBody__overflow"
+          class="euiText emotion-euiText-m"
+          data-test-subj="confirmModalBodyText"
         >
           <div
-            class="euiText emotion-euiText-m"
-            data-test-subj="confirmModalBodyText"
+            class="kbnOverlayMountWrapper"
           >
-            <div
-              class="kbnOverlayMountWrapper"
-            >
-              <span>
-                Modal content
-              </span>
-            </div>
+            <span>
+              Modal content
+            </span>
           </div>
         </div>
       </div>
-      <div
-        class="euiModalFooter"
+    </div>
+    <div
+      class="euiModalFooter emotion-euiModalFooter"
+    >
+      <button
+        class="euiButtonEmpty css-9t7nyf-empty-primary"
+        data-test-subj="confirmModalCancelButton"
+        type="button"
       >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--primary"
-          data-test-subj="confirmModalCancelButton"
-          type="button"
+        <span
+          class="euiButtonContent euiButtonEmpty__content"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiButtonEmpty__text"
           >
-            <span
-              class="euiButtonEmpty__text"
-            >
-              Cancel
-            </span>
+            Cancel
           </span>
-        </button>
-        <button
-          class="euiButton euiButton--primary euiButton--fill"
-          data-test-subj="confirmModalConfirmButton"
-          type="button"
+        </span>
+      </button>
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        data-test-subj="confirmModalConfirmButton"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButtonContent euiButton__content"
+            class="eui-textTruncate"
           >
-            <span
-              class="euiButton__text"
-            >
-              Confirm
-            </span>
+            Confirm
           </span>
-        </button>
-      </div>
+        </span>
+      </button>
     </div>
   </div>
 </div>
@@ -302,12 +298,12 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
-    class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+    class="euiModal euiModal--confirmation emotion-euiModal-defaultMaxWidth-confirmation"
     tabindex="0"
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -318,58 +314,54 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
       />
     </button>
     <div
-      class="euiModal__flex"
+      class="euiModalBody emotion-euiModalBody"
     >
       <div
-        class="euiModalBody"
+        class="euiModalBody__overflow emotion-euiModalBody__overflow"
       >
         <div
-          class="euiModalBody__overflow"
+          class="euiText emotion-euiText-m"
+          data-test-subj="confirmModalBodyText"
         >
-          <div
-            class="euiText emotion-euiText-m"
-            data-test-subj="confirmModalBodyText"
-          >
-            <p>
-              Some message
-            </p>
-          </div>
+          <p>
+            Some message
+          </p>
         </div>
       </div>
-      <div
-        class="euiModalFooter"
+    </div>
+    <div
+      class="euiModalFooter emotion-euiModalFooter"
+    >
+      <button
+        class="euiButtonEmpty css-9t7nyf-empty-primary"
+        data-test-subj="confirmModalCancelButton"
+        type="button"
       >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--primary"
-          data-test-subj="confirmModalCancelButton"
-          type="button"
+        <span
+          class="euiButtonContent euiButtonEmpty__content"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
+            class="euiButtonEmpty__text"
           >
-            <span
-              class="euiButtonEmpty__text"
-            >
-              Cancel
-            </span>
+            Cancel
           </span>
-        </button>
-        <button
-          class="euiButton euiButton--primary euiButton--fill"
-          data-test-subj="confirmModalConfirmButton"
-          type="button"
+        </span>
+      </button>
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        data-test-subj="confirmModalConfirmButton"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButtonContent euiButton__content"
+            class="eui-textTruncate"
           >
-            <span
-              class="euiButton__text"
-            >
-              Confirm
-            </span>
+            Confirm
           </span>
-        </button>
-      </div>
+        </span>
+      </button>
     </div>
   </div>
 </div>
@@ -1073,12 +1065,12 @@ exports[`ModalService openModal() renders a modal to the DOM 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
-    class="euiModal euiModal--maxWidth-default"
+    class="euiModal emotion-euiModal-defaultMaxWidth"
     tabindex="0"
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -1089,15 +1081,11 @@ exports[`ModalService openModal() renders a modal to the DOM 2`] = `
       />
     </button>
     <div
-      class="euiModal__flex"
+      class="kbnOverlayMountWrapper"
     >
-      <div
-        class="kbnOverlayMountWrapper"
-      >
-        <span>
-          Modal content
-        </span>
-      </div>
+      <span>
+        Modal content
+      </span>
     </div>
   </div>
 </div>

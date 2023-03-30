@@ -57,7 +57,6 @@ const SavedObjectsEditionPage = ({
         id={id}
         savedObjectType={type}
         http={coreStart.http}
-        savedObjectsClient={coreStart.savedObjects.client}
         overlays={coreStart.overlays}
         notifications={coreStart.notifications}
         capabilities={capabilities}

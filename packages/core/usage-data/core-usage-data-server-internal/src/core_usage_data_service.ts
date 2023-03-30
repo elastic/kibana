@@ -325,6 +325,7 @@ export class CoreUsageDataService
               http.securityResponseHeaders.permissionsPolicy ?? undefined
             ),
             disableEmbedding: http.securityResponseHeaders.disableEmbedding,
+            crossOriginOpenerPolicy: http.securityResponseHeaders.crossOriginOpenerPolicy ?? 'NULL',
           },
         },
 

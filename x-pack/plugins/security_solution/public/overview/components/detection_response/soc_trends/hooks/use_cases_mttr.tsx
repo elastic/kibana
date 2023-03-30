@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useReducer } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { statReducer } from './stat_reducer';
 import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -37,7 +37,7 @@ export const useCasesMttr = ({
   const {
     services: { cases },
   } = useKibana();
-  const uniqueQueryId = useMemo(() => `useCasesMttr-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `useCasesMttr-${uuidv4()}`, []);
   const [state, dispatch] = useReducer(statReducer, {
     description: i18n.CASES_MTTR_DESCRIPTION,
     isLoading: true,

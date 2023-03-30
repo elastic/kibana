@@ -20,7 +20,8 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
   AGENT_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+  SERVICE_ENVIRONMENT,
+} from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { SpanLinkDetails } from '../../../common/span_links';
 import { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
@@ -64,6 +65,7 @@ async function fetchSpanLinksDetails({
       SPAN_SUBTYPE,
       SPAN_TYPE,
       AGENT_NAME,
+      SERVICE_ENVIRONMENT,
     ],
     body: {
       track_total_hits: false,

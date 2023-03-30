@@ -16,10 +16,11 @@ export type HttpServiceFactory = KibanaPluginServiceFactory<
 >;
 export const httpServiceFactory: HttpServiceFactory = ({ coreStart }) => {
   const {
-    http: { fetch },
+    http: { get, fetch },
   } = coreStart;
 
   return {
+    get,
     fetch,
   };
 };

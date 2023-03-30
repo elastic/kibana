@@ -11,13 +11,8 @@ import {
   termQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  TIER,
-  SERVICE_NAME,
-  INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+import { TIER, SERVICE_NAME, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../../lib/helpers/setup_request';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   IndexLifecyclePhaseSelectOption,
@@ -31,10 +26,14 @@ import {
 } from './indices_stats_helpers';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
+export type SizeTimeseriesResponse = Array<{
+  serviceName: string;
+  timeseries: Array<{ x: number; y: number }>;
+}>;
+
 export async function getSizeTimeseries({
   environment,
   kuery,
-  setup,
   apmEventClient,
   searchAggregatedTransactions,
   start,
@@ -45,7 +44,6 @@ export async function getSizeTimeseries({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
@@ -53,7 +51,7 @@ export async function getSizeTimeseries({
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
   context: ApmPluginRequestHandlerContext;
-}) {
+}): Promise<SizeTimeseriesResponse> {
   const { intervalString } = getBucketSizeForAggregatedTransactions({
     start,
     end,
@@ -61,7 +59,7 @@ export async function getSizeTimeseries({
   });
 
   const [{ indices: allIndicesStats }, res] = await Promise.all([
-    getTotalIndicesStats({ setup, context }),
+    getTotalIndicesStats({ apmEventClient, context }),
     apmEventClient.search('get_storage_timeseries', {
       apm: {
         events: [

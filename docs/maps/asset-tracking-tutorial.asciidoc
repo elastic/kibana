@@ -8,7 +8,7 @@ In this tutorial, you’ll look at live urban transit data from the city of Port
 
 You’ll learn to:
 
-- Use {filebeat} to ingest the TriMet REST API into Elasticsearch.
+- Use {agent} to ingest the TriMet REST API into {es}.
 - Create a map with layers that visualize asset tracks and last-known locations.
 - Use symbols and colors to style data values and show which direction an asset is heading.
 - Set up tracking containment alerts to monitor moving vehicles.
@@ -23,11 +23,11 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial]. Download the deployment credentials.
 - Obtain an API key for https://developer.trimet.org/[TriMet web services] at https://developer.trimet.org/appid/registration/.
-- https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation-configuration.html[Install Filebeat].
+- {fleet-guide}/fleet-overview.html[Fleet] is enabled on your cluster, and one or more {fleet-guide}/elastic-agent-installation.html[{agent}s] is enrolled.
 
 [float]
 === Part 1: Ingest the Portland bus data
-To get to the fun of visualizing and alerting on Portland buses, you must first create a {filebeat} input to ingest the TriMet Portland bus data into {es}.
+To get to the fun of visualizing and alerting on Portland buses, you must first add the *Custom API* integration to an Elastic Agent policy to get the TriMet Portland bus data into {es}.
 
 [float]
 ==== Step 1: Set up an Elasticsearch index
@@ -270,47 +270,39 @@ PUT _ingest/pipeline/tri_met_tracks
 ----------------------------------
 
 [float]
-==== Step 2: Start {filebeat}
+==== Step 2: Configure {agent}
 
-. Replace the contents in your `filebeat.yml` file with the following:
+. From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
+
+. Click the name of the agent policy where you want to add the *Custom API* integration. The configuration changes you make only apply to the policy you select.
+
+. Click the name of the *Custom API* integration, or add the integration if the agent policy does not yet have it.
+
+. From the *Edit Custom API integration* page, expand the *Change defaults* section.
+
+. Set the *Dataset name* to *httpjson.trimet*.
+
+. Set the *Ingest Pipeline* to *tri_met_pipeline*.
+
+. Set the *Request URL* to *https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>*.
+
+. Set *Response Split* to *target: body.resultSet.vehicle*.
+
+. At the bottom of the configuration, expand *Advanced options*.
+
+. Set *Processors* to:
 +
 [source,yaml]
 ----------------------------------
-filebeat.inputs:
-# Fetch trimet bus data every minute.
-- type: httpjson
-  interval: 1m
-  request.url: "https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>"
-  response.split:
-    target: body.resultSet.vehicle
-  processors:
-    - decode_json_fields:
-        fields: ["message"]
-        target: "trimet"
-
-  pipeline: "tri_met_tracks"
-
-
-# ---------------------------- Elastic Cloud Output ----------------------------
-cloud.id: <cloud_id>
-cloud.auth: <username:password>
-
+- decode_json_fields:
+    fields: ["message"]
+    target: "trimet"
 ----------------------------------
 
-. Replace `<tri_met_app_id>` with your TriMet application id.
-. Replace `<username:password>` with your Elastic Cloud deployment credentials.
-. Replace `<cloud_id>` with your {ece}/ece-cloud-id.html[elastic cloud id].
-. Open a terminal window, and then navigate to the {filebeat} folder.
-. In your `filebeat` folder, run {filebeat} with the edited config:
-+
-[source,bash]
-----------------------------------
-/bin/filebeat -c filebeat.yml
-----------------------------------
+. Leave everything else as defaults.
 
-. Wait for {filebeat} to start shipping data to Elastic Cloud. {filebeat} should not produce any output to stdout. 
+. Click *Save integration* to deploy the configuration to any {agent} with the policy assigned.
 
-. Leave the terminal window open and {filebeat} running throughout this tutorial.
 
 [float]
 ==== Step 3: Create a data view for the tri_met_tracks {es} index
@@ -450,7 +442,7 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
 Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will log a message to the Kibana log.
 
-. Open *Stack Management*, and then click *Rules and Connectors*.
+. Open *{stack-manage-app}*, and then click *{rules-ui}*.
 . Click *Create rule*.
 . Name the rule *Bus Alerts*.
 . Set *Check every* to *5 seconds*.
@@ -489,9 +481,6 @@ image::maps/images/asset-tracking-tutorial/tracking_containment_configuration.pn
 
 . Click *Save*.
 
-The *Bus Alert connector* is added to the *Rules and Connectors* page. For more information on common connectors, refer to the <<slack-action-type, Slack>> and <<email-action-type, Email>> connectors.
-
-[role="screenshot"]
-image::maps/images/asset-tracking-tutorial/rules_and_connectors.png[]
+The *Bus Alert connector* is added to the *{connectors-ui}* page. For more information on common connectors, refer to the <<slack-action-type, Slack>> and <<email-action-type,Email>> connectors.
 
 Congratulations! You have completed the tutorial and have the recipe for tracking assets. You can now try replicating this same analysis with your own data.

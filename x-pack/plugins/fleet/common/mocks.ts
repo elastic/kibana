@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DeletePackagePoliciesResponse, NewPackagePolicy, PackagePolicy } from './types';
+import type { PostDeletePackagePoliciesResponse, NewPackagePolicy, PackagePolicy } from './types';
 import type { FleetAuthz } from './authz';
 import { ENDPOINT_PRIVILEGES } from './constants';
 
@@ -47,7 +47,7 @@ export const createPackagePolicyMock = (): PackagePolicy => {
   };
 };
 
-export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
+export const deletePackagePolicyMock = (): PostDeletePackagePoliciesResponse => {
   const newPackagePolicy = createNewPackagePolicyMock();
   return [
     {
@@ -62,7 +62,7 @@ export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
  * Creates mock `authz` object
  */
 export const createFleetAuthzMock = (): FleetAuthz => {
-  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege) => {
+  const endpointActions = Object.keys(ENDPOINT_PRIVILEGES).reduce((acc, privilege) => {
     return {
       ...acc,
       [privilege]: {

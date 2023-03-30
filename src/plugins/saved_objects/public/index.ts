@@ -11,6 +11,7 @@ import { SavedObjectsPublicPlugin } from './plugin';
 export type { OnSaveProps, OriginSaveModalProps, SaveModalState, SaveResult } from './save_modal';
 export { SavedObjectSaveModal, SavedObjectSaveModalOrigin, showSaveModal } from './save_modal';
 export type { SavedObjectFinderUiProps, SavedObjectMetaData } from './finder';
+export type { FinderAttributes } from '../common/types';
 export { getSavedObjectFinder, SavedObjectFinderUi } from './finder';
 export type {
   SavedObjectDecorator,

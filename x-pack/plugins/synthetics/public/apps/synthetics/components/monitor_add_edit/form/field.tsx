@@ -11,9 +11,9 @@ import { EuiFormRow } from '@elastic/eui';
 import { selectServiceLocationsState } from '../../../state';
 import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { ControlledField } from './controlled_field';
-import { FieldMeta } from '../types';
+import { FormConfig, FieldMeta } from '../types';
 
-type Props = FieldMeta & { fieldError?: FieldError };
+type Props = FieldMeta<any> & { fieldError?: FieldError };
 
 export const Field = memo<Props>(
   ({
@@ -34,7 +34,7 @@ export const Field = memo<Props>(
     customHook,
   }: Props) => {
     const { register, watch, control, setValue, reset, getFieldState, formState } =
-      useFormContext();
+      useFormContext<FormConfig>();
     const { locations } = useSelector(selectServiceLocationsState);
     const { space } = useKibanaSpace();
     const isEdit = useIsEditFlow();
@@ -76,7 +76,7 @@ export const Field = memo<Props>(
     };
 
     return controlled ? (
-      <Controller
+      <Controller<FormConfig, keyof FormConfig>
         control={control}
         name={fieldKey}
         rules={{
@@ -118,7 +118,7 @@ export const Field = memo<Props>(
                 formState,
                 setValue,
                 reset,
-                locations,
+                locations: locations.map((location) => ({ ...location, key: location.id })),
                 dependencies: dependenciesValues,
                 dependenciesFieldMeta,
                 space: space?.id,

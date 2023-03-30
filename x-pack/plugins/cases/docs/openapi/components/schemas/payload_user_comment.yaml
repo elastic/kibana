@@ -10,4 +10,4 @@ properties:
       type:
         type: string
         enum:
-          - user      
+          - user

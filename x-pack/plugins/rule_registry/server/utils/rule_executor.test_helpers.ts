@@ -19,6 +19,9 @@ import {
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Logger } from '@kbn/logging';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -47,15 +50,13 @@ export const createDefaultAlertExecutorOptions = <
   updatedAt?: Date;
   shouldWriteAlerts?: boolean;
 }): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
-  alertId,
-  createdBy: 'CREATED_BY',
   startedAt,
-  name: ruleName,
   rule: {
+    id: alertId,
     updatedBy: null,
-    tags: [],
+    tags: ['rule-tag1', 'rule-tag2'],
     name: ruleName,
-    createdBy: null,
+    createdBy: 'CREATED_BY',
     actions: [],
     enabled: true,
     consumer: 'CONSUMER',
@@ -65,10 +66,12 @@ export const createDefaultAlertExecutorOptions = <
     createdAt,
     updatedAt,
     notifyWhen: null,
+    revision: 0,
     ruleTypeId: 'RULE_TYPE_ID',
     ruleTypeName: 'RULE_TYPE_NAME',
+    muteAll: false,
+    snoozeSchedule: [],
   },
-  tags: [],
   params,
   spaceId: 'SPACE_ID',
   services: {
@@ -80,11 +83,13 @@ export const createDefaultAlertExecutorOptions = <
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
     searchSourceClient: searchSourceCommonMock,
+    share: {} as SharePluginStart,
+    dataViews: dataViewPluginMocks.createStartContract(),
   },
   state,
-  updatedBy: null,
   previousStartedAt: null,
   namespace: undefined,
   executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
   logger,
+  flappingSettings: DEFAULT_FLAPPING_SETTINGS,
 });

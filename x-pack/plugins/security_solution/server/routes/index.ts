@@ -55,7 +55,6 @@ import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
 } from '../lib/detection_engine/rule_types/types';
-import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
@@ -70,8 +69,8 @@ import {
   getRiskScoreIndexStatusRoute,
   installRiskScoresRoute,
   readPrebuiltDevToolContentRoute,
-  restartTransformRoute,
 } from '../lib/risk_score/routes';
+import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -93,6 +92,7 @@ export const initRoutes = (
   registerLegacyRuleActionsRoutes(router, logger);
   registerPrebuiltRulesRoutes(router, config, security);
   registerRuleExceptionsRoutes(router);
+  registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
   registerRuleMonitoringRoutes(router);
   registerRulePreviewRoutes(
@@ -147,10 +147,6 @@ export const initRoutes = (
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
 
-  // Sourcerer API to generate default pattern
-  createSourcererDataViewRoute(router, getStartServices);
-  getSourcererDataViewRoute(router, getStartServices);
-
   // risky score module
   createEsIndexRoute(router, logger);
   deleteEsIndicesRoute(router);
@@ -161,7 +157,6 @@ export const initRoutes = (
   deletePrebuiltSavedObjectsRoute(router, security);
   getRiskScoreIndexStatusRoute(router);
   installRiskScoresRoute(router, logger, security);
-  restartTransformRoute(router, logger);
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.

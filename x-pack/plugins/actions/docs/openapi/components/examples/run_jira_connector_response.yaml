@@ -1,0 +1,17 @@
+summary: Response from retrieving the list of issue types for a Jira connector.
+value:
+  connector_id: b3aad810-edbe-11ec-82d1-11348ecbf4a6
+  data:
+    - id: 10024
+      name: Improvement
+    - id: 10006
+      name: Task
+    - id: 10007
+      name: Sub-task
+    - id: 10025
+      name: New Feature
+    - id: 10023
+      name: Bug
+    - id: 10000
+      name: Epic
+  status: ok   

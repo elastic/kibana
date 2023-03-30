@@ -6,9 +6,19 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import { SecurityPageName } from '../../../../common/constants';
+import type { Request } from './types';
 
-export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
-  hostName
+export const VISUALIZATION_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
+
+const pageFilterFieldMap: Record<string, string> = {
+  [SecurityPageName.hosts]: 'host',
+  [SecurityPageName.users]: 'user',
+};
+
+export const getDetailsPageFilter = (pageName: string, detailName?: string): Filter[] => {
+  const field = pageFilterFieldMap[pageName];
+  return field && detailName
     ? [
         {
           meta: {
@@ -16,19 +26,20 @@ export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: 'host.name',
+            key: `${field}.name`,
             params: {
-              query: hostName,
+              query: detailName,
             },
           },
           query: {
             match_phrase: {
-              'host.name': hostName,
+              [`${field}.name`]: detailName,
             },
           },
         },
       ]
     : [];
+};
 
 export const hostNameExistsFilter: Filter[] = [
   {
@@ -145,3 +156,34 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
         },
       ]
     : [];
+
+export const getRequestsAndResponses = (requests: Request[] | null | undefined) => {
+  return (requests ?? []).reduce(
+    (acc: { requests: string[]; responses: string[] }, req: Request) => {
+      return {
+        requests: [
+          ...acc.requests,
+          JSON.stringify(
+            { body: req?.json, index: (req?.stats?.indexFilter?.value ?? '').split(',') },
+            null,
+            2
+          ),
+        ],
+        responses: [
+          ...acc.responses,
+          JSON.stringify(req?.response?.json?.rawResponse ?? {}, null, 2),
+        ],
+      };
+    },
+    { requests: [], responses: [] }
+  );
+};
+
+export const parseVisualizationData = <T>(data: string[]): T[] =>
+  data.reduce((acc, curr) => {
+    try {
+      return [...acc, JSON.parse(curr)];
+    } catch (e) {
+      return acc;
+    }
+  }, [] as T[]);

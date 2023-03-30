@@ -31,6 +31,7 @@ import { postCaseConfigureRoute } from './configure/post_configure';
 import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { getCaseMetricRoute } from './metrics/get_case_metrics';
 import { getCasesMetricRoute } from './metrics/get_cases_metrics';
+import { findUserActionsRoute } from './user_actions/find_user_actions';
 
 export const getExternalRoutes = () =>
   [
@@ -41,6 +42,7 @@ export const getExternalRoutes = () =>
     patchCaseRoute,
     postCaseRoute,
     pushCaseRoute,
+    findUserActionsRoute,
     getUserActionsRoute,
     getStatusRoute,
     getCasesByAlertIdRoute,

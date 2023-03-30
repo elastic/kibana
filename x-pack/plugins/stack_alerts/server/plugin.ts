@@ -8,7 +8,7 @@
 import { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
 import { StackAlertsDeps, StackAlertsStartDeps } from './types';
-import { registerBuiltInAlertTypes } from './alert_types';
+import { registerBuiltInRuleTypes } from './rule_types';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 export class AlertingBuiltinsPlugin
@@ -23,7 +23,7 @@ export class AlertingBuiltinsPlugin
   public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
 
-    registerBuiltInAlertTypes({
+    registerBuiltInRuleTypes({
       logger: this.logger,
       data: core
         .getStartServices()

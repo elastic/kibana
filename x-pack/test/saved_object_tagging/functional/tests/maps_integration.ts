@@ -7,36 +7,15 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { TAGFILTER_DROPDOWN_SELECTOR } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
-  const PageObjects = getPageObjects(['maps', 'tagManagement', 'common', 'visualize']);
+  const PageObjects = getPageObjects(['maps', 'common', 'tagManagement', 'visualize']);
 
-  /**
-   * Select tags in the searchbar's tag filter.
-   */
-  const selectFilterTags = async (...tagNames: string[]) => {
-    // open the filter dropdown
-    const filterButton = await find.byCssSelector(TAGFILTER_DROPDOWN_SELECTOR);
-    await filterButton.click();
-    // select the tags
-    for (const tagName of tagNames) {
-      await testSubjects.click(
-        `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(tagName)}`
-      );
-    }
-    // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
-    await searchFilter.click();
-  };
-
-  // Failing: See https://github.com/elastic/kibana/issues/89073
-  describe.skip('maps integration', () => {
+  describe('maps integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json'
@@ -51,8 +30,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('listing', () => {
       beforeEach(async () => {
+        // force refresh of maps listing page between tests
         await PageObjects.common.navigateToUrlWithBrowserHistory('maps', '/');
-        await PageObjects.maps.gotoMapListingPage();
+        await listingTable.waitUntilTableIsLoaded();
       });
 
       it('allows to manually type tag filter query', async () => {
@@ -64,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to filter by selecting a tag in the filter menu', async () => {
-        await selectFilterTags('tag-3');
+        await listingTable.selectFilterTags('tag-3');
 
         await listingTable.expectItemsCount('map', 2);
         const itemNames = await listingTable.getAllItemsNames();
@@ -72,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to filter by multiple tags', async () => {
-        await selectFilterTags('tag-2', 'tag-3');
+        await listingTable.selectFilterTags('tag-2', 'tag-3');
 
         await listingTable.expectItemsCount('map', 3);
         const itemNames = await listingTable.getAllItemsNames();
@@ -89,7 +69,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.maps.saveMap('my-new-map', true, true, ['tag-1', 'tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
-        await selectFilterTags('tag-1');
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.selectFilterTags('tag-1');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('my-new-map');
       });
@@ -125,7 +106,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('confirmSaveSavedObjectButton');
 
         await PageObjects.maps.gotoMapListingPage();
-        await selectFilterTags('my-new-tag');
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('map-with-new-tag');
       });
@@ -133,16 +115,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('editing', () => {
       beforeEach(async () => {
+        // force refresh of maps listing page between tests
         await PageObjects.common.navigateToUrlWithBrowserHistory('maps', '/');
+        await listingTable.waitUntilTableIsLoaded();
       });
 
       it('allows to select tags for an existing map', async () => {
         await listingTable.clickItemLink('map', 'map 4 (tag-1)');
 
-        await PageObjects.maps.saveMap('map 4 (tag-1)', true, true, ['tag-3']);
+        await PageObjects.maps.saveMap('map 4 (tag-1)', true, false, ['tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
-        await selectFilterTags('tag-3');
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.selectFilterTags('tag-3');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('map 4 (tag-1)');
       });

@@ -37,7 +37,7 @@ import type {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
-import { DataSourceType } from './types';
+import { DataSourceType, GroupByOptions } from './types';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
@@ -135,6 +135,11 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     ? convertHistoryStartToSize(rule.history_window_start)
     : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
+  groupByFields: rule.alert_suppression?.group_by ?? [],
+  groupByRadioSelection: rule.alert_suppression?.duration
+    ? GroupByOptions.PerTimePeriod
+    : GroupByOptions.PerRuleExecution,
+  groupByDuration: rule.alert_suppression?.duration ?? { value: 5, unit: 'm' },
 });
 
 const convertHistoryStartToSize = (relativeTime: string) => {

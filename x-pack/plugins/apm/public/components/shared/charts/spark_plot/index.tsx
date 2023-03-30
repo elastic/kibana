@@ -7,6 +7,7 @@
 
 import {
   AreaSeries,
+  BarSeries,
   Chart,
   CurveType,
   LineSeries,
@@ -35,7 +36,10 @@ function hasValidTimeseries(
 
 const flexGroupStyle = { overflow: 'hidden' };
 
+type SparkPlotType = 'line' | 'bar';
+
 export function SparkPlot({
+  type = 'line',
   color,
   isLoading,
   series,
@@ -44,6 +48,7 @@ export function SparkPlot({
   compact,
   comparisonSeriesColor,
 }: {
+  type?: SparkPlotType;
   color: string;
   isLoading: boolean;
   series?: Coordinate[] | null;
@@ -65,6 +70,7 @@ export function SparkPlot({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SparkPlotItem
+          type={type}
           color={color}
           isLoading={isLoading}
           series={series}
@@ -78,6 +84,7 @@ export function SparkPlot({
 }
 
 function SparkPlotItem({
+  type,
   color,
   isLoading,
   series,
@@ -85,6 +92,7 @@ function SparkPlotItem({
   comparisonSeriesColor,
   compact,
 }: {
+  type?: SparkPlotType;
   color: string;
   isLoading: boolean;
   series?: Coordinate[] | null;
@@ -136,27 +144,54 @@ function SparkPlotItem({
           showLegend={false}
           tooltip="none"
         />
-        <LineSeries
-          id="Sparkline"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={['y']}
-          data={series}
-          color={color}
-          curve={CurveType.CURVE_MONOTONE_X}
-        />
-        {hasComparisonSeries && (
-          <AreaSeries
-            id="comparisonSeries"
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor={'x'}
-            yAccessors={['y']}
-            data={comparisonSeries}
-            color={comparisonSeriesColor}
-            curve={CurveType.CURVE_MONOTONE_X}
-          />
+        {type && type === 'bar' ? (
+          <>
+            <BarSeries
+              id="barSeries"
+              xScaleType={ScaleType.Linear}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={series}
+              color={color}
+            />
+            {hasComparisonSeries && (
+              <BarSeries
+                id="comparisonBarSeries"
+                xScaleType={ScaleType.Linear}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={comparisonSeries}
+                color={comparisonSeriesColor}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            <LineSeries
+              id="Sparkline"
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={'x'}
+              yAccessors={['y']}
+              data={series}
+              color={color}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+            {hasComparisonSeries && (
+              <AreaSeries
+                id="comparisonSeries"
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={comparisonSeries}
+                color={comparisonSeriesColor}
+                curve={CurveType.CURVE_MONOTONE_X}
+              />
+            )}
+          </>
         )}
       </Chart>
     );

@@ -16,17 +16,13 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { DEFAULT_DARK_MODE, APP_NAME, APP_ID } from '../../common/constants';
+import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import {
-  KibanaContextProvider,
-  useGetUserCasesPermissions,
-  useKibana,
-  useUiSetting$,
-} from '../common/lib/kibana';
+import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
 import type { State } from '../common/store';
 
 import type { StartServices } from '../types';
@@ -54,11 +50,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const {
     i18n,
     application: { capabilities },
-    cases,
+    uiActions,
   } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-  const userCasesPermissions = useGetUserCasesPermissions();
-  const CasesContext = cases.ui.getCasesContext();
   return (
     <EuiErrorBoundary>
       <i18n.Context>
@@ -70,7 +64,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
                       <ReactQueryClientProvider>
-                        <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
+                        <CellActionsProvider
+                          getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                        >
                           <PageRouter
                             history={history}
                             onAppLeave={onAppLeave}
@@ -78,7 +74,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                           >
                             {children}
                           </PageRouter>
-                        </CasesContext>
+                        </CellActionsProvider>
                       </ReactQueryClientProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>

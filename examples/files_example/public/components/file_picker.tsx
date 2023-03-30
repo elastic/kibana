@@ -24,9 +24,11 @@ export const MyFilePicker: FunctionComponent<Props> = ({ onClose, onDone, onUplo
     <FilePicker
       kind={exampleFileKind.id}
       onClose={onClose}
-      onDone={onDone}
+      onDone={(files) => onDone(files.map((f) => f.id))}
       onUpload={(n) => onUpload(n.map(({ id }) => id))}
       pageSize={50}
+      uploadMeta={{ myCool: 'meta' }}
+      multiple
     />
   );
 };

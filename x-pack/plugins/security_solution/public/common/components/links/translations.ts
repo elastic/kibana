@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export * from '../../../network/components/details/translations';
+export * from '../../../explore/network/components/details/translations';
 
 export const CASE_DETAILS_LINK_ARIA = (detailName: string) =>
   i18n.translate('xpack.securitySolution.cases.caseTable.caseDetailsLinkAria', {

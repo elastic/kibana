@@ -64,13 +64,14 @@ export default function ({ getService }: FtrProviderContext) {
       await runMigrate(); // ensure that the ILM policy exists for the first test
     });
 
-    after(async () => {
-      await reportingAPI.teardownLogs();
-    });
-
     afterEach(async () => {
       await reportingAPI.deleteAllReports();
       await runMigrate(); // ensure that the ILM policy exists
+    });
+
+    after(async () => {
+      await reportingAPI.teardownLogs();
+      await reportingAPI.makeAllReportingIndicesUnmanaged(); // ensure that a delete phase does not remove the index while future tests are running
     });
 
     it('detects when no migration is needed', async () => {

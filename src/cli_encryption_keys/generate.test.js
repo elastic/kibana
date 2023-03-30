@@ -9,7 +9,7 @@
 import { EncryptionConfig } from './encryption_config';
 import { generate } from './generate';
 
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 
 describe('encryption key generation', () => {
   const encryptionConfig = new EncryptionConfig();

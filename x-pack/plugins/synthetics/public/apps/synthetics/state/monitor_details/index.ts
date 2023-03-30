@@ -8,10 +8,13 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../../common/runtime_types';
 import { checkIsStalePing } from '../../utils/monitor_test_result/check_pings';
+import { enableMonitorAlertAction } from '../monitor_list/actions';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
+  getMonitorLastRunAction,
+  updateMonitorLastRunAction,
   getMonitorRecentPingsAction,
   setMonitorDetailsLocationAction,
   getMonitorAction,
@@ -23,16 +26,23 @@ export interface MonitorDetailsState {
     data: Ping[];
     loading: boolean;
   };
+  lastRun: {
+    data?: Ping;
+    loading: boolean;
+  };
   syntheticsMonitorLoading: boolean;
   syntheticsMonitor: EncryptedSyntheticsSavedMonitor | null;
+  syntheticsMonitorDispatchedAt: number;
   error: IHttpSerializedFetchError | null;
   selectedLocationId: string | null;
 }
 
 const initialState: MonitorDetailsState = {
   pings: { total: 0, data: [], loading: false },
+  lastRun: { loading: false },
   syntheticsMonitor: null,
   syntheticsMonitorLoading: false,
+  syntheticsMonitorDispatchedAt: 0,
   error: null,
   selectedLocationId: null,
 };
@@ -42,7 +52,23 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(setMonitorDetailsLocationAction, (state, action) => {
       state.selectedLocationId = action.payload;
     })
-
+    .addCase(getMonitorLastRunAction.get, (state, action) => {
+      state.lastRun.loading = true;
+      if (checkIsStalePing(action.payload.monitorId, state.lastRun.data)) {
+        state.lastRun.data = undefined;
+      }
+    })
+    .addCase(getMonitorLastRunAction.success, (state, action) => {
+      state.lastRun.loading = false;
+      state.lastRun.data = action.payload.pings[0];
+    })
+    .addCase(getMonitorLastRunAction.fail, (state, action) => {
+      state.lastRun.loading = false;
+      state.error = action.payload;
+    })
+    .addCase(updateMonitorLastRunAction, (state, action) => {
+      state.lastRun.data = action.payload.data;
+    })
     .addCase(getMonitorRecentPingsAction.get, (state, action) => {
       state.pings.loading = true;
       state.pings.data = state.pings.data.filter(
@@ -59,16 +85,24 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       state.pings.loading = false;
     })
 
-    .addCase(getMonitorAction.get, (state) => {
+    .addCase(getMonitorAction.get, (state, action) => {
+      state.syntheticsMonitorDispatchedAt = action.meta.dispatchedAt;
       state.syntheticsMonitorLoading = true;
+      state.error = null;
     })
     .addCase(getMonitorAction.success, (state, action) => {
       state.syntheticsMonitor = action.payload;
       state.syntheticsMonitorLoading = false;
+      state.error = null;
     })
     .addCase(getMonitorAction.fail, (state, action) => {
       state.error = action.payload;
       state.syntheticsMonitorLoading = false;
+    })
+    .addCase(enableMonitorAlertAction.success, (state, action) => {
+      if ('updated_at' in action.payload && state.syntheticsMonitor) {
+        state.syntheticsMonitor = action.payload.attributes as EncryptedSyntheticsSavedMonitor;
+      }
     });
 });
 

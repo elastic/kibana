@@ -17,20 +17,41 @@ export interface JobServiceProvider {
     savedObjectsClient: SavedObjectsClientContract
   ): {
     jobsSummary: OrigJobServiceProvider['jobsSummary'];
+    forceStartDatafeeds: OrigJobServiceProvider['forceStartDatafeeds'];
+    stopDatafeeds: OrigJobServiceProvider['stopDatafeeds'];
   };
 }
 
 export function getJobServiceProvider(getGuards: GetGuards): JobServiceProvider {
   return {
     jobServiceProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         jobsSummary: async (...args) => {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(({ scopedClient, mlClient }) => {
               const { jobsSummary } = jobServiceProvider(scopedClient, mlClient);
               return jobsSummary(...args);
+            });
+        },
+        forceStartDatafeeds: async (...args) => {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canStartStopDatafeed'])
+            .ok(({ scopedClient, mlClient }) => {
+              const { forceStartDatafeeds } = jobServiceProvider(scopedClient, mlClient);
+              return forceStartDatafeeds(...args);
+            });
+        },
+        stopDatafeeds: async (...args) => {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canStartStopDatafeed'])
+            .ok(({ scopedClient, mlClient }) => {
+              const { stopDatafeeds } = jobServiceProvider(scopedClient, mlClient);
+              return stopDatafeeds(...args);
             });
         },
       };

@@ -10,7 +10,7 @@ import { FailedTransactionsCorrelation } from '../../../../common/correlations/f
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';

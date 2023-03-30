@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - Session Idle', function () {
     loadTestFile(require.resolve('./cleanup'));
     loadTestFile(require.resolve('./extension'));
+    loadTestFile(require.resolve('./expired'));
   });
 }

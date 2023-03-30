@@ -21,6 +21,7 @@ export interface IExternalReferenceMetaDataProps {
     queryId: string;
   };
 }
+const AttachmentContent = lazy(() => import('./external_references_content'));
 
 export const getLazyExternalContent =
   // eslint-disable-next-line react/display-name
@@ -53,8 +54,6 @@ export const getLazyExternalContent =
         />
       );
     }
-
-    const AttachmentContent = lazy(() => import('./external_references_content'));
 
     return (
       <Suspense fallback={null}>

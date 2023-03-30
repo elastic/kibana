@@ -16,18 +16,13 @@ import {
   getEstimatedSizeForDocumentsInIndex,
   getApmDiskSpacedUsedPct,
 } from './indices_stats_helpers';
-import { Setup } from '../../lib/helpers/setup_request';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import {
-  SERVICE_NAME,
-  TIER,
-  INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
@@ -38,7 +33,20 @@ import {
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getTracesPerMinute({
+interface SharedOptions {
+  apmEventClient: APMEventClient;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  start: number;
+  end: number;
+  environment: string;
+  kuery: string;
+}
+
+type TracesPerMinuteOptions = SharedOptions & {
+  searchAggregatedTransactions: boolean;
+};
+
+async function getTracesPerMinute({
   apmEventClient,
   indexLifecyclePhase,
   start,
@@ -46,15 +54,7 @@ export async function getTracesPerMinute({
   environment,
   kuery,
   searchAggregatedTransactions,
-}: {
-  apmEventClient: APMEventClient;
-  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-  start: number;
-  end: number;
-  environment: string;
-  kuery: string;
-  searchAggregatedTransactions: boolean;
-}) {
+}: TracesPerMinuteOptions) {
   const response = await apmEventClient.search('get_traces_per_minute', {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
@@ -100,8 +100,13 @@ export async function getTracesPerMinute({
   });
 }
 
-export async function getMainSummaryStats({
-  setup,
+type MainSummaryStatsOptions = SharedOptions & {
+  context: ApmPluginRequestHandlerContext;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  randomSampler: RandomSampler;
+};
+
+async function getMainSummaryStats({
   apmEventClient,
   context,
   indexLifecyclePhase,
@@ -110,19 +115,9 @@ export async function getMainSummaryStats({
   end,
   environment,
   kuery,
-}: {
-  setup: Setup;
-  apmEventClient: APMEventClient;
-  context: ApmPluginRequestHandlerContext;
-  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-  randomSampler: RandomSampler;
-  start: number;
-  end: number;
-  environment: string;
-  kuery: string;
-}) {
+}: MainSummaryStatsOptions) {
   const [totalIndicesStats, totalDiskSpace, res] = await Promise.all([
-    getTotalIndicesStats({ context, setup }),
+    getTotalIndicesStats({ context, apmEventClient }),
     getApmDiskSpacedUsedPct(context),
     apmEventClient.search('get_storage_explorer_main_summary_stats', {
       apm: {
@@ -203,5 +198,54 @@ export async function getMainSummaryStats({
     numberOfServices: res.aggregations?.services_count.value ?? 0,
     estimatedIncrementalSize,
     dailyDataGeneration: estimatedIncrementalSize / durationAsDays,
+  };
+}
+
+export interface StorageExplorerSummaryStatisticsResponse {
+  tracesPerMinute: number;
+  totalSize: number;
+  diskSpaceUsedPct: number;
+  numberOfServices: number;
+  estimatedIncrementalSize: number;
+  dailyDataGeneration: number;
+}
+
+export async function getSummaryStatistics({
+  apmEventClient,
+  context,
+  start,
+  end,
+  environment,
+  kuery,
+  randomSampler,
+  indexLifecyclePhase,
+  searchAggregatedTransactions,
+}: TracesPerMinuteOptions &
+  MainSummaryStatsOptions): Promise<StorageExplorerSummaryStatisticsResponse> {
+  const [mainSummaryStats, tracesPerMinute] = await Promise.all([
+    getMainSummaryStats({
+      apmEventClient,
+      context,
+      indexLifecyclePhase,
+      randomSampler,
+      start,
+      end,
+      environment,
+      kuery,
+    }),
+    getTracesPerMinute({
+      apmEventClient,
+      indexLifecyclePhase,
+      start,
+      end,
+      environment,
+      kuery,
+      searchAggregatedTransactions,
+    }),
+  ]);
+
+  return {
+    ...mainSummaryStats,
+    tracesPerMinute,
   };
 }

@@ -35,6 +35,11 @@ export function createPluginInitializerContext(
   return {
     opaqueId,
     env: coreContext.env,
+    logger: {
+      get(...contextParts) {
+        return coreContext.logger.get('plugins', pluginManifest.id, ...contextParts);
+      },
+    },
     config: {
       get<T>() {
         return pluginConfig as unknown as T;
@@ -69,14 +74,13 @@ export function createPluginSetupContext<
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
     },
+    customBranding: deps.customBranding,
     fatalErrors: deps.fatalErrors,
     executionContext: deps.executionContext,
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
-    injectedMetadata: {
-      getInjectedVar: deps.injectedMetadata.getInjectedVar,
-    },
+    settings: deps.settings,
     theme: deps.theme,
     getStartServices: () => plugin.startDependencies,
   };
@@ -112,6 +116,7 @@ export function createPluginStartContext<
       navigateToUrl: deps.application.navigateToUrl,
       getUrlForApp: deps.application.getUrlForApp,
     },
+    customBranding: deps.customBranding,
     docLinks: deps.docLinks,
     executionContext: deps.executionContext,
     http: deps.http,
@@ -120,10 +125,8 @@ export function createPluginStartContext<
     notifications: deps.notifications,
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
+    settings: deps.settings,
     savedObjects: deps.savedObjects,
-    injectedMetadata: {
-      getInjectedVar: deps.injectedMetadata.getInjectedVar,
-    },
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
     theme: deps.theme,

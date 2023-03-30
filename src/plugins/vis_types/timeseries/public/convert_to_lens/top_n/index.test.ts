@@ -20,7 +20,7 @@ const mockIsValidMetrics = jest.fn();
 const mockGetDatasourceValue = jest
   .fn()
   .mockImplementation(() => Promise.resolve(stubLogstashDataView));
-const mockGetDataSourceInfo = jest.fn();
+const mockExtractOrGenerateDatasourceInfo = jest.fn();
 
 jest.mock('../../services', () => ({
   getDataViewsStart: jest.fn(() => mockGetDatasourceValue),
@@ -46,7 +46,7 @@ jest.mock('../lib/metrics', () => ({
 }));
 
 jest.mock('../lib/datasource', () => ({
-  getDataSourceInfo: jest.fn(() => mockGetDataSourceInfo()),
+  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
 }));
 
 describe('convertToLens', () => {
@@ -67,7 +67,7 @@ describe('convertToLens', () => {
 
   beforeEach(() => {
     mockIsValidMetrics.mockReturnValue(true);
-    mockGetDataSourceInfo.mockReturnValue({
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
       indexPatternId: 'test-index-pattern',
       timeField: 'timeField',
       indexPattern: { id: 'test-index-pattern' },
@@ -104,6 +104,14 @@ describe('convertToLens', () => {
 
   test('should return state for valid model', async () => {
     const result = await convertToLens(vis);
+    expect(result).toBeDefined();
+    expect(result?.type).toBe('lnsXY');
+    expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);
+    expect(mockGetConfigurationForTopN).toBeCalledTimes(1);
+  });
+
+  test('should drop adhoc dataviews if action is required', async () => {
+    const result = await convertToLens(vis, undefined, true);
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsXY');
     expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);

@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectsMigrationVersion,
-  SavedObjectReference,
-} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '..';
 
 /**
  * A serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or
@@ -81,6 +79,7 @@ export interface SavedObjectsRawDocSource {
   namespace?: string;
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
+  typeMigrationVersion?: string;
   updated_at?: string;
   created_at?: string;
   references?: SavedObjectReference[];
@@ -102,6 +101,7 @@ interface SavedObjectDoc<T = unknown> {
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
   coreMigrationVersion?: string;
+  typeMigrationVersion?: string;
   version?: string;
   updated_at?: string;
   created_at?: string;

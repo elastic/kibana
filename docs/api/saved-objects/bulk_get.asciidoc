@@ -4,7 +4,9 @@
 <titleabbrev>Bulk get objects</titleabbrev>
 ++++
 
-experimental[] Retrieve multiple {kib} saved objects by ID.
+deprecated::[8.7.0, To be removed in an upcoming version]
+
+Retrieve multiple {kib} saved objects by ID.
 
 [[saved-objects-api-bulk-get-request]]
 ==== Request

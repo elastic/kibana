@@ -19,8 +19,6 @@ export function createHttpFetchError<TResponseBody>(
     name,
     request,
     response,
-    req: request,
-    res: response,
     body,
   });
 }

@@ -17,6 +17,7 @@ export * from '../../common/api_routes';
 
 export const FILES_API_ROUTES = {
   find: `${API_BASE_PATH}/find`,
+  bulkDelete: `${API_BASE_PATH}/blobs`,
   metrics: `${API_BASE_PATH}/metrics`,
   public: {
     download: `${FILES_PUBLIC_API_BASE_PATH}/blob/{fileName?}`,

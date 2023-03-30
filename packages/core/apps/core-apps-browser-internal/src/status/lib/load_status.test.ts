@@ -62,17 +62,9 @@ const mockedResponse: StatusResponse = {
       },
     },
     elasticsearch_client: {
-      protocol: 'https',
-      connectedNodes: 3,
-      nodesWithActiveSockets: 3,
-      nodesWithIdleSockets: 1,
       totalActiveSockets: 25,
       totalIdleSockets: 2,
       totalQueuedRequests: 0,
-      mostActiveNodeSockets: 15,
-      averageActiveSocketsPerNode: 8,
-      mostIdleNodeSockets: 2,
-      averageIdleSocketsPerNode: 0.5,
     },
     process: {
       pid: 1,
@@ -86,6 +78,11 @@ const mockedResponse: StatusResponse = {
       },
       event_loop_delay: 1,
       event_loop_delay_histogram: mocked.createHistogram(),
+      event_loop_utilization: {
+        active: 1,
+        idle: 1,
+        utilization: 1,
+      },
       uptime_in_millis: 1,
     },
     processes: [
@@ -101,6 +98,11 @@ const mockedResponse: StatusResponse = {
         },
         event_loop_delay: 1,
         event_loop_delay_histogram: mocked.createHistogram(),
+        event_loop_utilization: {
+          active: 1,
+          idle: 1,
+          utilization: 1,
+        },
         uptime_in_millis: 1,
       },
     ],
@@ -240,15 +242,15 @@ describe('response processing', () => {
     const data = await loadStatus({ http, notifications });
     const names = data.metrics.map((m) => m.name);
     expect(names).toEqual([
-      'Heap total',
-      'Heap used',
+      'Heap used out of 976.56 KB',
       'Requests per second',
+      'Utilization (active: 1.00 / idle: 1.00)',
       'Load',
       'Delay',
       'Response time avg',
     ]);
     const values = data.metrics.map((m) => m.value);
-    expect(values).toEqual([1000000, 100, 400, [4.1, 2.1, 0.1], 1, 4000]);
+    expect(values).toEqual([100, 400, 1, [4.1, 2.1, 0.1], 1, 4000]);
   });
 
   test('adds meta details to Load, Delay and Response time', async () => {

@@ -20,6 +20,7 @@ export function ActionsOpsgenieServiceProvider(
   common: ActionsCommon
 ) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return {
     async createNewConnector(fields: ConnectorFormFields) {
@@ -43,6 +44,21 @@ export function ActionsOpsgenieServiceProvider(
       const editFlyOutSaveButton = await testSubjects.find('edit-connector-flyout-save-btn');
       expect(await editFlyOutSaveButton.isEnabled()).to.be(true);
       await editFlyOutSaveButton.click();
+    },
+
+    async getObjFromJsonEditor() {
+      const jsonEditor = await find.byCssSelector('.monaco-editor .view-lines');
+
+      return JSON.parse(await jsonEditor.getVisibleText());
+    },
+
+    async setJsonEditor(value: object) {
+      const stringified = JSON.stringify(value);
+
+      await find.clickByCssSelector('.monaco-editor');
+      const input = await find.activeElement();
+      await input.clearValueWithKeyboard({ charByChar: true });
+      await input.type(stringified);
     },
   };
 }

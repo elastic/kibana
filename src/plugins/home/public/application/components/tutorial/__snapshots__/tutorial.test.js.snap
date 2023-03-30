@@ -62,7 +62,6 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
     <EuiFormRow
       describedByIds={Array []}
       display="row"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       labelType="label"

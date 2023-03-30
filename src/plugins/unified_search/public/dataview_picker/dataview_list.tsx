@@ -6,11 +6,58 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiSelectable, EuiSelectableProps, EuiPanel, EuiBadge } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiSelectable,
+  EuiSelectableProps,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiButtonGroup,
+  toSentenceCase,
+} from '@elastic/eui';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+
 import { css } from '@emotion/react';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
+
+import { SortingService } from './sorting_service';
+
+const strings = {
+  sortOrder: {
+    asc: {
+      getSortOrderLabel: () =>
+        i18n.translate('unifiedSearch.optionsList.popover.sortOrder.asc', {
+          defaultMessage: 'Ascending',
+        }),
+    },
+    desc: {
+      getSortOrderLabel: () =>
+        i18n.translate('unifiedSearch.optionsList.popover.sortOrder.desc', {
+          defaultMessage: 'Descending',
+        }),
+    },
+  },
+  editorAndPopover: {
+    getSortDirectionLegend: () =>
+      i18n.translate('unifiedSearch.optionsList.popover.sortDirections', {
+        defaultMessage: 'Sort directions',
+      }),
+    adhoc: {
+      getTemporaryDataviewLabel: () =>
+        i18n.translate('unifiedSearch.query.queryBar.indexPattern.temporaryDataviewLabel', {
+          defaultMessage: 'Temporary',
+        }),
+    },
+    search: {
+      getSearchPlaceholder: () =>
+        i18n.translate('unifiedSearch.query.queryBar.indexPattern.findDataView', {
+          defaultMessage: 'Find a data view',
+        }),
+    },
+  },
+};
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -33,6 +80,38 @@ export function DataViewsList({
   selectableProps,
   searchListInputId,
 }: DataViewsListProps) {
+  const sortingService = useMemo(
+    () =>
+      new SortingService<DataViewListItemEnhanced>({
+        alphabetically: (item) => item.name ?? item.title,
+      }),
+    []
+  );
+
+  const [sortedDataViewsList, setSortedDataViewsList] = useState<DataViewListItemEnhanced[]>(
+    sortingService.sortData(dataViewsList)
+  );
+
+  const sortOrderOptions = useMemo(
+    () =>
+      sortingService.getOrderDirections().map((key) => {
+        return {
+          id: key,
+          iconType: `sort${toSentenceCase(key)}ending`,
+          label: strings.sortOrder[key].getSortOrderLabel(),
+        };
+      }),
+    [sortingService]
+  );
+
+  const onChangeSortDirection = useCallback(
+    (value) => {
+      sortingService.setDirection(value);
+      setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
+    },
+    [sortingService]
+  );
+
   return (
     <EuiSelectable<{
       key?: string;
@@ -44,16 +123,14 @@ export function DataViewsList({
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"
-      options={dataViewsList?.map(({ title, id, name, isAdhoc }) => ({
+      options={sortedDataViewsList?.map(({ title, id, name, isAdhoc }) => ({
         key: id,
         label: name ? name : title,
         value: id,
         checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
         append: isAdhoc ? (
-          <EuiBadge color="hollow">
-            {i18n.translate('unifiedSearch.query.queryBar.indexPattern.temporaryDataviewLabel', {
-              defaultMessage: 'Temporary',
-            })}
+          <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
+            {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
           </EuiBadge>
         ) : null,
       }))}
@@ -66,9 +143,7 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
-        placeholder: i18n.translate('unifiedSearch.query.queryBar.indexPattern.findDataView', {
-          defaultMessage: 'Find a data view',
-        }),
+        placeholder: strings.editorAndPopover.search.getSearchPlaceholder(),
         'data-test-subj': 'indexPattern-switcher--input',
         ...(selectableProps ? selectableProps.searchProps : undefined),
       }}
@@ -82,7 +157,26 @@ export function DataViewsList({
             color="transparent"
             paddingSize="s"
           >
-            {search}
+            <EuiFlexGroup
+              gutterSize="xs"
+              direction="row"
+              justifyContent="spaceBetween"
+              alignItems="center"
+              responsive={false}
+            >
+              <EuiFlexItem>{search}</EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  isIconOnly
+                  buttonSize="compressed"
+                  options={sortOrderOptions}
+                  legend={strings.editorAndPopover.getSortDirectionLegend()}
+                  idSelected={sortingService.direction}
+                  onChange={onChangeSortDirection}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
           {list}
         </>
@@ -90,3 +184,7 @@ export function DataViewsList({
     </EuiSelectable>
   );
 }
+
+// React.lazy support
+// eslint-disable-next-line import/no-default-export
+export default DataViewsList;

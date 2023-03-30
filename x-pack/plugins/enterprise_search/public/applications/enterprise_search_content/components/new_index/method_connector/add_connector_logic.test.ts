@@ -53,7 +53,7 @@ describe('AddConnectorLogic', () => {
 
     describe('apiSuccess', () => {
       it('navigates to correct spot and flashes success toast', async () => {
-        jest.useFakeTimers('legacy');
+        jest.useFakeTimers({ legacyFakeTimers: true });
         AddConnectorApiLogic.actions.apiSuccess({ indexName: 'success' } as any);
         await nextTick();
         jest.advanceTimersByTime(1001);

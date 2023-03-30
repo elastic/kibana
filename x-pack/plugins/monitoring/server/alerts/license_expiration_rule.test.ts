@@ -203,7 +203,6 @@ describe('LicenseExpirationRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
@@ -225,7 +224,6 @@ describe('LicenseExpirationRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Danger);
@@ -246,7 +244,6 @@ describe('LicenseExpirationRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Warning);

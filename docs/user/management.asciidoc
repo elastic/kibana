@@ -74,12 +74,14 @@ You can add and remove remote clusters, and check their connectivity.
 [cols="50, 50"]
 |===
 
-| <<alerting-getting-started, Rules&nbsp;and Connectors>>
-| Centrally <<create-and-manage-rules, manage your rules>> across {kib}. Create and <<connector-management, manage reusable
-connectors>> for triggering actions.
+| <<alerting-getting-started,{rules-ui}>>
+| Centrally <<create-and-manage-rules,manage your rules>> across {kib}.
 
 | <<cases,Cases>>
 | Create and manage cases to investigate issues.
+
+| <<action-types,{connectors-ui}>>
+| Create and <<connector-management,manage reusable connectors>> for triggering actions.
 
 | <<reporting-getting-started, Reporting>>
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
@@ -197,6 +199,8 @@ include::{kib-repo-dir}/spaces/index.asciidoc[]
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
+
+include::{kib-repo-dir}/management/upgrade-assistant.asciidoc[]
 
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
 

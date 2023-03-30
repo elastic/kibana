@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { compact } from 'lodash';
 import { Query, TimeRange } from '@kbn/es-query';
-import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { compact } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { INDEX_EVENTS } from '../../../common';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 export function ProfilingSearchBar({
   kuery,
@@ -68,13 +68,13 @@ export function ProfilingSearchBar({
       showDatePicker
       showFilterBar={false}
       showSaveQuery={false}
-      // showSubmitButton={showSubmitButton}
-      showSubmitButton={true}
+      submitButtonStyle={!showSubmitButton ? 'iconOnly' : 'auto'}
       query={searchBarQuery}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
       indexPatterns={compact([dataView])}
       onRefresh={onRefresh}
+      displayStyle="inPage"
     />
   );
 }

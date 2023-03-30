@@ -22,6 +22,7 @@ import {
   PreconfiguredAgentPoliciesSchema,
   PreconfiguredOutputsSchema,
   PreconfiguredFleetServerHostsSchema,
+  PreconfiguredFleetProxiesSchema,
 } from './types';
 
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
@@ -34,6 +35,9 @@ export const config: PluginConfigDescriptor = {
       enabled: true,
     },
     enableExperimental: true,
+    developer: {
+      maxAgentPoliciesWithInactivityTimeout: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -117,8 +121,15 @@ export const config: PluginConfigDescriptor = {
     agentPolicies: PreconfiguredAgentPoliciesSchema,
     outputs: PreconfiguredOutputsSchema,
     fleetServerHosts: PreconfiguredFleetServerHostsSchema,
+    proxies: PreconfiguredFleetProxiesSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+    setup: schema.maybe(
+      schema.object({
+        agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
+      })
+    ),
     developer: schema.object({
+      maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
       bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),

@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { omit, uniq } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 

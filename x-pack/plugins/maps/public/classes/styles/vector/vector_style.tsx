@@ -25,7 +25,6 @@ import {
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
-// @ts-expect-error
 import { getMakiSymbol } from './symbol_utils';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
@@ -42,6 +41,7 @@ import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
 import { LabelZoomRangeProperty } from './properties/label_zoom_range_property';
 import { LabelBorderSizeProperty } from './properties/label_border_size_property';
+import { LabelPositionProperty } from './properties/label_position_property';
 import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 import { SymbolizeAsProperty } from './properties/symbolize_as_property';
 import { StaticIconProperty } from './properties/static_icon_property';
@@ -171,19 +171,20 @@ export class VectorStyle implements IVectorStyle {
   private readonly _source: IVectorSource;
   private readonly _styleMeta: StyleMeta;
 
-  private readonly _symbolizeAsStyleProperty: SymbolizeAsProperty;
-  private readonly _lineColorStyleProperty: StaticColorProperty | DynamicColorProperty;
-  private readonly _fillColorStyleProperty: StaticColorProperty | DynamicColorProperty;
-  private readonly _lineWidthStyleProperty: StaticSizeProperty | DynamicSizeProperty;
-  private readonly _iconStyleProperty: StaticIconProperty | DynamicIconProperty;
-  private readonly _iconSizeStyleProperty: StaticSizeProperty | DynamicSizeProperty;
-  private readonly _iconOrientationProperty: StaticOrientationProperty | DynamicOrientationProperty;
-  private readonly _labelStyleProperty: StaticTextProperty | DynamicTextProperty;
-  private readonly _labelZoomRangeProperty: LabelZoomRangeProperty;
-  private readonly _labelSizeStyleProperty: StaticSizeProperty | DynamicSizeProperty;
-  private readonly _labelColorStyleProperty: StaticColorProperty | DynamicColorProperty;
-  private readonly _labelBorderColorStyleProperty: StaticColorProperty | DynamicColorProperty;
-  private readonly _labelBorderSizeStyleProperty: LabelBorderSizeProperty;
+  private readonly _symbolizeAs: SymbolizeAsProperty;
+  private readonly _lineColor: StaticColorProperty | DynamicColorProperty;
+  private readonly _fillColor: StaticColorProperty | DynamicColorProperty;
+  private readonly _lineWidth: StaticSizeProperty | DynamicSizeProperty;
+  private readonly _icon: StaticIconProperty | DynamicIconProperty;
+  private readonly _iconSize: StaticSizeProperty | DynamicSizeProperty;
+  private readonly _iconOrientation: StaticOrientationProperty | DynamicOrientationProperty;
+  private readonly _label: StaticTextProperty | DynamicTextProperty;
+  private readonly _labelZoomRange: LabelZoomRangeProperty;
+  private readonly _labelSize: StaticSizeProperty | DynamicSizeProperty;
+  private readonly _labelColor: StaticColorProperty | DynamicColorProperty;
+  private readonly _labelBorderColor: StaticColorProperty | DynamicColorProperty;
+  private readonly _labelBorderSize: LabelBorderSizeProperty;
+  private readonly _labelPosition: LabelPositionProperty;
 
   static createDescriptor(
     properties: Partial<VectorStylePropertiesDescriptor> = {},
@@ -219,65 +220,69 @@ export class VectorStyle implements IVectorStyle {
 
     this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
 
-    this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
+    this._symbolizeAs = new SymbolizeAsProperty(
       this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
       VECTOR_STYLES.SYMBOLIZE_AS
     );
-    this._lineColorStyleProperty = this._makeColorProperty(
+    this._lineColor = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
       VECTOR_STYLES.LINE_COLOR,
       chartsPaletteServiceGetColor
     );
-    this._fillColorStyleProperty = this._makeColorProperty(
+    this._fillColor = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.FILL_COLOR],
       VECTOR_STYLES.FILL_COLOR,
       chartsPaletteServiceGetColor
     );
-    this._lineWidthStyleProperty = this._makeSizeProperty(
+    this._lineWidth = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
       VECTOR_STYLES.LINE_WIDTH,
-      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
+      this._symbolizeAs.isSymbolizedAsIcon()
     );
-    this._iconStyleProperty = this._makeIconProperty(
-      this._descriptor.properties[VECTOR_STYLES.ICON]
-    );
-    this._iconSizeStyleProperty = this._makeSizeProperty(
+    this._icon = this._makeIconProperty(this._descriptor.properties[VECTOR_STYLES.ICON]);
+    this._iconSize = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
       VECTOR_STYLES.ICON_SIZE,
-      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
+      this._symbolizeAs.isSymbolizedAsIcon()
     );
-    this._iconOrientationProperty = this._makeOrientationProperty(
+    this._iconOrientation = this._makeOrientationProperty(
       this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
       VECTOR_STYLES.ICON_ORIENTATION
     );
-    this._labelStyleProperty = this._makeLabelProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
-    );
-    this._labelZoomRangeProperty = new LabelZoomRangeProperty(
+    this._label = this._makeLabelProperty(this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]);
+    this._labelZoomRange = new LabelZoomRangeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_ZOOM_RANGE].options,
       VECTOR_STYLES.LABEL_ZOOM_RANGE,
       layer.getMinZoom(),
       layer.getMaxZoom()
     );
-    this._labelSizeStyleProperty = this._makeSizeProperty(
+    this._labelSize = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
       VECTOR_STYLES.LABEL_SIZE,
-      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
+      this._symbolizeAs.isSymbolizedAsIcon()
     );
-    this._labelColorStyleProperty = this._makeColorProperty(
+    this._labelColor = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
       VECTOR_STYLES.LABEL_COLOR,
       chartsPaletteServiceGetColor
     );
-    this._labelBorderColorStyleProperty = this._makeColorProperty(
+    this._labelBorderColor = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
       VECTOR_STYLES.LABEL_BORDER_COLOR,
       chartsPaletteServiceGetColor
     );
-    this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
+    this._labelBorderSize = new LabelBorderSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
       VECTOR_STYLES.LABEL_BORDER_SIZE,
-      this._labelSizeStyleProperty
+      this._labelSize
+    );
+    this._labelPosition = new LabelPositionProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_POSITION].options,
+      VECTOR_STYLES.LABEL_POSITION,
+      this._icon,
+      this._iconSize,
+      this._labelSize,
+      this._symbolizeAs.isSymbolizedAsIcon()
     );
   }
 
@@ -460,26 +465,27 @@ export class VectorStyle implements IVectorStyle {
 
   getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>> {
     return [
-      this._symbolizeAsStyleProperty,
-      this._iconStyleProperty,
-      this._lineColorStyleProperty,
-      this._fillColorStyleProperty,
-      this._lineWidthStyleProperty,
-      this._iconSizeStyleProperty,
-      this._iconOrientationProperty,
-      this._labelStyleProperty,
-      this._labelZoomRangeProperty,
-      this._labelSizeStyleProperty,
-      this._labelColorStyleProperty,
-      this._labelBorderColorStyleProperty,
-      this._labelBorderSizeStyleProperty,
+      this._symbolizeAs,
+      this._icon,
+      this._lineColor,
+      this._fillColor,
+      this._lineWidth,
+      this._iconSize,
+      this._iconOrientation,
+      this._label,
+      this._labelZoomRange,
+      this._labelSize,
+      this._labelColor,
+      this._labelBorderColor,
+      this._labelBorderSize,
+      this._labelPosition,
     ];
   }
 
   _hasBorder() {
-    return this._lineWidthStyleProperty.isDynamic()
-      ? this._lineWidthStyleProperty.isComplete()
-      : (this._lineWidthStyleProperty as StaticSizeProperty).getOptions().size !== 0;
+    return this._lineWidth.isDynamic()
+      ? this._lineWidth.isComplete()
+      : (this._lineWidth as StaticSizeProperty).getOptions().size !== 0;
   }
 
   renderEditor(
@@ -610,9 +616,9 @@ export class VectorStyle implements IVectorStyle {
   }
 
   _getSymbolId() {
-    return this.arePointsSymbolizedAsCircles() || this._iconStyleProperty.isDynamic()
+    return this.arePointsSymbolizedAsCircles() || this._icon.isDynamic()
       ? undefined
-      : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
+      : (this._icon as StaticIconProperty).getOptions().value;
   }
 
   _getIconMeta(
@@ -681,11 +687,11 @@ export class VectorStyle implements IVectorStyle {
   }
 
   isUsingCustomIcon(symbolId: string) {
-    if (this._iconStyleProperty.isDynamic()) {
-      const { customIconStops } = this._iconStyleProperty.getOptions() as IconDynamicOptions;
+    if (this._icon.isDynamic()) {
+      const { customIconStops } = this._icon.getOptions() as IconDynamicOptions;
       return customIconStops ? customIconStops.some(({ icon }) => icon === symbolId) : false;
     }
-    const { value } = this._iconStyleProperty.getOptions() as IconStaticOptions;
+    const { value } = this._icon.getOptions() as IconStaticOptions;
     return value === symbolId;
   }
 
@@ -781,11 +787,11 @@ export class VectorStyle implements IVectorStyle {
   }
 
   arePointsSymbolizedAsCircles() {
-    return !this._symbolizeAsStyleProperty.isSymbolizedAsIcon();
+    return !this._symbolizeAs.isSymbolizedAsIcon();
   }
 
   hasLabels() {
-    return getHasLabel(this._labelStyleProperty);
+    return getHasLabel(this._label);
   }
 
   setMBPaintProperties({
@@ -799,9 +805,9 @@ export class VectorStyle implements IVectorStyle {
     fillLayerId: string;
     lineLayerId: string;
   }) {
-    this._fillColorStyleProperty.syncFillColorWithMb(fillLayerId, mbMap, alpha);
-    this._lineColorStyleProperty.syncLineColorWithMb(lineLayerId, mbMap, alpha);
-    this._lineWidthStyleProperty.syncLineWidthWithMb(lineLayerId, mbMap);
+    this._fillColor.syncFillColorWithMb(fillLayerId, mbMap, alpha);
+    this._lineColor.syncLineColorWithMb(lineLayerId, mbMap, alpha);
+    this._lineWidth.syncLineWidthWithMb(lineLayerId, mbMap);
   }
 
   setMBPaintPropertiesForPoints({
@@ -813,13 +819,12 @@ export class VectorStyle implements IVectorStyle {
     mbMap: MbMap;
     pointLayerId: string;
   }) {
-    this._fillColorStyleProperty.syncCircleColorWithMb(pointLayerId, mbMap, alpha);
-    this._lineColorStyleProperty.syncCircleStrokeWithMb(pointLayerId, mbMap, alpha);
+    this._fillColor.syncCircleColorWithMb(pointLayerId, mbMap, alpha);
+    this._lineColor.syncCircleStrokeWithMb(pointLayerId, mbMap, alpha);
     const hasNoRadius =
-      !this._iconSizeStyleProperty.isDynamic() &&
-      (this._iconSizeStyleProperty as StaticSizeProperty).getOptions().size === 0;
-    this._lineWidthStyleProperty.syncCircleStrokeWidthWithMb(pointLayerId, mbMap, hasNoRadius);
-    this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
+      !this._iconSize.isDynamic() && (this._iconSize as StaticSizeProperty).getOptions().size === 0;
+    this._lineWidth.syncCircleStrokeWidthWithMb(pointLayerId, mbMap, hasNoRadius);
+    this._iconSize.syncCircleRadiusWithMb(pointLayerId, mbMap);
   }
 
   setMBPropertiesForLabelText({
@@ -831,12 +836,13 @@ export class VectorStyle implements IVectorStyle {
     mbMap: MbMap;
     textLayerId: string;
   }) {
-    this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
-    this._labelZoomRangeProperty.syncLabelZoomRange(textLayerId, mbMap);
-    this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
-    this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
-    this._labelBorderSizeStyleProperty.syncLabelBorderSizeWithMb(textLayerId, mbMap);
-    this._labelBorderColorStyleProperty.syncLabelBorderColorWithMb(textLayerId, mbMap);
+    this._label.syncTextFieldWithMb(textLayerId, mbMap);
+    this._labelZoomRange.syncLabelZoomRange(textLayerId, mbMap);
+    this._labelColor.syncLabelColorWithMb(textLayerId, mbMap, alpha);
+    this._labelSize.syncLabelSizeWithMb(textLayerId, mbMap);
+    this._labelBorderSize.syncLabelBorderSizeWithMb(textLayerId, mbMap);
+    this._labelPosition.syncLabelPositionWithMb(textLayerId, mbMap);
+    this._labelBorderColor.syncLabelBorderColorWithMb(textLayerId, mbMap);
   }
 
   setMBSymbolPropertiesForPoints({
@@ -852,13 +858,13 @@ export class VectorStyle implements IVectorStyle {
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
     mbMap.setLayoutProperty(symbolLayerId, 'icon-allow-overlap', true);
 
-    this._iconStyleProperty.syncIconWithMb(symbolLayerId, mbMap);
+    this._icon.syncIconWithMb(symbolLayerId, mbMap);
     // icon-color is only supported on SDF icons.
-    this._fillColorStyleProperty.syncIconColorWithMb(symbolLayerId, mbMap);
-    this._lineColorStyleProperty.syncHaloBorderColorWithMb(symbolLayerId, mbMap);
-    this._lineWidthStyleProperty.syncHaloWidthWithMb(symbolLayerId, mbMap);
-    this._iconSizeStyleProperty.syncIconSizeWithMb(symbolLayerId, mbMap);
-    this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
+    this._fillColor.syncIconColorWithMb(symbolLayerId, mbMap);
+    this._lineColor.syncHaloBorderColorWithMb(symbolLayerId, mbMap);
+    this._lineWidth.syncHaloWidthWithMb(symbolLayerId, mbMap);
+    this._iconSize.syncIconSizeWithMb(symbolLayerId, mbMap);
+    this._iconOrientation.syncIconRotationWithMb(symbolLayerId, mbMap);
   }
 
   _makeField(fieldDescriptor?: StylePropertyField): IField | null {

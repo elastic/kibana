@@ -27,8 +27,6 @@ export const mockAttributeService = <
   const core = customCore ? customCore : coreMock.createStart();
   return new AttributeService<A, V, R, M>(
     type,
-    jest.fn(),
-    core.i18n.Context,
     core.notifications.toasts,
     options,
     jest.fn().mockReturnValue(() => ({ getDisplayName: () => type }))

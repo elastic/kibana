@@ -81,6 +81,7 @@ describe('getUpdatedColumns', () => {
       expect(actionColumn.props()).toEqual({
         isActivelyEditing: expect.any(Function),
         displayedItems,
+        emptyPropertyAllowed: false,
         isLoading: false,
         canRemoveLastItem,
         lastItemWarning,

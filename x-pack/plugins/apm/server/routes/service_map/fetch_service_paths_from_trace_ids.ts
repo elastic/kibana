@@ -7,7 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
+import { TRACE_ID } from '../../../common/es_fields/apm';
 import {
   ConnectionNode,
   ExternalConnectionNode,

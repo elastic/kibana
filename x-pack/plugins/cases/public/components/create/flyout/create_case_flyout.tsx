@@ -10,6 +10,9 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { noop } from 'lodash';
+import type { CasePostRequest } from '../../../../common/api';
 import * as i18n from '../translations';
 import type { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
@@ -23,9 +26,10 @@ export interface CreateCaseFlyoutProps {
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   onClose?: () => void;
-  onSuccess?: (theCase: Case) => Promise<void>;
+  onSuccess?: (theCase: Case) => void;
   attachments?: CaseAttachmentsWithoutOwner;
   headerContent?: React.ReactNode;
+  initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -72,15 +76,17 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess, attachments, headerContent }) => {
-    const handleCancel = onClose || function () {};
-    const handleOnSuccess = onSuccess || async function () {};
+  ({ afterCaseCreated, attachments, headerContent, initialValue, onClose, onSuccess }) => {
+    const handleCancel = onClose || noop;
+    const handleOnSuccess = onSuccess || noop;
 
     return (
       <QueryClientProvider client={casesQueryClient}>
+        <ReactQueryDevtools initialIsOpen={false} />
         <GlobalStyle />
         <StyledFlyout
           onClose={onClose}
+          tour-step="create-case-flyout"
           data-test-subj="create-case-flyout"
           // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
           maskProps={{ className: maskOverlayClassName }}
@@ -99,6 +105,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
                 onCancel={handleCancel}
                 onSuccess={handleOnSuccess}
                 withSteps={false}
+                initialValue={initialValue}
               />
             </FormWrapper>
           </StyledEuiFlyoutBody>

@@ -8,7 +8,6 @@
 
 export { Defer, defer } from './defer';
 export { fieldWildcardMatcher, fieldWildcardFilter } from './field_wildcard';
-export type { UiComponent, UiComponentInstance } from './ui';
 export { of } from './of';
 export type {
   BaseState,
@@ -31,6 +30,8 @@ export type {
   PureTransition,
   CreateStateContainerOptions,
 } from './state_containers';
+export { setStateToKbnUrl } from './state_management/set_state_to_kbn_url';
+export { replaceUrlHashQuery } from './state_management/format';
 export {
   createStateContainerReactHelpers,
   useContainerSelector,

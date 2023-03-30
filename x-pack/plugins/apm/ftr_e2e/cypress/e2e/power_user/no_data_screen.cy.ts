@@ -10,7 +10,6 @@ describe('No data screen', () => {
     before(() => {
       // Change indices
       setApmIndices({
-        sourcemap: 'foo-*',
         error: 'foo-*',
         onboarding: 'foo-*',
         span: 'foo-*',
@@ -37,7 +36,6 @@ describe('No data screen', () => {
     after(() => {
       // reset to default indices
       setApmIndices({
-        sourcemap: '',
         error: '',
         onboarding: '',
         span: '',

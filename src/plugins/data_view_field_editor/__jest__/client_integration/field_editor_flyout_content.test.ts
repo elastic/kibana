@@ -18,7 +18,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -139,6 +139,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
 
       expect(onSave).toHaveBeenCalled();
@@ -158,6 +159,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
 
       fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
@@ -195,6 +197,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
 
       expect(onSave).toBeCalled();

@@ -112,7 +112,9 @@ Object {
           "layerId": "layer1",
           "layerType": "data",
           "legendDisplay": "hide",
-          "metric": "col2",
+          "metrics": Array [
+            "col2",
+          ],
           "nestedLegend": false,
           "numberDisplay": "percent",
           "primaryGroups": Array [

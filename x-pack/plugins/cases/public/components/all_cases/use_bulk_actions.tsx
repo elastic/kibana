@@ -15,7 +15,11 @@ import type { Case } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { useSeverityAction } from '../actions/severity/use_severity_action';
 import { useStatusAction } from '../actions/status/use_status_action';
+import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
+import { useTagsAction } from '../actions/tags/use_tags_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
+import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import * as i18n from './translations';
 
 interface UseBulkActionsProps {
@@ -27,6 +31,7 @@ interface UseBulkActionsProps {
 interface UseBulkActionsReturnValue {
   panels: EuiContextMenuPanelDescriptor[];
   modals: JSX.Element;
+  flyouts: JSX.Element;
 }
 
 export const useBulkActions = ({
@@ -50,6 +55,18 @@ export const useBulkActions = ({
 
   const severityAction = useSeverityAction({
     isDisabled,
+    onAction,
+    onActionSuccess,
+  });
+
+  const tagsAction = useTagsAction({
+    isDisabled,
+    onAction,
+    onActionSuccess,
+  });
+
+  const assigneesAction = useAssigneesAction({
+    isDisabled: false,
     onAction,
     onActionSuccess,
   });
@@ -94,6 +111,11 @@ export const useBulkActions = ({
       });
     }
 
+    if (canUpdate) {
+      mainPanelItems.push(tagsAction.getAction(selectedCases));
+      mainPanelItems.push(assigneesAction.getAction(selectedCases));
+    }
+
     if (canDelete) {
       mainPanelItems.push(deleteAction.getAction(selectedCases));
     }
@@ -113,7 +135,17 @@ export const useBulkActions = ({
     }
 
     return panelsToBuild;
-  }, [canDelete, canUpdate, deleteAction, isDisabled, selectedCases, severityAction, statusAction]);
+  }, [
+    canDelete,
+    canUpdate,
+    deleteAction,
+    isDisabled,
+    selectedCases,
+    severityAction,
+    statusAction,
+    tagsAction,
+    assigneesAction,
+  ]);
 
   return {
     modals: (
@@ -123,6 +155,24 @@ export const useBulkActions = ({
             totalCasesToBeDeleted={selectedCases.length}
             onCancel={deleteAction.onCloseModal}
             onConfirm={deleteAction.onConfirmDeletion}
+          />
+        ) : null}
+      </>
+    ),
+    flyouts: (
+      <>
+        {tagsAction.isFlyoutOpen ? (
+          <EditTagsFlyout
+            onClose={tagsAction.onFlyoutClosed}
+            selectedCases={selectedCases}
+            onSaveTags={tagsAction.onSaveTags}
+          />
+        ) : null}
+        {assigneesAction.isFlyoutOpen ? (
+          <EditAssigneesFlyout
+            onClose={assigneesAction.onFlyoutClosed}
+            selectedCases={selectedCases}
+            onSaveAssignees={assigneesAction.onSaveAssignees}
           />
         ) : null}
       </>

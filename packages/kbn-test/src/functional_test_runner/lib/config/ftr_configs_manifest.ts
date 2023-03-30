@@ -9,7 +9,7 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import JsYaml from 'js-yaml';
 
 export const FTR_CONFIGS_MANIFEST_REL = '.buildkite/ftr_configs.yml';

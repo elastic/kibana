@@ -8,7 +8,7 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
-import {
+import type {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
@@ -21,6 +21,7 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
 import { FormBasedPrivateState, FormBasedLayer } from './types';
@@ -29,6 +30,7 @@ import { FormattedIndexPatternColumn } from './operations/definitions/column_typ
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
+import { resolveTimeShift } from './time_shift_utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -54,6 +56,7 @@ function getExpressionForLayer(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
+  dateRange: DateRange,
   searchSessionId?: string
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
@@ -120,7 +123,10 @@ function getExpressionForLayer(
       operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
       operationDefinitionMap[col.operationType]?.input === 'managedReference'
   );
-  const hasDateHistogram = columnEntries.some(([, c]) => c.operationType === 'date_histogram');
+  const firstDateHistogramColumn = columnEntries.find(
+    ([, col]) => col.operationType === 'date_histogram'
+  );
+  const hasDateHistogram = Boolean(firstDateHistogramColumn);
 
   if (referenceEntries.length || esAggEntries.length) {
     let aggs: ExpressionAstExpressionBuilder[] = [];
@@ -137,19 +143,28 @@ function getExpressionForLayer(
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
     let esAggsIdMap: Record<string, OriginalColumn[]> = {};
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
+    const histogramBarsTarget = uiSettings.get('histogram:barTarget');
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
         const aggId = String(index);
 
-        const wrapInFilter = Boolean(def.filterable && col.filter);
+        const wrapInFilter = Boolean(def.filterable && col.filter?.query);
         const wrapInTimeFilter =
           def.canReduceTimeRange &&
           !hasDateHistogram &&
           col.reducedTimeRange &&
           indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
-          col,
+          {
+            ...col,
+            timeShift: resolveTimeShift(
+              col.timeShift,
+              dateRange,
+              histogramBarsTarget,
+              hasDateHistogram
+            ),
+          },
           wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
           indexPattern,
           layer,
@@ -171,11 +186,21 @@ function getExpressionForLayer(
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
                   timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
-                  timeShift: col.timeShift,
+                  timeShift: resolveTimeShift(
+                    col.timeShift,
+                    dateRange,
+                    histogramBarsTarget,
+                    hasDateHistogram
+                  ),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
-              timeShift: col.timeShift,
+              timeShift: resolveTimeShift(
+                col.timeShift,
+                dateRange,
+                histogramBarsTarget,
+                hasDateHistogram
+              ),
             }
           ).toAst();
         }
@@ -310,10 +335,6 @@ function getExpressionForLayer(
       return base;
     });
 
-    const firstDateHistogramColumn = columnEntries.find(
-      ([, col]) => col.operationType === 'date_histogram'
-    );
-
     const columnsWithTimeScale = columnEntries.filter(
       ([, col]) =>
         col.timeScale &&
@@ -446,6 +467,7 @@ export function toExpression(
   layerId: string,
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
+  dateRange: DateRange,
   searchSessionId?: string
 ) {
   if (state.layers[layerId]) {
@@ -453,6 +475,7 @@ export function toExpression(
       state.layers[layerId],
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
+      dateRange,
       searchSessionId
     );
   }

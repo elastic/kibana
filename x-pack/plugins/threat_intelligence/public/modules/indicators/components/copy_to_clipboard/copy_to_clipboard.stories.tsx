@@ -8,7 +8,11 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
-import { CopyToClipboardButtonEmpty, CopyToClipboardContextMenu } from '.';
+import {
+  CopyToClipboardButtonEmpty,
+  CopyToClipboardButtonIcon,
+  CopyToClipboardContextMenu,
+} from '.';
 
 export default {
   title: 'CopyToClipboard',
@@ -24,4 +28,8 @@ export const ContextMenu: Story<void> = () => {
   const items = [<CopyToClipboardContextMenu value={mockValue} />];
 
   return <EuiContextMenuPanel items={items} />;
+};
+
+export const ButtonIcon: Story<void> = () => {
+  return <CopyToClipboardButtonIcon value={mockValue} />;
 };

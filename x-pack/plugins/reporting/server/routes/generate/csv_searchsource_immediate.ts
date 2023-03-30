@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { incrementApiUsageCounter } from '..';
+import moment from 'moment';
 import type { ReportingCore } from '../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import type { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { PassThroughStream } from '../../lib';
-import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { RequestHandler } from '../lib/request_handler';
+import { authorizedUserPreRouting, getCounters } from '../lib';
 
 const API_BASE_URL_V1 = '/api/reporting/v1';
 const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
@@ -71,11 +70,10 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     authorizedUserPreRouting(
       reporting,
       async (user, context, req: CsvFromSavedObjectRequest, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         const logger = parentLogger.get(CSV_SEARCHSOURCE_IMMEDIATE_TYPE);
         const runTaskFn = runTaskFnFactory(reporting, logger);
-        const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
         const stream = new PassThroughStream();
         const eventLog = reporting.getEventLogger({
           jobtype: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
@@ -108,6 +106,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
 
           taskPromise.catch(logError);
 
+          counters.usageCounter();
+
           return res.ok({
             body: stream,
             headers: {
@@ -118,7 +118,21 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         } catch (error) {
           logError(error);
 
-          return requestHandler.handleError(error);
+          if (error instanceof Boom.Boom) {
+            const statusCode = error.output.statusCode;
+            counters.errorCounter(undefined, statusCode);
+
+            return res.customError({
+              statusCode,
+              body: error.output.payload.message,
+            });
+          }
+
+          counters.errorCounter(undefined, 500);
+
+          return res.customError({
+            statusCode: 500,
+          });
         }
       }
     )

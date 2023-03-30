@@ -1,7 +1,13 @@
 {
   "ml.start_trained_model_deployment": {
     "url_params": {
-      "timeout": ""
+      "cache_size": "",
+      "number_of_allocations": 0,
+      "threads_per_allocation": 0,
+      "priority": "",
+      "queue_capacity": 0,
+      "timeout": "",
+      "wait_for": ""
     },
     "methods": [
       "POST"
@@ -9,6 +15,6 @@
     "patterns": [
       "_ml/trained_models/{model_id}/deployment/_start"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-start-trained-model-deployment.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/start-trained-model-deployment.html"
   }
 }

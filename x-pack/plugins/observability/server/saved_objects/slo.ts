@@ -8,7 +8,7 @@
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
 
-import { StoredSLO } from '../types/models';
+import { StoredSLO } from '../domain/models';
 
 export const SO_SLO_TYPE = 'slo';
 
@@ -19,7 +19,8 @@ export const slo: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      name: { type: 'text' },
+      id: { type: 'keyword' },
+      name: { type: 'keyword' },
       description: { type: 'text' },
       indicator: {
         properties: {
@@ -27,28 +28,9 @@ export const slo: SavedObjectsType = {
           params: { type: 'flattened' },
         },
       },
-      time_window: {
-        properties: {
-          duration: { type: 'keyword' },
-          is_rolling: { type: 'boolean' },
-          calendar: {
-            properties: {
-              start_time: { type: 'date' },
-            },
-          },
-        },
-      },
-      budgeting_method: { type: 'keyword' },
-      objective: {
-        properties: {
-          target: { type: 'float' },
-          timeslice_target: { type: 'float' },
-          timeslice_window: { type: 'keyword' },
-        },
-      },
-      revision: { type: 'short' },
-      created_at: { type: 'date' },
-      updated_at: { type: 'date' },
+      budgetingMethod: { type: 'keyword' },
+      enabled: { type: 'boolean' },
+      tags: { type: 'keyword' },
     },
   },
   management: {

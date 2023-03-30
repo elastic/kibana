@@ -9,13 +9,6 @@ import * as t from 'io-ts';
 import { exportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
-const createSchema = <Required extends t.Props, Optional extends t.Props>(
-  requiredFields: Required,
-  optionalFields: Optional
-) => {
-  return t.intersection([t.exact(t.type(requiredFields)), t.exact(t.partial(optionalFields))]);
-};
-
 const exportRulesDetails = {
   exported_count: t.number,
   exported_rules_count: t.number,
@@ -28,11 +21,38 @@ const exportRulesDetails = {
   ),
   missing_rules_count: t.number,
 };
+const excludedActionConnectors = t.intersection([
+  t.exact(
+    t.type({
+      id: NonEmptyString,
+      type: NonEmptyString,
+    })
+  ),
+  t.exact(t.partial({ reason: t.string })),
+]);
 
-// With exceptions
-export const exportRulesDetailsWithExceptionsSchema = createSchema(
-  exportRulesDetails,
-  exportExceptionDetails
-);
+const exportRuleActionConnectorsDetails = {
+  exported_action_connector_count: t.number,
+  missing_action_connection_count: t.number,
+  missing_action_connections: t.array(
+    t.exact(
+      t.type({
+        id: NonEmptyString,
+        type: NonEmptyString,
+      })
+    )
+  ),
+  excluded_action_connection_count: t.number,
+  excluded_action_connections: t.array(excludedActionConnectors),
+};
 
-export type ExportRulesDetails = t.TypeOf<typeof exportRulesDetailsWithExceptionsSchema>;
+// With exceptions and connectors
+export const exportRulesDetailsWithExceptionsAndConnectorsSchema = t.intersection([
+  t.exact(t.type(exportRulesDetails)),
+  t.exact(t.partial(exportExceptionDetails)),
+  t.exact(t.partial(exportRuleActionConnectorsDetails)),
+]);
+
+export type ExportRulesDetails = t.TypeOf<
+  typeof exportRulesDetailsWithExceptionsAndConnectorsSchema
+>;

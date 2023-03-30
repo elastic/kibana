@@ -23,7 +23,7 @@ import type {
   PolicyOperatingSystem,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { ConfigForm, ConfigFormHeading } from '../config_form';
 
@@ -75,6 +75,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
   onValueSelection,
   supplementalOptions,
 }: EventsFormProps<T>) => {
+  const showEditableFormFields = useShowEditableFormFields();
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const theme = useContext(ThemeContext);
   const countSelected = useCallback(() => {
@@ -122,6 +123,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
             data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
             checked={selection[protectionField]}
             onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+            disabled={!showEditableFormFields}
           />
         );
       })}
@@ -165,7 +167,10 @@ const InnerEventsForm = <T extends OperatingSystem>({
                       data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
                       checked={selection[protectionField]}
                       onChange={(event) => onValueSelection(protectionField, event.target.checked)}
-                      disabled={isDisabled ? isDisabled(policyDetailsConfig) : false}
+                      disabled={
+                        !showEditableFormFields ||
+                        (isDisabled ? isDisabled(policyDetailsConfig) : false)
+                      }
                     />
                   </EuiFlexItem>
                   {tooltipText && (

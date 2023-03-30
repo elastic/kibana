@@ -7,7 +7,14 @@
  */
 
 import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import {
+  createRoot,
+  createTestServers,
+  createRootWithCorePlugins,
+  request as kbnServerRequest,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+
 import { RequestHandlerContext } from '../..';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -27,10 +34,10 @@ const withUtf8CharsContext = {
 };
 
 describe('trace', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
+  let esServer: TestElasticsearchUtils;
+  let root: ReturnType<typeof createRoot>;
   beforeAll(async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: jest.setTimeout,
     });
     esServer = await startES();
@@ -41,7 +48,7 @@ describe('trace', () => {
   });
 
   beforeEach(async () => {
-    root = kbnTestServer.createRootWithCorePlugins({
+    root = createRootWithCorePlugins({
       plugins: { initialize: false },
       server: {
         requestId: {
@@ -74,7 +81,7 @@ describe('trace', () => {
       await root.start();
 
       const myOpaqueId = 'my-opaque-id';
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set('x-opaque-id', myOpaqueId)
         .expect(200);
@@ -97,7 +104,7 @@ describe('trace', () => {
       await root.start();
 
       const myOpaqueId = 'my-opaque-id';
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set('x-opaque-id', myOpaqueId)
         .expect(200);
@@ -119,7 +126,7 @@ describe('trace', () => {
 
       await root.start();
 
-      const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+      const response = await kbnServerRequest.get(root, '/execution-context').expect(200);
 
       const header = response.body['x-opaque-id'];
       expect(header).toEqual(expect.any(String));
@@ -138,7 +145,7 @@ describe('trace', () => {
 
       await root.start();
 
-      const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+      const response = await kbnServerRequest.get(root, '/execution-context').expect(200);
 
       const header = response.body['x-opaque-id'];
       expect(header).toEqual(expect.any(String));
@@ -164,7 +171,7 @@ describe('trace', () => {
       await root.start();
 
       const myOpaqueId = 'my-opaque-id';
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set('x-opaque-id', myOpaqueId)
         .expect(200);
@@ -174,9 +181,9 @@ describe('trace', () => {
     });
 
     describe('ExecutionContext Service is disabled', () => {
-      let rootExecutionContextDisabled: ReturnType<typeof kbnTestServer.createRoot>;
+      let rootExecutionContextDisabled: ReturnType<typeof createRoot>;
       beforeEach(async () => {
-        rootExecutionContextDisabled = kbnTestServer.createRootWithCorePlugins({
+        rootExecutionContextDisabled = createRootWithCorePlugins({
           execution_context: { enabled: false },
           plugins: { initialize: false },
           server: {
@@ -205,7 +212,7 @@ describe('trace', () => {
         await rootExecutionContextDisabled.start();
 
         const myOpaqueId = 'my-opaque-id';
-        const response = await kbnTestServer.request
+        const response = await kbnServerRequest
           .get(rootExecutionContextDisabled, '/execution-context')
           .set('x-opaque-id', myOpaqueId)
           .expect(200);
@@ -234,7 +241,7 @@ describe('trace', () => {
         await rootExecutionContextDisabled.start();
 
         const myOpaqueId = 'my-opaque-id';
-        const response = await kbnTestServer.request
+        const response = await kbnServerRequest
           .get(rootExecutionContextDisabled, '/execution-context')
           .set('x-opaque-id', myOpaqueId)
           .expect(200);
@@ -258,7 +265,7 @@ describe('trace', () => {
       });
 
       await root.start();
-      const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+      const response = await kbnServerRequest.get(root, '/execution-context').expect(200);
       expect(response.body).toEqual(parentContext);
     });
 
@@ -274,7 +281,7 @@ describe('trace', () => {
       });
 
       await root.start();
-      const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+      const response = await kbnServerRequest.get(root, '/execution-context').expect(200);
       expect(response.body).toEqual(parentContext);
     });
 
@@ -291,8 +298,8 @@ describe('trace', () => {
       });
 
       await root.start();
-      const responseA = await kbnTestServer.request.get(root, '/execution-context').expect(200);
-      const responseB = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+      const responseA = await kbnServerRequest.get(root, '/execution-context').expect(200);
+      const responseB = await kbnServerRequest.get(root, '/execution-context').expect(200);
 
       expect(responseA.body).toEqual({ ...parentContext, id: '42' });
       expect(responseB.body).toEqual({ ...parentContext, id: '43' });
@@ -311,9 +318,9 @@ describe('trace', () => {
       });
 
       await root.start();
-      const responseA = kbnTestServer.request.get(root, '/execution-context');
-      const responseB = kbnTestServer.request.get(root, '/execution-context');
-      const responseC = kbnTestServer.request.get(root, '/execution-context');
+      const responseA = kbnServerRequest.get(root, '/execution-context');
+      const responseB = kbnServerRequest.get(root, '/execution-context');
+      const responseC = kbnServerRequest.get(root, '/execution-context');
 
       const [{ body: bodyA }, { body: bodyB }, { body: bodyC }] = await Promise.all([
         responseA,
@@ -341,13 +348,13 @@ describe('trace', () => {
       });
 
       await root.start();
-      const responseA = kbnTestServer.request
+      const responseA = kbnServerRequest
         .get(root, '/execution-context')
         .set('x-opaque-id', 'req-1');
-      const responseB = kbnTestServer.request
+      const responseB = kbnServerRequest
         .get(root, '/execution-context')
         .set('x-opaque-id', 'req-2');
-      const responseC = kbnTestServer.request
+      const responseC = kbnServerRequest
         .get(root, '/execution-context')
         .set('x-opaque-id', 'req-3');
 
@@ -371,7 +378,7 @@ describe('trace', () => {
       );
 
       await root.start();
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
@@ -391,7 +398,7 @@ describe('trace', () => {
       });
 
       await root.start();
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set('x-opaque-id', 'utf-test')
         .set(new ExecutionContextContainer(withUtf8CharsContext).toHeader())
@@ -453,7 +460,7 @@ describe('trace', () => {
       });
 
       await root.start();
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
@@ -480,7 +487,7 @@ describe('trace', () => {
 
       await root.start();
 
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
@@ -502,7 +509,7 @@ describe('trace', () => {
 
       await root.start();
 
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
@@ -525,7 +532,7 @@ describe('trace', () => {
       await root.start();
 
       const myOpaqueId = 'my-opaque-id';
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set('x-opaque-id', myOpaqueId)
         .expect(200);
@@ -549,7 +556,7 @@ describe('trace', () => {
       await root.start();
 
       const myOpaqueId = 'my-opaque-id';
-      const response = await kbnTestServer.request
+      const response = await kbnServerRequest
         .get(root, '/execution-context')
         .set('x-opaque-id', myOpaqueId)
         .expect(200);
@@ -578,7 +585,7 @@ describe('trace', () => {
 
       await root.start();
 
-      const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+      const response = await kbnServerRequest.get(root, '/execution-context').expect(200);
 
       const header = response.body['x-opaque-id'];
       expect(header).toContain('kibana:test-type:test-name:42');
@@ -597,7 +604,7 @@ describe('trace', () => {
         });
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+        const response = await kbnServerRequest.get(root, '/execution-context').expect(200);
         expect(response.body).toEqual(parentContext);
       });
 
@@ -623,7 +630,7 @@ describe('trace', () => {
         });
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+        const response = await kbnServerRequest.get(root, '/execution-context').expect(200);
         expect(response.body).toEqual({ child: nestedContext, ...parentContext });
       });
 
@@ -648,7 +655,7 @@ describe('trace', () => {
 
         await root.start();
 
-        const response = await kbnTestServer.request
+        const response = await kbnServerRequest
           .get(root, '/execution-context')
           .set(new ExecutionContextContainer(parentContext).toHeader())
           .expect(200);

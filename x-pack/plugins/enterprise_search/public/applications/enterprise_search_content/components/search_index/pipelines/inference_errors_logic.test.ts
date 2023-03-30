@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../../common/types/api';
 import { FetchMlInferenceErrorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
@@ -24,7 +24,6 @@ describe('InferenceErrorsLogic', () => {
   const { mount: mountFetchInferenceErrorsApiLogic } = new LogicMounter(
     FetchMlInferenceErrorsApiLogic
   );
-  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
   beforeEach(() => {
     jest.clearAllMocks();
     mountFetchInferenceErrorsApiLogic();
@@ -36,14 +35,6 @@ describe('InferenceErrorsLogic', () => {
   });
 
   describe('actions', () => {
-    it('should clear flash errors when fetching data', () => {
-      FetchMlInferenceErrorsApiLogic.actions.makeRequest({ indexName: 'test' });
-      expect(clearFlashMessages).toHaveBeenCalledTimes(1);
-    });
-    it('should flash errors fetching errors', () => {
-      FetchMlInferenceErrorsApiLogic.actions.apiError('error' as any);
-      expect(flashAPIErrors).toHaveBeenCalledWith('error');
-    });
     it('should load fetched errors', () => {
       const inferenceErrorsData = {
         errors: [

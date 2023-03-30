@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
           'logs',
           'uptime',
         ]);
-        expect(Object.keys(browserFields)).to.eql(['base']);
+        expect(Object.keys(browserFields)).to.eql(['base', 'event', 'kibana', 'message']);
       });
 
       it(`${superUser.username} should be able to get browser fields for o11y featureIds`, async () => {
@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
           'logs',
           'uptime',
         ]);
-        expect(Object.keys(browserFields)).to.eql(['base']);
+        expect(Object.keys(browserFields)).to.eql(['base', 'event', 'kibana', 'message']);
       });
 
       it(`${superUser.username} should NOT be able to get browser fields for siem featureId`, async () => {

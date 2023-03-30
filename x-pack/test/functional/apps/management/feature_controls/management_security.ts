@@ -68,7 +68,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',
-          sectionLinks: ['dataViews', 'objects', 'tags', 'search_sessions', 'spaces', 'settings'],
+          sectionLinks: [
+            'dataViews',
+            'filesManagement',
+            'objects',
+            'tags',
+            'search_sessions',
+            'spaces',
+            'settings',
+          ],
         });
       });
     });

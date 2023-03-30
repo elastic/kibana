@@ -14,9 +14,8 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../../../common/types';
-import { HttpError, Status } from '../../../../../../../common/types/api';
+import { Status } from '../../../../../../../common/types/api';
 import { DEFAULT_META } from '../../../../../shared/constants';
-import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../../../shared/table_pagination';
 import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
@@ -28,15 +27,14 @@ interface DomainManagementValues {
   domains: CrawlerDomain[];
   getData: CrawlerDomainsWithMeta | null;
   getStatus: Status;
+  indexName: string;
   isLoading: boolean;
   meta: Meta;
 }
 
 interface DomainManagementActions {
-  deleteApiError(error: HttpError): HttpError;
   deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
   deleteSuccess(): void;
-  getApiError(error: HttpError): HttpError;
   getApiSuccess(data: CrawlerDomainsWithMeta): CrawlerDomainsWithMeta;
   getDomains(meta: Meta): { meta: Meta };
   onPaginate(newPageIndex: number): { newPageIndex: number };
@@ -48,15 +46,17 @@ export const DomainManagementLogic = kea<
   connect: {
     actions: [
       GetCrawlerDomainsApiLogic,
-      ['apiError as getApiError', 'apiSuccess as getApiSuccess'],
+      ['apiSuccess as getApiSuccess'],
       DeleteCrawlerDomainApiLogic,
-      ['apiError as deleteApiError', 'apiSuccess as deleteApiSuccess'],
+      ['apiSuccess as deleteApiSuccess'],
     ],
     values: [
       GetCrawlerDomainsApiLogic,
       ['status as getStatus', 'data as getData'],
       DeleteCrawlerDomainApiLogic,
       ['status as deleteStatus'],
+      IndexNameLogic,
+      ['indexName'],
     ],
   },
   path: ['enterprise_search', 'domain_management'],
@@ -68,21 +68,15 @@ export const DomainManagementLogic = kea<
     }),
   },
   listeners: ({ values, actions }) => ({
-    deleteApiError: (error) => {
-      flashAPIErrors(error);
-    },
     deleteApiSuccess: () => {
       actions.getDomains(values.meta);
     },
     deleteDomain: ({ domain }) => {
-      const { indexName } = IndexNameLogic.values;
+      const { indexName } = values;
       DeleteCrawlerDomainApiLogic.actions.makeRequest({ domain, indexName });
     },
-    getApiError: (error) => {
-      flashAPIErrors(error);
-    },
     getDomains: ({ meta }) => {
-      const { indexName } = IndexNameLogic.values;
+      const { indexName } = values;
       GetCrawlerDomainsApiLogic.actions.makeRequest({ indexName, meta });
     },
     onPaginate: ({ newPageIndex }) => {
@@ -108,10 +102,5 @@ export const DomainManagementLogic = kea<
         getStatus === Status.LOADING ||
         deleteStatus === Status.LOADING,
     ],
-  }),
-  events: ({ actions, values }) => ({
-    afterMount: () => {
-      actions.getDomains(values.meta);
-    },
   }),
 });

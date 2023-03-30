@@ -13,6 +13,7 @@ import cuid from 'cuid';
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
 import type {
   File,
   FileJSON,
@@ -34,8 +35,15 @@ import { createAuditEvent } from '../audit_events';
 import type { FileClient, CreateArgs, DeleteArgs, P1, ShareArgs } from './types';
 import { serializeJSON, toJSON } from '../file/to_json';
 import { createDefaultFileAttributes } from './utils';
+import {
+  PerfArgs,
+  withReportPerformanceMetric,
+  FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
+} from '../performance';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
+
+const fourMiB = 4 * 1024 * 1024;
 
 export function createFileClient({
   fileKindDescriptor,
@@ -205,24 +213,46 @@ export class FileClientImpl implements FileClient {
    * @param options - Options for the upload
    */
   public upload = async (
-    id: string,
+    file: FileJSON,
     rs: Readable,
     options?: UploadOptions
   ): ReturnType<BlobStorageClient['upload']> => {
+    const { maxSizeBytes } = this.fileKindDescriptor;
+    const { transforms = [], ...blobOptions } = options || {};
+
+    let maxFileSize: number = typeof maxSizeBytes === 'number' ? maxSizeBytes : fourMiB;
+
+    if (typeof maxSizeBytes === 'function') {
+      const sizeLimitPerFile = maxSizeBytes(file);
+      if (typeof sizeLimitPerFile === 'number') {
+        maxFileSize = sizeLimitPerFile;
+      }
+    }
+
+    transforms.push(enforceMaxByteSizeTransform(maxFileSize));
+
     return this.blobStorageClient.upload(rs, {
-      ...options,
-      transforms: [
-        ...(options?.transforms || []),
-        enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity),
-      ],
-      id,
+      ...blobOptions,
+      transforms,
+      id: file.id,
     });
   };
 
-  public download: BlobStorageClient['download'] = (args) => {
+  public download: BlobStorageClient['download'] = async (args) => {
     this.incrementUsageCounter('DOWNLOAD');
     try {
-      return this.blobStorageClient.download(args);
+      const perf: PerfArgs = {
+        eventData: {
+          eventName: FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
+          key1: 'size',
+          value1: args.size,
+          meta: {
+            id: args.id,
+          },
+        },
+      };
+
+      return withReportPerformanceMetric(perf, () => this.blobStorageClient.download(args));
     } catch (e) {
       this.incrementUsageCounter('DOWNLOAD_ERROR');
       throw e;

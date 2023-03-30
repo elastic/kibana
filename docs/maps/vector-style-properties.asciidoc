@@ -14,6 +14,8 @@ You can add text labels to your Point features by configuring label style proper
 |===
 |*Label*
 |Specifies label content.
+|*Label position*
+|Place label above, in the center of, or below the Point feature.
 |*Label visibility*
 |Specifies the zoom range for which labels are displayed.
 |*Label color*

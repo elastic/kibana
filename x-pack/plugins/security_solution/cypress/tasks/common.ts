@@ -56,7 +56,19 @@ export const reload = () => {
   cy.contains('a', 'Security');
 };
 
+const clearSessionStorage = () => {
+  cy.window().then((win) => {
+    win.sessionStorage.clear();
+  });
+};
+
+/** Clears the rules and monitoring tables state. Automatically called in `cleanKibana()`. */
+export const resetRulesTableState = () => {
+  clearSessionStorage();
+};
+
 export const cleanKibana = () => {
+  resetRulesTableState();
   deleteAlertsAndRules();
   deleteCases();
   deleteTimelines();

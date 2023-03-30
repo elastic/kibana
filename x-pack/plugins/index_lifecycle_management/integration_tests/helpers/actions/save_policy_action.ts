@@ -13,6 +13,7 @@ export const createSavePolicyAction = (testBed: TestBed) => async () => {
 
   await act(async () => {
     find('savePolicyButton').simulate('click');
+    jest.advanceTimersByTime(0); // advance timers to allow the form to validate
   });
 
   component.update();

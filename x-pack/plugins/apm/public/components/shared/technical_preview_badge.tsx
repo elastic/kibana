@@ -9,11 +9,11 @@ import { EuiBetaBadge, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-interface Props {
+type Props = {
   icon?: IconType;
-}
+} & Pick<React.ComponentProps<typeof EuiBetaBadge>, 'size' | 'style'>;
 
-export function TechnicalPreviewBadge({ icon }: Props) {
+export function TechnicalPreviewBadge({ icon, size, style }: Props) {
   return (
     <EuiBetaBadge
       label={i18n.translate('xpack.apm.technicalPreviewBadgeLabel', {
@@ -27,6 +27,8 @@ export function TechnicalPreviewBadge({ icon }: Props) {
         }
       )}
       iconType={icon}
+      size={size}
+      style={style}
     />
   );
 }

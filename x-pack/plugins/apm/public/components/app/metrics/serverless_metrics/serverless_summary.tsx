@@ -98,9 +98,13 @@ export function ServerlessSummary({ serverlessId }: Props) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink href="https://ela.st/feedback-aws-lambda" target="_blank">
+          <EuiLink
+            data-test-subj="apmServerlessSummaryGiveFeedbackLink"
+            href="https://ela.st/feedback-aws-lambda"
+            target="_blank"
+          >
             {i18n.translate('xpack.apm.serverlessMetrics.summary.feedback', {
-              defaultMessage: 'Send feedback',
+              defaultMessage: 'Give feedback',
             })}
           </EuiLink>
         </EuiFlexItem>
@@ -163,6 +167,20 @@ export function ServerlessSummary({ serverlessId }: Props) {
           />
         </EuiFlexItem>
         {showVerticalRule && <VerticalRule />}
+        {data?.estimatedCost && (
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              isLoading={isLoading}
+              title={`$${data.estimatedCost}`}
+              titleSize="s"
+              description={i18n.translate(
+                'xpack.apm.serverlessMetrics.summary.estimatedCost',
+                { defaultMessage: 'Estimated costs avg.' }
+              )}
+              reverse
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

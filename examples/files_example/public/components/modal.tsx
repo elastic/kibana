@@ -10,7 +10,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiModal, EuiModalHeader, EuiModalBody, EuiText } from '@elastic/eui';
 import { exampleFileKind, MyImageMetadata } from '../../common';
-import { FilesClient, UploadFile } from '../imports';
+import { FilesClient, FileUpload } from '../imports';
 
 interface Props {
   client: FilesClient<MyImageMetadata>;
@@ -27,7 +27,7 @@ export const Modal: FunctionComponent<Props> = ({ onDismiss, onUploaded, client 
         </EuiText>
       </EuiModalHeader>
       <EuiModalBody>
-        <UploadFile
+        <FileUpload
           multiple
           kind={exampleFileKind.id}
           onDone={onUploaded}

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
@@ -44,7 +45,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
 export const ANALYTICS_PLUGIN = {
   ID: 'enterpriseSearchAnalytics',
   NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
-    defaultMessage: 'Analytics',
+    defaultMessage: 'Behavioral Analytics',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productDescription', {
     defaultMessage:
@@ -97,6 +98,32 @@ export const WORKPLACE_SEARCH_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
 };
 
+export const SEARCH_EXPERIENCES_PLUGIN = {
+  ID: 'searchExperiences',
+  NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
+    defaultMessage: 'Search Experiences',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.searchExperiences.navTitle', {
+    defaultMessage: 'Search Experiences',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
+    defaultMessage: 'Build an intuitive, engaging search experience without reinventing the wheel.',
+  }),
+  URL: '/app/enterprise_search/search_experiences',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  GITHUB_URL: 'https://github.com/elastic/search-ui/',
+  DOCUMENTATION_URL: 'https://docs.elastic.co/search-ui/',
+  ELASTICSEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
+  APP_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/app-search',
+  WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
+};
+
+export const ENGINES_PLUGIN = {
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
+    defaultMessage: 'Engines',
+  }),
+};
+
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
 
 export const JSON_HEADER = {
@@ -127,4 +154,19 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   name: DEFAULT_PIPELINE_NAME,
   reduce_whitespace: true,
   run_ml_inference: false,
+};
+
+export enum INGESTION_METHOD_IDS {
+  api = 'api',
+  connector = 'connector',
+  crawler = 'crawler',
+  native_connector = 'native_connector',
+}
+
+export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
+  hasConnectors: true,
+  hasDefaultIngestPipeline: true,
+  hasNativeConnectors: true,
+  hasSearchApplications: false,
+  hasWebCrawler: true,
 };

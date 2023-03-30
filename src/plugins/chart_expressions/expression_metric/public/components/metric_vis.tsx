@@ -30,12 +30,12 @@ import type {
   RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { FORMATS_UI_SETTINGS, type SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useResizeObserver } from '@elastic/eui';
+import { useResizeObserver, useEuiScrollBar } from '@elastic/eui';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import {
@@ -48,47 +48,28 @@ import { getCurrencyCode } from './currency_codes';
 import { getDataBoundsForPalette } from '../utils';
 
 export const defaultColor = euiThemeVars.euiColorLightestShade;
-const getBytesUnit = (value: number) => {
-  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];
-  const abs = Math.abs(value);
 
-  const base = 1024;
-  let unit = units[0];
-  let matched = abs < base;
-  let power;
-
-  if (!matched) {
-    for (power = 1; power < units.length; power++) {
-      const [min, max] = [Math.pow(base, power), Math.pow(base, power + 1)];
-      if (abs >= min && abs < max) {
-        unit = units[power];
-        matched = true;
-        value = value / min;
-        break;
-      }
-    }
+function getFormatId(serializedFieldFormat: SerializedFieldFormat | undefined): string | undefined {
+  if (serializedFieldFormat?.id === 'suffix') {
+    return `${serializedFieldFormat.params?.id || ''}`;
   }
-
-  if (!matched) {
-    value = value / Math.pow(base, units.length - 1);
-    unit = units[units.length - 1];
+  if (/bitd/.test(`${serializedFieldFormat?.params?.pattern || ''}`)) {
+    return 'bit';
   }
-
-  return { value, unit };
-};
+  return serializedFieldFormat?.id;
+}
 
 const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId =
-    (serializedFieldFormat?.id === 'suffix'
-      ? serializedFieldFormat.params?.id
-      : serializedFieldFormat?.id) ?? 'number';
+  const formatId = getFormatId(serializedFieldFormat) || 'number';
 
   if (
-    !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
+    !['number', 'currency', 'percent', 'bytes', 'bit', 'duration', 'string', 'null'].includes(
+      formatId
+    )
   ) {
     throw new Error(
       i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
@@ -150,10 +131,9 @@ const getMetricFormatter = (
     intlOptions.style = 'percent';
   }
 
-  return formatId === 'bytes'
+  return ['bit', 'bytes'].includes(formatId)
     ? (rawValue: number) => {
-        const { value, unit } = getBytesUnit(rawValue);
-        return new Intl.NumberFormat(locale, { ...intlOptions, style: 'unit', unit }).format(value);
+        return numeral(rawValue).format(`0,0[.]00 ${formatId === 'bytes' ? 'b' : 'bitd'}`);
       }
     : new Intl.NumberFormat(locale, intlOptions).format;
 };
@@ -174,6 +154,7 @@ const getColor = (
 };
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
+  const column = table.columns[columnIdx];
   return {
     name: 'filter',
     data: {
@@ -182,6 +163,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
           table,
           column: columnIdx,
           row: rowIdx,
+          value: table.rows[rowIdx][column.id],
         },
       ],
     },
@@ -336,9 +318,9 @@ export const MetricVis = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollDimensions = useResizeObserver(scrollContainerRef.current);
 
-  const {
-    metric: { minHeight },
-  } = getThemeService().useChartsBaseTheme();
+  const baseTheme = getThemeService().useChartsBaseTheme();
+
+  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
 
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * grid.length;
@@ -358,6 +340,7 @@ export const MetricVis = ({
         max-height: 100%;
         max-width: 100%;
         overflow-y: auto;
+        ${useEuiScrollBar()}
       `}
     >
       <div
@@ -377,6 +360,7 @@ export const MetricVis = ({
               },
               chartTheme,
             ]}
+            baseTheme={baseTheme}
             onRenderChange={onRenderChange}
             onElementClick={(events) => {
               if (!filterable) {

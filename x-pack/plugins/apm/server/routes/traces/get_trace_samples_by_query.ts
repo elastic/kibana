@@ -19,9 +19,14 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
   TRANSACTION_SAMPLED,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+
+export type TraceSamplesResponse = Array<{
+  traceId: string;
+  transactionId: string;
+}>;
 
 export async function getTraceSamplesByQuery({
   apmEventClient,
@@ -37,7 +42,7 @@ export async function getTraceSamplesByQuery({
   environment: Environment;
   query: string;
   type: TraceSearchType;
-}) {
+}): Promise<TraceSamplesResponse> {
   const size = 500;
 
   let traceIds: string[] = [];
@@ -89,19 +94,17 @@ export async function getTraceSamplesByQuery({
               ProcessorEvent.error,
             ],
           },
-          body: {
-            size: 1000,
-            filter: {
-              bool: {
-                filter: [
-                  ...rangeQuery(start, end),
-                  ...environmentQuery(environment),
-                ],
-              },
+          size: 1000,
+          filter: {
+            bool: {
+              filter: [
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+              ],
             },
-            event_category_field: PROCESSOR_EVENT,
-            query,
           },
+          event_category_field: PROCESSOR_EVENT,
+          query,
           filter_path: 'hits.sequences.events._source.trace.id',
         })
       ).hits?.sequences?.flatMap((sequence) =>

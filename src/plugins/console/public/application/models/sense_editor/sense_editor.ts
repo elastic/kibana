@@ -12,8 +12,6 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import RowParser from '../../../lib/row_parser';
 import * as utils from '../../../lib/utils';
-
-// @ts-ignore
 import { constructUrl } from '../../../lib/es/es';
 
 import { CoreEditor, Position, Range } from '../../../types';

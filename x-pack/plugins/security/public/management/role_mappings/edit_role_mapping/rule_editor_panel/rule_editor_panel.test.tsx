@@ -8,7 +8,7 @@
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/test-jest-helpers/target_node/src/stub_web_worker';
+import '@kbn/web-worker-stub';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
@@ -124,5 +124,84 @@ describe('RuleEditorPanel', () => {
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
+  });
+
+  describe('can render a readonly view', () => {
+    it('with visual editor', () => {
+      const props = {
+        rawRules: {
+          field: { username: '*' },
+        },
+        onChange: jest.fn(),
+        onValidityChange: jest.fn(),
+        validateForm: false,
+        readOnly: true,
+      };
+      const wrapper = renderView(props);
+
+      // No mode toggle
+      expect(findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton')).toHaveLength(0);
+
+      // Visual editor is read-only
+      const { readOnly: visualEditorReadOnly } = wrapper
+        .find('VisualRuleEditor[data-test-subj="roleMappingsVisualRuleEditor"]')
+        .props();
+      expect(visualEditorReadOnly).toEqual(true);
+    });
+
+    it('with JSON editor', () => {
+      const props = {
+        rawRules: {
+          all: [
+            {
+              field: {
+                username: '*',
+              },
+            },
+            {
+              all: [
+                {
+                  field: {
+                    username: '*',
+                  },
+                },
+                {
+                  all: [
+                    {
+                      field: {
+                        username: '*',
+                      },
+                    },
+                    {
+                      all: [
+                        {
+                          field: {
+                            username: '*',
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        onChange: jest.fn(),
+        onValidityChange: jest.fn(),
+        validateForm: false,
+        readOnly: true,
+      };
+      const wrapper = renderView(props);
+
+      // No mode toggle
+      expect(findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton')).toHaveLength(0);
+
+      // JSON editor is read-only
+      const { readOnly: jsonEditorReadOnly } = wrapper
+        .find('JSONRuleEditor[data-test-subj="roleMappingsJSONRuleEditor"]')
+        .props();
+      expect(jsonEditorReadOnly).toEqual(true);
+    });
   });
 });

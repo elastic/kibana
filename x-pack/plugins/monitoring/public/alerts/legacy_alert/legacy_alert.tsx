@@ -15,8 +15,11 @@ import {
 import type { MonitoringConfig } from '../../types';
 import { LazyExpression, LazyExpressionProps } from './lazy_expression';
 
+const DEFAULT_VALIDATE = () => ({ errors: {} });
+
 export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[] {
   return LEGACY_RULES.map((legacyAlert) => {
+    const validate = LEGACY_RULE_DETAILS[legacyAlert].validate ?? DEFAULT_VALIDATE;
     return {
       id: legacyAlert,
       description: LEGACY_RULE_DETAILS[legacyAlert].description,
@@ -25,10 +28,15 @@ export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[
         return `${docLinks.links.monitoring.alertsKibanaClusterAlerts}`;
       },
       ruleParamsExpression: (props: LazyExpressionProps) => (
-        <LazyExpression {...props} config={config} />
+        <LazyExpression
+          {...props}
+          defaults={LEGACY_RULE_DETAILS[legacyAlert].defaults}
+          expressionConfig={LEGACY_RULE_DETAILS[legacyAlert].expressionConfig}
+          config={config}
+        />
       ),
       defaultActionMessage: '{{context.internalFullMessage}}',
-      validate: () => ({ errors: {} }),
+      validate,
       requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
     };
   });

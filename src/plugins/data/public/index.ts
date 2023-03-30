@@ -169,6 +169,7 @@ export type {
   IEsError,
   Reason,
   WaitUntilNextSessionCompletesOptions,
+  SearchResponseWarning,
 } from './search';
 
 export {
@@ -180,6 +181,7 @@ export {
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
   isEsError,
+  getSearchErrorOverrideDisplay,
   SearchSource,
   SearchSessionState,
   SortDirection,
@@ -269,6 +271,9 @@ export type {
   TimefilterSetup,
   GlobalQueryStateFromUrl,
 } from './query';
+
+export type { ShardFailureRequest } from './shard_failure_modal';
+export { ShardFailureOpenModalButton } from './shard_failure_modal';
 
 export type { AggsStart } from './search/aggs';
 

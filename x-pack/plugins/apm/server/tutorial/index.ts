@@ -82,12 +82,12 @@ It allows you to monitor the performance of thousands of applications in real ti
 [Learn more]({learnMoreLink}).',
           values: {
             learnMoreLink:
-              '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
+              '{config.docs.base_url}guide/en/apm/guide/{config.docs.version}/index.html',
           },
         }
       ),
       euiIconType: 'apmApp',
-      integrationBrowserCategories: ['web'],
+      integrationBrowserCategories: ['observability', 'apm'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
       onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),

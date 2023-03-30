@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
-import { SearchBar } from '../../shared/search_bar';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { StorageChart } from './storage_chart';
 import { PermissionDenied } from './prompts/permission_denied';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -120,10 +120,13 @@ export function StorageExplorer() {
           <p>
             <FormattedMessage
               id="xpack.apm.storageExplorer.longLoadingTimeCalloutText"
-              defaultMessage="Enable progressive loading of data or optimized sorting for services list in {kibanaAdvancedSettingsLink}."
+              defaultMessage="Enable progressive loading of data and optimized sorting for services list in {kibanaAdvancedSettingsLink}."
               values={{
                 kibanaAdvancedSettingsLink: (
-                  <EuiLink href={getKibanaAdvancedSettingsHref(core)}>
+                  <EuiLink
+                    data-test-subj="apmStorageExplorerKibanaAdvancedSettingsLink"
+                    href={getKibanaAdvancedSettingsHref(core)}
+                  >
                     {i18n.translate(
                       'xpack.apm.storageExplorer.longLoadingTimeCalloutLink',
                       {
@@ -136,6 +139,7 @@ export function StorageExplorer() {
             />
           </p>
           <EuiButton
+            data-test-subj="apmStorageExplorerButton"
             onClick={() =>
               setCalloutDismissed({
                 ...calloutDismissed,
@@ -171,6 +175,7 @@ export function StorageExplorer() {
                 )}
               </p>
               <EuiButton
+                data-test-subj="apmStorageExplorerButton"
                 onClick={() =>
                   setCalloutDismissed({
                     ...calloutDismissed,

@@ -14,9 +14,10 @@ export interface IMvtVectorSource extends IVectorSource {
    * Append refreshToken as a URL parameter to force tile re-fetch on refresh (not required)
    */
   getTileUrl(
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     refreshToken: string,
-    hasLabels: boolean
+    hasLabels: boolean,
+    buffer: number
   ): Promise<string>;
 
   /*

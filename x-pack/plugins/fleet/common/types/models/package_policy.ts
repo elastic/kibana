@@ -33,6 +33,8 @@ export interface NewPackagePolicyInputStream {
       privileges?: {
         indices?: string[];
       };
+      index_mode?: string;
+      source_mode?: string;
     };
   };
   release?: RegistryRelease;
@@ -87,6 +89,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
   inputs: PackagePolicyInput[];
   version?: string;
+  agents?: number;
   revision: number;
   updated_at: string;
   updated_by: string;

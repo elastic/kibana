@@ -5,8 +5,9 @@
  * 2.0.
  */
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
@@ -14,7 +15,7 @@ import type {
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { parseDuration } from '@kbn/alerting-plugin/common';
+import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 
@@ -31,17 +32,18 @@ import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertCreateAPIToInternalSchema } from '../../../rule_management';
 import type { RuleParams } from '../../../rule_schema';
-import { createPreviewRuleExecutionLogger } from '../../../signals/preview/preview_rule_execution_logger';
-import { parseInterval } from '../../../signals/utils';
+import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logger';
+import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
 
 import type { ConfigType } from '../../../../../config';
-import { alertInstanceFactoryStub } from '../../../signals/preview/alert_instance_factory_stub';
+import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
@@ -51,7 +53,6 @@ import {
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
-  createSavedQueryAlertType,
   createThresholdAlertType,
   createNewTermsAlertType,
 } from '../../../rule_types';
@@ -61,6 +62,7 @@ import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
+const MAX_ROUTE_CONCURRENCY = 10;
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -80,7 +82,7 @@ export const previewRulesRoute = async (
         body: buildRouteValidation(previewRulesSchema),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     },
     async (context, request, response) => {
@@ -91,7 +93,7 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const [, { data, security: securityService }] = await getStartServices();
+        const [, { data, security: securityService, share, dataViews }] = await getStartServices();
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
@@ -121,7 +123,7 @@ export const previewRulesRoute = async (
         await listsContext?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
-        const previewId = uuid.v4();
+        const previewId = uuidv4();
         const username = security?.authc.getCurrentUser(request)?.username;
         const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
         const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
@@ -134,8 +136,8 @@ export const previewRulesRoute = async (
           .atSpace(spaceId, {
             elasticsearch: {
               index: {
-                [`${DEFAULT_PREVIEW_INDEX}`]: ['read'],
-                [`.internal${DEFAULT_PREVIEW_INDEX}-`]: ['read'],
+                [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]: ['read'],
+                [`.internal${DEFAULT_PREVIEW_INDEX}-${spaceId}-*`]: ['read'],
               },
               cluster: [],
             },
@@ -217,25 +219,31 @@ export const previewRulesRoute = async (
 
           const rule = {
             ...internalRule,
+            id: previewId,
             createdAt: new Date(),
             createdBy: username ?? 'preview-created-by',
             producer: 'preview-producer',
+            revision: 0,
             ruleTypeId,
             ruleTypeName,
             updatedAt: new Date(),
             updatedBy: username ?? 'preview-updated-by',
+            muteAll: false,
+            snoozeSchedule: [],
           };
 
           let invocationStartTime;
 
+          const dataViewsService = await dataViews.dataViewsServiceFactory(
+            savedObjectsClient,
+            coreContext.elasticsearch.client.asInternalUser
+          );
+
           while (invocationCount > 0 && !isAborted) {
             invocationStartTime = moment();
 
-            statePreview = (await executor({
-              alertId: previewId,
-              createdBy: rule.createdBy,
-              executionId: uuid.v4(),
-              name: rule.name,
+            ({ state: statePreview } = (await executor({
+              executionId: uuidv4(),
               params,
               previousStartedAt,
               rule,
@@ -253,18 +261,19 @@ export const previewRulesRoute = async (
                   searchSourceClient,
                 }),
                 uiSettingsClient: coreContext.uiSettings.client,
+                dataViews: dataViewsService,
+                share,
               },
               spaceId,
               startedAt: startedAt.toDate(),
               state: statePreview,
-              tags: [],
-              updatedBy: rule.updatedBy,
               logger,
-            })) as TState;
+              flappingSettings: DISABLE_FLAPPING_SETTINGS,
+            })) as { state: TState });
 
             const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-              .map((item) => item.message ?? 'Unkown Error');
+              .map((item) => item.message ?? 'Unknown Error');
 
             const warnings = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
@@ -292,7 +301,12 @@ export const previewRulesRoute = async (
         switch (previewRuleParams.type) {
           case 'query':
             const queryAlertType = previewRuleTypeWrapper(
-              createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+              createQueryAlertType({
+                ...ruleOptions,
+                ...queryRuleAdditionalOptions,
+                id: QUERY_RULE_TYPE_ID,
+                name: 'Custom Query Rule',
+              })
             );
             await runExecutors(
               queryAlertType.executor,
@@ -312,7 +326,12 @@ export const previewRulesRoute = async (
             break;
           case 'saved_query':
             const savedQueryAlertType = previewRuleTypeWrapper(
-              createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+              createQueryAlertType({
+                ...ruleOptions,
+                ...queryRuleAdditionalOptions,
+                id: SAVED_QUERY_RULE_TYPE_ID,
+                name: 'Saved Query Rule',
+              })
             );
             await runExecutors(
               savedQueryAlertType.executor,
@@ -407,9 +426,7 @@ export const previewRulesRoute = async (
             );
             break;
           case 'new_terms':
-            const newTermsAlertType = previewRuleTypeWrapper(
-              createNewTermsAlertType(ruleOptions, true)
-            );
+            const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType(ruleOptions));
             await runExecutors(
               newTermsAlertType.executor,
               newTermsAlertType.id,

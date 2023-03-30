@@ -54,10 +54,38 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          summary: {
+            properties: {
+              new: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              ongoing: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              recovered: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+            },
+          },
         },
       },
       alert: {
         properties: {
+          flapping: {
+            type: 'boolean',
+          },
           rule: {
             properties: {
               consumer: {
@@ -175,6 +203,9 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          space_agnostic: {
+            type: 'boolean',
+          },
         },
       },
       space_ids: {
@@ -183,6 +214,30 @@ exports.EcsCustomPropertyMappings = {
       },
       version: {
         type: 'version',
+      },
+      action: {
+        properties: {
+          name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          execution: {
+            properties: {
+              source: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+              uuid: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+            },
+          },
+        },
       },
     },
   },

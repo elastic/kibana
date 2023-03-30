@@ -25,7 +25,7 @@ describe('rule_tag_filter', () => {
     );
 
     expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
-    expect(wrapper.find('.euiNotificationBadge').text()).toEqual('0');
+    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('0');
   });
 
   it('can open the popover correctly', () => {

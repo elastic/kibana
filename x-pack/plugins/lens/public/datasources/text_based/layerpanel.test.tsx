@@ -68,8 +68,6 @@ describe('Layer Data Panel', () => {
           { id: '2', title: 'my-fake-restricted-pattern', name: 'my-fake-restricted-pattern' },
           { id: '3', title: 'my-compatible-pattern', name: 'my-compatible-pattern' },
         ],
-        existingFields: {},
-        isFirstExistenceFetch: false,
         indexPatterns: {},
       } as DataViewsState,
     };
@@ -80,7 +78,7 @@ describe('Layer Data Panel', () => {
     expect(instance.find(ChangeIndexPattern).prop('trigger')).toStrictEqual({
       fontWeight: 'normal',
       isDisabled: true,
-      label: 'My fake index pattern',
+      label: 'my-fake-index-pattern',
       size: 's',
       title: 'my-fake-index-pattern',
     });

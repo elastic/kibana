@@ -27,7 +27,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
+import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
 import { ListMetric } from '../../../shared/list_metric';
 import { ServerlessFunctionNameLink } from './serverless_function_name_link';
 
@@ -201,7 +201,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <TimeseriesChart
+          <TimeseriesChartWithContext
             timeseries={charts}
             id="activeInstances"
             fetchStatus={status}

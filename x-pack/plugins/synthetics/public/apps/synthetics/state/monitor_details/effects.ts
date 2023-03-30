@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { takeLeading } from 'redux-saga/effects';
+import { PayloadAction } from '@reduxjs/toolkit';
+import { takeLeading, takeEvery, select, put } from 'redux-saga/effects';
+
+import { ConfigKey, Ping, PingsResponse } from '../../../../../common/runtime_types';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { getMonitorRecentPingsAction, getMonitorAction } from './actions';
-import { fetchSyntheticsMonitor, fetchMonitorRecentPings } from './api';
+import {
+  getMonitorLastRunAction,
+  getMonitorRecentPingsAction,
+  getMonitorAction,
+  updateMonitorLastRunAction,
+} from './actions';
+import { fetchSyntheticsMonitor, fetchMonitorRecentPings, fetchMonitorLastRun } from './api';
+import { selectLastRunMetadata } from './selectors';
 
 export function* fetchSyntheticsMonitorEffect() {
   yield takeLeading(
@@ -18,6 +27,39 @@ export function* fetchSyntheticsMonitorEffect() {
       getMonitorRecentPingsAction.success,
       getMonitorRecentPingsAction.fail
     )
+  );
+
+  yield takeLeading(
+    getMonitorLastRunAction.get,
+    fetchEffectFactory(
+      fetchMonitorLastRun,
+      getMonitorLastRunAction.success,
+      getMonitorLastRunAction.fail
+    )
+  );
+
+  // Additional listener on `getMonitorRecentPingsAction.success` to possibly update the `lastRun` as well
+  yield takeEvery(
+    getMonitorRecentPingsAction.success,
+    function* (action: PayloadAction<PingsResponse>): Generator {
+      // If `lastRun` and pings from `getMonitorRecentPingsAction` are of the same monitor and location AND
+      // `getMonitorRecentPingsAction` fetched the latest pings than `lastRun`, update `lastRun` as well
+      const lastRun = yield select(selectLastRunMetadata);
+      const lastRunPing = (lastRun as { data?: Ping })?.data;
+      const recentPingFromList = action.payload?.pings[0];
+
+      if (
+        lastRunPing &&
+        recentPingFromList &&
+        lastRunPing?.[ConfigKey.CONFIG_ID] &&
+        recentPingFromList?.[ConfigKey.CONFIG_ID] &&
+        lastRunPing?.[ConfigKey.CONFIG_ID] === recentPingFromList?.[ConfigKey.CONFIG_ID] &&
+        lastRunPing?.observer?.geo?.name === recentPingFromList?.observer?.geo?.name &&
+        new Date(lastRunPing?.timestamp) < new Date(recentPingFromList?.timestamp)
+      ) {
+        yield put(updateMonitorLastRunAction({ data: recentPingFromList }));
+      }
+    }
   );
 
   yield takeLeading(

@@ -15,6 +15,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('Package Policy - delete', () => {
     skipIfNoDockerRegistry(providerContext);
+
     describe('Delete one', () => {
       let agentPolicy: any;
       let packagePolicy: any;

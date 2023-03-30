@@ -15,8 +15,11 @@ import { TrustedAppsList } from './trusted_apps_list';
 import { exceptionsListAllHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 
 jest.mock('../../../../common/components/user_privileges');
+const mockUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe('When on the trusted applications page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -24,6 +27,7 @@ describe('When on the trusted applications page', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let apiMocks: ReturnType<typeof exceptionsListAllHttpMocks>;
+  let mockedEndpointPrivileges: Partial<EndpointPrivileges>;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
@@ -35,6 +39,13 @@ describe('When on the trusted applications page', () => {
     act(() => {
       history.push(TRUSTED_APPS_PATH);
     });
+
+    mockedEndpointPrivileges = { canWriteTrustedApplications: true };
+    mockUserPrivileges.mockReturnValue({ endpointPrivileges: mockedEndpointPrivileges });
+  });
+
+  afterEach(() => {
+    mockUserPrivileges.mockReset();
   });
 
   it('should search using expected exception item fields', async () => {
@@ -58,5 +69,61 @@ describe('When on the trusted applications page', () => {
         }),
       })
     );
+  });
+
+  describe('RBAC Trusted Applications', () => {
+    describe('ALL privilege', () => {
+      beforeEach(() => {
+        mockedEndpointPrivileges.canWriteTrustedApplications = true;
+      });
+
+      it('should enable adding entries', async () => {
+        render();
+
+        await waitFor(() =>
+          expect(renderResult.queryByTestId('trustedAppsListPage-pageAddButton')).toBeTruthy()
+        );
+      });
+
+      it('should enable modifying/deleting entries', async () => {
+        render();
+
+        const actionsButton = await waitFor(
+          () => renderResult.getAllByTestId('trustedAppsListPage-card-header-actions-button')[0]
+        );
+        userEvent.click(actionsButton);
+
+        expect(renderResult.getByTestId('trustedAppsListPage-card-cardEditAction')).toBeTruthy();
+        expect(renderResult.getByTestId('trustedAppsListPage-card-cardDeleteAction')).toBeTruthy();
+      });
+    });
+
+    describe('READ privilege', () => {
+      beforeEach(() => {
+        mockedEndpointPrivileges.canWriteTrustedApplications = false;
+      });
+
+      it('should disable adding entries', async () => {
+        render();
+
+        await waitFor(() =>
+          expect(renderResult.queryByTestId('trustedAppsListPage-container')).toBeTruthy()
+        );
+
+        expect(renderResult.queryByTestId('trustedAppsListPage-pageAddButton')).toBeNull();
+      });
+
+      it('should disable modifying/deleting entries', async () => {
+        render();
+
+        await waitFor(() =>
+          expect(renderResult.queryByTestId('trustedAppsListPage-container')).toBeTruthy()
+        );
+
+        expect(
+          renderResult.queryByTestId('trustedAppsListPage-card-header-actions-button')
+        ).toBeNull();
+      });
+    });
   });
 });

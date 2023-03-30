@@ -28,7 +28,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -47,6 +47,20 @@ interface TopTracesParams {
   apmEventClient: APMEventClient;
   randomSampler: RandomSampler;
 }
+
+export interface TopTracesPrimaryStatsResponse {
+  // sort by impact by default so most impactful services are not cut off
+  items: Array<{
+    key: BucketKey;
+    serviceName: string;
+    transactionName: string;
+    averageResponseTime: number | null;
+    transactionsPerMinute: number;
+    transactionType: string;
+    impact: number;
+    agentName: AgentName;
+  }>;
+}
 export async function getTopTracesPrimaryStats({
   environment,
   kuery,
@@ -56,7 +70,7 @@ export async function getTopTracesPrimaryStats({
   end,
   apmEventClient,
   randomSampler,
-}: TopTracesParams) {
+}: TopTracesParams): Promise<TopTracesPrimaryStatsResponse> {
   return withApmSpan('get_top_traces_primary_stats', async () => {
     const response = await apmEventClient.search(
       'get_transaction_group_stats',

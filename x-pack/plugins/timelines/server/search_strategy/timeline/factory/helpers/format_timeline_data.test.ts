@@ -415,6 +415,50 @@ describe('formatTimelineData', () => {
             value: ['15d82f10-0926-11ed-bece-6b0c033d0075'],
           },
           {
+            field: 'kibana.alert.rule.parameters.sourceId',
+            value: ['default'],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.nodeType',
+            value: ['host'],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.criteria.comparator',
+            value: ['>'],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.criteria.timeSize',
+            value: ['1'],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.criteria.metric',
+            value: ['cpu'],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.criteria.threshold',
+            value: ['10'],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.criteria.customMetric.aggregation',
+            value: ['avg'],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.criteria.customMetric.id',
+            value: ['alert-custom-metric'],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.criteria.customMetric.field',
+            value: [''],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.criteria.customMetric.type',
+            value: ['custom'],
+          },
+          {
+            field: 'kibana.alert.rule.parameters.criteria.timeUnit',
+            value: ['d'],
+          },
+          {
             field: 'event.action',
             value: ['active'],
           },
@@ -466,50 +510,6 @@ describe('formatTimelineData', () => {
             field: 'kibana.version',
             value: ['8.4.0'],
           },
-          {
-            field: 'kibana.alert.rule.parameters.sourceId',
-            value: ['default'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.nodeType',
-            value: ['host'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.comparator',
-            value: ['>'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.timeSize',
-            value: ['1'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.metric',
-            value: ['cpu'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.threshold',
-            value: ['10'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.customMetric.aggregation',
-            value: ['avg'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.customMetric.id',
-            value: ['alert-custom-metric'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.customMetric.field',
-            value: [''],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.customMetric.type',
-            value: ['custom'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.timeUnit',
-            value: ['d'],
-          },
         ],
         ecs: {
           '@timestamp': ['2022-07-21T22:38:57.888Z'],
@@ -528,6 +528,9 @@ describe('formatTimelineData', () => {
                 consumer: ['infrastructure'],
                 name: ['test 1212'],
                 uuid: ['15d82f10-0926-11ed-bece-6b0c033d0075'],
+                parameters: [
+                  '{"sourceId":"default","nodeType":"host","criteria":[{"comparator":">","timeSize":1,"metric":"cpu","threshold":[10],"customMetric":{"aggregation":"avg","id":"alert-custom-metric","field":"","type":"custom"},"timeUnit":"d"}]}',
+                ],
               },
               workflow_status: ['open'],
             },

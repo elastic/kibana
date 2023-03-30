@@ -28,8 +28,11 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
 import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import {
+  AlertSuppression,
   AlertsIndex,
   BuildingBlockType,
   DataViewId,
@@ -70,11 +73,12 @@ import {
 } from '../../../../common/detection_engine/rule_schema';
 
 import type { PatchRuleRequestBody } from '../../../../common/detection_engine/rule_management';
+import { FindRulesSortField } from '../../../../common/detection_engine/rule_management';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
 } from '../../../../common/detection_engine/rule_schema';
-import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
+import { SortOrder } from '../../../../common/detection_engine/schemas/common';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -120,7 +124,6 @@ const MetaRule = t.intersection([
   }),
 ]);
 
-// TODO: make a ticket
 export const RuleSchema = t.intersection([
   t.type({
     author: RuleAuthorArray,
@@ -191,6 +194,7 @@ export const RuleSchema = t.intersection([
     uuid: t.string,
     version: RuleVersion,
     execution_summary: RuleExecutionSummary,
+    alert_suppression: AlertSuppression,
   }),
 ]);
 
@@ -199,11 +203,12 @@ export const RulesSchema = t.array(RuleSchema);
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
-export interface PaginationOptions {
-  page: number;
-  perPage: number;
-  total: number;
-}
+export type PaginationOptions = t.TypeOf<typeof PaginationOptions>;
+export const PaginationOptions = t.type({
+  page: PositiveInteger,
+  perPage: PositiveInteger,
+  total: PositiveInteger,
+});
 
 export interface FetchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
@@ -212,24 +217,11 @@ export interface FetchRulesProps {
   signal?: AbortSignal;
 }
 
-export type RulesSortingFields =
-  | 'created_at'
-  | 'enabled'
-  | 'execution_summary.last_execution.date'
-  | 'execution_summary.last_execution.metrics.execution_gap_duration_s'
-  | 'execution_summary.last_execution.metrics.total_indexing_duration_ms'
-  | 'execution_summary.last_execution.metrics.total_search_duration_ms'
-  | 'execution_summary.last_execution.status'
-  | 'name'
-  | 'risk_score'
-  | 'severity'
-  | 'updated_at'
-  | 'version';
-
-export interface SortingOptions {
-  field: RulesSortingFields;
-  order: SortOrder;
-}
+export type SortingOptions = t.TypeOf<typeof SortingOptions>;
+export const SortingOptions = t.type({
+  field: FindRulesSortField,
+  order: SortOrder,
+});
 
 export interface FilterOptions {
   filter: string;
@@ -237,6 +229,7 @@ export interface FilterOptions {
   showElasticRules: boolean;
   tags: string[];
   excludeRuleTypes?: Type[];
+  enabled?: boolean; // undefined is to display all the rules
 }
 
 export interface FetchRulesResponse {
@@ -259,6 +252,7 @@ export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
   overwriteExceptions?: boolean;
+  overwriteActionConnectors?: boolean;
   signal: AbortSignal;
 }
 
@@ -296,6 +290,10 @@ export interface ImportDataResponse {
   exceptions_success?: boolean;
   exceptions_success_count?: number;
   exceptions_errors?: ExceptionsImportError[];
+  action_connectors_success?: boolean;
+  action_connectors_success_count?: number;
+  action_connectors_errors?: Array<ImportRulesResponseError | ImportResponseError>;
+  action_connectors_warnings?: WarningSchema[];
 }
 
 export interface ExportDocumentsProps {

@@ -28,6 +28,8 @@ import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { Case } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
+import { removeItemFromSessionStorage } from '../utils';
 
 import * as i18n from './translations';
 import type { AddCommentFormSchema } from './schema';
@@ -68,8 +70,9 @@ export const AddComment = React.memo(
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { permissions, owner } = useCasesContext();
+      const { permissions, owner, appId } = useCasesContext();
       const { isLoading, createAttachments } = useCreateAttachments();
+      const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -116,9 +119,20 @@ export const AddComment = React.memo(
             data: [{ ...data, type: CommentType.user }],
             updateCase: onCommentPosted,
           });
-          reset();
+
+          reset({ defaultValue: {} });
         }
-      }, [submit, onCommentSaving, createAttachments, caseId, owner, onCommentPosted, reset]);
+        removeItemFromSessionStorage(draftStorageKey);
+      }, [
+        submit,
+        onCommentSaving,
+        createAttachments,
+        caseId,
+        owner,
+        onCommentPosted,
+        reset,
+        draftStorageKey,
+      ]);
 
       /**
        * Focus on the text area when a quote has been added.
@@ -163,6 +177,7 @@ export const AddComment = React.memo(
                 componentProps={{
                   ref: editorRef,
                   id,
+                  draftStorageKey,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',
@@ -177,7 +192,7 @@ export const AddComment = React.memo(
                           data-test-subj="submit-comment"
                           fill
                           iconType="plusInCircle"
-                          isDisabled={isLoading}
+                          isDisabled={!comment || isLoading}
                           isLoading={isLoading}
                           onClick={onSubmit}
                         >

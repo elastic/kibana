@@ -6,8 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
-import { getActionDetailsById } from '../../services';
+import { validateActionId, getFileDownloadStream, validateActionFileId } from '../../services';
 import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
@@ -18,8 +17,6 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { getFileDownloadStream } from '../../services/actions/action_files';
 
 export const registerActionFileDownloadRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -52,20 +49,14 @@ export const getActionFileDownloadRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
   return async (context, req, res) => {
-    const { action_id: actionId, agent_id: agentId } = req.params;
+    const { action_id: actionId, file_id: fileId } = req.params;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const endpointMetadataService = endpointContext.service.getEndpointMetadataService();
 
     try {
-      // Ensure action id is valid and that it was sent to the Agent ID requested.
-      const actionDetails = await getActionDetailsById(esClient, endpointMetadataService, actionId);
+      await validateActionId(esClient, actionId);
+      await validateActionFileId(esClient, logger, fileId, actionId);
 
-      if (!actionDetails.agents.includes(agentId)) {
-        throw new CustomHttpRequestError(`Action was not sent to agent id [${agentId}]`, 400);
-      }
-
-      const fileDownloadId = getFileDownloadId(actionDetails, agentId);
-      const { stream, fileName } = await getFileDownloadStream(esClient, logger, fileDownloadId);
+      const { stream, fileName } = await getFileDownloadStream(esClient, logger, fileId);
 
       return res.ok({
         body: stream,

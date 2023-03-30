@@ -12,7 +12,7 @@ import type { Query } from '@kbn/es-query';
 import { asyncMap } from '@kbn/std';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { DataRequest } from '../../util/data_request';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
@@ -36,6 +36,10 @@ export function isLayerGroup(layer: ILayer) {
   return layer instanceof LayerGroup;
 }
 
+export const DEFAULT_LAYER_GROUP_LABEL = i18n.translate('xpack.maps.layerGroup.defaultName', {
+  defaultMessage: 'Layer group',
+});
+
 export class LayerGroup implements ILayer {
   protected readonly _descriptor: LayerGroupDescriptor;
   private _children: ILayer[] = [];
@@ -44,13 +48,11 @@ export class LayerGroup implements ILayer {
     return {
       ...options,
       type: LAYER_TYPE.LAYER_GROUP,
-      id: typeof options.id === 'string' && options.id.length ? options.id : uuid(),
+      id: typeof options.id === 'string' && options.id.length ? options.id : uuidv4(),
       label:
         typeof options.label === 'string' && options.label.length
           ? options.label
-          : i18n.translate('xpack.maps.layerGroup.defaultName', {
-              defaultMessage: 'Layer group',
-            }),
+          : DEFAULT_LAYER_GROUP_LABEL,
       sourceDescriptor: null,
       visible: typeof options.visible === 'boolean' ? options.visible : true,
     };
@@ -84,7 +86,7 @@ export class LayerGroup implements ILayer {
 
   async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
 

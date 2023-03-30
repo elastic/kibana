@@ -40,7 +40,7 @@ describe('ElasticV3ServerShipper', () => {
   const setLastBatchSent = (ms: number) => (shipper['lastBatchSent'] = ms);
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     shipper = new ElasticV3ServerShipper(
       { version: '1.2.3', channelName: 'test-channel', debug: true },
@@ -578,6 +578,47 @@ describe('ElasticV3ServerShipper', () => {
           );
         })
       );
+    });
+  });
+
+  describe('flush method', () => {
+    test('resolves straight away if it should not send anything', async () => {
+      await expect(shipper.flush()).resolves.toBe(undefined);
+    });
+
+    test('resolves when all the ongoing requests are complete', async () => {
+      shipper.optIn(true);
+      shipper.reportEvents(events);
+      expect(fetchMock).toHaveBeenCalledTimes(0);
+      fetchMock.mockImplementation(async () => {
+        // eslint-disable-next-line dot-notation
+        expect(shipper['inFlightRequests$'].value).toBe(1);
+      });
+      await expect(shipper.flush()).resolves.toBe(undefined);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://telemetry-staging.elastic.co/v3/send/test-channel',
+        {
+          body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
+          headers: {
+            'content-type': 'application/x-ndjson',
+            'x-elastic-cluster-id': 'UNKNOWN',
+            'x-elastic-stack-version': '1.2.3',
+          },
+          method: 'POST',
+          query: { debug: true },
+        }
+      );
+    });
+
+    test('calling flush multiple times does not keep hanging', async () => {
+      await expect(shipper.flush()).resolves.toBe(undefined);
+      await expect(shipper.flush()).resolves.toBe(undefined);
+      await Promise.all([shipper.flush(), shipper.flush()]);
+    });
+
+    test('calling flush after shutdown does not keep hanging', async () => {
+      shipper.shutdown();
+      await expect(shipper.flush()).resolves.toBe(undefined);
     });
   });
 });

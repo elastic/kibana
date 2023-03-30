@@ -11,7 +11,7 @@ import { getFetch$ } from './get_fetch_observable';
 import { FetchStatus } from '../../types';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
-import { DataRefetch$ } from '../hooks/use_saved_search';
+import { DataRefetch$ } from '../services/discover_data_state_container';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 
 function createDataMock(
@@ -63,7 +63,6 @@ describe('getFetchObservable', () => {
       data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
       searchSessionManager: searchSessionManagerMock.searchSessionManager,
       searchSource: savedSearchMock.searchSource,
-      initialFetchStatus: FetchStatus.LOADING,
     });
 
     fetch$.subscribe(() => {
@@ -75,7 +74,7 @@ describe('getFetchObservable', () => {
   test(
     'getAutoRefreshFetch$ should trigger fetch$.next',
     fakeSchedulers((advance) => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       const searchSessionManagerMock = createSearchSessionMock();
       const autoRefreshFetch$ = new Subject();
 
@@ -95,7 +94,6 @@ describe('getFetchObservable', () => {
         data: dataMock,
         searchSessionManager: searchSessionManagerMock.searchSessionManager,
         searchSource: savedSearchMockWithTimeField.searchSource,
-        initialFetchStatus: FetchStatus.LOADING,
       });
 
       const fetchfnMock = jest.fn();

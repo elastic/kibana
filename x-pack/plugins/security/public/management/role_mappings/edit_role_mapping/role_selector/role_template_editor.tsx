@@ -35,6 +35,7 @@ interface Props {
   canUseStoredScripts: boolean;
   onChange: (roleTemplate: RoleTemplate) => void;
   onDelete: (roleTemplate: RoleTemplate) => void;
+  readOnly?: boolean;
 }
 
 export const RoleTemplateEditor = ({
@@ -43,6 +44,7 @@ export const RoleTemplateEditor = ({
   onDelete,
   canUseInlineScripts,
   canUseStoredScripts,
+  readOnly = false,
 }: Props) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -52,18 +54,20 @@ export const RoleTemplateEditor = ({
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="trash"
-              color="danger"
-              size="xs"
-              onClick={() => onDelete(roleTemplate)}
-              data-test-subj="deleteRoleTemplateButton"
-            >
-              <FormattedMessage
-                id="xpack.security.management.editRoleMapping.deleteRoleTemplateButton"
-                defaultMessage="Delete template"
-              />
-            </EuiButtonEmpty>
+            {!readOnly ? (
+              <EuiButtonEmpty
+                iconType="trash"
+                color="danger"
+                size="xs"
+                onClick={() => onDelete(roleTemplate)}
+                data-test-subj="deleteRoleTemplateButton"
+              >
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.deleteRoleTemplateButton"
+                  defaultMessage="Delete template"
+                />
+              </EuiButtonEmpty>
+            ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -81,6 +85,7 @@ export const RoleTemplateEditor = ({
     return (
       <EuiFormRow label={returnsJsonLabel}>
         <EuiSwitch
+          data-test-subj="roleTemplateFormatSwitch"
           checked={roleTemplate.format === 'json'}
           label={returnsJsonLabel}
           showLabel={false}
@@ -90,6 +95,7 @@ export const RoleTemplateEditor = ({
               format: e.target.checked ? 'json' : 'string',
             });
           }}
+          disabled={readOnly}
         />
       </EuiFormRow>
     );
@@ -111,6 +117,7 @@ export const RoleTemplateEditor = ({
             canUseStoredScripts={canUseStoredScripts}
             canUseInlineScripts={canUseInlineScripts}
             onChange={onChange}
+            readOnly={readOnly}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -131,7 +138,7 @@ export const RoleTemplateEditor = ({
   function getEditorForTemplate() {
     if (isInlineRoleTemplate(roleTemplate)) {
       const extraProps: Record<string, any> = {};
-      if (!canUseInlineScripts) {
+      if (!canUseInlineScripts && !readOnly) {
         extraProps.isInvalid = true;
         extraProps.error = (
           <EuiText size="xs" color="danger" data-test-subj="roleMappingInlineScriptsDisabled">
@@ -175,6 +182,7 @@ export const RoleTemplateEditor = ({
                     },
                   });
                 }}
+                disabled={readOnly}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -224,6 +232,7 @@ export const RoleTemplateEditor = ({
                     },
                   });
                 }}
+                disabled={readOnly}
               />
             </EuiFormRow>
           </EuiFlexItem>

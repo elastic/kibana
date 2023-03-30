@@ -9,7 +9,7 @@
 import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
 const BASIC_CONFIG = require.resolve('./__fixtures__/simple_project/config.js');

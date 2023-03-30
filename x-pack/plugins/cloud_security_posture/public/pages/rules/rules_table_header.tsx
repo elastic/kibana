@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 
@@ -17,28 +16,8 @@ interface RulesTableToolbarProps {
   isSearching: boolean;
 }
 
-interface CounterProps {
-  count: number;
-}
-
-export const RulesTableHeader = ({
-  search,
-  totalRulesCount,
-  searchValue,
-  isSearching,
-}: RulesTableToolbarProps) => (
-  <div>
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
-      <Counters total={totalRulesCount} />
-      <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
-    </EuiFlexGroup>
-  </div>
-);
-
-const Counters = ({ total }: { total: number }) => (
-  <EuiFlexItem grow={false} style={{ flexDirection: 'row', fontVariantNumeric: 'tabular-nums' }}>
-    <TotalRulesCount count={total} />
-  </EuiFlexItem>
+export const RulesTableHeader = ({ search, searchValue, isSearching }: RulesTableToolbarProps) => (
+  <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
 );
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -57,31 +36,13 @@ const SearchField = ({
       <EuiFieldSearch
         isLoading={isSearching}
         placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
-          defaultMessage: 'Search',
+          defaultMessage: 'Search by Rule Name',
         })}
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         style={{ minWidth: 150 }}
+        fullWidth
       />
     </EuiFlexItem>
   );
 };
-
-const TotalRulesCount = ({ count }: CounterProps) => (
-  <FormattedMessage
-    id="xpack.csp.rules.header.totalRulesCount"
-    defaultMessage="Showing {rules}"
-    values={{ rules: <RulesCountBold count={count} /> }}
-  />
-);
-
-const RulesCountBold = ({ count }: CounterProps) => (
-  <>
-    <strong style={{ margin: '0 4px' }}>{count}</strong>
-    <FormattedMessage
-      id="xpack.csp.rules.header.rulesCountLabel"
-      defaultMessage="{count, plural, one { rule} other { rules}}"
-      values={{ count }}
-    />
-  </>
-);

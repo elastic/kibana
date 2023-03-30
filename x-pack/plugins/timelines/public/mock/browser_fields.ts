@@ -810,6 +810,22 @@ export const mockBrowserFields: BrowserFields = {
           },
         },
       },
+      'nestedField.thirdAttributes': {
+        aggregatable: false,
+        category: 'nestedField',
+        description: '',
+        example: '',
+        format: '',
+        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+        name: 'nestedField.thirdAttributes',
+        searchable: true,
+        type: 'date',
+        subType: {
+          nested: {
+            path: 'nestedField',
+          },
+        },
+      },
     },
   },
 };

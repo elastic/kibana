@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         formula: `asdf`,
       });
 
-      expect(await PageObjects.lens.getErrorCount()).to.eql(1);
+      await PageObjects.lens.assertMessageListContains('Field asdf was not found.', 'error');
     });
 
     it('should keep the formula when entering expanded mode', async () => {
@@ -175,7 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.waitForVisualization('legacyMtrVis');
-      expect(await PageObjects.lens.getErrorCount()).to.eql(0);
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
     });
 
     it('should duplicate a moving average formula and be a valid table with conditional coloring', async () => {

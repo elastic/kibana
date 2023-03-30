@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { camelCase } from 'lodash';
 import type {
   CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
+import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
-  DETECTION_ENGINE_TAGS_URL,
 } from '../../../../common/constants';
 
 import {
@@ -28,9 +31,11 @@ import {
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
 
-import type { BulkActionEditPayload } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkAction } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-
+import type {
+  BulkActionEditPayload,
+  BulkActionDuplicatePayload,
+} from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import type {
   RuleResponse,
   PreviewResponse,
@@ -149,15 +154,10 @@ export const fetchRules = async ({
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const filterString = convertRulesFilterToKQL(filterOptions);
 
-  // Sort field is camel cased because we use that in our mapping, but display snake case on the front end
-  const getFieldNameForSortField = (field: string) => {
-    return field === 'name' ? `${field}.keyword` : camelCase(field);
-  };
-
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: getFieldNameForSortField(sortingOptions.field),
+    sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
     ...(filterString !== '' ? { filter: filterString } : {}),
   };
@@ -186,6 +186,7 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
 
 export interface BulkActionSummary {
   failed: number;
+  skipped: number;
   succeeded: number;
   total: number;
 }
@@ -194,6 +195,7 @@ export interface BulkActionResult {
   updated: Rule[];
   created: Rule[];
   deleted: Rule[];
+  skipped: Rule[];
 }
 
 export interface BulkActionAggregatedError {
@@ -203,58 +205,75 @@ export interface BulkActionAggregatedError {
   rules: Array<{ id: string; name?: string }>;
 }
 
+export interface BulkActionAttributes {
+  summary: BulkActionSummary;
+  results: BulkActionResult;
+  errors?: BulkActionAggregatedError[];
+}
+
 export interface BulkActionResponse {
   success?: boolean;
   rules_count?: number;
-  attributes: {
-    summary: BulkActionSummary;
-    results: BulkActionResult;
-    errors?: BulkActionAggregatedError[];
-  };
+  attributes: BulkActionAttributes;
 }
 
-export interface BulkActionProps {
-  action: Exclude<BulkAction, BulkAction.export>;
-  query?: string;
-  ids?: string[];
-  edit?: BulkActionEditPayload[];
-  isDryRun?: boolean;
+export interface BulkActionErrorResponse {
+  message: string;
+  status_code: number;
+  attributes?: BulkActionAttributes;
+}
+
+export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
+type PlainBulkAction = {
+  type: Exclude<
+    BulkActionType,
+    BulkActionType.edit | BulkActionType.export | BulkActionType.duplicate
+  >;
+} & QueryOrIds;
+
+type EditBulkAction = {
+  type: BulkActionType.edit;
+  editPayload: BulkActionEditPayload[];
+} & QueryOrIds;
+
+type DuplicateBulkAction = {
+  type: BulkActionType.duplicate;
+  duplicatePayload?: BulkActionDuplicatePayload;
+} & QueryOrIds;
+
+export type BulkAction = PlainBulkAction | EditBulkAction | DuplicateBulkAction;
+
+export interface PerformBulkActionProps {
+  bulkAction: BulkAction;
+  dryRun?: boolean;
 }
 
 /**
  * Perform bulk action with rules selected by a filter query
  *
- * @param query filter query to select rules to perform bulk action with
- * @param ids string[] rule ids to select rules to perform bulk action with
- * @param edit BulkEditActionPayload edit action payload
- * @param action bulk action to perform
- * @param isDryRun enables dry run mode for bulk actions
+ * @param bulkAction bulk action which contains type, query or ids and edit fields
+ * @param dryRun enables dry run mode for bulk actions
  *
  * @throws An error if response is not OK
  */
-export const performBulkAction = async ({
-  action,
-  query,
-  edit,
-  ids,
-  isDryRun,
-}: BulkActionProps): Promise<BulkActionResponse> =>
-  KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
-    method: 'POST',
-    body: JSON.stringify({
-      action,
-      ...(edit ? { edit } : {}),
-      ...(ids ? { ids } : {}),
-      ...(query !== undefined ? { query } : {}),
-    }),
-    query: {
-      ...(isDryRun ? { dry_run: isDryRun } : {}),
-    },
-  });
+export async function performBulkAction({
+  bulkAction,
+  dryRun = false,
+}: PerformBulkActionProps): Promise<BulkActionResponse> {
+  const params = {
+    action: bulkAction.type,
+    query: bulkAction.query,
+    ids: bulkAction.ids,
+    edit: bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
+    duplicate:
+      bulkAction.type === BulkActionType.duplicate ? bulkAction.duplicatePayload : undefined,
+  };
 
-export interface BulkExportProps {
-  query?: string;
-  ids?: string[];
+  return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+    method: 'POST',
+    body: JSON.stringify(params),
+    query: { dry_run: dryRun },
+  });
 }
 
 export type BulkExportResponse = Blob;
@@ -262,23 +281,22 @@ export type BulkExportResponse = Blob;
 /**
  * Bulk export rules selected by a filter query
  *
- * @param query filter query to select rules to perform bulk action with
- * @param ids string[] rule ids to select rules to perform bulk action with
+ * @param queryOrIds filter query to select rules to perform bulk action with or rule ids to select rules to perform bulk action with
  *
  * @throws An error if response is not OK
  */
-export const bulkExportRules = async ({
-  query,
-  ids,
-}: BulkExportProps): Promise<BulkExportResponse> =>
-  KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExportResponse> {
+  const params = {
+    action: BulkActionType.export,
+    query: queryOrIds.query,
+    ids: queryOrIds.ids,
+  };
+
+  return KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
     method: 'POST',
-    body: JSON.stringify({
-      action: BulkAction.export,
-      ...(ids ? { ids } : {}),
-      ...(query !== undefined ? { query } : {}),
-    }),
+    body: JSON.stringify(params),
   });
+}
 
 export interface CreatePrepackagedRulesResponse {
   rules_installed: number;
@@ -320,6 +338,7 @@ export const importRules = async ({
   fileToImport,
   overwrite = false,
   overwriteExceptions = false,
+  overwriteActionConnectors = false,
   signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
@@ -330,7 +349,11 @@ export const importRules = async ({
     {
       method: 'POST',
       headers: { 'Content-Type': undefined },
-      query: { overwrite, overwrite_exceptions: overwriteExceptions },
+      query: {
+        overwrite,
+        overwrite_exceptions: overwriteExceptions,
+        overwrite_action_connectors: overwriteActionConnectors,
+      },
       body: formData,
       signal,
     }
@@ -369,17 +392,19 @@ export const exportRules = async ({
   });
 };
 
-export type FetchTagsResponse = string[];
-
 /**
- * Fetch all unique Tags used by Rules
+ * Fetch rule filters related information like installed rules count, tags and etc
  *
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const fetchTags = async ({ signal }: { signal?: AbortSignal }): Promise<FetchTagsResponse> =>
-  KibanaServices.get().http.fetch<FetchTagsResponse>(DETECTION_ENGINE_TAGS_URL, {
+export const fetchRuleManagementFilters = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<RuleManagementFiltersResponse> =>
+  KibanaServices.get().http.fetch<RuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
     method: 'GET',
     signal,
   });
@@ -459,3 +484,61 @@ export const addRuleExceptions = async ({
       signal,
     }
   );
+
+export interface InstallFleetPackageProps {
+  packageName: string;
+  packageVersion: string;
+  prerelease?: boolean;
+  force?: boolean;
+}
+
+/**
+ * Install a Fleet package from the registry
+ *
+ * @param packageName Name of the package to install
+ * @param packageVersion Version of the package to install
+ * @param prerelease Whether to install a prerelease version of the package
+ * @param force Whether to force install the package. If false, the package will only be installed if it is not already installed
+ *
+ * @returns The response from the Fleet API
+ */
+export const installFleetPackage = ({
+  packageName,
+  packageVersion,
+  prerelease = false,
+  force = true,
+}: InstallFleetPackageProps): Promise<InstallPackageResponse> => {
+  return KibanaServices.get().http.post<InstallPackageResponse>(
+    epmRouteService.getInstallPath(packageName, packageVersion),
+    {
+      query: { prerelease },
+      body: JSON.stringify({ force }),
+    }
+  );
+};
+
+export interface BulkInstallFleetPackagesProps {
+  packages: string[];
+  prerelease?: boolean;
+}
+
+/**
+ * Install multiple Fleet packages from the registry
+ *
+ * @param packages Array of package names to install
+ * @param prerelease Whether to install prerelease versions of the packages
+ *
+ * @returns The response from the Fleet API
+ */
+export const bulkInstallFleetPackages = ({
+  packages,
+  prerelease = false,
+}: BulkInstallFleetPackagesProps): Promise<BulkInstallPackagesResponse> => {
+  return KibanaServices.get().http.post<BulkInstallPackagesResponse>(
+    epmRouteService.getBulkInstallPath(),
+    {
+      query: { prerelease },
+      body: JSON.stringify({ packages }),
+    }
+  );
+};

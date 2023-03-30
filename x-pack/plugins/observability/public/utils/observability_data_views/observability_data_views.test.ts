@@ -104,7 +104,9 @@ describe('ObservabilityDataViews', function () {
       fieldFormats,
       id: 'rum_static_index_pattern_id_trace_apm_',
       timeFieldName: '@timestamp',
-      title: '(rum-data-view)*,trace-*,apm-*',
+      title: 'trace-*,apm-*',
+      name: 'User experience (RUM)',
+      allowNoIndex: true,
     });
 
     expect(dataViews?.createAndSave).toHaveBeenCalledTimes(1);

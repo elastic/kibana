@@ -11,7 +11,7 @@
   Need tests for spacing, etc
 */
 
-import { evaluate, parse } from '@kbn/tinymath';
+import { evaluate, parse } from '../src';
 
 function variableEqual(value) {
   return expect.objectContaining({ type: 'variable', value });

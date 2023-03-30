@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
         // @ts-expect-error not full interface
         testJobConfig,
         testDatafeedConfig,
-        idSpace1
+        { space: idSpace1 }
       );
     });
 

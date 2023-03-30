@@ -8,7 +8,7 @@
 
 import { resolve } from 'path';
 
-import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
@@ -25,14 +25,22 @@ const versionInfo = jest.requireMock('./version_info').getVersionInfo();
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-const setup = async ({ targetAllPlatforms = true }: { targetAllPlatforms?: boolean } = {}) => {
+const setup = async ({
+  targetAllPlatforms = true,
+  isRelease = true,
+}: { targetAllPlatforms?: boolean; isRelease?: boolean } = {}) => {
   return await Config.create({
-    isRelease: true,
+    isRelease,
     targetAllPlatforms,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 };
 
@@ -184,6 +192,17 @@ describe('#getBuildSha()', () => {
   it('returns the sha from the build info', async () => {
     const config = await setup();
     expect(config.getBuildSha()).toBe(versionInfo.buildSha);
+  });
+});
+
+describe('#isRelease()', () => {
+  it('returns true when marked as a release', async () => {
+    const config = await setup({ isRelease: true });
+    expect(config.isRelease).toBe(true);
+  });
+  it('returns false when not marked as a release', async () => {
+    const config = await setup({ isRelease: false });
+    expect(config.isRelease).toBe(false);
   });
 });
 

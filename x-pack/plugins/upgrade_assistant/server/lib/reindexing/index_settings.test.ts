@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MAJOR_VERSION } from '../../../common/constants';
 import { versionService } from '../version';
 import { getMockVersionInfo } from '../__fixtures__/version';
 
@@ -129,7 +128,7 @@ describe('transformFlatSettings', () => {
 
   describe('sourceNameForIndex', () => {
     beforeEach(() => {
-      versionService.setup(MAJOR_VERSION);
+      versionService.setup('8.0.0');
     });
 
     it('parses internal indices', () => {
@@ -150,7 +149,7 @@ describe('transformFlatSettings', () => {
 
   describe('generateNewIndexName', () => {
     beforeEach(() => {
-      versionService.setup(MAJOR_VERSION);
+      versionService.setup('8.0.0');
     });
 
     it('parses internal indices', () => {

@@ -7,10 +7,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LogRecord, Layout } from '@kbn/logging';
-
 import {
-  Conversion,
+  PatternLayout as BasePatternLayout,
+  type Conversion,
+} from '@kbn/core-logging-common-internal';
+import {
   LoggerConversion,
   LevelConversion,
   MetaConversion,
@@ -19,9 +20,6 @@ import {
   DateConversion,
 } from './conversions';
 
-/**
- * Default pattern used by PatternLayout if it's not overridden in the configuration.
- */
 const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;
 
 export const patternSchema = schema.string({
@@ -50,23 +48,14 @@ const conversions: Conversion[] = [
  * color highlighting (eg. to make log messages easier to read in the terminal).
  * @internal
  */
-export class PatternLayout implements Layout {
+export class PatternLayout extends BasePatternLayout {
   public static configSchema = patternLayoutSchema;
-  constructor(private readonly pattern = DEFAULT_PATTERN, private readonly highlight = false) {}
 
-  /**
-   * Formats `LogRecord` into a string based on the specified `pattern` and `highlighting` options.
-   * @param record Instance of `LogRecord` to format into string.
-   */
-  public format(record: LogRecord): string {
-    let recordString = this.pattern;
-    for (const conversion of conversions) {
-      recordString = recordString.replace(
-        conversion.pattern,
-        conversion.convert.bind(null, record, this.highlight)
-      );
-    }
-
-    return recordString;
+  constructor(pattern: string = DEFAULT_PATTERN, highlight: boolean = false) {
+    super({
+      pattern,
+      highlight,
+      conversions,
+    });
   }
 }

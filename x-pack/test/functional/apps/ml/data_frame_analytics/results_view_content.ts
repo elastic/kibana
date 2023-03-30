@@ -294,6 +294,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
         });
 
+        it('should display the feature importance decision path after changing page', async () => {
+          await ml.dataFrameAnalyticsResults.selectResultsTablePage(3);
+          await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
+        });
+
         it('should display the histogram charts', async () => {
           await ml.testExecution.logTestStep(
             'displays the histogram charts when option is enabled'
@@ -321,6 +328,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('shows all and hides all columns');
           await ml.dataFrameAnalyticsResults.showAllResultsTableColumns();
           await ml.dataFrameAnalyticsResults.hideAllResultsTableColumns();
+        });
+
+        it('should link to custom visualization UI from scatterplot charts', async () => {
+          await ml.dataFrameAnalyticsResults.assertOpensExploreInCustomVisualization();
         });
       });
     }

@@ -23,7 +23,7 @@ import {
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import expect from 'expect';
+import { expect } from 'expect';
 import {
   createListsIndex,
   deleteAllExceptions,
@@ -33,7 +33,7 @@ import {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   executeSetupModuleRequest,
   forceStartDatafeeds,
@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/142993
+  // FLAKY: https://github.com/elastic/kibana/issues/145776
   describe.skip('Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     // First test creates a real rule - remaining tests use preview API

@@ -75,8 +75,13 @@ export const alertType: RuleType<
     }
 
     return {
-      peopleInSpace,
+      state: {
+        peopleInSpace,
+      },
     };
   },
   producer: ALERTING_EXAMPLE_APP_ID,
+  getViewInAppRelativeUrl({ rule }) {
+    return `/app/${ALERTING_EXAMPLE_APP_ID}/astros/${rule.id}`;
+  },
 };

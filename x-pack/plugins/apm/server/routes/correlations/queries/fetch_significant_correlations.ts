@@ -15,7 +15,6 @@ import type {
 } from '../../../../common/correlations/types';
 
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { Setup } from '../../../lib/helpers/setup_request';
 import {
   computeExpectationsAndRanges,
   splitAllSettledPromises,
@@ -28,8 +27,14 @@ import { fetchDurationRanges } from './fetch_duration_ranges';
 import { getEventType } from '../utils';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
+export interface SignificantCorrelationsResponse {
+  latencyCorrelations: LatencyCorrelation[];
+  ccsWarning: boolean;
+  totalDocCount: number;
+  fallbackResult?: LatencyCorrelation;
+}
+
 export const fetchSignificantCorrelations = async ({
-  setup,
   apmEventClient,
   start,
   end,
@@ -40,12 +45,11 @@ export const fetchSignificantCorrelations = async ({
   durationMaxOverride,
   fieldValuePairs,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
   apmEventClient: APMEventClient;
   durationMinOverride?: number;
   durationMaxOverride?: number;
   fieldValuePairs: FieldValuePair[];
-}) => {
+}): Promise<SignificantCorrelationsResponse> => {
   // Create an array of ranges [2, 4, 6, ..., 98]
   const percentileAggregationPercents = range(2, 100, 2);
   const chartType = LatencyDistributionChartType.latencyCorrelations;
@@ -168,7 +172,8 @@ export const fetchSignificantCorrelations = async ({
     }
   }
 
-  const index = setup.indices[eventType as keyof typeof setup.indices];
+  const index =
+    apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
   const ccsWarning = rejected.length > 0 && index.includes(':');
 

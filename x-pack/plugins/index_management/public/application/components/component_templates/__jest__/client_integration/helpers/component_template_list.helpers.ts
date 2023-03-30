@@ -32,7 +32,7 @@ export type ComponentTemplateListTestBed = TestBed<ComponentTemplateTestSubjects
 };
 
 const createActions = (testBed: TestBed) => {
-  const { find } = testBed;
+  const { find, component } = testBed;
 
   /**
    * User Actions
@@ -42,7 +42,7 @@ const createActions = (testBed: TestBed) => {
   };
 
   const clickComponentTemplateAt = async (index: number) => {
-    const { component, table, router } = testBed;
+    const { table, router } = testBed;
     const { rows } = table.getMetaData('componentTemplatesTable');
     const componentTemplateLink = findTestSubject(
       rows[index].reactWrapper,
@@ -55,6 +55,13 @@ const createActions = (testBed: TestBed) => {
       await nextTick();
       component.update();
     });
+  };
+
+  const clickTableColumnSortButton = async (index: number) => {
+    await act(async () => {
+      find('tableHeaderSortButton').at(index).simulate('click');
+    });
+    component.update();
   };
 
   const clickDeleteActionAt = (index: number) => {
@@ -70,6 +77,7 @@ const createActions = (testBed: TestBed) => {
     clickReloadButton,
     clickComponentTemplateAt,
     clickDeleteActionAt,
+    clickTableColumnSortButton,
   };
 };
 

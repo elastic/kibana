@@ -7,11 +7,11 @@
 
 import { parse, stringify } from 'query-string';
 import { History, Location } from 'history';
-import { throttle } from 'lodash';
 import React from 'react';
-import { Route, RouteProps } from 'react-router-dom';
-import { decode, encode, RisonValue } from 'rison-node';
+import { Route } from '@kbn/shared-ux-router';
+import { decode, encode, RisonValue } from '@kbn/rison';
 import { url } from '@kbn/kibana-utils-plugin/public';
+import { throttle } from 'lodash';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;
@@ -123,7 +123,7 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
 export const UrlStateContainer = <UrlState extends any>(
   props: UrlStateContainerProps<UrlState>
 ) => (
-  <Route<RouteProps>>
+  <Route>
     {({ history, location }) => (
       <UrlStateContainerLifecycle<UrlState> history={history} location={location} {...props} />
     )}

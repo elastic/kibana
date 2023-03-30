@@ -24,9 +24,7 @@ export interface SetupFleetForEndpointResponse {
  * Calls the fleet setup APIs and then installs the latest Endpoint package
  * @param kbnClient
  */
-export const setupFleetForEndpoint = async (
-  kbnClient: KbnClient
-): Promise<SetupFleetForEndpointResponse> => {
+export const setupFleetForEndpoint = async (kbnClient: KbnClient): Promise<void> => {
   // We try to use the kbnClient **private** logger, bug if unable to access it, then just use console
   // @ts-expect-error TS2341
   const log = kbnClient.log ? kbnClient.log : console;
@@ -66,18 +64,6 @@ export const setupFleetForEndpoint = async (
     log.error(error);
     throw error;
   }
-
-  // Install/upgrade the endpoint package
-  let endpointPackage: BulkInstallPackageInfo;
-
-  try {
-    endpointPackage = await installOrUpgradeEndpointFleetPackage(kbnClient);
-  } catch (error) {
-    log.error(error);
-    throw error;
-  }
-
-  return { endpointPackage };
 };
 
 /**
@@ -94,6 +80,9 @@ export const installOrUpgradeEndpointFleetPackage = async (
       method: 'POST',
       body: {
         packages: ['endpoint'],
+      },
+      query: {
+        prerelease: true,
       },
     })
     .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;

@@ -8,7 +8,6 @@
 
 import React, { FunctionComponent, CSSProperties } from 'react';
 import numeral from '@elastic/numeral';
-
 interface Props {
   /** The text to display under the metric */
   label?: string;
@@ -22,24 +21,23 @@ interface Props {
   metricFormat?: string;
 }
 
-const Metric: FunctionComponent<Props> = ({
+export const MetricComponent: FunctionComponent<Props> = ({
   label,
   metric,
   labelFont,
   metricFont,
   metricFormat,
-}) => (
-  <div className="canvasMetric">
-    <div className="canvasMetric__metric" style={metricFont}>
-      {metricFormat ? numeral(metric).format(metricFormat) : metric}
-    </div>
-    {label && (
-      <div className="canvasMetric__label" style={labelFont}>
-        {label}
+}) => {
+  return (
+    <div className="canvasMetric">
+      <div className="canvasMetric__metric" style={metricFont}>
+        {metricFormat ? numeral(metric).format(metricFormat) : metric}
       </div>
-    )}
-  </div>
-);
-
-// eslint-disable-next-line import/no-default-export
-export { Metric as default };
+      {label && (
+        <div className="canvasMetric__label" style={labelFont}>
+          {label}
+        </div>
+      )}
+    </div>
+  );
+};

@@ -17,7 +17,7 @@ import {
   STATUS_DOWN_LABEL,
   STATUS_FAILED_LABEL,
   STATUS_UP_LABEL,
-} from '../../../common/translations';
+} from '../../../../../../common/translations/translations';
 
 interface Props {
   pingStatus: string;

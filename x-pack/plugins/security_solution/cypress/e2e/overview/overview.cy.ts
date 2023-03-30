@@ -25,6 +25,9 @@ describe('Overview Page', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('overview');
+  });
+
+  beforeEach(() => {
     visit(OVERVIEW_URL);
   });
 

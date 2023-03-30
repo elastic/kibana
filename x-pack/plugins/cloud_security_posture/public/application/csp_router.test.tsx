@@ -4,63 +4,132 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getRoutesFromMapping, addSpyRouteComponentToRoute } from './csp_router';
+import CspRouter from './csp_router';
 import React from 'react';
-import Chance from 'chance';
-import { render, screen } from '@testing-library/react';
-import type { RouteComponentProps } from 'react-router-dom';
-import type { CloudSecurityPosturePageId } from '../common/navigation/types';
-import { createPageNavigationItemFixture } from '../test/fixtures/navigation_item';
+import { render } from '@testing-library/react';
+import { Router } from 'react-router-dom';
+import type { CspPage, CspPageNavigationItem } from '../common/navigation/types';
+import { CspSecuritySolutionContext } from '../types';
+import { createMemoryHistory, MemoryHistory } from 'history';
+import * as constants from '../common/navigation/constants';
+import { QueryClientProviderProps } from '@tanstack/react-query';
 
-const chance = new Chance();
-const DummyComponent = () => null;
+jest.mock('../pages', () => ({
+  Findings: () => <div data-test-subj="Findings">Findings</div>,
+  ComplianceDashboard: () => <div data-test-subj="ComplianceDashboard">ComplianceDashboard</div>,
+  Rules: () => <div data-test-subj="Rules">Rules</div>,
+  Benchmarks: () => <div data-test-subj="Benchmarks">Benchmarks</div>,
+}));
 
-describe('getRoutesFromMapping', () => {
-  it('should map routes', () => {
-    const pageId = chance.word();
-    const navigationItems = { [pageId]: createPageNavigationItemFixture() };
-    const routesMapping = { [pageId]: DummyComponent };
-    const routes = getRoutesFromMapping(navigationItems, routesMapping);
+jest.mock('@tanstack/react-query', () => ({
+  QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
+  QueryClient: jest.fn(),
+}));
 
-    expect(routes).toHaveLength(1);
-    expect(routes[0]).toMatchObject({
-      path: navigationItems[pageId].path,
-      component: DummyComponent,
+describe('CspRouter', () => {
+  const originalCloudPosturePages = { ...constants.cloudPosturePages };
+  const mockConstants = constants as { cloudPosturePages: Record<CspPage, CspPageNavigationItem> };
+
+  const securityContext: CspSecuritySolutionContext = {
+    getFiltersGlobalComponent: jest.fn(),
+    getSpyRouteComponent: () => () => <div data-test-subj="mockedSpyRoute" />,
+  };
+
+  let history: MemoryHistory;
+
+  const renderCspRouter = () =>
+    render(
+      <Router history={history}>
+        <CspRouter securitySolutionContext={securityContext} />
+      </Router>
+    );
+
+  beforeEach(() => {
+    mockConstants.cloudPosturePages = originalCloudPosturePages;
+    jest.clearAllMocks();
+    history = createMemoryHistory();
+  });
+
+  describe('happy path', () => {
+    it('should render Findings', () => {
+      history.push('/cloud_security_posture/findings');
+      const result = renderCspRouter();
+
+      expect(result.queryByTestId('Findings')).toBeInTheDocument();
+      expect(result.queryByTestId('ComplianceDashboard')).not.toBeInTheDocument();
+      expect(result.queryByTestId('Benchmarks')).not.toBeInTheDocument();
+      expect(result.queryByTestId('Rules')).not.toBeInTheDocument();
+    });
+
+    it('should render Dashboards', () => {
+      history.push('/cloud_security_posture/dashboard');
+      const result = renderCspRouter();
+
+      expect(result.queryByTestId('ComplianceDashboard')).toBeInTheDocument();
+      expect(result.queryByTestId('Findings')).not.toBeInTheDocument();
+      expect(result.queryByTestId('Benchmarks')).not.toBeInTheDocument();
+      expect(result.queryByTestId('Rules')).not.toBeInTheDocument();
+    });
+
+    it('should render Benchmarks', () => {
+      history.push('/cloud_security_posture/benchmarks');
+      const result = renderCspRouter();
+
+      expect(result.queryByTestId('Benchmarks')).toBeInTheDocument();
+      expect(result.queryByTestId('Findings')).not.toBeInTheDocument();
+      expect(result.queryByTestId('ComplianceDashboard')).not.toBeInTheDocument();
+      expect(result.queryByTestId('Rules')).not.toBeInTheDocument();
+    });
+
+    it('should render Rules', () => {
+      history.push('/cloud_security_posture/benchmarks/packagePolicyId/policyId/rules');
+      const result = renderCspRouter();
+
+      expect(result.queryByTestId('Rules')).toBeInTheDocument();
+      expect(result.queryByTestId('Findings')).not.toBeInTheDocument();
+      expect(result.queryByTestId('ComplianceDashboard')).not.toBeInTheDocument();
+      expect(result.queryByTestId('Benchmarks')).not.toBeInTheDocument();
     });
   });
 
-  it('should not map routes where the navigation item is disabled', () => {
-    const pageId = chance.word();
-    const navigationItems = { [pageId]: createPageNavigationItemFixture({ disabled: true }) };
-    const routesMapping = { [pageId]: DummyComponent };
-    const routes = getRoutesFromMapping(navigationItems, routesMapping);
+  describe('unhappy path', () => {
+    it('should redirect base path to dashboard', () => {
+      history.push('/cloud_security_posture/some_wrong_path');
+      const result = renderCspRouter();
 
-    expect(routes).toHaveLength(0);
+      expect(history.location.pathname).toEqual('/cloud_security_posture/dashboard');
+      expect(result.queryByTestId('ComplianceDashboard')).toBeInTheDocument();
+    });
   });
-});
 
-describe('addSpyRouteComponentToRoute', () => {
-  it('should add the spy route component to a csp route', () => {
-    const pageNameForRoute = chance.pickone<CloudSecurityPosturePageId>([
-      'cloud_security_posture-dashboard',
-      'cloud_security_posture-findings',
-      'cloud_security_posture-benchmarks',
-      'cloud_security_posture-rules',
-    ]);
+  describe('CspRoute', () => {
+    it('should not render disabled path', () => {
+      mockConstants.cloudPosturePages = {
+        ...constants.cloudPosturePages,
+        benchmarks: {
+          ...constants.cloudPosturePages.benchmarks,
+          disabled: true,
+        },
+      };
 
-    // Create a mock SpyRoute component that renders the page name as a test ID
-    const SpyRouteMock = ({ pageName }: { pageName?: string }) => <div data-test-subj={pageName} />;
-    const mockRouteComponentTestId = chance.word();
-    const MockRouteComponent = () => <div data-test-subj={mockRouteComponentTestId} />;
-    const route = { id: pageNameForRoute, path: chance.word(), component: MockRouteComponent };
-    const routeWithSpyRoute = addSpyRouteComponentToRoute(route, SpyRouteMock);
+      history.push('/cloud_security_posture/benchmarks');
+      const result = renderCspRouter();
 
-    expect(routeWithSpyRoute.render).toEqual(expect.any(Function));
+      expect(result.queryByTestId('ComplianceDashboard')).not.toBeInTheDocument();
+    });
 
-    render(<div>{routeWithSpyRoute.render!({} as unknown as RouteComponentProps)}</div>);
+    it('should render SpyRoute for static paths', () => {
+      history.push('/cloud_security_posture/benchmarks');
+      const result = renderCspRouter();
 
-    expect(routeWithSpyRoute.component).toBeUndefined();
-    expect(screen.getByTestId(mockRouteComponentTestId)).toBeInTheDocument();
-    expect(screen.getByTestId(pageNameForRoute)).toBeInTheDocument();
+      expect(result.queryByTestId('mockedSpyRoute')).toBeInTheDocument();
+    });
+
+    it('should not render SpyRoute for dynamic paths', () => {
+      history.push('/cloud_security_posture/benchmarks/packagePolicyId/policyId/rules');
+      const result = renderCspRouter();
+
+      expect(result.queryByTestId('mockedSpyRoute')).not.toBeInTheDocument();
+    });
   });
 });

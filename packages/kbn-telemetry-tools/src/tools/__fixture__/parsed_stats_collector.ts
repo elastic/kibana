@@ -11,7 +11,7 @@ import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedStatsCollector: ParsedUsageCollection[] = [
   [
-    'src/fixtures/telemetry_collectors/stats_collector.ts',
+    'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/stats_collector.ts',
     {
       collectorName: 'my_stats_collector_with_schema',
       schema: {
