@@ -6,35 +6,40 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 
+import { Criteria } from '@elastic/eui';
+import { isEqual } from 'lodash';
+import {
+  HostMetrics,
+  HostMetricsResponse,
+  HostSortField,
+} from '../../../../../common/http_api/hosts';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
-import type {
-  SnapshotNode,
-  SnapshotNodeMetric,
-  SnapshotMetricInput,
-} from '../../../../../common/http_api';
-import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
+import { useTableProperties } from './use_table_properties_url_state';
+import { useHostsViewContext } from './use_hosts_view';
+
+const METADATA_ATTRIBUTE_NAME = {
+  'cloud.provider': 'cloudProvider',
+  'host.os.name': 'os',
+};
 
 /**
  * Columns and items types
  */
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
+type HostValueByMetricType = Record<HostMetrics['name'], HostMetrics['value']> & {
+  name: { name: string; cloudProvider?: CloudProvider | null };
+};
 
-type HostMetric = 'cpu' | 'diskLatency' | 'rx' | 'tx' | 'memory' | 'memoryTotal';
-
-type HostMetrics = Record<HostMetric, SnapshotNodeMetric>;
-
-export interface HostNodeRow extends HostMetrics {
+export interface HostNodeRow extends HostValueByMetricType {
   os?: string | null;
   servicesOnHost?: number | null;
-  title: { name: string; cloudProvider?: CloudProvider | null };
-  name: string;
-  id: string;
+  uuid: string;
 }
 
 interface HostTableParams {
@@ -44,24 +49,29 @@ interface HostTableParams {
 /**
  * Helper functions
  */
-const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefined | null) => {
+const formatMetric = (type: HostMetrics['name'], value: number | undefined | null) => {
   return value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
 };
 
-const buildItemsList = (nodes: SnapshotNode[]) => {
-  return nodes.map(({ metrics, path, name }, index) => ({
-    id: `${name}-${index}`,
-    name,
-    os: path.at(-1)?.os ?? '-',
-    title: {
-      name,
-      cloudProvider: path.at(-1)?.cloudProvider ?? null,
-    },
-    ...metrics.reduce((data, metric) => {
-      data[metric.name as HostMetric] = metric;
-      return data;
-    }, {} as HostMetrics),
-  })) as HostNodeRow[];
+const buildItemsList = (nodes: HostMetricsResponse[]): HostNodeRow[] => {
+  return nodes.map(({ metrics, metadata, name }) => ({
+    uuid: uuidv4(),
+    ...metadata.reduce(
+      (acc, meta) => ({
+        ...acc,
+        name: {
+          ...acc.name,
+          [METADATA_ATTRIBUTE_NAME[meta.name]]: meta.value,
+        },
+      }),
+      { name: { name } } as HostValueByMetricType
+    ),
+
+    ...metrics.reduce(
+      (acc, metric) => ({ ...acc, [metric.name]: metric.value }),
+      {} as HostValueByMetricType
+    ),
+  }));
 };
 
 /**
@@ -69,10 +79,6 @@ const buildItemsList = (nodes: SnapshotNode[]) => {
  */
 const titleLabel = i18n.translate('xpack.infra.hostsViewPage.table.nameColumnHeader', {
   defaultMessage: 'Name',
-});
-
-const osLabel = i18n.translate('xpack.infra.hostsViewPage.table.operatingSystemColumnHeader', {
-  defaultMessage: 'Operating System',
 });
 
 const averageCpuUsageLabel = i18n.translate(
@@ -118,7 +124,9 @@ const toggleDialogActionLabel = i18n.translate(
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
-export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) => {
+export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableParams) => {
+  const { fetch } = useHostsViewContext();
+  const [properties, setProperties] = useTableProperties();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
@@ -128,7 +136,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   const closeFlyout = () => setHostFlyoutOpen({ clickedItemId: '' });
 
   const reportHostEntryClick = useCallback(
-    ({ name, cloudProvider }: HostNodeRow['title']) => {
+    ({ name, cloudProvider }: HostNodeRow['name']) => {
       telemetry.reportHostEntryClicked({
         hostname: name,
         cloud_provider: cloudProvider,
@@ -138,10 +146,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   );
 
   const items = useMemo(() => buildItemsList(nodes), [nodes]);
-  const clickedItem = useMemo(
-    () => items.find(({ id }) => id === hostFlyoutOpen.clickedItemId),
-    [hostFlyoutOpen.clickedItemId, items]
-  );
+  const sortableFields = useMemo(() => new Set(items.flatMap((p) => Object.keys(p))), [items]);
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
@@ -174,11 +179,11 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: titleLabel,
-        field: 'title',
+        field: 'name',
         sortable: true,
         truncateText: true,
         'data-test-subj': 'hostsView-tableRow-title',
-        render: (title: HostNodeRow['title']) => (
+        render: (title: HostNodeRow['name']) => (
           <HostsTableEntryTitle
             title={title}
             time={time}
@@ -187,15 +192,8 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         ),
       },
       {
-        name: osLabel,
-        field: 'os',
-        sortable: true,
-        'data-test-subj': 'hostsView-tableRow-os',
-        render: (os: string) => <EuiText size="s">{os}</EuiText>,
-      },
-      {
         name: averageCpuUsageLabel,
-        field: 'cpu.avg',
+        field: 'cpu',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
         render: (avg: number) => formatMetric('cpu', avg),
@@ -203,7 +201,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: diskLatencyLabel,
-        field: 'diskLatency.avg',
+        field: 'diskLatency',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-diskLatency',
         render: (avg: number) => formatMetric('diskLatency', avg),
@@ -211,7 +209,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: averageRXLabel,
-        field: 'rx.avg',
+        field: 'rx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
         render: (avg: number) => formatMetric('rx', avg),
@@ -219,7 +217,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: averageTXLabel,
-        field: 'tx.avg',
+        field: 'tx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
         render: (avg: number) => formatMetric('tx', avg),
@@ -227,7 +225,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: averageTotalMemoryLabel,
-        field: 'memoryTotal.avg',
+        field: 'memoryTotal',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryTotal',
         render: (avg: number) => formatMetric('memoryTotal', avg),
@@ -235,7 +233,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       },
       {
         name: averageMemoryUsageLabel,
-        field: 'memory.avg',
+        field: 'memory',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memory',
         render: (avg: number) => formatMetric('memory', avg),
@@ -245,11 +243,41 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
     [hostFlyoutOpen.clickedItemId, reportHostEntryClick, setHostFlyoutOpen, time]
   );
 
+  const onTableChange = useCallback(
+    async ({ page, sort }: Criteria<HostNodeRow>) => {
+      const { index: pageIndex, size: pageSize } = page ?? {};
+      const { field, direction } = sort ?? {};
+
+      const pagination = { pageIndex, pageSize };
+      // This isn't safe, but when only pagination happens,
+      // `field` will contain the column name instead of the column field.
+      // That's how here sorting action differentiates from pagination
+      const isSorting = sortableFields.has(field ?? '');
+
+      if (isSorting && !isEqual(properties.sorting, sort)) {
+        await fetch({
+          sortDirection: direction,
+          sortField: field as HostSortField,
+        });
+
+        setProperties({
+          sorting: sort,
+        });
+      } else if (!isEqual(properties.pagination, pagination)) {
+        setProperties({
+          pagination,
+        });
+      }
+    },
+    [fetch, properties.pagination, properties.sorting, setProperties, sortableFields]
+  );
+
   return {
     columns,
     items,
-    clickedItem,
     isFlyoutOpen: !!hostFlyoutOpen.clickedItemId,
     closeFlyout,
+    onTableChange,
+    ...properties,
   };
 };

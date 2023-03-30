@@ -16,6 +16,11 @@ export const HostMetricTypeRT = rt.keyof({
   tx: null,
 });
 
+export const TimerangeRT = rt.type({
+  from: rt.number,
+  to: rt.number,
+});
+
 export const HostMetadataTypeRT = rt.keyof({
   'host.os.name': null,
   'cloud.provider': null,
@@ -26,30 +31,49 @@ export const HostMetricsRT = rt.type({
   value: rt.union([rt.number, rt.null]),
 });
 
-export const HostMetadataRT = rt.partial({
+export const HostMetadataRT = rt.type({
   // keep the actual field name from the index mappings
   name: HostMetadataTypeRT,
-  value: rt.union([rt.number, rt.string, rt.null]),
+  value: rt.union([rt.string, rt.null]),
 });
 
-export const HostSortFieldRT = rt.union([rt.literal('name'), HostMetricTypeRT]);
+export const HostSortFieldRT = rt.keyof({ name: null, ...HostMetricTypeRT.keys });
 
-export const GetHostsRequestParamsRT = rt.type({
-  metrics: rt.array(rt.type({ type: HostMetricTypeRT })),
-  query: rt.string,
-  sortField: rt.union([HostSortFieldRT, rt.undefined]),
-  sortDirection: rt.union([rt.literal('desc'), rt.literal('asc'), rt.undefined]),
-  sourceId: rt.string,
+interface LimitRangeBrand {
+  readonly LimitRange: unique symbol;
+}
+
+export type LimitRange = rt.Branded<number, LimitRangeBrand>;
+
+const LimitBrandRT = rt.brand(
+  rt.number, // codec
+  (n: number): n is LimitRange => n > 0 && n <= 100,
+  // refinement of the number type
+  'LimitRange' // name of this codec
+);
+
+export const GetHostsRequestParamsRT = rt.intersection([
+  rt.partial({
+    sortField: HostSortFieldRT,
+    sortDirection: rt.union([rt.literal('desc'), rt.literal('asc')]),
+  }),
+  rt.type({
+    limit: LimitBrandRT,
+    metrics: rt.array(rt.type({ type: HostMetricTypeRT })),
+    query: rt.union([rt.string, rt.null]),
+    sourceId: rt.string,
+    timeRange: TimerangeRT,
+  }),
+]);
+
+export const HostMetricsResponseRT = rt.type({
+  name: rt.string,
+  metrics: rt.array(HostMetricsRT),
+  metadata: rt.array(HostMetadataRT),
 });
 
-export const GetHostsRequestResponsePayloadRT = rt.type({
-  hosts: rt.array(
-    rt.type({
-      name: rt.string,
-      metrics: rt.array(HostMetricsRT),
-      metadata: rt.union([rt.array(HostMetadataRT), rt.null]),
-    })
-  ),
+export const GetHostsResponsePayloadRT = rt.type({
+  hosts: rt.array(HostMetricsResponseRT),
 });
 
 export type HostMetrics = rt.TypeOf<typeof HostMetricsRT>;
@@ -58,4 +82,5 @@ export type HostMetricType = rt.TypeOf<typeof HostMetricTypeRT>;
 export type HostSortField = rt.TypeOf<typeof HostSortFieldRT>;
 
 export type GetHostsRequestParams = rt.TypeOf<typeof GetHostsRequestParamsRT>;
-export type GetHostsResponsePayload = rt.TypeOf<typeof GetHostsRequestResponsePayloadRT>;
+export type HostMetricsResponse = rt.TypeOf<typeof HostMetricsResponseRT>;
+export type GetHostsResponsePayload = rt.TypeOf<typeof GetHostsResponsePayloadRT>;

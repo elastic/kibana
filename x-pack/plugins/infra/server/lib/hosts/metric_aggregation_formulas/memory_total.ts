@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HostsAggregationQuery } from '../types';
+import { HostsMetricsAggregationQueryConfig } from '../types';
 
-export const memoryTotal: HostsAggregationQuery = {
+export const memoryTotal: HostsMetricsAggregationQueryConfig = {
   aggregation: {
     memoryTotal: {
       avg: {

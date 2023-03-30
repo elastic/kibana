@@ -7,9 +7,13 @@
 import React from 'react';
 
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { type ChartBaseProps, KPIChart } from './kpi_chart';
+import { type ChartBaseProps, KPIChart, AcceptedType } from './kpi_chart';
 
-export const HostsTile = ({ type, ...props }: ChartBaseProps) => {
+export interface HostsTileProps extends Omit<ChartBaseProps, 'type'> {
+  type: Extract<AcceptedType, 'hostsCount'>;
+}
+
+export const HostsTile = ({ type, ...props }: HostsTileProps) => {
   const { hostNodes, loading } = useHostsViewContext();
 
   return (

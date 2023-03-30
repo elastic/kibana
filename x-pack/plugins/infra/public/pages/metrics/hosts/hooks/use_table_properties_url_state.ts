@@ -11,9 +11,15 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { useUrlState } from '../../../../utils/use_url_state';
 
-export const GET_DEFAULT_TABLE_PROPERTIES = {
-  sorting: true,
-  pagination: true,
+export const GET_DEFAULT_TABLE_PROPERTIES: TableProperties = {
+  sorting: {
+    field: 'name',
+    direction: 'asc',
+  },
+  pagination: {
+    pageIndex: undefined,
+    pageSize: undefined,
+  },
 };
 const HOST_TABLE_PROPERTIES_URL_STATE_KEY = 'tableProperties';
 
@@ -33,11 +39,12 @@ export const useTableProperties = (): [TableProperties, PropertiesUpdater] => {
   return [urlState, setProperties];
 };
 
-const PaginationRT = rt.union([
-  rt.boolean,
-  rt.partial({ pageIndex: rt.number, pageSize: rt.number }),
-]);
-const SortingRT = rt.union([rt.boolean, rt.type({ field: rt.string, direction: rt.any })]);
+const PaginationRT = rt.partial({ pageIndex: rt.number, pageSize: rt.number });
+
+const SortingRT = rt.type({
+  field: rt.string,
+  direction: rt.union([rt.literal('asc'), rt.literal('desc')]),
+});
 
 const SetSortingRT = rt.partial({
   sorting: SortingRT,

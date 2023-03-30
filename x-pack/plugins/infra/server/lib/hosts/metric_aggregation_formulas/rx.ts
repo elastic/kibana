@@ -4,28 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HostsAggregationQuery } from '../types';
+import { HostsMetricsAggregationQueryConfig } from '../types';
 
-export const tx: HostsAggregationQuery = {
+export const rx: HostsMetricsAggregationQueryConfig = {
   runtimeField: {
-    tx_bytes_per_period: {
+    rx_bytes_per_period: {
       type: 'double',
       script: `
-          emit((doc['host.network.egress.bytes'].value/(doc['metricset.period'].value / 1000)));
+          emit((doc['host.network.ingress.bytes'].value/(doc['metricset.period'].value / 1000)));
         `,
     },
   },
   aggregation: {
-    tx: {
+    rx: {
       filter: {
         exists: {
-          field: 'host.network.egress.bytes',
+          field: 'host.network.ingress.bytes',
         },
       },
       aggs: {
         result: {
           avg: {
-            field: 'tx_bytes_per_period',
+            field: 'rx_bytes_per_period',
           },
         },
       },

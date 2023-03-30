@@ -7,6 +7,8 @@
 
 import { HostSortField } from '../../../common/http_api/hosts';
 
+export const BUCKET_KEY = 'host.name';
+export const MAX_FILTERED_HOST_SIZE = 1000;
 export const METADATA_FIELD = 'metadata';
 export const SORTFIELD_BY_AGGREGATION: Partial<Record<HostSortField, string>> = {
   name: '_key',

@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   GetHostsRequestParams,
   GetHostsResponsePayload,
   HostMetadata,
   HostMetrics,
-  HostMetricType,
 } from '../../../common/http_api/hosts';
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../metrics/types';
 import {
   FilteredMetricsTypeRT,
-  HostsSearchAggregationResponseRT,
-  HostsSearchBucket,
-  HostsSearchMetricValue,
-  HostsSearchMetricValueRT,
+  HostsMetricsSearchAggregationResponse,
+  HostsMetricsSearchBucket,
+  HostsMetricsSearchValue,
+  HostsMetricsSearchValueRT,
 } from './types';
 import { METADATA_FIELD } from './constants';
 
-const getValue = (valueObject: HostsSearchMetricValue) => {
+const getMetricValue = (valueObject: HostsMetricsSearchValue) => {
   if (FilteredMetricsTypeRT.is(valueObject)) {
     return valueObject.result.value;
   }
@@ -38,20 +35,22 @@ const getValue = (valueObject: HostsSearchMetricValue) => {
 
 const convertMetricBucket = (
   params: GetHostsRequestParams,
-  bucket: HostsSearchBucket
+  bucket: HostsMetricsSearchBucket
 ): HostMetrics[] => {
-  return (['cpu', 'diskLatency', 'memory', 'memoryTotal', 'rx', 'tx'] as HostMetricType[])
-    .filter((metricType) => !!bucket[metricType])
-    .map((metricType) => {
-      const metricValue = bucket[metricType];
+  return params.metrics
+    .filter((requestedMetric) => !!bucket[requestedMetric.type])
+    .map((returnedMetric) => {
+      const metricBucket = bucket[returnedMetric.type];
       return {
-        name: metricType,
-        value: HostsSearchMetricValueRT.is(metricValue) ? getValue(metricValue) : null,
+        name: returnedMetric.type,
+        value: HostsMetricsSearchValueRT.is(metricBucket)
+          ? getMetricValue(metricBucket) ?? 0
+          : null,
       } as HostMetrics;
     });
 };
 
-const convertMetadataBucket = (bucket: HostsSearchBucket): HostMetadata[] => {
+const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): HostMetadata[] => {
   const metadataAggregation = bucket[METADATA_FIELD];
   return TopMetricsTypeRT.is(metadataAggregation)
     ? metadataAggregation.top
@@ -68,7 +67,7 @@ const convertMetadataBucket = (bucket: HostsSearchBucket): HostMetadata[] => {
 
 export const convertBucketsToRows = (
   params: GetHostsRequestParams,
-  buckets: HostsSearchBucket[]
+  buckets: HostsMetricsSearchBucket[]
 ): GetHostsResponsePayload => {
   const hosts = buckets.map((bucket) => {
     const metrics = convertMetricBucket(params, bucket);
@@ -84,8 +83,12 @@ export const convertBucketsToRows = (
 
 export const mapToApiResponse = (
   params: GetHostsRequestParams,
-  aggregations: estypes.SearchResponse<Record<string, unknown>>['aggregations']
+  aggregations: HostsMetricsSearchAggregationResponse | null
 ): GetHostsResponsePayload => {
-  const hostsAggregations = decodeOrThrow(HostsSearchAggregationResponseRT)(aggregations);
-  return convertBucketsToRows(params, hostsAggregations.groupings.buckets);
+  if (!aggregations) {
+    return {
+      hosts: [],
+    };
+  }
+  return convertBucketsToRows(params, aggregations.groupings.buckets);
 };

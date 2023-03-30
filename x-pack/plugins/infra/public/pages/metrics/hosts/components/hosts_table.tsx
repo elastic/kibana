@@ -5,60 +5,34 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NoData } from '../../../../components/empty_states';
-import { InfraLoadingPanel } from '../../../../components/loading';
 import { useHostsTable } from '../hooks/use_hosts_table';
-import { useTableProperties } from '../hooks/use_table_properties_url_state';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { Flyout } from './host_details_flyout/flyout';
 
 export const HostsTable = () => {
-  const { hostNodes, loading } = useHostsViewContext();
+  const { hostNodes, loading, error } = useHostsViewContext();
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
-  const [properties, setProperties] = useTableProperties();
 
-  const { columns, items, isFlyoutOpen, closeFlyout, clickedItem } = useHostsTable(hostNodes, {
+  const {
+    columns,
+    items,
+    isFlyoutOpen,
+    closeFlyout,
+    clickedItem,
+    onTableChange,
+    pagination,
+    sorting,
+  } = useHostsTable(hostNodes, {
     time: searchCriteria.dateRange,
   });
 
-  const noData = items.length === 0;
-
-  const onTableChange = useCallback(
-    ({ page = {}, sort = {} }) => {
-      const { index: pageIndex, size: pageSize } = page;
-      const { field, direction } = sort;
-
-      const sorting = field && direction ? { field, direction } : true;
-      const pagination = pageIndex >= 0 && pageSize !== 0 ? { pageIndex, pageSize } : true;
-
-      if (!isEqual(properties.sorting, sorting)) {
-        setProperties({ sorting });
-      }
-      if (!isEqual(properties.pagination, pagination)) {
-        setProperties({ pagination });
-      }
-    },
-    [setProperties, properties.pagination, properties.sorting]
-  );
-
-  if (loading) {
-    return (
-      <InfraLoadingPanel
-        height="185px"
-        width="auto"
-        text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-          defaultMessage: 'Loading data',
-        })}
-      />
-    );
-  }
-
-  if (noData) {
+  if (!!error) {
     return (
       <NoData
         titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
@@ -80,18 +54,23 @@ export const HostsTable = () => {
     <>
       <EuiInMemoryTable
         data-test-subj="hostsView-table"
-        pagination={properties.pagination}
-        sorting={
-          typeof properties.sorting === 'boolean'
-            ? properties.sorting
-            : { sort: properties.sorting }
-        }
+        pagination={pagination}
+        sorting={{ sort: sorting }}
         rowProps={{
           'data-test-subj': 'hostsView-tableRow',
         }}
+        onChange={onTableChange}
         items={items}
         columns={columns}
-        onTableChange={onTableChange}
+        loading={loading}
+        message={
+          loading ? (
+            <FormattedMessage
+              id="xpack.infra.waffle.loadingDataText"
+              defaultMessage="Loading data"
+            />
+          ) : null
+        }
       />
       {isFlyoutOpen && clickedItem && <Flyout node={clickedItem} closeFlyout={closeFlyout} />}
     </>

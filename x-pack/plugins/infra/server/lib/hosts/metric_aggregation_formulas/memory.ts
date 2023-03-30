@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HostsAggregationQuery } from '../types';
+import { HostsMetricsAggregationQueryConfig } from '../types';
 
-export const memory: HostsAggregationQuery = {
+export const memory: HostsMetricsAggregationQueryConfig = {
   aggregation: {
     memory: {
       avg: {

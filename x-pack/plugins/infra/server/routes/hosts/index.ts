@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 
-import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -16,9 +15,13 @@ import { identity } from 'fp-ts/lib/function';
 import { throwErrors } from '@kbn/cases-plugin/common';
 
 import { IKibanaSearchResponse, ISearchOptionsSerializable } from '@kbn/data-plugin/common';
-import { GetHostsRequestParamsRT, GetHostsRequestParams } from '../../../common/http_api/hosts';
+import {
+  GetHostsRequestParamsRT,
+  GetHostsRequestParams,
+  GetHostsResponsePayloadRT,
+} from '../../../common/http_api/hosts';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { fetchHostsMetrics } from '../../lib/hosts/fetch_hosts_metrics';
+import { getHosts } from '../../lib/hosts/get_hosts';
 
 interface HostsBatchRequest {
   request: {
@@ -37,20 +40,32 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
     {
       method: 'post',
       path: '/api/metrics/hosts',
-      validate: {},
+      validate: {
+        body: validateParams,
+      },
     },
     async (context, request, response) => {
       const [{ savedObjects }, { data }] = await libs.getStartServices();
-      const params = request.body as any;
+      const params = request.body;
 
       const search = data.search.asScoped(request);
       const soClient = savedObjects.getScopedClient(request);
       const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
 
-      const res = await lastValueFrom(fetchHostsMetrics(search, source, params));
-      return response.ok({
-        body: res.rawResponse,
-      });
+      try {
+        const hosts = await getHosts(search, source, params);
+
+        return response.ok({
+          body: GetHostsResponsePayloadRT.encode(hosts.rawResponse),
+        });
+      } catch (err) {
+        return response.customError({
+          statusCode: err.statusCode ?? err,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
     }
   );
 
@@ -74,7 +89,7 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
           const { executionContext: ctx, ...restOptions } = options || {};
 
           return executionContext.withContext(ctx, async () => {
-            return firstValueFrom(fetchHostsMetrics(search, source, params, restOptions, id));
+            return getHosts(search, source, params, restOptions, id);
           });
         },
       };

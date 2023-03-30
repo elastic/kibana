@@ -5,28 +5,16 @@
  * 2.0.
  */
 import React from 'react';
+import { SnapshotNode } from '../../../../../../common/http_api';
 import type { SnapshotMetricType } from '../../../../../../common/inventory_models/types';
 
-import { useSnapshot } from '../../../inventory_view/hooks/use_snaphot';
-import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { type ChartBaseProps, KPIChart } from './kpi_chart';
 
-interface Props extends Omit<ChartBaseProps, 'type'> {
+export interface TileProps extends Omit<ChartBaseProps, 'type'> {
   type: SnapshotMetricType;
+  nodes: SnapshotNode[];
+  loading: boolean;
 }
-export const Tile = ({ type, ...props }: Props) => {
-  const { baseRequest } = useHostsViewContext();
-
-  const { nodes, loading } = useSnapshot(
-    {
-      ...baseRequest,
-      metrics: [{ type }],
-      groupBy: null,
-      includeTimeseries: true,
-      dropPartialBuckets: false,
-    },
-    { abortable: true }
-  );
-
+export const Tile = ({ type, nodes, loading, ...props }: TileProps) => {
   return <KPIChart id={`$metric-${type}`} type={type} nodes={nodes} loading={loading} {...props} />;
 };

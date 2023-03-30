@@ -12,7 +12,7 @@ import { memory } from './memory';
 import { rx } from './rx';
 import { tx } from './tx';
 
-export const metricsAggregations = {
+export const metricsAggregationFormulas = {
   cpu,
   diskLatency,
   memory,

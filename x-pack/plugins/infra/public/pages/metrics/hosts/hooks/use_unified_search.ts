@@ -12,6 +12,7 @@ import { map, skip, startWith } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
@@ -37,6 +38,7 @@ const buildQuerySubmittedPayload = (
 export const useUnifiedSearch = () => {
   const { state, dispatch, getTime, getDateRangeAsTimestamp } = useHostsUrlState();
   const { dataView } = useMetricsDataViewContext();
+  const querySettings = useKibanaQuerySettings();
   const { services } = useKibana<InfraClientStartDeps>();
   const {
     data: {
@@ -150,8 +152,8 @@ export const useUnifiedSearch = () => {
     [state.filters, state.panelFilters]
   );
   const buildQuery = useCallback(() => {
-    return buildEsQuery(dataView, state.query, getAllFilters());
-  }, [dataView, state.query, getAllFilters]);
+    return buildEsQuery(dataView, state.query, getAllFilters(), querySettings);
+  }, [dataView, state.query, getAllFilters, querySettings]);
 
   return {
     buildQuery,

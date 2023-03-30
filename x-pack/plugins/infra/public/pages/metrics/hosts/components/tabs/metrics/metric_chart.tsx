@@ -32,7 +32,7 @@ const MIN_HEIGHT = 300;
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { baseRequest } = useHostsViewContext();
+  const { requestTs } = useHostsViewContext();
   const {
     services: { lens },
   } = useKibana<InfraClientSetupDeps>();
@@ -107,7 +107,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
             query={searchCriteria.query}
             filters={searchCriteria.filters}
             extraActions={extraAction}
-            lastReloadRequestTime={baseRequest.requestTs}
+            lastReloadRequestTime={requestTs}
             executionContext={{
               type: 'infrastructure_observability_hosts_view',
               name: `Hosts View ${type} Chart`,

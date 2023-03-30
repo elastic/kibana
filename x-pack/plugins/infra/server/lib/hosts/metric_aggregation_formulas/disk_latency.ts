@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HostsAggregationQuery } from '../types';
+import { HostsMetricsAggregationQueryConfig } from '../types';
 
-export const diskLatency: HostsAggregationQuery = {
+export const diskLatency: HostsMetricsAggregationQueryConfig = {
   runtimeField: {
     disk_latency: {
       type: 'double',

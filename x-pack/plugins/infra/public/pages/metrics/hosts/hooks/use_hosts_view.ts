@@ -12,21 +12,21 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import createContainer from 'constate';
-import { BoolQuery } from '@kbn/es-query';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { estypes } from '@elastic/elasticsearch';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  GetHostsRequestParams,
+  GetHostsResponsePayload,
+  HostMetricType,
+} from '../../../../../common/http_api/hosts';
 import { InfraClientCoreStart } from '../../../../types';
-import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import { useSnapshot, type UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
-import { StringDateRangeTimestamp } from './use_unified_search_url_state';
 
-const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
+const HOST_TABLE_METRICS: Array<{ type: HostMetricType }> = [
   { type: 'rx' },
   { type: 'tx' },
   { type: 'memory' },
@@ -35,59 +35,57 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'memoryTotal' },
 ];
 
+type HostsRequest = Omit<GetHostsRequestParams, 'limit'> & { limit: number };
+
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const { http } = useKibana<InfraClientCoreStart>().services;
   const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
-  const baseRequest = useMemo(
-    () =>
-      createSnapshotRequest({
-        dateRange: getDateRangeAsTimestamp(),
-        esQuery: buildQuery(),
-        sourceId,
-      }),
+  const hostRequest = useMemo<HostsRequest & { requestTs: number }>(
+    () => ({
+      limit: 20,
+      metrics: HOST_TABLE_METRICS,
+      query: JSON.stringify(buildQuery()),
+      sourceId,
+      timeRange: getDateRangeAsTimestamp(),
+      requestTs: Date.now(),
+    }),
     [buildQuery, getDateRangeAsTimestamp, sourceId]
   );
 
   const abortCtrlRef = useRef(new AbortController());
-  const [state, refetch] = useAsyncFn(
-    () => {
+  const [{ loading, error, value }, refetch] = useAsyncFn(
+    (requestBody: HostsRequest) => {
       abortCtrlRef.current.abort();
       abortCtrlRef.current = new AbortController();
       return fetchAlertsCount({
         http,
         signal: abortCtrlRef.current.signal,
+        requestBody,
       });
     },
     [http],
     { loading: true }
   );
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
-  // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
-  // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
-  const {
-    loading,
-    error,
-    nodes: hostNodes,
-  } = useSnapshot(
-    {
-      ...baseRequest,
-      metrics: HOST_TABLE_METRICS,
+  const fetch = useCallback(
+    (newData?: Partial<HostsRequest>) => {
+      refetch({ ...hostRequest, ...newData });
     },
-    { abortable: true }
+    [hostRequest, refetch]
   );
 
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
   return {
-    baseRequest,
+    fetch,
     loading,
     error,
-    hostNodes,
+    requestTs: hostRequest.requestTs,
+    hostNodes: value?.hosts ?? [],
   };
 };
 
@@ -101,43 +99,16 @@ export const [HostsViewProvider, useHostsViewContext] = HostsView;
 interface FetchAlertsCountParams {
   http: HttpSetup;
   signal: AbortSignal;
+  requestBody: HostsRequest;
 }
 
-async function fetchAlertsCount({ http, signal }: FetchAlertsCountParams): Promise<unknown> {
-  return (
-    http
-      .post<estypes.SearchResponse<Record<string, unknown>>>(`/api/metrics/hosts`, {
-        signal,
-      })
-      // eslint-disable-next-line no-console
-      .then((res) => console.log('res', { res }))
-  );
+async function fetchAlertsCount({
+  http,
+  signal,
+  requestBody,
+}: FetchAlertsCountParams): Promise<GetHostsResponsePayload> {
+  return http.post<GetHostsResponsePayload>(`/api/metrics/hosts`, {
+    signal,
+    body: JSON.stringify(requestBody),
+  });
 }
-
-const createSnapshotRequest = ({
-  esQuery,
-  sourceId,
-  dateRange,
-}: {
-  esQuery: { bool: BoolQuery };
-  sourceId: string;
-  dateRange: StringDateRangeTimestamp;
-}): UseSnapshotRequest => ({
-  filterQuery: JSON.stringify(esQuery),
-  metrics: [],
-  groupBy: [],
-  nodeType: 'host',
-  sourceId,
-  currentTime: dateRange.to,
-  includeTimeseries: false,
-  sendRequestImmediately: true,
-  timerange: {
-    interval: '1m',
-    from: dateRange.from,
-    to: dateRange.to,
-    ignoreLookback: true,
-  },
-  // The user might want to click on the submit button without changing the filters
-  // This makes sure all child components will re-render.
-  requestTs: Date.now(),
-});

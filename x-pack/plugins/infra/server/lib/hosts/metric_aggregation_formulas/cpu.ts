@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HostsAggregationQuery } from '../types';
+import { HostsMetricsAggregationQueryConfig } from '../types';
 
-export const cpu: HostsAggregationQuery = {
+export const cpu: HostsMetricsAggregationQueryConfig = {
   runtimeField: {
     cpu_usage: {
       type: 'double',

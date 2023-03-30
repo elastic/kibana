@@ -25,7 +25,7 @@ import type { SnapshotMetricType } from '../../../../../../common/inventory_mode
 
 type MetricType = keyof Pick<SnapshotNodeMetric, 'avg' | 'max' | 'value'>;
 
-type AcceptedType = SnapshotMetricType | 'hostsCount';
+export type AcceptedType = SnapshotMetricType | 'hostsCount';
 
 export interface ChartBaseProps
   extends Pick<
