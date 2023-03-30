@@ -11,19 +11,19 @@ import {
   APP_ID,
   constructFileKindIdByOwner,
   constructFilesHttpOperationTag,
-  MAX_FILE_SIZE,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
 import { HttpApiTagOperation } from '../../common/constants/types';
 import { ALLOWED_MIME_TYPES, IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
+import type { FilesConfig } from './types';
 
-const buildFileKind = (owner: Owner): FileKind => {
+const buildFileKind = (config: FilesConfig, owner: Owner): FileKind => {
   return {
     id: constructFileKindIdByOwner(owner),
     http: fileKindHttpTags(owner),
-    maxSizeBytes,
+    maxSizeBytes: createMaxCallback(config),
     allowedMimeTypes: ALLOWED_MIME_TYPES,
   };
 };
@@ -46,27 +46,37 @@ const buildTag = (owner: Owner, operation: HttpApiTagOperation) => {
   };
 };
 
-const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024; // 10 MiB
+const createMaxCallback =
+  (config: FilesConfig) =>
+  (file: FileJSON): number => {
+    const allowedMimeTypesSet = new Set(config.allowedMimeTypes);
 
-const maxSizeBytes = (file: FileJSON): number => {
-  if (file.mimeType != null && IMAGE_MIME_TYPES.has(file.mimeType)) {
-    return MAX_IMAGE_FILE_SIZE;
-  }
+    if (
+      file.mimeType != null &&
+      allowedMimeTypesSet.has(file.mimeType) &&
+      IMAGE_MIME_TYPES.has(file.mimeType)
+    ) {
+      return config.maxImageSize;
+    }
 
-  return MAX_FILE_SIZE;
-};
+    return config.maxSize;
+  };
 
 /**
  * The file kind definition for interacting with the file service for the backend
  */
-const CASES_FILE_KINDS: Record<Owner, FileKind> = {
-  [APP_ID]: buildFileKind(APP_ID),
-  [SECURITY_SOLUTION_OWNER]: buildFileKind(SECURITY_SOLUTION_OWNER),
-  [OBSERVABILITY_OWNER]: buildFileKind(OBSERVABILITY_OWNER),
+const createFileKinds = (config: FilesConfig): Record<Owner, FileKind> => {
+  return {
+    [APP_ID]: buildFileKind(config, APP_ID),
+    [SECURITY_SOLUTION_OWNER]: buildFileKind(config, SECURITY_SOLUTION_OWNER),
+    [OBSERVABILITY_OWNER]: buildFileKind(config, OBSERVABILITY_OWNER),
+  };
 };
 
-export const registerCaseFileKinds = (filesSetupPlugin: FilesSetup) => {
-  for (const fileKind of Object.values(CASES_FILE_KINDS)) {
+export const registerCaseFileKinds = (config: FilesConfig, filesSetupPlugin: FilesSetup) => {
+  const fileKinds = createFileKinds(config);
+
+  for (const fileKind of Object.values(fileKinds)) {
     filesSetupPlugin.registerFileKind(fileKind);
   }
 };
