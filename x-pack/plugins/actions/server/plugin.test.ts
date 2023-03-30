@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
