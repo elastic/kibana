@@ -35,7 +35,7 @@ export const useAddToExistingCase = ({
     ];
   }, [lensAttributes, timeRange]);
 
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({
+  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
     onClose: onAddToCaseClicked,
     toastContent: ADD_TO_CASE_SUCCESS,
   });
