@@ -157,7 +157,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
             'data-test-subj': 'hostsView-flyout-button',
             onClick: ({ id }) => {
               setHostFlyoutOpen({
-                clickedItemId: String(id),
+                clickedItemId: id,
               });
               if (hostFlyoutOpen.isFlyoutOpen && id === hostFlyoutOpen.clickedItemId) {
                 setHostFlyoutOpen({ isFlyoutOpen: false, clickedItemId: '' });
