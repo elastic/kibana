@@ -37,6 +37,7 @@ import { TaskRunner } from './task_runner';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { InMemoryMetrics } from '../monitoring';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
+import { AlertsService } from '../alerts_service/alerts_service';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -55,6 +56,7 @@ export interface TaskRunnerContext {
   basePathService: IBasePath;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   ruleTypeRegistry: RuleTypeRegistry;
+  alertsService: AlertsService | null;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
