@@ -13,6 +13,7 @@ import { convertTo, TopAlert } from '@kbn/observability-plugin/public';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useFetchTriggeredAlertsHistory } from '../../../../../hooks/use_fetch_triggered_alert_history';
 import { type PartialCriterion } from '../../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../../expression_editor/criterion_preview_chart';
@@ -31,27 +32,30 @@ const LogsHistoryChart = ({
   const dateNow = Date.now();
   const dateLast30Days = Number(moment(dateNow).subtract(30, 'days').format('x'));
   const { triggeredAlertsData } = useFetchTriggeredAlertsHistory({
-    features: 'logs',
+    features: AlertConsumers.LOGS,
     ruleId: rule.id,
   });
-  const getSourceFromGroupBy = () => {
-    const ruleGroupBy = rule.params.groupBy;
-    if (ruleGroupBy && ruleGroupBy.length > 0) {
-      // Use the first GroupBy as a source
-      const fieldName = String(ruleGroupBy[0]);
-      return alert.fields[fieldName];
-    }
-  };
+
+  const alertHistoryAnnotations =
+    triggeredAlertsData?.histogramTriggeredAlerts
+      .filter((annotation) => annotation.doc_count > 0)
+      .map((annotation) => {
+        return {
+          dataValue: annotation.key,
+          header: String(annotation.doc_count),
+          // Only the date(without time) is needed here, uiSettings don't provide that
+          details: moment(annotation.key_as_string).format('yyyy-MM-DD'),
+        };
+      }) || [];
+
   return (
     <EuiPanel hasBorder={true} data-test-subj="logsHistoryChartAlertDetails">
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>
-              {getSourceFromGroupBy()}
-              &nbsp;
               {i18n.translate('xpack.infra.logs.alertDetails.chartHistory.chartTitle', {
-                defaultMessage: 'logs threshold alerts history',
+                defaultMessage: 'Logs threshold alerts history',
               })}
             </h2>
           </EuiTitle>
@@ -116,18 +120,7 @@ const LogsHistoryChart = ({
             id="annotations"
             key={'annotationsAlertHistory'}
             domainType={AnnotationDomainType.XDomain}
-            dataValues={
-              triggeredAlertsData?.histogramTriggeredAlerts
-                .filter((annotation) => annotation.doc_count > 0)
-                .map((annotation) => {
-                  return {
-                    dataValue: annotation.key,
-                    header: String(annotation.doc_count),
-                    // Only the date(without time) is needed here, uiSettings don't provide that
-                    details: moment(annotation.key_as_string).format('yyyy-MM-DD'),
-                  };
-                }) || []
-            }
+            dataValues={alertHistoryAnnotations}
             style={{
               line: {
                 strokeWidth: 3,
