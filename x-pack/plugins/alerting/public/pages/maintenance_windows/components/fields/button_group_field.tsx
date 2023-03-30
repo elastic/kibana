@@ -19,8 +19,16 @@ interface ButtonGroupFieldProps {
   legend: string;
   options: EuiButtonGroupOptionProps[];
   type?: 'single' | 'multi';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  display?:
+    | 'row'
+    | 'rowCompressed'
+    | 'columnCompressed'
+    | 'center'
+    | 'centerCompressed'
+    | 'columnCompressedSwitch'
+    | undefined;
+  style?: Record<string, string>;
+  'data-test-subj'?: string;
 }
 
 export const ButtonGroupField: React.FC<ButtonGroupFieldProps> = React.memo(

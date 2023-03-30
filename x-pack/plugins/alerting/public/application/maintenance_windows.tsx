@@ -22,12 +22,9 @@ const App = React.memo(() => {
   return (
     <>
       <Switch>
-        {Object.keys(routes.maintenanceWindows).map((key) => {
-          const path = key as keyof typeof routes.maintenanceWindows;
+        {Object.keys(routes.maintenanceWindows).map((path) => {
           const { handler, exact } = routes.maintenanceWindows[path];
-          const Wrapper = () => {
-            return handler();
-          };
+          const Wrapper = () => handler();
           return <Route key={path} path={path} exact={exact} component={Wrapper} />;
         })}
       </Switch>

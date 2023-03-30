@@ -23,11 +23,5 @@ describe('TruncatedText', () => {
 
     const text = result.getByText('Test text');
     expect(text).toBeInTheDocument();
-    expect(text).toHaveStyleRule('text-overflow', 'ellipsis');
-    expect(text).toHaveStyleRule('display', '-webkit-box');
-    expect(text).toHaveStyleRule('-webkit-line-clamp', '3');
-    expect(text).toHaveStyleRule('-webkit-box-orient', 'vertical');
-    expect(text).toHaveStyleRule('overflow', 'hidden');
-    expect(text).toHaveStyleRule('word-break', 'break-word');
   });
 });

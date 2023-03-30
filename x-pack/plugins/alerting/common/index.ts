@@ -39,6 +39,3 @@ export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 export const ALERTS_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
-
-export const MAINTENANCE_WINDOWS_APP_ID = 'maintenanceWindows';
-export const APP_ID = 'management';

@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { paths } from './paths';
+export { paths, AlertingDeepLinkId, APP_ID, MAINTENANCE_WINDOWS_APP_ID } from './paths';
+
+export type { IAlertingDeepLinkId } from './paths';

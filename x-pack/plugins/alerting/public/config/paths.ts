@@ -5,10 +5,19 @@
  * 2.0.
  */
 
+export const MAINTENANCE_WINDOWS_APP_ID = 'maintenanceWindows';
+export const APP_ID = 'management';
+
 export const paths = {
   alerting: {
-    maintenanceWindows: '/maintenanceWindows',
+    maintenanceWindows: `/${MAINTENANCE_WINDOWS_APP_ID}`,
     maintenanceWindowsCreate: 'create',
-    maintenanceWindowsEdit: (windowId: string) => `/edit/${encodeURI(windowId)}`,
   },
 };
+
+export const AlertingDeepLinkId = {
+  maintenanceWindows: MAINTENANCE_WINDOWS_APP_ID,
+  maintenanceWindowsCreate: 'create',
+};
+
+export type IAlertingDeepLinkId = typeof AlertingDeepLinkId[keyof typeof AlertingDeepLinkId];

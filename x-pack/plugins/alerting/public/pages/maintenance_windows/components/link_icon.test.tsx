@@ -20,7 +20,7 @@ describe('LinkIcon', () => {
 
   test('it renders', () => {
     const result = appMockRenderer.render(
-      <LinkIcon href="#" iconSide="right" iconSize="xxl" iconType="warning">
+      <LinkIcon iconSide="right" iconSize="xxl" iconType="warning">
         {'Test link'}
       </LinkIcon>
     );
@@ -38,16 +38,6 @@ describe('LinkIcon', () => {
     expect(result.getByRole('button')).toBeInTheDocument();
   });
 
-  test('it renders an action link when href is provided', () => {
-    const result = appMockRenderer.render(
-      <LinkIcon href="#" iconType="warning">
-        {'Test link'}
-      </LinkIcon>
-    );
-
-    expect(result.getByRole('link')).toBeInTheDocument();
-  });
-
   test('it renders an icon', () => {
     const result = appMockRenderer.render(<LinkIcon iconType="warning">{'Test link'}</LinkIcon>);
 
@@ -61,7 +51,7 @@ describe('LinkIcon', () => {
       </LinkIcon>
     );
 
-    expect(result.getByRole('button')).toHaveStyleRule('flex-direction', 'row-reverse');
+    expect(result.getByRole('button')).toHaveStyle({ 'flex-direction': 'row-reverse' });
   });
 
   test('it positions the icon to the left when iconSide is left (or not provided)', () => {
@@ -71,7 +61,7 @@ describe('LinkIcon', () => {
       </LinkIcon>
     );
 
-    expect(result.getByRole('button')).not.toHaveStyleRule('flex-direction', 'row-reverse');
+    expect(result.getByRole('button')).toHaveStyle({ 'flex-direction': 'row' });
   });
 
   test('it renders a label', () => {

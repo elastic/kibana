@@ -12,7 +12,7 @@ import {
   useMaintenanceWindowsNavigation,
 } from './use_navigation';
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
-import { APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../../common';
+import { APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../config';
 
 const mockNavigateTo = jest.fn();
 const mockGetAppUrl = jest.fn();

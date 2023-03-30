@@ -13,7 +13,8 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/alert_api';
-import { MAINTENANCE_WINDOWS_APP_ID, Rule } from '../common';
+import { Rule } from '../common';
+import { MAINTENANCE_WINDOWS_APP_ID } from './config';
 
 export interface PluginSetupContract {
   /**

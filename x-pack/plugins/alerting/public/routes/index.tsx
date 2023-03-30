@@ -8,20 +8,28 @@
 import React from 'react';
 import { MaintenanceWindowsPage } from '../pages/maintenance_windows';
 import { MaintenanceWindowsCreatePage } from '../pages/maintenance_windows/create';
-export const routes = {
+
+interface Route {
+  handler: () => JSX.Element;
+  exact: boolean;
+}
+
+interface AlertingRoutes {
+  maintenanceWindows: Record<string, Route>;
+}
+
+export const routes: AlertingRoutes = {
   maintenanceWindows: {
     '/': {
       handler: () => {
         return <MaintenanceWindowsPage />;
       },
-      params: {},
       exact: true,
     },
     '/create': {
       handler: () => {
         return <MaintenanceWindowsCreatePage />;
       },
-      params: {},
       exact: true,
     },
   },

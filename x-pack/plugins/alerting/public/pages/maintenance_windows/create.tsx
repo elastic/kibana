@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { EuiPageSection } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { AlertingDeepLinkId, useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
+import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
 import * as i18n from './translations';
 import { PageHeader } from './components/page_header';
 import { CreateMaintenanceWindowForm } from './components/form';
+import { AlertingDeepLinkId } from '../../config';
 
 export const MaintenanceWindowsCreatePage = React.memo(() => {
   useBreadcrumbs(AlertingDeepLinkId.maintenanceWindowsCreate);
@@ -21,6 +22,7 @@ export const MaintenanceWindowsCreatePage = React.memo(() => {
   return (
     <EuiPageSection restrictWidth={true}>
       <PageHeader showBackButton={true} title={i18n.CREATE_MAINTENANCE_WINDOW_TITLE} />
+      <EuiSpacer size="xl" />
       <CreateMaintenanceWindowForm
         onCancel={navigateToMaintenanceWindows}
         onSuccess={navigateToMaintenanceWindows}

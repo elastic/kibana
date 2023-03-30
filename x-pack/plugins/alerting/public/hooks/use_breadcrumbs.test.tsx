@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useBreadcrumbs } from './use_breadcrumbs';
-import { AlertingDeepLinkId } from './use_navigation';
+import { AlertingDeepLinkId } from '../config';
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 
 const mockSetBreadcrumbs = jest.fn();

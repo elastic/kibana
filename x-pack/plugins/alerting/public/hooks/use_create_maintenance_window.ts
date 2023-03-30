@@ -18,8 +18,8 @@ export function useCreateMaintenanceWindow() {
     notifications: { toasts },
   } = useKibana().services;
 
-  const mutationFn = async (maintenanceWindow: MaintenanceWindow) => {
-    return await createMaintenanceWindow({ http, maintenanceWindow });
+  const mutationFn = (maintenanceWindow: MaintenanceWindow) => {
+    return createMaintenanceWindow({ http, maintenanceWindow });
   };
 
   return useMutation(mutationFn, {

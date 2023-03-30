@@ -6,25 +6,23 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { isString } from 'lodash';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 
 import { LinkIcon } from './link_icon';
 import * as i18n from '../translations';
 import { TruncatedText } from './truncated_text';
 import { useMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 
-const LinkBack = styled.div.attrs({
-  'data-test-subj': 'link-back',
-})`
-  ${({ theme }) => css`
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-    margin-bottom: ${theme.eui.euiSizeS};
-  `}
-`;
-LinkBack.displayName = 'LinkBack';
+export const styles = {
+  linkBack: css`
+    font-size: ${euiThemeVars.euiFontSizeXS};
+    line-height: ${euiThemeVars.euiLineHeight};
+    margin-bottom: ${euiThemeVars.euiSizeS};
+  `,
+};
 
 interface TitleProps {
   title: string | React.ReactNode;
@@ -48,39 +46,25 @@ export interface PageHeaderProps {
 }
 
 export const PageHeader = React.memo<PageHeaderProps>(({ showBackButton = false, title }) => {
-  const { getMaintenanceWindowsUrl, navigateToMaintenanceWindows } =
-    useMaintenanceWindowsNavigation();
+  const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
 
-  const navigateToMaintenanceWindowsClick = useCallback(
-    (e) => {
-      if (e) {
-        e.preventDefault();
-      }
-      navigateToMaintenanceWindows();
-    },
-    [navigateToMaintenanceWindows]
-  );
+  const navigateToMaintenanceWindowsClick = useCallback(() => {
+    navigateToMaintenanceWindows();
+  }, [navigateToMaintenanceWindows]);
 
   return (
-    <>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          {showBackButton && (
-            <LinkBack>
-              <LinkIcon
-                onClick={navigateToMaintenanceWindowsClick}
-                href={getMaintenanceWindowsUrl()}
-                iconType="arrowLeft"
-              >
-                {i18n.MAINTENANCE_WINDOWS_RETURN_LINK}
-              </LinkIcon>
-            </LinkBack>
-          )}
-          <Title title={title} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xl" />
-    </>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
+        {showBackButton && (
+          <div data-test-subj="link-back" css={styles.linkBack}>
+            <LinkIcon onClick={navigateToMaintenanceWindowsClick} iconType="arrowLeft">
+              {i18n.MAINTENANCE_WINDOWS_RETURN_LINK}
+            </LinkIcon>
+          </div>
+        )}
+        <Title title={title} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
 PageHeader.displayName = 'PageHeader';

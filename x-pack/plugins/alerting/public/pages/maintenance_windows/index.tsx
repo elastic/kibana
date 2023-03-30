@@ -11,10 +11,8 @@ import { useKibana } from '../../utils/kibana_react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EmptyPrompt } from './components/empty_prompt';
 import * as i18n from './translations';
-import {
-  AlertingDeepLinkId,
-  useCreateMaintenanceWindowNavigation,
-} from '../../hooks/use_navigation';
+import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
+import { AlertingDeepLinkId } from '../../config';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const { docLinks } = useKibana().services;

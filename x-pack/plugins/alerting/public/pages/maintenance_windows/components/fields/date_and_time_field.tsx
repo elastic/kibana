@@ -19,8 +19,16 @@ import { get } from 'lodash';
 interface DateAndTimeFieldProps {
   field: FieldHook;
   showTimeSelect?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  display?:
+    | 'row'
+    | 'rowCompressed'
+    | 'columnCompressed'
+    | 'center'
+    | 'centerCompressed'
+    | 'columnCompressedSwitch'
+    | undefined;
+  style?: Record<string, string>;
+  'data-test-subj'?: string;
 }
 
 export const DateAndTimeField: React.FC<DateAndTimeFieldProps> = React.memo(
@@ -28,8 +36,12 @@ export const DateAndTimeField: React.FC<DateAndTimeFieldProps> = React.memo(
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [field.path] });
     // parse from a string date to moment() if there is an intitial value
-    // otherwise just get an initial date
-    const selected = get(form, field.path) ? moment(get(form, field.path)) : moment();
+    // otherwise just get the current date
+    const initialValue = get(form, field.path);
+    let selected = moment();
+    if (initialValue && moment(initialValue).isValid()) {
+      selected = moment(initialValue);
+    }
 
     const onChange = useCallback(
       (currentDate: Moment | null) => {

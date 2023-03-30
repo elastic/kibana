@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 import { DocLinks } from '@kbn/doc-links';
 import * as i18n from '../translations';
@@ -16,9 +16,12 @@ interface EmptyPromptProps {
   showCreateButton?: boolean;
 }
 
+const emptyTitle = <h2>{i18n.EMPTY_PROMPT_TITLE}</h2>;
+const emptyBody = <p>{i18n.EMPTY_PROMPT_DESCRIPTION}</p>;
+
 export const EmptyPrompt = React.memo<EmptyPromptProps>(
   ({ onClickCreate, showCreateButton = true, docLinks }) => {
-    const renderActions = () => {
+    const renderActions = useMemo(() => {
       if (showCreateButton) {
         return [
           <EuiButton key="create-action" fill onClick={onClickCreate}>
@@ -35,14 +38,10 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
         ];
       }
       return null;
-    };
+    }, [showCreateButton, onClickCreate, docLinks]);
 
     return (
-      <EuiPageTemplate.EmptyPrompt
-        title={<h2>{i18n.EMPTY_PROMPT_TITLE}</h2>}
-        body={<p>{i18n.EMPTY_PROMPT_DESCRIPTION}</p>}
-        actions={renderActions()}
-      />
+      <EuiPageTemplate.EmptyPrompt title={emptyTitle} body={emptyBody} actions={renderActions} />
     );
   }
 );

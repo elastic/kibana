@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React from 'react';
-import styled from 'styled-components';
 
 const LINE_CLAMP = 3;
 
-const Text = styled.span`
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-`;
+export const styles = {
+  truncatedText: css`
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: ${LINE_CLAMP};
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  `,
+};
 
 interface TruncatedTextProps {
   text: string;
 }
 
 export const TruncatedText = React.memo<TruncatedTextProps>(({ text }) => {
-  return <Text title={text}>{text}</Text>;
+  return <div css={styles.truncatedText}>{text}</div>;
 });
 TruncatedText.displayName = 'TruncatedText';
