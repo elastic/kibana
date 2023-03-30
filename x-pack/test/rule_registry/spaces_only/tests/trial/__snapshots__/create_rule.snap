@@ -48,6 +48,9 @@ Object {
   "kibana.alert.rule.producer": Array [
     "apm",
   ],
+  "kibana.alert.rule.revision": Array [
+    0,
+  ],
   "kibana.alert.rule.rule_type_id": Array [
     "apm.transaction_error_rate",
   ],
@@ -124,6 +127,9 @@ Object {
   ],
   "kibana.alert.rule.producer": Array [
     "apm",
+  ],
+  "kibana.alert.rule.revision": Array [
+    0,
   ],
   "kibana.alert.rule.rule_type_id": Array [
     "apm.transaction_error_rate",
