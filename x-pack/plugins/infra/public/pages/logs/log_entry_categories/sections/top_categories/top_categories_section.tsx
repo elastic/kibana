@@ -9,6 +9,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+import { PersistedLogViewReference } from '../../../../../../common/log_views';
 import { LogEntryCategory } from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
@@ -18,7 +19,7 @@ import { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_r
 export const TopCategoriesSection: React.FunctionComponent<{
   isLoadingTopCategories?: boolean;
   jobId: string;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   timeRange: TimeRange;
   topCategories: LogEntryCategory[];
   sortOptions: SortOptions;
@@ -26,7 +27,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
 }> = ({
   isLoadingTopCategories = false,
   jobId,
-  sourceId,
+  logViewReference,
   timeRange,
   topCategories,
   sortOptions,
@@ -40,7 +41,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
       >
         <TopCategoriesTable
           categorizationJobId={jobId}
-          sourceId={sourceId}
+          logViewReference={logViewReference}
           timeRange={timeRange}
           topCategories={topCategories}
           sortOptions={sortOptions}
