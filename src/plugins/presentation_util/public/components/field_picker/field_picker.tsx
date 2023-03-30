@@ -88,12 +88,14 @@ export const FieldPicker = ({
       onFieldTypesChange={(types) => setTypesFilter(types)}
       fieldTypesValue={typesFilter}
       availableFieldTypes={uniqueTypes}
+      buttonProps={{ disabled: Boolean(selectableProps?.isLoading) }}
     />
   );
 
   return (
     <EuiSelectable
       {...selectableProps}
+      className="fieldPickerSelectable"
       emptyMessage={i18n.translate('presentationUtil.fieldPicker.noFieldsLabel', {
         defaultMessage: 'No matching fields',
       })}
@@ -113,13 +115,14 @@ export const FieldPicker = ({
         placeholder: i18n.translate('presentationUtil.fieldSearch.searchPlaceHolder', {
           defaultMessage: 'Search field names',
         }),
+        disabled: Boolean(selectableProps?.isLoading),
       }}
       listProps={{
         isVirtualized: true,
         showIcons: false,
         bordered: true,
       }}
-      height={300}
+      height="full"
     >
       {(list, search) => (
         <>
