@@ -79,6 +79,8 @@ const partialEventSchema = {
       type: 'number',
       nullable: false,
       multipleOf: 1,
+      // Just some sane limits so the number doesn't escape too far into the
+      // future or past.
       minimum: 1600000000000, // Sep 2020
       maximum: 2600000000000, // May 2052
     },
