@@ -137,7 +137,6 @@ export class TriggersActionsUiExamplePlugin
 
     const config: AlertsTableConfigurationRegistry = {
       id: 'observabilityCases',
-      casesFeatureId: 'observabilityCases',
       columns,
       useInternalFlyout,
       getRenderCellValue: () => (props: any) => {
