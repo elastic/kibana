@@ -69,15 +69,20 @@ describe('FieldSuggestions', () => {
       expect(http.fetch).not.toHaveBeenCalled();
     });
 
-    it('should return an empty array if the field type is not a string or boolean', async () => {
-      const [field] = stubFields.filter(({ type }) => type !== 'string' && type !== 'boolean');
-      const suggestions = await getValueSuggestions({
-        indexPattern: stubIndexPattern,
-        field,
-        query: '',
-      });
-
-      expect(suggestions).toEqual([]);
+    it('should return an empty array if the field type is not a string, boolean, or IP', async () => {
+      const fields = stubFields.filter(
+        ({ type }) => type !== 'string' && type !== 'boolean' && type !== 'ip'
+      );
+      await Promise.all(
+        fields.map(async (field) => {
+          const suggestions = await getValueSuggestions({
+            indexPattern: stubIndexPattern,
+            field,
+            query: '',
+          });
+          expect(suggestions).toEqual([]);
+        })
+      );
       expect(http.fetch).not.toHaveBeenCalled();
     });
 
@@ -95,7 +100,7 @@ describe('FieldSuggestions', () => {
 
     it('should otherwise request suggestions', async () => {
       const [field] = stubFields.filter(
-        ({ type, aggregatable }) => type === 'string' && aggregatable
+        ({ type, aggregatable }) => (type === 'string' || type === 'ip') && aggregatable
       );
 
       await getValueSuggestions({
