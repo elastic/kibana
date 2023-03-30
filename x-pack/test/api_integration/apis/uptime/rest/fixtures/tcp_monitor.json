@@ -12,7 +12,6 @@
   "timeout": "16",
   "__ui": {
     "is_tls_enabled": true,
-    "is_zip_url_tls_enabled": false
   },
   "hosts": "example-host:40",
   "urls": "example-host:40",
