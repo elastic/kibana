@@ -8,6 +8,7 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useMemo, useEffect } from 'react';
 
+import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { NerInference } from './models/ner';
 import { QuestionAnsweringInference } from './models/question_answering';
 
@@ -20,10 +21,6 @@ import {
 
 import { TextEmbeddingInference } from './models/text_embedding';
 
-import {
-  TRAINED_MODEL_TYPE,
-  SUPPORTED_PYTORCH_TASKS,
-} from '../../../../common/constants/trained_models';
 import { useMlApiContext } from '../../contexts/kibana';
 import { InferenceInputForm } from './models/inference_input_form';
 import { InferrerType } from './models';
@@ -44,22 +41,16 @@ export const SelectedModel: FC<Props> = ({ model, inputType }) => {
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:
           return new NerInference(trainedModels, model, inputType);
-          break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
           return new TextClassificationInference(trainedModels, model, inputType);
-          break;
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
           return new ZeroShotClassificationInference(trainedModels, model, inputType);
-          break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
           return new TextEmbeddingInference(trainedModels, model, inputType);
-          break;
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
           return new FillMaskInference(trainedModels, model, inputType);
-          break;
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
           return new QuestionAnsweringInference(trainedModels, model, inputType);
-          break;
 
         default:
           break;

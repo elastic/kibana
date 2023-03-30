@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { BUILT_IN_MODEL_TAG } from '../../../common/constants/data_frame_analytics';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
@@ -19,7 +20,6 @@ import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import { DataFrameAnalysisConfigType } from '../../../common/types/data_frame_analytics';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../common/constants/trained_models';
 import { isTestable } from './test_models';
 import { ModelItem } from './models_list';
 

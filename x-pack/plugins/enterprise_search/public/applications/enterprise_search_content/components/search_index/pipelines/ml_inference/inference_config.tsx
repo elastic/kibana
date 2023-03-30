@@ -11,11 +11,9 @@ import { useValues } from 'kea';
 
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
-import {
-  getMlModelTypesForModelConfig,
-  SUPPORTED_PYTORCH_TASKS,
-} from '../../../../../../../common/ml_inference_pipeline';
+import { getMlModelTypesForModelConfig } from '../../../../../../../common/ml_inference_pipeline';
 import { getMLType } from '../../../shared/ml_inference/utils';
 
 import { MLInferenceLogic } from './ml_inference_logic';
