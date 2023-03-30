@@ -19,7 +19,11 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
 } from '../../types';
-import { addToSearchAfterReturn, getUnprocessedExceptionsWarnings } from '../../utils/utils';
+import {
+  addToSearchAfterReturn,
+  getMaxSignalsWarning,
+  getUnprocessedExceptionsWarnings,
+} from '../../utils/utils';
 import type { SuppressionBuckets } from './wrap_suppressed_alerts';
 import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
@@ -204,6 +208,10 @@ export const groupAndBulkCreate = async ({
 
       if (buckets.length === 0) {
         return toReturn;
+      }
+
+      if (buckets.length >= tuple.maxSignals) {
+        toReturn.warningMessages.push(getMaxSignalsWarning(tuple.maxSignals));
       }
 
       const suppressionBuckets: SuppressionBuckets[] = buckets.map((bucket) => ({

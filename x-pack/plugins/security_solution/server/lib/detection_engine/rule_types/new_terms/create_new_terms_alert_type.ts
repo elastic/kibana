@@ -38,6 +38,7 @@ import {
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
+  getMaxSignalsWarning,
   getUnprocessedExceptionsWarnings,
 } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
@@ -301,6 +302,10 @@ export const createNewTermsAlertType = (
             alertTimestampOverride,
             ruleExecutionLogger,
           });
+
+          if (wrappedAlerts.length + result.createdSignalsCount > params.maxSignals) {
+            result.warningMessages.push(getMaxSignalsWarning(params.maxSignals));
+          }
 
           const bulkCreateResult = await bulkCreate(
             wrappedAlerts,
