@@ -14,8 +14,6 @@
       "charts",
       "uiActions"
     ],
-    "requiredBundles": [
-      "kibanaUtils"
-    ]
+    "requiredBundles": []
   }
 }
