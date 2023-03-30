@@ -22,7 +22,7 @@ interface AvailabilityPanelprops {
 export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
   const {
     services: {
-      observability: { ExploratoryViewEmbeddable },
+      exploratoryView: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
   const selectedLocation = useSelectedLocation();

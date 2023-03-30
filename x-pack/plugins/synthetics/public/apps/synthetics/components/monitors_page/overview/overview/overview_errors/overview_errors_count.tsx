@@ -25,9 +25,9 @@ export const OverviewErrorsCount = ({
   to,
   locations,
 }: MonitorErrorsCountProps) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
