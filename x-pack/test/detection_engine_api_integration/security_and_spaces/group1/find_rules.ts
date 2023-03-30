@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ...action,
             uuid: body.data[0].actions[0].uuid,
             frequency: {
-              notifyWhen: 'onActionGroupChange',
+              notifyWhen: 'onActiveAlert',
               summary: true,
               throttle: null,
             },

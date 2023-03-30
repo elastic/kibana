@@ -126,7 +126,7 @@ describe('patchRules', () => {
                 frequency: {
                   summary: true,
                   throttle: null,
-                  notifyWhen: 'onActionGroupChange',
+                  notifyWhen: 'onActiveAlert',
                 },
               },
             ],
@@ -166,7 +166,7 @@ describe('patchRules', () => {
                 frequency: {
                   summary: true,
                   throttle: null,
-                  notifyWhen: 'onActionGroupChange',
+                  notifyWhen: 'onActiveAlert',
                 },
               },
             ],
