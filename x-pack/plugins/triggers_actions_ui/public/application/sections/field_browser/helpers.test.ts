@@ -244,6 +244,19 @@ describe('helpers', () => {
             },
           },
         },
+        kibana: {
+          fields: {
+            'kibana.alert.case_ids': {
+              name: 'kibana.alert.case_ids',
+              type: 'string',
+              searchable: true,
+              aggregatable: true,
+              readFromDocValues: true,
+              category: 'kibana',
+              format: 'string',
+            },
+          },
+        },
       };
 
       expect(
@@ -253,6 +266,34 @@ describe('helpers', () => {
         })
       ).toEqual(filtered);
     });
+
+    test.each(['cases', 'Cases', 'case', 'Case', 'ca'])(
+      'it matches the cases label with search term: %s',
+      (searchTerm) => {
+        const casesField = {
+          kibana: {
+            fields: {
+              'kibana.alert.case_ids': {
+                name: 'kibana.alert.case_ids',
+                type: 'string',
+                searchable: true,
+                aggregatable: true,
+                readFromDocValues: true,
+                category: 'kibana',
+                format: 'string',
+              },
+            },
+          },
+        };
+
+        expect(
+          filterBrowserFieldsByFieldName({
+            browserFields: { ...casesField, mockBrowserFields },
+            substring: searchTerm,
+          })
+        ).toEqual(casesField);
+      }
+    );
   });
 
   describe('filterSelectedBrowserFields', () => {

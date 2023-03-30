@@ -5620,7 +5620,7 @@
         "signature": [
           "{ alertsTableConfiguration: ",
           "AlertsTableConfigurationRegistry",
-          "; casesData: { cases: Map<string, ",
+          "; cases: { data: Map<string, ",
           "Case",
           ">; isLoading: boolean; }; columns: ",
           "EuiDataGridColumn",
