@@ -8,8 +8,10 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { keyBy, partition } from 'lodash';
+import { keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { TransformStats } from '../../../../common/types/transform_stats';
 import { TransformHealthRuleParams } from './schema';
 import {
   ALL_TRANSFORMS_SELECTION,
@@ -18,9 +20,9 @@ import {
   TRANSFORM_STATE,
 } from '../../../../common/constants';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
-import {
+import type {
   ErrorMessagesTransformResponse,
-  NotStartedTransformResponse,
+  TransformStateReportResponse,
   TransformHealthAlertContext,
 } from './register_transform_health_rule_type';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
@@ -41,10 +43,15 @@ type Transform = estypes.TransformGetTransformTransformSummary & {
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
 
-export function transformHealthServiceProvider(
-  esClient: ElasticsearchClient,
-  rulesClient?: RulesClient
-) {
+export function transformHealthServiceProvider({
+  esClient,
+  rulesClient,
+  fieldFormatsRegistry,
+}: {
+  esClient: ElasticsearchClient;
+  rulesClient?: RulesClient;
+  fieldFormatsRegistry?: FieldFormatsRegistry;
+}) {
   const transformsDict = new Map<string, Transform>();
 
   /**
@@ -90,6 +97,42 @@ export function transformHealthServiceProvider(
     return resultTransformIds;
   };
 
+  const getTransformStats = memoize(async (transformIds: string[]): Promise<TransformStats[]> => {
+    return (
+      await esClient.transform.getTransformStats({
+        transform_id: transformIds.join(','),
+      })
+    ).transforms as TransformStats[];
+  });
+
+  function baseTransformAlertResponseFormatter(
+    transformStats: TransformStats
+  ): TransformStateReportResponse {
+    const dateFormatter = fieldFormatsRegistry!.deserialize({ id: FIELD_FORMAT_IDS.DATE });
+
+    return {
+      transform_id: transformStats.id,
+      description: transformsDict.get(transformStats.id)?.description,
+      transform_state: transformStats.state,
+      node_name: transformStats.node?.name,
+      health_status: transformStats.health.status,
+      ...(transformStats.health.issues
+        ? {
+            issues: transformStats.health.issues.map((issue) => {
+              return {
+                issue: issue.issue,
+                details: issue.details,
+                count: issue.count,
+                ...(issue.first_occurrence
+                  ? { first_occurrence: dateFormatter.convert(issue.first_occurrence) }
+                  : {}),
+              };
+            }),
+          }
+        : {}),
+    };
+  }
+
   return {
     /**
      * Returns report about not started transforms
@@ -99,20 +142,11 @@ export function transformHealthServiceProvider(
      */
     async getTransformsStateReport(
       transformIds: string[]
-    ): Promise<[NotStartedTransformResponse[], NotStartedTransformResponse[]]> {
-      const transformsStats = (
-        await esClient.transform.getTransformStats({
-          transform_id: transformIds.join(','),
-        })
-      ).transforms;
+    ): Promise<[TransformStateReportResponse[], TransformStateReportResponse[]]> {
+      const transformsStats = await getTransformStats(transformIds);
 
       return partition(
-        transformsStats.map((t) => ({
-          transform_id: t.id,
-          description: transformsDict.get(t.id)?.description,
-          transform_state: t.state,
-          node_name: t.node?.name,
-        })),
+        transformsStats.map(baseTransformAlertResponseFormatter),
         (t) =>
           t.transform_state !== TRANSFORM_STATE.STARTED &&
           t.transform_state !== TRANSFORM_STATE.INDEXING
@@ -193,6 +227,19 @@ export function transformHealthServiceProvider(
         .filter((v) => failedTransforms.has(v.transform_id));
     },
     /**
+     * Returns report about unhealthy transforms
+     * @param transformIds
+     */
+    async getUnhealthyTransformsReport(
+      transformIds: string[]
+    ): Promise<TransformStateReportResponse[]> {
+      const transformsStats = await getTransformStats(transformIds);
+
+      return transformsStats
+        .filter((t) => t.health.status !== 'green')
+        .map(baseTransformAlertResponseFormatter);
+    },
+    /**
      * Returns results of the transform health checks
      * @param params
      */
@@ -265,6 +312,34 @@ export function transformHealthServiceProvider(
               : i18n.translate('xpack.transform.alertTypes.transformHealth.errorMessagesMessage', {
                   defaultMessage:
                     '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {contains} other {contain}} error messages.',
+                  values: { count, transformsString },
+                }),
+          },
+        });
+      }
+
+      if (testsConfig.healthCheck.enabled) {
+        const response = await this.getUnhealthyTransformsReport(transformIds);
+        const isHealthy = response.length === 0;
+        const count = response.length;
+        const transformsString = response.map((t) => t.transform_id).join(', ');
+        result.push({
+          isHealthy,
+          name: TRANSFORM_HEALTH_CHECK_NAMES.healthCheck.name,
+          context: {
+            results: isHealthy ? [] : response,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.transform.alertTypes.transformHealth.healthCheckRecoveryMessage',
+                  {
+                    defaultMessage:
+                      '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} healthy.',
+                    values: { count, transformsString },
+                  }
+                )
+              : i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckMessage', {
+                  defaultMessage:
+                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} unhealthy.',
                   values: { count, transformsString },
                 }),
           },

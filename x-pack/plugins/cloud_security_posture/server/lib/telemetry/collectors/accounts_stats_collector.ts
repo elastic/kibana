@@ -6,8 +6,11 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getIdentifierRuntimeMapping } from '../../get_identifier_runtime_mapping';
+import type {
+  AggregationsMultiBucketBase,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type { CspmAccountsStats } from './types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
@@ -15,11 +18,6 @@ import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 interface Value {
   value: number;
 }
-
-interface DocCount {
-  doc_count: number;
-}
-
 interface BenchmarkName {
   metrics: { 'rule.benchmark.name': string };
 }
@@ -32,6 +30,10 @@ interface BenchmarkVersion {
   metrics: { 'rule.benchmark.version': string };
 }
 
+interface KubernetesVersion {
+  metrics: { 'cloudbeat.kubernetes.version': string };
+}
+
 interface AccountsStats {
   accounts: {
     buckets: AccountEntity[];
@@ -40,11 +42,12 @@ interface AccountsStats {
 interface AccountEntity {
   key: string; // account_id
   doc_count: number; // latest findings doc count
-  passed_findings_count: DocCount;
-  failed_findings_count: DocCount;
+  passed_findings_count: AggregationsMultiBucketBase;
+  failed_findings_count: AggregationsMultiBucketBase;
   benchmark_name: { top: BenchmarkName[] };
   benchmark_id: { top: BenchmarkId[] };
   benchmark_version: { top: BenchmarkVersion[] };
+  kubernetes_version: { top: KubernetesVersion[] };
   agents_count: Value;
   nodes_count: Value;
   pods_count: Value;
@@ -53,8 +56,8 @@ interface AccountEntity {
   };
 }
 
-const getAccountsStatsQuery = (index: string): SearchRequest => ({
-  index,
+const getAccountsStatsQuery = (): SearchRequest => ({
+  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
     match_all: {},
@@ -105,6 +108,17 @@ const getAccountsStatsQuery = (index: string): SearchRequest => ({
           top_metrics: {
             metrics: {
               field: 'rule.benchmark.name',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
+        kubernetes_version: {
+          top_metrics: {
+            metrics: {
+              field: 'cloudbeat.kubernetes.version',
             },
             size: 1,
             sort: {
@@ -205,6 +219,7 @@ const getCspmAccountsStats = (
     benchmark_name: account.benchmark_name.top[0].metrics['rule.benchmark.name'],
     benchmark_id: account.benchmark_id.top[0].metrics['rule.benchmark.id'],
     benchmark_version: account.benchmark_version.top[0].metrics['rule.benchmark.version'],
+    kubernetes_version: account.kubernetes_version.top[0].metrics['cloudbeat.kubernetes.version'],
     agents_count: account.agents_count.value,
     nodes_count: account.nodes_count.value,
     pods_count: account.resources.pods_count.value,
@@ -225,7 +240,7 @@ export const getAccountsStats = async (
 
     if (isIndexExists) {
       const accountsStatsResponse = await esClient.search<unknown, AccountsStats>(
-        getAccountsStatsQuery(LATEST_FINDINGS_INDEX_DEFAULT_NS)
+        getAccountsStatsQuery()
       );
 
       const cspmAccountsStats = accountsStatsResponse.aggregations
@@ -237,7 +252,7 @@ export const getAccountsStats = async (
 
     return [];
   } catch (e) {
-    logger.error(`Failed to get resources stats ${e}`);
+    logger.error(`Failed to get account stats ${e}`);
     return [];
   }
 };

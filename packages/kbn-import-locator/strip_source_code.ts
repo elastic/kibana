@@ -35,31 +35,30 @@
 import { SyntaxKind } from 'typescript';
 import type { Scanner } from 'typescript';
 
+const TYPE_IMPORT_COMMENT_RE = /\{(.*import.*\(.*["'].*)\}/g;
+
 export function stripSourceCode(scanner: Scanner, contents: string): string {
   scanner.setText(contents);
   let token = scanner.scan();
-  const statements = [];
+  const statements: string[] = [];
   let start = null;
   while (token !== SyntaxKind.EndOfFileToken) {
     const potentialStart = scanner.getStartPos();
     switch (token) {
       case SyntaxKind.MultiLineCommentTrivia:
       case SyntaxKind.SingleLineCommentTrivia: {
-        const isMultiLineCommentTrivia = token === SyntaxKind.MultiLineCommentTrivia;
-        const start = potentialStart + 2;
+        const isMultiline = token === SyntaxKind.MultiLineCommentTrivia;
+        const start = potentialStart;
         token = scanner.scan();
-        const end = scanner.getStartPos() - (isMultiLineCommentTrivia ? 2 : 0);
-        const comment = contents.substring(start, end).trim();
-        if (comment === 'nx-ignore-next-line') {
-          // reading till the end of the line
-          while (token === SyntaxKind.WhitespaceTrivia || token === SyntaxKind.NewLineTrivia) {
-            token = scanner.scan();
-          }
+        if (!isMultiline) {
+          break;
+        }
 
-          // ignore next line
-          while (token !== SyntaxKind.NewLineTrivia && token !== SyntaxKind.EndOfFileToken) {
-            token = scanner.scan();
-          }
+        const end = scanner.getStartPos();
+        const comment = contents.substring(start, end);
+        // preserve multi-line comments which import types
+        for (const match of comment.matchAll(TYPE_IMPORT_COMMENT_RE)) {
+          statements.push(match[1]);
         }
         break;
       }

@@ -8,33 +8,30 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL, ALERTS_DATASET } from '../../common/constants';
 
-const MOCK_YAML_CONFIGURATION = `
-selectors:
-  # default selector (user can modify or remove if they want)
-  - name: default
-    operation: [createExecutable, modifyExecutable, execMemFd]
-
-  # example custom selector
-  - name: nginxOnly
-    containerImageName:
-      - nginx
-
-  # example selector used for exclude
-  - name: excludeCustomNginxBuild
-    containerImageTag:
-      - staging
-
-# responses are evaluated from top to bottom
-# only the first response with a match will run its actions
-responses:
-  - match: [nginxOnly]
-    exclude: [excludeCustomNginxBuild]
-    actions: [alert, block]
-
-  # default response
-  # delete this if no default response needed
-  - match: [default]
-    actions: [alert]
+export const MOCK_YAML_CONFIGURATION = `file:
+  selectors:
+    - name: default
+      operation:
+        - createExecutable
+        - modifyExecutable
+    - name: nginxOnly
+      containerImageName:
+        - nginx
+    - name: excludeCustomNginxBuild
+      containerImageTag:
+        - staging
+  responses:
+    - match:
+        - nginxOnly
+      exclude:
+        - excludeCustomNginxBuild
+      actions:
+        - alert
+        - block
+    - match:
+        - default
+      actions:
+        - alert
 `;
 
 export const MOCK_YAML_INVALID_CONFIGURATION = `
@@ -71,8 +68,8 @@ export const getCloudDefendNewPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): New
   ],
   package: {
     name: 'cloud_defend',
-    title: 'Kubernetes Security Posture Management',
-    version: '0.0.21',
+    title: 'Container drift prevention',
+    version: '1.0.0',
   },
 });
 
@@ -114,7 +111,7 @@ export const getCloudDefendPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): Packag
   ],
   package: {
     name: 'cloud_defend',
-    title: 'Kubernetes Security Posture Management',
-    version: '0.0.21',
+    title: 'Container drift prevention',
+    version: '1.0.0',
   },
 });

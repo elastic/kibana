@@ -23,6 +23,7 @@ import { decodeCommentRequest } from '../utils';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
+import { validateRegisteredAttachments } from './validators';
 
 /**
  * Create an attachment to a case.
@@ -40,11 +41,21 @@ export const bulkCreate = async (
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  attachments.forEach((attachment) => {
-    decodeCommentRequest(attachment);
-  });
+  const {
+    logger,
+    authorization,
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+  } = clientArgs;
 
-  const { logger, authorization } = clientArgs;
+  attachments.forEach((attachment) => {
+    decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
+    validateRegisteredAttachments({
+      query: attachment,
+      persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry,
+    });
+  });
 
   try {
     const [attachmentsWithIds, entities]: [Array<{ id: string } & CommentRequest>, OwnerEntity[]] =

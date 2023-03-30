@@ -8,17 +8,17 @@
 import { isEmpty } from 'lodash';
 import { BASE_ENDPOINT_ROUTE } from '../../../../common/endpoint/constants';
 import { runEndpointLoaderScript } from './run_endpoint_loader';
+import { request } from './common';
 
 // Checks for Endpoint data and creates it if needed
 export const loadEndpointDataForEventFiltersIfNeeded = () => {
-  cy.request({
+  request({
     method: 'POST',
     url: `${BASE_ENDPOINT_ROUTE}/suggestions/eventFilters`,
     body: {
       field: 'agent.type',
       query: '',
     },
-    headers: { 'kbn-xsrf': 'kibana' },
     failOnStatusCode: false,
   }).then(({ body }) => {
     if (isEmpty(body)) {

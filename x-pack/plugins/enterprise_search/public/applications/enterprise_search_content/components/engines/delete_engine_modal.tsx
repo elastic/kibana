@@ -12,6 +12,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
+import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
 import { EnginesListLogic } from './engines_list_logic';
 
@@ -22,6 +23,7 @@ export interface DeleteEngineModalProps {
 
 export const DeleteEngineModal: React.FC<DeleteEngineModalProps> = ({ engineName, onClose }) => {
   const { deleteEngine } = useActions(EnginesListLogic);
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { isDeleteLoading } = useValues(EnginesListLogic);
   return (
     <EuiConfirmModal
@@ -31,6 +33,10 @@ export const DeleteEngineModal: React.FC<DeleteEngineModalProps> = ({ engineName
       onCancel={onClose}
       onConfirm={() => {
         deleteEngine({ engineName });
+        sendEnterpriseSearchTelemetry({
+          action: 'clicked',
+          metric: 'entSearchContent-engines-engineView-deleteEngineConfirm',
+        });
       }}
       cancelButtonText={CANCEL_BUTTON_LABEL}
       confirmButtonText={i18n.translate(

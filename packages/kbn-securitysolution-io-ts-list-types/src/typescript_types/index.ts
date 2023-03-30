@@ -77,6 +77,7 @@ export interface ApiCallMemoProps {
 // remove unnecessary validation checks
 export interface ApiListExportProps {
   id: string;
+  includeExpiredExceptions: boolean;
   listId: string;
   namespaceType: NamespaceType;
   onError: (err: Error) => void;
@@ -133,6 +134,7 @@ export interface ExportExceptionListProps {
   id: string;
   listId: string;
   namespaceType: NamespaceType;
+  includeExpiredExceptions: boolean;
   signal: AbortSignal;
 }
 

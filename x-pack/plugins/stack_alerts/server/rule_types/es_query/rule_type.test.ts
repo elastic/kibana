@@ -67,6 +67,7 @@ describe('ruleType', () => {
             "description": "Navigate to Discover and show the records that triggered
              the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.",
             "name": "link",
+            "usesPublicBaseUrl": true,
           },
         ],
         "params": Array [
@@ -715,6 +716,7 @@ async function invokeExecutor({
       ruleTypeId: '',
       ruleTypeName: '',
       enabled: true,
+      revision: 0,
       schedule: {
         interval: '1h',
       },
@@ -725,6 +727,8 @@ async function invokeExecutor({
       updatedAt: new Date(),
       throttle: null,
       notifyWhen: null,
+      muteAll: false,
+      snoozeSchedule: [],
     },
     logger,
     flappingSettings: DEFAULT_FLAPPING_SETTINGS,

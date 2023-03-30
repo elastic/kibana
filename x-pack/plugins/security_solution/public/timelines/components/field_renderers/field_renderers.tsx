@@ -11,8 +11,12 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, Fragment, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
 import type {
   AutonomousSystem,
   FlowTarget,
@@ -26,10 +30,6 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../explore/network/components/details/translations';
-import {
-  CELL_ACTIONS_DEFAULT_TRIGGER,
-  CELL_ACTIONS_TIMELINE_TRIGGER,
-} from '../../../../common/constants';
 import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
@@ -288,13 +288,23 @@ interface MoreContainerProps {
   fieldType: string;
   values: string[];
   idPrefix: string;
+  isAggregatable?: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
   render?: (item: string) => React.ReactNode;
 }
 
 export const MoreContainer = React.memo<MoreContainerProps>(
-  ({ fieldName, fieldType, idPrefix, moreMaxHeight, overflowIndexStart, render, values }) => {
+  ({
+    fieldName,
+    fieldType,
+    idPrefix,
+    isAggregatable,
+    moreMaxHeight,
+    overflowIndexStart,
+    render,
+    values,
+  }) => {
     const { timelineId } = useContext(TimelineContext);
 
     const moreItemsWithHoverActions = useMemo(
@@ -305,29 +315,40 @@ export const MoreContainer = React.memo<MoreContainerProps>(
           if (typeof value === 'string' && fieldName != null) {
             acc.push(
               <EuiFlexItem key={id}>
-                <CellActions
+                <SecurityCellActions
                   key={id}
                   mode={CellActionsMode.HOVER}
                   visibleCellActions={5}
                   showActionTooltips
-                  triggerId={
-                    timelineId ? CELL_ACTIONS_TIMELINE_TRIGGER : CELL_ACTIONS_DEFAULT_TRIGGER
-                  }
+                  triggerId={SecurityCellActionsTrigger.DEFAULT}
                   field={{
                     name: fieldName,
                     value,
                     type: fieldType,
+                    aggregatable: isAggregatable,
+                  }}
+                  metadata={{
+                    scopeId: timelineId ?? undefined,
                   }}
                 >
                   <>{render ? render(value) : defaultToEmptyTag(value)}</>
-                </CellActions>
+                </SecurityCellActions>
               </EuiFlexItem>
             );
           }
 
           return acc;
         }, []),
-      [fieldName, fieldType, idPrefix, overflowIndexStart, render, values, timelineId]
+      [
+        fieldName,
+        fieldType,
+        idPrefix,
+        overflowIndexStart,
+        render,
+        values,
+        timelineId,
+        isAggregatable,
+      ]
     );
 
     return (
@@ -349,7 +370,16 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 MoreContainer.displayName = 'MoreContainer';
 
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({ attrName, idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems, fieldType }) => {
+  ({
+    attrName,
+    idPrefix,
+    moreMaxHeight,
+    overflowIndexStart = 5,
+    render,
+    rowItems,
+    fieldType,
+    isAggregatable,
+  }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
@@ -391,6 +421,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
               fieldType={fieldType}
+              isAggregatable={isAggregatable}
             />
           </EuiPopover>
         )}

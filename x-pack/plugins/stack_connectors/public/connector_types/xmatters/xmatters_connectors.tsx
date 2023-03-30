@@ -115,6 +115,11 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         options={authenticationButtons}
       />
       <HiddenField path={'config.usesBasic'} config={{ defaultValue: true }} />
+      {/* The components size depends on auth option we choose. Just putting a limit to form width
+          would change component dehaviour during the sizing. This line make component size to max, so
+          it does not change during sizing, but keep the same behaviour the designer put into it.
+      */}
+      <div style={{ width: '100vw', height: 0 }} />
       <EuiSpacer size="m" />
       {selectedAuth === XmattersAuthenticationType.URL ? (
         <EuiFlexGroup justifyContent="spaceBetween">

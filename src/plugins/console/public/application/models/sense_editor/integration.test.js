@@ -13,6 +13,9 @@ import $ from 'jquery';
 
 import * as kb from '../../../lib/kb/kb';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../../services';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { StorageMock } from '../../../services/storage.mock';
+import { SettingsMock } from '../../../services/settings.mock';
 
 describe('Integration', () => {
   let senseEditor;
@@ -27,6 +30,15 @@ describe('Integration', () => {
     $(senseEditor.getCoreEditor().getContainer()).show();
     senseEditor.autocomplete._test.removeChangeListener();
     autocompleteInfo = new AutocompleteInfo();
+
+    const httpMock = httpServiceMock.createSetupContract();
+    const storage = new StorageMock({}, 'test');
+    const settingsMock = new SettingsMock(storage);
+
+    settingsMock.getAutocomplete.mockReturnValue({ fields: true });
+
+    autocompleteInfo.mapping.setup(httpMock, settingsMock);
+
     setAutocompleteInfo(autocompleteInfo);
   });
   afterEach(() => {
@@ -164,7 +176,8 @@ describe('Integration', () => {
             ac('textBoxPosition', posCompare);
             ac('rangeToReplace', rangeCompare);
             done();
-          }
+          },
+          { setAnnotation: () => {}, removeAnnotation: () => {} }
         );
       });
     });

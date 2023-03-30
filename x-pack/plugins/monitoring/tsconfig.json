@@ -39,6 +39,7 @@
     "@kbn/io-ts-utils",
     "@kbn/dashboard-plugin",
     "@kbn/fleet-plugin",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

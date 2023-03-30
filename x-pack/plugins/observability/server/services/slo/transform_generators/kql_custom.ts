@@ -6,12 +6,11 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -27,11 +26,12 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
+      this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildCommonGroupBy(slo),
+      this.buildGroupBy(slo, this.getTimestampFieldOrDefault(slo.indicator.params.timestampField)),
       this.buildAggregations(slo, slo.indicator),
-      this.buildSettings(slo)
+      this.buildSettings(slo, this.getTimestampFieldOrDefault(slo.indicator.params.timestampField))
     );
   }
 
@@ -79,12 +79,8 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       }),
     };
   }
-}
 
-function getElastichsearchQueryOrThrow(kuery: string) {
-  try {
-    return toElasticsearchQuery(fromKueryExpression(kuery));
-  } catch (err) {
-    throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
+  private getTimestampFieldOrDefault(timestampField: string | undefined): string {
+    return !!timestampField && timestampField.length > 0 ? timestampField : '@timestamp';
   }
 }

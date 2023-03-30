@@ -51,6 +51,15 @@ const documentTypeConfigMap: Record<
     }),
     rollupIntervals: defaultRollupIntervals,
   },
+  [ApmDocumentType.ServiceSummaryMetric]: {
+    processorEvent: ProcessorEvent.metric,
+    getQuery: (rollupInterval) => ({
+      bool: {
+        filter: getDefaultFilter('service_summary', rollupInterval),
+      },
+    }),
+    rollupIntervals: defaultRollupIntervals,
+  },
   [ApmDocumentType.TransactionMetric]: {
     processorEvent: ProcessorEvent.metric,
     getQuery: (rollupInterval) => ({

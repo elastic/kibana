@@ -5,21 +5,31 @@
  * 2.0.
  */
 import React, { createContext } from 'react';
+import {
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
+} from '@kbn/observability-plugin/common';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../hooks/use_apm_route_path';
 import { FetcherResult, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 
 export const TimeRangeMetadataContext = createContext<
   FetcherResult<TimeRangeMetadata> | undefined
 >(undefined);
 
-export function TimeRangeMetadataContextProvider({
+export function ApmTimeRangeMetadataContextProvider({
   children,
 }: {
-  children: React.ReactElement;
+  children?: React.ReactNode;
 }) {
+  const {
+    core: { uiSettings },
+  } = useApmPluginContext();
+
   const { query } = useApmParams('/*');
 
   const kuery = 'kuery' in query ? query.kuery : '';
@@ -41,6 +51,44 @@ export function TimeRangeMetadataContextProvider({
     routePath.startsWith('/dependencies/operation') ||
     routePath.startsWith('/dependencies/operations');
 
+  return (
+    <TimeRangeMetadataContextProvider
+      uiSettings={uiSettings}
+      useSpanName={isOperationView}
+      start={start}
+      end={end}
+      kuery={kuery}
+    >
+      {children}
+    </TimeRangeMetadataContextProvider>
+  );
+}
+
+export function TimeRangeMetadataContextProvider({
+  children,
+  uiSettings,
+  useSpanName,
+  start,
+  end,
+  kuery,
+}: {
+  children?: React.ReactNode;
+  uiSettings: IUiSettingsClient;
+  useSpanName: boolean;
+  start: string;
+  end: string;
+  kuery: string;
+}) {
+  const enableServiceTransactionMetrics = uiSettings.get<boolean>(
+    apmEnableServiceMetrics,
+    true
+  );
+
+  const enableContinuousRollups = uiSettings.get<boolean>(
+    apmEnableContinuousRollups,
+    true
+  );
+
   const fetcherResult = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/time_range_metadata', {
@@ -49,12 +97,21 @@ export function TimeRangeMetadataContextProvider({
             start,
             end,
             kuery,
-            useSpanName: isOperationView,
+            useSpanName,
+            enableServiceTransactionMetrics,
+            enableContinuousRollups,
           },
         },
       });
     },
-    [start, end, kuery, isOperationView]
+    [
+      start,
+      end,
+      kuery,
+      useSpanName,
+      enableServiceTransactionMetrics,
+      enableContinuousRollups,
+    ]
   );
 
   return (

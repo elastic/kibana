@@ -86,7 +86,6 @@ function getInvalidSortFieldMessage(
       displayLocations: [
         { id: 'toolbar' },
         { id: 'dimensionButton', dimensionId: columnId },
-        { id: 'visualization' },
         { id: 'embeddableBadge' },
       ],
     };
@@ -200,8 +199,8 @@ export const lastValueOperation: OperationDefinition<
           : oldColumn.filter,
     };
   },
-  getPossibleOperationForField: ({ aggregationRestrictions, type }) => {
-    if (supportedTypes.has(type) && !aggregationRestrictions) {
+  getPossibleOperationForField: ({ aggregationRestrictions, type, timeSeriesMetric }) => {
+    if (supportedTypes.has(type) && !aggregationRestrictions && timeSeriesMetric !== 'counter') {
       return {
         dataType: type as DataType,
         isBucketed: false,

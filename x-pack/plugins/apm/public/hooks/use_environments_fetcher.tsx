@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { SERVICE_ENVIRONMENT } from '../../common/es_fields/apm';
 import { useFetcher } from './use_fetcher';
+import { Environment } from '../../common/environment_rt';
+import { APIReturnType } from '../services/rest/create_call_apm_api';
 
-const INITIAL_DATA = { environments: [] };
+type EnvironmentsAPIResponse = APIReturnType<'GET /internal/apm/environments'>;
 
+const INITIAL_DATA: EnvironmentsAPIResponse = { environments: [] };
 export function useEnvironmentsFetcher({
   serviceName,
   start,
@@ -20,7 +24,11 @@ export function useEnvironmentsFetcher({
 }) {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (!start || !end) {
+        return;
+      }
+
+      if (serviceName) {
         return callApmApi('GET /internal/apm/environments', {
           params: {
             query: {
@@ -31,9 +39,24 @@ export function useEnvironmentsFetcher({
           },
         });
       }
+      return callApmApi('GET /internal/apm/suggestions', {
+        params: {
+          query: {
+            start,
+            end,
+            fieldName: SERVICE_ENVIRONMENT,
+            fieldValue: '',
+          },
+        },
+      }).then((response) => {
+        return { environments: response.terms };
+      });
     },
     [start, end, serviceName]
   );
 
-  return { environments: data.environments, status };
+  return {
+    environments: data.environments as Environment[],
+    status,
+  };
 }

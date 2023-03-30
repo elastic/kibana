@@ -31,8 +31,12 @@ describe('get_time_options', () => {
   test('if getTimeFieldOptions return only date type fields', () => {
     const timeOnlyTypeFields = getTimeFieldOptions([
       { type: 'date', name: 'order_date' },
+      { type: 'date_nanos', name: 'order_date_nanos' },
       { type: 'number', name: 'sum' },
     ]);
-    expect(timeOnlyTypeFields).toMatchObject([{ text: 'order_date', value: 'order_date' }]);
+    expect(timeOnlyTypeFields).toMatchObject([
+      { text: 'order_date', value: 'order_date' },
+      { text: 'order_date_nanos', value: 'order_date_nanos' },
+    ]);
   });
 });

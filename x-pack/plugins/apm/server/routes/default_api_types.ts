@@ -22,9 +22,22 @@ export const probabilityRt = t.type({
 });
 export const kueryRt = t.type({ kuery: t.string });
 
-export const dataSourceRt = t.type({
+export const serviceTransactionDataSourceRt = t.type({
   documentType: t.union([
     t.literal(ApmDocumentType.ServiceTransactionMetric),
+    t.literal(ApmDocumentType.TransactionMetric),
+    t.literal(ApmDocumentType.TransactionEvent),
+  ]),
+  rollupInterval: t.union([
+    t.literal(RollupInterval.OneMinute),
+    t.literal(RollupInterval.TenMinutes),
+    t.literal(RollupInterval.SixtyMinutes),
+    t.literal(RollupInterval.None),
+  ]),
+});
+
+export const transactionDataSourceRt = t.type({
+  documentType: t.union([
     t.literal(ApmDocumentType.TransactionMetric),
     t.literal(ApmDocumentType.TransactionEvent),
   ]),

@@ -13,7 +13,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { severityAggregations } from '../alerts_summary_charts_panel/aggregations';
-import { isAlertsBySeverityData } from './helpers';
+import { getIsAlertsBySeverityData } from './helpers';
 import { SeverityLevelChart } from './severity_level_chart';
 import * as i18n from './translations';
 
@@ -38,7 +38,7 @@ export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
     skip,
     uniqueQueryId,
   });
-  const data = useMemo(() => (isAlertsBySeverityData(items) ? items : []), [items]);
+  const data = useMemo(() => (getIsAlertsBySeverityData(items) ? items : []), [items]);
   return (
     <InspectButtonContainer>
       <EuiPanel hasBorder hasShadow={false} data-test-subj="severty-level-panel">

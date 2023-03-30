@@ -11,16 +11,20 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../common/parse_duration';
-import { RawRule, SanitizedRule, RuleTypeParams, RuleAction, Rule } from '../../types';
+import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
-import { createRuleSavedObject, extractReferences, validateActions } from '../lib';
+import {
+  createRuleSavedObject,
+  extractReferences,
+  validateActions,
+  addGeneratedActionValues,
+} from '../lib';
 import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
+import { NormalizedAlertAction, RulesClientContext } from '../types';
 
-type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 interface SavedObjectOptions {
   id?: string;
   migrationVersion?: Record<string, string>;
@@ -44,6 +48,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'isSnoozedUntil'
     | 'lastRun'
     | 'nextRun'
+    | 'revision'
   > & { actions: NormalizedAlertAction[] };
   options?: SavedObjectOptions;
   allowMissingConnectorSecrets?: boolean;
@@ -51,8 +56,10 @@ export interface CreateOptions<Params extends RuleTypeParams> {
 
 export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { data, options, allowMissingConnectorSecrets }: CreateOptions<Params>
+  { data: initialData, options, allowMissingConnectorSecrets }: CreateOptions<Params>
 ): Promise<SanitizedRule<Params>> {
+  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
+
   const id = options?.id || SavedObjectsUtils.generateId();
 
   try {
@@ -105,7 +112,6 @@ export async function create<Params extends RuleTypeParams = never>(
     }
   }
 
-  await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
   await withSpan({ name: 'validateActions', type: 'rules' }, () =>
     validateActions(context, ruleType, data, allowMissingConnectorSecrets)
   );
@@ -153,6 +159,7 @@ export async function create<Params extends RuleTypeParams = never>(
     throttle,
     executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
     monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    revision: 0,
     running: false,
   };
 

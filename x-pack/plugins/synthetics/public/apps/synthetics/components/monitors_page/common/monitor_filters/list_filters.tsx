@@ -12,7 +12,7 @@ import { FilterGroup } from './filter_group';
 import { SearchField } from '../search_field';
 import { SyntheticsMonitorFilterChangeHandler } from './filter_fields';
 
-export function ListFilters({
+export const ListFilters = function ({
   handleFilterChange,
 }: {
   handleFilterChange: SyntheticsMonitorFilterChangeHandler;
@@ -27,4 +27,4 @@ export function ListFilters({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+};

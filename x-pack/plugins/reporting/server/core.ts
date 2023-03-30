@@ -7,8 +7,11 @@
 
 import type {
   DocLinksServiceSetup,
+  FakeRawRequest,
+  Headers,
   IBasePath,
   IClusterClient,
+  KibanaRequest,
   Logger,
   PackageInfo,
   PluginInitializerContext,
@@ -16,12 +19,10 @@ import type {
   SavedObjectsServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
-  KibanaRequest,
-  FakeRawRequest,
-  Headers,
 } from '@kbn/core/server';
 import { CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -69,6 +70,7 @@ export interface ReportingInternalStart {
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   data: DataPluginStart;
+  discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;

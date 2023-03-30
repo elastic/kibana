@@ -10,14 +10,12 @@ import { ComponentStory } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import { PageTitle as Component, PageTitleProps } from './page_title';
+import { alert } from '../mock/alert';
 
 export default {
   component: Component,
   title: 'app/AlertDetails/PageTitle',
-  argTypes: {
-    title: { control: 'text' },
-    active: { control: 'boolean' },
-  },
+  alert,
 };
 
 const Template: ComponentStory<typeof Component> = (props: PageTitleProps) => (
@@ -31,12 +29,10 @@ const TemplateWithPageTemplate: ComponentStory<typeof Component> = (props: PageT
 );
 
 const defaultProps = {
-  title: 'host.cpu.usage is 0.2024 in the last 1 min for all hosts. Alert when > 0.02.',
-  active: true,
+  alert,
 };
 
 export const PageTitle = Template.bind({});
 PageTitle.args = defaultProps;
-
 export const PageTitleUsedWithinPageTemplate = TemplateWithPageTemplate.bind({});
 PageTitleUsedWithinPageTemplate.args = defaultProps;

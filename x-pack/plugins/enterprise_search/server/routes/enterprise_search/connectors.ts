@@ -101,7 +101,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         body: schema.recordOf(
           schema.string(),
-          schema.object({ label: schema.string(), value: schema.nullable(schema.string()) })
+          schema.oneOf([schema.string(), schema.number(), schema.boolean()])
         ),
         params: schema.object({
           connectorId: schema.string(),
@@ -110,8 +110,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await updateConnectorConfiguration(client, request.params.connectorId, request.body);
-      return response.ok();
+      const configuration = await updateConnectorConfiguration(
+        client,
+        request.params.connectorId,
+        request.body
+      );
+      return response.ok({ body: configuration });
     })
   );
 

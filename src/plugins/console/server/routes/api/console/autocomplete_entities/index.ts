@@ -6,26 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { parse } from 'query-string';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { RouteDependencies } from '../../..';
-interface SettingsToRetrieve {
-  indices: boolean;
-  fields: boolean;
-  templates: boolean;
-  dataStreams: boolean;
-}
+import { autoCompleteEntitiesValidationConfig, type SettingsToRetrieve } from './validation_config';
 
 const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // Limit the response size to 10MB, because the response can be very large and sending it to the client
 // can cause the browser to hang.
 
 const getMappings = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
-  if (settings.fields) {
-    const mappings = await esClient.asInternalUser.indices.getMapping(undefined, {
-      maxResponseSize: MAX_RESPONSE_SIZE,
-      maxCompressedResponseSize: MAX_RESPONSE_SIZE,
-    });
+  if (settings.fields && settings.fieldsIndices) {
+    const mappings = await esClient.asInternalUser.indices.getMapping(
+      {
+        index: settings.fieldsIndices,
+      },
+      {
+        maxResponseSize: MAX_RESPONSE_SIZE,
+        maxCompressedResponseSize: MAX_RESPONSE_SIZE,
+      }
+    );
     return mappings;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
@@ -87,20 +86,11 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       options: {
         tags: ['access:console'],
       },
-      validate: false,
+      validate: autoCompleteEntitiesValidationConfig,
     },
     async (context, request, response) => {
       const esClient = (await context.core).elasticsearch.client;
-      const settings = parse(request.url.search, {
-        parseBooleans: true,
-      }) as unknown as SettingsToRetrieve;
-
-      // If no settings are specified, then return 400.
-      if (Object.keys(settings).length === 0) {
-        return response.badRequest({
-          body: 'Request must contain at least one of the following parameters: indices, fields, templates, dataStreams',
-        });
-      }
+      const settings = request.query;
 
       // Wait for all requests to complete, in case one of them fails return the successfull ones
       const results = await Promise.allSettled([

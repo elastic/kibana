@@ -52,7 +52,6 @@ export const chartHeight = 288;
 export function MobileServiceOverview() {
   const { serviceName } = useApmServiceContext();
   const router = useApmRouter();
-  const embeddableFilters = useFiltersForEmbeddableCharts();
 
   const {
     query,
@@ -65,8 +64,15 @@ export function MobileServiceOverview() {
       osVersion,
       appVersion,
       netConnectionType,
+      offset,
+      comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
+
+  const embeddableFilters = useFiltersForEmbeddableCharts({
+    serviceName,
+    environment,
+  });
 
   const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
@@ -127,7 +133,11 @@ export function MobileServiceOverview() {
             preview. You can help us improve the experience by giving feedback. {feedbackLink}."
                   values={{
                     feedbackLink: (
-                      <EuiLink href="https://ela.st/feedback-mobile-apm">
+                      <EuiLink
+                        target={'_blank'}
+                        data-test-subj="apmMobileServiceOverviewGiveFeedbackLink"
+                        href="https://ela.st/feedback-apm-mobile"
+                      >
                         {i18n.translate(
                           'xpack.apm.serviceOverview.mobileCallOutLink',
                           {
@@ -151,29 +161,33 @@ export function MobileServiceOverview() {
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={8}>
-                <EuiPanel hasBorder={true}>
+            <EuiPanel hasBorder={true}>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={8}>
                   <GeoMap
                     start={start}
                     end={end}
                     kuery={kueryWithMobileFilters}
                     filters={embeddableFilters}
                   />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem grow={4}>
-                <MobileLocationStats
-                  start={start}
-                  end={end}
-                  kuery={kueryWithMobileFilters}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={4}>
+                  <MobileLocationStats
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    environment={environment}
+                    offset={offset}
+                    serviceName={serviceName}
+                    comparisonEnabled={comparisonEnabled}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiPanel hasBorder={true} color="subdued">
+            <EuiPanel hasBorder={true}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>
@@ -187,76 +201,68 @@ export function MobileServiceOverview() {
               <EuiFlexGroup direction={rowDirection} gutterSize="s">
                 {/* Device */}
                 <EuiFlexItem>
-                  <EuiPanel hasBorder={true}>
-                    <MostUsedChart
-                      title={i18n.translate(
-                        'xpack.apm.serviceOverview.mostUsed.device',
-                        {
-                          defaultMessage: 'Devices',
-                        }
-                      )}
-                      metric={DEVICE_MODEL_IDENTIFIER}
-                      start={start}
-                      end={end}
-                      kuery={kueryWithMobileFilters}
-                      filters={embeddableFilters}
-                    />
-                  </EuiPanel>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.device',
+                      {
+                        defaultMessage: 'Devices',
+                      }
+                    )}
+                    metric={DEVICE_MODEL_IDENTIFIER}
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
+                  />
                 </EuiFlexItem>
                 {/* NCT */}
                 <EuiFlexItem>
-                  <EuiPanel hasBorder={true}>
-                    <MostUsedChart
-                      title={i18n.translate(
-                        'xpack.apm.serviceOverview.mostUsed.nct',
-                        {
-                          defaultMessage: 'Network Connection Type',
-                        }
-                      )}
-                      metric={NETWORK_CONNECTION_TYPE}
-                      start={start}
-                      end={end}
-                      kuery={kueryWithMobileFilters}
-                      filters={embeddableFilters}
-                    />
-                  </EuiPanel>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.nct',
+                      {
+                        defaultMessage: 'Network Connection Type',
+                      }
+                    )}
+                    metric={NETWORK_CONNECTION_TYPE}
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
+                  />
                 </EuiFlexItem>
                 <EuiSpacer size="s" />
                 {/* OS version */}
                 <EuiFlexItem>
-                  <EuiPanel hasBorder={true}>
-                    <MostUsedChart
-                      title={i18n.translate(
-                        'xpack.apm.serviceOverview.mostUsed.osVersion',
-                        {
-                          defaultMessage: 'OS version',
-                        }
-                      )}
-                      metric={HOST_OS_VERSION}
-                      start={start}
-                      end={end}
-                      kuery={kueryWithMobileFilters}
-                      filters={embeddableFilters}
-                    />
-                  </EuiPanel>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.osVersion',
+                      {
+                        defaultMessage: 'OS version',
+                      }
+                    )}
+                    metric={HOST_OS_VERSION}
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
+                  />
                 </EuiFlexItem>
                 {/* App version */}
                 <EuiFlexItem>
-                  <EuiPanel hasBorder={true}>
-                    <MostUsedChart
-                      title={i18n.translate(
-                        'xpack.apm.serviceOverview.mostUsed.appVersion',
-                        {
-                          defaultMessage: 'App version',
-                        }
-                      )}
-                      metric={SERVICE_VERSION}
-                      start={start}
-                      end={end}
-                      kuery={kueryWithMobileFilters}
-                      filters={embeddableFilters}
-                    />
-                  </EuiPanel>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.appVersion',
+                      {
+                        defaultMessage: 'App version',
+                      }
+                    )}
+                    metric={SERVICE_VERSION}
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -318,7 +324,10 @@ export function MobileServiceOverview() {
                     fixedHeight={true}
                     showPerPageOptions={false}
                     link={
-                      <EuiLink href={dependenciesLink}>
+                      <EuiLink
+                        data-test-subj="apmMobileServiceOverviewViewDependenciesLink"
+                        href={dependenciesLink}
+                      >
                         {i18n.translate(
                           'xpack.apm.serviceOverview.dependenciesTableTabLink',
                           { defaultMessage: 'View dependencies' }

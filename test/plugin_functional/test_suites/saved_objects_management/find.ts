@@ -27,9 +27,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       );
       it('returns saved objects with importableAndExportable types', async () =>
         await supertest
-          .get(
-            '/api/kibana/management/saved_objects/_find?type=test-hidden-importable-exportable&fields=title'
-          )
+          .get('/api/kibana/management/saved_objects/_find?type=test-hidden-importable-exportable')
           .set('kbn-xsrf', 'true')
           .expect(200)
           .then((resp) => {

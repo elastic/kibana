@@ -9,7 +9,7 @@ import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { recordVideo } from '../../../helpers/record_video';
 import { getReasonMessage } from '../../../../server/legacy_uptime/lib/alerts/status_check';
 import { syntheticsAppPageProvider } from '../../../page_objects/synthetics/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
@@ -50,7 +50,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('Go to monitors page', async () => {
-    await syntheticsApp.navigateToOverview(true);
+    await syntheticsApp.navigateToOverview(true, 15);
   });
 
   step('should create default status alert', async () => {
@@ -58,8 +58,6 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.isDisabled(byTestId('xpack.synthetics.toggleAlertFlyout'));
     await page.click(byTestId('xpack.synthetics.toggleAlertFlyout'));
     await page.waitForSelector('text=Edit rule');
-    await page.selectOption(byTestId('intervalInputUnit'), { label: 'second' });
-    await page.fill(byTestId('intervalInput'), '20');
     await page.click(byTestId('saveEditedRuleButton'));
     await page.waitForSelector("text=Updated 'Synthetics internal alert'");
   });
@@ -93,6 +91,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
     await page.click(byTestId('syntheticsMonitorManagementTab'));
     await page.click(byTestId('syntheticsMonitorOverviewTab'));
+
+    await page.waitForTimeout(5 * 1000);
 
     const totalDown = await page.textContent(
       byTestId('xpack.uptime.synthetics.overview.status.down')
@@ -193,7 +193,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     });
 
     await page.click(byTestId('alert-status-filter-active-button'));
-    await page.waitForTimeout(5 * 1000);
+    await syntheticsApp.waitForLoadingToFinish();
+    await page.waitForTimeout(10 * 1000);
 
     await page.click('[aria-label="View in app"]');
     await page.click(byTestId('syntheticsMonitorOverviewTab'));

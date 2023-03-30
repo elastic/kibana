@@ -13,9 +13,14 @@ import { PropertyActions } from '../../property_actions';
 interface Props {
   isLoading: boolean;
   propertyActions: PropertyActionButtonProps[];
+  customDataTestSubj?: string;
 }
 
-const UserActionPropertyActionsComponent: React.FC<Props> = ({ isLoading, propertyActions }) => {
+const UserActionPropertyActionsComponent: React.FC<Props> = ({
+  isLoading,
+  propertyActions,
+  customDataTestSubj = 'user-action',
+}) => {
   if (propertyActions.length === 0) {
     return null;
   }
@@ -25,7 +30,10 @@ const UserActionPropertyActionsComponent: React.FC<Props> = ({ isLoading, proper
       {isLoading ? (
         <EuiLoadingSpinner data-test-subj="user-action-title-loading" />
       ) : (
-        <PropertyActions propertyActions={propertyActions} />
+        <PropertyActions
+          propertyActions={propertyActions}
+          customDataTestSubj={customDataTestSubj}
+        />
       )}
     </EuiFlexItem>
   );

@@ -986,6 +986,27 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async waitForADJobRecordCount(
+      jobId: string,
+      expectedCount: number,
+      timeout: number = 2 * 60 * 1000
+    ) {
+      await retry.waitForWithTimeout(
+        `job ${jobId} record count to be ${expectedCount}`,
+        timeout,
+        async () => {
+          const count = await this.getADJobRecordCount(jobId);
+          if (count === expectedCount) {
+            return true;
+          } else {
+            throw new Error(
+              `expected job ${jobId} record count to be ${expectedCount} but got ${count}`
+            );
+          }
+        }
+      );
+    },
+
     async getFilter(filterId: string, expectedCode = 200) {
       const response = await esSupertest.get(`/_ml/filters/${filterId}`);
       this.assertResponseStatusCode(expectedCode, response.status, response.body);

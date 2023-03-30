@@ -69,6 +69,7 @@ export type {
   RequestHandlerContextBase,
   ResponseError,
   CustomHttpResponseOptions,
+  FileHttpResponseOptions,
   HttpResponseOptions,
   HttpResponsePayload,
   IKibanaResponse,
@@ -127,3 +128,14 @@ export type {
   HttpServiceSetup,
   HttpServiceStart,
 } from './src/http_contract';
+
+export type {
+  AddVersionOpts,
+  VersionedRouteRequestValidation,
+  VersionedRouteResponseValidation,
+  ApiVersion,
+  VersionedRoute,
+  VersionedRouteConfig,
+  VersionedRouteRegistrar,
+  VersionedRouter,
+} from './src/versioning';

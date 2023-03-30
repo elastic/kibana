@@ -69,6 +69,38 @@ describe('authorization', () => {
       await expect(authPromise).resolves.not.toThrow();
     });
 
+    it('creates an Authorization object without spaces', async () => {
+      expect.assertions(2);
+
+      const authPromise = Authorization.create({
+        request,
+        securityAuth: securityStart.authz,
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+      });
+
+      await expect(authPromise).resolves.toBeDefined();
+      await expect(authPromise).resolves.not.toThrow();
+    });
+
+    it('if spaces are disabled it does not filtered out disabled features', async () => {
+      (spacesStart.spacesService.getActiveSpace as jest.Mock).mockImplementation(() => {
+        return { disabledFeatures: ['1'] } as Space;
+      });
+
+      const auth = await Authorization.create({
+        request,
+        securityAuth: securityStart.authz,
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+      });
+
+      // @ts-expect-error: featureCaseOwners is a private method of the auth class
+      expect([...auth.featureCaseOwners.values()]).toEqual(['a']);
+    });
+
     it('throws and error when a failure occurs', async () => {
       expect.assertions(1);
 

@@ -1553,7 +1553,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"palette\" | \"system_palette\""
+              "\"system_palette\" | \"palette\""
             ],
             "path": "packages/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
@@ -1851,7 +1851,7 @@
         "label": "PaletteContinuity",
         "description": [],
         "signature": [
-          "\"above\" | \"below\" | \"none\" | \"all\""
+          "\"none\" | \"all\" | \"above\" | \"below\""
         ],
         "path": "packages/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
@@ -1866,7 +1866,7 @@
         "label": "RequiredPaletteParamTypes",
         "description": [],
         "signature": [
-          "{ name: string; rangeMin: number; reverse: boolean; rangeType: \"number\" | \"percent\"; continuity: ",
+          "{ reverse: boolean; name: string; rangeMin: number; rangeType: \"number\" | \"percent\"; continuity: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",

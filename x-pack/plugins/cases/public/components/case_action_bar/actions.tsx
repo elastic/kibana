@@ -84,7 +84,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
 
   return (
     <EuiFlexItem grow={false} data-test-subj="case-view-actions">
-      <PropertyActions propertyActions={propertyActions} />
+      <PropertyActions propertyActions={propertyActions} customDataTestSubj={'case'} />
       {isModalVisible ? (
         <ConfirmDeleteCaseModal
           totalCasesToBeDeleted={1}

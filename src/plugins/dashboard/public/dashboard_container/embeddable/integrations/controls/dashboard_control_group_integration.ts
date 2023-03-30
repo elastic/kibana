@@ -65,12 +65,19 @@ export async function startControlGroupIntegration(
     return;
   }
 
-  this.untilInitialized().then(() => startSyncingDashboardControlGroup.bind(this)());
+  this.untilInitialized().then(() => {
+    const stopSyncingControlGroup =
+      startSyncingDashboardControlGroup.bind(this)()?.stopSyncingWithControlGroup;
+    this.onDestroyControlGroup = () => {
+      stopSyncingControlGroup?.();
+      this.controlGroup?.destroy();
+    };
+  });
   await controlGroup.untilInitialized();
   return controlGroup;
 }
 
-async function startSyncingDashboardControlGroup(this: DashboardContainer) {
+function startSyncingDashboardControlGroup(this: DashboardContainer) {
   if (!this.controlGroup) return;
   const subscriptions = new Subscription();
 
@@ -174,7 +181,7 @@ async function startSyncingDashboardControlGroup(this: DashboardContainer) {
         ),
         skip(1) // skip first filter output because it will have been applied in initialize
       )
-      .subscribe(() => this.updateInput({ lastReloadRequestTime: Date.now() }))
+      .subscribe(() => this.forceRefresh())
   );
 
   subscriptions.add(
@@ -186,7 +193,9 @@ async function startSyncingDashboardControlGroup(this: DashboardContainer) {
         )
       )
       .subscribe(({ timeslice }) => {
-        this.updateInput({ timeslice });
+        if (!_.isEqual(timeslice, this.getInputAsValueType().timeslice)) {
+          this.updateInput({ timeslice });
+        }
       })
   );
 

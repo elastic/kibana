@@ -82,7 +82,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *activity* - keyword, number.long
 
-* _unified_log.activity_ - the activity ID associate with the entry.
+* _unified_log.activity_ - the activity ID associate with the entry
 
 *actual* - keyword, number.long
 
@@ -101,7 +101,6 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _arp_cache.address_ - IPv4 address target
 * _dns_resolvers.address_ - Resolver IP/IPv6 address
 * _etc_hosts.address_ - IP address mapping
-* _fbsd_kmods.address_ - Kernel module address
 * _interface_addresses.address_ - Specific address for interface
 * _kernel_modules.address_ - Kernel module address
 * _listening_ports.address_ - Specific address for bind
@@ -187,7 +186,6 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _deb_packages.arch_ - Package architecture
 * _docker_version.arch_ - Hardware architecture
 * _os_version.arch_ - OS Architecture
-* _pkg_packages.arch_ - Architecture(s) supported
 * _rpm_packages.arch_ - Architecture(s) supported
 * _seccomp_events.arch_ - Information about the CPU architecture
 * _signature.arch_ - If applicable, the arch of the signed code
@@ -246,6 +244,42 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *audible_alarm* - keyword, text.text
 
 * _chassis_info.audible_alarm_ - If TRUE, the frame is equipped with an audible alarm.
+
+*audit_account_logon* - keyword, number.long
+
+* _security_profile_info.audit_account_logon_ - Determines whether the operating system MUST audit each time this computer validates the credentials of an account
+
+*audit_account_manage* - keyword, number.long
+
+* _security_profile_info.audit_account_manage_ - Determines whether the operating system MUST audit each event of account management on a computer
+
+*audit_ds_access* - keyword, number.long
+
+* _security_profile_info.audit_ds_access_ - Determines whether the operating system MUST audit each instance of user attempts to access an Active Directory object that has its own system access control list (SACL) specified
+
+*audit_logon_events* - keyword, number.long
+
+* _security_profile_info.audit_logon_events_ - Determines whether the operating system MUST audit each instance of a user attempt to log on or log off this computer
+
+*audit_object_access* - keyword, number.long
+
+* _security_profile_info.audit_object_access_ - Determines whether the operating system MUST audit each instance of user attempts to access a non-Active Directory object that has its own SACL specified
+
+*audit_policy_change* - keyword, number.long
+
+* _security_profile_info.audit_policy_change_ - Determines whether the operating system MUST audit each instance of user attempts to change user rights assignment policy, audit policy, account policy, or trust policy
+
+*audit_privilege_use* - keyword, number.long
+
+* _security_profile_info.audit_privilege_use_ - Determines whether the operating system MUST audit each instance of user attempts to exercise a user right
+
+*audit_process_tracking* - keyword, number.long
+
+* _security_profile_info.audit_process_tracking_ - Determines whether the operating system MUST audit process-related events
+
+*audit_system_events* - keyword, number.long
+
+* _security_profile_info.audit_system_events_ - Determines whether the operating system MUST audit System Change, System Startup, System Shutdown, Authentication Component Load, and Loss or Excess of Security events
 
 *auid* - keyword
 
@@ -625,7 +659,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _ntfs_journal_events.category_ - The category that the event originated from
 * _power_sensors.category_ - The sensor category: currents, voltage, wattage
 * _system_extensions.category_ - System extension category
-* _unified_log.category_ - The category of the os_log_t used
+* _unified_log.category_ - the category of the os_log_t used
 * _yara_events.category_ - The category of the file
 
 *cdhash* - keyword, text.text
@@ -731,6 +765,10 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _wmi_filter_consumer_binding.class_ - The name of the class.
 * _wmi_script_event_consumers.class_ - The name of the class.
 
+*clear_text_password* - keyword, number.long
+
+* _security_profile_info.clear_text_password_ - Determines whether passwords MUST be stored by using reversible encryption
+
 *client_app_id* - keyword, text.text
 
 * _windows_update_history.client_app_id_ - Identifier of the client application that processed an update
@@ -766,6 +804,10 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *codename* - keyword, text.text
 
 * _os_version.codename_ - OS version codename
+
+*codesigning_flags* - keyword, text.text
+
+* _es_process_events.codesigning_flags_ - Codesigning flags matching one of these options, in a comma separated list: NOT_VALID, ADHOC, NOT_RUNTIME, INSTALLER. See kern/cs_blobs.h in XNU for descriptions.
 
 *collect_cross_processes* - keyword, number.long
 
@@ -848,7 +890,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _authorized_keys.comment_ - Optional comment
 * _docker_image_history.comment_ - Instruction comment
 * _etc_protocols.comment_ - Comment with protocol description
-* _etc_services.comment_ - Optional comment for a service
+* _etc_services.comment_ - Optional comment for a service.
 * _groups.comment_ - Remarks or comments associated with the group
 * _keychain_items.comment_ - Optional keychain comment
 
@@ -1092,7 +1134,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _docker_image_history.created_ - Time of creation as UNIX time
 * _docker_images.created_ - Time of creation as UNIX time
 * _docker_networks.created_ - Time of creation as UNIX time
-* _keychain_items.created_ - Data item was created
+* _keychain_items.created_ - Date item was created
 
 *created_at* - keyword, text.text
 
@@ -1590,6 +1632,14 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 * _processes.elevated_token_ - Process uses elevated token yes=1, no=0
 
+*enable_admin_account* - keyword, number.long
+
+* _security_profile_info.enable_admin_account_ - Determines whether the Administrator account on the local computer is enabled
+
+*enable_guest_account* - keyword, number.long
+
+* _security_profile_info.enable_guest_account_ - Determines whether the Guest account on the local computer is enabled
+
 *enable_ipv6* - keyword, number.long
 
 * _docker_networks.enable_ipv6_ - 1 if IPv6 is enabled on this network. 0 otherwise
@@ -1949,7 +1999,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *firmware_type* - keyword, text.text
 
-* _platform_info.firmware_type_ - The type of firmware (Uefi, Bios, Unknown).
+* _platform_info.firmware_type_ - The type of firmware (uefi, bios, iboot, openfirmware, unknown).
 
 *firmware_version* - keyword, text.text
 
@@ -1972,10 +2022,6 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _pipes.flags_ - The flags indicating whether this pipe connection is a server or client end, and if the pipe for sending messages or bytes
 * _routes.flags_ - Flags to describe route
 
-*flatsize* - keyword, number.long
-
-* _pkg_packages.flatsize_ - Package size in bytes
-
 *folder_id* - keyword, text.text
 
 * _ycloud_instance_metadata.folder_id_ - Folder identifier for the VM
@@ -1983,6 +2029,10 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *following* - keyword, text.text
 
 * _systemd_units.following_ - The name of another unit that this unit follows in state
+
+*force_logoff_when_expire* - keyword, number.long
+
+* _security_profile_info.force_logoff_when_expire_ - Determines whether SMB client sessions with the SMB server will be forcibly disconnected when the client's logon hours expire
 
 *forced* - keyword, number.long
 
@@ -2250,7 +2300,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *hostname* - keyword, text.text
 
-* _curl_certificate.hostname_ - Hostname to CURL (domain[:port], for example, osquery.io)
+* _curl_certificate.hostname_ - Hostname to CURL (domain[:port], e.g. osquery.io)
 * _system_info.hostname_ - Network hostname including domain
 * _ycloud_instance_metadata.hostname_ - Hostname of the VM
 
@@ -2626,7 +2676,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *is_active* - keyword, number.long
 
-* _running_apps.is_active_ - 1 if the application is in focus, 0 otherwise
+* _running_apps.is_active_ - (DEPRECATED)
 
 *is_hidden* - keyword, number.long
 
@@ -2949,6 +2999,10 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 * _shared_memory.locked_ - 1 if segment is locked else 0
 
+*lockout_bad_count* - keyword, number.long
+
+* _security_profile_info.lockout_bad_count_ - Number of failed logon attempts after which a user account MUST be locked out
+
 *log_file_disk_quota_mb* - keyword, number.long
 
 * _carbon_black_info.log_file_disk_quota_mb_ - Event file disk quota in MB
@@ -2997,9 +3051,17 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 * _logon_sessions.logon_time_ - The time the session owner logged on.
 
+*logon_to_change_password* - keyword, number.long
+
+* _security_profile_info.logon_to_change_password_ - Determines if logon session is required to change the password
+
 *logon_type* - keyword, text.text
 
 * _logon_sessions.logon_type_ - The logon method.
+
+*lsa_anonymous_name_lookup* - keyword, number.long
+
+* _security_profile_info.lsa_anonymous_name_lookup_ - Determines if an anonymous user is allowed to query the local LSA policy
 
 *mac* - keyword, text.text
 
@@ -3110,7 +3172,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *max_rows* - keyword, number.long
 
-* _unified_log.max_rows_ - The max number of rows returned (defaults to 100).
+* _unified_log.max_rows_ - the max number of rows returned (defaults to 100)
 
 *max_speed* - keyword, number.long
 
@@ -3123,6 +3185,10 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *maximum_allowed* - keyword, number.long
 
 * _shared_resources.maximum_allowed_ - Limit on the maximum number of users allowed to use this resource concurrently. The value is only valid if the AllowMaximum property is set to FALSE.
+
+*maximum_password_age* - keyword, number.long
+
+* _security_profile_info.maximum_password_age_ - Determines the maximum number of days that a password can be used before the client requires the user to change it
 
 *md5* - keyword, text.text
 
@@ -3240,7 +3306,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _lxd_cluster_members.message_ - Message from the node (Online/Offline)
 * _selinux_events.message_ - Message
 * _syslog_events.message_ - The syslog message
-* _unified_log.message_ - Composed message
+* _unified_log.message_ - composed message
 * _user_events.message_ - Message from the event
 
 *metadata_endpoint* - keyword, text.text
@@ -3296,6 +3362,14 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *min_voltage* - keyword, number.long
 
 * _memory_devices.min_voltage_ - Minimum operating voltage of device in millivolts
+
+*minimum_password_age* - keyword, number.long
+
+* _security_profile_info.minimum_password_age_ - Determines the minimum number of days that a password must be used before the user can change it
+
+*minimum_password_length* - keyword, number.long
+
+* _security_profile_info.minimum_password_length_ - Determines the least number of characters that can make up a password for a user account
 
 *minimum_system_version* - keyword, text.text
 
@@ -3459,7 +3533,6 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _etc_protocols.name_ - Protocol name
 * _etc_services.name_ - Service name
 * _fan_speed_sensors.name_ - Fan name
-* _fbsd_kmods.name_ - Module name
 * _firefox_addons.name_ - Addon display name
 * _homebrew_packages.name_ - Package name
 * _ie_extensions.name_ - Extension display name
@@ -3491,7 +3564,6 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _package_install_history.name_ - Package display name
 * _physical_disk_performance.name_ - Name of the physical disk
 * _pipes.name_ - Name of the pipe
-* _pkg_packages.name_ - Package name
 * _power_sensors.name_ - Name of power source
 * _processes.name_ - The process path or shorthand argv[0]
 * _programs.name_ - Commonly used product name.
@@ -3529,7 +3601,6 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *native* - keyword, number.long
 
 * _browser_plugins.native_ - Plugin requires native execution
-* _firefox_addons.native_ - 1 If the addon includes binary components else 0
 
 *net_namespace* - keyword, text.text
 
@@ -3560,6 +3631,14 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *network_tx_bytes* - keyword, number.long
 
 * _docker_container_stats.network_tx_bytes_ - Total network bytes transmitted
+
+*new_administrator_name* - keyword, text.text
+
+* _security_profile_info.new_administrator_name_ - Determines the name of the Administrator account on the local computer
+
+*new_guest_name* - keyword, text.text
+
+* _security_profile_info.new_guest_name_ - Determines the name of the Guest account on the local computer
 
 *next_run_time* - keyword, number.long
 
@@ -3916,6 +3995,14 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 * _wifi_networks.passpoint_ - 1 if Passpoint is supported, 0 otherwise
 
+*password_complexity* - keyword, number.long
+
+* _security_profile_info.password_complexity_ - Determines whether passwords must meet a series of strong-password guidelines
+
+*password_history_size* - keyword, number.long
+
+* _security_profile_info.password_history_size_ - Number of unique new passwords that must be associated with a user account before an old password can be reused
+
 *password_last_set_time* - keyword, number.double
 
 * _account_policy_data.password_last_set_time_ - The time the password was last changed
@@ -4150,10 +4237,10 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _processes.pid_ - Process (or thread) ID
 * _running_apps.pid_ - The pid of the application
 * _seccomp_events.pid_ - Process ID
-* _services.pid_ - The Process ID of the service
+* _services.pid_ - the Process ID of the service
 * _shared_memory.pid_ - Process ID to last use the segment
 * _socket_events.pid_ - Process (or thread) ID
-* _unified_log.pid_ - The pid of the process that made the entry
+* _unified_log.pid_ - the pid of the process that made the entry
 * _user_events.pid_ - Process (or thread) ID
 * _windows_crashes.pid_ - Process ID of the crashed process
 * _windows_eventlog.pid_ - Process ID which emitted the event record
@@ -4327,7 +4414,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *process* - keyword, text.text
 
 * _alf_explicit_auths.process_ - Process name explicitly allowed
-* _unified_log.process_ - The name of the process that made the entry
+* _unified_log.process_ - the name of the process that made the entry
 
 *process_being_tapped* - keyword, number.long
 
@@ -4560,7 +4647,6 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *refs* - keyword, number.long
 
-* _fbsd_kmods.refs_ - Module reverse dependencies
 * _kernel_extensions.refs_ - Reference count
 
 *region* - keyword, text.text
@@ -4875,7 +4961,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *sender* - keyword, text.text
 
 * _asl.sender_ - Sender's identification string.  Default is process name.
-* _unified_log.sender_ - The name of the binary image that made the entry
+* _unified_log.sender_ - the name of the binary image that made the entry
 
 *sensor_backend_server* - keyword, text.text
 
@@ -5101,7 +5187,6 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _device_file.size_ - Size of file in bytes
 * _disk_events.size_ - Size of partition in bytes
 * _docker_image_history.size_ - Size of instruction in bytes
-* _fbsd_kmods.size_ - Size of module content
 * _file.size_ - Size of file in bytes
 * _file_events.size_ - Size of file in bytes
 * _kernel_extensions.size_ - Bytes of wired memory used by extension
@@ -5337,7 +5422,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *storage* - keyword, number.long
 
-* _unified_log.storage_ - The storage category for the entry.
+* _unified_log.storage_ - the storage category for the entry
 
 *storage_driver* - keyword, text.text
 
@@ -5416,7 +5501,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *subsystem* - keyword, text.text
 
 * _system_controls.subsystem_ - Subsystem ID, control type
-* _unified_log.subsystem_ - The subsystem of the os_log_t used
+* _unified_log.subsystem_ - the subsystem of the os_log_t used
 
 *subsystem_model* - keyword, text.text
 
@@ -5585,7 +5670,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 * _bpf_process_events.tid_ - Thread ID
 * _bpf_socket_events.tid_ - Thread ID
-* _unified_log.tid_ - The tid of the thread that made the entry
+* _unified_log.tid_ - the tid of the thread that made the entry
 * _windows_crashes.tid_ - Thread ID of the crashed thread
 * _windows_eventlog.tid_ - Thread ID which emitted the event record
 
@@ -5637,7 +5722,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 *timestamp* - keyword, text.text
 
 * _time.timestamp_ - Current timestamp (log format) in UTC
-* _unified_log.timestamp_ - Unix timestamp associated with the entry
+* _unified_log.timestamp_ - unix timestamp associated with the entry
 * _windows_eventlog.timestamp_ - Timestamp to selectively filter the events
 
 *timestamp_ms* - keyword, number.long
@@ -6078,7 +6163,6 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 * _osquery_packs.version_ - Minimum osquery version that this query will run on
 * _package_install_history.version_ - Package display version
 * _package_receipts.version_ - Installed package version
-* _pkg_packages.version_ - Package version
 * _platform_info.version_ - Platform code version
 * _portage_keywords.version_ - The version which are affected by the use flags, empty means all
 * _portage_packages.version_ - The version which are affected by the use flags, empty means all

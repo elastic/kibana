@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from '.';
-import { RawRule } from '../../types';
+import { RawRule, RawRuleAction } from '../../types';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
@@ -2606,6 +2606,68 @@ describe('successful migrations', () => {
         expect(migratedAlert870.references).toEqual([]);
       });
     });
+
+    test('migrates last run outcome order', () => {
+      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
+
+      // Failed rule
+      const failedRule = getMockData({ lastRun: { outcome: 'failed' } });
+      const failedRule870 = migration870(failedRule, migrationContext);
+      expect(failedRule870.attributes.lastRun).toEqual({ outcome: 'failed', outcomeOrder: 20 });
+
+      // Rule with warnings
+      const warningRule = getMockData({ lastRun: { outcome: 'warning' } });
+      const warningRule870 = migration870(warningRule, migrationContext);
+      expect(warningRule870.attributes.lastRun).toEqual({ outcome: 'warning', outcomeOrder: 10 });
+
+      // Succeeded rule
+      const succeededRule = getMockData({ lastRun: { outcome: 'succeeded' } });
+      const succeededRule870 = migration870(succeededRule, migrationContext);
+      expect(succeededRule870.attributes.lastRun).toEqual({
+        outcome: 'succeeded',
+        outcomeOrder: 0,
+      });
+    });
+  });
+
+  describe('8.8.0', () => {
+    test('adds uuid to rule actions', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+      const rule = getMockData(
+        {
+          params: { foo: true },
+          alertTypeId: '.not-es-query',
+        },
+        true
+      );
+      const migratedAlert880 = migration880(rule, migrationContext);
+
+      expect(migratedAlert880.attributes.actions).toEqual([
+        {
+          group: 'default',
+          actionRef: '1',
+          actionTypeId: '1',
+          params: { foo: true },
+          uuid: expect.stringMatching(/.*\S.*/), // non-empty string
+        },
+      ]);
+    });
+
+    test('migrates rule to include revision and defaults revision to 0', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+
+      const rule = getMockData();
+      const migratedAlert880 = migration880(rule, migrationContext);
+      expect(migratedAlert880.attributes.revision).toEqual(0);
+    });
+
+    test('migrates security rule version to revision', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+
+      const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, params: { version: 2 } });
+      const migratedAlert880 = migration880(rule, migrationContext);
+      expect(migratedAlert880.attributes.revision).toEqual(2);
+    });
   });
 
   describe('Metrics Inventory Threshold rule', () => {
@@ -2952,7 +3014,7 @@ function getMockData(
           params: {
             foo: true,
           },
-        },
+        } as unknown as RawRuleAction,
       ],
       ...overwrites,
     },

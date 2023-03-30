@@ -127,7 +127,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             {statusCode}: {errorTitle} - {message}
           </EuiCallOut>

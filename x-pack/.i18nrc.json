@@ -24,6 +24,7 @@
     "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
     "xpack.dataVisualizer": "plugins/data_visualizer",
+    "xpack.exploratoryView": "plugins/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": ["plugins/global_search"],
     "xpack.globalSearchBar": ["plugins/global_search_bar"],
@@ -77,8 +78,8 @@
   },
   "exclude": ["examples"],
   "translations": [
-    "plugins/translations/translations/zh-CN.json",
-    "plugins/translations/translations/ja-JP.json",
-    "plugins/translations/translations/fr-FR.json"
+    "@kbn/translations-plugin/translations/zh-CN.json",
+    "@kbn/translations-plugin/translations/ja-JP.json",
+    "@kbn/translations-plugin/translations/fr-FR.json"
   ]
 }

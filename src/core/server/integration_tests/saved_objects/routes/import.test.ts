@@ -9,7 +9,7 @@
 jest.mock('uuid');
 
 import supertest from 'supertest';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
@@ -147,7 +147,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [expect.objectContaining({ migrationVersion: {} })],
+      [expect.objectContaining({ typeMigrationVersion: '' })],
       expect.any(Object) // options
     );
   });

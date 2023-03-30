@@ -30,7 +30,7 @@ export async function getHasTransactionsEvents({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery: string;
+  kuery?: string;
 }) {
   const response = await apmEventClient.search(
     'get_has_aggregated_transactions',
@@ -69,7 +69,7 @@ export async function getSearchTransactionsEvents({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery: string;
+  kuery?: string;
 }): Promise<boolean> {
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:
@@ -91,7 +91,11 @@ export async function getSearchTransactionsEvents({
 }
 
 export function getDurationFieldForTransactions(
-  typeOrSearchAgggregatedTransactions: ApmDocumentType | boolean
+  typeOrSearchAgggregatedTransactions:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent
+    | boolean
 ) {
   let type: ApmDocumentType;
   if (typeOrSearchAgggregatedTransactions === true) {

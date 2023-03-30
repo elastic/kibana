@@ -46,6 +46,7 @@ export const ButtonGroup: React.FC<Props> = ({ onChange, options, selected }) =>
             'buttonGroupOption--selected': isSelected,
           })}
           grow={false}
+          key={index}
           onClick={() => {
             onChange(option);
           }}

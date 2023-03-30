@@ -20,7 +20,7 @@ import {
   sampleDocSearchResultsNoSortIdNoVersion,
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
-} from '../../../signals/__mocks__/es_results';
+} from '../../../rule_types/__mocks__/es_results';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../../../common/constants';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 
@@ -53,6 +53,7 @@ describe('legacyRules_notification_alert_type', () => {
         tags: [],
         consumer: 'foo',
         producer: 'foo',
+        revision: 0,
         ruleTypeId: 'ruleType',
         ruleTypeName: 'Name of rule',
         enabled: true,
@@ -66,6 +67,8 @@ describe('legacyRules_notification_alert_type', () => {
         updatedAt: new Date('2019-12-14T16:40:33.400Z'),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,

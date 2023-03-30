@@ -11,8 +11,9 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformDatePickerProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
-  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['timePicker']);
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   return {
     async assertSuperDatePickerToggleQuickMenuButtonExists() {
@@ -44,6 +45,24 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
 
     async setTimeRange(fromTime: string, toTime: string) {
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    },
+
+    async clickUseFullDataButton(expectedTimeConfig: { start: string; end: string }) {
+      await testSubjects.existOrFail('mlDatePickerButtonUseFullData');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
+
+      await retry.try(async () => {
+        const start = await testSubjects.getVisibleText('superDatePickerstartDatePopoverButton');
+        const end = await testSubjects.getVisibleText('superDatePickerendDatePopoverButton');
+        const actualTimeConfig = { start, end };
+
+        expect(actualTimeConfig).to.eql(
+          expectedTimeConfig,
+          `Transform time config should be '${JSON.stringify(
+            expectedTimeConfig
+          )}' (got '${JSON.stringify(actualTimeConfig)}')`
+        );
+      });
     },
   };
 }

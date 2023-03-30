@@ -5,16 +5,23 @@
  * 2.0.
  */
 
+import { BaseCspSetupBothPolicy } from '../../../../common/types';
+
 export interface CspmUsage {
   indices: CspmIndicesStats;
   resources_stats: CspmResourcesStats[];
   accounts_stats: CspmAccountsStats[];
+  rules_stats: CspmRulesStats[];
 }
 
 export interface CspmIndicesStats {
   findings: IndexStats | {};
   latest_findings: IndexStats | {};
   score: IndexStats | {};
+  latestPackageVersion: string;
+  cspm: BaseCspSetupBothPolicy;
+  kspm: BaseCspSetupBothPolicy;
+  vuln_mgmt: BaseCspSetupBothPolicy;
 }
 
 export interface IndexStats {
@@ -40,9 +47,24 @@ export interface CspmAccountsStats {
   benchmark_id: string;
   benchmark_name: string;
   benchmark_version: string;
+  kubernetes_version: string | null;
   passed_findings_count: number;
   failed_findings_count: number;
   agents_count: number;
   nodes_count: number;
   pods_count: number;
+}
+export interface CspmRulesStats {
+  account_id: string;
+  rule_id: string;
+  rule_name: string;
+  rule_section: string;
+  rule_version: string;
+  rule_number: string;
+  posture_type: string;
+  benchmark_id: string;
+  benchmark_name: string;
+  benchmark_version: string;
+  passed_findings_count: number;
+  failed_findings_count: number;
 }

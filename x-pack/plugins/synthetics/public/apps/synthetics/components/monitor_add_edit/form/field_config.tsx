@@ -28,6 +28,8 @@ import {
   EuiTextAreaProps,
   EuiButtonGroupProps,
   EuiSuperSelectProps,
+  EuiHighlight,
+  EuiBadge,
 } from '@elastic/eui';
 import {
   FieldText,
@@ -406,7 +408,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           isServiceManaged: location.isServiceManaged || false,
         })),
         selectedOptions: Object.values(field?.value || {}).map((location) => ({
-          color: locations.some((s) => s.id === location.id) ? 'default' : 'danger',
+          color: locations.some((s) => s.id === location.id)
+            ? location.isServiceManaged
+              ? 'default'
+              : 'primary'
+            : 'danger',
           label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
           id: location.id || '',
           isServiceManaged: location.isServiceManaged || false,
@@ -418,6 +424,20 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           });
         },
         isDisabled: readOnly,
+        renderOption: (option: FormLocation, searchValue: string) => {
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem>
+                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              </EuiFlexItem>
+              {!option.isServiceManaged && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="primary">Private</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        },
       };
     },
   },
@@ -443,6 +463,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         setValue(ConfigKey.ENABLED, !!event.target.checked);
       },
       'data-test-subj': 'syntheticsEnableSwitch',
+      // enabled is an allowed field for read only
+      // isDisabled: readOnly,
     }),
   },
   [AlertConfigKey.STATUS_ENABLED]: {
@@ -465,7 +487,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       onChange: (event) => {
         setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
       },
-      disabled: readOnly,
+      'data-test-subj': 'syntheticsAlertStatusSwitch',
+      // alert config is an allowed field for read only
+      // isDisabled: readOnly,
     }),
   },
   [ConfigKey.TAGS]: {
@@ -552,7 +576,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage:
             "Change the default namespace. This setting changes the name of the monitor's data stream. ",
         })}
-        <EuiLink href="#" target="_blank">
+        <EuiLink data-test-subj="syntheticsFIELDLearnMoreLink" href="#" target="_blank">
           {i18n.translate('xpack.synthetics.monitorConfig.namespace.learnMore', {
             defaultMessage: 'Learn more',
           })}
@@ -886,8 +910,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     label: i18n.translate('xpack.synthetics.monitorConfig.params.label', {
       defaultMessage: 'Parameters',
     }),
+    controlled: true,
     component: JSONEditor,
-    props: ({ setValue }): JSONCodeEditorProps => ({
+    props: (): JSONCodeEditorProps => ({
       id: 'syntheticsMonitorConfigParams',
       height: '100px',
       ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.paramsAria.label', {
@@ -1133,6 +1158,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage: 'Configure Playwright agent with custom options. ',
         })}
         <EuiLink
+          data-test-subj="syntheticsFIELDLearnMoreLink"
           href={getDocLinks()?.links?.observability?.syntheticsCommandReference}
           target="_blank"
         >

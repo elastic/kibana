@@ -11,9 +11,7 @@
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/developer-examples-plugin",
@@ -24,6 +22,6 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/es-query",
+    "@kbn/es-query"
   ]
 }

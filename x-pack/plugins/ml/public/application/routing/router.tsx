@@ -19,6 +19,8 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { EuiLoadingContent } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 import { MlContext, MlContextValue } from '../contexts/ml';
 
@@ -65,6 +67,10 @@ export interface PageDependencies {
   dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   redirectToMlAccessDeniedPage: () => Promise<void>;
+  getSavedSearchDeps: {
+    search: DataPublicPluginStart['search'];
+    savedObjectsClient: SavedObjectsClientContract;
+  };
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {

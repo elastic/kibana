@@ -239,6 +239,7 @@ describe('experimental_datastream_features', () => {
               mappings: expect.objectContaining({ _source: { mode: 'synthetic' } }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -268,6 +269,7 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -297,6 +299,7 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -325,6 +328,7 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -349,6 +353,7 @@ describe('experimental_datastream_features', () => {
               }),
             }),
           }),
+          _meta: { has_experimental_data_stream_indexing_features: true },
         })
       );
     });
@@ -446,6 +451,7 @@ describe('experimental_datastream_features', () => {
                 mappings: expect.objectContaining({ _source: { mode: 'synthetic' } }),
               }),
             }),
+            _meta: { has_experimental_data_stream_indexing_features: true },
           })
         );
       });
@@ -475,6 +481,7 @@ describe('experimental_datastream_features', () => {
                 }),
               }),
             }),
+            _meta: { has_experimental_data_stream_indexing_features: true },
           })
         );
       });
@@ -504,6 +511,7 @@ describe('experimental_datastream_features', () => {
                 }),
               }),
             }),
+            _meta: { has_experimental_data_stream_indexing_features: false },
           })
         );
       });
@@ -544,6 +552,7 @@ describe('experimental_datastream_features', () => {
                 }),
               }),
             }),
+            _meta: { has_experimental_data_stream_indexing_features: true },
           })
         );
       });

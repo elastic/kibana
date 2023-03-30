@@ -3,14 +3,14 @@ on:
   issues:
     types: [labeled]
 jobs:
-  sync_issues_with_table:
-    runs-on: ubuntu-latest
+  add_to_project:
     name: Add issues to project
+    runs-on: ubuntu-latest
     if: |
       github.event.label.name == 'Team: Actionable Observability'
     steps:
       - name: Add
-        uses: richkuz/projectnext-label-assigner@1.0.2
+        uses: richkuz/projectnext-label-assigner@1.1.0
         id: add_to_projects
         with:
           config: |
@@ -19,5 +19,4 @@ jobs:
             ]
         env:
           GRAPHQL_API_BASE: 'https://api.github.com'
-          PAT_TOKEN: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

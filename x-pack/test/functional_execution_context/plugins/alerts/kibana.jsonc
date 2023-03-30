@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/fec-alerts-test-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "fecAlertsTestPlugin",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "features",
+      "alerting"
+    ]
+  }
+}

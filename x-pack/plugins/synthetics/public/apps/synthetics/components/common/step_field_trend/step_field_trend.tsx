@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { AllSeries, createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { AllSeries, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
@@ -70,7 +70,13 @@ export function StepFieldTrend({
       <EmbeddableExpView
         title={title}
         appendTitle={
-          <EuiButton iconType={'visArea'} href={href} target="_blank" size="s">
+          <EuiButton
+            data-test-subj="syntheticsStepFieldTrendButton"
+            iconType={'visArea'}
+            href={href}
+            target="_blank"
+            size="s"
+          >
             {EXPLORE_LABEL}
           </EuiButton>
         }

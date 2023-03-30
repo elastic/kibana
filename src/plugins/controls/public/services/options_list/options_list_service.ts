@@ -16,7 +16,7 @@ import {
   OptionsListRequest,
   OptionsListResponse,
   OptionsListRequestBody,
-  OptionsListField,
+  OptionsListFailureResponse,
 } from '../../../common/options_list/types';
 import { ControlsHTTPService } from '../http/types';
 import { ControlsDataService } from '../data/types';
@@ -38,6 +38,7 @@ class OptionsListService implements ControlsOptionsListService {
 
   private optionsListCacheResolver = (request: OptionsListRequest) => {
     const {
+      size,
       sort,
       query,
       filters,
@@ -59,6 +60,7 @@ class OptionsListService implements ControlsOptionsListService {
       dataViewTitle,
       searchString,
       fieldName,
+      size,
     ].join('|');
   };
 
@@ -90,18 +92,39 @@ class OptionsListService implements ControlsOptionsListService {
       filters: esFilters,
       fieldName: field.name,
       fieldSpec: field,
-      textFieldName: (field as OptionsListField).textFieldName,
       runtimeFieldMap: dataView.toSpec().runtimeFieldMap,
     };
+  };
+
+  private cachedAllowExpensiveQueries = memoize(async () => {
+    const { allowExpensiveQueries } = await this.http.get<{
+      allowExpensiveQueries: boolean;
+    }>('/api/kibana/controls/optionsList/getClusterSettings');
+    return allowExpensiveQueries;
+  });
+
+  public getAllowExpensiveQueries = async (): Promise<boolean> => {
+    try {
+      return await this.cachedAllowExpensiveQueries();
+    } catch (error) {
+      return false;
+    }
+  };
+
+  public optionsListResponseWasFailure = (
+    response: OptionsListResponse
+  ): response is OptionsListFailureResponse => {
+    return (response as OptionsListFailureResponse).error !== undefined;
   };
 
   public runOptionsListRequest = async (request: OptionsListRequest, abortSignal: AbortSignal) => {
     try {
       return await this.cachedOptionsListRequest(request, abortSignal);
-    } catch (error) {
+    } catch (error: any) {
       // Remove rejected results from memoize cache
       this.cachedOptionsListRequest.cache.delete(this.optionsListCacheResolver(request));
-      return { rejected: true } as OptionsListResponse;
+      if (error.name === 'AbortError') return { error: 'aborted' } as OptionsListFailureResponse;
+      return { error } as OptionsListFailureResponse;
     }
   };
 

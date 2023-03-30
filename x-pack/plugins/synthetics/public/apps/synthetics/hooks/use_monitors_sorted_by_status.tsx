@@ -31,10 +31,11 @@ export function useMonitorsSortedByStatus() {
         down: [],
         up: [],
         disabled: [],
+        pending: [],
       };
     }
 
-    const { downConfigs } = status;
+    const { downConfigs, pendingConfigs } = status;
     const downMonitorMap: Record<string, string[]> = {};
     Object.values(downConfigs).forEach(({ location, configId }) => {
       if (downMonitorMap[configId]) {
@@ -47,6 +48,7 @@ export function useMonitorsSortedByStatus() {
     const orderedDownMonitors: MonitorOverviewItem[] = [];
     const orderedUpMonitors: MonitorOverviewItem[] = [];
     const orderedDisabledMonitors: MonitorOverviewItem[] = [];
+    const orderedPendingMonitors: MonitorOverviewItem[] = [];
 
     monitors.forEach((monitor) => {
       const monitorLocation = locationNames[monitor.location.id];
@@ -57,6 +59,8 @@ export function useMonitorsSortedByStatus() {
         downMonitorMap[monitor.configId].includes(monitorLocation)
       ) {
         orderedDownMonitors.push(monitor);
+      } else if (pendingConfigs?.[`${monitor.configId}-${locationNames[monitor.location.id]}`]) {
+        orderedPendingMonitors.push(monitor);
       } else {
         orderedUpMonitors.push(monitor);
       }
@@ -67,6 +71,7 @@ export function useMonitorsSortedByStatus() {
       down: orderedDownMonitors,
       up: orderedUpMonitors,
       disabled: orderedDisabledMonitors,
+      pending: orderedPendingMonitors,
     };
   }, [monitors, locationNames, downMonitors, status]);
 
@@ -96,7 +101,11 @@ export function useMonitorsSortedByStatus() {
         : [...monitorsSortedByStatus.up, ...monitorsSortedByStatus.down];
 
     return {
-      monitorsSortedByStatus: [...upAndDownMonitors, ...monitorsSortedByStatus.disabled],
+      monitorsSortedByStatus: [
+        ...upAndDownMonitors,
+        ...monitorsSortedByStatus.disabled,
+        ...monitorsSortedByStatus.pending,
+      ],
       downMonitors: downMonitors.current,
     };
   }, [downMonitors, monitorsSortedByStatus, sortOrder, statusFilter]);

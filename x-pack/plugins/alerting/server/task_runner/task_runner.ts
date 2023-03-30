@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -45,6 +46,7 @@ import {
   RuleTypeState,
   parseDuration,
   RawAlertInstance,
+  RuleLastRunOutcomeOrderMap,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -257,6 +259,9 @@ export class TaskRunner<
       updatedAt,
       enabled,
       actions,
+      muteAll,
+      revision,
+      snoozeSchedule,
     } = rule;
     const {
       params: { alertId: ruleId, spaceId },
@@ -274,6 +279,19 @@ export class TaskRunner<
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
+
+    if (this.context.alertsService && ruleType.alerts) {
+      // Wait for alerts-as-data resources to be installed
+      // Since this occurs at the beginning of rule execution, we can be
+      // assured that all resources will be ready for reading/writing when
+      // the rule type executors are called
+
+      // TODO - add retry if any initialization steps have failed
+      await this.context.alertsService.getContextInitializationPromise(
+        ruleType.alerts.context,
+        namespace ?? DEFAULT_NAMESPACE_STRING
+      );
+    }
 
     const wrappedClientOptions = {
       rule: {
@@ -362,6 +380,7 @@ export class TaskRunner<
                 tags,
                 consumer,
                 producer: ruleType.producer,
+                revision,
                 ruleTypeId: rule.alertTypeId,
                 ruleTypeName: ruleType.name,
                 enabled,
@@ -373,6 +392,8 @@ export class TaskRunner<
                 updatedAt,
                 throttle,
                 notifyWhen,
+                muteAll,
+                snoozeSchedule,
               },
               logger: this.logger,
               flappingSettings,
@@ -422,6 +443,7 @@ export class TaskRunner<
         ruleRunMetricsStore,
         shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
+        notifyWhen,
       });
     });
 
@@ -440,7 +462,7 @@ export class TaskRunner<
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
     });
 
-    let executionHandlerRunResult: RunResult = { throttledActions: {} };
+    let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       await rulesClient.clearExpiredSnoozes({ id: rule.id });
@@ -454,11 +476,13 @@ export class TaskRunner<
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
         executionHandlerRunResult = await executionHandler.run({
-          ...this.legacyAlertsClient.getProcessedAlerts('active'),
+          ...this.legacyAlertsClient.getProcessedAlerts('activeCurrent'),
           ...this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent'),
         });
       }
     });
+
+    this.legacyAlertsClient.setFlapping(flappingSettings);
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
@@ -476,7 +500,7 @@ export class TaskRunner<
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
-      summaryActions: executionHandlerRunResult.throttledActions,
+      summaryActions: executionHandlerRunResult.throttledSummaryActions,
     };
   }
 
@@ -821,10 +845,12 @@ export class TaskRunner<
     this.logger.debug(
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
+    const outcome = 'failed';
     await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
       lastRun: {
-        outcome: 'failed',
+        outcome,
+        outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
         warning: RuleExecutionStatusErrorReasons.Timeout,
         outcomeMsg,
         alertsCount: {},

@@ -11,7 +11,7 @@ import {
   ACTION_STATUS_ROUTE,
   AGENT_POLICY_SUMMARY_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
-  ENDPOINTS_ACTION_LIST_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
   GET_PROCESSES_ROUTE,
   GET_FILE_ROUTE,
   HOST_METADATA_GET_ROUTE,
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     const canReadActionsLogManagementApiList: ApiCallsInterface[] = [
       {
         method: 'get',
-        path: ENDPOINTS_ACTION_LIST_ROUTE,
+        path: BASE_ENDPOINT_ACTION_ROUTE,
         body: undefined,
       },
     ];
@@ -149,8 +149,8 @@ export default function ({ getService }: FtrProviderContext) {
       actionId = indexedData.actions[0].action_id;
     });
 
-    after(() => {
-      endpointTestResources.unloadEndpointData(indexedData);
+    after(async () => {
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     describe('with minimal_all', () => {

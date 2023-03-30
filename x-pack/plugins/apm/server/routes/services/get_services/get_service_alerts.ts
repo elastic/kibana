@@ -36,6 +36,11 @@ interface ServiceAggResponse {
   >;
 }
 
+export type ServiceAlertsResponse = Array<{
+  serviceName: string;
+  alertsCount: number;
+}>;
+
 export async function getServicesAlerts({
   apmAlertsClient,
   kuery,
@@ -54,7 +59,7 @@ export async function getServicesAlerts({
   start: number;
   end: number;
   environment?: string;
-}) {
+}): Promise<ServiceAlertsResponse> {
   const params = {
     size: 0,
     query: {

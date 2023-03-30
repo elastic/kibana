@@ -1583,6 +1583,21 @@ components:
         type: string
         example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   schemas:
+    notify_when:
+      type: string
+      description: |
+        Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.
+      enum:
+        - onActionGroupChange
+        - onActiveAlert
+        - onThrottleInterval
+      example: onActiveAlert
+    throttle:
+      type: string
+      description: The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if `notify_when` is set to `onThrottleInterval`. It is specified in seconds, minutes, hours, or days.
+      nullable: true
+      default: null
+      example: 10m
     actions:
       type: array
       default: []
@@ -1594,6 +1609,26 @@ components:
       items:
         type: object
         properties:
+          connector_type_id:
+            type: string
+            description: The type of connector. This property appears in responses but cannot be set in requests.
+            example: .server-log
+            readOnly: true
+          frequency:
+            type: object
+            description: |
+              The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
+            required:
+              - notify_when
+              - summary
+            properties:
+              notify_when:
+                $ref: '#/components/schemas/notify_when'
+              summary:
+                type: boolean
+                description: Indicates whether the action is a summary.
+              throttle:
+                $ref: '#/components/schemas/throttle'
           group:
             type: string
             description: The group name for the actions. If you don't need to group actions, set to `default`.
@@ -1606,15 +1641,6 @@ components:
             type: object
             description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
             additionalProperties: true
-    notify_when:
-      type: string
-      description: |
-        Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.
-      enum:
-        - onActionGroupChange
-        - onActiveAlert
-        - onThrottleInterval
-      example: onActiveAlert
     schedule:
       type: object
       description: The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.
@@ -1628,12 +1654,6 @@ components:
       items:
         type: string
       default: []
-    throttle:
-      type: string
-      description: The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if `notify_when` is set to `onThrottleInterval`. It is specified in seconds, minutes, hours, or days.
-      nullable: true
-      default: null
-      example: 10m
     rule_response_properties:
       title: Rule response properties
       type: object
@@ -1649,7 +1669,6 @@ components:
         - mute_all
         - muted_alert_ids
         - name
-        - notify_when
         - params
         - rule_type_id
         - schedule
@@ -1752,6 +1771,9 @@ components:
           description: |
             The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
           example: monitoring_alert_cluster_health
+        running:
+          type: boolean
+          description: Indicates whether the rule is running.
         schedule:
           $ref: '#/components/schemas/schedule'
         scheduled_task_id:
@@ -1808,7 +1830,6 @@ components:
       type: object
       required:
         - name
-        - notify_when
         - params
         - schedule
       properties:
@@ -1837,7 +1858,6 @@ components:
       required:
         - consumer
         - name
-        - notify_when
         - params
         - rule_type_id
         - schedule
@@ -2020,26 +2040,38 @@ components:
     update_rule_request:
       summary: Update an index threshold rule.
       value:
-        notify_when: onActionGroupChange
+        actions:
+          - frequency:
+              summary: false
+              notify_when: onActionGroupChange
+            group: threshold met
+            id: 96b668d0-a1b6-11ed-afdf-d39a49596974
+            params:
+              level: info
+              message: |-
+                alert {{alertName}} is active for group {{context.group}}:
+
+                - Value: {{context.value}}
+                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                - Timestamp: {{context.date}}
         params:
+          aggField: sheet.version
+          aggType: avg
           index:
             - .test-index
-          timeField: '@timestamp'
           groupBy: top
-          aggType: avg
-          timeWindowSize: 5
-          timeWindowUnit: m
-          thresholdComparator: '>'
-          threshold:
-            - 1000
-          aggField: sheet.version
           termField: name.keyword
           termSize: 6
+          threshold:
+            - 1000
+          thresholdComparator: '>'
+          timeField: '@timestamp'
+          timeWindowSize: 5
+          timeWindowUnit: m
+        name: new name
         schedule:
           interval: 1m
-        actions: []
         tags: []
-        name: new name
         throttle: null
     update_rule_response:
       summary: The update rule API returns a JSON object that contains details about the rule.
@@ -2050,8 +2082,9 @@ components:
         name: new name
         enabled: true
         throttle: null
+        running: false
         schedule:
-          interval: 1m
+          interval: 10m
         params:
           index:
             - .updated-index
@@ -2071,16 +2104,30 @@ components:
         updated_by: elastic
         rule_type_id: .index-threshold
         scheduled_task_id: 4c5eda00-e74f-11ec-b72f-5b18752ff9ea
-        created_at: '2022-12-12T22:43:20.578Z'
-        updated_at: '2022-12-12T22:44:21.783Z'
-        notify_when: onActionGroupChange
+        created_at: '2023-01-31T23:03:33.127Z'
+        updated_at: '2023-01-31T23:55:27.314Z'
         mute_all: false
         muted_alert_ids: []
         execution_status:
           status: ok
-          last_execution_date: '2022-12-12T22:43:21.723Z'
-          last_duration: 125
-        actions: []
+          last_execution_date: '2023-01-31T23:48:42.499Z'
+          last_duration: 52
+        actions:
+          - group: threshold met
+            params:
+              level: info
+              message: |-
+                alert {{alertName}} is active for group {{context.group}}:
+
+                - Value: {{context.value}}
+                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                - Timestamp: {{context.date}
+            id: 96b668d0-a1b6-11ed-afdf-d39a49596974
+            connector_type_id: .server-log
+            frequency:
+              summary: false
+              throttle: null
+              notify_when: onActionGroupChange
         last_run:
           alerts_count:
             new: 0
@@ -2090,12 +2137,15 @@ components:
           outcome_msg: null
           warning: null
           outcome: succeeded
-        next_run: '2022-12-12T22:44:21.653Z'
+        next_run: '2023-01-31T23:49:42.432Z'
     create_rule_request:
       summary: Create an index threshold rule.
       value:
         actions:
           - id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+            frequency:
+              notify_when: onActionGroupChange
+              summary: false
             group: threshold met
             params:
               level: info
@@ -2107,7 +2157,6 @@ components:
                 - Timestamp: {{context.date}}
         consumer: alerts
         name: my rule
-        notify_when: onActionGroupChange
         params:
           aggType: avg
           termSize: 6
@@ -2133,6 +2182,10 @@ components:
         actions:
           - group: threshold met
             id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+            frequency:
+              notify_when: onActionGroupChange
+              summary: false
+              throttle: null
             params:
               level: info
               message: |-
@@ -2169,6 +2222,7 @@ components:
           aggField: sheet.version
           termField: name.keyword
         rule_type_id: .index-threshold
+        running: false
         schedule:
           interval: 1m
         scheduled_task_id: 425b0800-6bca-11eb-9e0d-85d233e3ee35

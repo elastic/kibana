@@ -10,9 +10,11 @@ import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { DisplaySettings } from './display_settings';
 import { DisplaySettingsRouter } from './display_settings_router';

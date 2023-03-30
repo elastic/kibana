@@ -17,9 +17,13 @@ export const useFetchHistoricalSummary = ({
 }: Params): UseFetchHistoricalSummaryResponse => {
   const data: Record<string, HistoricalSummaryResponse[]> = {};
   sloIds.forEach((sloId) => (data[sloId] = historicalSummaryData[HEALTHY_ROLLING_SLO]));
+
   return {
-    loading: false,
-    error: false,
-    data,
+    isLoading: false,
+    isInitialLoading: false,
+    isRefetching: false,
+    isSuccess: false,
+    isError: false,
+    sloHistoricalSummaryResponse: data,
   };
 };

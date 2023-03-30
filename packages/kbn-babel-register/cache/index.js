@@ -10,7 +10,6 @@ const Fs = require('fs');
 const Path = require('path');
 const Crypto = require('crypto');
 
-const { readHashOfPackageMap } = require('@kbn/repo-packages');
 const babel = require('@babel/core');
 const peggy = require('@kbn/peggy');
 const { REPO_ROOT, UPSTREAM_BRANCH } = require('@kbn/repo-info');
@@ -25,7 +24,6 @@ const { getBabelOptions } = require('@kbn/babel-transform');
  */
 function determineCachePrefix() {
   const json = JSON.stringify({
-    synthPkgMapHash: readHashOfPackageMap(),
     babelVersion: babel.version,
     peggyVersion: peggy.version,
     // get a config for a fake js, ts, and tsx file to make sure we
@@ -63,8 +61,7 @@ function getCache() {
   if (lmdbAvailable()) {
     log?.write('lmdb is available, using lmdb cache\n');
     return new (require('./lmdb_cache').LmdbCache)({
-      pathRoot: REPO_ROOT,
-      dir: Path.resolve(REPO_ROOT, 'data/babel_register_cache_v1', UPSTREAM_BRANCH),
+      dir: Path.resolve(REPO_ROOT, 'data/babel_register_cache', UPSTREAM_BRANCH),
       prefix: determineCachePrefix(),
       log,
     });

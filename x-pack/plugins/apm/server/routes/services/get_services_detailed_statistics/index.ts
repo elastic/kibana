@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ApmDocumentType } from '../../../../common/document_type';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { getServiceDetailedStatsPeriods } from './get_service_transaction_detailed_statistics';
+import { getServiceTransactionDetailedStatsPeriods } from './get_service_transaction_detailed_statistics';
 
 export async function getServicesDetailedStatistics({
   serviceNames,
@@ -28,7 +28,7 @@ export async function getServicesDetailedStatistics({
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  documentType: ApmDocumentType;
+  documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
   offset?: string;
@@ -36,7 +36,7 @@ export async function getServicesDetailedStatistics({
   end: number;
   randomSampler: RandomSampler;
 }) {
-  return getServiceDetailedStatsPeriods({
+  return getServiceTransactionDetailedStatsPeriods({
     serviceNames,
     environment,
     kuery,

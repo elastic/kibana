@@ -163,7 +163,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async closeTimeline() {
       await testSubjects.click('toggleTimelineButton');
-      await testSubjects.existOrFail('timelineContainerClosed');
+      const timelineSelectorsVisible = await Promise.all([
+        testSubjects.exists('timelineContainerClosed'),
+        testSubjects.exists('timelineContainerOpen'),
+      ]);
+
+      return timelineSelectorsVisible.every((visible) => !visible);
     },
 
     async openInvenotrySwitcher() {

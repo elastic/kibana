@@ -28,7 +28,11 @@ export function processorEventsToIndex(
   events: ProcessorEvent[],
   indices: ApmIndicesConfig
 ) {
-  return uniq(events.map((event) => indices[processorEventIndexMap[event]]));
+  return uniq(
+    events.flatMap((event) =>
+      indices[processorEventIndexMap[event]].split(',').map((str) => str.trim())
+    )
+  );
 }
 
 export function getRequestBase(options: {

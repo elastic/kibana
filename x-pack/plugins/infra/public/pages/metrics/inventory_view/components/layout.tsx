@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { SavedView } from '../../../../containers/saved_view/saved_view';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -31,7 +33,7 @@ import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
 import { LegendControls } from './waffle/legend_controls';
-import { HostViewIntroPanel } from './hosts_view_intro_panel';
+import { TryItButton } from '../../../../components/try_it_button';
 
 interface Props {
   shouldLoadDefault: boolean;
@@ -47,6 +49,8 @@ interface LegendControlOptions {
   bounds: InfraWaffleMapBounds;
   legend: WaffleLegendOptions;
 }
+
+const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
 
 export const Layout = React.memo(
   ({ shouldLoadDefault, currentView, reload, interval, nodes, loading }: Props) => {
@@ -70,6 +74,12 @@ export const Layout = React.memo(
     const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
     const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
     const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
+
+    const [hostsLinkClicked, setHostsLinkClicked] = useLocalStorage<boolean>(
+      HOSTS_LINK_LOCAL_STORAGE_KEY,
+      false
+    );
+    const hostsLinkClickedRef = useRef<boolean | undefined>(hostsLinkClicked);
 
     const options = {
       formatter: InfraFormatterType.percent,
@@ -141,92 +151,88 @@ export const Layout = React.memo(
     return (
       <>
         <PageContent>
-          <AutoSizer bounds>
-            {({ measureRef: pageMeasureRef, bounds: { width = 0 } }) => (
-              <MainContainer ref={pageMeasureRef}>
-                <AutoSizer bounds>
-                  {({
-                    measureRef: topActionMeasureRef,
-                    bounds: { height: topActionHeight = 0 },
-                  }) => (
-                    <>
-                      <TopActionContainer ref={topActionMeasureRef}>
-                        <EuiFlexGroup
-                          justifyContent="spaceBetween"
-                          alignItems="center"
-                          gutterSize="m"
-                        >
-                          <Toolbar nodeType={nodeType} currentTime={currentTime} />
-                          <EuiFlexGroup
-                            responsive={false}
-                            style={{ margin: 0, justifyContent: 'end' }}
-                          >
-                            {view === 'map' && (
-                              <EuiFlexItem grow={false}>
-                                <LegendControls
-                                  options={legend != null ? legend : DEFAULT_LEGEND}
-                                  dataBounds={dataBounds}
-                                  bounds={bounds}
-                                  autoBounds={autoBounds}
-                                  boundsOverride={boundsOverride}
-                                  onChange={handleLegendControlChange}
-                                />
-                              </EuiFlexItem>
-                            )}
-                            <EuiFlexItem grow={false}>
-                              <ViewSwitcher view={view} onChange={changeView} />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexGroup>
-                      </TopActionContainer>
-                      <HostViewIntroPanel />
-                      <AutoSizer bounds>
-                        {({ measureRef, bounds: { height = 0 } }) => (
-                          <>
-                            <NodesOverview
-                              nodes={nodes}
-                              options={options}
-                              nodeType={nodeType}
-                              loading={loading}
-                              showLoading={showLoading}
-                              reload={reload}
-                              onDrilldown={applyFilterQuery}
-                              currentTime={currentTime}
-                              view={view}
-                              autoBounds={autoBounds}
-                              boundsOverride={boundsOverride}
-                              formatter={formatter}
-                              bottomMargin={height}
-                              topMargin={topActionHeight}
-                            />
-                            {view === 'map' && (
-                              <BottomDrawer
-                                measureRef={measureRef}
-                                interval={interval}
-                                formatter={formatter}
-                                width={width}
-                              />
-                            )}
-                          </>
-                        )}
-                      </AutoSizer>
-                    </>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <TopActionContainer grow={false}>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+                <Toolbar nodeType={nodeType} currentTime={currentTime} />
+                <EuiFlexGroup
+                  responsive={false}
+                  css={css`
+                    margin: 0;
+                    justify-content: flex-end;
+                  `}
+                >
+                  {view === 'map' && (
+                    <EuiFlexItem grow={false}>
+                      <LegendControls
+                        options={legend != null ? legend : DEFAULT_LEGEND}
+                        dataBounds={dataBounds}
+                        bounds={bounds}
+                        autoBounds={autoBounds}
+                        boundsOverride={boundsOverride}
+                        onChange={handleLegendControlChange}
+                      />
+                    </EuiFlexItem>
                   )}
-                </AutoSizer>
-              </MainContainer>
-            )}
-          </AutoSizer>
+                  <EuiFlexItem grow={false}>
+                    <ViewSwitcher view={view} onChange={changeView} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexGroup>
+            </TopActionContainer>
+            <EuiFlexItem grow={false}>
+              {!hostsLinkClickedRef.current && (
+                <TryItButton
+                  data-test-subj="inventory-hostsView-link"
+                  label={i18n.translate('xpack.infra.layout.hostsLandingPageLink', {
+                    defaultMessage: 'Introducing a new Hosts analysis experience',
+                  })}
+                  link={{
+                    app: 'metrics',
+                    pathname: '/hosts',
+                  }}
+                  experimental
+                  onClick={() => {
+                    setHostsLinkClicked(true);
+                  }}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                position: relative;
+                flex: 1 1 auto;
+              `}
+            >
+              <AutoSizer bounds>
+                {({ bounds: { height = 0 } }) => (
+                  <NodesOverview
+                    nodes={nodes}
+                    options={options}
+                    nodeType={nodeType}
+                    loading={loading}
+                    showLoading={showLoading}
+                    reload={reload}
+                    onDrilldown={applyFilterQuery}
+                    currentTime={currentTime}
+                    view={view}
+                    autoBounds={autoBounds}
+                    boundsOverride={boundsOverride}
+                    formatter={formatter}
+                    bottomMargin={height}
+                  />
+                )}
+              </AutoSizer>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </PageContent>
+        <BottomDrawer interval={interval} formatter={formatter} view={view} nodeType={nodeType} />
       </>
     );
   }
 );
 
-const MainContainer = euiStyled.div`
-  position: relative;
-  flex: 1 1 auto;
-`;
-
-const TopActionContainer = euiStyled.div`
-  padding: ${(props) => `12px ${props.theme.eui.euiSizeM}`};
+const TopActionContainer = euiStyled(EuiFlexItem)`
+  padding: ${(props) => `${props.theme.eui.euiSizeM} 0`};
 `;

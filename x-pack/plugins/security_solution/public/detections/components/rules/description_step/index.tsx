@@ -56,6 +56,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
+  max-width: 600px;
   &.euiDescriptionList--column .euiDescriptionList__title {
     width: 30%;
   }

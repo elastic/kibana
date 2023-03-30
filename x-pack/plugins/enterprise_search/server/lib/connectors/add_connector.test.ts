@@ -17,6 +17,7 @@ import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { textAnalysisSettings } from '../indices/text_analysis';
 
 import { addConnector } from './add_connector';
+import { deleteConnectorById } from './delete_connector';
 import { fetchConnectorByIndexName } from './fetch_connectors';
 
 jest.mock('../../index_management/setup_indices', () => ({
@@ -24,12 +25,12 @@ jest.mock('../../index_management/setup_indices', () => ({
 }));
 
 jest.mock('./fetch_connectors', () => ({ fetchConnectorByIndexName: jest.fn() }));
+jest.mock('./delete_connector', () => ({ deleteConnectorById: jest.fn() }));
 jest.mock('../crawler/fetch_crawlers', () => ({ fetchCrawlerByIndexName: jest.fn() }));
 
 describe('addConnector lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      delete: jest.fn(),
       index: jest.fn(),
       indices: {
         create: jest.fn(),
@@ -262,10 +263,7 @@ describe('addConnector lib function', () => {
         language: null,
       })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
-    expect(mockClient.asCurrentUser.delete).toHaveBeenCalledWith({
-      id: 'connectorId',
-      index: CONNECTORS_INDEX,
-    });
+    expect(deleteConnectorById).toHaveBeenCalledWith(mockClient, 'connectorId');
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         api_key_id: null,

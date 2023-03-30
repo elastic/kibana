@@ -126,9 +126,10 @@ describe('useStatusAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-          expectedMessage
-        );
+        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          title: expectedMessage,
+          className: 'eui-textBreakWord',
+        });
       });
     }
   );
@@ -157,9 +158,10 @@ describe('useStatusAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-          expectedMessage
-        );
+        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          title: expectedMessage,
+          className: 'eui-textBreakWord',
+        });
       });
     }
   );

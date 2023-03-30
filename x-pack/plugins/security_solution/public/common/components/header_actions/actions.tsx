@@ -62,6 +62,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
   showNotes,
   timelineId,
   toggleShowNotes,
+  refetch,
+  setEventsLoading,
 }) => {
   const dispatch = useDispatch();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
@@ -296,6 +298,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           scopeId={timelineId}
           disabled={isContextMenuDisabled}
           onRuleChange={onRuleChange}
+          refetch={refetch}
         />
         {isDisabled === false ? (
           <div>

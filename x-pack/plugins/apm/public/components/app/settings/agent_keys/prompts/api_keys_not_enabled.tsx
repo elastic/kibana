@@ -27,7 +27,7 @@ export function ApiKeysNotEnabled() {
           )}
         </h2>
       }
-      iconType="alert"
+      iconType="warning"
       body={
         <p>
           <FormattedMessage
@@ -36,6 +36,7 @@ export function ApiKeysNotEnabled() {
             values={{
               link: (
                 <EuiLink
+                  data-test-subj="apmApiKeysNotEnabledDocsLink"
                   href={docLinks?.links.security.apiKeyServiceSettings}
                   target="_blank"
                 >

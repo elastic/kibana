@@ -114,11 +114,11 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
     <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
       <>
         <EuiFlexGroup direction="column">
-          {isDifferentialView ? (
-            <EuiFlexItem>
+          {isDifferentialView && (
+            <EuiFlexItem grow={false}>
               <PrimaryAndComparisonSearchBar />
             </EuiFlexItem>
-          ) : null}
+          )}
           <EuiFlexItem>
             <EuiFlexGroup direction="row" gutterSize="s">
               <EuiFlexItem>

@@ -9,9 +9,15 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
+import { useLocation } from 'react-router-dom';
 import { ApmPluginStartDeps } from '../../plugin';
 
-export class ApmErrorBoundary extends React.Component<
+export function ApmErrorBoundary({ children }: { children?: React.ReactNode }) {
+  const location = useLocation();
+  return <ErrorBoundary key={location.pathname}>{children}</ErrorBoundary>;
+}
+
+class ErrorBoundary extends React.Component<
   { children?: React.ReactNode },
   { error?: Error },
   {}

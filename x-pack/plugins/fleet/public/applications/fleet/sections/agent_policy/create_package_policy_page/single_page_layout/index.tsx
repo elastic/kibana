@@ -27,7 +27,7 @@ import { useCancelAddPackagePolicy } from '../hooks';
 import { splitPkgKey } from '../../../../../../../common/services';
 import { generateNewAgentPolicyWithDefaults } from '../../../../services';
 import type { NewAgentPolicy } from '../../../../types';
-import { useConfig, sendGetAgentStatus, useGetPackageInfoByKey } from '../../../../hooks';
+import { useConfig, sendGetAgentStatus, useGetPackageInfoByKeyQuery } from '../../../../hooks';
 import {
   Loading,
   Error as ErrorComponent,
@@ -97,7 +97,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { full: true, prerelease });
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, { full: true, prerelease });
   const packageInfo = useMemo(() => {
     if (packageInfoData && packageInfoData.item) {
       return packageInfoData.item;
@@ -278,18 +278,23 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
-  const replaceStepConfigurePackagePolicy = replaceDefineStepView && packageInfo?.name && (
-    <ExtensionWrapper>
-      <replaceDefineStepView.Component
-        agentPolicy={agentPolicy}
-        packageInfo={packageInfo}
-        newPolicy={packagePolicy}
-        onChange={handleExtensionViewOnChange}
-        validationResults={validationResults}
-        isEditPage={false}
-      />
-    </ExtensionWrapper>
-  );
+  const replaceStepConfigurePackagePolicy =
+    replaceDefineStepView && packageInfo?.name ? (
+      !isInitialized ? (
+        <Loading />
+      ) : (
+        <ExtensionWrapper>
+          <replaceDefineStepView.Component
+            agentPolicy={agentPolicy}
+            packageInfo={packageInfo}
+            newPolicy={packagePolicy}
+            onChange={handleExtensionViewOnChange}
+            validationResults={validationResults}
+            isEditPage={false}
+          />
+        </ExtensionWrapper>
+      )
+    ) : undefined;
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
@@ -376,7 +381,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
-
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -391,7 +395,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
           <PostInstallAddAgentModal
             packageInfo={packageInfo}
-            agentPolicy={agentPolicy}
             onConfirm={() => navigateAddAgent(savedPackagePolicy)}
             onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
           />

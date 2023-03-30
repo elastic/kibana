@@ -65,7 +65,7 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
       <EuiIcon
         {...baseIconProps}
         type="color"
-        color="text"
+        color="subdued"
         aria-label={i18n.translate('xpack.lens.editorFrame.paletteColorIndicatorLabel', {
           defaultMessage: 'This dimension is using a palette',
         })}

@@ -207,10 +207,10 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
     expect(queryByText('Delete case')).not.toBeInTheDocument();
-    expect(queryByTestId('property-actions-trash')).not.toBeInTheDocument();
-    expect(queryByTestId('property-actions-copyClipboard')).toBeInTheDocument();
+    expect(queryByTestId('property-actions-case-trash')).not.toBeInTheDocument();
+    expect(queryByTestId('property-actions-case-copyClipboard')).toBeInTheDocument();
   });
 
   it('should show the the delete item in the menu when the user does have delete privileges', () => {
@@ -220,7 +220,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
     expect(queryByText('Delete case')).toBeInTheDocument();
   });
 
@@ -239,10 +239,10 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('property-actions-popout')).toBeInTheDocument();
+      expect(screen.getByTestId('property-actions-case-popout')).toBeInTheDocument();
     });
   });
 
@@ -253,8 +253,8 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
 
-    expect(screen.queryByTestId('property-actions-popout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('property-actions-case-popout')).not.toBeInTheDocument();
   });
 });
