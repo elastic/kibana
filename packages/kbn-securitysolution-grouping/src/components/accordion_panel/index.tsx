@@ -8,18 +8,23 @@
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { groupActions } from '../../hooks/state';
+import { Action } from '../..';
 import { firstNonNullValue } from '../../helpers';
 import type { RawBucket } from '../types';
 import { createGroupFilter } from './helpers';
 
 interface GroupPanelProps<T> {
+  childGroups: string[];
   customAccordionButtonClassName?: string;
   customAccordionClassName?: string;
+  dispatch: React.Dispatch<Action>;
   extraAction?: React.ReactNode;
   forceState?: 'open' | 'closed';
   groupBucket: RawBucket<T>;
   groupPanelRenderer?: JSX.Element;
+  groupingId: string;
   isLoading: boolean;
   level?: number;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
@@ -41,12 +46,15 @@ const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
 );
 
 const GroupPanelComponent = <T,>({
+  childGroups,
   customAccordionButtonClassName,
   customAccordionClassName = 'groupingAccordionForm',
+  dispatch,
   extraAction,
   forceState,
   groupBucket,
   groupPanelRenderer,
+  groupingId,
   isLoading,
   level = 0,
   onToggleGroup,
@@ -54,6 +62,26 @@ const GroupPanelComponent = <T,>({
   selectedGroup,
   groupingLevel = 0,
 }: GroupPanelProps<T>) => {
+  const lastForceState = useRef(forceState);
+
+  useEffect(() => {
+    if (lastForceState.current === 'open' && forceState === 'closed') {
+      // when parent group closes, reset pagination of any child groups
+      childGroups.forEach((group) => {
+        dispatch(
+          groupActions.updateGroupActivePage({
+            id: groupingId,
+            activePage: 0,
+            selectedGroup: group,
+          })
+        );
+      });
+      lastForceState.current = 'closed';
+    } else if (lastForceState.current === 'closed' && forceState === 'open') {
+      lastForceState.current = 'open';
+    }
+  }, [childGroups, dispatch, forceState, groupingId, selectedGroup]);
+
   const groupFieldValue = useMemo(() => firstNonNullValue(groupBucket.key), [groupBucket.key]);
 
   const groupFilters = useMemo(

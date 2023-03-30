@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
@@ -35,12 +35,6 @@ const AlertDetailsRoute = () => (
 );
 
 const AlertsContainerComponent: React.FC = () => {
-  useEffect(() => {
-    console.log('AlertsContainerComponent mount');
-    return () => {
-      console.log('AlertsContainerComponent UNmount');
-    };
-  }, []);
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
   return (

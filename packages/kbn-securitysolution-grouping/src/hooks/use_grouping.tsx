@@ -122,6 +122,7 @@ export const useGrouping = <T,>({
         <GroupingComponent
           {...componentProps}
           {...props}
+          childGroups={selectedGroups.slice((props.groupingLevel ?? 0) + 1, selectedGroups.length)}
           groupingId={groupingId}
           groupSelector={groupSelector}
           pagination={pagination}
@@ -129,7 +130,7 @@ export const useGrouping = <T,>({
           dispatch={dispatch}
         />
       ),
-    [componentProps, groupSelector, groupingId, pagination, tracker]
+    [componentProps, groupSelector, groupingId, pagination, selectedGroups, tracker]
   );
 
   return useMemo(

@@ -96,12 +96,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearEventsLoading,
   clearEventsDeleted,
 }) => {
-  useEffect(() => {
-    console.log('DetectionEnginePage mount');
-    return () => {
-      console.log('DetectionEnginePage UNmount');
-    };
-  }, []);
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
