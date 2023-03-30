@@ -5,9 +5,35 @@
  * 2.0.
  */
 
-import { constructOwnerFromFileKind } from '.';
+import {
+  constructFileKindIdByOwner,
+  constructFilesHttpOperationTag,
+  constructOwnerFromFileKind,
+} from '.';
+import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../constants';
+import { HttpApiTagOperation } from '../constants/types';
 
 describe('files index', () => {
+  describe('constructFilesHttpOperationTag', () => {
+    it.each([
+      [SECURITY_SOLUTION_OWNER, HttpApiTagOperation.Read, 'securitySolutionFilesCasesRead'],
+      [OBSERVABILITY_OWNER, HttpApiTagOperation.Create, 'observabilityFilesCasesCreate'],
+      [APP_ID, HttpApiTagOperation.Delete, 'casesFilesCasesDelete'],
+    ])('builds the tag for owner: %p operation: %p tag: %p', (owner, operation, tag) => {
+      expect(constructFilesHttpOperationTag(owner, operation)).toEqual(tag);
+    });
+  });
+
+  describe('constructFileKindIdByOwner', () => {
+    it.each([
+      [SECURITY_SOLUTION_OWNER, 'securitySolutionFilesCases'],
+      [OBSERVABILITY_OWNER, 'observabilityFilesCases'],
+      [APP_ID, 'casesFilesCases'],
+    ])('builds the right file kind for owner: %p file kind: %p', (owner, fileKind) => {
+      expect(constructFileKindIdByOwner(owner)).toEqual(fileKind);
+    });
+  });
+
   describe('constructOwnerFromFileKind', () => {
     it('returns undefined when the delimiter cannot be found with an empty string', () => {
       expect(constructOwnerFromFileKind('')).toBeUndefined();

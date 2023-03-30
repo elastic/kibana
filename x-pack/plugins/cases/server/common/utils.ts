@@ -12,12 +12,11 @@ import type {
   SavedObjectReference,
   IBasePath,
 } from '@kbn/core/server';
-import { flatMap, partition, uniqWith, xorWith } from 'lodash';
+import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { isValidOwner } from '../../common/utils/owner';
 import {
-  CASE_SAVED_OBJECT,
   CASE_VIEW_COMMENT_PATH,
   CASE_VIEW_PATH,
   CASE_VIEW_TAB_PATH,
@@ -25,12 +24,7 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type {
-  AlertInfo,
-  AttachmentSavedObject,
-  CaseSavedObject,
-  FileAttachmentRequest,
-} from './types';
+import type { AlertInfo, CaseSavedObject, FileAttachmentRequest } from './types';
 
 import type {
   CaseAttributes,
@@ -62,7 +56,6 @@ import {
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
-import { CASE_REF_NAME } from './constants';
 
 /**
  * Default sort field for querying saved objects.
@@ -476,17 +469,4 @@ export const getCaseViewPath = (params: {
   }
 
   return `${basePath}${normalizePath(CASE_VIEW_PATH.replace(':detailName', caseId))}`;
-};
-
-export const partitionByCaseAssociation = (caseId: string, attachments: AttachmentSavedObject[]) =>
-  partition(attachments, (attachment) => {
-    const ref = getCaseReference(attachment.references);
-
-    return caseId === ref?.id;
-  });
-
-export const getCaseReference = (
-  references: SavedObjectReference[]
-): SavedObjectReference | undefined => {
-  return references.find((ref) => ref.name === CASE_REF_NAME && ref.type === CASE_SAVED_OBJECT);
 };

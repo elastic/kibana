@@ -32,8 +32,9 @@ import {
   injectAttachmentAttributesAndHandleErrors,
   injectAttachmentSOAttributesFromRefs,
 } from '../../so_references';
-import { getCaseReference, partitionByCaseAssociation } from '../../../common/utils';
+import { partitionByCaseAssociation } from '../../../common/partitioning';
 import type { AttachmentSavedObject } from '../../../common/types';
+import { getCaseReferenceId } from '../../../common/references';
 
 type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
 
@@ -322,9 +323,9 @@ export class AttachmentGetter {
   ) {
     const caseIds: string[] = [];
     for (const attachment of attachments) {
-      const caseRef = getCaseReference(attachment.references);
-      if (caseRef != null) {
-        caseIds.push(caseRef.id);
+      const caseRefId = getCaseReferenceId(attachment.references);
+      if (caseRefId != null) {
+        caseIds.push(caseRefId);
       }
     }
 

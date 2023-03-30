@@ -19,7 +19,7 @@ import {
   BulkGetAttachmentsResponseRt,
   BulkGetAttachmentsRequestRt,
 } from '../../../common/api';
-import { flattenCommentSavedObjects, partitionByCaseAssociation } from '../../common/utils';
+import { flattenCommentSavedObjects } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs, SOWithErrors } from '../types';
 import { Operations } from '../../authorization';
@@ -27,6 +27,7 @@ import type { BulkGetArgs } from './types';
 import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/attachments/types';
 import type { CasesClient } from '../client';
 import type { AttachmentSavedObject } from '../../common/types';
+import { partitionByCaseAssociation } from '../../common/partitioning';
 
 type AttachmentSavedObjectWithErrors = SOWithErrors<CommentAttributes>;
 

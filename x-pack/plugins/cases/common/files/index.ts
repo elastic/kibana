@@ -20,11 +20,11 @@ export const CaseFileMetadataForDeletionRt = rt.type({
 
 export type CaseFileMetadata = rt.TypeOf<typeof CaseFileMetadataForDeletionRt>;
 
-export const constructFilesHttpOperationTag = (owner: Owner, operation: HttpApiTagOperation) => {
-  return `${owner}FilesCases${operation}`;
-};
-
 const FILE_KIND_DELIMITER = 'FilesCases';
+
+export const constructFilesHttpOperationTag = (owner: Owner, operation: HttpApiTagOperation) => {
+  return `${owner}${FILE_KIND_DELIMITER}${operation}`;
+};
 
 export const constructFileKindIdByOwner = (owner: Owner) => `${owner}${FILE_KIND_DELIMITER}`;
 
