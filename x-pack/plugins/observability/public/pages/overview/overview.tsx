@@ -12,7 +12,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
 
-import { observabilityFeatureId } from '../../../common';
 import type { ObservabilityAppServices } from '../../application/types';
 import { LoadingObservability } from '../../components/loading_observability';
 import { HeaderActions } from './components/header_actions';
@@ -27,7 +26,6 @@ import { paths } from '../../config/paths';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useFetcher } from '../../hooks/use_fetcher';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -47,9 +45,6 @@ const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
 
 export function OverviewPage() {
   const {
-    cases: {
-      ui: { getCasesContext },
-    },
     charts,
     http,
     triggersActionsUi: {
@@ -77,9 +72,6 @@ export function OverviewPage() {
   const { hasAnyData, isAllRequestsComplete } = useHasData();
 
   const { trackMetric } = useOverviewMetrics({ hasAnyData });
-
-  const CasesContext = getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions();
 
   const [isDataAssistantFlyoutVisible, setIsDataAssistantFlyoutVisible] = useState(false);
 
@@ -201,31 +193,25 @@ export function OverviewPage() {
             initialIsOpen={hasAnyData}
             hasError={false}
           >
-            <CasesContext
-              owner={[observabilityFeatureId]}
-              permissions={userCasesPermissions}
-              features={{ alerts: { sync: false } }}
-            >
-              <AlertSummaryWidget
-                chartProps={chartProps}
-                featureIds={observabilityAlertFeatureIds}
-                filter={esQuery}
-                fullSize
-                timeRange={alertSummaryTimeRange}
-              />
-              <AlertsStateTable
-                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                configurationId={AlertConsumers.OBSERVABILITY}
-                flyoutSize="s"
-                featureIds={observabilityAlertFeatureIds}
-                hideLazyLoader
-                id={ALERTS_TABLE_ID}
-                pageSize={ALERTS_PER_PAGE}
-                query={esQuery}
-                showExpandToDetails={false}
-                showAlertStatusWithFlapping
-              />
-            </CasesContext>
+            <AlertSummaryWidget
+              chartProps={chartProps}
+              featureIds={observabilityAlertFeatureIds}
+              filter={esQuery}
+              fullSize
+              timeRange={alertSummaryTimeRange}
+            />
+            <AlertsStateTable
+              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+              configurationId={AlertConsumers.OBSERVABILITY}
+              flyoutSize="s"
+              featureIds={observabilityAlertFeatureIds}
+              hideLazyLoader
+              id={ALERTS_TABLE_ID}
+              pageSize={ALERTS_PER_PAGE}
+              query={esQuery}
+              showExpandToDetails={false}
+              showAlertStatusWithFlapping
+            />
           </SectionContainer>
         </EuiFlexItem>
         <EuiFlexItem>
