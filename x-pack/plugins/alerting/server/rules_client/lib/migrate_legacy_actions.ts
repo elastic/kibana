@@ -129,7 +129,7 @@ export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule
   return { legacyActions: [], legacyActionsReferences: [] };
 };
 
-const transformFromLegacyActions = (
+export const transformFromLegacyActions = (
   legacyActionsAttr: LegacyIRuleActionsAttributes,
   references: SavedObjectReference[]
 ): RawRuleAction[] => {
