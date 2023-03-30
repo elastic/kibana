@@ -38,7 +38,7 @@ describe('getModelVersionTransforms', () => {
     log = loggerMock.create();
   });
 
-  it('generate transforms for model version having a transformation', () => {
+  it('generate transforms for all model versions', () => {
     const typeDefinition = createType({
       name: 'foo',
       modelVersions: {
@@ -67,6 +67,7 @@ describe('getModelVersionTransforms', () => {
 
     expect(transforms).toEqual([
       expectTransform(TransformType.Migrate, '10.1.0'),
+      expectTransform(TransformType.Migrate, '10.2.0'),
       expectTransform(TransformType.Migrate, '10.3.0'),
     ]);
   });
@@ -100,6 +101,7 @@ describe('getModelVersionTransforms', () => {
 
     expect(transforms).toEqual([
       expectTransform(TransformType.Migrate, '10.1.0'),
+      expectTransform(TransformType.Migrate, '10.2.0'),
       expectTransform(TransformType.Migrate, '10.3.0'),
     ]);
   });
