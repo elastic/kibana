@@ -32,7 +32,7 @@ interface ActionAlertsFilterTimeframeProps {
 const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
 
 const useDefaultTimezone = () => {
-  const kibanaTz: string = useUiSetting('dateFormat:tz');
+  const kibanaTz: string = useUiSetting('dateFormat:tz', 'UTC');
   if (!kibanaTz || kibanaTz === 'Browser') return moment.tz?.guess() ?? 'UTC';
   return kibanaTz;
 };
@@ -50,7 +50,9 @@ const useTimeframe = (initialTimeframe: AlertsFilterTimeframe | null) => {
   return useState<AlertsFilterTimeframe>(initialTimeframe || DEFAULT_TIMEFRAME);
 };
 const useTimeFormat = () => {
-  const dateFormatScaled: Array<[string, string]> = useUiSetting('dateFormat:scaled');
+  const dateFormatScaled: Array<[string, string]> = useUiSetting('dateFormat:scaled') ?? [
+    ['PT1M', 'HH:mm'],
+  ];
   const [, PT1M] = dateFormatScaled.find(([key]) => key === 'PT1M') ?? ['', 'HH:mm'];
   return PT1M;
 };

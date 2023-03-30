@@ -47,6 +47,13 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api', () 
   loadAlertTypes: jest.fn(),
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => {
+    console.log('defaultValue', defaultValue);
+    return defaultValue;
+  }),
+}));
+
 const initLegacyShims = () => {
   const triggersActionsUi = {
     actionTypeRegistry: actionTypeRegistryMock.create(),

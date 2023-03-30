@@ -36,6 +36,10 @@ jest.mock('../../lib/action_variables', () => {
   };
 });
 
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
+}));
+
 describe('action_type_form', () => {
   afterEach(() => {
     jest.clearAllMocks();
