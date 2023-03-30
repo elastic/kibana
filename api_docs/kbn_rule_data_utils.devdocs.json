@@ -675,6 +675,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_RULE_REVISION",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_RULE_REVISION",
+        "description": [],
+        "signature": [
+          "\"kibana.alert.rule.revision\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ALERT_RULE_RULE_ID",
         "type": "string",
         "tags": [],
@@ -1311,7 +1326,7 @@
         "label": "DefaultAlertFieldName",
         "description": [],
         "signature": [
-          "\"@timestamp\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.flapping_history\" | \"kibana.alert.instance.id\" | \"kibana.alert.last_detected\" | \"kibana.alert.reason\" | \"kibana.alert.rule\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.start\" | \"kibana.alert.status\" | \"kibana.alert.time_range\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_status\" | \"kibana.space_ids\" | \"kibana.version\""
+          "\"@timestamp\" | \"kibana\" | \"kibana.alert.rule.rule_type_id\" | \"kibana.alert.rule.consumer\" | \"kibana.alert.rule.execution.uuid\" | \"kibana.alert\" | \"kibana.alert.action_group\" | \"kibana.alert.case_ids\" | \"kibana.alert.duration.us\" | \"kibana.alert.end\" | \"kibana.alert.flapping\" | \"kibana.alert.flapping_history\" | \"kibana.alert.instance.id\" | \"kibana.alert.last_detected\" | \"kibana.alert.reason\" | \"kibana.alert.rule\" | \"kibana.alert.rule.category\" | \"kibana.alert.rule.name\" | \"kibana.alert.rule.parameters\" | \"kibana.alert.rule.producer\" | \"kibana.alert.rule.revision\" | \"kibana.alert.rule.tags\" | \"kibana.alert.rule.uuid\" | \"kibana.alert.start\" | \"kibana.alert.status\" | \"kibana.alert.time_range\" | \"kibana.alert.uuid\" | \"kibana.alert.workflow_status\" | \"kibana.space_ids\" | \"kibana.version\""
         ],
         "path": "packages/kbn-rule-data-utils/src/default_alerts_as_data.ts",
         "deprecated": false,
