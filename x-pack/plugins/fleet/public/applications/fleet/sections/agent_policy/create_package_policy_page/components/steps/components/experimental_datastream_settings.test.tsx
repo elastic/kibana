@@ -218,7 +218,7 @@ describe('ExperimentDatastreamSettings', () => {
 
       const tsdbSwitch = res.getByTestId('packagePolicyEditor.tsdbExperimentalFeature.switch');
 
-      expect(tsdbSwitch).toBeEnabled();
+      expect(tsdbSwitch).toBeDisabled();
       expect(tsdbSwitch).toBeChecked();
       expect(mockSetNewExperimentalDataFeatures).not.toBeCalled();
     });

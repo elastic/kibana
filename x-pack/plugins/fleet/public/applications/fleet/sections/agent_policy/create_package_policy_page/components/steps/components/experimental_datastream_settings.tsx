@@ -187,6 +187,7 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
         <EuiFlexItem>
           <EuiSwitch
             checked={newExperimentalIndexingFeature.tsdb ?? false}
+            disabled={isTimeSeriesEnabledByDefault}
             data-test-subj="packagePolicyEditor.tsdbExperimentalFeature.switch"
             label={
               <FormattedMessage
