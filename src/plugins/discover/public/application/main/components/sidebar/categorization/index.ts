@@ -5,12 +5,4 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './row_click_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './default_trigger';
-export * from './categorize_field_trigger';
+export { FieldPopoverCategorize } from './field_popover_categorize';

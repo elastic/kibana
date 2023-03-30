@@ -12,7 +12,7 @@
       "data",
       "lens",
       "licensing",
-      "unifiedFieldList"
+      "uiActions",
     ],
     "requiredBundles": [
       "fieldFormats",

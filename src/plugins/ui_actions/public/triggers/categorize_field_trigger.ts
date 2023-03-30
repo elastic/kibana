@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { ExtraFieldActionsRegistry } from './extra_field_actions_registry';
+import { Trigger } from '.';
 
-export const [getExtraFieldActionsRegistry, setExtraFieldActionsRegistry] =
-  createGetterSetter<ExtraFieldActionsRegistry>('ExtraFieldActionsRegistry');
+export const CATEGORIZE_FIELD_TRIGGER = 'CATEGORIZE_FIELD_TRIGGER';
+export const categorizeFieldTrigger: Trigger = {
+  id: CATEGORIZE_FIELD_TRIGGER,
+  title: 'Categorize field',
+  description: 'Triggered when user wants to categorize a field.',
+};

@@ -43,12 +43,6 @@ export const LogCategorization: FC<LogCategorizationAppStateProps> = (props) => 
   </LazyWrapper>
 );
 
-export const LogCategorizationFlyoutContents: FC<LogCategorizationAppStateProps> = (props) => (
-  <LazyWrapper>
-    <LogCategorizationAppStateLazy {...props} />
-  </LazyWrapper>
-);
-
 const ChangePointDetectionLazy = React.lazy(() => import('./components/change_point_detection'));
 /**
  * Lazy-wrapped LogCategorizationAppStateProps React component

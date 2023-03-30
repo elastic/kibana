@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/public';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
-import { showCategorizeFlyout } from './shared_flyout';
+import type { CoreStart, Plugin } from '@kbn/core/public';
+import { CATEGORIZE_FIELD_TRIGGER, ACTION_CATEGORIZE_FIELD } from '@kbn/ui-actions-plugin/public';
+import { categorizeFieldAction } from './categorize_field_actions';
 
 import {
   AiopsPluginSetup,
@@ -21,30 +19,19 @@ import {
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
-  public setup(
-    core: CoreSetup<AiopsPluginStartDeps, AiopsPluginSetupDeps>,
-    plugins: AiopsPluginSetupDeps
-  ) {
-    plugins.unifiedFieldList.extraFieldOptions.register(
-      (field: DataViewField, dataView: DataView, onAddFilter?: AddFieldFilterHandler) => {
-        return {
-          icon: 'editorOrderedList',
-          title: i18n.translate('unifiedFieldList.fieldPopover.addExistsFilterLabel', {
-            defaultMessage: 'Categorize field',
-          }),
-          onClick: async () => {
-            const [coreStart, { data, charts }] = await core.getStartServices();
-            showCategorizeFlyout(field, dataView, coreStart, data, charts, onAddFilter);
-            // console.log(field);
-          },
-          canShow: () => field.esTypes !== undefined && field.esTypes.includes('text'),
-        };
-      }
-    );
+  public setup() {
     return {};
   }
 
-  public start() {
+  public start(core: CoreStart, plugins: AiopsPluginStartDeps) {
+    if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD)) {
+      plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD);
+    }
+    plugins.uiActions.addTriggerAction(
+      CATEGORIZE_FIELD_TRIGGER,
+      categorizeFieldAction(core, plugins.data, plugins.charts)
+    );
+
     return {};
   }
 

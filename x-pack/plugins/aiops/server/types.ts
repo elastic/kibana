@@ -7,12 +7,10 @@
 
 import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 
 export interface AiopsPluginSetupDeps {
   data: PluginSetup;
   licensing: LicensingPluginStart;
-  discover: DiscoverSetup;
 }
 
 export interface AiopsPluginStartDeps {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiButtonIcon,
   EuiButtonIconProps,
@@ -19,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler } from '../../types';
-import { getExtraFieldActionsRegistry } from '../../kibana_services';
 
 export interface FieldPopoverHeaderProps {
   field: DataViewField;
@@ -39,7 +38,6 @@ export interface FieldPopoverHeaderProps {
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   field,
-  dataView,
   closePopover,
   buttonAddFieldToWorkspaceProps,
   buttonAddFilterProps,
@@ -47,12 +45,9 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   buttonDeleteFieldProps,
   onAddFieldToWorkspace,
   onAddFilter,
-  onAddDSLFilter,
   onEditField,
   onDeleteField,
 }) => {
-  const extraActions = useMemo(() => getExtraFieldActionsRegistry(), []);
-
   if (!field) {
     return null;
   }
@@ -123,32 +118,6 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
           </EuiToolTip>
         </EuiFlexItem>
       )}
-
-      {dataView !== undefined
-        ? extraActions
-            .getActionsGetters()
-            .map((actionGetter) => actionGetter(field, dataView, onAddDSLFilter))
-            .filter((action) => action.canShow())
-            .map((action) => {
-              return (
-                <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addExistsFilter">
-                  <EuiToolTip content={action.title}>
-                    <EuiButtonIcon
-                      data-test-subj={`fieldPopoverHeader_addExistsFilter-${field.name}`}
-                      aria-label={field.name}
-                      {...(buttonAddFilterProps || {})}
-                      iconType="editorOrderedList"
-                      onClick={() => {
-                        closePopover();
-                        action.onClick();
-                      }}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              );
-            })
-        : null}
-
       {onEditField &&
         (field.isRuntimeField || !['unknown', 'unknown_selected'].includes(field.type)) && (
           <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_editField">

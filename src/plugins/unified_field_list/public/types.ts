@@ -7,11 +7,8 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { ExtraFieldActionsRegistry } from './extra_field_actions_registry';
-
-export interface UnifiedFieldListPluginSetup {
-  extraFieldOptions: { register: ExtraFieldActionsRegistry['addExtraFieldAction'] };
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UnifiedFieldListPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListPluginStart {}
@@ -19,8 +16,7 @@ export interface UnifiedFieldListPluginStart {}
 export type AddFieldFilterHandler = (
   field: DataViewField | '_exists_',
   value: unknown,
-  type: '+' | '-',
-  label?: string
+  type: '+' | '-'
 ) => void;
 
 export enum ExistenceFetchStatus {
