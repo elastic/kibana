@@ -184,7 +184,9 @@ export function withServiceStatus(
 
   const level =
     status === HealthStatus.OK ? ServiceStatusLevels.available : ServiceStatusLevels.degraded;
-  const summary = LEVEL_SUMMARY[level.toString()] + reason ? ` - Reason: ${reason}` : '';
+
+  const defaultMessage = LEVEL_SUMMARY[level.toString()];
+  const summary = reason ? `${defaultMessage} - Reason: ${reason}` : defaultMessage;
 
   return [
     monitoredHealth,
