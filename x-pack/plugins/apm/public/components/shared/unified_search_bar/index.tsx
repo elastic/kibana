@@ -10,7 +10,6 @@ import { Query, TimeRange } from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EuiSkeletonRectangle } from '@elastic/eui';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -98,9 +97,9 @@ export function UnifiedSearchBar({
     }
   }, [queryStringService, urlQuery]);
 
-  useEffectOnce(() => {
+  useEffect(() => {
     syncSearchBarWithUrl();
-  });
+  }, [syncSearchBarWithUrl]);
 
   const location = useLocation();
   const history = useHistory();
