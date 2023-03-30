@@ -132,7 +132,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
           name: schema.string({
             validate: (value) => {
               if (value === 'synthetics') {
-                return i18n.translate('xpack.fleet.config.invalidPackageVersionError', {
+                return i18n.translate('xpack.fleet.config.disableSynthetics', {
                   defaultMessage:
                     'Synthetics package is not supported via kibana.yml config. Please use synthetics app to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
                 });
