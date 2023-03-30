@@ -10,19 +10,17 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiEmptyPrompt, EuiIconTip, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaLogic } from '../../../shared/kibana';
 import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
 import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
-import { AnalyticsCollectionDataViewIdLogic } from './analytics_collection_data_view_id_logic';
+import { AnalyticsCollectionToolbar } from './analytics_collection_toolbar/analytics_collection_toolbar';
+import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
@@ -34,15 +32,13 @@ export const collectionViewBreadcrumbs = [
 
 export const AnalyticsCollectionView: React.FC = () => {
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);
-  const { fetchAnalyticsCollectionDataViewId } = useActions(AnalyticsCollectionDataViewIdLogic);
+  const { setTimeRange } = useActions(AnalyticsCollectionToolbarLogic);
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
-  const { dataViewId } = useValues(AnalyticsCollectionDataViewIdLogic);
+  const { timeRange, searchSessionId } = useValues(AnalyticsCollectionToolbarLogic);
   const { name, section } = useParams<{ name: string; section: string }>();
-  const { application } = useValues(KibanaLogic);
 
   useEffect(() => {
     fetchAnalyticsCollection(name);
-    fetchAnalyticsCollectionDataViewId(name);
   }, []);
 
   return (
@@ -56,38 +52,16 @@ export const AnalyticsCollectionView: React.FC = () => {
         pageTitle: i18n.translate('xpack.enterpriseSearch.analytics.collectionsView.title', {
           defaultMessage: 'Overview',
         }),
-        rightSideItems: dataViewId
-          ? [
-              <RedirectAppLinks application={application}>
-                <EuiLink
-                  href={application.getUrlForApp('discover', {
-                    path: `#/?_a=(index:'${dataViewId}')`,
-                  })}
-                >
-                  <EuiIconTip
-                    position="bottom"
-                    content={
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.analytics.collectionsView.exploreTooltip"
-                        defaultMessage="For a deeper analysis, explore event logs on Discover."
-                      />
-                    }
-                    type="inspect"
-                  />
-                </EuiLink>
-              </RedirectAppLinks>,
-            ]
-          : undefined,
+        rightSideItems: [<AnalyticsCollectionToolbar />],
       }}
     >
       {analyticsCollection ? (
         <AnalyticsCollectionChartWithLens
           id={'analytics-collection-chart-' + analyticsCollection.name}
           dataViewQuery={analyticsCollection.events_datastream}
-          timeRange={{
-            from: 'now-90d',
-            to: 'now',
-          }}
+          timeRange={timeRange}
+          setTimeRange={setTimeRange}
+          searchSessionId={searchSessionId}
         />
       ) : (
         <EuiEmptyPrompt
