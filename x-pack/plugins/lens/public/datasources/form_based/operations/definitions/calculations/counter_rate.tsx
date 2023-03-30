@@ -18,7 +18,7 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter } from '../helpers';
+import {getFormatFromPreviousColumn, getFilter, isColumnOfType} from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -85,6 +85,7 @@ export const counterRateOperation: OperationDefinition<
       layer.columns[(layer.columns[columnId] as ReferenceBasedIndexPatternColumn).references[0]];
     if (
       metric &&
+      isColumnOfType('max', metric) &&
       'sourceField' in metric &&
       indexPattern.getFieldByName(metric.sourceField)?.timeSeriesMetric === 'counter'
     ) {

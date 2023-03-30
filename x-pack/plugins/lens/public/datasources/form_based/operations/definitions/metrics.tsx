@@ -61,16 +61,6 @@ function timeScaleToUnit(t?: string) {
   else return 'day';
 }
 
-function operationToAggFn(t?: string) {
-  if (t === 'max') {
-    return 'aggBucketMax';
-  } else if (t === 'min') {
-    return 'aggBucketMin';
-  } else {
-    return 'aggBucketSum';
-  }
-}
-
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
   displayName,
@@ -233,18 +223,15 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     ) => {
       const counterRateColumn = layer.columnOrder.find(
         (c) =>
-          layer.columns[c].operationType === 'counter_rate' &&
+          isColumnOfType('max', column) &&
+          isColumnOfType('counter_rate', layer.columns[c]) &&
           (layer.columns[c] as ReferenceBasedIndexPatternColumn).references[0] === colId
       );
       const counterField =
         _indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric === 'counter';
+
       if (counterRateColumn && counterField) {
-        const fnName = operationToAggFn(column.operationType);
-        return buildExpressionFunction<
-          | AggFunctionsMapping['aggBucketMin']
-          | AggFunctionsMapping['aggBucketMax']
-          | AggFunctionsMapping['aggBucketSum']
-        >(fnName, {
+        return buildExpressionFunction<AggFunctionsMapping['aggBucketSum']>('aggBucketSum', {
           id: columnId,
           enabled: true,
           schema: 'metric',
