@@ -10,12 +10,14 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../__mocks__/react_router';
 
-import React, { ReactElement } from 'react';
+import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
+
+import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
 
 import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate/analytics_collection_integrate';
 import { AnalyticsCollectionSettings } from './analytics_collection_settings';
@@ -24,81 +26,87 @@ import { AnalyticsCollectionView } from './analytics_collection_view';
 
 const mockValues = {
   analyticsCollection: {
-    name: 'Analytics Collection 1',
+    events_datastream: 'analytics-events-example',
+    name: 'Analytics-Collection-1',
   } as AnalyticsCollection,
-  dataViewId: '1234-1234-1234',
+  searchSessionId: 'session-id',
+  timeRange: {
+    from: 'now-90d',
+    to: 'now',
+  },
 };
 
 const mockActions = {
   fetchAnalyticsCollection: jest.fn(),
   fetchAnalyticsCollectionDataViewId: jest.fn(),
+  setTimeRange: jest.fn(),
 };
 
-describe('AnalyticsOverview', () => {
+describe('AnalyticsView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockUseParams.mockReturnValue({ name: '1', section: 'settings' });
   });
 
-  describe('empty state', () => {
-    it('renders when analytics collection is empty on inital query', () => {
-      setMockValues({
-        ...mockValues,
-        analyticsCollection: null,
-      });
-      setMockActions(mockActions);
-      const wrapper = shallow(<AnalyticsCollectionView />);
-
-      expect(mockActions.fetchAnalyticsCollection).toHaveBeenCalled();
-
-      expect(wrapper.find(AnalyticsCollectionSettings)).toHaveLength(0);
-      expect(wrapper.find(AnalyticsCollectionIntegrate)).toHaveLength(0);
+  it('renders when analytics collection is empty on initial query', () => {
+    setMockValues({
+      ...mockValues,
+      analyticsCollection: null,
     });
+    setMockActions(mockActions);
+    const wrapper = shallow(<AnalyticsCollectionView />);
 
-    it('renders with Data', async () => {
-      setMockValues(mockValues);
-      setMockActions(mockActions);
+    expect(mockActions.fetchAnalyticsCollection).toHaveBeenCalled();
 
-      const wrapper = shallow(<AnalyticsCollectionView />);
+    expect(wrapper.find(AnalyticsCollectionSettings)).toHaveLength(0);
+    expect(wrapper.find(AnalyticsCollectionIntegrate)).toHaveLength(0);
+  });
 
-      expect(wrapper.find(AnalyticsCollectionSettings)).toHaveLength(1);
-      expect(mockActions.fetchAnalyticsCollection).toHaveBeenCalled();
-    });
+  it('renders with Data', async () => {
+    setMockValues(mockValues);
+    setMockActions(mockActions);
 
-    it('sends correct telemetry page name for selected tab', async () => {
-      setMockValues(mockValues);
-      setMockActions(mockActions);
+    shallow(<AnalyticsCollectionView />);
 
-      const wrapper = shallow(<AnalyticsCollectionView />);
+    expect(mockActions.fetchAnalyticsCollection).toHaveBeenCalled();
+  });
 
-      expect(wrapper.prop('pageViewTelemetry')).toBe('View Analytics Collection - settings');
-    });
+  it('sends correct telemetry page name for selected tab', async () => {
+    setMockValues(mockValues);
+    setMockActions(mockActions);
 
-    it('send correct pageHeader rightSideItems when dataViewId exists', async () => {
-      setMockValues(mockValues);
-      setMockActions(mockActions);
+    const wrapper = shallow(<AnalyticsCollectionView />);
 
-      const rightSideItems = shallow(<AnalyticsCollectionView />)
-        ?.find(EnterpriseSearchAnalyticsPageTemplate)
-        ?.prop('pageHeader')?.rightSideItems;
+    expect(wrapper.prop('pageViewTelemetry')).toBe('View Analytics Collection - settings');
+  });
 
-      expect(rightSideItems).toHaveLength(1);
+  it('render toolbar in pageHeader rightSideItems ', async () => {
+    setMockValues({ ...mockValues, dataViewId: null });
+    setMockActions(mockActions);
 
-      expect((rightSideItems?.[0] as ReactElement).props?.children?.props?.href).toBe(
-        "/app/discover#/?_a=(index:'1234-1234-1234')"
-      );
-    });
+    const wrapper = shallow(<AnalyticsCollectionView />);
 
-    it('hide pageHeader rightSideItems when dataViewId not exists', async () => {
-      setMockValues({ ...mockValues, dataViewId: null });
-      setMockActions(mockActions);
+    expect(
+      wrapper?.find(EnterpriseSearchAnalyticsPageTemplate)?.prop('pageHeader')?.rightSideItems
+    ).toHaveLength(1);
+  });
 
-      const wrapper = shallow(<AnalyticsCollectionView />);
+  it('render AnalyticsCollectionChartWithLens with collection', () => {
+    setMockValues(mockValues);
+    setMockActions(mockActions);
 
-      expect(
-        wrapper?.find(EnterpriseSearchAnalyticsPageTemplate)?.prop('pageHeader')?.rightSideItems
-      ).toBeUndefined();
+    const wrapper = shallow(<AnalyticsCollectionView />);
+    expect(wrapper?.find(AnalyticsCollectionChartWithLens)).toHaveLength(1);
+    expect(wrapper?.find(AnalyticsCollectionChartWithLens).props()).toEqual({
+      dataViewQuery: 'analytics-events-example',
+      id: 'analytics-collection-chart-Analytics-Collection-1',
+      searchSessionId: 'session-id',
+      setTimeRange: mockActions.setTimeRange,
+      timeRange: {
+        from: 'now-90d',
+        to: 'now',
+      },
     });
   });
 });

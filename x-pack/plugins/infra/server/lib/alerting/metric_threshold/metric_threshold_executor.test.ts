@@ -113,6 +113,7 @@ const mockOptions = {
     throttle: null,
     notifyWhen: null,
     producer: '',
+    revision: 0,
     ruleTypeId: '',
     ruleTypeName: '',
     muteAll: false,

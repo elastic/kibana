@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { validateParamsValue } from '../fleet_package/validation';
 import {
   ConfigKey,
   DataStream,
@@ -29,6 +28,17 @@ function validateHeaders<T>(headers: T): boolean {
     }
   });
 }
+
+export const validateParamsValue = (params?: string) => {
+  try {
+    if (params) {
+      JSON.parse(params ?? '');
+    }
+  } catch (e) {
+    return true;
+  }
+  return false;
+};
 
 // returns true if invalid
 const validateTimeout = ({
@@ -142,14 +152,7 @@ const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) =
 
 const validateBrowser: Validation = {
   ...validateCommon,
-  [ConfigKey.SOURCE_ZIP_URL]: ({
-    [ConfigKey.SOURCE_ZIP_URL]: zipUrl,
-    [ConfigKey.SOURCE_INLINE]: inlineScript,
-  }) => !zipUrl && !inlineScript,
-  [ConfigKey.SOURCE_INLINE]: ({
-    [ConfigKey.SOURCE_ZIP_URL]: zipUrl,
-    [ConfigKey.SOURCE_INLINE]: inlineScript,
-  }) => !zipUrl && !inlineScript,
+  [ConfigKey.SOURCE_INLINE]: ({ [ConfigKey.SOURCE_INLINE]: inlineScript }) => !inlineScript,
   [ConfigKey.DOWNLOAD_SPEED]: ({ [ConfigKey.DOWNLOAD_SPEED]: downloadSpeed }) =>
     validateThrottleValue(downloadSpeed),
   [ConfigKey.UPLOAD_SPEED]: ({ [ConfigKey.UPLOAD_SPEED]: uploadSpeed }) =>

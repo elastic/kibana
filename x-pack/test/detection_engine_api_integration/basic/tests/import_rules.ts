@@ -360,7 +360,6 @@ export default ({ getService }: FtrProviderContext): void => {
           output_index: '',
         };
         ruleOutput.name = 'some other name';
-        ruleOutput.version = 2;
         ruleOutput.revision = 0;
         expect(bodyToCompare).to.eql(ruleOutput);
       });
