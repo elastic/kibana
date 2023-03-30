@@ -37,7 +37,7 @@ import {
   LensDocShape860,
 } from './types';
 import { DOCUMENT_FIELD_NAME } from '../../common/constants';
-import type { LegacyMetricState } from '../../common';
+import type { LegacyMetricState } from '../../common/types';
 import { isPartitionShape } from '../../common/visualizations';
 import { LensDocShape } from './saved_object_migrations';
 
