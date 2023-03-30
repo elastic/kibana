@@ -101,7 +101,7 @@ exports[`it renders without crashing 1`] = `
     }
   >
     <EuiComboBox
-      aria-label="Run as user"
+      aria-label="Run as privileges"
       async={false}
       compressed={false}
       fullWidth={false}
