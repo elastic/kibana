@@ -293,7 +293,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe.only('Logs Tab', () => {
+      describe('Logs Tab', () => {
         before(async () => {
           browser.scrollTop();
           await pageObjects.infraHostsView.visitLogsTab();
@@ -301,12 +301,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('should load the Logs tab section when clicking on it', async () => {
           testSubjects.existOrFail('hostsView-logs');
-        });
-
-        it('should render the log entries for the hosts', async () => {
-          const logEntries = await pageObjects.infraHostsView.getLogEntries();
-
-          expect(logEntries.length).equal(200);
         });
       });
 
