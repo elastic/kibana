@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { buildUserDetailsQuery } from './query.user_details.dsl';
+import { buildObservedUserDetailsQuery } from './query.observed_user_details.dsl';
 import { mockOptions } from './__mocks__';
 
 describe('buildUserDetailsQuery', () => {
   test('build query from options correctly', () => {
-    expect(buildUserDetailsQuery(mockOptions)).toMatchSnapshot();
+    expect(buildObservedUserDetailsQuery(mockOptions)).toMatchSnapshot();
   });
 });

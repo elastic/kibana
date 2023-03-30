@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
-import type { UserDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/details';
+import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
+import { NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
+import type { ObservedUserDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/observed_details';
 import { buildFieldsTermAggregation } from '../../hosts/details/helpers';
 import { USER_FIELDS } from './helpers';
 
-export const buildUserDetailsQuery = ({
-  userName,
-  defaultIndex,
-  timerange: { from, to },
-}: UserDetailsRequestOptions): ISearchRequestParams => {
-  const filter = [
+export const buildObservedUserDetailsQuery = (
+  { userName, defaultIndex, timerange: { from, to } }: ObservedUserDetailsRequestOptions,
+  experimentalFeatures?: ExperimentalFeatures
+): ISearchRequestParams => {
+  const filter: QueryDslQueryContainer[] = [
     { term: { 'user.name': userName } },
     {
       range: {
@@ -27,6 +29,10 @@ export const buildUserDetailsQuery = ({
       },
     },
   ];
+
+  if (experimentalFeatures?.newUserDetailsFlyout) {
+    filter.push(NOT_EVENT_KIND_ASSET_FILTER);
+  }
 
   const dslQuery = {
     allow_no_indices: true,

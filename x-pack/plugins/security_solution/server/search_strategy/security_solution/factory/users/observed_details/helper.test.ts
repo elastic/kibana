@@ -24,13 +24,9 @@ describe('helpers', () => {
           },
         ],
       },
-      first_seen: { value_as_string: '123456789' },
-      last_seen: { value_as_string: '987654321' },
     };
 
     expect(formatUserItem(aggregations)).toEqual({
-      firstSeen: '123456789',
-      lastSeen: '987654321',
       user: { id: [userId] },
     });
   });

@@ -6,7 +6,7 @@
  */
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../../common/mock';
-import { useUserDetails } from '.';
+import { useObservedUserDetails } from '.';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
 
 jest.mock('../../../../../common/containers/use_search_strategy', () => ({
@@ -38,7 +38,7 @@ describe('useUserDetails', () => {
   });
 
   it('runs search', () => {
-    renderHook(() => useUserDetails(defaultProps), {
+    renderHook(() => useObservedUserDetails(defaultProps), {
       wrapper: TestProviders,
     });
 
@@ -50,7 +50,7 @@ describe('useUserDetails', () => {
       ...defaultProps,
       skip: true,
     };
-    renderHook(() => useUserDetails(props), {
+    renderHook(() => useObservedUserDetails(props), {
       wrapper: TestProviders,
     });
 
@@ -60,7 +60,7 @@ describe('useUserDetails', () => {
     const props = {
       ...defaultProps,
     };
-    const { rerender } = renderHook(() => useUserDetails(props), {
+    const { rerender } = renderHook(() => useObservedUserDetails(props), {
       wrapper: TestProviders,
     });
     props.skip = true;

@@ -13,7 +13,7 @@ import { UsersQueries } from '../../../../../../common/search_strategy/security_
 import type { UserItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
 
-export const ID = 'usersDetailsQuery';
+export const OBSERVED_USER_QUERY_ID = 'observedUsersDetailsQuery';
 
 export interface UserDetailsArgs {
   id: string;
@@ -33,11 +33,11 @@ interface UseUserDetails {
   startDate: string;
 }
 
-export const useUserDetails = ({
+export const useObservedUserDetails = ({
   endDate,
   userName,
   indexNames,
-  id = ID,
+  id = OBSERVED_USER_QUERY_ID,
   skip = false,
   startDate,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
@@ -47,8 +47,8 @@ export const useUserDetails = ({
     search,
     refetch,
     inspect,
-  } = useSearchStrategy<UsersQueries.details>({
-    factoryQueryType: UsersQueries.details,
+  } = useSearchStrategy<UsersQueries.observedDetails>({
+    factoryQueryType: UsersQueries.observedDetails,
     initialResult: {
       userDetails: {},
     },
@@ -62,7 +62,6 @@ export const useUserDetails = ({
       userDetails: response.userDetails,
       id,
       inspect,
-      isInspected: false,
       refetch,
       startDate,
     }),
@@ -72,7 +71,7 @@ export const useUserDetails = ({
   const userDetailsRequest = useMemo(
     () => ({
       defaultIndex: indexNames,
-      factoryQueryType: UsersQueries.details,
+      factoryQueryType: UsersQueries.observedDetails,
       userName,
       timerange: {
         interval: '12h',

@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import * as buildQuery from './query.user_details.dsl';
-import { userDetails } from '.';
+import * as buildQuery from './query.observed_user_details.dsl';
+import { observedUserDetails } from '.';
 import { mockOptions, mockSearchStrategyResponse } from './__mocks__';
+import { mockGlobalState } from '../../../../../../public/common/mock';
 
 describe('userDetails search strategy', () => {
-  const buildHostDetailsQuery = jest.spyOn(buildQuery, 'buildUserDetailsQuery');
+  const buildUserDetailsQuery = jest.spyOn(buildQuery, 'buildObservedUserDetailsQuery');
 
   afterEach(() => {
-    buildHostDetailsQuery.mockClear();
+    buildUserDetailsQuery.mockClear();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
-      userDetails.buildDsl(mockOptions);
-      expect(buildHostDetailsQuery).toHaveBeenCalledWith(mockOptions);
+      observedUserDetails.buildDsl(mockOptions, mockGlobalState.app.enableExperimental);
+      expect(buildUserDetailsQuery).toHaveBeenCalledWith(
+        mockOptions,
+        mockGlobalState.app.enableExperimental
+      );
     });
   });
 
   describe('parse', () => {
     test('should parse data correctly', async () => {
-      const result = await userDetails.parse(mockOptions, mockSearchStrategyResponse);
+      const result = await observedUserDetails.parse(mockOptions, mockSearchStrategyResponse);
       expect(result).toMatchSnapshot();
     });
   });

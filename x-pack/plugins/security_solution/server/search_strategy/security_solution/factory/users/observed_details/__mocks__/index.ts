@@ -8,11 +8,11 @@
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
 
-import type { UserDetailsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/details';
+import type { ObservedUserDetailsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/observed_details';
 
-export const mockOptions: UserDetailsRequestOptions = {
+export const mockOptions: ObservedUserDetailsRequestOptions = {
   defaultIndex: ['test_indices*'],
-  factoryQueryType: UsersQueries.details,
+  factoryQueryType: UsersQueries.observedDetails,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"user.name":{"query":"test_user"}}}],"should":[],"must_not":[]}}',
   timerange: {
@@ -22,7 +22,7 @@ export const mockOptions: UserDetailsRequestOptions = {
   },
   params: {},
   userName: 'bastion00.siem.estc.dev',
-} as UserDetailsRequestOptions;
+} as ObservedUserDetailsRequestOptions;
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
   rawResponse: {
@@ -124,14 +124,6 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             },
           },
         ],
-      },
-      first_seen: {
-        value: 1644837532000,
-        value_as_string: '2022-02-14T11:18:52.000Z',
-      },
-      last_seen: {
-        value: 1644837532000,
-        value_as_string: '2022-02-14T11:18:52.000Z',
       },
       user_domain: {
         doc_count_error_upper_bound: 0,

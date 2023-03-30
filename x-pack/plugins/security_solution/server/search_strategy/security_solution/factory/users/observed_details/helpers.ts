@@ -25,11 +25,6 @@ export const USER_FIELDS = [
 export const fieldNameToAggField = (fieldName: string) => fieldName.replace(/\./g, '_');
 
 export const formatUserItem = (aggregations: UserAggEsItem): UserItem => {
-  const firstLastSeen = {
-    firstSeen: get('first_seen.value_as_string', aggregations),
-    lastSeen: get('last_seen.value_as_string', aggregations),
-  };
-
   return USER_FIELDS.reduce<UserItem>((flattenedFields, fieldName) => {
     const aggField = fieldNameToAggField(fieldName);
 
@@ -40,5 +35,5 @@ export const formatUserItem = (aggregations: UserAggEsItem): UserItem => {
       return set(fieldName, fieldValue, flattenedFields);
     }
     return flattenedFields;
-  }, firstLastSeen);
+  }, {});
 };
