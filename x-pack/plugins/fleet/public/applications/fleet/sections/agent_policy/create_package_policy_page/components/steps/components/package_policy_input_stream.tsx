@@ -25,7 +25,10 @@ import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
 
-import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../../common/services';
+import {
+  getRegistryDataStreamAssetBaseName,
+  mapPackageReleaseToIntegrationCardRelease,
+} from '../../../../../../../../../common/services';
 import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
 
 import type {
@@ -40,6 +43,8 @@ import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
 import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
 import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
+
+import { useIndexTemplateExists } from '../../datastream_hooks';
 
 import { ExperimentDatastreamSettings } from './experimental_datastream_settings';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
@@ -90,14 +95,24 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
-    const isInputOnlyPackage = packageInfo.type === 'input';
 
-    const packageHasDatasetVar = packageInputStream.vars?.some(
-      (varDef) => varDef.name === DATASET_VAR_NAME
-    );
     const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
-    const showPipelinesAndMappings = isInputOnlyPackage || !packageHasDatasetVar;
+
+    const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
+      useIndexTemplateExists(
+        getRegistryDataStreamAssetBaseName({
+          dataset: customDatasetVarValue,
+          type: packageInputStream.data_stream.type,
+        })
+      );
+
+    // only show pipelines and mappings if the matching index template exists
+    // in the legacy case (e.g logs package pre 2.0.0) the index template will not exist 
+    // because we allowed dataset to be customized but didnt create a matching index template
+    // for the new dataset.
+    const showPipelinesAndMappings = !isLoadingIndexTemplate && indexTemplateExists;
+
     useEffect(() => {
       if (isDefaultDatastream && containerRef.current) {
         containerRef.current.scrollIntoView();
