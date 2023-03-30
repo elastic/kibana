@@ -120,8 +120,8 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
         >
           <EuiComboBox
             aria-label={i18n.translate(
-              'xpack.security.management.editRole.elasticSearchPrivileges.runAsUserAriaLabel',
-              { defaultMessage: 'Run as user' }
+              'xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesAriaLabel',
+              { defaultMessage: 'Run as privileges' }
             )}
             placeholder={
               this.props.editable
