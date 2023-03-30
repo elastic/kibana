@@ -414,6 +414,7 @@ describe('get_export_by_object_ids', () => {
       );
       const rulesJson = JSON.parse(exports.rulesNdjson);
       const detailsJson = JSON.parse(exports.exportDetails);
+      // Check if the rule has the correct actions
       expect(rulesJson).toEqual(
         expect.objectContaining({
           actions: [
