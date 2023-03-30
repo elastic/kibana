@@ -65,7 +65,7 @@ export function MapSettingsPanel({
           <h2>
             <FormattedMessage
               id="xpack.maps.mapSettingsPanel.title"
-              defaultMessage="Map settings"
+              defaultMessage="Settings"
             />
           </h2>
         </EuiTitle>

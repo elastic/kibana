@@ -39,7 +39,11 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => {
       dispatch(addPreviewLayers(layerDescriptors));
     },
-    promotePreviewLayers: () => {
+    addLayersAndClose: (close: boolean) => {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch(promotePreviewLayers());
+    },
+    addLayersAndContinue: (close: boolean) => {
       dispatch(setFirstPreviewLayerToSelectedLayer());
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
       dispatch(promotePreviewLayers());

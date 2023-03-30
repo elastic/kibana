@@ -37,7 +37,7 @@ export class FlyoutFooter extends Component<Props, State> {
     const cancelButtonLabel = this.props.hasStateChanged ? (
       <FormattedMessage
         id="xpack.maps.layerPanel.footer.cancelButtonLabel"
-        defaultMessage="Cancel"
+        defaultMessage="Discard changes"
       />
     ) : (
       <FormattedMessage id="xpack.maps.layerPanel.footer.closeButtonLabel" defaultMessage="Close" />
@@ -95,7 +95,7 @@ export class FlyoutFooter extends Component<Props, State> {
             >
               <FormattedMessage
                 id="xpack.maps.layerPanel.footer.saveAndCloseButtonLabel"
-                defaultMessage="Save & close"
+                defaultMessage="Keep changes"
               />
             </EuiButton>
           </EuiFlexItem>
