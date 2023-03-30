@@ -16,7 +16,7 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { processesTab } from './processes';
 import { useFlyoutTabId, FlyoutTabIds } from '../../hooks/use_flyout_tab_id';
 import { Metadata } from './metadata/metadata';
-import { ProcessesTabComponent } from '../../../inventory_view/components/node_details/tabs/processes/tab_component';
+import { TabComponent } from '../../../inventory_view/components/node_details/tabs/processes';
 
 interface Props {
   node: HostNodeRow;
@@ -72,11 +72,7 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
         )}
         {renderedTabsSet.current.has(FlyoutTabIds.PROCESSES) && (
           <div hidden={selectedTabId !== FlyoutTabIds.PROCESSES}>
-            <ProcessesTabComponent
-              node={node}
-              nodeType={NODE_TYPE}
-              currentTime={currentTimeRange.to}
-            />
+            <TabComponent node={node} nodeType={NODE_TYPE} currentTime={currentTimeRange.to} />
           </div>
         )}
       </EuiFlyoutBody>
