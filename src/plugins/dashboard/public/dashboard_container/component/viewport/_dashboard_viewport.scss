@@ -1,9 +1,15 @@
+.dshDashboardViewportWrapper {
+  flex: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .dshDashboardViewport {
   width: 100%;
 }
 
-.dshDashboardViewport-withMargins {
-  width: 100%;
+.dshDashboardViewport--panelExpanded {
+  flex: 1;
 }
 
 .dshDashboardViewport-controls {
