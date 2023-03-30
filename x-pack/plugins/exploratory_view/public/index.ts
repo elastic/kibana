@@ -40,6 +40,7 @@ export { APP_ROUTE as EXPLORATORY_VIEW_APP_URL } from './constants';
 export type { UXMetrics } from './components/shared/core_web_vitals';
 
 export {
+  getCoreVitalsComponent,
   ExploratoryView,
   FieldValueSuggestions,
   FieldValueSelection,
