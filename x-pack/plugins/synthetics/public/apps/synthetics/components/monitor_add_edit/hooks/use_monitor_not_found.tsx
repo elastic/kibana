@@ -5,56 +5,89 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { useGetUrlParams } from '../../../hooks';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useFetcher } from '@kbn/observability-plugin/public';
+import { MonitorNotFoundPage } from '../../monitor_details/monitor_not_found_page';
+import { useGetUrlParams, useUrlParams } from '../../../hooks';
+import { deletePackagePolicy } from '../../../state/monitor_management/api';
 
-export const useMonitorNotFound = (error?: IHttpFetchError<ResponseErrorBody>) => {
+export const useMonitorNotFound = (error?: IHttpFetchError<ResponseErrorBody>, id?: string) => {
   const { packagePolicyId } = useGetUrlParams();
+  const updateUrlParams = useUrlParams()[1];
+
+  useEffect(() => {
+    if (id && packagePolicyId && !error) {
+      updateUrlParams({ packagePolicyId: undefined });
+    }
+  }, [error, id, packagePolicyId, updateUrlParams]);
 
   if (!error) return null;
   if (error.body?.statusCode === 404) {
     return (
       <>
-        <EuiCallOut title="Monitor not found" color="warning" iconType="help">
-          <p>
-            Monitor is not found. Please check the monitor id and try again. If you are trying to
-            add a new monitor, please click on the button below.
-          </p>
-
-          <EuiButton
-            data-test-subj="syntheticsUseMonitorNotFoundCreateNewMonitorButton"
-            href="#"
-            color="primary"
-          >
-            Create new monitor
-          </EuiButton>
-        </EuiCallOut>
+        <LeftoverIntegrationFound />
         <EuiSpacer size="m" />
-        {packagePolicyId && (
-          <EuiCallOut title="Leftover integration found" color="warning" iconType="help">
-            <p>
-              Please click on the button below to delete the integration. Normally this should not
-              happen. Since the monitor has been deleted, the integration is deleted as well
-              automatically.{' '}
-              <EuiLink
-                data-test-subj="syntheticsUseMonitorNotFoundReportAnIssueLink"
-                href="https://github.com/elastic/kibana/issues/new/choose"
-              >
-                Report an issue.
-              </EuiLink>
-            </p>
-            <EuiButton
-              data-test-subj="syntheticsUseMonitorNotFoundDeleteIntegrationButton"
-              href={`#/policies/${packagePolicyId}/edit`}
-              color="danger"
-            >
-              Delete integration
-            </EuiButton>
-          </EuiCallOut>
-        )}
+        <MonitorNotFoundPage />
       </>
     );
   }
+};
+
+const LeftoverIntegrationFound: React.FC = () => {
+  const { packagePolicyId } = useGetUrlParams();
+  const updateUrlParams = useUrlParams()[1];
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { data, loading } = useFetcher(() => {
+    if (!packagePolicyId || !isDeleting) return;
+    return deletePackagePolicy(packagePolicyId);
+  }, [isDeleting, packagePolicyId]);
+
+  useEffect(() => {
+    if (isDeleting && data && !loading) {
+      updateUrlParams({ packagePolicyId: undefined });
+      setIsDeleting(false);
+    }
+  }, [data, isDeleting, loading, updateUrlParams]);
+
+  if (!packagePolicyId) return null;
+
+  return (
+    <EuiCallOut title="Leftover integration found" color="warning" iconType="help">
+      <p>
+        <FormattedMessage
+          id="xpack.synthetics.leftOver.errors.title"
+          defaultMessage="Please click on the button below to delete the integration. Normally this should not happen.
+        Since the monitor has been deleted, the integration is deleted as well automatically. If
+        this happens often, report it by "
+        />
+        <EuiLink
+          data-test-subj="syntheticsLeftoverIntegrationFoundCreatingAnIssueLink"
+          href="https://github.com/elastic/kibana/issues/new/choose"
+        >
+          <FormattedMessage
+            id="xpack.synthetics.leftOver.errors.createIssue"
+            defaultMessage="creating an issue."
+          />
+        </EuiLink>
+      </p>
+      <EuiButton
+        data-test-subj="syntheticsUseMonitorNotFoundDeleteIntegrationButton"
+        color="danger"
+        isLoading={loading && isDeleting}
+        onClick={() => {
+          setIsDeleting(true);
+        }}
+      >
+        <FormattedMessage
+          id="xpack.synthetics.leftOver.errors.delete"
+          defaultMessage="Delete integration"
+        />
+      </EuiButton>
+    </EuiCallOut>
+  );
 };

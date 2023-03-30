@@ -52,7 +52,7 @@ export const deletePackagePolicy = async (
 ): Promise<{
   apiKey: { encoded: string };
 }> => {
-  return await apiService.get(
+  return await apiService.delete(
     SYNTHETICS_API_URLS.DELETE_PACKAGE_POLICY.replace('{packagePolicyId}', packagePolicyId)
   );
 };

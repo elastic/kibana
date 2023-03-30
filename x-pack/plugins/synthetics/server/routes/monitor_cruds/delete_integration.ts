@@ -19,7 +19,7 @@ export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({
   handler: async ({ request, savedObjectsClient, server, uptimeEsClient }): Promise<any> => {
     const { packagePolicyId } = request.params;
 
-    return await server.fleet.packagePolicyService.delete(
+    const response = await server.fleet.packagePolicyService.delete(
       savedObjectsClient,
       uptimeEsClient.baseESClient,
       [packagePolicyId],
@@ -27,5 +27,10 @@ export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({
         force: true,
       }
     );
+    if (response?.[0].success) {
+      return response;
+    } else {
+      throw new Error(response?.[0].body?.message);
+    }
   },
 });

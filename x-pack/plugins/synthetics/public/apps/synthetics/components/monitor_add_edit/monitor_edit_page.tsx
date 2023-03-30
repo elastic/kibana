@@ -43,7 +43,7 @@ export const MonitorEditPage: React.FC = () => {
     return getMonitorAPI({ id: monitorId });
   }, []);
 
-  const notFoundContent = useMonitorNotFound(error as IHttpFetchError<ResponseErrorBody>);
+  const notFoundContent = useMonitorNotFound(error as IHttpFetchError<ResponseErrorBody>, data?.id);
 
   if (notFoundContent) {
     return notFoundContent;
