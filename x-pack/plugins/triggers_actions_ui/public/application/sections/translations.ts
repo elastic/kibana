@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { extractBulkResponseDeleteFailures } from './extract_bulk_response_delete_failures';
-export { bulkDelete } from './bulk_delete';
-export { getRawActionTaskParamsIdFromTask } from './get_raw_action_task_params_id_from_task';
+import { i18n } from '@kbn/i18n';
+
+export const CASES = i18n.translate('xpack.triggersActionsUI.cases.label', {
+  defaultMessage: 'Cases',
+});
