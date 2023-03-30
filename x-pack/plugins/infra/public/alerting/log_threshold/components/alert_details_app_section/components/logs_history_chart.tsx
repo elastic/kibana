@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { convertTo, TopAlert } from '@kbn/observability-plugin/public';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { EuiIcon, EuiBadge } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useFetchTriggeredAlertsHistory } from '../../../../../hooks/use_fetch_triggered_alert_history';
 import { type PartialCriterion } from '../../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../../expression_editor/criterion_preview_chart';
@@ -129,7 +130,7 @@ const LogsHistoryChart = ({
             style={{
               line: {
                 strokeWidth: 3,
-                stroke: '#bd271e', // danger
+                stroke: euiThemeVars.euiColorDangerText,
                 opacity: 1,
               },
             }}

@@ -10,7 +10,7 @@ import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts'
 import moment from 'moment';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { euiThemeVars } from '@kbn/ui-theme';
 export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
   return (
     <LineAnnotation
@@ -28,7 +28,7 @@ export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
       style={{
         line: {
           strokeWidth: 3,
-          stroke: '#bd271e', // danger
+          stroke: euiThemeVars.euiColorDangerText,
           opacity: 1,
         },
       }}
