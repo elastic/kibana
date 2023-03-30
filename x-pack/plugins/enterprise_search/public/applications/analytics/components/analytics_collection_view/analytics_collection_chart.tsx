@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { useValues } from 'kea';
 import moment from 'moment';
@@ -58,6 +58,7 @@ interface AnalyticsCollectionChartLensProps {
 export const AnalyticsCollectionChart: React.FC<
   AnalyticsCollectionChartProps & AnalyticsCollectionChartLensProps
 > = ({ id: lensId, data, timeRange, dataViewQuery, isLoading, searchSessionId }) => {
+  const [currentData, setCurrentData] = useState(data);
   const [hoverChart, setHoverChart] = useState<ChartIds | null>(null);
   const [selectedChart, setSelectedChart] = useState<ChartIds>(ChartIds.Searches);
   const { uiSettings, charts: chartSettings } = useValues(KibanaLogic);
@@ -70,7 +71,7 @@ export const AnalyticsCollectionChart: React.FC<
     () => [
       {
         chartColor: euiThemeVars.euiColorVis0,
-        data: data[ChartIds.Searches] || [],
+        data: currentData[ChartIds.Searches] || [],
         id: ChartIds.Searches,
         name: i18n.translate(
           'xpack.enterpriseSearch.analytics.collections.collectionsView.charts.searches',
@@ -81,7 +82,7 @@ export const AnalyticsCollectionChart: React.FC<
       },
       {
         chartColor: euiThemeVars.euiColorVis2,
-        data: data[ChartIds.NoResults] || [],
+        data: currentData[ChartIds.NoResults] || [],
         id: ChartIds.NoResults,
         name: i18n.translate(
           'xpack.enterpriseSearch.analytics.collections.collectionsView.charts.noResults',
@@ -92,7 +93,7 @@ export const AnalyticsCollectionChart: React.FC<
       },
       {
         chartColor: euiThemeVars.euiColorVis3,
-        data: data[ChartIds.Clicks] || [],
+        data: currentData[ChartIds.Clicks] || [],
         id: ChartIds.Clicks,
         name: i18n.translate(
           'xpack.enterpriseSearch.analytics.collections.collectionsView.charts.clicks',
@@ -103,7 +104,7 @@ export const AnalyticsCollectionChart: React.FC<
       },
       {
         chartColor: euiThemeVars.euiColorVis5,
-        data: data[ChartIds.Sessions] || [],
+        data: currentData[ChartIds.Sessions] || [],
         id: ChartIds.Sessions,
         name: i18n.translate(
           'xpack.enterpriseSearch.analytics.collections.collectionsView.charts.sessions',
@@ -113,8 +114,14 @@ export const AnalyticsCollectionChart: React.FC<
         ),
       },
     ],
-    [data]
+    [currentData]
   );
+
+  useEffect(() => {
+    if (Object.keys(data).length !== 0) {
+      setCurrentData(data);
+    }
+  }, [data]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -138,7 +145,7 @@ export const AnalyticsCollectionChart: React.FC<
         ))}
       </EuiFlexGroup>
 
-      {isLoading ? (
+      {isLoading && Object.keys(currentData).length === 0 ? (
         <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: CHART_HEIGHT }}>
           <EuiLoadingChart size="l" />
         </EuiFlexGroup>

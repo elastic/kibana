@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -71,7 +71,22 @@ export const AnalyticsCollectionViewMetric: React.FC<
   AnalyticsCollectionViewMetricProps & AnalyticsCollectionViewMetricLensProps
 > = ({ isLoading, isSelected, metric, name, onClick, secondaryMetric }) => {
   const { euiTheme } = useEuiTheme();
-  const { icon, color } = getMetricTheme(euiTheme, getMetricStatus(secondaryMetric || 0));
+  const [displayMetric, setDisplayMetric] = useState(metric);
+  const [displaySecondaryMetric, setDisplaySecondaryMetric] = useState(secondaryMetric);
+
+  useEffect(() => {
+    if (metric !== null) {
+      setDisplayMetric(metric);
+    }
+  }, [metric]);
+
+  useEffect(() => {
+    if (secondaryMetric !== null) {
+      setDisplaySecondaryMetric(metric);
+    }
+  }, [secondaryMetric]);
+
+  const { icon, color } = getMetricTheme(euiTheme, getMetricStatus(displaySecondaryMetric || 0));
 
   return (
     <EuiPanel
@@ -101,30 +116,30 @@ export const AnalyticsCollectionViewMetric: React.FC<
           </EuiText>
           <EuiText size="s" color={color}>
             <span>
-              {secondaryMetric === null ? (
+              {displaySecondaryMetric === null ? (
                 i18n.translate('xpack.enterpriseSearch.analytics.collection.notAvailableLabel', {
                   defaultMessage: 'N/A',
                 })
               ) : (
                 <>
                   <EuiIcon type={icon} />
-                  {secondaryMetric + '%'}
+                  {displaySecondaryMetric + '%'}
                 </>
               )}
             </span>
           </EuiText>
         </EuiFlexGroup>
-        {isLoading ? (
+        {isLoading && displayMetric === null ? (
           <EuiSkeletonRectangle height={euiTheme.size.xl} width="100%" />
         ) : (
           <EuiText color={isSelected ? euiTheme.colors.primaryText : color}>
             <h2>
-              {metric === null ? (
+              {displayMetric === null ? (
                 i18n.translate('xpack.enterpriseSearch.analytics.collection.notAvailableLabel', {
                   defaultMessage: 'N/A',
                 })
               ) : (
-                <EuiI18nNumber value={metric} />
+                <EuiI18nNumber value={displayMetric} />
               )}
             </h2>
           </EuiText>
