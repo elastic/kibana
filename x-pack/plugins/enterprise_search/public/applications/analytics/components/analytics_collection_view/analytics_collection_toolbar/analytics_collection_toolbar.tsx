@@ -7,7 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -16,12 +15,10 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiSuperDatePicker,
   EuiSuperDatePickerCommonRange,
-  useEuiTheme,
 } from '@elastic/eui';
 import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
 
@@ -79,7 +76,6 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
 ];
 
 export const AnalyticsCollectionToolbar: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopover] = useState(false);
   const { application, navigateToUrl } = useValues(KibanaLogic);
   const { analyticsCollection } = useValues(FetchAnalyticsCollectionLogic);
@@ -89,6 +85,9 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
   const { refreshInterval, timeRange, dataViewId } = useValues(AnalyticsCollectionToolbarLogic);
   const { deleteAnalyticsCollection } = useActions(DeleteAnalyticsCollectionLogic);
   const { isLoading } = useValues(DeleteAnalyticsCollectionLogic);
+  const discoverUrl = application.getUrlForApp('discover', {
+    path: `#/?_a=(index:'${dataViewId}')`,
+  });
   const handleTimeChange = ({ start: from, end: to }: OnTimeChangeProps) => {
     setTimeRange({ from, to });
   };
@@ -101,9 +100,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
   const onRefreshChange = ({ isPaused: pause, refreshInterval: value }: OnRefreshChangeProps) => {
     setRefreshInterval({ pause, value });
   };
-  const contextItemStyle = css`
-    color: ${euiTheme.colors.primaryText};
-  `;
 
   useEffect(() => {
     if (analyticsCollection) findDataViewId(analyticsCollection);
@@ -143,11 +139,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
           panelPaddingSize="none"
         >
           <EuiContextMenuPanel>
-            <EuiContextMenuItem
-              css={contextItemStyle}
-              icon={<EuiIcon type="database" color="primary" />}
-              size="s"
-            >
+            <EuiContextMenuItem icon="database" size="s">
               <FormattedMessage
                 id="xpack.enterpriseSearch.analytics.collectionsView.aboutCollection"
                 defaultMessage="About this collection"
@@ -155,8 +147,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
             </EuiContextMenuItem>
 
             <EuiContextMenuItem
-              css={contextItemStyle}
-              icon={<EuiIcon type="link" color="primary" />}
+              icon="link"
               size="s"
               onClick={() =>
                 navigateToUrl(
@@ -173,14 +164,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
             </EuiContextMenuItem>
 
             <RedirectAppLinks application={application}>
-              <EuiContextMenuItem
-                css={contextItemStyle}
-                icon={<EuiIcon type="visArea" color="primary" />}
-                href={application.getUrlForApp('discover', {
-                  path: `#/?_a=(index:'${dataViewId}')`,
-                })}
-                size="s"
-              >
+              <EuiContextMenuItem icon="visArea" href={discoverUrl} size="s">
                 <FormattedMessage
                   id="xpack.enterpriseSearch.analytics.collectionsView.openInDiscover"
                   defaultMessage="Create dashboards in Discover"
