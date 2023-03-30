@@ -26,15 +26,13 @@ import type { CollapseExpressionFunction } from '../../../common/expressions';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
+import { PieLayerState, PieVisualizationState, EmptySizeRatios } from '../../../common/types';
 import {
   CategoryDisplay,
+  LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  PieLayerState,
-  PieVisualizationState,
-  EmptySizeRatios,
-  LegendDisplay,
-} from '../../../common';
+} from '../../../common/constants';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { isCollapsed } from './visualization';
 

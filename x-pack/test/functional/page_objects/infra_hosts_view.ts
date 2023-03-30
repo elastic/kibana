@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { AlertStatus, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
@@ -18,6 +18,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async clickTryHostViewBadge() {
       return await testSubjects.click('inventory-hostsView-link-badge');
+    },
+
+    async clickTableOpenFlyoutButton() {
+      return await testSubjects.click('hostsView-flyout-button');
+    },
+
+    async clickCloseFlyoutButton() {
+      return await testSubjects.click('euiFlyoutCloseButton');
     },
 
     async getHostsLandingPageDisabled() {
@@ -44,6 +52,23 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async getHostsTableData() {
       const table = await testSubjects.find('hostsView-table');
       return table.findAllByTestSubject('hostsView-tableRow');
+    },
+
+    async getHostsRowData(row: WebElementWrapper) {
+      // Find all the row cells
+      const cells = await row.findAllByCssSelector('[data-test-subj*="hostsView-tableRow-"]');
+
+      // Retrieve content for each cell
+      const [title, os, cpuUsage, diskLatency, rx, tx, memoryTotal, memory] = await Promise.all(
+        cells.map((cell) => this.getHostsCellContent(cell))
+      );
+
+      return { title, os, cpuUsage, diskLatency, rx, tx, memoryTotal, memory };
+    },
+
+    async getHostsCellContent(cell: WebElementWrapper) {
+      const cellContent = await cell.findByClassName('euiTableCellContent');
+      return cellContent.getVisibleText();
     },
 
     async getMetricsTrendContainer() {
@@ -90,6 +115,33 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.existOrFail('embeddablePanelAction-openInLens');
     },
 
+    // Flyout Tabs
+    getMetadataTab() {
+      return testSubjects.find('hostsView-flyout-tabs-metadata');
+    },
+
+    async getMetadataTabName() {
+      const tabElement = await this.getMetadataTab();
+      const tabTitle = await tabElement.findByClassName('euiTab__content');
+      return await tabTitle.getVisibleText();
+    },
+
+    // Logs Tab
+    getLogsTab() {
+      return testSubjects.find('hostsView-tabs-logs');
+    },
+
+    async visitLogsTab() {
+      const logsTab = await this.getLogsTab();
+      logsTab.click();
+    },
+
+    async getLogEntries() {
+      const container = await testSubjects.find('hostsView-logs');
+
+      return container.findAllByCssSelector('[data-test-subj*=streamEntry]');
+    },
+
     // Alerts Tab
     getAlertsTab() {
       return testSubjects.find('hostsView-tabs-alerts');
@@ -97,6 +149,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     getAlertsTabCountBadge() {
       return testSubjects.find('hostsView-tabs-alerts-count');
+    },
+
+    async getAlertsCount() {
+      const alertsCountBadge = await this.getAlertsTabCountBadge();
+      return alertsCountBadge.getVisibleText();
     },
 
     async visitAlertTab() {
@@ -114,6 +171,29 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const buttonSubject = alertStatus ? buttons[alertStatus] : buttons.all;
 
       return testSubjects.click(buttonSubject);
+    },
+
+    // Query Bar
+    getQueryBar() {
+      return testSubjects.find('queryInput');
+    },
+
+    async clearQueryBar() {
+      const queryBar = await this.getQueryBar();
+
+      return queryBar.clearValueWithKeyboard();
+    },
+
+    async typeInQueryBar(query: string) {
+      const queryBar = await this.getQueryBar();
+
+      return queryBar.type(query);
+    },
+
+    async submitQuery(query: string) {
+      await this.typeInQueryBar(query);
+
+      await testSubjects.click('querySubmitButton');
     },
   };
 }

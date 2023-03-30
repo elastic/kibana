@@ -102,7 +102,7 @@ import {
   FeatureBadge,
 } from '../types';
 
-import { getEditPath, DOC_TYPE } from '../../common';
+import { getEditPath, DOC_TYPE } from '../../common/constants';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';

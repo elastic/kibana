@@ -84,6 +84,7 @@ const defaultProps = {
   loadFeatureGeometry: () => {
     return null;
   },
+  executionContext: {},
 };
 
 describe('TooltipPopover', () => {

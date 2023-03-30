@@ -8,7 +8,7 @@ import { SearchResponse, AcknowledgedResponseBase } from '@elastic/elasticsearch
 import { schema } from '@kbn/config-schema';
 
 import {
-  EnterpriseSearchEngineDetails,
+  EnterpriseSearchEngine,
   EnterpriseSearchEnginesResponse,
   EnterpriseSearchEngineUpsertResponse,
 } from '../../../common/types/engines';
@@ -20,9 +20,9 @@ import { RouteDependencies } from '../../plugin';
 
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { fetchEnterpriseSearch, isResponseError } from '../../utils/fetch_enterprise_search';
+import { isNotFoundException } from '../../utils/identify_exceptions';
 
-export function registerEnginesRoutes({ config, log, router }: RouteDependencies) {
+export function registerEnginesRoutes({ log, router }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/engines',
@@ -59,7 +59,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
+      const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngine>({
         method: 'GET',
         path: `/_application/search_application/${request.params.engine_name}`,
       });
@@ -75,11 +75,11 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
           indices: schema.arrayOf(schema.string()),
           name: schema.maybe(schema.string()),
         }),
-        query: schema.object({
-          create: schema.maybe(schema.boolean()),
-        }),
         params: schema.object({
           engine_name: schema.string(),
+        }),
+        query: schema.object({
+          create: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -87,9 +87,9 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
       const { client } = (await context.core).elasticsearch;
       const engine =
         await client.asCurrentUser.transport.request<EnterpriseSearchEngineUpsertResponse>({
+          body: { indices: request.body.indices },
           method: 'PUT',
           path: `/_application/search_application/${request.params.engine_name}`,
-          body: { indices: request.body.indices },
           querystring: request.query,
         });
       return response.ok({ body: engine });
@@ -130,9 +130,9 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const engines = await client.asCurrentUser.transport.request<SearchResponse>({
+        body: {},
         method: 'POST',
         path: `/${request.params.engine_name}/_search`,
-        body: {},
       });
       return response.ok({ body: engines });
     })
@@ -168,37 +168,31 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
       validate: { params: schema.object({ engine_name: schema.string() }) },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const engineName = decodeURIComponent(request.params.engine_name);
-      const { client } = (await context.core).elasticsearch;
+      try {
+        const engineName = decodeURIComponent(request.params.engine_name);
+        const { client } = (await context.core).elasticsearch;
 
-      const engine = await fetchEnterpriseSearch<EnterpriseSearchEngineDetails>(
-        config,
-        request,
-        `/api/engines/${engineName}`
-      );
-
-      if (!engine || (isResponseError(engine) && engine.responseStatus === 404)) {
-        return createError({
-          errorCode: ErrorCode.ENGINE_NOT_FOUND,
-          message: 'Could not find engine',
-          response,
-          statusCode: 404,
+        const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngine>({
+          method: 'GET',
+          path: `/_application/search_application/${engineName}`,
         });
-      }
-      if (isResponseError(engine)) {
-        return createError({
-          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
-          message: 'Error fetching engine',
-          response,
-          statusCode: engine.responseStatus,
-        });
-      }
 
-      const data = await fetchEngineFieldCapabilities(client, engine);
-      return response.ok({
-        body: data,
-        headers: { 'content-type': 'application/json' },
-      });
+        const data = await fetchEngineFieldCapabilities(client, engine);
+        return response.ok({
+          body: data,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        if (isNotFoundException(e)) {
+          return createError({
+            errorCode: ErrorCode.ENGINE_NOT_FOUND,
+            message: 'Could not find engine',
+            response,
+            statusCode: 404,
+          });
+        }
+        throw e;
+      }
     })
   );
 }
