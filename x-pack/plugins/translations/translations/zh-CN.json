@@ -26410,7 +26410,6 @@
     "xpack.profiling.breadcrumb.topnFunctions": "排名前 N",
     "xpack.profiling.checkSetup.setupFailureToastTitle": "无法完成设置",
     "xpack.profiling.featureRegistry.profilingFeatureName": "Universal Profiling",
-    "xpack.profiling.flameGraph.showInformationWindow": "显示信息窗口",
     "xpack.profiling.flameGraphInformationWindow.annualizedCo2ExclusiveLabel": "年化 CO2（不包括子项）",
     "xpack.profiling.flameGraphInformationWindow.annualizedCo2InclusiveLabel": "年化 CO2",
     "xpack.profiling.flameGraphInformationWindow.annualizedCoreSecondsExclusiveLabel": "年化核心-秒（不包括子项）",
