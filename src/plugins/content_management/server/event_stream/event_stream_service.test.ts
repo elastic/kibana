@@ -330,35 +330,4 @@ describe('EventStreamService', () => {
       });
     });
   });
-
-  describe('registry', () => {
-    test.todo('can register new event types');
-    test.todo('only allows registering event types once');
-    test.todo('only allows registering event types with valid names');
-    test.todo('allows to emit events of registered types');
-    test.todo('does not allow to emit events of unregistered types');
-  });
-
-  describe('buffering', () => {
-    test.todo('buffers events until flushed');
-    test.todo('flushes events to the underlying client');
-    test.todo('flushes events to the underlying client on shutdown');
-    test.todo('can manually flush events');
-  });
-
-  describe('transactions', () => {
-    test.todo('can emit events in a transaction');
-    test.todo('can emit events in a transaction with a custom transaction id');
-    test.todo('can read all events of a transaction');
-  });
-
-  describe('filtering', () => {
-    test.todo('can filter events by subject');
-    test.todo('can filter events by predicate');
-  });
-
-  describe('aggregation', () => {
-    test.todo('can aggregate events by subject and predicate');
-    test.todo('can aggregate events by object and predicate');
-  });
 });
