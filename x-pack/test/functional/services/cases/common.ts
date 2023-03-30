@@ -121,23 +121,5 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
       await header.waitUntilLoadingHasFinished();
     },
-
-    async generateSeverityUserActions() {
-      await this.selectSeverity(CaseSeverity.LOW);
-
-      await header.waitUntilLoadingHasFinished();
-
-      await this.selectSeverity(CaseSeverity.MEDIUM);
-
-      await header.waitUntilLoadingHasFinished();
-
-      await this.selectSeverity(CaseSeverity.HIGH);
-
-      await header.waitUntilLoadingHasFinished();
-
-      await this.selectSeverity(CaseSeverity.CRITICAL);
-
-      await header.waitUntilLoadingHasFinished();
-    },
   };
 }

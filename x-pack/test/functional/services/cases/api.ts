@@ -112,20 +112,22 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       caseId: string;
       caseVersion: string;
       params: {
+        title: string,
+        description: string,
         severity: CaseSeverity;
         status: 'open' | 'in-progress' | 'closed';
         tags: string[];
       };
     }) {
-      await updateCase({
+      return await updateCase({
         supertest: kbnSupertest,
         params: {
           cases: [
             {
               id: caseId,
               version: caseVersion,
-              title: 'title updated',
-              description: 'description updated',
+              title: params.title,
+              description: params.description,
               severity: params.severity,
               status: CaseStatuses[params.status],
               tags: params.tags,
