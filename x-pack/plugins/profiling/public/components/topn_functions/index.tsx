@@ -22,6 +22,7 @@ import { keyBy, orderBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
 import { getCalleeFunction, StackFrameMetadata } from '../../../common/profiling';
+import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
 import { StackFrameSummary } from '../stack_frame_summary';
 import { GetLabel } from './get_label';
 
@@ -31,6 +32,7 @@ interface Row {
   samples: number;
   exclusiveCPU: number;
   inclusiveCPU: number;
+  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   diff?: {
     rank: number;
     samples: number;
@@ -125,13 +127,7 @@ function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number }) {
   );
 }
 
-export const TopNFunctionsTable = ({
-  sortDirection,
-  sortField,
-  onSortChange,
-  topNFunctions,
-  comparisonTopNFunctions,
-}: {
+interface Props {
   sortDirection: 'asc' | 'desc';
   sortField: TopNFunctionSortField;
   onSortChange: (options: {
@@ -140,7 +136,17 @@ export const TopNFunctionsTable = ({
   }) => void;
   topNFunctions?: TopNFunctions;
   comparisonTopNFunctions?: TopNFunctions;
-}) => {
+  totalSeconds: number;
+}
+
+export function TopNFunctionsTable({
+  sortDirection,
+  sortField,
+  onSortChange,
+  topNFunctions,
+  comparisonTopNFunctions,
+  totalSeconds,
+}: Props) {
   const totalCount: number = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
@@ -163,6 +169,17 @@ export const TopNFunctionsTable = ({
 
       const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
       const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
+      const totalSamples = topN.CountExclusive;
+
+      const impactEstimates =
+        totalSeconds > 0
+          ? calculateImpactEstimates({
+              countExclusive: exclusiveCPU,
+              countInclusive: inclusiveCPU,
+              totalSamples,
+              totalSeconds,
+            })
+          : undefined;
 
       const diff =
         comparisonTopNFunctions && comparisonRow
@@ -184,10 +201,11 @@ export const TopNFunctionsTable = ({
         samples: topN.CountExclusive,
         exclusiveCPU,
         inclusiveCPU,
+        impactEstimates,
         diff,
       };
     });
-  }, [topNFunctions, comparisonTopNFunctions]);
+  }, [topNFunctions, comparisonTopNFunctions, totalSeconds]);
 
   const theme = useEuiTheme();
 
@@ -197,7 +215,6 @@ export const TopNFunctionsTable = ({
       name: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
         defaultMessage: 'Rank',
       }),
-      align: 'right',
       render: (_, { rank }) => {
         return <EuiText style={{ whiteSpace: 'nowrap', fontSize: 'inherit' }}>{rank}</EuiText>;
       },
@@ -207,7 +224,6 @@ export const TopNFunctionsTable = ({
       name: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
         defaultMessage: 'Function',
       }),
-      width: '100%',
       render: (_, { frame }) => <StackFrameSummary frame={frame} />,
     },
     {
@@ -215,7 +231,6 @@ export const TopNFunctionsTable = ({
       name: i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
         defaultMessage: 'Samples (estd.)',
       }),
-      align: 'right',
       render: (_, { samples, diff }) => {
         return (
           <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} />
@@ -241,7 +256,6 @@ export const TopNFunctionsTable = ({
       render: (_, { exclusiveCPU, diff }) => {
         return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
       },
-      align: 'right',
     },
     {
       field: TopNFunctionSortField.InclusiveCPU,
@@ -262,7 +276,6 @@ export const TopNFunctionsTable = ({
       render: (_, { inclusiveCPU, diff }) => {
         return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;
       },
-      align: 'right',
     },
   ];
 
@@ -299,6 +312,14 @@ export const TopNFunctionsTable = ({
             {diff.rank}
           </EuiBadge>
         );
+      },
+    });
+  } else {
+    columns.push({
+      field: 'Co2',
+      name: 'Co2',
+      render: (_, { impactEstimates }) => {
+        return <div>{impactEstimates?.annualizedCo2}</div>;
       },
     });
   }
@@ -341,4 +362,4 @@ export const TopNFunctionsTable = ({
       />
     </>
   );
-};
+}

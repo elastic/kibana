@@ -142,10 +142,13 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
                         },
                       });
                     }}
+                    totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
                   />
                 </AsyncComponent>
               </EuiFlexItem>
-              {isDifferentialView && comparisonTimeRange.start && comparisonTimeRange.end ? (
+              {isDifferentialView &&
+              comparisonTimeRange.inSeconds.start &&
+              comparisonTimeRange.inSeconds.end ? (
                 <EuiFlexItem>
                   <AsyncComponent {...comparisonState} size="xl" alignTop>
                     <TopNFunctionsTable
@@ -166,6 +169,9 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
                       }}
                       topNFunctions={comparisonState.data}
                       comparisonTopNFunctions={state.data}
+                      totalSeconds={
+                        comparisonTimeRange.inSeconds.end - comparisonTimeRange.inSeconds.start
+                      }
                     />
                   </AsyncComponent>
                 </EuiFlexItem>
