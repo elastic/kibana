@@ -24,7 +24,7 @@ import {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
-import { ActionStateBadge, WatchStateBadge, SectionError } from '../../../../components';
+import { ActionStateBadge, SectionError } from '../../../../components';
 import { getTypeFromAction } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 
@@ -42,6 +42,21 @@ export const SimulateWatchResultsFlyout = ({
   const { watch } = useContext(WatchContext);
 
   const { actionModes } = executeDetails;
+
+  const conditionNotMetActionStatus = (mode: string) => {
+    switch (mode) {
+      case 'simulate':
+      case 'force_simulate':
+        return 'not simulated';
+      case 'execute':
+      case 'force_execute':
+        return 'not executed';
+      case 'skip':
+        return 'throttled';
+      default:
+        return '';
+    }
+  };
 
   const getTableData = () => {
     const actions = watch.watch && watch.watch.actions;
@@ -62,7 +77,7 @@ export const SimulateWatchResultsFlyout = ({
             (isConditionMet &&
               executeResults.details.result.actions.find((action: any) => action.id === actionKey)
                 .status) ||
-            '',
+            conditionNotMetActionStatus(actionModes[actionKey]),
         };
       });
     }
@@ -125,21 +140,6 @@ export const SimulateWatchResultsFlyout = ({
       ),
     },
     {
-      field: 'metCondition',
-      name: i18n.translate(
-        'xpack.watcher.sections.watchEdit.simulateResults.table.metConditionColumnLabel',
-        {
-          defaultMessage: 'Condition met',
-        }
-      ),
-      truncateText: true,
-      render: () => {
-        if (details.result.condition.met) {
-          return <EuiIcon color="green" type="check" />;
-        }
-      },
-    },
-    {
       field: 'actionStatus',
       name: i18n.translate(
         'xpack.watcher.sections.watchEdit.simulateResults.table.statusColumnLabel',
@@ -188,10 +188,17 @@ export const SimulateWatchResultsFlyout = ({
     return null;
   }
 
-  const {
-    watchStatus: { state },
-    details,
-  } = executeResults;
+  const { details } = executeResults;
+
+  const conditionMetStatus = (details.result.condition.met && (
+    <>
+      <EuiIcon color="green" type="check" /> Condition met
+    </>
+  )) || (
+    <>
+      <EuiIcon color="subdued" type="cross" /> Condition not met
+    </>
+  );
 
   return (
     <EuiFlyout
@@ -204,7 +211,7 @@ export const SimulateWatchResultsFlyout = ({
       <EuiFlyoutHeader hasBorder>
         {flyoutTitle}
         <EuiSpacer size="s" />
-        <WatchStateBadge state={state} size="m" />
+        {conditionMetStatus}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
