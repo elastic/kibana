@@ -29,14 +29,17 @@ export const MissingEncryptionKeyCallout = memo(() => {
           color="warning"
           iconType="gear"
           data-test-subj="missingEncryptionKeyCallout"
-          title={i18n.translate('xpack.securitySolution.responder.hostOffline.callout.title', {
-            defaultMessage: 'Encryption Key not set',
-          })}
+          title={i18n.translate(
+            'xpack.securitySolution.responder.missingEncryptionKey.callout.title',
+            {
+              defaultMessage: 'Encryption Key not set',
+            }
+          )}
         >
           <p>
             <FormattedMessage
-              id="xpack.securitySolution.responder.hostOffline.callout.body"
-              defaultMessage="The encryptionKey is not set on your kibana.yml config file and response actions might have unexpected behaviour"
+              id="xpack.securitySolution.responder.missingEncryptionKey.callout.body"
+              defaultMessage="The encryptionKey is not set in your kibana.yml config file and response actions might have unexpected behaviour"
             />
           </p>
           <EuiSpacer size="s" />
