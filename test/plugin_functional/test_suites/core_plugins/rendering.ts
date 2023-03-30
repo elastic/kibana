@@ -162,7 +162,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'usageCollection.uiCounters.enabled (boolean)',
         'vis_type_vega.enableExternalUrls (boolean)',
         'xpack.actions.email.domain_allowlist (array)',
-        'xpack.alerting.enableMaintenanceWindows (boolean)',
         'xpack.apm.serviceMapEnabled (boolean)',
         'xpack.apm.ui.enabled (boolean)',
         'xpack.apm.ui.maxTraceItems (number)',

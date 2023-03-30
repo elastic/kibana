@@ -13,7 +13,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/alert_api';
-import { Rule } from '../common';
+import { ENABLE_MAINTENANCE_WINDOWS, Rule } from '../common';
 import { MAINTENANCE_WINDOWS_APP_ID } from './config';
 
 export interface PluginSetupContract {
@@ -66,10 +66,6 @@ export interface AlertingPluginStart {
   spaces: SpacesPluginStart;
 }
 
-export interface AlertsUiConfigType {
-  enableMaintenanceWindows: boolean;
-}
-
 export class AlertingPublicPlugin
   implements
     Plugin<PluginSetupContract, PluginStartContract, AlertingPluginSetup, AlertingPluginStart>
@@ -82,7 +78,6 @@ export class AlertingPublicPlugin
     this.alertNavigationRegistry = new AlertNavigationRegistry();
 
     const kibanaVersion = this.initContext.env.packageInfo.version;
-    const config = this.initContext.config.get<AlertsUiConfigType>();
 
     const registerNavigation = async (
       applicationId: string,
@@ -97,7 +92,7 @@ export class AlertingPublicPlugin
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
 
-    if (config.enableMaintenanceWindows) {
+    if (ENABLE_MAINTENANCE_WINDOWS) {
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: MAINTENANCE_WINDOWS_APP_ID,
         title: i18n.translate('xpack.alerting.management.section.title', {

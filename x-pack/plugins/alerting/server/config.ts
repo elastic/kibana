@@ -65,7 +65,6 @@ export const configSchema = schema.object({
   enableFrameworkAlerts: schema.boolean({ defaultValue: false }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
-  enableMaintenanceWindows: schema.boolean({ defaultValue: false }),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
