@@ -20,57 +20,59 @@ export function updateSavedSearch(
     services,
   }: {
     savedSearch: SavedSearch;
-    dataView: DataView;
-    state: DiscoverAppState;
+    dataView?: DataView;
+    state?: DiscoverAppState;
     services: DiscoverServices;
   },
   initial: boolean = false
 ) {
-  if (!initial) {
+  if (dataView) {
+    savedSearch.searchSource.setField('index', dataView);
+    savedSearch.usesAdHocDataView = !dataView.isPersisted();
+  }
+  if (!initial || !state) {
     savedSearch.searchSource
-      .setField('index', dataView)
       .setField('query', services.data.query.queryString.getQuery() || null)
       .setField('filter', services.data.query.filterManager.getFilters());
   } else {
     savedSearch.searchSource
-      .setField('index', dataView)
       .setField('query', state.query)
       .setField('filter', cloneDeep(state.filters));
   }
-  savedSearch.columns = state.columns || [];
-  savedSearch.sort = (state.sort as SortOrder[]) || [];
-  if (state.grid) {
-    savedSearch.grid = state.grid;
-  }
-  if (typeof state.hideChart !== 'undefined') {
-    savedSearch.hideChart = state.hideChart;
-  }
-  if (typeof state.rowHeight !== 'undefined') {
-    savedSearch.rowHeight = state.rowHeight;
-  }
+  if (state) {
+    savedSearch.columns = state.columns || [];
+    savedSearch.sort = (state.sort as SortOrder[]) || [];
+    if (state.grid) {
+      savedSearch.grid = state.grid;
+    }
+    if (typeof state.hideChart !== 'undefined') {
+      savedSearch.hideChart = state.hideChart;
+    }
+    if (typeof state.rowHeight !== 'undefined') {
+      savedSearch.rowHeight = state.rowHeight;
+    }
 
-  if (state.viewMode) {
-    savedSearch.viewMode = state.viewMode;
-  }
+    if (state.viewMode) {
+      savedSearch.viewMode = state.viewMode;
+    }
 
-  if (typeof state.breakdownField !== 'undefined') {
-    savedSearch.breakdownField = state.breakdownField;
-  } else if (savedSearch.breakdownField) {
-    savedSearch.breakdownField = '';
-  }
+    if (typeof state.breakdownField !== 'undefined') {
+      savedSearch.breakdownField = state.breakdownField;
+    } else if (savedSearch.breakdownField) {
+      savedSearch.breakdownField = '';
+    }
 
-  if (state.hideAggregatedPreview) {
-    savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
-  }
+    if (state.hideAggregatedPreview) {
+      savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
+    }
 
-  // add a flag here to identify text based language queries
-  // these should be filtered out from the visualize editor
-  const isTextBasedQuery = state.query && isOfAggregateQueryType(state.query);
-  if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
-    savedSearch.isTextBasedQuery = isTextBasedQuery;
+    // add a flag here to identify text based language queries
+    // these should be filtered out from the visualize editor
+    const isTextBasedQuery = state.query && isOfAggregateQueryType(state.query);
+    if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
+      savedSearch.isTextBasedQuery = isTextBasedQuery;
+    }
   }
-
-  savedSearch.usesAdHocDataView = !dataView.isPersisted();
 
   const { from, to } = services.timefilter.getTime();
   const refreshInterval = services.timefilter.getRefreshInterval();

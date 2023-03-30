@@ -146,6 +146,7 @@ export function getSavedSearchContainer({
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
+    updateSavedSearch({ savedSearch: nextSavedSearch, services });
 
     const id = await saveSavedSearch(
       nextSavedSearch,
