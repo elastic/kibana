@@ -30210,8 +30210,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.formTitle": "添加规则操作",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.overwriteCheckboxLabel": "覆盖所有选定规则操作",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.ruleVariablesDetail": "基于规则类型，规则变量可能仅影响您选择的某些规则（例如，\\u007b\\u007bcontext.rule.threshold\\u007d\\u007d 将仅显示阈值规则的值）。",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.throttleHelpText": "选择在规则评估为 true 时应执行自动操作的时间。",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.throttleLabel": "操作频率",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.warningCalloutMessage.buttonLabel": "保存",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.formTitle": "应用时间线模板",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.templateSelectorDefaultValue": "无",
