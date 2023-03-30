@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Query, TimeRange } from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { EuiSkeletonRectangle } from '@elastic/eui';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmDataView } from '../../../hooks/use_apm_data_view';
@@ -86,6 +87,7 @@ export function UnifiedSearchBar({
   } = services;
 
   const urlQuery = useKueryParams(value);
+  const [displaySearchBar, setDisplaySearchBar] = useState(false);
 
   const syncSearchBarWithUrl = useCallback(() => {
     if (urlQuery && !deepEqual(queryStringService.getQuery(), urlQuery)) {
@@ -105,6 +107,9 @@ export function UnifiedSearchBar({
   const { dataView } = useApmDataView();
   const searchbarPlaceholder = useSearchBarPlaceholder(placeholder);
 
+  useEffect(() => {
+    if (dataView) setDisplaySearchBar(true);
+  }, [dataView]);
   const handleSubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
     const { dateRange, query } = payload;
     const { from: rangeFrom, to: rangeTo } = dateRange;
@@ -122,23 +127,29 @@ export function UnifiedSearchBar({
   };
 
   return (
-    <SearchBar
-      appName={i18n.translate('xpack.apm.appName', {
-        defaultMessage: 'Service Transaction',
-      })}
-      iconType="search"
-      placeholder={searchbarPlaceholder}
-      useDefaultBehaviors={true}
-      indexPatterns={dataView ? [dataView] : undefined}
-      showQueryInput={true}
-      showQueryMenu={false}
-      showFilterBar={false}
-      showDatePicker={showDatePicker}
-      showSubmitButton={showSubmitButton}
-      displayStyle="inPage"
-      onQuerySubmit={handleSubmit}
-      isClearable={isClearable}
-      data-test-subj="apmUnifiedSearchBar"
-    />
+    <EuiSkeletonRectangle
+      isLoading={!displaySearchBar}
+      width="100%"
+      height="40px"
+    >
+      <SearchBar
+        appName={i18n.translate('xpack.apm.appName', {
+          defaultMessage: 'Service Transaction',
+        })}
+        iconType="search"
+        placeholder={searchbarPlaceholder}
+        useDefaultBehaviors={true}
+        indexPatterns={dataView ? [dataView] : undefined}
+        showQueryInput={true}
+        showQueryMenu={false}
+        showFilterBar={false}
+        showDatePicker={showDatePicker}
+        showSubmitButton={showSubmitButton}
+        displayStyle="inPage"
+        onQuerySubmit={handleSubmit}
+        isClearable={isClearable}
+        data-test-subj="apmUnifiedSearchBar"
+      />
+    </EuiSkeletonRectangle>
   );
 }

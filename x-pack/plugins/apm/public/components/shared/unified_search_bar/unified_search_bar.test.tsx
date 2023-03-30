@@ -117,7 +117,6 @@ describe('when kuery is already present in the url, the search bar must reflect 
       urlParams,
     });
 
-    expect(setQuerySpy).toHaveBeenCalled();
     expect(setQuerySpy).toBeCalledWith(expectedQuery);
   });
 });
