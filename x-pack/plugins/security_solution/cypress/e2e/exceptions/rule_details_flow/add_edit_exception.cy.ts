@@ -86,20 +86,21 @@ describe('Add/edit exception from rule details', () => {
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
-        createRule({
-          ...getNewRule(),
-          query: 'agent.name:*',
-          index: ['exceptions*'],
-          exceptions_list: [
-            {
-              id: response.body.id,
-              list_id: exceptionList.list_id,
-              type: exceptionList.type,
-              namespace_type: exceptionList.namespace_type,
-            },
-          ],
-          rule_id: '2',
-        });
+        createRule(
+          getNewRule({
+            query: 'agent.name:*',
+            index: ['exceptions*'],
+            exceptions_list: [
+              {
+                id: response.body.id,
+                list_id: exceptionList.list_id,
+                type: exceptionList.type,
+                namespace_type: exceptionList.namespace_type,
+              },
+            ],
+            rule_id: '2',
+          })
+        );
         createExceptionListItem(exceptionList.list_id, {
           list_id: exceptionList.list_id,
           item_id: 'simple_list_item',
@@ -249,13 +250,14 @@ describe('Add/edit exception from rule details', () => {
   describe('rule without existing exceptions', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
-      createRule({
-        ...getNewRule(),
-        query: 'agent.name:*',
-        index: ['exceptions*'],
-        interval: '10s',
-        rule_id: 'rule_testing',
-      });
+      createRule(
+        getNewRule({
+          query: 'agent.name:*',
+          index: ['exceptions*'],
+          interval: '10s',
+          rule_id: 'rule_testing',
+        })
+      );
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();

@@ -6,6 +6,7 @@
  */
 
 import {
+  DOCUMENT_DETAILS_FLYOUT_BODY,
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB,
@@ -13,12 +14,20 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CLEAR_FILTER,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_FILTER,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ADD_TO_TIMELINE,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON,
 } from '../screens/document_expandable_flyout';
 import { EXPAND_ALERT_BTN } from '../screens/alerts';
+import { getClassSelector } from '../helpers/common';
 
 /**
  * Find the first alert row in the alerts table then click on the expand icon button to open the flyout
@@ -40,10 +49,26 @@ export const collapseDocumentDetailsExpandableFlyoutLeftSection = () =>
   cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).should('be.visible').click();
 
 /**
+ * Scroll to x-y positions within the right section of the document details expandable flyout
+ * // TODO revisit this as it seems very fragile: the first element found is the timeline flyout, which isn't visible but still exist in the DOM
+ */
+export const scrollWithinDocumentDetailsExpandableFlyoutRightSection = (x: number, y: number) =>
+  cy.get(getClassSelector('euiFlyout')).last().scrollTo(x, y);
+
+/**
  * Open the Overview tab in the document details expandable flyout right section
  */
 export const openOverviewTab = () =>
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).should('be.visible').click();
+
+/**
+ * Toggle the Overview tab description section in the document details expandable flyout right section
+ */
+export const toggleOverviewTabDescriptionSection = () =>
+  cy
+    .get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER)
+    .should('be.visible')
+    .click();
 
 /**
  * Open the Table tab in the document details expandable flyout right section
@@ -92,3 +117,62 @@ export const openInvestigationsTab = () =>
  */
 export const openHistoryTab = () =>
   cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB).should('be.visible').click();
+
+/**
+ * Filter table under the Table tab in the alert details expandable flyout right section
+ */
+export const filterTableTabTable = (filterValue: string) =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_FILTER).type(filterValue);
+  });
+
+/**
+ * Clear table filter under the Table tab in the alert details expandable flyout right section
+ */
+export const clearFilterTableTabTable = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CLEAR_FILTER).click();
+  });
+
+/**
+ * Filter In action in the first table row under the Table tab in the alert details expandable flyout right section
+ */
+export const filterInTableTabTable = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN).first().click();
+  });
+
+/**
+ * Filter Out action in the first table row under the Table tab in the alert details expandable flyout right section
+ */
+export const filterOutTableTabTable = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT).first().click();
+  });
+
+/**
+ * Add to timeline action in the first table row under the Table tab in the alert details expandable flyout right section
+ */
+export const addToTimelineTableTabTable = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS).first().click();
+  });
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ADD_TO_TIMELINE).click();
+};
+
+/**
+ * Show Copy to clipboard button in the first table row under the Table tab in the alert details expandable flyout right section
+ */
+export const copyToClipboardTableTabTable = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_MORE_ACTIONS).first().click();
+  });
+};
+
+/**
+ * Clear filters in the alert page KQL bar
+ */
+export const clearFilters = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT).first().click();
+  });

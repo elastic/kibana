@@ -35,7 +35,12 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: number; seri
 
   const button = (
     <EuiToolTip content={EDIT_SERIES_COLOR_LABEL}>
-      <EuiButtonEmpty size="s" onClick={() => setIsOpen((prevState) => !prevState)} flush="both">
+      <EuiButtonEmpty
+        data-test-subj="o11ySeriesColorPickerButton"
+        size="s"
+        onClick={() => setIsOpen((prevState) => !prevState)}
+        flush="both"
+      >
         <EuiIcon type="stopFilled" size="l" color={color} />
       </EuiButtonEmpty>
     </EuiToolTip>

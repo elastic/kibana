@@ -133,14 +133,22 @@ export function LabsFlyout({ onClose }: Props) {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={handelCancel}>
+                <EuiButtonEmpty
+                  data-test-subj="apmLabsFlyoutCancelButton"
+                  onClick={handelCancel}
+                >
                   {i18n.translate('xpack.apm.labs.cancel', {
                     defaultMessage: 'Cancel',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill isLoading={isSaving} onClick={handleSave}>
+                <EuiButton
+                  data-test-subj="apmLabsFlyoutReloadToApplyChangesButton"
+                  fill
+                  isLoading={isSaving}
+                  onClick={handleSave}
+                >
                   {i18n.translate('xpack.apm.labs.reload', {
                     defaultMessage: 'Reload to apply changes',
                   })}

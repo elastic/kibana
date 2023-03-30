@@ -160,7 +160,11 @@ export function SettingsPage({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {!isEditMode && (
-                <EuiButton onClick={onClickEdit} iconType="pencil">
+                <EuiButton
+                  data-test-subj="apmSettingsPageEditButton"
+                  onClick={onClickEdit}
+                  iconType="pencil"
+                >
                   {i18n.translate(
                     'xpack.apm.agentConfig.chooseService.editButton',
                     { defaultMessage: 'Edit' }
