@@ -42,8 +42,9 @@ import { indexHealthToHealthColor } from '../../../../shared/constants/health_co
 
 import { EngineViewLogic } from '../engine_view_logic';
 
-import { convertResults, ConvertedResult } from './convert_results';
+import { convertResultToFieldsAndIndex, ConvertedResult, FieldValue } from './convert_results';
 import { useSelectedDocument } from './document_context';
+import { FieldValueCell } from './field_value_cell';
 
 export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
   return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
@@ -55,21 +56,12 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   const { engineData } = useValues(EngineViewLogic);
   const { setSelectedDocument } = useSelectedDocument();
 
-  const {
-    _meta: {
-      id: encodedId,
-      rawHit: { _index: index },
-    },
-    ...otherFields
-  } = result;
+  const { fields, index } = convertResultToFieldsAndIndex(result);
 
-  const [, id] = JSON.parse(atob(encodedId));
+  const id = result._meta.rawHit.__id;
 
-  const fields = { ...otherFields, id };
-  const results = convertResults(fields);
-
-  const truncatedFields = results.slice(0, RESULT_FIELDS_TRUNCATE_AT);
-  const hiddenFields = results.length - truncatedFields.length;
+  const truncatedFields = fields.slice(0, RESULT_FIELDS_TRUNCATE_AT);
+  const hiddenFields = fields.length - truncatedFields.length;
 
   const indexHealth = engineData?.indices.find((i) => i.name === index)?.health;
   const badgeColor =
@@ -100,9 +92,11 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
         'xpack.enterpriseSearch.content.engine.searchPreview.result.valueColumn',
         { defaultMessage: 'Value' }
       ),
-      render: (value: React.ReactNode) => (
+      render: (value: FieldValue) => (
         <EuiText>
-          <code>{value}</code>
+          <code>
+            <FieldValueCell value={value} />
+          </code>
         </EuiText>
       ),
     },
