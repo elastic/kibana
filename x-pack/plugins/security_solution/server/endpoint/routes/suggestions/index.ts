@@ -65,7 +65,7 @@ export const getEndpointSuggestionsRequestHandler = (
     if (request.params.suggestion_type === 'eventFilters') {
       if (!EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(fieldName)) {
         return response.badRequest({
-          body: `Unsuported field name: ${fieldName}`,
+          body: `Unsupported field name: ${fieldName}`,
         });
       }
       index = eventsIndexPattern;

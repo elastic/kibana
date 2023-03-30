@@ -176,7 +176,7 @@ describe('when calling the Suggestions route handler', () => {
       await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: 'Unsuported field name: test-field',
+        body: 'Unsupported field name: test-field',
       });
     });
   });
