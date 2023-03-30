@@ -598,7 +598,7 @@ describe('all', () => {
       },
       management: {
         kibana: {
-          indices: false, // nested values are always disabled (why?)
+          indices: false, // nested values are always disabled
         },
       },
       catalogue: {},
