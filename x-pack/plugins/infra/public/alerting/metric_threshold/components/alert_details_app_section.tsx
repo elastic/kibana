@@ -51,7 +51,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
       key={ALERT_START_ANNOTATION_ID}
       alertStarted={alert.start}
       color={euiTheme.colors.danger}
-      dateFormat={uiSettings?.get('dateFormat') || DEFAULT_DATE_FORMAT}
+      dateFormat={uiSettings.get('dateFormat') || DEFAULT_DATE_FORMAT}
       id={ALERT_START_ANNOTATION_ID}
       title={i18n.translate('xpack.infra.metrics.alertDetails.alertAnnotationTitle', {
         defaultMessage: 'Alert started',

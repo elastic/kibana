@@ -171,7 +171,7 @@ export const ExpressionChart: React.FC<Props> = ({
               domain={domain}
             />
           )}
-          {annotations && annotations}
+          {annotations}
           <Axis
             id={'timestamp'}
             position={Position.Bottom}
