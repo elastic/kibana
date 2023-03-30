@@ -344,6 +344,7 @@ x-pack/plugins/event_log @elastic/response-ops
 packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations
 x-pack/examples/exploratory_view_example @elastic/uptime
+x-pack/plugins/exploratory_view @elastic/uptime
 src/plugins/expression_error @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_heatmap @elastic/kibana-visualizations
@@ -813,6 +814,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
+/x-pack/test/api_integration/apis/synthetics @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/field_value_suggestions @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/core_web_vitals @elastic/uptime
