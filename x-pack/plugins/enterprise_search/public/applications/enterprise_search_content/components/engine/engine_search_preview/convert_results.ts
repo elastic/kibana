@@ -61,7 +61,7 @@ export const flattenObjectPreservingValues = (
   return Object.keys(obj).reduce((acc: Record<string, FieldValue>, key: string) => {
     const dot = prefix.length ? prefix + '.' : '';
     const val = obj[key];
-    if (typeof val === 'object') {
+    if (typeof val === 'object' && val !== null) {
       Object.assign(
         acc,
         flattenObjectPreservingValues(
