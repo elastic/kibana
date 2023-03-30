@@ -272,7 +272,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const processesTotalValue =
             await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
           const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql(313);
+          expect(processValue).to.eql('313');
         });
 
         it('should render processes table', async () => {

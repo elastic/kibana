@@ -21,15 +21,15 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickTableOpenFlyoutButton() {
-      return await testSubjects.click('hostsView-flyout-button');
+      return testSubjects.click('hostsView-flyout-button');
     },
 
     async clickCloseFlyoutButton() {
-      return await testSubjects.click('euiFlyoutCloseButton');
+      return testSubjects.click('euiFlyoutCloseButton');
     },
 
     async clickProcessesFlyoutTab() {
-      return await testSubjects.click('hostsView-flyout-tabs-processes');
+      return testSubjects.click('hostsView-flyout-tabs-processes');
     },
 
     async getHostsLandingPageDisabled() {
@@ -127,21 +127,21 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async getMetadataTabName() {
       const tabElement = await this.getMetadataTab();
       const tabTitle = await tabElement.findByClassName('euiTab__content');
-      return await tabTitle.getVisibleText();
+      return tabTitle.getVisibleText();
     },
 
     async getProcessesTabContentTitle(index: number) {
       const processesListElements = await testSubjects.findAll(
         'infra_processes_summary_table_item'
       );
-      return await processesListElements[index].findByCssSelector('dt');
+      return processesListElements[index].findByCssSelector('dt');
     },
 
     async getProcessesTabContentTotalValue() {
       const processesListElements = await testSubjects.findAll(
         'infra_processes_summary_table_item'
       );
-      return await processesListElements[0].findByCssSelector('dd');
+      return processesListElements[0].findByCssSelector('dd');
     },
 
     getProcessesTable() {
