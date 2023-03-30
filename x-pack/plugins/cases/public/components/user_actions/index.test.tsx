@@ -580,6 +580,7 @@ describe(`UserActions`, () => {
             },
           ],
         },
+        hasNextPage: true,
       });
       useFindCaseUserActionsMock.mockReturnValue({
         ...defaultUseFindCaseUserActions,
@@ -591,12 +592,26 @@ describe(`UserActions`, () => {
         },
       });
 
-      rerender(<UserActions {...props} />);
+      const newProps = {
+        ...props,
+        userActionsStats: {
+          total: 21,
+          totalComments: 11,
+          totalOtherActions: 10,
+        },
+      };
+
+      rerender(<UserActions {...newProps} />);
 
       await waitForComponentToUpdate();
 
       expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
-      expect(screen.queryByTestId('cases-show-more-user-actions')).not.toBeInTheDocument();
+
+      const firstUserActionsList = screen.getAllByTestId('user-actions-list')[0];
+
+      expect(firstUserActionsList.getElementsByTagName('li')).toHaveLength(11);
+
+      expect(screen.getByTestId('cases-show-more-user-actions')).toBeInTheDocument();
     });
   });
 });
