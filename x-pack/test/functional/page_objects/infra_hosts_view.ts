@@ -32,6 +32,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-tabs-processes');
     },
 
+    async clickProcessesTableExpandButton() {
+      return testSubjects.click('infraProcessRowButton');
+    },
+
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
       const containerText = await container.getVisibleText();
@@ -146,6 +150,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     getProcessesTable() {
       return testSubjects.find('infraProcessesTable');
+    },
+
+    async getProcessesTableBody() {
+      const processesTable = await this.getProcessesTable();
+      return processesTable.findByCssSelector('tbody');
     },
 
     // Logs Tab

@@ -276,6 +276,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render processes table', async () => {
           await pageObjects.infraHostsView.clickProcessesFlyoutTab();
           await pageObjects.infraHostsView.getProcessesTable();
+          await pageObjects.infraHostsView.getProcessesTableBody();
+          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
         });
       });
     });
