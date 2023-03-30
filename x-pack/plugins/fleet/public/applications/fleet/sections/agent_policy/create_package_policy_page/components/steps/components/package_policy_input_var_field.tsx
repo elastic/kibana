@@ -156,7 +156,10 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             />
           );
         case 'select':
-          const selectOptions = options?.map((option) => ({ value, label: option.text }));
+          const selectOptions = options?.map((option) => ({
+            value: option.value,
+            label: option.text,
+          }));
           const selectedOptions =
             value === undefined ? [] : selectOptions?.filter((option) => option.value === value);
           return (
