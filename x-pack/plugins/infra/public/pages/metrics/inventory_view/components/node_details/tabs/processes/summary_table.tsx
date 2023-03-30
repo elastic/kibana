@@ -47,7 +47,7 @@ export const SummaryTable = ({ processSummary, isLoading }: Props) => {
           <EuiFlexItem key={field}>
             <EuiDescriptionList
               data-test-subj="infra_processes_summary_table_item"
-              compressed={true}
+              compressed
             >
               <ColumnTitle>{columnTitles[field as keyof SummaryRecord]}</ColumnTitle>
               <EuiDescriptionListDescription>
