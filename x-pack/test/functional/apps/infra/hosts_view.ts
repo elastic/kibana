@@ -223,16 +223,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('#Single host Flyout', () => {
       before(async () => {
-        await Promise.all([
-          await setHostViewEnabled(true),
-          await loginWithReadOnlyUser(),
-          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH),
-          await pageObjects.timePicker.setAbsoluteRange(
-            START_HOST_PROCESSES_DATE.format(timepickerFormat),
-            END_HOST_PROCESSES_DATE.format(timepickerFormat)
-          ),
-          pageObjects.infraHostsView.clickTableOpenFlyoutButton(),
-        ]);
+        await setHostViewEnabled(true);
+        await loginWithReadOnlyUser();
+        await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+        await pageObjects.timePicker.setAbsoluteRange(
+          START_HOST_PROCESSES_DATE.format(timepickerFormat),
+          END_HOST_PROCESSES_DATE.format(timepickerFormat)
+        );
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
       });
 
       after(async () => {
