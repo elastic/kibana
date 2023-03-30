@@ -797,10 +797,11 @@ describe('Detections Rules API', () => {
       fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
 
       expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
         expect.objectContaining({
-          query: {
-            filter: 'alert.id:"alert:id1" or alert.id:"alert:id1"',
-          },
+          query: expect.objectContaining({
+            filter: 'alert.id:"alert:id1" or alert.id:"alert:id2"',
+          }),
         })
       );
     });
@@ -809,10 +810,11 @@ describe('Detections Rules API', () => {
       fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
 
       expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
         expect.objectContaining({
-          query: {
+          query: expect.objectContaining({
             per_page: 2,
-          },
+          }),
         })
       );
     });
