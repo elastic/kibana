@@ -492,6 +492,20 @@ export class SyntheticsService {
     // no need to wait here
     finder.close();
 
+    if (paramsBySpace[ALL_SPACES_ID]) {
+      Object.keys(paramsBySpace).forEach((space) => {
+        if (space !== ALL_SPACES_ID) {
+          paramsBySpace[space] = Object.assign(paramsBySpace[ALL_SPACES_ID], paramsBySpace[space]);
+        }
+      });
+      if (spaceId) {
+        paramsBySpace[spaceId] = {
+          ...(paramsBySpace?.[spaceId] ?? {}),
+          ...(paramsBySpace?.[ALL_SPACES_ID] ?? {}),
+        };
+      }
+    }
+
     return paramsBySpace;
   }
 
