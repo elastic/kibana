@@ -16,17 +16,17 @@ describe('getShouldClauses', () => {
     expect(shouldClauses).toEqual([
       {
         terms: {
+          user: ['Peter'],
+        },
+      },
+      {
+        terms: {
           response_code: ['500'],
         },
       },
       {
         terms: {
           url: ['home.php', 'login.php'],
-        },
-      },
-      {
-        terms: {
-          user: ['Peter'],
         },
       },
     ]);
@@ -39,16 +39,16 @@ describe('getFrequentItemSetsAggFields', () => {
 
     expect(frequentItemSetsAggFields).toEqual([
       {
+        field: 'user',
+        include: ['Peter'],
+      },
+      {
         field: 'response_code',
         include: ['500'],
       },
       {
         field: 'url',
         include: ['home.php', 'login.php'],
-      },
-      {
-        field: 'user',
-        include: ['Peter'],
       },
     ]);
   });
