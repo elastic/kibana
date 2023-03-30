@@ -16,7 +16,11 @@ import { EuiSideNavItemType } from '@elastic/eui';
 import { DEFAULT_PRODUCT_FEATURES } from '../../../../common/constants';
 import { ProductAccess } from '../../../../common/types';
 
-import { useEnterpriseSearchNav, useEnterpriseSearchEngineNav } from './nav';
+import {
+  useEnterpriseSearchNav,
+  useEnterpriseSearchEngineNav,
+  useEnterpriseSearchAnalyticsNav,
+} from './nav';
 
 const DEFAULT_PRODUCT_ACCESS: ProductAccess = {
   hasAppSearchAccess: true,
@@ -530,5 +534,159 @@ describe('useEnterpriseSearchEngineNav', () => {
       id: 'engineId',
       name: engineName,
     });
+  });
+});
+
+describe('useEnterpriseSearchAnalyticsNav', () => {
+  const baseNavs = [
+    {
+      href: '/app/enterprise_search/overview',
+      id: 'es_overview',
+      name: 'Overview',
+    },
+    {
+      id: 'content',
+      items: [
+        {
+          href: '/app/enterprise_search/content/search_indices',
+          id: 'search_indices',
+          name: 'Indices',
+        },
+      ],
+      name: 'Content',
+    },
+    {
+      id: 'enterpriseSearchAnalytics',
+      items: [
+        {
+          href: '/app/enterprise_search/analytics',
+          id: 'analytics_collections',
+          name: 'Collections',
+        },
+      ],
+      name: 'Behavioral Analytics',
+    },
+    {
+      id: 'search',
+      items: [
+        {
+          href: '/app/enterprise_search/elasticsearch',
+          id: 'elasticsearch',
+          name: 'Elasticsearch',
+        },
+        {
+          href: '/app/enterprise_search/search_experiences',
+          id: 'searchExperiences',
+          name: 'Search Experiences',
+        },
+        {
+          href: '/app/enterprise_search/app_search',
+          id: 'app_search',
+          name: 'App Search',
+        },
+        {
+          href: '/app/enterprise_search/workplace_search',
+          id: 'workplace_search',
+          name: 'Workplace Search',
+        },
+      ],
+      name: 'Search',
+    },
+  ];
+
+  it('returns basic nav all params are empty', () => {
+    const navItems = useEnterpriseSearchAnalyticsNav();
+    expect(navItems).toEqual(baseNavs);
+  });
+
+  it('returns basic nav if only name provided', () => {
+    const navItems = useEnterpriseSearchAnalyticsNav('my-test-collection');
+    expect(navItems).toEqual(baseNavs);
+  });
+
+  it('returns nav with sub items when name and paths provided', () => {
+    const navItems = useEnterpriseSearchAnalyticsNav('my-test-collection', {
+      explorer: '/explorer-path',
+      integration: '/integration-path',
+      overview: '/overview-path',
+    });
+    expect(navItems).toEqual([
+      {
+        href: '/app/enterprise_search/overview',
+        id: 'es_overview',
+        name: 'Overview',
+      },
+      {
+        id: 'content',
+        items: [
+          {
+            href: '/app/enterprise_search/content/search_indices',
+            id: 'search_indices',
+            name: 'Indices',
+          },
+        ],
+        name: 'Content',
+      },
+      {
+        id: 'enterpriseSearchAnalytics',
+        items: [
+          {
+            href: '/app/enterprise_search/analytics',
+            id: 'analytics_collections',
+            items: [
+              {
+                id: 'analytics_collections',
+                items: [
+                  {
+                    href: '/app/enterprise_search/analytics/overview-path',
+                    id: 'enterpriseSearchEngineOverview',
+                    name: 'Overview',
+                  },
+                  {
+                    href: '/app/enterprise_search/analytics/explorer-path',
+                    id: 'enterpriseSearchEngineIndices',
+                    name: 'Explorer',
+                  },
+                  {
+                    href: '/app/enterprise_search/analytics/integration-path',
+                    id: 'enterpriseSearchEngineSchema',
+                    name: 'Integration',
+                  },
+                ],
+                name: 'my-test-collection',
+              },
+            ],
+            name: 'Collections',
+          },
+        ],
+        name: 'Behavioral Analytics',
+      },
+      {
+        id: 'search',
+        items: [
+          {
+            href: '/app/enterprise_search/elasticsearch',
+            id: 'elasticsearch',
+            name: 'Elasticsearch',
+          },
+          {
+            href: '/app/enterprise_search/search_experiences',
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+          },
+          {
+            href: '/app/enterprise_search/app_search',
+            id: 'app_search',
+            name: 'App Search',
+          },
+          {
+            href: '/app/enterprise_search/workplace_search',
+            id: 'workplace_search',
+            name: 'Workplace Search',
+          },
+        ],
+        name: 'Search',
+      },
+    ]);
   });
 });
