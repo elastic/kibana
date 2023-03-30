@@ -46,6 +46,7 @@
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/ml-string-hash",
+    "@kbn/ml-trained-models-utils",
     "@kbn/core-http-browser",
     "@kbn/home-plugin",
     "@kbn/management-plugin",
@@ -87,5 +88,6 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/monaco",
     "@kbn/repo-info",
+    "@kbn/ml-trained-models-utils",
   ],
 }
