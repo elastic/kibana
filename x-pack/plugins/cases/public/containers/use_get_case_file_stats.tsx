@@ -7,6 +7,8 @@
 
 import type { UseQueryResult } from '@tanstack/react-query';
 
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { useQuery } from '@tanstack/react-query';
 
@@ -18,6 +20,10 @@ import { useCasesToast } from '../common/use_cases_toast';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
+
+const getTotalFromFileList = (data: { files: FileJSON[]; total: number }): { total: number } => ({
+  total: data.total,
+});
 
 export interface GetCaseFileStatsParams {
   caseId: string;
@@ -41,6 +47,7 @@ export const useGetCaseFileStats = ({
       });
     },
     {
+      select: getTotalFromFileList,
       keepPreviousData: true,
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
