@@ -386,4 +386,221 @@ describe('DocumentMigratorPipeline', () => {
 
     expect(outputDoc.typeMigrationVersion).toEqual('8.5.0');
   });
+
+  it('ignores convert type transforms', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+      coreMigrationVersion: '8.7.0',
+      typeMigrationVersion: '8.7.0',
+    });
+
+    const migrate8_7_0_down = createTransformFn();
+    const convert8_7_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Migrate,
+        version: '8.7.0',
+        transform: jest.fn(),
+        transformDown: migrate8_7_0_down,
+      },
+      {
+        transformType: TransformType.Convert,
+        version: '8.7.0',
+        transform: jest.fn(),
+        transformDown: convert8_7_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.8.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.6.0',
+    });
+
+    const { document: outputDoc } = pipeline.run();
+
+    expect(migrate8_7_0_down).toHaveBeenCalledTimes(1);
+    expect(convert8_7_0_down).not.toHaveBeenCalled();
+
+    expect(outputDoc.typeMigrationVersion).toEqual('8.6.0');
+  });
+
+  it('ignores reference type transforms', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+      coreMigrationVersion: '8.7.0',
+      typeMigrationVersion: '8.7.0',
+    });
+
+    const migrate8_7_0_down = createTransformFn();
+    const reference8_7_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Migrate,
+        version: '8.7.0',
+        transform: jest.fn(),
+        transformDown: migrate8_7_0_down,
+      },
+      {
+        transformType: TransformType.Reference,
+        version: '8.7.0',
+        transform: jest.fn(),
+        transformDown: reference8_7_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.8.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.6.0',
+    });
+
+    const { document: outputDoc } = pipeline.run();
+
+    expect(migrate8_7_0_down).toHaveBeenCalledTimes(1);
+    expect(reference8_7_0_down).not.toHaveBeenCalled();
+
+    expect(outputDoc.typeMigrationVersion).toEqual('8.6.0');
+  });
+
+  it('ignores core type transforms if targetCoreVersion is not specified', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+      coreMigrationVersion: '8.7.0',
+      typeMigrationVersion: '8.7.0',
+    });
+
+    const migrate8_7_0_down = createTransformFn();
+    const core8_7_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Migrate,
+        version: '8.7.0',
+        transform: jest.fn(),
+        transformDown: migrate8_7_0_down,
+      },
+      {
+        transformType: TransformType.Core,
+        version: '8.7.0',
+        transform: jest.fn(),
+        transformDown: core8_7_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.8.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.6.0',
+    });
+
+    const { document: outputDoc } = pipeline.run();
+
+    expect(migrate8_7_0_down).toHaveBeenCalledTimes(1);
+    expect(core8_7_0_down).not.toHaveBeenCalled();
+
+    expect(outputDoc.typeMigrationVersion).toEqual('8.6.0');
+    expect(outputDoc.coreMigrationVersion).toEqual('8.7.0');
+  });
+
+  it('applies core type transforms if targetCoreVersion is specified', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+      coreMigrationVersion: '8.7.0',
+      typeMigrationVersion: '8.7.0',
+    });
+
+    const migrate8_7_0_down = createTransformFn();
+    const core8_7_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Migrate,
+        version: '8.7.0',
+        transform: jest.fn(),
+        transformDown: migrate8_7_0_down,
+      },
+      {
+        transformType: TransformType.Core,
+        version: '8.7.0',
+        transform: jest.fn(),
+        transformDown: core8_7_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.8.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.6.0',
+      targetCoreVersion: '8.6.0',
+    });
+
+    const { document: outputDoc } = pipeline.run();
+
+    expect(migrate8_7_0_down).toHaveBeenCalledTimes(1);
+    expect(core8_7_0_down).toHaveBeenCalledTimes(1);
+
+    expect(outputDoc.typeMigrationVersion).toEqual('8.6.0');
+    expect(outputDoc.coreMigrationVersion).toEqual('8.6.0');
+  });
+
+  it('applies all expected core type transforms when targetCoreVersion is specified', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+      coreMigrationVersion: '8.9.0',
+      typeMigrationVersion: '8.8.0',
+    });
+
+    const core8_7_0_down = createTransformFn();
+    const core8_8_0_down = createTransformFn();
+    const core8_9_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Core,
+        version: '8.7.0',
+        transform: jest.fn(),
+        transformDown: core8_7_0_down,
+      },
+      {
+        transformType: TransformType.Core,
+        version: '8.8.0',
+        transform: jest.fn(),
+        transformDown: core8_8_0_down,
+      },
+      {
+        transformType: TransformType.Core,
+        version: '8.9.0',
+        transform: jest.fn(),
+        transformDown: core8_9_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.9.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.7.0',
+      targetCoreVersion: '8.7.0',
+    });
+
+    const { document: outputDoc } = pipeline.run();
+
+    expect(core8_7_0_down).not.toHaveBeenCalled();
+    expect(core8_8_0_down).toHaveBeenCalledTimes(1);
+    expect(core8_9_0_down).toHaveBeenCalledTimes(1);
+
+    expect(outputDoc.coreMigrationVersion).toEqual('8.7.0');
+  });
 });
