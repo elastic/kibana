@@ -18,7 +18,10 @@ import type {
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import {
+  getCreateExceptionListDetectionSchemaMock,
+  getCreateExceptionListMinimalSchemaMock,
+} from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
@@ -834,6 +837,64 @@ export default ({ getService }: FtrProviderContext) => {
             const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
             expect(signalsOpen.hits.hits.length).equal(0);
           });
+        });
+      });
+    });
+    describe('Synchronizations', () => {
+      /*
+          This test to mimic if we have two browser tabs, and the user tried to 
+          edit an exception in a tab after deleting it in another 
+        */
+      it('should Not edit an exception after being deleted', async () => {
+        const { list_id: skippedListId, ...newExceptionItem } =
+          getCreateExceptionListDetectionSchemaMock();
+        const {
+          body: { id, list_id, namespace_type, type },
+        } = await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(newExceptionItem)
+          .expect(200);
+
+        const ruleWithException: RuleCreateProps = {
+          ...getSimpleRule(),
+          exceptions_list: [
+            {
+              id,
+              list_id,
+              namespace_type,
+              type,
+            },
+          ],
+        };
+
+        await createRule(supertest, log, ruleWithException);
+
+        // Delete the exception
+        await supertest
+          .delete(`${EXCEPTION_LIST_ITEM_URL}?id=${id}&namespace_type=single`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        // Edit after delete as if it was opened in another browser tab
+        const { body } = await supertest
+          .put(`${EXCEPTION_LIST_ITEM_URL}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            id: list_id,
+            item_id: id,
+            name: 'edit',
+            entries: [{ field: 'ss', operator: 'included', type: 'match', value: 'ss' }],
+            namespace_type,
+            description: 'Exception list item - Edit',
+            type: 'simple',
+          })
+          .expect(404);
+
+        expect(body).to.eql({
+          message: `exception list item id: "${list_id}" does not exist`,
+          status_code: 404,
         });
       });
     });
