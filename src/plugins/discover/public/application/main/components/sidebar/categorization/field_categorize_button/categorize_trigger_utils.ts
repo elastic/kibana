@@ -59,7 +59,7 @@ export async function canCategorize(
   contextualFields: string[] = [],
   multiFields: DataViewField[] = []
 ) {
-  if (field.name === '_id' || !dataView?.id || field.esTypes?.includes('text') === undefined) {
+  if (field.name === '_id' || !dataView?.id || !field.esTypes?.includes('text')) {
     return false;
   }
 

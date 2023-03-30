@@ -28,7 +28,9 @@ export const categorizeFieldAction = (
       i18n.translate('xpack.lens.discover.visualizeFieldLegend', {
         defaultMessage: 'Categorize field',
       }),
-    isCompatible: async () => !!coreStart.application.capabilities.visualize.show,
+    isCompatible: async ({ field }: CategorizeFieldContext) => {
+      return field.esTypes?.includes('text') === true;
+    },
     execute: async (context: CategorizeFieldContext) => {
       // console.log(3333333333333333333);
       // application.navigateToApp('lens', {
