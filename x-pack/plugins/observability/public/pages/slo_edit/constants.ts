@@ -72,6 +72,6 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
   tags: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
   objective: {
-    target: 99.5,
+    target: 99,
   },
 };
