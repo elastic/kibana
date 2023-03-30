@@ -65,40 +65,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-<<<<<<< HEAD
   actions: rewriteActionsRes(actions),
-||||||| e9b5683cb5c
-  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-    frequency: frequency
-      ? {
-          summary: frequency.summary,
-          notify_when: frequency.notifyWhen,
-          throttle: frequency.throttle,
-        }
-      : undefined,
-    ...(uuid && { uuid }),
-  })),
-=======
-  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-    frequency: frequency
-      ? {
-          summary: frequency.summary,
-          notify_when: frequency.notifyWhen,
-          throttle: frequency.throttle,
-        }
-      : undefined,
-    ...(uuid && { uuid }),
-    ...(alertsFilter && { alerts_filter: alertsFilter }),
-  })),
->>>>>>> upstream/main
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(viewInAppRelativeUrl ? { view_in_app_relative_url: viewInAppRelativeUrl } : {}),
