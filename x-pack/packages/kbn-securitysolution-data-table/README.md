@@ -24,3 +24,10 @@ showcases the redux store setup for the plugin.
 ### Extras
 
 Be sure to check out provided helpers
+
+## Storybook
+
+General look of the component can be checked visually running the following storybook:
+`yarn storybook security_solution_x_packages`
+
+Note that all the interactions are mocked.

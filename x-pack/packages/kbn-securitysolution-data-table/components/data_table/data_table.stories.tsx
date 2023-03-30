@@ -1,21 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
-import { DataTableComponent } from './index';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { euiDarkVars } from '@kbn/ui-theme';
-import { mockGlobalState } from '@kbn/securitysolution-data-table/mock/global_state';
 import { Store } from 'redux';
 import { createStore as createReduxStore } from 'redux';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { getMappedNonEcsValue } from './utils';
-import { TableId } from '@kbn/securitysolution-data-table';
-import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { mockGlobalState } from '../../mock/global_state';
+import { getMappedNonEcsValue } from './utils';
+import { TableId } from '../..';
+import { mockTimelineData } from '../../mock/mock_timeline_data';
+import { DataTableComponent } from '.';
 
 export default {
   component: DataTableComponent,
