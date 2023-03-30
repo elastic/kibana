@@ -316,7 +316,7 @@ describe('terms', () => {
           },
         },
         'col1',
-        {} as IndexPattern,
+        createMockedIndexPattern(),
         layer,
         uiSettingsMock,
         [],
@@ -2740,7 +2740,7 @@ describe('terms', () => {
                       <strong>
                         notExisting
                       </strong>
-                      
+
                     </React.Fragment>
                   </React.Fragment>,
                 }
