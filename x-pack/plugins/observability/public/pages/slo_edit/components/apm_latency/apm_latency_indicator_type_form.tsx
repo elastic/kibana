@@ -103,9 +103,11 @@ export function ApmLatencyIndicatorTypeForm() {
               required: true,
               min: 0,
             }}
-            render={({ field: { ref, ...field } }) => (
+            render={({ field: { ref, ...field }, fieldState }) => (
               <EuiFieldNumber
                 {...field}
+                required
+                isInvalid={fieldState.invalid}
                 value={String(field.value)}
                 data-test-subj="apmLatencyThresholdInput"
                 min={0}

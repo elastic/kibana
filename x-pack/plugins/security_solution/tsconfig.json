@@ -151,6 +151,7 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
-    "@kbn/security-solution-side-nav"
+    "@kbn/security-solution-side-nav",
+    "@kbn/core-lifecycle-browser"
   ]
 }

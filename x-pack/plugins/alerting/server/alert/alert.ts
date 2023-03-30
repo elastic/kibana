@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -254,5 +256,15 @@ export class Alert<
 
   resetPendingRecoveredCount() {
     this.meta.pendingRecoveredCount = 0;
+  }
+
+  isFilteredOut(summarizedAlerts: CombinedSummarizedAlerts | null) {
+    if (summarizedAlerts === null) {
+      return false;
+    }
+
+    return !summarizedAlerts.all.data.some(
+      (alert) => get(alert, ALERT_INSTANCE_ID) === this.getId()
+    );
   }
 }

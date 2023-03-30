@@ -91,6 +91,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     isActiveTimelines: isActiveTimeline(scopeId ?? ''),
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
     isInDetections,
+    refetch,
   });
 
   const { loading: endpointPrivilegesLoading, canWriteEventFilters } =

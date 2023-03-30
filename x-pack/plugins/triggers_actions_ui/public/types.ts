@@ -253,6 +253,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
+  resetParamsOnConnectorChange?: (params: ActionParams) => ActionParams | {};
 }
 
 export interface GenericValidationResult<T> {
@@ -407,6 +408,7 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
+  hideInterval?: boolean;
   onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
@@ -422,6 +424,7 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
+  hideInterval?: boolean;
   onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
@@ -490,7 +493,10 @@ export interface FetchAlertData {
 
 export type AlertsTableProps = {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
-  casesData: { cases: Map<string, Case>; isLoading: boolean };
+  cases: {
+    data: Map<string, Case>;
+    isLoading: boolean;
+  };
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
@@ -594,7 +600,11 @@ export type UseFieldBrowserOptions = (args: UseFieldBrowserOptionsArgs) => Field
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
-  casesFeatureId: string;
+  cases?: {
+    featureId: string;
+    owner: string[];
+    syncAlerts?: boolean;
+  };
   columns: EuiDataGridColumn[];
   useInternalFlyout?: () => {
     header: AlertTableFlyoutComponent;
@@ -611,7 +621,6 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
-  app_id?: string;
 }
 
 export enum BulkActionsVerbs {
