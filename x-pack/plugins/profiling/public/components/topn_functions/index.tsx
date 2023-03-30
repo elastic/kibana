@@ -13,16 +13,17 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiStat,
   EuiText,
-  EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { keyBy, orderBy } from 'lodash';
 import React, { useMemo } from 'react';
-import { TopNFunctions, TopNFunctionSortField } from '../../common/functions';
-import { getCalleeFunction, StackFrameMetadata } from '../../common/profiling';
-import { StackFrameSummary } from './stack_frame_summary';
+import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
+import { getCalleeFunction, StackFrameMetadata } from '../../../common/profiling';
+import { StackFrameSummary } from '../stack_frame_summary';
+import { GetLabel } from './get_label';
 
 interface Row {
   rank: number;
@@ -38,15 +39,6 @@ interface Row {
   };
 }
 
-function getColorLabel(percent: number) {
-  const color = percent < 0 ? 'success' : 'danger';
-  const prefix = percent < 0 ? '-' : '+';
-  const label =
-    Math.abs(percent) <= 0.01 ? '<0.01' : ' ' + prefix + Math.abs(percent).toFixed(2) + '%';
-
-  return [color, label] as const;
-}
-
 function TotalSamplesStat({
   totalSamples,
   newSamples,
@@ -54,29 +46,34 @@ function TotalSamplesStat({
   totalSamples: number;
   newSamples: number | undefined;
 }) {
+  const value = totalSamples.toLocaleString();
+
   const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
     defaultMessage: ' Total sample estimate: ',
   });
 
   if (newSamples === undefined || newSamples === 0) {
     return (
-      <EuiText size="xs">
-        <strong>{sampleHeader}</strong>
-        {' ' + totalSamples.toLocaleString()}
-      </EuiText>
+      <EuiStat
+        title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
+        description={sampleHeader}
+      />
     );
   }
 
   const diffSamples = totalSamples - newSamples;
   const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
-  const [color, label] = getColorLabel(percentDelta);
 
   return (
-    <EuiText size="xs">
-      <strong>{sampleHeader}</strong>
-      {' ' + totalSamples.toLocaleString() + ' '}
-      <EuiTextColor color={color}>({label})</EuiTextColor>
-    </EuiText>
+    <EuiStat
+      title={
+        <EuiText style={{ fontWeight: 'bold' }}>
+          {value}
+          <GetLabel value={percentDelta} prepend="(" append=")" />
+        </EuiText>
+      }
+      description={sampleHeader}
+    />
   );
 }
 
@@ -86,7 +83,7 @@ function SampleStat({
   totalSamples,
 }: {
   samples: number;
-  diffSamples: number | undefined;
+  diffSamples?: number;
   totalSamples: number;
 }) {
   const samplesLabel = `${samples.toLocaleString()}`;
@@ -96,44 +93,33 @@ function SampleStat({
   }
 
   const percentDelta = (diffSamples / (samples - diffSamples)) * 100;
-  const [color, label] = getColorLabel(percentDelta);
-
   const totalPercentDelta = (diffSamples / totalSamples) * 100;
-  const [totalColor, totalLabel] = getColorLabel(totalPercentDelta);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>{samplesLabel}</EuiFlexItem>
       <EuiFlexItem>
-        <EuiText color={color} size="s">
-          {label} rel
-        </EuiText>
+        <GetLabel value={percentDelta} append=" rel" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText color={totalColor} size="s">
-          {totalLabel} abs
-        </EuiText>
+        <GetLabel value={totalPercentDelta} append=" abs" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU: number | undefined }) {
+function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number }) {
   const cpuLabel = `${cpu.toFixed(2)}%`;
 
   if (diffCPU === undefined || diffCPU === 0) {
     return <>{cpuLabel}</>;
   }
 
-  const [color, label] = getColorLabel(diffCPU);
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>{cpuLabel}</EuiFlexItem>
       <EuiFlexItem>
-        <EuiText color={color} size="s">
-          ({label})
-        </EuiText>
+        <GetLabel value={diffCPU} prepend="(" append=")" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

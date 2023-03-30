@@ -4,15 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getImpactRows } from './get_impact_rows';
@@ -32,7 +24,6 @@ interface Props {
   };
   totalSamples: number;
   totalSeconds: number;
-  onClose: () => void;
 }
 
 function KeyValueList({ rows }: { rows: Array<{ label: string; value: React.ReactNode }> }) {
@@ -59,46 +50,31 @@ function KeyValueList({ rows }: { rows: Array<{ label: string; value: React.Reac
   );
 }
 
-function FlamegraphFrameInformationPanel({
-  children,
-  onClose,
-}: {
-  children: React.ReactNode;
-  onClose: () => void;
-}) {
+function FlamegraphFrameInformationPanel({ children }: { children: React.ReactNode }) {
   return (
-    <EuiPanel style={{ width: 400, maxHeight: '100%', overflow: 'auto' }} hasBorder>
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow>
-              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate('xpack.profiling.flameGraphInformationWindowTitle', {
-                        defaultMessage: 'Frame information',
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon iconType="cross" onClick={() => onClose()} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>{children}</EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate('xpack.profiling.flameGraphInformationWindowTitle', {
+                  defaultMessage: 'Frame information',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>{children}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
-export function FlamegraphInformationWindow({ onClose, frame, totalSamples, totalSeconds }: Props) {
+export function FlamegraphInformationWindow({ frame, totalSamples, totalSeconds }: Props) {
   if (!frame) {
     return (
-      <FlamegraphFrameInformationPanel onClose={onClose}>
+      <FlamegraphFrameInformationPanel>
         <EuiText>
           {i18n.translate('xpack.profiling.flamegraphInformationWindow.selectFrame', {
             defaultMessage: 'Click on a frame to display more information',
@@ -138,7 +114,7 @@ export function FlamegraphInformationWindow({ onClose, frame, totalSamples, tota
   });
 
   return (
-    <FlamegraphFrameInformationPanel onClose={onClose}>
+    <FlamegraphFrameInformationPanel>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <KeyValueList rows={informationRows} />
