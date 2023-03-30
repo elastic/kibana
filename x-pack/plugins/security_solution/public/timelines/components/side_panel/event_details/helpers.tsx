@@ -20,6 +20,7 @@ export interface GetBasicDataFromDetailsData {
   ruleName: string;
   timestamp: string;
   data: TimelineEventsDetailsItem[] | null;
+  ruleDescription: string;
 }
 
 export const useBasicDataFromDetailsData = (
@@ -29,6 +30,11 @@ export const useBasicDataFromDetailsData = (
 
   const ruleName = useMemo(
     () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, data),
+    [data]
+  );
+
+  const ruleDescription = useMemo(
+    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.description' }, data),
     [data]
   );
 
@@ -64,8 +70,9 @@ export const useBasicDataFromDetailsData = (
       ruleName,
       timestamp,
       data,
+      ruleDescription,
     }),
-    [agentId, alertId, hostName, isAlert, ruleName, timestamp, userName, data]
+    [agentId, alertId, hostName, isAlert, ruleName, timestamp, userName, data, ruleDescription]
   );
 };
 

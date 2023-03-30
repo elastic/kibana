@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormLabel, EuiPanel, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFormLabel, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import React from 'react';
@@ -33,17 +33,13 @@ export function SloEditFormIndicatorSection() {
   };
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-      <EuiTitle>
-        <h2>
-          {i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
-            defaultMessage: 'Define SLI',
-          })}
-        </h2>
-      </EuiTitle>
-
-      <EuiSpacer size="xl" />
-
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      style={{ maxWidth }}
+      data-test-subj="sloEditFormIndicatorSection"
+    >
       <EuiFormLabel>
         {i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
           defaultMessage: 'Choose the SLI type',
@@ -67,8 +63,6 @@ export function SloEditFormIndicatorSection() {
       <EuiSpacer size="xxl" />
 
       {getIndicatorTypeForm()}
-
-      <EuiSpacer size="m" />
     </EuiPanel>
   );
 }
