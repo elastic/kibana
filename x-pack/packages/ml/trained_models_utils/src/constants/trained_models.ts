@@ -38,3 +38,5 @@ export const BUILT_IN_MODEL_TYPE = i18n.translate(
   'xpack.ml.trainedModels.modelsList.builtInModelLabel',
   { defaultMessage: 'built-in' }
 );
+
+export const BUILT_IN_MODEL_TAG = 'prepackaged';

@@ -27,7 +27,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { BUILT_IN_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../components/stats_bar';
@@ -38,7 +38,6 @@ import {
   TrainedModelConfigResponse,
   TrainedModelStat,
 } from '../../../common/types/trained_models';
-import { BUILT_IN_MODEL_TAG } from '../../../common/constants/data_frame_analytics';
 import { DeleteModelsModal } from './delete_models_modal';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../common/types/common';

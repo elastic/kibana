@@ -10,8 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
-import { BUILT_IN_MODEL_TAG } from '../../../common/constants/data_frame_analytics';
+import {
+  DEPLOYMENT_STATE,
+  TRAINED_MODEL_TYPE,
+  BUILT_IN_MODEL_TAG,
+} from '@kbn/ml-trained-models-utils';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';

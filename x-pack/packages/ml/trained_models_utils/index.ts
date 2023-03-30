@@ -6,11 +6,12 @@
  */
 
 export {
-  SUPPORTED_PYTORCH_TASKS,
+  BUILT_IN_MODEL_TAG,
   BUILT_IN_MODEL_TYPE,
   DEPLOYMENT_STATE,
+  SUPPORTED_PYTORCH_TASKS,
+  TRAINED_MODEL_TYPE,
   type DeploymentState,
   type SupportedPytorchTasksType,
-  TRAINED_MODEL_TYPE,
   type TrainedModelType,
 } from './src/constants/trained_models';

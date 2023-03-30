@@ -12,6 +12,7 @@ import {
   MlTrainedModelConfig,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
+
 import { SUPPORTED_PYTORCH_TASKS, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 
 import {
@@ -22,7 +23,6 @@ import {
 } from '../types/pipelines';
 
 export const ELSER_TASK_TYPE = 'text_expansion';
-export const LANG_IDENT_MODEL_TYPE = 'lang_ident';
 
 export interface MlInferencePipelineParams {
   description?: string;
@@ -199,7 +199,10 @@ export const parseModelStateFromStats = (
   model?: Partial<MlTrainedModelStats> & Partial<MlTrainedModelConfig>,
   modelTypes?: string[]
 ) => {
-  if (model?.model_type === LANG_IDENT_MODEL_TYPE || modelTypes?.includes(LANG_IDENT_MODEL_TYPE))
+  if (
+    model?.model_type === TRAINED_MODEL_TYPE.LANG_IDENT ||
+    modelTypes?.includes(TRAINED_MODEL_TYPE.LANG_IDENT)
+  )
     return TrainedModelState.Started;
   switch (model?.deployment_stats?.state) {
     case 'started':

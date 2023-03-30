@@ -11,13 +11,11 @@ import {
   MlTrainedModelConfig,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+import { SUPPORTED_PYTORCH_TASKS, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 
 import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
 
 import {
-  BUILT_IN_MODEL_TAG as LOCAL_BUILT_IN_MODEL_TAG,
   generateMlInferencePipelineBody,
   getMlModelTypesForModelConfig,
   getRemoveProcessorForInferenceType,
@@ -63,10 +61,6 @@ describe('getMlModelTypesForModelConfig lib function', () => {
     const expected = ['lang_ident', 'text_classification', BUILT_IN_MODEL_TAG];
     const response = getMlModelTypesForModelConfig(builtInMockModel);
     expect(response.sort()).toEqual(expected.sort());
-  });
-
-  it('local BUILT_IN_MODEL_TAG matches ml plugin', () => {
-    expect(LOCAL_BUILT_IN_MODEL_TAG).toEqual(BUILT_IN_MODEL_TAG);
   });
 });
 
