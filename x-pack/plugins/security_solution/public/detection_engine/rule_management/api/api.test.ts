@@ -35,6 +35,7 @@ import {
   previewRule,
   findRuleExceptionReferences,
   performBulkAction,
+  fetchRulesSnoozeSettings,
 } from './api';
 
 const abortCtrl = new AbortController();
@@ -784,6 +785,36 @@ describe('Detections Rules API', () => {
       });
 
       expect(result).toBe(fetchMockResult);
+    });
+  });
+
+  describe('fetchRulesSnoozeSettings', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+    });
+
+    test('requests rules by its ids', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            filter: 'alert.id:"alert:id1" or alert.id:"alert:id1"',
+          },
+        })
+      );
+    });
+
+    test('requests the same number of rules as the number of ids provided', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            per_page: 2,
+          },
+        })
+      );
     });
   });
 });

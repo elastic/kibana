@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
+import type { Rule, RuleSnoozeSettings } from '../../../../rule_management/logic/types';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import type { RulesTableState } from './rules_table_context';
@@ -27,21 +28,48 @@ jest.mock('../../../../rule_management/logic/use_find_rules');
 jest.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings');
 jest.mock('./use_rules_table_saved_state');
 
-function renderUseRulesTableContext(
-  savedState: ReturnType<typeof useRulesTableSavedState>
-): RulesTableState {
+function renderUseRulesTableContext({
+  rules,
+  rulesSnoozeSettings,
+  savedState,
+}: {
+  rules?: Rule[] | Error;
+  rulesSnoozeSettings?: RuleSnoozeSettings[] | Error;
+  savedState?: ReturnType<typeof useRulesTableSavedState>;
+}): RulesTableState {
   (useFindRules as jest.Mock).mockReturnValue({
-    data: { rules: [], total: 0 },
+    data: rules instanceof Error || !rules ? undefined : { rules, total: rules?.length },
     refetch: jest.fn(),
     dataUpdatedAt: 0,
-    isFetched: false,
-    isFetching: false,
-    isLoading: false,
+    isFetched: !!rules,
+    isFetching: !rules,
+    isLoading: !rules,
     isRefetching: false,
+    isError: rules instanceof Error,
   });
-  (useFetchRulesSnoozeSettings as jest.Mock).mockReturnValue({ data: undefined, isError: false });
+  (useFetchRulesSnoozeSettings as jest.Mock).mockReturnValue({
+    data: rulesSnoozeSettings instanceof Error ? undefined : rulesSnoozeSettings,
+    isError: rulesSnoozeSettings instanceof Error,
+  });
   (useUiSetting$ as jest.Mock).mockReturnValue([{ on: false, value: 0, idleTimeout: 0 }]);
-  (useRulesTableSavedState as jest.Mock).mockReturnValue(savedState);
+  (useRulesTableSavedState as jest.Mock).mockReturnValue(
+    savedState ?? {
+      filter: {
+        searchTerm: undefined,
+        source: undefined,
+        tags: undefined,
+        enabled: undefined,
+      },
+      sorting: {
+        field: undefined,
+        order: undefined,
+      },
+      pagination: {
+        page: undefined,
+        perPage: undefined,
+      },
+    }
+  );
 
   const wrapper = ({ children }: PropsWithChildren<{}>) => (
     <RulesTableContextProvider>{children}</RulesTableContextProvider>
@@ -59,19 +87,22 @@ describe('RulesTableContextProvider', () => {
   describe('persisted state', () => {
     it('restores persisted rules table state', () => {
       const state = renderUseRulesTableContext({
-        filter: {
-          searchTerm: 'test',
-          source: RuleSource.Custom,
-          tags: ['test'],
-          enabled: true,
-        },
-        sorting: {
-          field: 'name',
-          order: 'asc',
-        },
-        pagination: {
-          page: 2,
-          perPage: 10,
+        rules: [],
+        savedState: {
+          filter: {
+            searchTerm: 'test',
+            source: RuleSource.Custom,
+            tags: ['test'],
+            enabled: true,
+          },
+          sorting: {
+            field: 'name',
+            order: 'asc',
+          },
+          pagination: {
+            page: 2,
+            perPage: 10,
+          },
         },
       });
 
@@ -113,6 +144,73 @@ describe('RulesTableContextProvider', () => {
         total: 0,
       });
       expect(state.isDefault).toBeTruthy();
+    });
+  });
+
+  describe('state', () => {
+    describe('rules', () => {
+      it('returns an empty array while loading', () => {
+        const state = renderUseRulesTableContext({
+          rules: undefined,
+        });
+
+        expect(state.rules).toEqual([]);
+      });
+
+      it('returns an empty array upon error', () => {
+        const state = renderUseRulesTableContext({
+          rules: new Error('some error'),
+        });
+
+        expect(state.rules).toEqual([]);
+      });
+
+      it('returns rules while snooze settings are not loaded yet', () => {
+        const state = renderUseRulesTableContext({
+          rules: [{ name: 'rule 1' }, { name: 'rule 2' }] as Rule[],
+          rulesSnoozeSettings: undefined,
+        });
+
+        expect(state.rules).toEqual([{ name: 'rule 1' }, { name: 'rule 2' }]);
+      });
+
+      it('returns rules even if snooze settings failed to be loaded', () => {
+        const state = renderUseRulesTableContext({
+          rules: [{ name: 'rule 1' }, { name: 'rule 2' }] as Rule[],
+          rulesSnoozeSettings: new Error('some error'),
+        });
+
+        expect(state.rules).toEqual([
+          { name: 'rule 1', snoozeSettings: new Error('Unable to fetch snooze settings') },
+          { name: 'rule 2', snoozeSettings: new Error('Unable to fetch snooze settings') },
+        ]);
+      });
+
+      it('returns rules with snooze settings', () => {
+        const state = renderUseRulesTableContext({
+          rules: [
+            { id: '1', name: 'rule 1' },
+            { id: '2', name: 'rule 2' },
+          ] as Rule[],
+          rulesSnoozeSettings: [
+            { id: '1', mute_all: true, snooze_schedule: [] },
+            { id: '2', mute_all: false, snooze_schedule: [] },
+          ],
+        });
+
+        expect(state.rules).toEqual([
+          {
+            id: '1',
+            name: 'rule 1',
+            snoozeSettings: { id: '1', mute_all: true, snooze_schedule: [] },
+          },
+          {
+            id: '2',
+            name: 'rule 2',
+            snoozeSettings: { id: '2', mute_all: false, snooze_schedule: [] },
+          },
+        ]);
+      });
     });
   });
 });
