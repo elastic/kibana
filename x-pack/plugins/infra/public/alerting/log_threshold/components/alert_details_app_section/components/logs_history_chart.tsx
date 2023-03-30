@@ -123,6 +123,7 @@ const LogsHistoryChart = ({
                   return {
                     dataValue: annotation.key,
                     header: String(annotation.doc_count),
+                    // Only the date(without time) is needed here, uiSettings don't provide that
                     details: moment(annotation.key_as_string).format('yyyy-MM-DD'),
                   };
                 }) || []

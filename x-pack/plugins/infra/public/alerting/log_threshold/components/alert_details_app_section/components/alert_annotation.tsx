@@ -11,7 +11,11 @@ import moment from 'moment';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
+  const { uiSettings } = useKibanaContextForPlugin().services;
+
   return (
     <LineAnnotation
       id="annotation_alert_started"
@@ -19,7 +23,7 @@ export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
       dataValues={[
         {
           dataValue: alertStarted,
-          header: moment(alertStarted).format('HH:mm:ss'),
+          header: moment(alertStarted).format(uiSettings.get(UI_SETTINGS.DATE_FORMAT)),
           details: i18n.translate('xpack.infra.logs.alertDetails.chartAnnotation.alertStarted', {
             defaultMessage: 'Alert started',
           }),
