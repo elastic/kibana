@@ -5,6 +5,7 @@
  * 2.0.
  */
 import fetch from 'node-fetch';
+import { ErrorWithStatusCode } from './error_with_status_code';
 
 export const fetchWithTimeout = async (
   url: string,
@@ -20,5 +21,12 @@ export const fetchWithTimeout = async (
   });
   clearTimeout(id);
 
-  return response;
+  if (response.status !== 200) {
+    throw new ErrorWithStatusCode(
+      `${response.status} - ${await response.text()}`,
+      `${response.status}`
+    );
+  }
+
+  return await response.json();
 };

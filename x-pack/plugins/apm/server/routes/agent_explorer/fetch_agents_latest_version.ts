@@ -35,8 +35,7 @@ export const fetchAgentsLatestVersion = async (
   logger: Logger
 ): Promise<AgentLatestVersionsResponse> => {
   try {
-    const response = await fetchWithTimeout(bucketUrl);
-    const data = await response.json();
+    const data = await fetchWithTimeout(bucketUrl);
 
     return { data };
   } catch (error) {
