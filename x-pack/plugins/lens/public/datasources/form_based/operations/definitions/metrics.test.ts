@@ -6,7 +6,11 @@
  */
 
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
-import { operationDefinitionMap } from '.';
+import { MaxIndexPatternColumn, operationDefinitionMap } from '.';
+import { maxOperation } from './metrics';
+import { createMockedIndexPattern } from '../../mocks';
+import { FormBasedLayer } from '../../../..';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 const sumOperation = operationDefinitionMap.sum;
 
@@ -127,6 +131,161 @@ describe('metrics', () => {
           'aggFilteredMetric id="2" enabled=true schema="metric" \n  customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}} \n  customMetric={aggCardinality id="2-metric" enabled=true schema="metric" field="bytes" emptyAsNull=false}'
         )
       ).toBeUndefined();
+    });
+  });
+
+  describe('toEsAggsFn', () => {
+    const indexPattern = createMockedIndexPattern();
+    let layer: FormBasedLayer;
+
+    beforeEach(() => {
+      layer = {
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          a: {
+            label: 'Max',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'max',
+            sourceField: 'bytes',
+          },
+          1: {
+            label: 'Counter rate of Count',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'counter_rate',
+            references: ['a'],
+          },
+        },
+      };
+
+      layer.columnOrder = Object.keys(layer.columns);
+    });
+
+    it('returns metric aggregation', () => {
+      expect(
+        maxOperation.toEsAggsFn(
+          layer.columns.a as MaxIndexPatternColumn,
+          'a',
+          indexPattern,
+          layer,
+          {} as unknown as IUiSettingsClient,
+          [],
+          operationDefinitionMap,
+          'a'
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Object {
+            "enabled": Array [
+              true,
+            ],
+            "field": Array [
+              "bytes",
+            ],
+            "id": Array [
+              "a",
+            ],
+            "schema": Array [
+              "metric",
+            ],
+          },
+          "function": "aggMax",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('returns es rate agg when metric is max and parent operation is counter rate', () => {
+      indexPattern.getFieldByName = jest.fn().mockReturnValue({
+        name: 'bytes',
+        type: 'number',
+        esTypes: ['number'],
+        aggregatable: true,
+        searchable: true,
+        readFromDocValues: true,
+        timeSeriesMetric: 'counter',
+      });
+
+      expect(
+        maxOperation.toEsAggsFn(
+          layer.columns.a as MaxIndexPatternColumn,
+          'a',
+          indexPattern,
+          layer,
+          {} as unknown as IUiSettingsClient,
+          [],
+          operationDefinitionMap,
+          'a'
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Object {
+            "customBucket": Array [
+              Object {
+                "chain": Array [
+                  Object {
+                    "arguments": Object {
+                      "enabled": Array [
+                        true,
+                      ],
+                      "id": Array [
+                        "-timeseries",
+                      ],
+                      "schema": Array [
+                        "bucket",
+                      ],
+                    },
+                    "function": "aggTimeSeries",
+                    "type": "function",
+                  },
+                ],
+                "type": "expression",
+              },
+            ],
+            "customMetric": Array [
+              Object {
+                "chain": Array [
+                  Object {
+                    "arguments": Object {
+                      "enabled": Array [
+                        true,
+                      ],
+                      "field": Array [
+                        "bytes",
+                      ],
+                      "id": Array [
+                        "-metric",
+                      ],
+                      "schema": Array [
+                        "metric",
+                      ],
+                      "unit": Array [
+                        "second",
+                      ],
+                    },
+                    "function": "aggRate",
+                    "type": "function",
+                  },
+                ],
+                "type": "expression",
+              },
+            ],
+            "enabled": Array [
+              true,
+            ],
+            "id": Array [
+              "a",
+            ],
+            "schema": Array [
+              "metric",
+            ],
+          },
+          "function": "aggBucketSum",
+          "type": "function",
+        }
+      `);
     });
   });
 });

@@ -18,7 +18,7 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import {getFormatFromPreviousColumn, getFilter, isColumnOfType} from '../helpers';
+import { getFormatFromPreviousColumn, getFilter, isColumnOfType } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
