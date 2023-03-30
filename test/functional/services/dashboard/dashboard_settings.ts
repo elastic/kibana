@@ -118,6 +118,7 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
     public async clickCancelButton() {
       log.debug('clickCancelButton');
       await retry.try(async () => {
+        await toasts.dismissAllToasts();
         await testSubjects.click('cancelCustomizeDashboardButton');
         await this.expectDashboardSettingsFlyoutClosed();
       });
@@ -126,6 +127,7 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
     public async clickCloseFlyoutButton() {
       log.debug();
       await retry.try(async () => {
+        await toasts.dismissAllToasts();
         await (await this.findFlyoutTestSubject('euiFlyoutCloseButton')).click();
         await this.expectDashboardSettingsFlyoutClosed();
       });
