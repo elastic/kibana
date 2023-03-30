@@ -74,7 +74,7 @@ export interface IndexDetails {
   status: IndexStatus;
 }
 
-interface BaseCspSetupBothPolicy {
+export interface BaseCspSetupBothPolicy {
   status: CspStatusCode;
   installedPackagePolicies: number;
   healthyAgents: number;
