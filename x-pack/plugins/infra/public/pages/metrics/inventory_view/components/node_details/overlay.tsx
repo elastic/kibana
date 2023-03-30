@@ -47,14 +47,7 @@ export const NodeContextPopover = ({
   openAlertFlyout,
 }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tabConfigs = [
-    MetricsTab,
-    LogsTab,
-    ProcessesTab('infraNodeTabsProcesses'),
-    PropertiesTab,
-    AnomaliesTab,
-    OsqueryTab,
-  ];
+  const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab, AnomaliesTab, OsqueryTab];
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   const { application, share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>().services;

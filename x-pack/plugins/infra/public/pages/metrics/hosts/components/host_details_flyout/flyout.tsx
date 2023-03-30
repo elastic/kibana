@@ -5,49 +5,53 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
-import { MetadataTab } from './metadata/metadata';
+import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
+import { metadataTab } from './metadata';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { ProcessesTab } from '../../../inventory_view/components/node_details/tabs/processes';
+import { processesTab } from './processes';
+import { useFlyoutTabId, FlyoutTabIds } from '../../hooks/use_flyout_tab_id';
+import { Metadata } from './metadata/metadata';
+import { ProcessesTabComponent } from '../../../inventory_view/components/node_details/tabs/processes/tab_component';
 
 interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
 }
 
-const flyoutTabs = [MetadataTab, ProcessesTab('hostsView-flyout-tabs-processes')];
+const flyoutTabs = [metadataTab, processesTab];
 const NODE_TYPE = 'host' as InventoryItemType;
 
 export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
-  const tabs = useMemo(() => {
-    const currentTimeRange = {
-      ...getDateRangeAsTimestamp(),
-      interval: '1m',
-    };
+  const currentTimeRange = {
+    ...getDateRangeAsTimestamp(),
+    interval: '1m',
+  };
 
-    return flyoutTabs.map((m) => {
-      const TabContent = m.content;
-      return {
-        ...m,
-        content: (
-          <TabContent
-            node={node}
-            currentTimeRange={currentTimeRange}
-            currentTime={currentTimeRange.to}
-            nodeType={NODE_TYPE}
-          />
-        ),
-      };
-    });
-  }, [getDateRangeAsTimestamp, node]);
+  const [selectedTabId, setSelectedTabId] = useFlyoutTabId(flyoutTabs[0].id);
+  // This map allow to keep track of which tabs content have been rendered the first time.
+  // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
+  const renderedTabsSet = useLazyRef(() => new Set([selectedTabId]));
 
-  const [selectedTab, setSelectedTab] = useState(0);
+  const tabEntries = flyoutTabs.map((tab) => (
+    <EuiTab
+      {...tab}
+      key={tab.id}
+      onClick={() => {
+        renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
+        setSelectedTabId(tab.id);
+      }}
+      isSelected={tab.id === selectedTabId}
+    >
+      {tab.name}
+    </EuiTab>
+  ));
 
   return (
     <EuiFlyout onClose={closeFlyout} ownFocus={false}>
@@ -57,19 +61,25 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiTabs style={{ marginBottom: '-25px' }} size="s">
-          {tabs.map((tab, i) => (
-            <EuiTab
-              key={tab.id}
-              isSelected={i === selectedTab}
-              onClick={() => setSelectedTab(i)}
-              data-test-subj={tab['data-test-subj']}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
+          {tabEntries}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{tabs[selectedTab].content}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        {renderedTabsSet.current.has(FlyoutTabIds.METADATA) && (
+          <div hidden={selectedTabId !== FlyoutTabIds.METADATA}>
+            <Metadata currentTimeRange={currentTimeRange} node={node} nodeType={NODE_TYPE} />
+          </div>
+        )}
+        {renderedTabsSet.current.has(FlyoutTabIds.PROCESSES) && (
+          <div hidden={selectedTabId !== FlyoutTabIds.PROCESSES}>
+            <ProcessesTabComponent
+              node={node}
+              nodeType={NODE_TYPE}
+              currentTime={currentTimeRange.to}
+            />
+          </div>
+        )}
+      </EuiFlyoutBody>
     </EuiFlyout>
   );
 };

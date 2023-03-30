@@ -101,12 +101,3 @@ const LoadingPlaceholder = () => {
     </div>
   );
 };
-
-export const MetadataTab = {
-  id: 'metadata',
-  name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata.title', {
-    defaultMessage: 'Metadata',
-  }),
-  content: Metadata,
-  'data-test-subj': 'hostsView-flyout-tabs-metadata',
-};
