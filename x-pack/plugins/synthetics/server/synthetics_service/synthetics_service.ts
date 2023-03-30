@@ -528,7 +528,7 @@ export class SyntheticsService {
     if (paramsBySpace[ALL_SPACES_ID]) {
       Object.keys(paramsBySpace).forEach((space) => {
         if (space !== ALL_SPACES_ID) {
-          paramsBySpace[space] = Object.assign(paramsBySpace[space], paramsBySpace[ALL_SPACES_ID]);
+          paramsBySpace[space] = Object.assign(paramsBySpace[ALL_SPACES_ID], paramsBySpace[space]);
         }
       });
       if (spaceId) {
