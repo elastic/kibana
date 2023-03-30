@@ -22,8 +22,7 @@ export interface OtelAgentLatestVersion {
 
 interface AgentLatestVersionsResponse {
   data: AgentLatestVersions;
-  timedOut?: boolean;
-  error?: { message: string; type: string };
+  error?: { message: string; type?: string; statusCode?: string };
 }
 
 type AgentLatestVersions = Record<
@@ -47,7 +46,6 @@ export const fetchAgentsLatestVersion = async (
 
     return {
       data: {} as AgentLatestVersions,
-      timedOut,
       error,
     };
   }

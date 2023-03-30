@@ -33,11 +33,11 @@ export type AgentExplorerItem = ValuesType<
 
 export function getAgentsColumns({
   selectedAgent,
-  latestVersionsTimedOut,
+  latestVersionsFailed,
   onAgentSelected,
 }: {
   selectedAgent?: AgentExplorerItem;
-  latestVersionsTimedOut?: boolean;
+  latestVersionsFailed: boolean;
   onAgentSelected: (agent: AgentExplorerItem) => void;
 }): Array<ITableColumn<AgentExplorerItem>> {
   return [
@@ -190,7 +190,7 @@ export function getAgentsColumns({
         <AgentLatestVersion
           agentName={agentName as AgentName}
           latestVersion={latestVersion}
-          timedOut={latestVersionsTimedOut}
+          failed={latestVersionsFailed}
         />
       ),
     },
@@ -218,14 +218,14 @@ interface Props {
   items: AgentExplorerItem[];
   noItemsMessage: React.ReactNode;
   isLoading: boolean;
-  latestVersionsTimedOut?: boolean;
+  latestVersionsFailed: boolean;
 }
 
 export function AgentList({
   items,
   noItemsMessage,
   isLoading,
-  latestVersionsTimedOut,
+  latestVersionsFailed,
 }: Props) {
   const [selectedAgent, setSelectedAgent] = useState<AgentExplorerItem>();
 
@@ -241,16 +241,20 @@ export function AgentList({
     () =>
       getAgentsColumns({
         selectedAgent,
-        latestVersionsTimedOut,
+        latestVersionsFailed,
         onAgentSelected,
       }),
-    [selectedAgent, latestVersionsTimedOut]
+    [selectedAgent, latestVersionsFailed]
   );
 
   return (
     <>
       {selectedAgent && (
-        <AgentInstances agent={selectedAgent} onClose={onCloseFlyout} />
+        <AgentInstances
+          agent={selectedAgent}
+          latestVersionsFailed={latestVersionsFailed}
+          onClose={onCloseFlyout}
+        />
       )}
       <ManagedTable
         columns={agentColumns}

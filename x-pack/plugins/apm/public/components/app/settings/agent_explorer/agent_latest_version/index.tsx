@@ -14,13 +14,13 @@ import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent'
 export function AgentLatestVersion({
   agentName,
   latestVersion,
-  timedOut,
+  failed,
 }: {
   agentName: AgentName;
   latestVersion?: string;
-  timedOut?: boolean;
+  failed?: boolean;
 }) {
-  if (!timedOut) {
+  if (!failed) {
     return latestVersion ? <>{latestVersion}</> : <>{NOT_AVAILABLE_LABEL}</>;
   }
 

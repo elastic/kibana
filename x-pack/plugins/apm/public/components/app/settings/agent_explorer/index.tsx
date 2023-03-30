@@ -201,7 +201,7 @@ export function AgentExplorer() {
           isLoading={isLoading}
           items={agents.data?.items ?? []}
           noItemsMessage={noItemsMessage}
-          latestVersionsTimedOut={agents.data?.latestVersionTimedOut}
+          latestVersionsFailed={!!agents.data?.latestVersionError}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

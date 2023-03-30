@@ -18,7 +18,7 @@ import { StickyProperties } from '../../../../../shared/sticky_properties';
 import { getComparisonEnabled } from '../../../../../shared/time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../../common/i18n';
+import { AgentLatestVersion } from '../../agent_latest_version';
 
 const serviceLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.serviceLabel',
@@ -62,6 +62,7 @@ export function AgentContextualInformation({
   instances,
   latestVersion,
   query,
+  latestVersionsFailed,
 }: {
   agentName: AgentName;
   serviceName: string;
@@ -69,6 +70,7 @@ export function AgentContextualInformation({
   instances: number;
   latestVersion?: string;
   query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
+  latestVersionsFailed: boolean;
 }) {
   const { core } = useApmPluginContext();
   const comparisonEnabled = getComparisonEnabled({ core });
@@ -127,7 +129,13 @@ export function AgentContextualInformation({
     {
       label: latestVersionLabel,
       fieldName: latestVersionLabel,
-      val: latestVersion ? <>{latestVersion}</> : <>{NOT_AVAILABLE_LABEL}</>,
+      val: (
+        <AgentLatestVersion
+          agentName={agentName as AgentName}
+          latestVersion={latestVersion}
+          failed={latestVersionsFailed}
+        />
+      ),
       width: '20%',
     },
     {

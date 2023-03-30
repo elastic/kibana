@@ -58,10 +58,15 @@ function useAgentInstancesFetcher({ serviceName }: { serviceName: string }) {
 
 interface Props {
   agent: AgentExplorerItem;
+  latestVersionsFailed: boolean;
   onClose: () => void;
 }
 
-export function AgentInstances({ agent, onClose }: Props) {
+export function AgentInstances({
+  agent,
+  latestVersionsFailed,
+  onClose,
+}: Props) {
   const { query } = useApmParams('/settings/agent-explorer');
 
   const instances = useAgentInstancesFetcher({
@@ -97,6 +102,7 @@ export function AgentInstances({ agent, onClose }: Props) {
             instances={agent.instances}
             latestVersion={agent.latestVersion}
             query={query}
+            latestVersionsFailed={latestVersionsFailed}
           />
           <EuiHorizontalRule margin="m" />
           <EuiSpacer size="m" />
