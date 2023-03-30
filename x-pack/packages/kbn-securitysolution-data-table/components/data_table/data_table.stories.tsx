@@ -1,7 +1,6 @@
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellValueElementProps } from '@kbn/timelines-plugin/common';
-import { FieldBrowserProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
@@ -15,6 +14,8 @@ import { createStore as createReduxStore } from 'redux';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { getMappedNonEcsValue } from './utils';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { mockTimelineData } from '../../mock/mock_timeline_data';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 export default {
   component: DataTableComponent,
@@ -43,8 +44,6 @@ const StoryProviders: React.FC<Props> = ({ children, onDragEnd = () => {}, cellA
   const store = createStore(mockGlobalState);
   const queryClient = new QueryClient();
 
-  console.log(store.getState());
-
   return (
     <I18nProvider>
       <ReduxStoreProvider store={store}>
@@ -60,25 +59,40 @@ const StoryProviders: React.FC<Props> = ({ children, onDragEnd = () => {}, cellA
   );
 };
 
+const MockFieldBrowser = () => {
+  return (
+    <EuiButtonEmpty
+      color="text"
+      data-test-subj="show-field-browser"
+      iconType="tableOfContents"
+      size="xs"
+      onClick={() => window.alert('Not implemented')}
+    >
+      Field Browser
+    </EuiButtonEmpty>
+  );
+};
+
 export function Example() {
   return (
     <StoryProviders>
       <DataTableComponent
         browserFields={{}}
-        data={[]}
+        data={mockTimelineData}
         id={TableId.test}
         renderCellValue={StoryCellRenderer}
         leadingControlColumns={[]}
-        loadPage={function (newActivePage: number): void {
-          throw new Error('Function not implemented.');
+        unitCountText="10 events"
+        pagination={{
+          pageSize: 25,
+          pageIndex: 0,
+          onChangeItemsPerPage: () => {},
+          onChangePage: () => {},
         }}
+        loadPage={() => {}}
         rowRenderers={[]}
-        unitCountText={''}
-        pagination={{} as any}
-        totalItems={0}
-        getFieldBrowser={(props: FieldBrowserProps) => {
-          return null;
-        }}
+        totalItems={mockTimelineData.length}
+        getFieldBrowser={() => <MockFieldBrowser />}
       />
     </StoryProviders>
   );
