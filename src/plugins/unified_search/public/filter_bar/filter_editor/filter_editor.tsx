@@ -147,7 +147,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       selectedDataView: dataView,
       customLabel: props.filter.meta.alias || '',
       queryDsl: this.parseFilterToQueryDsl(props.filter),
-      isCustomEditorOpen: this.isUnknownFilterType() || this.props.filter?.meta.isMultiIndex,
+      isCustomEditorOpen: this.isUnknownFilterType() || !!this.props.filter?.meta.isMultiIndex,
       localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
     };
   }
