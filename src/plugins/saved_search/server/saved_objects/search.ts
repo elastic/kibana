@@ -44,34 +44,39 @@ export function getSavedSearchObjectType(
     },
     schemas: {
       '8.8.0': schema.object({
-        columns: schema.arrayOf(schema.string()),
-        description: schema.string(),
+        columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        description: schema.string({ defaultValue: '' }),
         viewMode: schema.maybe(
           schema.oneOf([
             schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
             schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
           ])
         ),
-        hideChart: schema.boolean(),
-        isTextBasedQuery: schema.boolean(),
+        hideChart: schema.boolean({ defaultValue: false }),
+        isTextBasedQuery: schema.boolean({ defaultValue: false }),
         usesAdHocDataView: schema.maybe(schema.boolean()),
         hideAggregatedPreview: schema.maybe(schema.boolean()),
         hits: schema.maybe(schema.number()),
         kibanaSavedObjectMeta: schema.object({
           searchSourceJSON: schema.string(),
         }),
-        sort: schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 })),
-        title: schema.string(),
-        grid: schema.object({
-          columns: schema.maybe(
-            schema.recordOf(
-              schema.string(),
-              schema.object({
-                width: schema.maybe(schema.number()),
-              })
-            )
-          ),
+        sort: schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 }), {
+          defaultValue: [],
         }),
+        title: schema.string({ defaultValue: '' }),
+        grid: schema.object(
+          {
+            columns: schema.maybe(
+              schema.recordOf(
+                schema.string(),
+                schema.object({
+                  width: schema.maybe(schema.number()),
+                })
+              )
+            ),
+          },
+          { defaultValue: {} }
+        ),
         version: schema.maybe(schema.number()),
         rowHeight: schema.maybe(schema.number()),
         timeRestore: schema.maybe(schema.boolean()),
