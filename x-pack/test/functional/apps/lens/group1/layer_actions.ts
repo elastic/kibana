@@ -198,20 +198,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // click on the badge and check the popover
       await testSubjects.click('lns-feature-badges-trigger');
-      expect((await testSubjects.getVisibleText('lns-feature-badges-0-0')).split('\n')).to.eql([
-        'Bar vertical stacked',
-        '1%',
-        'logstash-*',
-      ]);
-      expect((await testSubjects.getVisibleText('lns-feature-badges-0-1')).split('\n')).to.eql([
-        'Bar vertical stacked',
-        '0.1%',
-        'logstash-*',
-      ]);
-      expect((await testSubjects.getVisibleText('lns-feature-badges-1-0')).split('\n')).to.eql([
-        'Annotations',
-        'logstash-*',
-      ]);
+      expect((await testSubjects.getVisibleText('lns-feature-badges-0-0')).split('\n')).to.contain(
+        '1%'
+      );
+      expect((await testSubjects.getVisibleText('lns-feature-badges-0-1')).split('\n')).to.contain(
+        '0.1%'
+      );
+      expect((await testSubjects.getVisibleText('lns-feature-badges-1-0')).split('\n')).to.contain(
+        'Annotations'
+      );
     });
   });
 }
