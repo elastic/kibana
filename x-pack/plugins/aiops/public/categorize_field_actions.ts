@@ -32,21 +32,7 @@ export const categorizeFieldAction = (
       return field.esTypes?.includes('text') === true;
     },
     execute: async (context: CategorizeFieldContext) => {
-      // console.log(3333333333333333333);
-      // application.navigateToApp('lens', {
-      //   state: { type: ACTION_CATEGORIZE_FIELD, payload: context },
-      // });
       const { field, dataView, onAddDSLFilter } = context;
-      // const onAddFilter = () => {};
-      // if (dataViewSpec.id === undefined) {
-      //   return;
-      // }
-
-      // const dataView = await data.dataViews.get(dataViewSpec.id);
-      // const field = dataView.fields.find((f) => f.displayName === fieldName);
-      // if (field === undefined) {
-      //   return;
-      // }
       showCategorizeFlyout(field, dataView, coreStart, data, charts, onAddDSLFilter);
     },
   });
