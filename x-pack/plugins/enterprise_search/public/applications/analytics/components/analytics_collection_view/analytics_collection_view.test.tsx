@@ -10,7 +10,7 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../__mocks__/react_router';
 
-import React, { ReactElement } from 'react';
+import React from 'react';
 
 import { shallow } from 'enzyme';
 
@@ -29,15 +29,20 @@ const mockValues = {
     events_datastream: 'analytics-events-example',
     name: 'Analytics-Collection-1',
   } as AnalyticsCollection,
-  dataViewId: '1234-1234-1234',
+  searchSessionId: 'session-id',
+  timeRange: {
+    from: 'now-90d',
+    to: 'now',
+  },
 };
 
 const mockActions = {
   fetchAnalyticsCollection: jest.fn(),
   fetchAnalyticsCollectionDataViewId: jest.fn(),
+  setTimeRange: jest.fn(),
 };
 
-describe('AnalyticsOverview', () => {
+describe('AnalyticsView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -76,22 +81,7 @@ describe('AnalyticsOverview', () => {
     expect(wrapper.prop('pageViewTelemetry')).toBe('View Analytics Collection - settings');
   });
 
-  it('send correct pageHeader rightSideItems when dataViewId exists', async () => {
-    setMockValues(mockValues);
-    setMockActions(mockActions);
-
-    const rightSideItems = shallow(<AnalyticsCollectionView />)
-      ?.find(EnterpriseSearchAnalyticsPageTemplate)
-      ?.prop('pageHeader')?.rightSideItems;
-
-    expect(rightSideItems).toHaveLength(1);
-
-    expect((rightSideItems?.[0] as ReactElement).props?.children?.props?.href).toBe(
-      "/app/discover#/?_a=(index:'1234-1234-1234')"
-    );
-  });
-
-  it('hide pageHeader rightSideItems when dataViewId not exists', async () => {
+  it('render toolbar in pageHeader rightSideItems ', async () => {
     setMockValues({ ...mockValues, dataViewId: null });
     setMockActions(mockActions);
 
@@ -99,7 +89,7 @@ describe('AnalyticsOverview', () => {
 
     expect(
       wrapper?.find(EnterpriseSearchAnalyticsPageTemplate)?.prop('pageHeader')?.rightSideItems
-    ).toBeUndefined();
+    ).toHaveLength(1);
   });
 
   it('render AnalyticsCollectionChartWithLens with collection', () => {
@@ -111,6 +101,8 @@ describe('AnalyticsOverview', () => {
     expect(wrapper?.find(AnalyticsCollectionChartWithLens).props()).toEqual({
       dataViewQuery: 'analytics-events-example',
       id: 'analytics-collection-chart-Analytics-Collection-1',
+      searchSessionId: 'session-id',
+      setTimeRange: mockActions.setTimeRange,
       timeRange: {
         from: 'now-90d',
         to: 'now',
