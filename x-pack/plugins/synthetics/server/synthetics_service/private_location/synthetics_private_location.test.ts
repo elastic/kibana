@@ -253,44 +253,6 @@ describe('SyntheticsPrivateLocation', () => {
           value:
             "\"step('Go to https://www.elastic.co/', async () => {\\n  await page.goto('https://www.elastic.co/');\\n});\"",
         },
-        'source.zip_url.folder': {
-          type: 'text',
-          value: '',
-        },
-        'source.zip_url.password': {
-          type: 'password',
-          value: '',
-        },
-        'source.zip_url.proxy_url': {
-          type: 'text',
-          value: '',
-        },
-        'source.zip_url.ssl.certificate': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.certificate_authorities': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.key': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.key_passphrase': {
-          type: 'text',
-        },
-        'source.zip_url.ssl.supported_protocols': {
-          type: 'yaml',
-        },
-        'source.zip_url.ssl.verification_mode': {
-          type: 'text',
-        },
-        'source.zip_url.url': {
-          type: 'text',
-          value: '',
-        },
-        'source.zip_url.username': {
-          type: 'text',
-          value: '',
-        },
         synthetics_args: {
           type: 'text',
           value: null,

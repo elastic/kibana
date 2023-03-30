@@ -29,7 +29,6 @@ import {
   TLSFields,
   TLSVersion,
   VerificationMode,
-  ZipUrlTLSFields,
 } from '../../../common/runtime_types';
 import { validateMonitor } from './monitor_validation';
 
@@ -46,7 +45,6 @@ describe('validateMonitor', () => {
   let testHTTPSimpleFields: HTTPSimpleFields;
   let testHTTPAdvancedFields: HTTPAdvancedFields;
   let testHTTPFields: HTTPFields;
-  let testZipUrlTLSFields: ZipUrlTLSFields;
   let testBrowserSimpleFields: BrowserSimpleFields;
   let testBrowserAdvancedFields: BrowserAdvancedFields;
   let testBrowserFields: BrowserFields;
@@ -158,7 +156,6 @@ describe('validateMonitor', () => {
     };
 
     testBrowserSimpleFields = {
-      ...testZipUrlTLSFields,
       ...testCommonFields,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
       [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
