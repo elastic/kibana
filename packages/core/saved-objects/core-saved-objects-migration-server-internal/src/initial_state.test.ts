@@ -130,6 +130,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "osquery-manager-usage-metric",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "osquery-usage-metric",
                 },
               },
