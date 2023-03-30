@@ -928,6 +928,10 @@ export interface VisualizationSuggestion<T = unknown> {
    */
   hide?: boolean;
   /**
+   * Flag indicating whether this suggestion is incomplete
+   */
+  incomplete?: boolean;
+  /**
    * Descriptive title of the suggestion. Should be as short as possible. This title is shown if
    * the suggestion is advertised to the user and will also show either the `previewExpression` or
    * the `previewIcon`

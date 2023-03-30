@@ -151,4 +151,52 @@ describe('suggestionsApi', () => {
     expect(datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
     expect(suggestions?.length).toEqual(1);
   });
+
+  test('filters out the suggestion if exists on excludedVisualizations', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const visualizationMap = {
+      testVis: {
+        ...mockVis,
+        getSuggestions: () => [
+          {
+            score: 0.2,
+            title: 'Test',
+            state: {},
+            previewIcon: 'empty',
+            visualizationId: 'lnsXY',
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+          },
+        ],
+      },
+    };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    const context = {
+      dataViewSpec: {
+        id: 'index1',
+        title: 'index1',
+        name: 'DataView',
+      },
+      fieldName: '',
+      contextualFields: ['field1', 'field2'],
+      query: {
+        sql: 'SELECT field1, field2 FROM "index1"',
+      },
+    };
+    const suggestions = suggestionsApi({
+      context,
+      dataView,
+      datasourceMap,
+      visualizationMap,
+      excludedVisualizations: ['lnsXY'],
+    });
+    expect(datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
+    expect(suggestions?.length).toEqual(1);
+  });
 });
