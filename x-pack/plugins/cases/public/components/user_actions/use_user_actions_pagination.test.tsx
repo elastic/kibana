@@ -43,6 +43,7 @@ describe('useUserActionsPagination', () => {
         userActionsStats,
         userActivityQueryParams,
         caseId: basicCase.id,
+        lastPage: 3,
       })
     );
 
@@ -57,35 +58,11 @@ describe('useUserActionsPagination', () => {
     await waitFor(() => {
       expect(result.current).toEqual(
         expect.objectContaining({
-          lastPage: 3,
           showBottomList: true,
           isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
           infiniteCaseUserActions: defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
           hasNextPage: defaultInfiniteUseFindCaseUserActions.hasNextPage,
           fetchNextPage: defaultInfiniteUseFindCaseUserActions.fetchNextPage,
-        })
-      );
-    });
-  });
-
-  it('returns correct last page', async () => {
-    const { result, waitFor } = renderHook(() =>
-      useUserActionsPagination({
-        userActionsStats: { total: 38, totalComments: 17, totalOtherActions: 21 },
-        userActivityQueryParams: {
-          ...userActivityQueryParams,
-          type: 'user',
-        },
-        caseId: basicCase.id,
-      })
-    );
-
-    expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
-
-    await waitFor(() => {
-      expect(result.current).toEqual(
-        expect.objectContaining({
-          lastPage: 2,
         })
       );
     });
@@ -97,6 +74,7 @@ describe('useUserActionsPagination', () => {
         userActionsStats: { total: 9, totalComments: 3, totalOtherActions: 6 },
         userActivityQueryParams,
         caseId: basicCase.id,
+        lastPage: 1,
       })
     );
 
@@ -110,7 +88,6 @@ describe('useUserActionsPagination', () => {
     await waitFor(() => {
       expect(result.current).toEqual(
         expect.objectContaining({
-          lastPage: 1,
           showBottomList: false,
           isLoadingInfiniteUserActions: false,
           infiniteCaseUserActions: defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
@@ -128,6 +105,7 @@ describe('useUserActionsPagination', () => {
         userActionsStats,
         userActivityQueryParams,
         caseId: basicCase.id,
+        lastPage: 3,
       })
     );
 
@@ -142,9 +120,41 @@ describe('useUserActionsPagination', () => {
     await waitFor(() => {
       expect(result.current).toEqual(
         expect.objectContaining({
-          lastPage: 3,
           showBottomList: true,
           isLoadingInfiniteUserActions: true,
+          infiniteCaseUserActions: [],
+          hasNextPage: undefined,
+          fetchNextPage: undefined,
+        })
+      );
+    });
+  });
+
+  it('returns empty array when data is undefined', async () => {
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: false, data: undefined });
+
+    const { result, waitFor } = renderHook(() =>
+      useUserActionsPagination({
+        userActionsStats,
+        userActivityQueryParams,
+        caseId: basicCase.id,
+        lastPage: 3,
+      })
+    );
+
+    expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+      basicCase.id,
+      userActivityQueryParams,
+      true
+    );
+
+    expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          showBottomList: true,
+          isLoadingInfiniteUserActions: false,
           infiniteCaseUserActions: [],
           hasNextPage: undefined,
           fetchNextPage: undefined,
@@ -166,6 +176,7 @@ describe('useUserActionsPagination', () => {
         userActionsStats: { total: 9, totalComments: 3, totalOtherActions: 6 },
         userActivityQueryParams,
         caseId: basicCase.id,
+        lastPage: 1,
       })
     );
 
@@ -178,7 +189,6 @@ describe('useUserActionsPagination', () => {
     await waitFor(() => {
       expect(result.current).toEqual(
         expect.objectContaining({
-          lastPage: 1,
           showBottomList: false,
           isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
           infiniteCaseUserActions: [],

@@ -24,6 +24,7 @@ import { UserActionsList } from './user_actions_list';
 import { useUserActionsPagination } from './use_user_actions_pagination';
 import { useLastPageUserActions } from './use_user_actions_last_page';
 import { ShowMoreButton } from './show_more_button';
+import { useLastPage } from './use_last_page';
 
 const getIconsCss = (
   showBottomList: boolean,
@@ -92,10 +93,12 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     userActionsStats,
   } = props;
   const { detailName: caseId } = useCaseViewParams();
+
+  const { lastPage } = useLastPage({ userActivityQueryParams, userActionsStats });
+
   const {
     infiniteCaseUserActions,
     isLoadingInfiniteUserActions,
-    lastPage,
     hasNextPage,
     fetchNextPage,
     showBottomList,
@@ -103,6 +106,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     userActivityQueryParams,
     userActionsStats,
     caseId: caseData.id,
+    lastPage,
   });
 
   const { euiTheme } = useEuiTheme();
@@ -195,7 +199,12 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           bottomActions={lastPage <= 1 ? bottomActions : []}
           isExpandable
         />
-        {hasNextPage && <ShowMoreButton onShowMoreClick={handleShowMore} />}
+        {hasNextPage && (
+          <ShowMoreButton
+            onShowMoreClick={handleShowMore}
+            isLoading={isLoadingInfiniteUserActions}
+          />
+        )}
         {lastPageUserActions?.length ? (
           <EuiFlexItem>
             <UserActionsList

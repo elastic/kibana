@@ -104,4 +104,33 @@ describe('useLastPageUserActions', () => {
       );
     });
   });
+
+  it('returns empty array when data is undefined', async () => {
+    useFindCaseUserActionsMock.mockReturnValue({ isLoading: false, data: undefined });
+
+    const { result, waitFor } = renderHook(() =>
+      useLastPageUserActions({
+        lastPage: 2,
+        userActivityQueryParams,
+        caseId: basicCase.id,
+      })
+    );
+
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+      basicCase.id,
+      { ...userActivityQueryParams, page: 2 },
+      true
+    );
+
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          isLoadingLastPageUserActions: false,
+          lastPageUserActions: [],
+        })
+      );
+    });
+  });
 });

@@ -15,31 +15,15 @@ interface UserActionsPagination {
   userActivityQueryParams: UserActivityParams;
   userActionsStats: CaseUserActionsStats;
   caseId: string;
+  lastPage: number;
 }
 
 export const useUserActionsPagination = ({
   userActivityQueryParams,
   userActionsStats,
   caseId,
+  lastPage,
 }: UserActionsPagination) => {
-  const lastPage = useMemo(() => {
-    if (!userActionsStats) {
-      return 1;
-    }
-
-    const perPage = userActivityQueryParams.perPage;
-
-    switch (userActivityQueryParams.type) {
-      case 'action':
-        return Math.ceil(userActionsStats.totalOtherActions / perPage);
-      case 'user':
-        return Math.ceil(userActionsStats.totalComments / perPage);
-      case 'all':
-      default:
-        return Math.ceil(userActionsStats.total / perPage);
-    }
-  }, [userActionsStats, userActivityQueryParams]);
-
   const {
     data: caseInfiniteUserActionsData,
     isLoading: isLoadingInfiniteUserActions,

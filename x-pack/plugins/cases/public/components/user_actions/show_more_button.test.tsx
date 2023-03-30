@@ -28,6 +28,16 @@ describe('ShowMoreButton', () => {
     expect(screen.getByTestId('cases-show-more-user-actions')).toBeInTheDocument();
   });
 
+  it('shows loading state and is disabled when isLoading is true', () => {
+    appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} isLoading={true} />);
+
+    const btn = screen.getByTestId('cases-show-more-user-actions');
+
+    expect(btn).toBeInTheDocument();
+    expect(btn).toHaveAttribute('disabled');
+    expect(screen.getByRole('progressbar')).toBeTruthy();
+  });
+
   it('calls onShowMoreClick on button click', () => {
     appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
 

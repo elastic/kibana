@@ -13,36 +13,40 @@ import * as i18n from './translations';
 
 interface ShowMoreButtonProps {
   onShowMoreClick: () => void;
+  isLoading?: boolean;
 }
 
-export const ShowMoreButton = React.memo<ShowMoreButtonProps>(({ onShowMoreClick }) => {
-  const handleShowMore = () => {
-    onShowMoreClick();
-  };
+export const ShowMoreButton = React.memo<ShowMoreButtonProps>(
+  ({ onShowMoreClick, isLoading = false }) => {
+    const handleShowMore = () => {
+      onShowMoreClick();
+    };
 
-  const { euiTheme } = useEuiTheme();
+    const { euiTheme } = useEuiTheme();
 
-  return (
-    <EuiPanel
-      color="subdued"
-      css={css`
-        display: flex;
-        justify-content: center;
-        margin-block: ${euiTheme.size.xl};
-        margin-inline-start: ${euiTheme.size.xxxl};
-      `}
-    >
-      <EuiButton
-        fill
-        color="text"
-        size="s"
-        onClick={handleShowMore}
-        data-test-subj="cases-show-more-user-actions"
+    return (
+      <EuiPanel
+        color="subdued"
+        css={css`
+          display: flex;
+          justify-content: center;
+          margin-block: ${euiTheme.size.xl};
+          margin-inline-start: ${euiTheme.size.xxxl};
+        `}
       >
-        {i18n.SHOW_MORE}
-      </EuiButton>
-    </EuiPanel>
-  );
-});
+        <EuiButton
+          fill
+          color="text"
+          size="s"
+          onClick={handleShowMore}
+          data-test-subj="cases-show-more-user-actions"
+          isLoading={isLoading}
+        >
+          {i18n.SHOW_MORE}
+        </EuiButton>
+      </EuiPanel>
+    );
+  }
+);
 
 ShowMoreButton.displayName = 'ShowMoreButton';

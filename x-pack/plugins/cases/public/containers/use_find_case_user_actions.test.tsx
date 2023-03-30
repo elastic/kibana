@@ -57,7 +57,7 @@ describe('UseFindCaseUserActions', () => {
         data: {
           userActions: [...findCaseUserActionsResponse.userActions],
           total: 20,
-          perPage: 1000,
+          perPage: 10,
           page: 1,
         },
         isError: false,

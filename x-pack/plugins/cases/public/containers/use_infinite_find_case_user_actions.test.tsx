@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+
 import { useInfiniteFindCaseUserActions } from './use_infinite_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';
@@ -22,6 +23,16 @@ const initialData = {
   isError: false,
   isLoading: true,
 };
+
+// const generateMockedResponse = (page: any) => {
+//   const currentPage = Number(page);
+//   // const nextPage = currentPage + 1;
+
+//   return {
+//         ...findCaseUserActionsResponse,
+//         page: currentPage,
+//   };
+// };
 
 describe('UseInfiniteFindCaseUserActions', () => {
   const filterActionType: CaseUserActionTypeWithAll = 'all';
@@ -57,7 +68,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
             {
               userActions: [...findCaseUserActionsResponse.userActions],
               total: 20,
-              perPage: 1000,
+              perPage: 10,
               page: 1,
             },
           ],
@@ -138,4 +149,75 @@ describe('UseInfiniteFindCaseUserActions', () => {
     );
     expect(addError).toHaveBeenCalled();
   });
+
+  // describe('getNextPageParams', () => {
+  //   beforeAll(() => {
+  //     nock("https://localhost:5601/api/")
+  //       .defaultReplyHeaders({
+  //         "access-control-allow-origin": "*",
+  //         "access-control-allow-credentials": "true",
+  //       })
+  //       .persist()
+  //       .get("/user_actions/_find")
+  //       .query(true)
+  //       .reply(200, (uri) => {
+  //         const url = new URL(`https://localhost:5601/api/${uri}`);
+  //         const { page } = Object.fromEntries(url.searchParams);
+  //         return generateMockedResponse(page);
+  //       });
+  //   });
+
+  //   afterEach(cleanup);
+
+  //   test("fetches next page", async () => {
+  //     const { result, waitFor } = renderHook(
+  //       () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
+  //       { wrapper: appMockRender.AppWrapper }
+  //     );
+
+  //     await waitFor(() => result.current.isSuccess);
+
+  //     expect(result.current.data?.pages).toStrictEqual([
+  //       generateMockedResponse(1),
+  //     ]);
+
+  //     expect(result.current.hasNextPage).toBe(true);
+
+  //     act(() => {
+  //       result.current.fetchNextPage();
+  //     });
+
+  //     await waitFor(() => result.current.data?.pages.length === 2);
+
+  //     expect(result.current.data?.pages).toStrictEqual([
+  //       generateMockedResponse(1),
+  //       generateMockedResponse(2),
+  //     ]);
+  //   });
+
+  //   it("fetches the next page", async () => {
+  //     // Fetches Page 1
+  //     const { result } = renderHook(
+  //       () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
+  //       {
+  //         wrapper: appMockRender.AppWrapper,
+  //       }
+  //     );
+
+  //     await waitFor(() => expect(result.current.status === "success").toBe(true));
+
+  //     expect(result.current.data?.pages[0]).toStrictEqual(findCaseUserActionsResponse);
+
+  //     // Fetches Page 2
+
+  //     result.current.fetchNextPage();
+  //     // await waitFor(() => expect(result.current.isFetchingNextPage).toBe(true));
+  //     // await waitFor(() => expect(result.current.isFetchingNextPage).toBe(false));
+
+  //     expect(result.current.data?.pages).toEqual([
+  //       findCaseUserActionsResponse,
+  //       {...findCaseUserActionsResponse, page: 2},
+  //     ]);
+  //   });
+  // });
 });

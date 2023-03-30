@@ -15,6 +15,7 @@ import routeData from 'react-router';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import {
   basicCase,
+  caseUserActions,
   getHostIsolationUserAction,
   getUserAction,
   hostIsolationComment,
@@ -510,6 +511,92 @@ describe(`UserActions`, () => {
       await waitFor(() => {
         expect(defaultInfiniteUseFindCaseUserActions.fetchNextPage).toHaveBeenCalled();
       });
+    });
+
+    it('shows more button visible 21st user action added', async () => {
+      const mockUserActions = [
+        ...caseUserActions,
+        getUserAction('comment', Actions.create),
+        getUserAction('comment', Actions.update),
+        getUserAction('comment', Actions.create),
+        getUserAction('comment', Actions.update),
+        getUserAction('comment', Actions.create),
+        getUserAction('comment', Actions.update),
+        getUserAction('comment', Actions.create),
+      ];
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        ...defaultInfiniteUseFindCaseUserActions,
+        data: {
+          pages: [
+            {
+              total: 20,
+              page: 1,
+              perPage: 10,
+              userActions: mockUserActions,
+            },
+          ],
+        },
+      });
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: {
+          total: 20,
+          page: 2,
+          perPage: 10,
+          userActions: mockUserActions,
+        },
+      });
+      const props = {
+        ...defaultProps,
+        userActionsStats: {
+          total: 20,
+          totalComments: 10,
+          totalOtherActions: 10,
+        },
+      };
+
+      const { rerender } = appMockRender.render(<UserActions {...props} />);
+
+      await waitForComponentToUpdate();
+
+      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
+      expect(screen.queryByTestId('cases-show-more-user-actions')).not.toBeInTheDocument();
+
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        ...defaultInfiniteUseFindCaseUserActions,
+        data: {
+          pages: [
+            {
+              total: 21,
+              page: 1,
+              perPage: 10,
+              userActions: mockUserActions,
+            },
+            {
+              total: 21,
+              page: 2,
+              perPage: 10,
+              userActions: [getUserAction('comment', Actions.create)],
+            },
+          ],
+        },
+      });
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: {
+          total: 21,
+          page: 2,
+          perPage: 10,
+          userActions: mockUserActions,
+        },
+      });
+
+      rerender(<UserActions {...props} />);
+
+      await waitForComponentToUpdate();
+
+      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
+      expect(screen.queryByTestId('cases-show-more-user-actions')).not.toBeInTheDocument();
     });
   });
 });
