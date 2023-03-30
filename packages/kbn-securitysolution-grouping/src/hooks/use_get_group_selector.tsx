@@ -80,12 +80,12 @@ export const useGetGroupSelector = ({
         }
         return;
       }
-      setGroupsActivePage(groupSelection, 0);
-      setSelectedGroups(
-        isNoneGroup([groupSelection])
-          ? [groupSelection]
-          : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection]
-      );
+
+      const newSelectedGroups = isNoneGroup([groupSelection])
+        ? [groupSelection]
+        : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
+      newSelectedGroups.forEach((group) => setGroupsActivePage(group, 0));
+      setSelectedGroups(newSelectedGroups);
 
       // built-in telemetry: UI-counter
       tracker?.(

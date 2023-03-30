@@ -143,10 +143,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
 
   useEffect(() => {
     if (!isEqual(prevQueryGroups.current, queryGroups)) {
-      console.log('useEffect setAlertsQuery action', {
-        prevQueryGroups: prevQueryGroups.current,
-        queryGroups,
-      });
       prevQueryGroups.current = queryGroups;
       setAlertsQuery(queryGroups);
     }

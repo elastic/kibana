@@ -27,7 +27,6 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
   switch (action.type) {
     case ActionType.updateActiveGroups: {
       const { id, activeGroups } = action.payload;
-      console.log('update active groups?');
       return {
         ...state,
         groupById: {

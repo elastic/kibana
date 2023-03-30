@@ -106,28 +106,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
 
   const getAdditionalFilters = useCallback(
     (level: number, parentGroupingFilter?: Filter[]) => {
-      // const filters = {
-      //   defaultFilters: props.defaultFilters,
-      //   globalFilters: props.globalFilters,
-      //   globalQuery: props.globalQuery,
-      //   parentGroupingFilter,
-      // };
-      // console.log('getAdditionalFilters', {
-      //   lastFilters: lastFilters.current,
-      //   filters,
-      // });
-      // const currentLevel = lastFilters.current[level];
-      //
-      // if (currentLevel == null) {
-      //   console.log('currentLevel null');
-      //   lastFilters.current[level] = filters;
-      // } else if (!isEqual(currentLevel, filters)) {
-      //   console.log('reset pagination');
-      //   // if any filter changes, reset pagination
-      //   resetPagination();
-      //   lastFilters.current[level] = filters;
-      // }
-
       try {
         return [
           buildEsQuery(undefined, props.globalQuery != null ? [props.globalQuery] : [], [
