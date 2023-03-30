@@ -29,10 +29,17 @@ interface DocumentMigratorOptions {
 }
 
 /**
- * Manages migration of individual documents.
+ * Manages transformations of individual documents.
  */
 export interface VersionedTransformer {
+  /**
+   * Migrates a document to its latest version.
+   */
   migrate: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+  /**
+   * Migrates a document to the latest version and applies type conversions if applicable.
+   * Also returns any additional document(s) that may have been created during the transformation process.
+   */
   migrateAndConvert: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
 }
 
@@ -51,7 +58,6 @@ export class DocumentMigrator implements VersionedTransformer {
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
    * @prop {string} convertVersion - The version of Kibana in which documents can be converted to multi-namespace types
    * @prop {Logger} log - The migration logger
-   * @memberof DocumentMigrator
    */
   constructor(options: DocumentMigratorOptions) {
     this.options = options;
@@ -59,10 +65,6 @@ export class DocumentMigrator implements VersionedTransformer {
 
   /**
    * Gets the latest version of each migrate-able property.
-   *
-   * @readonly
-   * @type {SavedObjectsMigrationVersion}
-   * @memberof DocumentMigrator
    */
   public get migrationVersion(): SavedObjectsMigrationVersion {
     if (!this.migrations) {
@@ -81,11 +83,7 @@ export class DocumentMigrator implements VersionedTransformer {
 
   /**
    * Prepares active migrations and document transformer function.
-   *
-   * @returns {void}
-   * @memberof DocumentMigrator
    */
-
   public prepareMigrations = () => {
     const { typeRegistry, kibanaVersion, log, convertVersion } = this.options;
     this.migrations = buildActiveMigrations({
@@ -94,6 +92,25 @@ export class DocumentMigrator implements VersionedTransformer {
       log,
       convertVersion,
     });
+  };
+
+  /**
+   * Migrates a document to the latest version.
+   */
+  public migrate = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
+    const { document } = this.transform(doc);
+
+    return document;
+  };
+
+  /**
+   * Migrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may
+   * have been created during the transformation process.
+   */
+  public migrateAndConvert = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] => {
+    const { document, additionalDocs } = this.transform(doc, { convertNamespaceTypes: true });
+
+    return [document, ...additionalDocs];
   };
 
   private transform(
@@ -114,31 +131,4 @@ export class DocumentMigrator implements VersionedTransformer {
 
     return { document, additionalDocs };
   }
-
-  /**
-   * Migrates a document to the latest version.
-   *
-   * @param {SavedObjectUnsanitizedDoc} doc
-   * @returns {SavedObjectUnsanitizedDoc}
-   * @memberof DocumentMigrator
-   */
-  public migrate = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
-    const { document } = this.transform(doc);
-
-    return document;
-  };
-
-  /**
-   * Migrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may
-   * have been created during the transformation process.
-   *
-   * @param {SavedObjectUnsanitizedDoc} doc
-   * @returns {SavedObjectUnsanitizedDoc}
-   * @memberof DocumentMigrator
-   */
-  public migrateAndConvert = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] => {
-    const { document, additionalDocs } = this.transform(doc, { convertNamespaceTypes: true });
-
-    return [document, ...additionalDocs];
-  };
 }
