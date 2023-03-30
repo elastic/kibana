@@ -6,40 +6,40 @@
  */
 
 // Cloud Posture Management Status
-export const getCpmStatus = (cpmStatusData : any) => {
-    // if has findings in any of the integrations.
-    const hasFindings =
+export const getCpmStatus = (cpmStatusData: any) => {
+  // if has findings in any of the integrations.
+  const hasFindings =
     cpmStatusData.data?.indicesDetails[0].status === 'not-empty' ||
     cpmStatusData.data?.kspm.status === 'indexed' ||
     cpmStatusData.data?.cspm.status === 'indexed';
-  
-    // kspm
-    const hasKspmFindings =
+
+  // kspm
+  const hasKspmFindings =
     cpmStatusData.data?.kspm?.status === 'indexed' ||
     cpmStatusData.data?.indicesDetails[0].status === 'not-empty';
-  
-    // cspm
-    const hasCspmFindings =
+
+  // cspm
+  const hasCspmFindings =
     cpmStatusData.data?.cspm?.status === 'indexed' ||
     cpmStatusData.data?.indicesDetails[0].status === 'not-empty';
 
-    const isKspmInstalled = cpmStatusData.data?.kspm?.status !== 'not-installed';
-    const isCspmInstalled = cpmStatusData.data?.cspm?.status !== 'not-installed';
-    const isKspmPrivileged = cpmStatusData.data?.kspm?.status !== 'unprivileged';
-    const isCspmPrivileged = cpmStatusData.data?.cspm?.status !== 'unprivileged';
+  const isKspmInstalled = cpmStatusData.data?.kspm?.status !== 'not-installed';
+  const isCspmInstalled = cpmStatusData.data?.cspm?.status !== 'not-installed';
+  const isKspmPrivileged = cpmStatusData.data?.kspm?.status !== 'unprivileged';
+  const isCspmPrivileged = cpmStatusData.data?.cspm?.status !== 'unprivileged';
 
-    const isCspmIntegrationInstalled = isCspmInstalled && isCspmPrivileged;
-    const isKspmIntegrationInstalled = isKspmInstalled && isKspmPrivileged;
-  
-    return {
-      hasFindings,
-      hasKspmFindings,
-      hasCspmFindings,
-      isCspmInstalled,
-      isKspmInstalled,
-      isKspmPrivileged,
-      isCspmPrivileged,
-      isCspmIntegrationInstalled,
-      isKspmIntegrationInstalled
-    };
+  const isCspmIntegrationInstalled = isCspmInstalled && isCspmPrivileged;
+  const isKspmIntegrationInstalled = isKspmInstalled && isKspmPrivileged;
+
+  return {
+    hasFindings,
+    hasKspmFindings,
+    hasCspmFindings,
+    isCspmInstalled,
+    isKspmInstalled,
+    isKspmPrivileged,
+    isCspmPrivileged,
+    isCspmIntegrationInstalled,
+    isKspmIntegrationInstalled,
   };
+};
