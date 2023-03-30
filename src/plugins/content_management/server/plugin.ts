@@ -74,7 +74,7 @@ export class ContentManagementPlugin
     return {};
   }
 
-  public stop(): void {
-    this.#eventStream.stop();
+  public async stop(): Promise<void> {
+    await this.#eventStream.stop();
   }
 }

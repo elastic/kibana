@@ -78,8 +78,8 @@ export class EventStreamService {
   }
 
   /** Called during "stop" plugin life-cycle. */
-  public stop(): void {
-    this.#buffer.flush();
+  public async stop(): Promise<void> {
+    await this.#buffer.flushAsync();
   }
 
   #getClient(): EventStreamClient {
