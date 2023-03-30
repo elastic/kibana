@@ -9,6 +9,7 @@ Array [
         color="#BD271E"
         dateFormat="YYYY-MM-DD HH:mm"
         id="annotation_alert_start"
+        title="Alert started"
       />,
     ],
     "chartType": "line",
