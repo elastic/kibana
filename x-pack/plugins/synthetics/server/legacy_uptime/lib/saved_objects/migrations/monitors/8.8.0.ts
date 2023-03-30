@@ -12,7 +12,9 @@ import {
   SyntheticsMonitorWithSecrets,
   MonitorFields,
   BrowserFields,
+  ScheduleUnit,
 } from '../../../../../../common/runtime_types';
+import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../../../../common/constants/monitor_defaults';
 import {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
   SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
@@ -33,14 +35,25 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
     migration: (
       doc: SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>
     ): SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets> => {
-      const normalizedDoc = normalizeSecrets(doc);
-      if (normalizedDoc.attributes.type === 'browser') {
-        return {
-          ...doc,
+      let migrated = doc;
+      migrated = {
+        ...migrated,
+        attributes: {
+          ...migrated.attributes,
+          [ConfigKey.SCHEDULE]: {
+            number: getNearestSupportedSchedule(migrated.attributes[ConfigKey.SCHEDULE].number),
+            unit: ScheduleUnit.MINUTES,
+          },
+        },
+      };
+      if (migrated.attributes.type === 'browser') {
+        const normalizedDoc = normalizeSecrets(migrated);
+        migrated = {
+          ...migrated,
           attributes: omitZipUrlFields(normalizedDoc.attributes as BrowserFields),
         };
       }
-      return doc;
+      return migrated;
     },
     inputType: LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
     migratedType: SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
@@ -48,19 +61,23 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
 };
 
 const getNearestSupportedSchedule = (currentSchedule: string): string => {
-  const counts = ['4', '9', '15', '6', '2'];
+  const schedules = ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`);
 
-  const closest = counts.reduce(function (prev, curr) {
-    const supportedSchedule = parseInt(curr, 10);
-    const currSchedule = parseInt(currentSchedule, 10);
-    const prevSupportedSchedule = parseInt(prev, 10);
-    return Math.abs(supportedSchedule - currSchedule) <
-      Math.abs(prevSupportedSchedule - currSchedule)
-      ? curr
-      : prev;
-  });
+  try {
+    const closest = schedules.reduce(function (prev, curr) {
+      const supportedSchedule = parseFloat(curr);
+      const currSchedule = parseFloat(currentSchedule);
+      const prevSupportedSchedule = parseFloat(prev);
+      return Math.abs(supportedSchedule - currSchedule) <
+        Math.abs(prevSupportedSchedule - currSchedule)
+        ? curr
+        : prev;
+    });
 
-  return closest;
+    return closest;
+  } catch {
+    return `${ALLOWED_SCHEDULES_IN_MINUTES[0]}`;
+  }
 };
 
 const omitZipUrlFields = (fields: BrowserFields) => {

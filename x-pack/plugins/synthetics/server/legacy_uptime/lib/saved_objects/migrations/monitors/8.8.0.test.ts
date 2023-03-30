@@ -7,7 +7,14 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migration880 } from './8.8.0';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { SourceType, FormMonitorType } from '../../../../../../common/runtime_types';
+import {
+  DataStream,
+  SourceType,
+  FormMonitorType,
+  ConfigKey,
+  ScheduleUnit,
+} from '../../../../../../common/runtime_types';
+import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../../../../common/constants/monitor_defaults';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -16,7 +23,7 @@ const testMonitor = {
   type: 'synthetics-monitor',
   id: '625bedf7-2cbd-4454-aa2c-4e8cc08a9683',
   attributes: {
-    type: 'browser',
+    type: DataStream.BROWSER,
     form_monitor_type: FormMonitorType.MULTISTEP,
     enabled: true,
     alert: { status: { enabled: true } },
@@ -76,6 +83,29 @@ const testMonitor = {
 };
 
 describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
+  const testSchedules = [
+    ['4', '3'],
+    ['7', '5'],
+    ['8', '10'],
+    ['9.5', '10'],
+    ['12', '10'],
+    ['13', '15'],
+    ['16', '15'],
+    ['18', '20'],
+    ['21', '20'],
+    ['25', '20'],
+    ['26', '30'],
+    ['31', '30'],
+    ['45', '30'],
+    ['46', '60'],
+    ['61', '60'],
+    ['90', '60'],
+    ['91', '120'],
+    ['121', '120'],
+    ['195', '240'],
+    ['600', '240'],
+  ];
+
   beforeEach(() => {
     jest.resetAllMocks();
     encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
@@ -160,6 +190,115 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
     expect(Object.keys(actual.attributes).some((key: string) => key.includes('zip_url'))).toEqual(
       false
     );
+  });
+
+  it.each(testSchedules)(
+    'handles migrating schedule with invalid schedules',
+    (previous, migrated) => {
+      const testMonitorWithSchedule = {
+        ...testMonitor,
+        attributes: {
+          ...testMonitor.attributes,
+          [ConfigKey.SCHEDULE]: {
+            unit: ScheduleUnit.MINUTES,
+            number: previous,
+          },
+        },
+      };
+      expect(
+        ALLOWED_SCHEDULES_IN_MINUTES.includes(
+          parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+        )
+      ).toBe(false);
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+      expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(migrated);
+      expect(
+        ALLOWED_SCHEDULES_IN_MINUTES.includes(
+          parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+        )
+      ).toBe(true);
+      expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+    }
+  );
+
+  it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+    'handles migrating schedule with valid schedules',
+    (validSchedule) => {
+      const testMonitorWithSchedule = {
+        ...testMonitor,
+        attributes: {
+          ...testMonitor.attributes,
+          [ConfigKey.SCHEDULE]: {
+            unit: ScheduleUnit.MINUTES,
+            number: validSchedule,
+          },
+        },
+      };
+      expect(
+        ALLOWED_SCHEDULES_IN_MINUTES.includes(
+          parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+        )
+      ).toBe(true);
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+      expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
+      expect(
+        ALLOWED_SCHEDULES_IN_MINUTES.includes(
+          parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+        )
+      ).toBe(true);
+      expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+    }
+  );
+
+  // handles invalid values stored in saved object
+  it.each([null, undefined, {}, []])(
+    'handles migrating schedule with invalid values',
+    (invalidSchedule) => {
+      const testMonitorWithSchedule = {
+        ...testMonitor,
+        attributes: {
+          ...testMonitor.attributes,
+          [ConfigKey.SCHEDULE]: {
+            unit: ScheduleUnit.MINUTES,
+            number: invalidSchedule,
+          },
+        },
+      };
+      const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+      expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual('1');
+      expect(
+        ALLOWED_SCHEDULES_IN_MINUTES.includes(
+          parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+        )
+      ).toBe(true);
+      expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+    }
+  );
+
+  // handles
+  it.each([
+    [5, '5'],
+    [4, '3'],
+    [2.5, '3'],
+  ])('handles migrating schedule numeric values', (invalidSchedule, migrated) => {
+    const testMonitorWithSchedule = {
+      ...testMonitor,
+      attributes: {
+        ...testMonitor.attributes,
+        [ConfigKey.SCHEDULE]: {
+          unit: ScheduleUnit.MINUTES,
+          number: invalidSchedule,
+        },
+      },
+    };
+    const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+    expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(migrated);
+    expect(
+      ALLOWED_SCHEDULES_IN_MINUTES.includes(
+        parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+      )
+    ).toBe(true);
+    expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
   });
 
   // it('project monitors - adds custom heartbeat id to id field', () => {
