@@ -92,10 +92,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const isPackagePolicyEdit = !!packagePolicyId;
     const isInputOnlyPackage = packageInfo.type === 'input';
 
-    const hasDatasetVar = packageInputStream.vars?.some(
+    const packageHasDatasetVar = packageInputStream.vars?.some(
       (varDef) => varDef.name === DATASET_VAR_NAME
     );
-    const showPipelinesAndMappings = !isInputOnlyPackage && !hasDatasetVar;
+    const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
+    const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
+    const showPipelinesAndMappings = isInputOnlyPackage || !packageHasDatasetVar;
     useEffect(() => {
       if (isDefaultDatastream && containerRef.current) {
         containerRef.current.scrollIntoView();
@@ -302,19 +304,20 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         </EuiFlexItem>
                       );
                     })}
-                    {/* Only show datastream pipelines and mappings on edit and not for input packages*/}
                     {isPackagePolicyEdit && showPipelinesAndMappings && (
                       <>
                         <EuiFlexItem>
                           <PackagePolicyEditorDatastreamPipelines
                             packageInputStream={packagePolicyInputStream}
                             packageInfo={packageInfo}
+                            customDataset={customDatasetVarValue}
                           />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <PackagePolicyEditorDatastreamMappings
                             packageInputStream={packagePolicyInputStream}
                             packageInfo={packageInfo}
+                            customDataset={customDatasetVarValue}
                           />
                         </EuiFlexItem>
                       </>
