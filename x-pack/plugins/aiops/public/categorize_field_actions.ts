@@ -34,8 +34,8 @@ export const categorizeFieldAction = (
       // application.navigateToApp('lens', {
       //   state: { type: ACTION_CATEGORIZE_FIELD, payload: context },
       // });
-      const { field, dataView } = context;
-      const onAddFilter = () => {};
+      const { field, dataView, onAddDSLFilter } = context;
+      // const onAddFilter = () => {};
       // if (dataViewSpec.id === undefined) {
       //   return;
       // }
@@ -45,6 +45,6 @@ export const categorizeFieldAction = (
       // if (field === undefined) {
       //   return;
       // }
-      showCategorizeFlyout(field, dataView, coreStart, data, charts, onAddFilter);
+      showCategorizeFlyout(field, dataView, coreStart, data, charts, onAddDSLFilter);
     },
   });

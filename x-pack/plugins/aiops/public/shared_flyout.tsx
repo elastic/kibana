@@ -22,7 +22,7 @@ import {
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
+// import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { LogCategorizationFlyout } from './components/log_categorization/log_categorization_for_flyout';
@@ -39,7 +39,12 @@ export async function showCategorizeFlyout(
   coreStart: CoreStart,
   data: DataPublicPluginStart,
   charts: ChartsPluginStart,
-  onAddFilter?: AddFieldFilterHandler
+  onAddFilter?: (
+    field: DataViewField | string,
+    value: unknown,
+    type: '+' | '-',
+    title?: string
+  ) => void
   // share: SharePluginStart,
   // data: DataPublicPluginStart
   // lens: LensPublicStart

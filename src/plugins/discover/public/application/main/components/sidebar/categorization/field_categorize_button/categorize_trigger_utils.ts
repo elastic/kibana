@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { type UiActionsStart, CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import {
+  type UiActionsStart,
+  CATEGORIZE_FIELD_TRIGGER,
+  CategorizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
 async function getCompatibleActions(
@@ -29,14 +33,21 @@ export function triggerCategorizeActions(
   field: DataViewField,
   contextualFields: string[] = [],
   originatingApp: string,
-  dataView?: DataView
+  dataView?: DataView,
+  onAddDSLFilter?: (
+    field: DataViewField | string,
+    value: unknown,
+    type: '+' | '-',
+    title?: string
+  ) => void
 ) {
   if (!dataView) return;
-  const triggerOptions = {
+  const triggerOptions: CategorizeFieldContext = {
     dataView,
     field,
     contextualFields,
     originatingApp,
+    onAddDSLFilter,
   };
   uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec(triggerOptions);
 }

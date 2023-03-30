@@ -22,7 +22,7 @@ import {
   EuiTableSelectionType,
 } from '@elastic/eui';
 
-import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
+// import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
@@ -49,7 +49,12 @@ interface Props {
   setPinnedCategory: (category: Category | null) => void;
   selectedCategory: Category | null;
   setSelectedCategory: (category: Category | null) => void;
-  onAddFilter?: AddFieldFilterHandler;
+  onAddFilter?: (
+    field: DataViewField | string,
+    value: unknown,
+    type: '+' | '-',
+    title?: string
+  ) => void;
   onClose: () => void;
   enableRowActions?: boolean;
 }

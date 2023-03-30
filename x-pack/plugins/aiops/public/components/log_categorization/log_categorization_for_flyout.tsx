@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiLoadingContent, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
 
-import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
+// import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
 // import { FullTimeRangeSelector } from '../full_time_range_selector';
 // import { DatePickerWrapper } from '../date_picker_wrapper';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useData } from '../../hooks/use_data';
 // import { SearchPanel } from '../search_panel';
 import type { SearchQueryLanguage } from '../../application/utils/search_utils';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+// import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
@@ -31,7 +31,12 @@ export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
-  onAddFilter?: AddFieldFilterHandler;
+  onAddFilter?: (
+    field: DataViewField | string,
+    value: unknown,
+    type: '+' | '-',
+    title?: string
+  ) => void;
   onClose: () => void;
 }
 
@@ -44,9 +49,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   onAddFilter,
   onClose,
 }) => {
-  const {
-    notifications: { toasts },
-  } = useAiopsAppContext();
+  // const {
+  //   notifications: { toasts },
+  // } = useAiopsAppContext();
 
   const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);

@@ -29,6 +29,12 @@ export interface CategorizeFieldContext {
   contextualFields?: string[];
   originatingApp?: string;
   query?: AggregateQuery;
+  onAddDSLFilter?: (
+    field: DataViewField | string,
+    value: unknown,
+    type: '+' | '-',
+    title?: string
+  ) => void;
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';

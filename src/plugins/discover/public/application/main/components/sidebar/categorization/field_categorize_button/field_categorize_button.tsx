@@ -25,7 +25,12 @@ export interface FieldCategorizeButtonProps {
   buttonProps?: Partial<EuiButtonProps>;
   wrapInContainer?: (element: React.ReactElement) => React.ReactElement;
   closePopover?: () => void;
-  onAddDSLFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
+  onAddDSLFilter?: (
+    field: DataViewField | string,
+    value: unknown,
+    type: '+' | '-',
+    title?: string
+  ) => void;
 }
 
 export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React.memo(
@@ -40,6 +45,7 @@ export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React
     buttonProps,
     wrapInContainer,
     closePopover,
+    onAddDSLFilter,
   }) => {
     const [canCategorizeField, setCanCategorizeField] = useState<boolean>(false);
 
@@ -65,7 +71,8 @@ export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React
           field,
           contextualFields,
           originatingApp,
-          updatedDataView
+          updatedDataView,
+          onAddDSLFilter
         );
       };
       triggerVisualization(dataView);
