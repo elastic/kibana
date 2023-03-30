@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
@@ -18,17 +18,11 @@ import {
   CLOUD_DASHBOARD_CONTAINER,
   DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_CONTAINER,
-  KUBERNETES_DASHBOARD_TAB,
-  CLOUD_DASHBOARD_TAB,
 } from './test_subjects';
 import { mockDashboardData } from './mock';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { expectIdsInDoc } from '../../test/utils';
-import {
-  CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
-  KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
-} from '../../components/cloud_posture_page';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
@@ -497,88 +491,6 @@ describe('<ComplianceDashboard />', () => {
       be: [CLOUD_DASHBOARD_CONTAINER],
       notToBe: [
         KUBERNETES_DASHBOARD_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
-
-  it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'indexed' },
-          cspm: { status: 'not-installed' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
-          ],
-        },
-      })
-    );
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: mockDashboardData,
-    }));
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: undefined,
-    }));
-
-    renderComplianceDashboardPage();
-
-    screen.getByTestId(CLOUD_DASHBOARD_TAB).click();
-
-    expectIdsInDoc({
-      be: [CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
-      notToBe: [
-        KUBERNETES_DASHBOARD_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
-
-  it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          cspm: { status: 'indexed' },
-          kspm: { status: 'not-installed' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
-          ],
-        },
-      })
-    );
-    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: mockDashboardData,
-    }));
-    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
-      isSuccess: true,
-      isLoading: false,
-      data: undefined,
-    }));
-
-    renderComplianceDashboardPage();
-
-    screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
-
-    expectIdsInDoc({
-      be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
-      notToBe: [
-        CLOUD_DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,

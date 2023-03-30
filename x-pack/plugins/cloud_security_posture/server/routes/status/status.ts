@@ -291,7 +291,6 @@ export const getCspStatus = async ({
       findingsLatest: vulnerabilitiesLatestIndexStatus,
       findings: vulnerabilitiesIndexStatus,
     },
-    installedPackagePoliciesTotalVulnMgmt,
     healthyAgentsVulMgmt,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates

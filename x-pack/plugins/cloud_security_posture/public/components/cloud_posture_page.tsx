@@ -28,6 +28,7 @@ import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_
 
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
+import { getCpmStatus } from '../common/utils/get_cpm_status';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
@@ -246,7 +247,6 @@ interface CloudPosturePageProps<TData, TError> {
 export const CloudPosturePage = <TData, TError>({
   children,
   query,
-  hasFindings = true,
   loadingRender = defaultLoadingRenderer,
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
@@ -255,6 +255,7 @@ export const CloudPosturePage = <TData, TError>({
   const getSetupStatus = useCspSetupStatusApi();
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+  const status = getCpmStatus(getSetupStatus);
 
   const render = () => {
     if (subscriptionStatus.isError) {
@@ -286,7 +287,7 @@ export const CloudPosturePage = <TData, TError>({
       return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
     }
 
-    if (!hasFindings) {
+    if (!status.hasFindings) {
       return children;
     }
 

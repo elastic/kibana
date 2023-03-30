@@ -35,6 +35,7 @@ import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
+import { getCpmStatus } from '../../common/utils/get_cpm_status';
 
 const noDataOptions: Record<
   PosturePolicyTemplate,
@@ -123,7 +124,6 @@ const IntegrationPostureDashboard = ({
   dashboardType: PosturePolicyTemplate;
 }) => {
   const noFindings = !complianceData || complianceData.stats.totalFindings === 0;
-
   // integration is not installed, and there are no findings for this integration
   if (noFindings && !isIntegrationInstalled) {
     return <CspNoDataPage {...notInstalledConfig} />;
@@ -179,21 +179,17 @@ const IntegrationPostureDashboard = ({
 export const ComplianceDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(CSPM_POLICY_TEMPLATE);
   const getSetupStatus = useCspSetupStatusApi();
-  const hasFindingsKspm =
-    getSetupStatus.data?.kspm?.status === 'indexed' ||
-    getSetupStatus.data?.indicesDetails[0].status === 'not-empty';
-  const hasFindingsCspm =
-    getSetupStatus.data?.cspm?.status === 'indexed' ||
-    getSetupStatus.data?.indicesDetails[0].status === 'not-empty';
+  const status: any = getCpmStatus(getSetupStatus);
+  const hasFindingsKspm = status.hasKspmFindings;
+  const hasFindingsCspm = status.hasCspmFindings;
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
-  const isKspmInstalled = getSetupStatus.data?.kspm?.status !== 'not-installed';
-  const isCspmInstalled = getSetupStatus.data?.cspm?.status !== 'not-installed';
-  const isKspmPrivileged = getSetupStatus.data?.kspm?.status !== 'unprivileged';
-  const isCspmPrivileged = getSetupStatus.data?.cspm?.status !== 'unprivileged';
-  const isCspmIntegrationInstalled = isCspmInstalled && isCspmPrivileged;
-  const isKspmIntegrationInstalled = isKspmInstalled && isKspmPrivileged;
+  const isKspmInstalled = status.isKspmInstalled;
+  const isCspmInstalled = status.isCspmInstalled;
+
+  const isCspmIntegrationInstalled = status.isCspmIntegrationInstalled;
+  const isKspmIntegrationInstalled = status.isKspmIntegrationInstalled;
 
   const getCspmDashboardData = useCspmStatsApi({
     enabled: hasFindingsCspm,
@@ -254,7 +250,7 @@ export const ComplianceDashboard = () => {
         content: (
           <>
             {hasFindingsCspm || !isCspmInstalled ? (
-              <CloudPosturePage query={getCspmDashboardData} hasFindings={hasFindingsCspm}>
+              <CloudPosturePage query={getCspmDashboardData}>
                 <div data-test-subj={CLOUD_DASHBOARD_CONTAINER}>
                   <IntegrationPostureDashboard
                     dashboardType={CSPM_POLICY_TEMPLATE}
@@ -283,7 +279,7 @@ export const ComplianceDashboard = () => {
         content: (
           <>
             {hasFindingsKspm || !isKspmInstalled ? (
-              <CloudPosturePage query={getKspmDashboardData} hasFindings={hasFindingsKspm}>
+              <CloudPosturePage query={getKspmDashboardData}>
                 <div data-test-subj={KUBERNETES_DASHBOARD_CONTAINER}>
                   <IntegrationPostureDashboard
                     dashboardType={KSPM_POLICY_TEMPLATE}
