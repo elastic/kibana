@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-process.env.TZ = 'Asia/Calcutta';
-
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
