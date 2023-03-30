@@ -14,7 +14,8 @@ import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts'
 import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { useFetchTriggeredAlertsHistory } from '../../../../../hooks/use_fetch_triggered_alert_history';
+import DateMath from '@kbn/datemath';
+import { useAlertsHistory } from '../../../../../hooks/use_alerts_history';
 import { type PartialCriterion } from '../../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../../expression_editor/criterion_preview_chart';
 import { PartialRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
@@ -29,15 +30,23 @@ const LogsHistoryChart = ({
   // Show the Logs History Chart ONLY if we have one criteria
   // So always pull the first criteria
   const criteria = rule.params.criteria[0];
-  const dateNow = Date.now();
-  const dateLast30Days = Number(moment(dateNow).subtract(30, 'days').format('x'));
-  const { triggeredAlertsData } = useFetchTriggeredAlertsHistory({
-    features: AlertConsumers.LOGS,
-    ruleId: rule.id,
-  });
 
+  const dateRange = {
+    from: 'now-30d',
+    to: 'now',
+  };
+  const executionTimeRange = {
+    gte: DateMath.parse(dateRange.from)!.valueOf(),
+    lte: DateMath.parse(dateRange.to, { roundUp: true })!.valueOf(),
+  };
+
+  const { alertsHistory } = useAlertsHistory({
+    featureIds: [AlertConsumers.LOGS],
+    ruleId: rule.id,
+    dateRange,
+  });
   const alertHistoryAnnotations =
-    triggeredAlertsData?.histogramTriggeredAlerts
+    alertsHistory?.histogramTriggeredAlerts
       .filter((annotation) => annotation.doc_count > 0)
       .map((annotation) => {
         return {
@@ -75,7 +84,7 @@ const LogsHistoryChart = ({
             <EuiFlexItem grow={false}>
               <EuiText color="danger">
                 <EuiTitle size="s">
-                  <h3>{triggeredAlertsData?.totalTriggeredAlerts || '-'}</h3>
+                  <h3>{alertsHistory?.totalTriggeredAlerts || '-'}</h3>
                 </EuiTitle>
               </EuiText>
             </EuiFlexItem>
@@ -93,10 +102,10 @@ const LogsHistoryChart = ({
             <EuiText>
               <EuiTitle size="s">
                 <h3>
-                  {triggeredAlertsData?.avgTimeToRecoverUS
+                  {alertsHistory?.avgTimeToRecoverUS
                     ? convertTo({
                         unit: 'minutes',
-                        microseconds: triggeredAlertsData?.avgTimeToRecoverUS,
+                        microseconds: alertsHistory?.avgTimeToRecoverUS,
                         extended: true,
                       }).formatted
                     : '-'}
@@ -146,7 +155,7 @@ const LogsHistoryChart = ({
         sourceId={rule.params.logView.logViewId}
         chartCriterion={criteria as PartialCriterion}
         showThreshold={true}
-        executionTimeRange={{ gte: dateLast30Days, lte: dateNow }}
+        executionTimeRange={executionTimeRange}
       />
     </EuiPanel>
   );

@@ -13,16 +13,21 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-interface UseFetchTriggeredAlertsHistoryProps {
-  features: string;
+interface Props {
+  featureIds: ValidFeatureId[];
   ruleId: string;
+  dateRange: {
+    from: string;
+    to: string;
+  };
 }
-interface FetchTriggeredAlertsHistory {
+interface FetchAlertsHistory {
   totalTriggeredAlerts: number;
   histogramTriggeredAlerts: Array<{
     key_as_string: string;
@@ -33,18 +38,15 @@ interface FetchTriggeredAlertsHistory {
   avgTimeToRecoverUS: number;
 }
 
-interface TriggeredAlertsHistory {
-  isLoadingTriggeredAlertHistory: boolean;
-  errorTriggeredAlertHistory?: string;
-  triggeredAlertsData?: FetchTriggeredAlertsHistory;
+interface AlertsHistory {
+  isLoadingAlertsHistory: boolean;
+  errorAlertHistory?: string;
+  alertsHistory?: FetchAlertsHistory;
 }
-export function useFetchTriggeredAlertsHistory({
-  features,
-  ruleId,
-}: UseFetchTriggeredAlertsHistoryProps) {
+export function useAlertsHistory({ featureIds, ruleId, dateRange }: Props) {
   const { http } = useKibana().services;
-  const [triggeredAlertsHistory, setTriggeredAlertsHistory] = useState<TriggeredAlertsHistory>({
-    isLoadingTriggeredAlertHistory: true,
+  const [triggeredAlertsHistory, setTriggeredAlertsHistory] = useState<AlertsHistory>({
+    isLoadingAlertsHistory: true,
   });
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
@@ -55,45 +57,42 @@ export function useFetchTriggeredAlertsHistory({
 
     try {
       if (!http) throw new Error('No http client');
-      if (!features) return;
-      const { index } = await fetchIndexNameAPI({
-        http,
-        features,
-      });
+      if (!featureIds || !featureIds.length) throw new Error('No featureIds');
 
       const { totalTriggeredAlerts, histogramTriggeredAlerts, error, avgTimeToRecoverUS } =
         await fetchTriggeredAlertsHistory({
+          featureIds,
           http,
-          index,
           ruleId,
           signal: abortCtrlRef.current.signal,
+          dateRange,
         });
 
       if (error) throw error;
       if (!isCancelledRef.current) {
-        setTriggeredAlertsHistory((oldState: TriggeredAlertsHistory) => ({
+        setTriggeredAlertsHistory((oldState: AlertsHistory) => ({
           ...oldState,
-          triggeredAlertsData: {
+          alertsHistory: {
             totalTriggeredAlerts,
             histogramTriggeredAlerts,
             avgTimeToRecoverUS,
           },
-          isLoadingRuleAlertsAggs: false,
+          isLoadingAlertsHistory: false,
         }));
       }
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          setTriggeredAlertsHistory((oldState: TriggeredAlertsHistory) => ({
+          setTriggeredAlertsHistory((oldState: AlertsHistory) => ({
             ...oldState,
-            isLoadingRuleAlertsAggs: false,
-            errorTriggeredAlertHistory: error,
-            triggeredAlertsData: undefined,
+            isLoadingAlertsHistory: false,
+            errorAlertHistory: error,
+            alertsHistory: undefined,
           }));
         }
       }
     }
-  }, [features, http, ruleId]);
+  }, [dateRange, featureIds, http, ruleId]);
   useEffect(() => {
     loadRuleAlertsAgg();
   }, [loadRuleAlertsAgg]);
@@ -101,42 +100,28 @@ export function useFetchTriggeredAlertsHistory({
   return triggeredAlertsHistory;
 }
 
-interface IndexName {
-  index: string;
-}
-
-export async function fetchIndexNameAPI({
-  http,
-  features,
-}: {
-  http: HttpSetup;
-  features: string;
-}): Promise<IndexName> {
-  const res = await http.get<{ index_name: string[] }>(`${BASE_RAC_ALERTS_API_PATH}/index`, {
-    query: { features },
-  });
-  return {
-    index: res.index_name[0],
-  };
-}
-
 export async function fetchTriggeredAlertsHistory({
+  featureIds,
   http,
-  index,
   ruleId,
   signal,
+  dateRange,
 }: {
+  featureIds: ValidFeatureId[];
   http: HttpSetup;
-  index: string;
   ruleId: string;
   signal: AbortSignal;
-}): Promise<FetchTriggeredAlertsHistory> {
+  dateRange: {
+    from: string;
+    to: string;
+  };
+}): Promise<FetchAlertsHistory> {
   try {
     const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
       signal,
       body: JSON.stringify({
-        index,
         size: 0,
+        feature_ids: featureIds,
         query: {
           bool: {
             must: [
@@ -147,10 +132,7 @@ export async function fetchTriggeredAlertsHistory({
               },
               {
                 range: {
-                  [ALERT_TIME_RANGE]: {
-                    gte: 'now-30d',
-                    lt: 'now',
-                  },
+                  [ALERT_TIME_RANGE]: dateRange,
                 },
               },
             ],
@@ -162,8 +144,8 @@ export async function fetchTriggeredAlertsHistory({
               field: ALERT_START,
               fixed_interval: '1d',
               extended_bounds: {
-                min: 'now-30d',
-                max: 'now',
+                min: dateRange.from,
+                max: dateRange.to,
               },
             },
           },
@@ -187,6 +169,7 @@ export async function fetchTriggeredAlertsHistory({
     const totalTriggeredAlerts = res?.hits.total.value;
     const histogramTriggeredAlerts = res?.aggregations?.histogramTriggeredAlerts.buckets;
     const avgTimeToRecoverUS = res?.aggregations?.avgTimeToRecoverUS.recoveryTime.value;
+
     return {
       totalTriggeredAlerts,
       histogramTriggeredAlerts,
