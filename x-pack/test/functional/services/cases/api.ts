@@ -112,8 +112,8 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       caseId: string;
       caseVersion: string;
       params: {
-        title: string,
-        description: string,
+        title: string;
+        description: string;
         severity: CaseSeverity;
         status: 'open' | 'in-progress' | 'closed';
         tags: string[];
