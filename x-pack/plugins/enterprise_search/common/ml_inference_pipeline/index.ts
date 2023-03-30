@@ -23,6 +23,7 @@ import {
 } from '../types/pipelines';
 
 export const ELSER_TASK_TYPE = 'text_expansion';
+export const LANG_IDENT_MODEL_TYPE = 'lang_ident';
 
 export interface MlInferencePipelineParams {
   description?: string;
