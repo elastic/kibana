@@ -46,7 +46,7 @@ export function CustomKqlIndicatorTypeForm() {
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.observability.slo.sloEdit.additionalSettings.timestampField.label',
+              'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.label',
               { defaultMessage: 'Timestamp field' }
             )}
           >
@@ -61,14 +61,14 @@ export function CustomKqlIndicatorTypeForm() {
                   {...field}
                   async
                   placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.additionalSettings.timestampField.placeholder',
+                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
                     { defaultMessage: 'Select a timestamp field' }
                   )}
                   aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.additionalSettings.timestampField.placeholder',
+                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
                     { defaultMessage: 'Select a timestamp field' }
                   )}
-                  data-test-subj="timestampFieldSelect"
+                  data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
                   isClearable={true}
                   isDisabled={!watch('indicator.params.index')}
                   isInvalid={!!fieldState.error}
@@ -89,7 +89,7 @@ export function CustomKqlIndicatorTypeForm() {
                           {
                             value: field.value,
                             label: field.value,
-                            'data-test-subj': `timestampFieldSelectedValue`,
+                            'data-test-subj': `customKqlIndicatorFormTimestampFieldSelectedValue`,
                           },
                         ]
                       : []
