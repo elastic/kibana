@@ -19,12 +19,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { keyBy, orderBy } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
 import { getCalleeFunction, StackFrameMetadata } from '../../../common/profiling';
 import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
+import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { StackFrameSummary } from '../stack_frame_summary';
 import { GetLabel } from './get_label';
 
@@ -151,6 +152,8 @@ export function TopNFunctionsTable({
   totalSeconds,
   isDifferentialView,
 }: Props) {
+  const [selectedRow, setSelectedRow] = useState<Row | undefined>();
+
   const totalCount: number = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
@@ -349,6 +352,21 @@ export function TopNFunctionsTable({
           }
         },
         align: 'right',
+      },
+      {
+        name: 'Actions',
+        actions: [
+          {
+            name: 'show_more_information',
+            description: i18n.translate('xpack.profiling.functionsView.showMoreButton', {
+              defaultMessage: `Show more information`,
+            }),
+            icon: 'inspect',
+            color: 'primary',
+            type: 'icon',
+            onClick: setSelectedRow,
+          },
+        ],
       }
     );
   }
@@ -389,6 +407,26 @@ export function TopNFunctionsTable({
           },
         }}
       />
+      {selectedRow && (
+        <FrameInformationTooltip
+          onClose={() => {
+            setSelectedRow(undefined);
+          }}
+          frame={{
+            addressOrLine: selectedRow.frame.AddressOrLine,
+            countExclusive: selectedRow.exclusiveCPU,
+            countInclusive: selectedRow.inclusiveCPU,
+            exeFileName: selectedRow.frame.ExeFileName,
+            fileID: selectedRow.frame.FileID,
+            frameType: selectedRow.frame.FrameType,
+            functionName: selectedRow.frame.FunctionName,
+            sourceFileName: selectedRow.frame.SourceFilename,
+            sourceLine: selectedRow.frame.SourceLine,
+          }}
+          totalSeconds={totalSeconds ?? 0}
+          totalSamples={selectedRow.samples}
+        />
+      )}
     </>
   );
 }
