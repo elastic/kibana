@@ -63,10 +63,7 @@ export function MapSettingsPanel({
       <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
         <EuiTitle size="s">
           <h2>
-            <FormattedMessage
-              id="xpack.maps.mapSettingsPanel.title"
-              defaultMessage="Settings"
-            />
+            <FormattedMessage id="xpack.maps.mapSettingsPanel.title" defaultMessage="Settings" />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>

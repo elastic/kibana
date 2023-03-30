@@ -20,18 +20,27 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers';
-import { type LayerWizardStep, getWizardById } from '../../classes/layers/wizards/layer_wizard_registry';
+import {
+  type LayerWizardStep,
+  getWizardById,
+} from '../../classes/layers/wizards/layer_wizard_registry';
 
 export const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
 const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
   defaultMessage: 'Add layer',
 });
-const ADD_LAYER_STEP_NEXT_BUTTON_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayerNextButtonLabel', {
-  defaultMessage: 'Add and continue',
-});
-const ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayerSecondaryActionButtonLabel', {
-  defaultMessage: 'Add and close',
-})
+const ADD_LAYER_STEP_NEXT_BUTTON_LABEL = i18n.translate(
+  'xpack.maps.addLayerPanel.addLayerNextButtonLabel',
+  {
+    defaultMessage: 'Add and continue',
+  }
+);
+const ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL = i18n.translate(
+  'xpack.maps.addLayerPanel.addLayerSecondaryActionButtonLabel',
+  {
+    defaultMessage: 'Add and close',
+  }
+);
 
 export interface Props {
   addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => void;
@@ -174,28 +183,31 @@ export class AddLayerPanel extends Component<Props, State> {
           onClick={this._onNext}
           fill
         >
-          {this.state.currentStep.nextButtonLabel ? this.state.currentStep.nextButtonLabel : this.state.currentStep.label}
+          {this.state.currentStep.nextButtonLabel
+            ? this.state.currentStep.nextButtonLabel
+            : this.state.currentStep.label}
         </EuiButton>
       </EuiFlexItem>
     );
 
-    return this.state.currentStep.id === ADD_LAYER_STEP_ID
-      ?
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false} gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                disabled={isDisabled || isLoading}
-                isLoading={isLoading}
-                onClick={this.props.addLayersAndClose}
-              >
-                {ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
-            {nextButton}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      : nextButton;
+    return this.state.currentStep.id === ADD_LAYER_STEP_ID ? (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              disabled={isDisabled || isLoading}
+              isLoading={isLoading}
+              onClick={this.props.addLayersAndClose}
+            >
+              {ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+          {nextButton}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    ) : (
+      nextButton
+    );
   }
 
   render() {
