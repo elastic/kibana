@@ -42,7 +42,7 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { PLUGIN_ID } from '../common';
+import { PLUGIN_ID, SEARCH_FIELDS_FROM_SOURCE } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
@@ -76,7 +76,7 @@ const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
 );
 const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
-const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
+const SourceViewer = React.lazy(() => import('./tmp'));
 
 /**
  * @public
@@ -262,22 +262,32 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView }) => (
-        <React.Suspense
-          fallback={
-            <DeferredSpinner>
-              <EuiLoadingContent />
-            </DeferredSpinner>
-          }
-        >
-          <SourceViewer
-            index={hit.raw._index}
-            id={hit.raw._id}
-            dataView={dataView}
-            hasLineNumbers
-          />
-        </React.Suspense>
-      ),
+      component: ({ hit, dataView }) => {
+        // TODO: Move these to the @kbn/unified-doc-viewer package
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { uiSettings } = useDiscoverServices();
+        const useDocExplorer = !uiSettings.get(DOC_TABLE_LEGACY);
+        const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+
+        return (
+          <React.Suspense
+            fallback={
+              <DeferredSpinner>
+                <EuiLoadingContent />
+              </DeferredSpinner>
+            }
+          >
+            <SourceViewer
+              index={hit.raw._index}
+              id={hit.raw._id}
+              dataView={dataView}
+              hasLineNumbers
+              useDocExplorer={useDocExplorer}
+              useNewFieldsApi={useNewFieldsApi}
+            />
+          </React.Suspense>
+        );
+      },
     });
 
     const {

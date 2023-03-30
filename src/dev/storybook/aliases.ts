@@ -50,4 +50,5 @@ export const storybookAliases = {
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
+  unified_doc_viewer: 'src/plugins/unified_doc_viewer/.storybook',
 };

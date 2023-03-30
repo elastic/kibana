@@ -21,8 +21,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
-import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';

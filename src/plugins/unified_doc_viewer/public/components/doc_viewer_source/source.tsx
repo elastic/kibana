@@ -8,16 +8,14 @@
 import './source.scss';
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
-import { useEsDocSearch } from '../../../../hooks/use_es_doc_search';
-import { ElasticRequestState } from '../../../../application/doc/types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { monaco } from '@kbn/monaco';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { useEsDocSearch } from '../../hooks';
+import { ElasticRequestState } from '../../types';
+import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
 import { getHeight } from './get_height';
 
 interface SourceViewerProps {
@@ -26,6 +24,8 @@ interface SourceViewerProps {
   dataView: DataView;
   hasLineNumbers: boolean;
   width?: number;
+  useNewFieldsApi: boolean;
+  useDocExplorer: boolean;
 }
 
 // Ihe number of lines displayed without scrolling used for classic table, which renders the component
@@ -40,13 +40,12 @@ export const DocViewerSource = ({
   dataView,
   width,
   hasLineNumbers,
+  useNewFieldsApi,
+  useDocExplorer,
 }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [editorHeight, setEditorHeight] = useState<number>();
   const [jsonValue, setJsonValue] = useState<string>('');
-  const { uiSettings } = useDiscoverServices();
-  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const useDocExplorer = !uiSettings.get(DOC_TABLE_LEGACY);
   const [reqState, hit, requestData] = useEsDocSearch({
     id,
     index,
@@ -56,7 +55,7 @@ export const DocViewerSource = ({
 
   useEffect(() => {
     if (reqState === ElasticRequestState.Found && hit) {
-      setJsonValue(JSON.stringify(hit.raw, undefined, 2));
+      setJsonValue(JSON.stringify(hit, undefined, 2));
     }
   }, [reqState, hit]);
 
@@ -127,12 +126,16 @@ export const DocViewerSource = ({
   }
 
   return (
-    <JSONCodeEditorCommonMemoized
-      jsonValue={jsonValue}
-      width={width}
-      height={editorHeight}
-      hasLineNumbers={hasLineNumbers}
-      onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
-    />
+    <>
+      <JSONCodeEditorCommonMemoized
+        jsonValue={jsonValue}
+        width={width}
+        height={editorHeight}
+        hasLineNumbers={hasLineNumbers}
+        onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) =>
+          setEditor(editorNode)
+        }
+      />
+    </>
   );
 };

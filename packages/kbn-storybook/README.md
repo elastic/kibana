@@ -19,7 +19,7 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
 
 - Create sample Storybook stories. For example, in your plugin create a file at
   `src/plugins/<plugin>/public/components/hello_world/hello_world.stories.tsx` with
-  the following [Component Story Format](https://storybook.js.org/docs/react/api/csf) contents:
+  the following [Component Story Format](https://storybook.js.org/docs/react/api/csf) contents:``
 
   ```jsx
   import { MyComponent } from './my_component';

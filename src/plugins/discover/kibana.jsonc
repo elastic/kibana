@@ -25,7 +25,8 @@
       "expressions",
       "unifiedFieldList",
       "unifiedSearch",
-      "unifiedHistogram"
+      "unifiedHistogram",
+      "unifiedDocViewer"
     ],
     "optionalPlugins": [
       "home",

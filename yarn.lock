@@ -5381,6 +5381,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-doc-viewer-plugin@link:src/plugins/unified_doc_viewer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-field-list-plugin@link:src/plugins/unified_field_list":
   version "0.0.0"
   uid ""

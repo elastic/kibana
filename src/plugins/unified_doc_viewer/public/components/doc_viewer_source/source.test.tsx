@@ -7,15 +7,15 @@
  */
 
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DocViewerSource } from './source';
-import * as hooks from '../../../../hooks/use_es_doc_search';
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import * as hooks from '@kbn/discover-plugin/public/hooks/use_es_doc_search';
+import { buildDataTableRecord } from '@kbn/discover-plugin/public/utils/build_data_record';
+import { JsonCodeEditorCommon } from '../json_code_editor';
+import { DocViewerSource } from './source';
 
 const mockDataView = {
   getComputedFields: () => [],

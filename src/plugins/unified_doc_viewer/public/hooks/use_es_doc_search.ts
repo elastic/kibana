@@ -7,17 +7,13 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
+import type { SearchHit, ESSearchRequest } from '@kbn/es-types';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord } from '../types';
-import { DocProps } from '../application/doc/components/doc';
-import { ElasticRequestState } from '../application/doc/types';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
-import { useDiscoverServices } from './use_discover_services';
+import { useUnifiedDocViewerServices } from './use_doc_view_services';
+import { DocProps, ElasticRequestState } from '../types';
 
-type RequestBody = Pick<estypes.SearchRequest, 'body'>;
+type RequestBody = Pick<ESSearchRequest, 'body'>;
 
 /**
  * Custom react hook for querying a single doc in ElasticSearch
@@ -27,11 +23,16 @@ export function useEsDocSearch({
   index,
   dataView,
   requestSource,
-}: DocProps): [ElasticRequestState, DataTableRecord | null, () => void] {
+}: DocProps): [ElasticRequestState, Record<string, unknown> | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
-  const [hit, setHit] = useState<DataTableRecord | null>(null);
-  const { data, uiSettings } = useDiscoverServices();
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+  const [hit, setHit] = useState<SearchHit<any> | null>(null);
+  const { data, uiSettings } = useUnifiedDocViewerServices();
+
+  // TODO: Use a const instead of hard-coding this value
+  const useNewFieldsApi = useMemo(
+    () => !uiSettings.get('discover:searchFieldsFromSource'),
+    [uiSettings]
+  );
 
   const requestData = useCallback(async () => {
     try {
@@ -49,7 +50,7 @@ export function useEsDocSearch({
 
       if (hits?.hits?.[0]) {
         setStatus(ElasticRequestState.Found);
-        setHit(buildDataTableRecord(hits.hits[0], dataView));
+        setHit(hits.hits[0]);
       } else {
         setStatus(ElasticRequestState.NotFound);
       }
@@ -82,8 +83,8 @@ export function buildSearchBody(
   useNewFieldsApi: boolean,
   requestAllFields?: boolean
 ): RequestBody | undefined {
-  const computedFields = dataView.getComputedFields();
-  const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
+  const { docvalueFields, runtimeFields, scriptFields, storedFields } =
+    dataView.getComputedFields();
   const request: RequestBody = {
     body: {
       query: {
@@ -91,8 +92,8 @@ export function buildSearchBody(
           filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
         },
       },
-      stored_fields: computedFields.storedFields,
-      script_fields: computedFields.scriptFields,
+      stored_fields: storedFields,
+      script_fields: scriptFields,
       version: true,
     },
   };
@@ -109,6 +110,6 @@ export function buildSearchBody(
   } else {
     request.body._source = true;
   }
-  request.body.fields = [...(request.body?.fields || []), ...(computedFields.docvalueFields || [])];
+  request.body.fields = [...(request.body?.fields || []), ...(docvalueFields || [])];
   return request;
 }

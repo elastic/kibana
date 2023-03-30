@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DocViewerSource } from './source';
 
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default DocViewerSource;
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UnifiedDocViewerServices } from '../types';
+
+export const useUnifiedDocViewerServices = () => useKibana<UnifiedDocViewerServices>().services;
