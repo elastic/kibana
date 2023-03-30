@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
@@ -14,9 +15,9 @@ import { AlertAnnotation, getAlertTimeRange } from '@kbn/observability-alert-det
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { ExpressionChart } from './expression_chart';
-import { MetricThresholdRuleTypeParams } from '..';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricThresholdRuleTypeParams } from '..';
+import { ExpressionChart } from './expression_chart';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type MetricThresholdRule = Rule<
@@ -52,6 +53,9 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
       color={euiTheme.colors.danger}
       dateFormat={uiSettings?.get('dateFormat') || DEFAULT_DATE_FORMAT}
       id={ALERT_START_ANNOTATION_ID}
+      title={i18n.translate('xpack.infra.metrics.alertDetails.alertAnnotationTitle', {
+        defaultMessage: 'Alert started',
+      })}
     />,
   ];
 

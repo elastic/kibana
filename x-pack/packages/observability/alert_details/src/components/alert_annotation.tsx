@@ -9,16 +9,16 @@ import React from 'react';
 import moment from 'moment';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 interface Props {
   alertStarted: number;
   color: string;
   dateFormat: string;
   id: string;
+  title: string;
 }
 
-export function AlertAnnotation({ alertStarted, color, dateFormat, id }: Props) {
+export function AlertAnnotation({ alertStarted, color, dateFormat, id, title }: Props) {
   return (
     <LineAnnotation
       id={id}
@@ -27,9 +27,7 @@ export function AlertAnnotation({ alertStarted, color, dateFormat, id }: Props) 
         {
           dataValue: alertStarted,
           header: moment(alertStarted).format(dateFormat),
-          details: i18n.translate('xpack.packages.observability.alertDetails.alertStarted', {
-            defaultMessage: 'Alert started',
-          }),
+          details: title,
         },
       ]}
       style={{
