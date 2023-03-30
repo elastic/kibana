@@ -119,16 +119,6 @@ Here's the steps on how to test a Puppeteer upgrade, run these tests on Mac, Win
 - All functional and API tests that generate PDF and PNG files should pass.
 - Use a VM to run Kibana in a low-memory environment and try to generate a PNG of a dashboard that outputs as a 4MB file. Document the minimum requirements in the PR.
 
-## Resources
-
-The following links provide helpful context about how the Chromium build works, and its prerequisites:
-
-- Tools for Chromium version information: https://omahaproxy.appspot.com/
-- https://www.chromium.org/developers/how-tos/get-the-code/working-with-release-branches
-- https://chromium.googlesource.com/chromium/src/+/HEAD/docs/linux/build_instructions.md
-- Some build-flag descriptions: https://www.chromium.org/developers/gn-build-configuration
-- The serverless Chromium project was indispensable: https://github.com/adieuadieu/serverless-chrome/blob/b29445aa5a96d031be2edd5d1fc8651683bf262c/packages/lambda/builds/chromium/build/build.sh
-
 ## Testing Chromium upgrades on a Windows Machine
 
 Directions on creating a build of Kibana off an existing PR can be found here: 
@@ -170,3 +160,13 @@ Run `.\bin\elasticsearch.bat` in the elasticsearch directory first and then once
 Navigate to localhost:5601 and there shouldn't be any prompts to set up security etc. To test PNG reporting, you may need to upload a license. Navigate to https://wiki.elastic.co/display/PM/Internal+License+-+X-Pack+and+Endgame and download the license.json from Internal Licenses. 
 
 Navigate to Stack Management in Kibana and you can upload the license.json from internal licenses. You won't need to restart the cluster and should be able to test the Kibana feature as needed at this point. 
+
+## Resources
+
+The following links provide helpful context about how the Chromium build works, and its prerequisites:
+
+- Tools for Chromium version information: https://omahaproxy.appspot.com/
+- https://www.chromium.org/developers/how-tos/get-the-code/working-with-release-branches
+- https://chromium.googlesource.com/chromium/src/+/HEAD/docs/linux/build_instructions.md
+- Some build-flag descriptions: https://www.chromium.org/developers/gn-build-configuration
+- The serverless Chromium project was indispensable: https://github.com/adieuadieu/serverless-chrome/blob/b29445aa5a96d031be2edd5d1fc8651683bf262c/packages/lambda/builds/chromium/build/build.sh
