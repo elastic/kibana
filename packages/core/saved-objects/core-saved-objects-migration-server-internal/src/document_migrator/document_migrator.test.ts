@@ -1382,6 +1382,10 @@ describe('DocumentMigrator', () => {
         ...testOpts(),
         typeRegistry: createRegistry({
           name: 'down-test',
+          migrations: {
+            '7.8.0': jest.fn(),
+            '7.9.0': jest.fn(),
+          },
           switchToModelVersionAt: '8.0.0',
           modelVersions: {
             1: {
@@ -1489,6 +1493,21 @@ describe('DocumentMigrator', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Document \\"test-doc\\" belongs to a more recent version of Kibana [10.4.0] when the last known version is [10.3.0]."`
+      );
+    });
+
+    it('throw when trying to transform to a version without down conversion', () => {
+      const document = createDoc({
+        type: 'down-test',
+        typeMigrationVersion: modelVersionToVirtualVersion(2),
+      });
+
+      expect(() =>
+        migrator.transformDown(document, {
+          targetTypeVersion: '7.8.0',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Could not apply transformation migrate:7.9.0: no down conversion registered"`
       );
     });
   });
