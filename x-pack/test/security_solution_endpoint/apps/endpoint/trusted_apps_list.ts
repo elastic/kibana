@@ -14,14 +14,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/153855
-  describe.skip('When on the Trusted Apps list', function () {
+  describe('When on the Trusted Apps list', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
