@@ -89,12 +89,12 @@ const legacyGetBulkRuleActionsSavedObject = async ({
       acc[ruleAlertIdKey] = {
         ruleThrottle: savedObject.attributes.ruleThrottle,
         legacyActionsReferences: savedObject.references,
-        //  legacyActions: transformFromLegacyActions(savedObject.attributes, savedObject.references),
         legacyRuleActions: injectReferencesIntoActions(
           ruleAlertIdKey,
           legacyRawActions,
           savedObject.references
-        ),
+        ) // remove uuid from action, as this uuid is not persistent
+          .map(({ uuid, ...action }) => action),
       };
     } else {
       logger.error(
