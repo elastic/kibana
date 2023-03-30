@@ -25,7 +25,7 @@ import {
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType, OperationMetadata } from '../../../../../types';
 import { OperationDefinition } from '..';

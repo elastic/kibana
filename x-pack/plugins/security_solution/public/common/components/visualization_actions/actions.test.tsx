@@ -87,10 +87,10 @@ describe('VisualizationActions', () => {
         cases: {
           ...mockCasesContract(),
           hooks: {
-            getUseCasesAddToExistingCaseModal: jest
+            useCasesAddToExistingCaseModal: jest
               .fn()
               .mockReturnValue({ open: mockGetAllCasesSelectorModalOpen }),
-            getUseCasesAddToNewCaseFlyout: jest
+            useCasesAddToNewCaseFlyout: jest
               .fn()
               .mockReturnValue({ open: mockGetCreateCaseFlyoutOpen }),
           },
