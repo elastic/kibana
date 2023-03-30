@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-process.env.TZ = 'Asia/Calcutta'
+process.env.TZ = 'Asia/Calcutta';
 
 module.exports = {
   preset: '@kbn/test',
