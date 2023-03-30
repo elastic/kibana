@@ -98,7 +98,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
     }
 
     // If nothing is pending
-    if (endpointPendingActions?.totalPending === 0 || isIsolated) {
+    if (endpointPendingActions?.totalPending === 0) {
       // and host is either releasing and or currently released, then render nothing
       if ((!wasIsolating.current && wasReleasing.current) || !isIsolated) {
         return null;
