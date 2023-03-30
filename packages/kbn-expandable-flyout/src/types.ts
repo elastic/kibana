@@ -39,5 +39,5 @@ export interface Panel {
   /**
    * Width used when rendering the panel
    */
-  width: number; // TODO remove this, the width shouldn't be a property of a panel, but handled at the flyout level
+  width: number; // TODO remove this, see https://github.com/elastic/security-team/issues/6247
 }
