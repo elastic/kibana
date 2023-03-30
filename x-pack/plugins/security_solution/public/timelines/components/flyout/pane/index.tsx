@@ -8,13 +8,10 @@
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlyout } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import {
-  SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
-  TIMELINE_EUI_THEME_ZINDEX_LEVEL,
-} from '../../timeline/styles';
+import { SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME } from '../../timeline/styles';
 import { StatefulTimeline } from '../../timeline';
 import type { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
@@ -31,18 +28,6 @@ interface FlyoutPaneComponentProps {
 const StyledEuiFlyout = styled(EuiFlyout)<EuiFlyoutProps>`
   animation: none;
   min-width: 150px;
-  z-index: ${({ theme }) => theme.eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
-`;
-
-// SIDE EFFECT: the following creates a global class selector
-const IndexPatternFieldEditorOverlayGlobalStyle = createGlobalStyle<{
-  theme: { eui: { euiZLevel5: number } };
-}>`
-  .euiOverlayMask.indexPatternFieldEditorMaskOverlay {
-    ${({ theme }) => `
-    z-index: ${theme.eui.euiZLevel5};
-  `}
-  }
 `;
 
 const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
@@ -75,7 +60,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         ownFocus={false}
         style={{ display: visible ? 'block' : 'none' }}
       >
-        <IndexPatternFieldEditorOverlayGlobalStyle />
         <StatefulTimeline
           renderCellValue={DefaultCellRenderer}
           rowRenderers={defaultRowRenderers}

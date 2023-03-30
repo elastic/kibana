@@ -187,11 +187,7 @@ export const FlyoutFooterComponent = React.memo(
             />
           )}
         {isAddEventFilterModalOpen && detailsEcsData != null && (
-          <EventFiltersFlyout
-            data={detailsEcsData}
-            onCancel={closeAddEventFilterModal}
-            maskProps={{ style: 'z-index: 5000' }}
-          />
+          <EventFiltersFlyout data={detailsEcsData} onCancel={closeAddEventFilterModal} />
         )}
         {isOsqueryFlyoutOpenWithAgentId && detailsEcsData != null && (
           <OsqueryFlyout
