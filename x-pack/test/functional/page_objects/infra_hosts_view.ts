@@ -146,6 +146,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     getProcessesTable() {
       return testSubjects.find('infraProcessesTable');
+    },
 
     // Logs Tab
     getLogsTab() {
