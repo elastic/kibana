@@ -118,6 +118,7 @@ export interface FieldMap {
   [AlertConfigKey.STATUS_ENABLED]: FieldMeta<AlertConfigKey.STATUS_ENABLED>;
   [ConfigKey.NAMESPACE]: FieldMeta<ConfigKey.NAMESPACE>;
   [ConfigKey.TIMEOUT]: FieldMeta<ConfigKey.TIMEOUT>;
+  ['timeout__browser']: FieldMeta<ConfigKey.TIMEOUT>;
   [ConfigKey.MAX_REDIRECTS]: FieldMeta<ConfigKey.MAX_REDIRECTS>;
   [ConfigKey.WAIT]: FieldMeta<ConfigKey.WAIT>;
   [ConfigKey.USERNAME]: FieldMeta<ConfigKey.USERNAME>;

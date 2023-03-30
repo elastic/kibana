@@ -506,6 +506,79 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       isDisabled: readOnly,
     }),
   },
+  ['timeout__browser']: {
+    fieldKey: ConfigKey.TIMEOUT,
+    component: Select,
+    label: i18n.translate('xpack.synthet.browserics.monitorConfig.timeout.browser.label', {
+      defaultMessage: 'Timeout',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.timeout.browser.helpText', {
+      defaultMessage: 'The total time allowed for testing the connection and exchanging data.',
+    }),
+    props: ({ dependencies, setValue }): EuiSelectProps => {
+      const value = parseInt(dependencies[1] as string, 10);
+      return {
+        'data-test-subj': 'browserMonitorTimeoutSelect',
+        options: [
+          {
+            value: 30,
+            text: '30 seconds',
+          },
+          {
+            value: 60,
+            text: '1 minute',
+          },
+          {
+            value: 180,
+            text: '3 minutes',
+          },
+          {
+            value: 300,
+            text: '5 minutes',
+          },
+          {
+            value: 600,
+            text: '10 minutes',
+          },
+          {
+            value: 900,
+            text: '15 minutes',
+          },
+        ],
+        disabled: readOnly,
+        required: false,
+        value: Number.isNaN(value) ? 900 : value,
+      };
+    },
+    dependencies: [ConfigKey.SCHEDULE, ConfigKey.TIMEOUT],
+    validation: () => {
+      return {
+        validate: (value) => {
+          const iValue = parseInt(value, 10);
+          if (!Number.isInteger(iValue))
+            return i18n.translate('xpack.synthetics.monitorConfig.timeout.browser.formatError', {
+              defaultMessage: 'Timeout must be an integer.',
+            });
+          else if (iValue <= 0)
+            return i18n.translate(
+              'xpack.synthetics.monitorConfig.timeout.browser.greaterThan0Error',
+              {
+                defaultMessage: 'Timeout must be greater 0.',
+              }
+            );
+          else if (iValue > 900)
+            return i18n.translate(
+              'xpack.synthetics.monitorConfig.timeout.browser.greaterThan15Error',
+              {
+                defaultMessage: 'Timeout may not exceed 15.',
+              }
+            );
+
+          return true;
+        },
+      };
+    },
+  },
   [ConfigKey.TIMEOUT]: {
     fieldKey: ConfigKey.TIMEOUT,
     component: FieldNumber,
