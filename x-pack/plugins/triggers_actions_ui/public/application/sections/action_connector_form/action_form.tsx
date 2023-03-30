@@ -77,6 +77,7 @@ export interface ActionAccordionFormProps {
   defaultSummaryMessage?: string;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
+  showActionAlertsFilter?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -107,6 +108,7 @@ export const ActionForm = ({
   defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
+  showActionAlertsFilter,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -430,6 +432,7 @@ export const ActionForm = ({
               defaultSummaryMessage={defaultSummaryMessage}
               hasSummary={hasSummary}
               minimumThrottleInterval={minimumThrottleInterval}
+              showActionAlertsFilter={showActionAlertsFilter}
             />
           );
         })}

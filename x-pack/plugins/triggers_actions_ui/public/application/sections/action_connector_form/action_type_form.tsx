@@ -125,7 +125,7 @@ export const ActionTypeForm = ({
   defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
-  showActionAlertsFilter = true,
+  showActionAlertsFilter,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },

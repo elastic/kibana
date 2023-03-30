@@ -187,7 +187,22 @@ export interface Rule<Params extends RuleTypeParams = never> {
   viewInAppRelativeUrl?: string;
 }
 
-export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
+export interface SanitizedAlertsFilter extends AlertsFilter {
+  query: null | {
+    kql: string;
+  };
+  timeframe: null | AlertsFilterTimeframe;
+}
+
+export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
+  alertsFilter?: SanitizedAlertsFilter;
+};
+
+export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
+  Rule<Params>,
+  'apiKey' | 'actions'
+> & { actions: SanitizedRuleAction[] };
+
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 
@@ -207,6 +222,7 @@ export type SanitizedRuleConfig = Pick<
   | 'throttle'
   | 'notifyWhen'
   | 'muteAll'
+  | 'revision'
   | 'snoozeSchedule'
 > & {
   producer: string;
