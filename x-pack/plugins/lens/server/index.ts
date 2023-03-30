@@ -10,3 +10,5 @@ import { LensServerPlugin } from './plugin';
 export type { LensServerPluginSetup } from './plugin';
 
 export const plugin = () => new LensServerPlugin();
+
+export type { LensDocShape715 } from './migrations/types';
