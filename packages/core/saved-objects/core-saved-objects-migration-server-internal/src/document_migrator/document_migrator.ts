@@ -6,41 +6,6 @@
  * Side Public License, v 1.
  */
 
-/*
- * This file contains logic for transforming / migrating a saved object document.
- *
- * At first, it may seem as if this could be a simple filter + reduce operation,
- * running the document through a linear set of transform functions until it is
- * up to date, but there are some edge cases that make it more complicated.
- *
- * A transform can add a new property, rename an existing property, remove a property, etc.
- * This means that we aren't able to do a reduce over a fixed list of properties, as
- * each transform operation could essentially change what transforms should be applied
- * next.
- *
- * The basic algorithm, then, is this:
- *
- * While there are any unmigrated properties in the doc, find the next unmigrated property,
- * and run the doc through the transforms that target that property.
- *
- * This way, we keep looping until there are no transforms left to apply, and we properly
- * handle property addition / deletion / renaming.
- *
- * A caveat is that this means we must restrict what a migration can do to the doc's
- * migrationVersion itself. Migrations should *not* make any changes to the migrationVersion property.
- *
- * One last gotcha is that any docs which have no migrationVersion are assumed to be up-to-date.
- * This is because Kibana UI and other clients really can't be expected build the migrationVersion
- * in a reliable way. Instead, callers of our APIs are expected to send us up-to-date documents,
- * and those documents are simply given a stamp of approval by this transformer. This is why it is
- * important for migration authors to *also* write a saved object validation that will prevent this
- * assumption from inserting out-of-date documents into the index.
- *
- * If the client(s) send us documents with migrationVersion specified, we will migrate them as
- * appropriate. This means for data import scenarios, any documetns being imported should be explicitly
- * given an empty migrationVersion property {} if no such property exists.
- */
-
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type {
