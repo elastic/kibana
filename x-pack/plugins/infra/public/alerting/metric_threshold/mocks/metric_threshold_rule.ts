@@ -168,6 +168,7 @@ export const buildMetricThresholdAlert = (
       'event.action': 'active',
       'kibana.version': '8.8.0',
       'kibana.alert.flapping': false,
+      'kibana.alert.rule.revision': 1,
     },
     active: true,
     start: 1678716383695,
