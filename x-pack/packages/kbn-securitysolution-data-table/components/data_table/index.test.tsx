@@ -19,22 +19,9 @@ import { defaultHeaders } from '../../mock/header';
 import { mockGlobalState } from '../../mock/global_state';
 import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { TestProviders } from '../../mock/test_providers';
-import { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { mockBrowserFields } from '../../mock/mock_source';
-
-export const getMappedNonEcsValue = ({
-  data,
-  fieldName,
-}: {
-  data: TimelineNonEcsData[];
-  fieldName: string;
-}): string[] | undefined => {
-  const item = data.find((d) => d.field === fieldName);
-  if (item != null && item.value != null) {
-    return item.value;
-  }
-  return undefined;
-};
+import { getMappedNonEcsValue } from './utils';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => ({
