@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { CaseFileKinds } from '../../../files/types';
 import type { CasesUiConfigType } from '../../../../common/ui/types';
 
 type GlobalServices = Pick<CoreStart, 'http'>;
@@ -14,15 +15,22 @@ export class KibanaServices {
   private static kibanaVersion?: string;
   private static services?: GlobalServices;
   private static config?: CasesUiConfigType;
+  private static _fileKinds?: CaseFileKinds;
 
   public static init({
     http,
     kibanaVersion,
     config,
-  }: GlobalServices & { kibanaVersion: string; config: CasesUiConfigType }) {
+    fileKinds,
+  }: GlobalServices & {
+    kibanaVersion: string;
+    config: CasesUiConfigType;
+    fileKinds: CaseFileKinds;
+  }) {
     this.services = { http };
     this.kibanaVersion = kibanaVersion;
     this.config = config;
+    this._fileKinds = fileKinds;
   }
 
   public static get(): GlobalServices {
@@ -43,6 +51,14 @@ export class KibanaServices {
 
   public static getConfig() {
     return this.config;
+  }
+
+  public static get fileKinds(): CaseFileKinds {
+    if (!this._fileKinds) {
+      this.throwUninitializedError();
+    }
+
+    return this._fileKinds;
   }
 
   private static throwUninitializedError(): never {

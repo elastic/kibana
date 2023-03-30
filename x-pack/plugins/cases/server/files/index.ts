@@ -16,7 +16,7 @@ import {
 } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
 import { HttpApiTagOperation } from '../../common/constants/types';
-import { ALLOWED_MIME_TYPES, IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
+import { IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
 import type { FilesConfig } from './types';
 
 const buildFileKind = (config: FilesConfig, owner: Owner): FileKind => {
@@ -24,7 +24,7 @@ const buildFileKind = (config: FilesConfig, owner: Owner): FileKind => {
     id: constructFileKindIdByOwner(owner),
     http: fileKindHttpTags(owner),
     maxSizeBytes: createMaxCallback(config),
-    allowedMimeTypes: ALLOWED_MIME_TYPES,
+    allowedMimeTypes: config.allowedMimeTypes,
   };
 };
 
@@ -46,7 +46,7 @@ const buildTag = (owner: Owner, operation: HttpApiTagOperation) => {
   };
 };
 
-const createMaxCallback =
+export const createMaxCallback =
   (config: FilesConfig) =>
   (file: FileJSON): number => {
     const allowedMimeTypesSet = new Set(config.allowedMimeTypes);
@@ -68,8 +68,8 @@ const createMaxCallback =
 const createFileKinds = (config: FilesConfig): Record<Owner, FileKind> => {
   return {
     [APP_ID]: buildFileKind(config, APP_ID),
-    [SECURITY_SOLUTION_OWNER]: buildFileKind(config, SECURITY_SOLUTION_OWNER),
     [OBSERVABILITY_OWNER]: buildFileKind(config, OBSERVABILITY_OWNER),
+    [SECURITY_SOLUTION_OWNER]: buildFileKind(config, SECURITY_SOLUTION_OWNER),
   };
 };
 

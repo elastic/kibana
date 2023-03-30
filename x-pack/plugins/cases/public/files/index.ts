@@ -11,8 +11,9 @@ import { ALLOWED_MIME_TYPES } from '../../common/constants/mime_types';
 import { constructFileKindIdByOwner, MAX_FILE_SIZE } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
 import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common';
+import type { CaseFileKinds, FilesConfig } from './types';
 
-const buildFileKind = (owner: Owner): FileKindBrowser => {
+const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
   return {
     id: constructFileKindIdByOwner(owner),
     allowedMimeTypes: ALLOWED_MIME_TYPES,
@@ -23,14 +24,23 @@ const buildFileKind = (owner: Owner): FileKindBrowser => {
 /**
  * The file kind definition for interacting with the file service for the UI
  */
-const CASES_FILE_KINDS: Record<Owner, FileKindBrowser> = {
-  [APP_ID]: buildFileKind(APP_ID),
-  [SECURITY_SOLUTION_OWNER]: buildFileKind(SECURITY_SOLUTION_OWNER),
-  [OBSERVABILITY_OWNER]: buildFileKind(OBSERVABILITY_OWNER),
+const createFileKinds = (config: FilesConfig): CaseFileKinds => {
+  return {
+    [APP_ID]: buildFileKind(config, APP_ID),
+    [SECURITY_SOLUTION_OWNER]: buildFileKind(config, SECURITY_SOLUTION_OWNER),
+    [OBSERVABILITY_OWNER]: buildFileKind(config, OBSERVABILITY_OWNER),
+  };
 };
 
-export const registerCaseFileKinds = (filesSetupPlugin: FilesSetup) => {
-  for (const fileKind of Object.values(CASES_FILE_KINDS)) {
+export const registerCaseFileKinds = (
+  config: FilesConfig,
+  filesSetupPlugin: FilesSetup
+): CaseFileKinds => {
+  const fileKinds = createFileKinds(config);
+
+  for (const fileKind of Object.values(fileKinds)) {
     filesSetupPlugin.registerFileKind(fileKind);
   }
+
+  return fileKinds;
 };

@@ -52,6 +52,9 @@ export interface CasesUiConfigType {
   markdownPlugins: {
     lens: boolean;
   };
+  files: {
+    maxSize: number;
+  };
 }
 
 export const StatusAll = 'all' as const;
