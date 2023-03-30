@@ -36,7 +36,9 @@ export const useLensSuggestions = ({
       contextualFields: columns,
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
-    const allSuggestions = isPlainRecord ? lensSuggestionsApi(context, dataView) : undefined;
+    const allSuggestions = isPlainRecord
+      ? lensSuggestionsApi(context, dataView, ['lnsDatatable'])
+      : undefined;
     const firstSuggestion = allSuggestions?.length ? allSuggestions[0] : undefined;
     const firstSuggestionExists = allSuggestions?.find(
       (sug) => sug.title === firstSuggestion?.title

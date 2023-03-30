@@ -873,6 +873,8 @@ export interface Suggestion<T = unknown, V = unknown> {
   previewExpression?: Ast | string;
   previewIcon: IconType;
   hide?: boolean;
+  // flag to indicate if the visualization is incomplete
+  incomplete?: boolean;
   changeType: TableChangeType;
   keptLayerIds: string[];
 }

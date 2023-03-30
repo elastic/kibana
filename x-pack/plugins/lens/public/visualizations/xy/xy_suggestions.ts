@@ -587,6 +587,7 @@ function buildSuggestion({
         // Don't advertise charts without at least one split
         (!xValue && !splitBy)),
     state,
+    incomplete: yValues.length === 0,
     previewIcon: getIconForSeries(seriesType),
   };
 }

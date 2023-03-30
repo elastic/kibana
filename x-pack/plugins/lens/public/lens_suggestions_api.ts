@@ -15,6 +15,7 @@ interface SuggestionsApi {
   dataView: DataView;
   visualizationMap?: VisualizationMap;
   datasourceMap?: DatasourceMap;
+  excludedVisualizations?: string[];
 }
 
 export const suggestionsApi = ({
@@ -22,6 +23,7 @@ export const suggestionsApi = ({
   dataView,
   datasourceMap,
   visualizationMap,
+  excludedVisualizations,
 }: SuggestionsApi) => {
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
@@ -63,8 +65,10 @@ export const suggestionsApi = ({
   });
   if (!suggestions.length) return [];
   const activeVisualization = suggestions[0];
-  // remove the lnsMetric check when new metric is on GA and hide will be false
-  if (activeVisualization.visualizationId !== 'lnsMetric' && activeVisualization.hide) {
+  if (
+    activeVisualization.incomplete ||
+    excludedVisualizations?.includes(activeVisualization.visualizationId)
+  ) {
     return [];
   }
   // compute the rest suggestions depending on the active one and filter out the lnsLegacyMetric

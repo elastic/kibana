@@ -103,7 +103,7 @@ describe('suggestionsApi', () => {
     expect(suggestions?.length).toEqual(1);
   });
 
-  test('filters out legacy metric and hidden suggestions', async () => {
+  test('filters out legacy metric and incomplete suggestions', async () => {
     const dataView = { id: 'index1' } as unknown as DataView;
     const visualizationMap = {
       testVis: {
@@ -127,7 +127,7 @@ describe('suggestionsApi', () => {
             title: 'Test2',
             state: {},
             previewIcon: 'empty',
-            hide: true,
+            incomplete: true,
           },
         ],
       },
