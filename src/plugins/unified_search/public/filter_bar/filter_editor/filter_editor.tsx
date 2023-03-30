@@ -559,6 +559,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     if (isCustomEditorOpen) {
       const filter =
         this.props.filter?.meta.type === FILTERS.CUSTOM ||
+        // only convert non-custom filters to custom when DSL changes
         queryDsl !== this.parseFilterToQueryDsl(this.props.filter)
           ? this.getFilterFromQueryDsl(queryDsl)
           : {
