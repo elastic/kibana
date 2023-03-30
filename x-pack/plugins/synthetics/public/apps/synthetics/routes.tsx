@@ -18,6 +18,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
 import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
@@ -192,6 +193,8 @@ export const PageRouter: FC = () => {
 
   apiService.addInspectorRequest = addInspectorRequest;
 
+  const isUnPrivileged = useSyntheticsPrivileges();
+
   return (
     <Switch>
       {routes.map(
@@ -207,12 +210,12 @@ export const PageRouter: FC = () => {
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
               <PageTemplateComponent
-                pageHeader={pageHeader}
+                pageHeader={isUnPrivileged ? undefined : pageHeader}
                 data-test-subj={'synthetics-page-template'}
                 isPageDataLoaded={true}
                 {...pageTemplateProps}
               >
-                <RouteComponent />
+                {isUnPrivileged || <RouteComponent />}
               </PageTemplateComponent>
             </div>
           </Route>

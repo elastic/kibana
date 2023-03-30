@@ -8,8 +8,9 @@
 import * as t from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
 import { schema } from '@kbn/config-schema';
+import { getJourneyScreenshotBlocks } from '../../lib/requests/get_journey_screenshot_blocks';
 import { UMServerLibs } from '../../lib/lib';
-import { UMRestApiRouteFactory } from '../types';
+import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
 
 function isStringArray(data: unknown): data is string[] {
@@ -24,22 +25,30 @@ export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory = (libs: 
       hashes: schema.arrayOf(schema.string()),
     }),
   },
-  handler: async ({ request, response, uptimeEsClient }) => {
-    const { hashes: blockIds } = request.body;
-
-    if (!isStringArray(blockIds)) return response.badRequest();
-
-    const result = await libs.requests.getJourneyScreenshotBlocks({
-      blockIds,
-      uptimeEsClient,
-    });
-
-    if (result.length === 0) {
-      return response.notFound();
-    }
-
-    return response.ok({
-      body: result,
-    });
+  handler: async (routeProps) => {
+    return await journeyScreenshotBlocksHandler(routeProps);
   },
 });
+
+export const journeyScreenshotBlocksHandler = async ({
+  response,
+  request,
+  uptimeEsClient,
+}: RouteContext | UptimeRouteContext) => {
+  const { hashes: blockIds } = request.body;
+
+  if (!isStringArray(blockIds)) return response.badRequest();
+
+  const result = await getJourneyScreenshotBlocks({
+    blockIds,
+    uptimeEsClient,
+  });
+
+  if (result.length === 0) {
+    return response.notFound();
+  }
+
+  return response.ok({
+    body: result,
+  });
+};
