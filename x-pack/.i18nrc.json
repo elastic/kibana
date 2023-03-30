@@ -24,6 +24,7 @@
     "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
     "xpack.dataVisualizer": "plugins/data_visualizer",
+    "xpack.exploratoryView": "plugins/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": ["plugins/global_search"],
     "xpack.globalSearchBar": ["plugins/global_search_bar"],

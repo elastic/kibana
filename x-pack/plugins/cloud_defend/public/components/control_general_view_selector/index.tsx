@@ -25,6 +25,7 @@ import {
   EuiText,
   EuiCheckbox,
 } from '@elastic/eui';
+import { i18n as i18nLib } from '@kbn/i18n';
 import { useStyles } from './styles';
 import {
   ControlGeneralViewSelectorDeps,
@@ -47,6 +48,8 @@ import {
   MAX_CONDITION_VALUE_LENGTH_BYTES,
   MAX_FILE_PATH_VALUE_LENGTH_BYTES,
 } from '../../common/constants';
+
+const { translate } = i18nLib;
 
 interface ConditionProps {
   label: string;
@@ -287,10 +290,23 @@ export const ControlGeneralViewSelector = ({
         errors.push(i18n.errorValueRequired);
       }
 
+      const { pattern, patternError } = SelectorConditionsMap[prop];
+
       values.forEach((value) => {
         const bytes = new Blob([value]).size;
 
-        if (prop === 'targetFilePath') {
+        if (pattern && !new RegExp(pattern).test(value)) {
+          if (patternError) {
+            errors.push(patternError);
+          } else {
+            errors.push(
+              translate('xpack.cloudDefend.errorGenericRegexFailure', {
+                defaultMessage: '"{prop}" values must match the pattern: /{pattern}/',
+                values: { prop, pattern },
+              })
+            );
+          }
+        } else if (prop === 'targetFilePath') {
           if (bytes > MAX_FILE_PATH_VALUE_LENGTH_BYTES) {
             errors.push(i18n.errorValueLengthExceeded);
           }

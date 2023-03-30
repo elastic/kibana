@@ -2624,6 +2624,38 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.resetParamsOnConnectorChange",
+            "type": "Function",
+            "tags": [],
+            "label": "resetParamsOnConnectorChange",
+            "description": [],
+            "signature": [
+              "((params: ActionParams) => {} | ActionParams) | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.ActionTypeModel.resetParamsOnConnectorChange.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ActionParams"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5588,7 +5620,7 @@
         "signature": [
           "{ alertsTableConfiguration: ",
           "AlertsTableConfigurationRegistry",
-          "; casesData: { cases: Map<string, ",
+          "; cases: { data: Map<string, ",
           "Case",
           ">; isLoading: boolean; }; columns: ",
           "EuiDataGridColumn",
