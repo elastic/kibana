@@ -17,9 +17,6 @@ import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';
 import { DocumentUpgradePipeline } from './pipelines';
 
-export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
-export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
-
 interface TransformOptions {
   convertNamespaceTypes?: boolean;
 }
@@ -35,31 +32,29 @@ interface DocumentMigratorOptions {
  * Manages migration of individual documents.
  */
 export interface VersionedTransformer {
-  migrationVersion: SavedObjectsMigrationVersion;
-  migrate: MigrateFn;
-  migrateAndConvert: MigrateAndConvertFn;
-  prepareMigrations: () => void;
+  migrate: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+  migrateAndConvert: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
 }
 
 /**
  * A concrete implementation of the VersionedTransformer interface.
  */
 export class DocumentMigrator implements VersionedTransformer {
-  private documentMigratorOptions: DocumentMigratorOptions;
+  private options: DocumentMigratorOptions;
   private migrations?: ActiveMigrations;
 
   /**
    * Creates an instance of DocumentMigrator.
    *
-   * @param {DocumentMigratorOptions} opts
+   * @param {DocumentMigratorOptions} options
    * @prop {string} kibanaVersion - The current version of Kibana
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
    * @prop {string} convertVersion - The version of Kibana in which documents can be converted to multi-namespace types
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor(documentMigratorOptions: DocumentMigratorOptions) {
-    this.documentMigratorOptions = documentMigratorOptions;
+  constructor(options: DocumentMigratorOptions) {
+    this.options = options;
   }
 
   /**
@@ -92,7 +87,7 @@ export class DocumentMigrator implements VersionedTransformer {
    */
 
   public prepareMigrations = () => {
-    const { typeRegistry, kibanaVersion, log, convertVersion } = this.documentMigratorOptions;
+    const { typeRegistry, kibanaVersion, log, convertVersion } = this.options;
     this.migrations = buildActiveMigrations({
       typeRegistry,
       kibanaVersion,
@@ -112,7 +107,7 @@ export class DocumentMigrator implements VersionedTransformer {
     const pipeline = new DocumentUpgradePipeline({
       document: doc,
       migrations: this.migrations,
-      kibanaVersion: this.documentMigratorOptions.kibanaVersion,
+      kibanaVersion: this.options.kibanaVersion,
       convertNamespaceTypes,
     });
     const { document, additionalDocs } = pipeline.run();
