@@ -29,6 +29,8 @@ export const FieldCategorizeButtonInner: React.FC<FieldVisualizeButtonInnerProps
         data-test-subj={`fieldVisualize-${fieldName}`}
         {...(buttonProps || {})}
         onClick={handleVisualizeLinkClick}
+        iconSide="left"
+        iconType="machineLearningApp"
       >
         <FormattedMessage
           id="unifiedFieldList.fieldVisualizeButton.label"
