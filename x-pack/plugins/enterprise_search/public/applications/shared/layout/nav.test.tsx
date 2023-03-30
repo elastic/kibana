@@ -594,6 +594,11 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
     },
   ];
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setMockValues({});
+  });
+
   it('returns basic nav all params are empty', () => {
     const navItems = useEnterpriseSearchAnalyticsNav();
     expect(navItems).toEqual(baseNavs);
