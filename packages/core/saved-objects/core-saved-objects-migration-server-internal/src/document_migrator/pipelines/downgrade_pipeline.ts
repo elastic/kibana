@@ -12,7 +12,7 @@ import Semver from 'semver';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { Transform, TransformType, TypeTransforms } from '../types';
 import type { MigrationPipeline, MigrationPipelineResult } from './types';
-import { applyVersion, assertValidCoreVersion, maxVersion } from './utils';
+import { applyVersion, assertValidCoreVersion } from './utils';
 
 export class DocumentDowngradePipeline implements MigrationPipeline {
   private document: SavedObjectUnsanitizedDoc;
@@ -100,21 +100,23 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
   }
 
   /**
-   * Verifies that the document version is not greater than the version supported by Kibana.
-   * If we have a document with some version and no migrations available for this type,
-   * the document belongs to a future version.
+   * Verifies that the current document version is not greater than the version supported by Kibana.
+   * And that the targetTypeVersion is not greater than the document's
    */
   private assertCompatibility() {
     const { id, typeMigrationVersion: currentVersion } = this.document;
-    const latestVersion = maxVersion(
-      this.typeTransforms.latestVersion.migrate,
-      this.typeTransforms.latestVersion.convert
-    )!;
+    const latestVersion = this.typeTransforms.latestVersion.migrate;
 
     if (currentVersion && Semver.gt(currentVersion, latestVersion)) {
       throw Boom.badData(
         `Document "${id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`,
         this.document
+      );
+    }
+
+    if (currentVersion && Semver.gt(this.targetTypeVersion, currentVersion)) {
+      throw new Error(
+        `Trying to transform down to a higher version: ${currentVersion} to ${this.targetTypeVersion}`
       );
     }
   }

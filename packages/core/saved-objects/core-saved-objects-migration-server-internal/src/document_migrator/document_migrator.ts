@@ -15,7 +15,7 @@ import type {
 import type { ActiveMigrations } from './types';
 import { maxVersion } from './pipelines/utils';
 import { buildActiveMigrations } from './build_active_migrations';
-import { DocumentUpgradePipeline } from './pipelines';
+import { DocumentUpgradePipeline, DocumentDowngradePipeline } from './pipelines';
 
 interface TransformOptions {
   convertNamespaceTypes?: boolean;
@@ -41,6 +41,13 @@ export interface VersionedTransformer {
    * Also returns any additional document(s) that may have been created during the transformation process.
    */
   migrateAndConvert: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
+  /**
+   * Converts a document down to the specified version.
+   */
+  transformDown: (
+    doc: SavedObjectUnsanitizedDoc,
+    options: { targetTypeVersion: string }
+  ) => SavedObjectUnsanitizedDoc;
 }
 
 /**
@@ -111,6 +118,24 @@ export class DocumentMigrator implements VersionedTransformer {
     const { document, additionalDocs } = this.transform(doc, { convertNamespaceTypes: true });
 
     return [document, ...additionalDocs];
+  };
+
+  public transformDown = (
+    doc: SavedObjectUnsanitizedDoc,
+    options: { targetTypeVersion: string }
+  ): SavedObjectUnsanitizedDoc => {
+    if (!this.migrations) {
+      throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
+    }
+
+    const pipeline = new DocumentDowngradePipeline({
+      document: doc,
+      typeTransforms: this.migrations[doc.type],
+      kibanaVersion: this.options.kibanaVersion,
+      targetTypeVersion: options.targetTypeVersion,
+    });
+    const { document } = pipeline.run();
+    return document;
   };
 
   private transform(

@@ -55,7 +55,7 @@ describe('DocumentMigratorPipeline', () => {
     return jest.fn().mockImplementation(impl ?? defaultImpl);
   };
 
-  it('calls multiple `Migrate` conversion function in order', () => {
+  it('calls multiple `Migrate` transform functions in order', () => {
     const document = createDoc({
       id: 'foo-1',
       type: 'foo',
@@ -122,7 +122,7 @@ describe('DocumentMigratorPipeline', () => {
     expect(outputDoc.typeMigrationVersion).toEqual('8.5.0');
   });
 
-  it('does not call migrations with versions equal or below the requested version', () => {
+  it('does not call transforms with versions equal or below the requested version', () => {
     const document = createDoc({
       id: 'foo-1',
       type: 'foo',
@@ -177,5 +177,213 @@ describe('DocumentMigratorPipeline', () => {
     expect(migrate8_6_0_down).not.toHaveBeenCalled();
 
     expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
+  });
+
+  it('throws trying to apply a transform without down fn', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+      typeMigrationVersion: '8.8.0',
+    });
+
+    const migrate8_6_0_up = createTransformFn();
+    const migrate8_6_0_down = createTransformFn();
+    const migrate8_7_0_up = createTransformFn();
+    const migrate8_8_0_up = createTransformFn();
+    const migrate8_8_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Migrate,
+        version: '8.6.0',
+        transform: migrate8_6_0_up,
+        transformDown: migrate8_6_0_down,
+      },
+      {
+        transformType: TransformType.Migrate,
+        version: '8.7.0',
+        transform: migrate8_7_0_up,
+      },
+      {
+        transformType: TransformType.Migrate,
+        version: '8.8.0',
+        transform: migrate8_8_0_up,
+        transformDown: migrate8_8_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.8.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.5.0',
+    });
+
+    expect(() => pipeline.run()).toThrowErrorMatchingInlineSnapshot(
+      `"Could not apply transformation migrate:8.7.0: no down conversion registered"`
+    );
+  });
+
+  it('throws trying to downgrade to a higher version', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+      typeMigrationVersion: '8.7.0',
+    });
+
+    const migrate8_6_0_up = createTransformFn();
+    const migrate8_6_0_down = createTransformFn();
+    const migrate8_7_0_up = createTransformFn();
+    const migrate8_8_0_up = createTransformFn();
+    const migrate8_8_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Migrate,
+        version: '8.6.0',
+        transform: migrate8_6_0_up,
+        transformDown: migrate8_6_0_down,
+      },
+      {
+        transformType: TransformType.Migrate,
+        version: '8.7.0',
+        transform: migrate8_7_0_up,
+      },
+      {
+        transformType: TransformType.Migrate,
+        version: '8.8.0',
+        transform: migrate8_8_0_up,
+        transformDown: migrate8_8_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.8.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.8.0',
+    });
+
+    expect(() => pipeline.run()).toThrowErrorMatchingInlineSnapshot(
+      `"Trying to transform down to a higher version: 8.7.0 to 8.8.0"`
+    );
+  });
+
+  it('calls no transforms when converting down to the same version', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+      typeMigrationVersion: '8.7.0',
+    });
+
+    const migrate8_6_0_up = createTransformFn();
+    const migrate8_6_0_down = createTransformFn();
+    const migrate8_7_0_up = createTransformFn();
+    const migrate8_7_0_down = createTransformFn();
+    const migrate8_8_0_up = createTransformFn();
+    const migrate8_8_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Migrate,
+        version: '8.6.0',
+        transform: migrate8_6_0_up,
+        transformDown: migrate8_6_0_down,
+      },
+      {
+        transformType: TransformType.Migrate,
+        version: '8.7.0',
+        transform: migrate8_7_0_up,
+        transformDown: migrate8_7_0_down,
+      },
+      {
+        transformType: TransformType.Migrate,
+        version: '8.8.0',
+        transform: migrate8_8_0_up,
+        transformDown: migrate8_8_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.8.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.7.0',
+    });
+
+    const { document: outputDoc } = pipeline.run();
+
+    expect(migrate8_6_0_down).not.toHaveBeenCalled();
+    expect(migrate8_7_0_down).not.toHaveBeenCalled();
+    expect(migrate8_8_0_down).not.toHaveBeenCalled();
+
+    expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
+  });
+
+  it('considers undefined typeMigrationVersion as being the highest current version', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+    });
+    document.typeMigrationVersion = undefined;
+
+    const migrate8_6_0_up = createTransformFn();
+    const migrate8_6_0_down = createTransformFn();
+    const migrate8_7_0_up = createTransformFn();
+    const migrate8_7_0_down = createTransformFn();
+    const migrate8_8_0_up = createTransformFn();
+    const migrate8_8_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Migrate,
+        version: '8.6.0',
+        transform: migrate8_6_0_up,
+        transformDown: migrate8_6_0_down,
+      },
+      {
+        transformType: TransformType.Migrate,
+        version: '8.7.0',
+        transform: migrate8_7_0_up,
+        transformDown: migrate8_7_0_down,
+      },
+      {
+        transformType: TransformType.Migrate,
+        version: '8.8.0',
+        transform: migrate8_8_0_up,
+        transformDown: migrate8_8_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.8.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.5.0',
+    });
+
+    const { document: outputDoc } = pipeline.run();
+
+    expect(migrate8_6_0_up).not.toHaveBeenCalled();
+    expect(migrate8_7_0_up).not.toHaveBeenCalled();
+    expect(migrate8_8_0_up).not.toHaveBeenCalled();
+
+    expect(migrate8_8_0_down).toHaveBeenCalledTimes(1);
+    expect(migrate8_8_0_down).toHaveBeenCalledWith(document);
+
+    expect(migrate8_7_0_down).toHaveBeenCalledTimes(1);
+    expect(migrate8_7_0_down).toHaveBeenCalledWith({ ...document, typeMigrationVersion: '8.8.0' });
+
+    expect(migrate8_6_0_down).toHaveBeenCalledTimes(1);
+    expect(migrate8_6_0_down).toHaveBeenCalledWith({ ...document, typeMigrationVersion: '8.7.0' });
+
+    expect(migrate8_8_0_down.mock.invocationCallOrder[0]).toBeLessThan(
+      migrate8_7_0_down.mock.invocationCallOrder[0]
+    );
+    expect(migrate8_7_0_down.mock.invocationCallOrder[0]).toBeLessThan(
+      migrate8_6_0_down.mock.invocationCallOrder[0]
+    );
+
+    expect(outputDoc.typeMigrationVersion).toEqual('8.5.0');
   });
 });
