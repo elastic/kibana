@@ -20,7 +20,7 @@ export const useMonitorNotFound = (error?: IHttpFetchError<ResponseErrorBody>, i
 
   useEffect(() => {
     if (id && packagePolicyId && !error) {
-      updateUrlParams({ packagePolicyId: undefined });
+      updateUrlParams({ packagePolicyId: undefined }, true);
     }
   }, [error, id, packagePolicyId, updateUrlParams]);
 
@@ -49,7 +49,7 @@ const LeftoverIntegrationFound: React.FC = () => {
 
   useEffect(() => {
     if (isDeleting && data && !loading) {
-      updateUrlParams({ packagePolicyId: undefined });
+      updateUrlParams({ packagePolicyId: undefined }, true);
       setIsDeleting(false);
     }
   }, [data, isDeleting, loading, updateUrlParams]);
