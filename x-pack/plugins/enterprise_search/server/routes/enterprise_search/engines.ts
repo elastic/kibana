@@ -14,6 +14,7 @@ import {
 } from '../../../common/types/engines';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { createApiKey } from '../../lib/engines/create_api_key';
+import { fetchIndicesStats } from '../../lib/engines/fetch_indices_stats';
 
 import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
 import { RouteDependencies } from '../../plugin';
@@ -63,7 +64,9 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
         method: 'GET',
         path: `/_application/search_application/${request.params.engine_name}`,
       });
-      return response.ok({ body: engine });
+      const indicesStats = await fetchIndicesStats(client, engine.indices);
+
+      return response.ok({ body: { ...engine, indices: indicesStats } });
     })
   );
 
