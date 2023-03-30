@@ -189,10 +189,9 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       nextState.dateRangeTo = nextDateRange.dateRangeTo;
 
       /**
-       * SecuritySolution relys on triggering an action to update the time range in its reducer.
-       * onTimeRangeChange here is to notify the new time range whever it is updated, so the consumer can persist the staus.
-       * https://github.com/elastic/kibana/pull/153040/files#r1149336889
-       */
+       * Some applications do not rely on the _g url parameter to update the time. The onTimeRangeChange 
+       * callback can be used in these cases to notify the consumer for the time change.
+      */
       if (nextDateRange.dateRangeFrom && nextDateRange.dateRangeTo) {
         nextProps?.onTimeRangeChange?.({
           dateRange: {
