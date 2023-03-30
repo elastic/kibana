@@ -108,7 +108,8 @@ export const strings = {
     }),
   getSpatialFilterQueryDslHelpText: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.spatialFilterQueryDslHelpText', {
-      defaultMessage: 'Editing Elasticsearch Query DSL prevents filter geometry from displaying in map.',
+      defaultMessage:
+        'Editing Elasticsearch Query DSL prevents filter geometry from displaying in map.',
     }),
 };
 
@@ -166,27 +167,23 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   public render() {
-    const toggleEditorFlexItem = this.props.filter?.meta.isMultiIndex
-      ? null
-      : <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  data-test-subj="editQueryDSL"
-                  onClick={this.toggleCustomEditor}
-                >
-                  {this.state.isCustomEditorOpen ? (
-                    <FormattedMessage
-                      id="unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel"
-                      defaultMessage="Edit filter values"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="unifiedSearch.filter.filterEditor.editQueryDslButtonLabel"
-                      defaultMessage="Edit as Query DSL"
-                    />
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>;
+    const toggleEditorFlexItem = this.props.filter?.meta.isMultiIndex ? null : (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty size="xs" data-test-subj="editQueryDSL" onClick={this.toggleCustomEditor}>
+          {this.state.isCustomEditorOpen ? (
+            <FormattedMessage
+              id="unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel"
+              defaultMessage="Edit filter values"
+            />
+          ) : (
+            <FormattedMessage
+              id="unifiedSearch.filter.filterEditor.editQueryDslButtonLabel"
+              defaultMessage="Edit as Query DSL"
+            />
+          )}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    );
     return (
       <div>
         <EuiPopoverTitle paddingSize="s">
@@ -376,15 +373,14 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   private renderCustomEditor() {
-    const helpText = this.props.filter?.meta.type === FILTERS.SPATIAL_FILTER
-      ? <EuiTextColor color="warning">{strings.getSpatialFilterQueryDslHelpText()}</EuiTextColor>
-      : '';
+    const helpText =
+      this.props.filter?.meta.type === FILTERS.SPATIAL_FILTER ? (
+        <EuiTextColor color="warning">{strings.getSpatialFilterQueryDslHelpText()}</EuiTextColor>
+      ) : (
+        ''
+      );
     return (
-      <EuiFormRow
-        fullWidth
-        label={strings.getQueryDslLabel()}
-        helpText={helpText}
-      >
+      <EuiFormRow fullWidth label={strings.getQueryDslLabel()} helpText={helpText}>
         <CodeEditor
           languageId={XJsonLang.ID}
           width="100%"
@@ -561,15 +557,17 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
 
     if (isCustomEditorOpen) {
-      const filter = this.props.filter?.meta.type === FILTERS.CUSTOM || queryDsl !== this.parseFilterToQueryDsl(this.props.filter)
-        ? this.getFilterFromQueryDsl(queryDsl)
-        : {
-          ...this.props.filter,
-          meta: {
-            ...(this.props.filter.meta ?? {}),
-            alias: customLabel || null
-          }
-        };
+      const filter =
+        this.props.filter?.meta.type === FILTERS.CUSTOM ||
+        queryDsl !== this.parseFilterToQueryDsl(this.props.filter)
+          ? this.getFilterFromQueryDsl(queryDsl)
+          : {
+              ...this.props.filter,
+              meta: {
+                ...(this.props.filter.meta ?? {}),
+                alias: customLabel || null,
+              },
+            };
       if (!filter) {
         return;
       }
