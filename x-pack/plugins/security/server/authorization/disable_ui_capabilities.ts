@@ -30,6 +30,7 @@ export function disableUICapabilitiesFactory(
 ) {
   // nav links are sourced from the apps property.
   // The Kibana Platform associates nav links to the app which registers it, in a 1:1 relationship.
+  // .filter(f => f.privileges !== null)
   const featureNavLinkIds = features
     .flatMap((feature) => feature.app)
     .filter((navLinkId) => navLinkId != null);
@@ -71,9 +72,22 @@ export function disableUICapabilitiesFactory(
     featureId: keyof UICapabilities,
     uiCapability: string
   ) => {
-    // if the navLink isn't for a feature that we have registered, we don't wish to
-    // disable it based on privileges
-    return featureId !== 'navLinks' || featureNavLinkIds.includes(uiCapability);
+    // This method answers: 'Do we wish to disable a feature based on privileges?'
+
+    // if the feature is 'navLinks', return true if the nav link was registered
+    // (i.e. found in the 'app' property of a registered Kibana feature)
+    if (featureId === 'navLinks') return featureNavLinkIds.includes(uiCapability)
+
+    // if the feature is a Kibana feature, return true if it defines privileges
+    // (i.e. it adheres to the Kibana security model)
+    // Kibana features with no privileges opt out of the Kibana security model and
+    // are not subject to our control(e.g.Enterprise Search features)
+    const kibanaFeature = features.find(f => f.id === featureId);
+    if (!!kibanaFeature) return !!(kibanaFeature.privileges);
+
+    // Lastly return true if the feature is a registered es feature (we always want to affect these),
+    // otherwise false(we don't know what this feature is so we don't touch it)
+    return !!elasticsearchFeatureMap[featureId];
   };
 
   const disableAll = (uiCapabilities: UICapabilities) => {
