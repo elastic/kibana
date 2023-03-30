@@ -77,7 +77,7 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
     // Check if the current recurrence has been skipped manually
     if (snooze.skipRecurrences?.includes(lastOccurrence.toISOString())) return null;
     const lastOccurrenceEndTime = lastOccurrence.getTime() + duration;
-    if (now < lastOccurrenceEndTime)
+    if (nowDate.getTime() < lastOccurrenceEndTime)
       return {
         lastOccurrence,
         snoozeEndTime: localUtcToUtc(new Date(lastOccurrenceEndTime), tzid),

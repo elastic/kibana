@@ -19,7 +19,7 @@ describe('isSnoozeExpired', () => {
   test('snooze is NOT active byweekday', () => {
     // Set the current time as:
     //   - Feb 27 2023 08:15:00 GMT+0000 - Monday
-    fakeTimer = sinon.useFakeTimers(new Date('2023-02-27T08:15:00.000Z'));
+    fakeTimer = sinon.useFakeTimers(new Date('2023-02-27T06:15:00.000Z'));
 
     // Try to get snooze end time with:
     //   - Start date of: Feb 24 2023 23:00:00 GMT+0000 - Friday
@@ -201,13 +201,7 @@ describe('isSnoozeExpired', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`
-      Object {
-        "id": "9141dc1f-ed85-4656-91e4-119173105432",
-        "lastOccurrence": 2023-01-01T01:00:00.000Z,
-        "snoozeEndTime": 2023-02-01T00:00:00.000Z,
-      }
-    `);
+    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`null`);
     fakeTimer.restore();
   });
 
