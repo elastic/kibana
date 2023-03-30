@@ -523,7 +523,7 @@ export default ({ getService }: FtrProviderContext): void => {
        */
       const getAllCasesSortedByCreatedAtAsc = async () => {
         const cases = await es.search<CaseAttributes>({
-          index: '.kibana',
+          index: '.kibana_cases',
           body: {
             size: 10000,
             sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],

@@ -176,7 +176,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
 
     deleteAllSavedObjectsFromKibanaIndex: async () => {
       await es.deleteByQuery({
-        index: '.kibana',
+        index: ['.kibana', '.kibana_ui', '.kibana_cases'],
         wait_for_completion: true,
         body: {
           // @ts-expect-error

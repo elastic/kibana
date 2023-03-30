@@ -17,7 +17,8 @@ export async function getSavedObjectFromES<T>(
 ): Promise<TransportResult<estypes.SearchResponse<T>, unknown>> {
   return await es.search<T>(
     {
-      index: '.kibana',
+      // CHECKPOINT impacted by the .kibana split
+      index: ['.kibana', '.kibana_ui', '.kibana_cases'],
       body: {
         query: {
           bool: {
