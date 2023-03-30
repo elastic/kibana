@@ -13,6 +13,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { EsEventStreamClient } from '../es_event_stream_client';
+import { EsEventStreamNames } from '../es_event_stream_names';
 import { EventStreamLoggerMock } from '../../tests/event_stream_logger_mock';
 import { testEventStreamClient } from '../../tests/test_event_stream_client';
 
@@ -26,7 +27,7 @@ describe('EsEventStreamClient', () => {
   });
 
   const baseName = '.kibana-test';
-  const indexTemplateName = `${baseName}-event-stream-template`;
+  const names = new EsEventStreamNames(baseName);
 
   beforeAll(async () => {
     const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
@@ -52,7 +53,7 @@ describe('EsEventStreamClient', () => {
 
   it('can initialize the Event Stream', async () => {
     const exists1 = await esClient.indices.existsIndexTemplate({
-      name: indexTemplateName,
+      name: names.indexTemplate,
     });
 
     expect(exists1).toBe(false);
@@ -60,10 +61,21 @@ describe('EsEventStreamClient', () => {
     await (await client).initialize();
 
     const exists2 = await esClient.indices.existsIndexTemplate({
-      name: indexTemplateName,
+      name: names.indexTemplate,
     });
 
     expect(exists2).toBe(true);
+  });
+
+  it('should return "resource_already_exists_exception" error when data stream already exists', async () => {
+    try {
+      await esClient.indices.createDataStream({
+        name: names.dataStream,
+      });
+      throw 'Not expected';
+    } catch (error) {
+      expect(error.body.error.type).toBe('resource_already_exists_exception');
+    }
   });
 
   testEventStreamClient(client);
