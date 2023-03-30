@@ -40,7 +40,6 @@ import { ExperimentalFeaturesService } from '../../../../services';
 ExperimentalFeaturesService.init({});
 import { Detail } from '.';
 
-// FLAKY: https://github.com/elastic/kibana/issues/150607
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
