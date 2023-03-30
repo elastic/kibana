@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { significantTerms } from '../__mocks__/artificial_logs/significant_terms';
+import { finalSignificantTermGroups } from '../__mocks__/artificial_logs/final_significant_term_groups';
+
 import {
   addSignificantTermsAction,
+  addSignificantTermsGroupAction,
   resetAllAction,
+  resetGroupsAction,
   updateLoadingStateAction,
 } from './explain_log_rate_spikes';
 import { initialState, streamReducer } from './stream_reducer';
@@ -29,7 +34,7 @@ describe('streamReducer', () => {
     });
   });
 
-  it('adds significant term, then resets state again', () => {
+  it('adds significant term, then resets all state again', () => {
     const state1 = streamReducer(
       initialState,
       addSignificantTermsAction([
@@ -52,5 +57,25 @@ describe('streamReducer', () => {
     const state2 = streamReducer(state1, resetAllAction());
 
     expect(state2.significantTerms).toHaveLength(0);
+  });
+
+  it('adds significant terms and groups, then resets groups only', () => {
+    const state1 = streamReducer(initialState, addSignificantTermsAction(significantTerms));
+
+    expect(state1.significantTerms).toHaveLength(4);
+    expect(state1.significantTermsGroups).toHaveLength(0);
+
+    const state2 = streamReducer(
+      state1,
+      addSignificantTermsGroupAction(finalSignificantTermGroups)
+    );
+
+    expect(state2.significantTerms).toHaveLength(4);
+    expect(state2.significantTermsGroups).toHaveLength(4);
+
+    const state3 = streamReducer(state2, resetGroupsAction());
+
+    expect(state3.significantTerms).toHaveLength(4);
+    expect(state3.significantTermsGroups).toHaveLength(0);
   });
 });
