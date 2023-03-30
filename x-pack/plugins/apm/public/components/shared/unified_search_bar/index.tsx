@@ -147,7 +147,7 @@ export function UnifiedSearchBar({
         displayStyle="inPage"
         onQuerySubmit={handleSubmit}
         isClearable={isClearable}
-        data-test-subj="apmUnifiedSearchBar"
+        dataTestSubj="apmUnifiedSearchBar"
       />
     </EuiSkeletonRectangle>
   );

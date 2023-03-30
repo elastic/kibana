@@ -79,16 +79,14 @@ describe('Errors page', () => {
         cy.contains('div', 'Error 1');
       });
 
-      it('clicking on type adds a filter in the kuerybar', () => {
+      it('clicking on type adds a filter in the searchbar', () => {
         cy.visitKibana(javaServiceErrorsPageHref);
-        cy.getByTestSubj('headerFilterKuerybar')
-          .invoke('val')
-          .should('be.empty');
+        cy.getByTestSubj('apmUnifiedSearchBar').should('be.empty');
         // `force: true` because Cypress says the element is 0x0
         cy.contains('exception 0').click({
           force: true,
         });
-        cy.getByTestSubj('headerFilterKuerybar')
+        cy.getByTestSubj('apmUnifiedSearchBar')
           .its('length')
           .should('be.gt', 0);
         cy.get('table')
