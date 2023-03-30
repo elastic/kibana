@@ -30,6 +30,8 @@ export interface IconButton {
   onClick: () => void;
   /** HTML `title` attribute for tooltips if different from `label` */
   title?: string;
+  /** Test subject for button */
+  'data-test-subj'?: string;
 }
 
 /**
@@ -53,7 +55,6 @@ export const IconButtonGroup = ({ buttons, legend }: Props) => {
 
   const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
     const { label, title = label, ...rest } = button;
-
     return {
       ...rest,
       'aria-label': title ?? label,

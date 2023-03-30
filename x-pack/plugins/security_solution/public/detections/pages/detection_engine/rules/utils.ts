@@ -18,7 +18,7 @@ import type { RouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
 import { DEFAULT_THREAT_MATCH_QUERY, RULES_PATH } from '../../../../../common/constants';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
-import { DataSourceType, RuleStep } from './types';
+import { DataSourceType, GroupByOptions, RuleStep } from './types';
 import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import {
   RuleDetailTabs,
@@ -144,6 +144,11 @@ export const stepDefineDefaultValue: DefineStepRule = {
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
   groupByFields: [],
+  groupByRadioSelection: GroupByOptions.PerRuleExecution,
+  groupByDuration: {
+    value: 5,
+    unit: 'm',
+  },
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {

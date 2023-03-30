@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useChangePointDetectionContext } from './change_point_detection_context';
 
 interface MetricFieldSelectorProps {
@@ -19,19 +19,34 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
   ({ value, onChange }) => {
     const { metricFieldOptions } = useChangePointDetectionContext();
 
-    const options = useMemo<EuiSelectOption[]>(() => {
-      return metricFieldOptions.map((v) => ({ value: v.name, text: v.displayName }));
+    const options = useMemo<EuiComboBoxOptionOption[]>(() => {
+      return metricFieldOptions.map((v) => ({ value: v.name, label: v.displayName }));
     }, [metricFieldOptions]);
+
+    const selection = options.filter((v) => v.value === value);
+
+    const onChangeCallback = useCallback(
+      (selectedOptions: EuiComboBoxOptionOption[]) => {
+        const option = selectedOptions[0];
+        if (typeof option !== 'undefined') {
+          onChange(option.label);
+        }
+      },
+      [onChange]
+    );
 
     return (
       <EuiFormRow>
-        <EuiSelect
+        <EuiComboBox
           prepend={i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
             defaultMessage: 'Metric field',
           })}
+          singleSelection={{ asPlainText: true }}
           options={options}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          selectedOptions={selection}
+          onChange={onChangeCallback}
+          isClearable={false}
+          data-test-subj="aiopsChangePointMetricField"
         />
       </EuiFormRow>
     );

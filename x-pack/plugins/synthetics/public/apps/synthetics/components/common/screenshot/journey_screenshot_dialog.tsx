@@ -28,18 +28,21 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
+import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { SyntheticsSettingsContext } from '../../../contexts';
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
 
 import { ScreenshotImage } from './screenshot_image';
 
 export const JourneyScreenshotDialog = ({
+  timestamp,
   checkGroup,
   initialImgSrc,
   initialStepNumber,
   isOpen,
   onClose,
 }: {
+  timestamp?: string;
   checkGroup: string | undefined;
   initialImgSrc: string | undefined;
   initialStepNumber: number;
@@ -52,7 +55,7 @@ export const JourneyScreenshotDialog = ({
   const [stepNumber, setStepNumber] = useState(initialStepNumber);
 
   const { basePath } = useContext(SyntheticsSettingsContext);
-  const imgPath = `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
+  const imgPath = getScreenshotUrl({ basePath, checkGroup, stepNumber });
 
   const imageResult = useRetrieveStepImage({
     hasIntersected: true,
@@ -60,6 +63,7 @@ export const JourneyScreenshotDialog = ({
     imgPath,
     retryFetchOnRevisit: false,
     checkGroup,
+    timestamp,
   });
   const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
   const imgSrc = stepNumber === initialStepNumber ? initialImgSrc ?? url : url;
@@ -200,6 +204,24 @@ export const JourneyScreenshotDialog = ({
       </EuiModal>
     </EuiOutsideClickDetector>
   ) : null;
+};
+
+export const getScreenshotUrl = ({
+  basePath,
+  checkGroup,
+  stepNumber,
+}: {
+  basePath: string;
+  checkGroup?: string;
+  stepNumber: number;
+}) => {
+  if (!checkGroup) {
+    return '';
+  }
+  return `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
+    '{checkGroup}',
+    checkGroup
+  ).replace('{stepIndex}', stepNumber.toString())}`;
 };
 
 export const formatScreenshotStepsCount = (stepNumber: number, totalSteps: number) =>

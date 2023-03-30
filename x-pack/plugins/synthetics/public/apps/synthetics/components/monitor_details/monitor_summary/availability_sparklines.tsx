@@ -16,6 +16,7 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 interface AvailabilitySparklinesProps {
   from: string;
   to: string;
+  id: string;
 }
 
 export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
@@ -36,6 +37,7 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id={props.id}
       customHeight="70px"
       reportType={ReportTypes.KPI}
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}

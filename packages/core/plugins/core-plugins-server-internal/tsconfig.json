@@ -37,6 +37,7 @@
     "@kbn/core-environment-server-internal",
     "@kbn/core-node-server-internal",
     "@kbn/core-plugins-base-server-internal",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",

@@ -63,6 +63,7 @@ describe('buildSortedEventsQuery', () => {
         sort: [
           {
             timefield: {
+              format: 'strict_date_optional_time||epoch_millis',
               order: 'asc',
             },
           },
@@ -111,6 +112,7 @@ describe('buildSortedEventsQuery', () => {
         sort: [
           {
             timefield: {
+              format: 'strict_date_optional_time||epoch_millis',
               order: 'asc',
             },
           },
@@ -160,6 +162,7 @@ describe('buildSortedEventsQuery', () => {
         sort: [
           {
             timefield: {
+              format: 'strict_date_optional_time||epoch_millis',
               order: 'asc',
             },
           },
@@ -210,6 +213,7 @@ describe('buildSortedEventsQuery', () => {
         sort: [
           {
             timefield: {
+              format: 'strict_date_optional_time||epoch_millis',
               order: 'asc',
             },
           },
@@ -272,6 +276,7 @@ describe('buildSortedEventsQuery', () => {
         sort: [
           {
             timefield: {
+              format: 'strict_date_optional_time||epoch_millis',
               order: 'asc',
             },
           },
@@ -320,6 +325,7 @@ describe('buildSortedEventsQuery', () => {
         sort: [
           {
             timefield: {
+              format: 'strict_date_optional_time||epoch_millis',
               order: 'desc',
             },
           },
@@ -368,6 +374,7 @@ describe('buildSortedEventsQuery', () => {
         sort: [
           {
             timefield: {
+              format: 'strict_date_optional_time||epoch_millis',
               order: 'asc',
             },
           },

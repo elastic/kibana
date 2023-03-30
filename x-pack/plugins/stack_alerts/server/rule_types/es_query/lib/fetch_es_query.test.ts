@@ -130,6 +130,7 @@ describe('fetchEsQuery', () => {
           sort: [
             {
               '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
                 order: 'desc',
               },
             },
@@ -194,6 +195,7 @@ describe('fetchEsQuery', () => {
           sort: [
             {
               '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
                 order: 'desc',
               },
             },
@@ -258,6 +260,7 @@ describe('fetchEsQuery', () => {
           sort: [
             {
               '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
                 order: 'desc',
               },
             },
@@ -349,6 +352,7 @@ describe('fetchEsQuery', () => {
           sort: [
             {
               '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
                 order: 'desc',
               },
             },

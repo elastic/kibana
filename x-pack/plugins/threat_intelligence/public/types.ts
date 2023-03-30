@@ -23,6 +23,7 @@ import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { Policy } from './modules/block_list/hooks/use_policies';
 
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: Array<FieldSpec & DataViewField>;
@@ -79,7 +80,8 @@ export interface UseInvestigateInTimelineProps {
 export interface BlockListFlyoutProps {
   apiClient: unknown;
   item: CreateExceptionListItemSchema;
-  policies: unknown[];
+  policies: Policy[];
+  policiesIsLoading: boolean;
   FormComponent: NamedExoticComponent<BlockListFormProps>;
   onClose: () => void;
 }
@@ -106,14 +108,17 @@ export interface SecuritySolutionPluginContext {
    * Get the user's license to drive the Threat Intelligence plugin's visibility.
    */
   licenseService: LicenseAware;
+
   /**
    * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView.
    */
   sourcererDataView: SourcererDataView;
+
   /**
    * Security Solution store
    */
   securitySolutionStore: Store;
+
   /**
    * Pass UseInvestigateInTimeline functionality to TI plugin
    */
@@ -124,7 +129,9 @@ export interface SecuritySolutionPluginContext {
   }: UseInvestigateInTimelineProps) => () => Promise<void>;
 
   useQuery: () => Query;
+
   useFilters: () => Filter[];
+
   useGlobalTime: () => TimeRange;
 
   SiemSearchBar: VFC<any>;
@@ -139,7 +146,11 @@ export interface SecuritySolutionPluginContext {
    */
   deregisterQuery: (query: { id: string }) => void;
 
+  /**
+   * Add to blocklist feature
+   */
   blockList: {
+    canWriteBlocklist: boolean;
     exceptionListApiClient: unknown;
     useSetUrlParams: () => (
       params: Record<string, string | number | null | undefined>,

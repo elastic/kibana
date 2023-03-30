@@ -54,8 +54,13 @@ interface AlertOpts {
 interface ActionOpts {
   id: string;
   typeId: string;
-  alertId: string;
+  alertId?: string;
   alertGroup?: string;
+  alertSummary?: {
+    new: number;
+    ongoing: number;
+    recovered: number;
+  };
 }
 
 export class AlertingEventLogger {
@@ -184,7 +189,7 @@ export class AlertingEventLogger {
           alertingOutcome: 'failure',
           reason: status.error?.reason || 'unknown',
           error: this.event?.error?.message || status.error.message,
-          ...(this.event.message
+          ...(this.event.message && this.event.event?.outcome === 'failure'
             ? {}
             : {
                 message: `${this.ruleContext.ruleType.id}:${this.ruleContext.ruleId}: execution failed`,
@@ -278,6 +283,7 @@ export function createActionExecuteRecord(context: RuleContextOpts, action: Acti
       },
     ],
     ruleName: context.ruleName,
+    alertSummary: action.alertSummary,
   });
 }
 

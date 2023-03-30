@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Route, Switch, useParams } from 'react-router-dom';
+import { Redirect, Switch, useParams } from 'react-router-dom';
 
 import { useActions } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { ENGINE_PATH, ENGINE_TAB_PATH, EngineViewTabs } from '../../routes';

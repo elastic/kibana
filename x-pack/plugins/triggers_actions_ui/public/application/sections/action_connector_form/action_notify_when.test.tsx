@@ -12,14 +12,11 @@ import { act } from 'react-dom/test-utils';
 import { RuleAction } from '../../../types';
 import { ActionNotifyWhen } from './action_notify_when';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import {
-  DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
-  DEFAULT_FREQUENCY_WITH_SUMMARY,
-} from '../../../common/constants';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 describe('action_notify_when', () => {
   async function setup(
-    frequency: RuleAction['frequency'] = DEFAULT_FREQUENCY_WITH_SUMMARY,
+    frequency: RuleAction['frequency'] = DEFAULT_FREQUENCY,
     hasSummary: boolean = true
   ) {
     const wrapper = mountWithIntl(
@@ -50,15 +47,15 @@ describe('action_notify_when', () => {
         '[data-test-subj="summaryOrPerRuleSelect"]'
       );
       expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('Summary of alerts');
+      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
 
       const notifyWhenSelect = wrapperDefault.find('[data-test-subj="notifyWhenSelect"]');
       expect(notifyWhenSelect.exists()).toBeTruthy();
       expect((notifyWhenSelect.first().props() as EuiSuperSelectProps<''>).valueOfSelected).toEqual(
-        RuleNotifyWhen.ACTIVE
+        RuleNotifyWhen.CHANGE
       );
     }
-    const wrapperForEach = await setup(DEFAULT_FREQUENCY_WITHOUT_SUMMARY);
+    const wrapperForEach = await setup(DEFAULT_FREQUENCY);
     {
       const summaryOrPerRuleSelect = wrapperForEach.find(
         '[data-test-subj="summaryOrPerRuleSelect"]'
@@ -73,7 +70,7 @@ describe('action_notify_when', () => {
       );
     }
     const wrapperSummaryThrottle = await setup({
-      ...DEFAULT_FREQUENCY_WITH_SUMMARY,
+      ...DEFAULT_FREQUENCY,
       throttle: '5h',
       notifyWhen: RuleNotifyWhen.THROTTLE,
     });
@@ -82,7 +79,7 @@ describe('action_notify_when', () => {
         '[data-test-subj="summaryOrPerRuleSelect"]'
       );
       expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('Summary of alerts');
+      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
 
       const notifyWhenSelect = wrapperSummaryThrottle.find('[data-test-subj="notifyWhenSelect"]');
       expect(notifyWhenSelect.exists()).toBeTruthy();
@@ -99,7 +96,7 @@ describe('action_notify_when', () => {
   });
 
   it('hides the summary selector when hasSummary is false', async () => {
-    const wrapper = await setup(DEFAULT_FREQUENCY_WITHOUT_SUMMARY, false);
+    const wrapper = await setup(DEFAULT_FREQUENCY, false);
     const summaryOrPerRuleSelect = wrapper.find('[data-test-subj="summaryOrPerRuleSelect"]');
     expect(summaryOrPerRuleSelect.exists()).toBeFalsy();
   });

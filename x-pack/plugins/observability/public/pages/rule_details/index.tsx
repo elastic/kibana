@@ -39,10 +39,13 @@ import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, toQuery } from '../../utils/url';
+import {
+  defaultTimeRange,
+  getDefaultAlertSummaryTimeRange,
+} from '../../utils/alert_summary_widget';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
-import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { getDefaultAlertSummaryTimeRange } from './helpers';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 import {
   EXECUTION_TAB,
@@ -55,16 +58,15 @@ import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle } from './components';
 import { getHealthColor } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
-import { AlertStatus } from '../../../common/typings';
 import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
-import { ObservabilityAppServices } from '../../application/types';
+import type { AlertStatus } from '../../../common/typings';
+import type { ObservabilityAppServices } from '../../application/types';
 
 export function RuleDetailsPage() {
   const {
@@ -73,11 +75,11 @@ export function RuleDetailsPage() {
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       ruleTypeRegistry,
-      getEditAlertFlyout,
+      getEditRuleFlyout: EditRuleFlyout,
       getRuleEventLogList,
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
-      getRuleStatusPanel,
+      getRuleStatusPanel: RuleStatusPanel,
       getRuleDefinition,
     },
     application: { capabilities, navigateToUrl },
@@ -92,7 +94,7 @@ export function RuleDetailsPage() {
   const history = useHistory();
   const location = useLocation();
 
-  const chartThemes = {
+  const chartProps = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
@@ -130,13 +132,16 @@ export function RuleDetailsPage() {
   });
   const tabsRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
+  }, [esQuery]);
+
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
-    const timeRange = getDefaultAlertSummaryTimeRange();
-    setAlertSummaryWidgetTimeRange(timeRange);
+    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
-        rangeFrom: timeRange.utcFrom,
-        rangeTo: timeRange.utcTo,
+        rangeFrom: defaultTimeRange.from,
+        rangeTo: defaultTimeRange.to,
         ruleId,
         status,
         tabId: ALERTS_TAB,
@@ -213,7 +218,9 @@ export function RuleDetailsPage() {
     },
     {
       href: http.basePath.prepend(paths.observability.rules),
-      text: RULES_BREADCRUMB_TEXT,
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
     },
     {
       text: rule && rule.name,
@@ -281,6 +288,7 @@ export function RuleDetailsPage() {
                   featureIds={featureIds}
                   query={esQuery}
                   showExpandToDetails={false}
+                  showAlertStatusWithFlapping
                 />
               )}
             </EuiFlexItem>
@@ -295,7 +303,7 @@ export function RuleDetailsPage() {
     return (
       <EuiPanel>
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           color="danger"
           title={
             <h2>
@@ -386,17 +394,17 @@ export function RuleDetailsPage() {
     >
       <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
-          {getRuleStatusPanel({
-            rule,
-            isEditable: hasEditButton,
-            requestRefresh: reloadRule,
-            healthColor: getHealthColor(rule.executionStatus.status),
-            statusMessage,
-          })}
+          <RuleStatusPanel
+            rule={rule}
+            isEditable={hasEditButton}
+            requestRefresh={reloadRule}
+            healthColor={getHealthColor(rule.executionStatus.status)}
+            statusMessage={statusMessage}
+          />
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartThemes={chartThemes}
+            chartProps={chartProps}
             featureIds={featureIds}
             onClick={onAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
@@ -416,14 +424,15 @@ export function RuleDetailsPage() {
           onTabIdChange(tab.id as TabId);
         }}
       />
-      {editFlyoutVisible &&
-        getEditAlertFlyout({
-          initialRule: rule,
-          onClose: () => {
+      {editFlyoutVisible && (
+        <EditRuleFlyout
+          initialRule={rule}
+          onClose={() => {
             setEditFlyoutVisible(false);
-          },
-          onSave: reloadRule,
-        })}
+          }}
+          onSave={reloadRule}
+        />
+      )}
       <DeleteModalConfirmation
         onDeleted={() => {
           setRuleToDelete([]);

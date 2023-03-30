@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { loadRuleTypes } from '../lib/rule_api';
+import { loadRuleTypes } from '../lib/rule_api/rule_types';
 import { useKibana } from '../../common/lib/kibana';
 import { RuleType, RuleTypeIndex } from '../../types';
 
@@ -54,6 +54,7 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     queryKey: ['loadRuleTypes'],
     queryFn,
     onError: onErrorFn,
+    refetchOnWindowFocus: false,
   });
 
   const filteredIndex = data ? getFilteredIndex(data, filteredRuleTypes) : new Map();

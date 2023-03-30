@@ -6,6 +6,8 @@
  */
 
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
+import type { Serializable } from '@kbn/utility-types';
+
 import { isArray, isString, isEmpty } from 'lodash/fp';
 import { INDICATOR_REFERENCE } from '../../../common/cti/constants';
 import type { DataProvider, QueryOperator } from '../../../common/types';
@@ -24,6 +26,7 @@ import {
   REFERENCE_URL_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
 } from '../../timelines/components/timeline/body/renderers/constants';
+import { isCountField } from '../utils';
 
 export const getDataProvider = ({
   field,
@@ -58,6 +61,8 @@ export interface CreateDataProviderParams {
   fieldFormat?: string;
   fieldType?: string;
   values: string | string[] | null | undefined;
+  sourceParamType?: Serializable;
+  negate?: boolean;
 }
 
 export const createDataProviders = ({
@@ -67,10 +72,12 @@ export const createDataProviders = ({
   fieldFormat,
   fieldType,
   values,
+  sourceParamType,
+  negate,
 }: CreateDataProviderParams) => {
   if (field == null) return null;
 
-  const arrayValues = Array.isArray(values) ? values : [values];
+  const arrayValues = Array.isArray(values) ? (values.length > 0 ? values : [null]) : [values];
 
   return arrayValues.reduce<DataProvider[]>((dataProviders, value, index) => {
     let id: string = '';
@@ -78,7 +85,15 @@ export const createDataProviders = ({
       value ? `-${value}` : ''
     }`;
 
-    if (fieldType === GEO_FIELD_TYPE || field === MESSAGE_FIELD_NAME) {
+    if (!isValidDataProviderField(field, fieldType)) {
+      return dataProviders;
+    }
+
+    if (isCountField(fieldType, sourceParamType)) {
+      id = `value-count-data-provider-${contextId}-${field}`;
+      dataProviders.push(
+        getDataProvider({ field, id, value: '', excluded: false, operator: EXISTS_OPERATOR })
+      );
       return dataProviders;
     }
 
@@ -111,10 +126,13 @@ export const createDataProviders = ({
     }
 
     id = getIdForField({ field, fieldFormat, appendedUniqueId, value });
-    dataProviders.push(getDataProvider({ field, id, value }));
+    dataProviders.push(getDataProvider({ field, id, value, excluded: negate }));
     return dataProviders;
   }, []);
 };
+
+export const isValidDataProviderField = (fieldName: string, fieldType: string | undefined) =>
+  fieldType !== GEO_FIELD_TYPE && fieldName !== MESSAGE_FIELD_NAME;
 
 const getIdForField = ({
   field,

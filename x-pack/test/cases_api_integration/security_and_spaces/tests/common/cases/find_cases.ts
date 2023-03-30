@@ -30,7 +30,7 @@ import {
   createCase,
   updateCase,
   createComment,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   obsOnly,
   secOnly,
@@ -240,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns the correct fields', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        // all fields that contain the UserRT definition must be included here (aka created_by, closed_by, and updated_by)
+        // all fields that contain the UserRt definition must be included here (aka created_by, closed_by, and updated_by)
         // see https://github.com/elastic/kibana/issues/139503
         const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
           ['title', 'created_by', 'closed_by', 'updated_by'],

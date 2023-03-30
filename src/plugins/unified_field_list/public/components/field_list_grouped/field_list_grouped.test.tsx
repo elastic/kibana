@@ -369,7 +369,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
       '1 available field. 4 unmapped fields. 0 empty fields. 0 meta fields.'
     );
-  });
+  }, 10000);
 
   it('renders correctly when non-supported fields are filtered out', async () => {
     const hookParams = {

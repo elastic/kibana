@@ -131,6 +131,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
         {(series.filters ?? []).length > 0 && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="o11ySelectedFiltersClearFiltersButton"
               flush="left"
               iconType="cross"
               onClick={() => {

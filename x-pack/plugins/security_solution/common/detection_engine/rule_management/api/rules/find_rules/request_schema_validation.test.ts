@@ -18,7 +18,7 @@ describe('Find rules request schema, additional validation', () => {
 
     test('You can have both a sort_field and and a sort_order', () => {
       const schema: FindRulesRequestQuery = {
-        sort_field: 'some field',
+        sort_field: 'name',
         sort_order: 'asc',
       };
       const errors = validateFindRulesRequestQuery(schema);
@@ -27,7 +27,7 @@ describe('Find rules request schema, additional validation', () => {
 
     test('You cannot have sort_field without sort_order', () => {
       const schema: FindRulesRequestQuery = {
-        sort_field: 'some field',
+        sort_field: 'name',
       };
       const errors = validateFindRulesRequestQuery(schema);
       expect(errors).toEqual([

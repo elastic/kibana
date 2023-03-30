@@ -104,7 +104,12 @@ describe('FetchHistoricalSummary', () => {
   let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-01-18T15:00:00.000Z'));
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   describe('Rolling and Occurrences SLOs', () => {

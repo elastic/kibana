@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/task-manager-fixture-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "taskManagerFixture",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "taskManager"
+    ]
+  }
+}

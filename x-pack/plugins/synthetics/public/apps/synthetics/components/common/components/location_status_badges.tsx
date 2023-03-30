@@ -109,7 +109,7 @@ const MonitorDetailLinkForLocation = ({
 
   return (
     <EuiBadge
-      iconType={() => <EuiIcon size="s" type="dot" color={color} />}
+      iconType={() => <EuiIcon size="m" type="dot" color={color} />}
       color="hollow"
       iconOnClickAriaLabel={CLICK_LOCATION_LABEL}
       iconOnClick={() => {

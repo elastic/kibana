@@ -13,7 +13,7 @@ import type { MainHistoryLocationState } from '../../common/locator/locator';
 import type { Document } from '../persistence';
 
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
-import type { DateRange } from '../../common';
+import type { DateRange } from '../../common/types';
 import type { LensAppServices } from '../app_plugin/types';
 import type {
   DatasourceMap,
@@ -38,7 +38,6 @@ export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
   activeData?: TableInspectorAdapter;
-  requestWarnings?: string[];
 }
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;

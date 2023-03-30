@@ -1352,3 +1352,54 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:8bd01ff0-9d84-11ed-994d-f1971f849da5",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "name": "Old Log threshold rule",
+        "alertTypeId": "logs.alert.document.count",
+        "consumer": "logs",
+        "params": {
+          "timeSize": 5,
+          "timeUnit": "m",
+          "count": {
+            "value": 75,
+            "comparator": "more than"
+          },
+          "criteria": [
+            {
+              "field": "log.level",
+              "comparator": "equals",
+              "value": "error"
+            }
+          ]
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "enabled": true,
+        "actions": [
+        ],
+        "throttle": null,
+        "apiKeyOwner": null,
+        "createdBy" : "elastic",
+        "updatedBy" : "elastic",
+        "createdAt": "2023-01-26T14:20:13.449Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "scheduledTaskId": "8bd01ff0-9d84-11ed-994d-f1971f849da5",
+        "tags": []
+      },
+      "type": "alert",
+      "updated_at": "2022-03-26T16:05:55.957Z",
+      "references": [],
+      "migrationVersion": {
+        "alert": "8.0.1"
+      }
+    }
+  }
+}

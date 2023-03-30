@@ -59,7 +59,7 @@ const getAggResultBuckets = (
   const keyParts = key.split(OTHER_BUCKET_SEPARATOR);
   let responseAgg = response;
   for (const i in keyParts) {
-    if (keyParts[i]) {
+    if (keyParts[i] || keyParts[i] === '') {
       const responseAggs: Array<Record<string, any>> = values(responseAgg);
       // If you have multi aggs, we cannot just assume the first one is the `other` bucket,
       // so we need to loop over each agg until we find it.
@@ -196,12 +196,11 @@ export const buildOtherBucketAgg = (
     key: string
   ) => {
     // make sure there are actually results for the buckets
-    if (aggregations[aggId]?.buckets.length < 1) {
+    const agg = aggregations[aggId];
+    if (!agg || !agg.buckets.length) {
       noAggBucketResults = true;
       return;
     }
-
-    const agg = aggregations[aggId];
     const newAggIndex = aggIndex + 1;
     const newAgg = bucketAggs[newAggIndex];
     const currentAgg = bucketAggs[aggIndex];
@@ -209,7 +208,7 @@ export const buildOtherBucketAgg = (
       exhaustiveBuckets = false;
     }
     if (aggIndex < index) {
-      each(agg.buckets, (bucket: any, bucketObjKey) => {
+      each(agg?.buckets, (bucket: any, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(
           bucket,
           isNumber(bucketObjKey) ? undefined : bucketObjKey

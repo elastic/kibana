@@ -14,6 +14,7 @@ export interface LogViewsStaticConfig {
 export const logViewOriginRT = rt.keyof({
   stored: null,
   internal: null,
+  inline: null,
   'infra-source-stored': null,
   'infra-source-internal': null,
   'infra-source-fallback': null,
@@ -102,3 +103,20 @@ export const logViewStatusRT = rt.strict({
   index: logViewIndexStatusRT,
 });
 export type LogViewStatus = rt.TypeOf<typeof logViewStatusRT>;
+
+export const persistedLogViewReferenceRT = rt.type({
+  logViewId: rt.string,
+  type: rt.literal('log-view-reference'),
+});
+
+export type PersistedLogViewReference = rt.TypeOf<typeof persistedLogViewReferenceRT>;
+
+export const inlineLogViewReferenceRT = rt.type({
+  type: rt.literal('log-view-inline'),
+  id: rt.string,
+  attributes: logViewAttributesRT,
+});
+
+export const logViewReferenceRT = rt.union([persistedLogViewReferenceRT, inlineLogViewReferenceRT]);
+
+export type LogViewReference = rt.TypeOf<typeof logViewReferenceRT>;

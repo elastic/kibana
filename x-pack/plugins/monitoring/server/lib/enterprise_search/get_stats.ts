@@ -10,7 +10,7 @@ import { TimeRange } from '../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
-import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import {
   entSearchAggFilterPath,
@@ -27,9 +27,8 @@ export async function getStats(
   const end = moment.utc(req.payload.timeRange.max).valueOf();
   const maxBucketSize = config.ui.max_bucket_size;
 
-  // just get the legacy pattern since no integration exists yet
-  const indexPattern = getLegacyIndexPattern({
-    moduleType: 'enterprise_search',
+  const indexPattern = getIndexPatterns({
+    moduleType: 'enterprisesearch',
     config: Globals.app.config,
     ccs: req.payload.ccs,
   });

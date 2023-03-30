@@ -1,5 +1,5 @@
 {
-  "name": "security-solution-fixtures",
+  "name": "@kbn/security-solution-fixtures-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

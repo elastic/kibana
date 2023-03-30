@@ -21,6 +21,7 @@ export class CspConfig implements ICspConfig {
 
   readonly #directives: CspDirectives;
   public readonly strict: boolean;
+  public readonly disableUnsafeEval: boolean;
   public readonly warnLegacyBrowsers: boolean;
   public readonly disableEmbedding: boolean;
   public readonly header: string;
@@ -37,6 +38,7 @@ export class CspConfig implements ICspConfig {
     }
     this.header = this.#directives.getCspHeader();
     this.strict = rawCspConfig.strict;
+    this.disableUnsafeEval = rawCspConfig.disableUnsafeEval;
     this.warnLegacyBrowsers = rawCspConfig.warnLegacyBrowsers;
     this.disableEmbedding = rawCspConfig.disableEmbedding;
   }

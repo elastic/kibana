@@ -163,7 +163,7 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
                     <EuiIconTip
                       data-test-subj="ruleDurationWarning"
                       anchorClassName="ruleDurationWarningIcon"
-                      type="alert"
+                      type="warning"
                       color="warning"
                       content={i18n.translate(
                         'xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage',

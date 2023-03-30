@@ -95,7 +95,7 @@ export const KPIChart = ({
   };
 
   return (
-    <EuiPanel paddingSize="none" {...props}>
+    <EuiPanel hasShadow={false} paddingSize="none" {...props}>
       {loading ? (
         <EuiFlexGroup style={{ minHeight: MIN_HEIGHT }} justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -120,6 +120,7 @@ export const KPIChart = ({
 
 const KPIChartStyled = styled(Chart)`
   .echMetric {
-    border-radius: 5px;
+    border-radius: ${(p) => p.theme.eui.euiBorderRadius};
+    pointer-events: none;
   }
 `;

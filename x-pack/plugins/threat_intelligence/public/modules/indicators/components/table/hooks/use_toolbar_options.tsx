@@ -7,15 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiDataGridColumn, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { useInspector } from '../../../../../hooks';
 import { IndicatorsFieldBrowser } from '../components';
 import { INSPECT_BUTTON_TEST_ID } from './test_ids';
-
-const INSPECT_BUTTON_TITLE = i18n.translate('xpack.threatIntelligence.inspectTitle', {
-  defaultMessage: 'Inspect',
-});
+import { INSPECT_BUTTON_TITLE } from './translations';
 
 export const useToolbarOptions = ({
   browserFields,

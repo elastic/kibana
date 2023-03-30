@@ -55,8 +55,12 @@ import {
   isCommentRequestTypeActions,
   assertUnreachable,
 } from '../common/utils';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
-export const decodeCommentRequest = (comment: CommentRequest) => {
+export const decodeCommentRequest = (
+  comment: CommentRequest,
+  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
+) => {
   if (isCommentRequestTypeUser(comment)) {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isCommentRequestTypeActions(comment)) {
@@ -106,7 +110,7 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
       );
     }
   } else if (isCommentRequestTypeExternalReference(comment)) {
-    decodeExternalReferenceAttachment(comment);
+    decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
     pipe(
       excess(PersistableStateAttachmentRt).decode(comment),
@@ -122,7 +126,10 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
   }
 };
 
-const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalReferenceType) => {
+const decodeExternalReferenceAttachment = (
+  attachment: CommentRequestExternalReferenceType,
+  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
+) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
     pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
   } else {
@@ -130,6 +137,13 @@ const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalRef
       excess(ExternalReferenceNoSORt).decode(attachment),
       fold(throwErrors(badRequest), identity)
     );
+  }
+
+  const metadata = attachment.externalReferenceMetadata;
+  if (externalRefRegistry.has(attachment.externalReferenceAttachmentTypeId)) {
+    const attachmentType = externalRefRegistry.get(attachment.externalReferenceAttachmentTypeId);
+
+    attachmentType.schemaValidator?.(metadata);
   }
 };
 

@@ -51,8 +51,20 @@ export function createDiscoverServicesMock(): DiscoverServices {
   dataPlugin.query.getState = jest.fn(() => ({
     query: { query: '', language: 'lucene' },
     filters: [],
+    time: {
+      from: 'now-15m',
+      to: 'now',
+    },
   }));
   dataPlugin.dataViews = createDiscoverDataViewsMock();
+  expressionsPlugin.run = jest.fn(() =>
+    of({
+      partial: false,
+      result: {
+        rows: [],
+      },
+    })
+  ) as unknown as typeof expressionsPlugin.run;
 
   return {
     core: coreMock.createStart(),
@@ -148,7 +160,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
     savedObjectsTagging: {},
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
-    lens: { EmbeddableComponent: jest.fn(() => null) },
+    lens: {
+      EmbeddableComponent: jest.fn(() => null),
+      stateHelperApi: jest.fn(() => {
+        return {
+          suggestions: jest.fn(),
+        };
+      }),
+    },
     locator: {
       useUrl: jest.fn(() => ''),
       navigate: jest.fn(),

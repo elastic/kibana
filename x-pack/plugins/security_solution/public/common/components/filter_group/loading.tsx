@@ -7,11 +7,16 @@
 
 import React from 'react';
 import { EuiButton, EuiLoadingChart } from '@elastic/eui';
+import styled from 'styled-components';
+
+const FilterGroupLoadingButton = styled(EuiButton)`
+  height: 34px;
+`;
 
 export const FilterGroupLoading = () => {
   return (
-    <EuiButton color="text">
-      <EuiLoadingChart data-test-subj="filter-group__loading" />
-    </EuiButton>
+    <FilterGroupLoadingButton color="text">
+      <EuiLoadingChart className="filter-group__loading" data-test-subj="filter-group__loading" />
+    </FilterGroupLoadingButton>
   );
 };

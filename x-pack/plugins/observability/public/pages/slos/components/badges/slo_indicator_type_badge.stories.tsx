@@ -8,14 +8,15 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { EuiFlexGroup } from '@elastic/eui';
+import {
+  buildCustomKqlIndicator,
+  buildApmAvailabilityIndicator,
+  buildApmLatencyIndicator,
+} from '../../../../data/slo/indicator';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloIndicatorTypeBadge as Component, Props } from './slo_indicator_type_badge';
-import {
-  aCustomKqlIndicator,
-  anApmAvailabilityIndicator,
-  anApmLatencyIndicator,
-  createSLO,
-} from '../../../../data/slo/slo';
+import { buildSlo } from '../../../../data/slo/slo';
 
 export default {
   component: Component,
@@ -23,13 +24,17 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
+const Template: ComponentStory<typeof Component> = (props: Props) => (
+  <EuiFlexGroup gutterSize="s">
+    <Component {...props} />
+  </EuiFlexGroup>
+);
 
 export const WithCustomKql = Template.bind({});
-WithCustomKql.args = { slo: createSLO({ indicator: aCustomKqlIndicator }) };
+WithCustomKql.args = { slo: buildSlo({ indicator: buildCustomKqlIndicator() }) };
 
 export const WithApmAvailability = Template.bind({});
-WithApmAvailability.args = { slo: createSLO({ indicator: anApmAvailabilityIndicator }) };
+WithApmAvailability.args = { slo: buildSlo({ indicator: buildApmAvailabilityIndicator() }) };
 
 export const WithApmLatency = Template.bind({});
-WithApmLatency.args = { slo: createSLO({ indicator: anApmLatencyIndicator }) };
+WithApmLatency.args = { slo: buildSlo({ indicator: buildApmLatencyIndicator() }) };

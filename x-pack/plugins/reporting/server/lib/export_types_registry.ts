@@ -6,7 +6,8 @@
  */
 
 import { isString } from 'lodash';
-import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_searchsource_immediate';
+import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_v2';
+import { getExportType as getTypeCsvFromSavedObjectImmediate } from '../export_types/csv_searchsource_immediate';
 import { getExportType as getTypeCsv } from '../export_types/csv_searchsource';
 import { getExportType as getTypePng } from '../export_types/png';
 import { getExportType as getTypePngV2 } from '../export_types/png_v2';
@@ -88,6 +89,7 @@ export function getExportTypesRegistry(): ExportTypesRegistry {
   const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
     getTypeCsv,
     getTypeCsvFromSavedObject,
+    getTypeCsvFromSavedObjectImmediate,
     getTypePng,
     getTypePngV2,
     getTypePrintablePdf,

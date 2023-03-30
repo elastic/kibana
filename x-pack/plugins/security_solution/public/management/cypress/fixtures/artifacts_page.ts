@@ -5,31 +5,49 @@
  * 2.0.
  */
 
-import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import type { TranslatedExceptionListItem } from '../../../../server/endpoint/schemas';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { FormAction } from '../tasks/perform_user_actions';
 
-export interface ArtifactResponseType {
-  _index: string;
-  _id: string;
-  _score: number;
-  _source: ArtifactElasticsearchProperties;
+interface FormEditingDescription {
+  formActions: FormAction[];
+
+  checkResults: Array<{
+    selector: string;
+    value: string;
+  }>;
 }
 
-export interface ArtifactBodyType {
-  entries: TranslatedExceptionListItem[];
+interface ArtifactsFixtureType {
+  title: string;
+  pagePrefix: string;
+  tabId: string;
+  artifactName: string;
+  privilegePrefix: string;
+  urlPath: string;
+  emptyState: string;
+
+  create: FormEditingDescription;
+  update: FormEditingDescription;
+
+  delete: {
+    confirmSelector: string;
+    card: string;
+  };
+
+  createRequestBody: {
+    list_id: string;
+    entries: object[];
+    os_types: string[];
+  };
 }
 
-export interface FormAction {
-  type: string;
-  selector?: string;
-  customSelector?: string;
-  value?: string;
-}
-
-export const getArtifactsListTestsData = () => [
+export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
   {
     title: 'Trusted applications',
     pagePrefix: 'trustedAppsListPage',
+    tabId: 'trustedApps',
+    artifactName: 'Trusted application name',
+    privilegePrefix: 'trusted_applications_',
     create: {
       formActions: [
         {
@@ -122,13 +140,40 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'trustedAppsListPage-deleteModal-submitButton',
       card: 'trustedAppsListPage-card',
     },
-    pageObject: 'trustedApplications',
     urlPath: 'trusted_apps',
     emptyState: 'trustedAppsListPage-emptyState',
+
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+      entries: [
+        {
+          entries: [
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'abcd',
+            },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+        },
+      ],
+      os_types: ['windows'],
+    },
   },
   {
     title: 'Event Filters',
     pagePrefix: 'EventFiltersListPage',
+    tabId: 'eventFilters',
+    artifactName: 'Event filter name',
+    privilegePrefix: 'event_filters_',
     create: {
       formActions: [
         {
@@ -222,13 +267,28 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'EventFiltersListPage-deleteModal-submitButton',
       card: 'EventFiltersListPage-card',
     },
-    pageObject: 'eventFilters',
     urlPath: 'event_filters',
     emptyState: 'EventFiltersListPage-emptyState',
+
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+      entries: [
+        {
+          field: 'destination.ip',
+          operator: 'included',
+          type: 'match',
+          value: '1.2.3.4',
+        },
+      ],
+      os_types: ['windows'],
+    },
   },
   {
     title: 'Blocklist',
     pagePrefix: 'blocklistPage',
+    tabId: 'blocklists',
+    artifactName: 'Blocklist name',
+    privilegePrefix: 'blocklist_',
     create: {
       formActions: [
         {
@@ -330,13 +390,34 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'blocklistDeletionConfirm',
       card: 'blocklistCard',
     },
-    pageObject: 'blocklist',
     urlPath: 'blocklist',
     emptyState: 'blocklistPage-emptyState',
+
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+      entries: [
+        {
+          field: 'file.Ext.code_signature',
+          entries: [
+            {
+              field: 'subject_name',
+              value: ['wegwergwegw'],
+              type: 'match_any',
+              operator: 'included',
+            },
+          ],
+          type: 'nested',
+        },
+      ],
+      os_types: ['windows'],
+    },
   },
   {
     title: 'Host isolation exceptions',
     pagePrefix: 'hostIsolationExceptionsListPage',
+    tabId: 'hostIsolationExceptions',
+    artifactName: 'Host Isolation exception name',
+    privilegePrefix: 'host_isolation_exceptions_',
     create: {
       formActions: [
         {
@@ -411,8 +492,20 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'hostIsolationExceptionsDeletionConfirm',
       card: 'hostIsolationExceptionsCard',
     },
-    pageObject: 'hostIsolationExceptions',
     urlPath: 'host_isolation_exceptions',
     emptyState: 'hostIsolationExceptionsListPage-emptyState',
+
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+      entries: [
+        {
+          field: 'destination.ip',
+          operator: 'included',
+          type: 'match',
+          value: '1.2.3.4',
+        },
+      ],
+      os_types: ['windows', 'linux', 'macos'],
+    },
   },
 ];

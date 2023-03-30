@@ -33,7 +33,7 @@ export const getLifecycleMethods = (getService: FtrProviderContext['getService']
       // the tests suites. since the archiver doesn't have any reference to the
       // mappings it can't automatically delete it and we have to do the cleanup manually
       await deleteDataStream('.monitoring-*');
-      await deleteDataStream('metrics-beats.stack_monitoring.*');
+      await deleteDataStream('metrics-*.stack_monitoring.*');
     },
   };
 };

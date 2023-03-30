@@ -14,6 +14,7 @@ import { getServiceNowITSMConnectorType } from './servicenow_itsm';
 import { getServiceNowSIRConnectorType } from './servicenow_sir';
 import { getServiceNowITOMConnectorType } from './servicenow_itom';
 import { getTinesConnectorType } from './tines';
+import { getActionType as getTorqConnectorType } from './torq';
 import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
@@ -44,8 +45,8 @@ export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
 export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';
 export type { ActionParamsType as ServerLogActionParams } from './server_log';
 export { ServiceNowITOMConnectorTypeId } from './servicenow_itom';
-export { ConnectorTypeId as SlackConnectorTypeId } from './slack';
-export type { ActionParamsType as SlackActionParams } from './slack';
+export type { SlackActionParams as SlackActionParams } from '../../common/slack/types';
+export { SLACK_CONNECTOR_ID as SlackConnectorTypeId } from '../../common/slack/constants';
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
@@ -79,7 +80,7 @@ export function registerConnectorTypes({
   actions.registerType(getPagerDutyConnectorType());
   actions.registerType(getSwimlaneConnectorType());
   actions.registerType(getServerLogConnectorType());
-  actions.registerType(getSlackConnectorType({}));
+  actions.registerType(getSlackConnectorType());
   actions.registerType(getWebhookConnectorType());
   actions.registerType(getCasesWebhookConnectorType());
   actions.registerType(getXmattersConnectorType());
@@ -89,6 +90,7 @@ export function registerConnectorTypes({
   actions.registerType(getJiraConnectorType());
   actions.registerType(getResilientConnectorType());
   actions.registerType(getTeamsConnectorType());
+  actions.registerType(getTorqConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());

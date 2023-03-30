@@ -90,7 +90,7 @@ const mountComponent = ({
   };
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.dataState.data$ = savedSearchData$;
-  stateContainer.setAppState({
+  stateContainer.appState.update({
     interval: 'auto',
     hideChart,
     columns: [],
@@ -100,7 +100,6 @@ const mountComponent = ({
     isPlainRecord,
     dataView: dataViewMock,
     navigateTo: jest.fn(),
-    setExpandedDoc: jest.fn(),
     savedSearch,
     stateContainer,
     onFieldEdited: jest.fn(),

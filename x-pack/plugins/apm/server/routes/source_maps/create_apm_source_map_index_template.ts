@@ -17,8 +17,9 @@ const indexTemplate: IndicesPutIndexTemplateRequest = {
     index_patterns: [APM_SOURCE_MAP_INDEX],
     template: {
       settings: {
-        number_of_shards: 1,
         index: {
+          number_of_shards: 1,
+          auto_expand_replicas: '0-2',
           hidden: true,
         },
       },

@@ -3,6 +3,10 @@ value:
   actions:
     - group: threshold met
       id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+      frequency:
+        notify_when: onActionGroupChange
+        summary: false
+        throttle: null
       params:
         level: info
         message: "alert {{alertName}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
@@ -34,6 +38,7 @@ value:
     aggField: sheet.version
     termField: name.keyword
   rule_type_id: .index-threshold
+  running: false
   schedule:
     interval: 1m
   scheduled_task_id: 425b0800-6bca-11eb-9e0d-85d233e3ee35

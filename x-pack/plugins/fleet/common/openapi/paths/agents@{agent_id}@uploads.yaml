@@ -6,7 +6,8 @@ parameters:
     required: true
 get:
   summary: List agent uploads
-  tags: []
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -22,4 +23,6 @@ get:
                     type: array
                     items:
                       $ref: ../components/schemas/agent_diagnostics.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: list-agent-uploads

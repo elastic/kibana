@@ -41,6 +41,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+const Fs = require('fs');
 const Path = require('path');
 
 const { addHook } = require('pirates');
@@ -105,7 +106,18 @@ function install(options = undefined) {
     environment: 'node',
     // @ts-expect-error bad source-map-support types
     retrieveSourceMap(path) {
-      const map = cache.getSourceMap(path);
+      if (!Path.isAbsolute(path)) {
+        return null;
+      }
+
+      let source;
+      try {
+        source = Fs.readFileSync(path, 'utf8');
+      } catch {
+        return null;
+      }
+
+      const map = cache.getSourceMap(cache.getKey(path, source));
       return map ? { map, url: null } : null;
     },
   });

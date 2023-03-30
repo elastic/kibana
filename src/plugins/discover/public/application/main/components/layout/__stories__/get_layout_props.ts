@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewAttributes, SavedObject } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { SearchSource } from '@kbn/data-plugin/common';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
+import { createHashHistory } from 'history';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
@@ -23,7 +24,11 @@ import { buildDataTableRecordList } from '../../../../../utils/build_data_record
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { SavedSearch } from '../../../../..';
 import { DiscoverLayoutProps } from '../types';
-import { DiscoverStateContainer } from '../../../services/discover_state';
+import {
+  DiscoverStateContainer,
+  getDiscoverStateContainer,
+} from '../../../services/discover_state';
+import { services } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 
 const documentObservables = {
   main$: new BehaviorSubject({
@@ -45,6 +50,7 @@ const documentObservables = {
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHits.length),
   }) as DataTotalHits$,
+  fetch$: new Observable(),
 };
 
 const plainRecordObservables = {
@@ -72,17 +78,11 @@ const plainRecordObservables = {
   }) as DataTotalHits$,
 };
 
-const getCommonProps = (dataView: DataView) => {
+const getCommonProps = () => {
   const searchSourceMock = {} as unknown as SearchSource;
-
-  const dataViewList = [dataView].map((ip) => {
-    return { ...ip, ...{ attributes: { title: ip.getIndexPattern() } } };
-  }) as unknown as Array<SavedObject<DataViewAttributes>>;
 
   const savedSearchMock = {} as unknown as SavedSearch;
   return {
-    dataView,
-    dataViewList,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: action('navigate to somewhere nice'),
     onChangeDataView: action('change the data view'),
@@ -104,33 +104,70 @@ const getCommonProps = (dataView: DataView) => {
   };
 };
 
-export function getDocumentsLayoutProps(dataView: DataView) {
+function getSavedSearch(dataView: DataView) {
   return {
-    ...getCommonProps(dataView),
-    savedSearchData$: documentObservables,
-    state: {
-      columns: ['name', 'message', 'bytes'],
-      sort: [['date', 'desc']],
-      query: {
-        language: 'kuery',
-        query: '',
+    searchSource: {
+      getField: (value: string) => {
+        if (value === 'index') {
+          return dataView;
+        }
       },
-      filters: [],
+      getOwnField: () => {
+        return {
+          query: '',
+        };
+      },
+      createChild: () => {
+        return {
+          fetch$: () => new Observable(),
+        } as unknown as SearchSource;
+      },
     },
+  } as unknown as SavedSearch;
+}
+
+export function getDocumentsLayoutProps(dataView: DataView) {
+  const stateContainer = getDiscoverStateContainer({
+    history: createHashHistory(),
+    savedSearch: getSavedSearch(dataView),
+    services,
+  });
+  stateContainer.appState.set({
+    columns: ['name', 'message', 'bytes'],
+    sort: dataView.timeFieldName ? [['date', 'desc']] : [['name', 'desc']],
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+    filters: [],
+    hideChart: true,
+  });
+  stateContainer.actions.setDataView(dataView);
+  stateContainer.dataState.data$ = documentObservables;
+  return {
+    ...getCommonProps(),
+    stateContainer,
   } as unknown as DiscoverLayoutProps;
 }
 
 export const getPlainRecordLayoutProps = (dataView: DataView) => {
-  return {
-    ...getCommonProps(dataView),
-    savedSearchData$: plainRecordObservables,
-    state: {
-      columns: ['name', 'message', 'bytes'],
-      sort: [['date', 'desc']],
-      query: {
-        sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
-      },
-      filters: [],
+  const stateContainer = getDiscoverStateContainer({
+    history: createHashHistory(),
+    savedSearch: getSavedSearch(dataView),
+    services,
+  });
+  stateContainer.appState.set({
+    columns: ['name', 'message', 'bytes'],
+    sort: [['date', 'desc']],
+    query: {
+      sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
     },
+    filters: [],
+  });
+  stateContainer.actions.setDataView(dataView);
+  stateContainer.dataState.data$ = plainRecordObservables;
+  return {
+    ...getCommonProps(),
+    stateContainer,
   } as unknown as DiscoverLayoutProps;
 };

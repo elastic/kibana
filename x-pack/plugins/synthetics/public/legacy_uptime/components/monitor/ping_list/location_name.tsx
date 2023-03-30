@@ -17,6 +17,7 @@ export const LocationName = ({ location }: LocationNameProps) =>
     <EuiText>{location}</EuiText>
   ) : (
     <EuiLink
+      data-test-subj="syntheticsLocationNameAddLocationLink"
       href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html"
       target="_blank"
     >

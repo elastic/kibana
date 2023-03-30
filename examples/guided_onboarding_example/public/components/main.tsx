@@ -25,6 +25,7 @@ import {
   EuiText,
   EuiTitle,
   EuiSelectOption,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
@@ -34,7 +35,14 @@ interface MainProps {
   notifications: CoreStart['notifications'];
 }
 
-const exampleGuideIds: GuideId[] = ['search', 'siem', 'kubernetes', 'testGuide'];
+const exampleGuideIds: GuideId[] = [
+  'appSearch',
+  'websiteSearch',
+  'databaseSearch',
+  'siem',
+  'kubernetes',
+  'testGuide',
+];
 const selectOptions: EuiSelectOption[] = exampleGuideIds.map((guideId) => ({
   value: guideId,
   text: guideId,
@@ -211,7 +219,7 @@ export const Main = (props: MainProps) => {
           </h3>
         </EuiText>
         <EuiSpacer />
-        <EuiFlexGroup>
+        <EuiFlexGrid columns={3}>
           {exampleGuideIds.map((guideId) => {
             const guideState = guidesState?.find((guide) => guide.guideId === guideId);
             return (
@@ -255,7 +263,7 @@ export const Main = (props: MainProps) => {
               </EuiFlexItem>
             );
           })}
-        </EuiFlexGroup>
+        </EuiFlexGrid>
         <EuiSpacer />
         <EuiHorizontalRule />
         <EuiText>

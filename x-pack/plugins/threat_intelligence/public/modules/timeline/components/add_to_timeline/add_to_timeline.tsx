@@ -15,18 +15,15 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { generateDataProvider } from '../../utils';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators';
 import { Indicator } from '../../../../../common/types/indicator';
 import { useKibana } from '../../../../hooks';
 import { useStyles } from './styles';
 import { useAddToTimeline } from '../../hooks';
+import { TITLE } from './translations';
 
 const ICON_TYPE = 'timeline';
-const TITLE = i18n.translate('xpack.threatIntelligence.timeline.addToTimeline', {
-  defaultMessage: 'Add to Timeline',
-});
 
 export interface AddToTimelineProps {
   /**

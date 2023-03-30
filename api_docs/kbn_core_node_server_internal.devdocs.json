@@ -87,64 +87,6 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-node-server-internal",
-        "id": "def-common.nodeConfig",
-        "type": "Object",
-        "tags": [],
-        "label": "nodeConfig",
-        "description": [],
-        "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-common.nodeConfig.path",
-            "type": "string",
-            "tags": [],
-            "label": "path",
-            "description": [],
-            "signature": [
-              "\"node\""
-            ],
-            "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-node-server-internal",
-            "id": "def-common.nodeConfig.schema",
-            "type": "Object",
-            "tags": [],
-            "label": "schema",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ObjectType",
-                "text": "ObjectType"
-              },
-              "<{ roles: ",
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.Type",
-                "text": "Type"
-              },
-              "<\"*\"[] | (\"ui\" | \"background_tasks\")[]>; }>"
-            ],
-            "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

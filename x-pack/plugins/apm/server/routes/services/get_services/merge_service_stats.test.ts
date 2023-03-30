@@ -10,7 +10,7 @@ import { mergeServiceStats } from './merge_service_stats';
 
 type ServiceTransactionStat = Awaited<
   ReturnType<typeof getServiceTransactionStats>
->[number];
+>['serviceStats'][number];
 
 function stat(values: Partial<ServiceTransactionStat>): ServiceTransactionStat {
   return {
@@ -29,7 +29,7 @@ describe('mergeServiceStats', () => {
   it('joins stats by service name', () => {
     expect(
       mergeServiceStats({
-        transactionStats: [
+        serviceStats: [
           stat({
             serviceName: 'opbeans-java',
             environments: ['production'],
@@ -40,7 +40,7 @@ describe('mergeServiceStats', () => {
             throughput: 4,
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [
+        servicesWithoutTransactions: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',
@@ -87,13 +87,13 @@ describe('mergeServiceStats', () => {
   it('shows services that only have metric documents', () => {
     expect(
       mergeServiceStats({
-        transactionStats: [
+        serviceStats: [
           stat({
             serviceName: 'opbeans-java-2',
             environments: ['staging'],
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [
+        servicesWithoutTransactions: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',
@@ -136,13 +136,13 @@ describe('mergeServiceStats', () => {
   it('does not show services that only have ML data', () => {
     expect(
       mergeServiceStats({
-        transactionStats: [
+        serviceStats: [
           stat({
             serviceName: 'opbeans-java-2',
             environments: ['staging'],
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [],
+        servicesWithoutTransactions: [],
         healthStatuses: [
           {
             healthStatus: ServiceHealthStatus.healthy,
@@ -173,13 +173,13 @@ describe('mergeServiceStats', () => {
   it('concatenates environments from metric/transaction data', () => {
     expect(
       mergeServiceStats({
-        transactionStats: [
+        serviceStats: [
           stat({
             serviceName: 'opbeans-java',
             environments: ['staging'],
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [
+        servicesWithoutTransactions: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',

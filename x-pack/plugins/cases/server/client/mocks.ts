@@ -74,6 +74,7 @@ type AttachmentsSubClientMock = jest.Mocked<AttachmentsSubClient>;
 
 const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
   return {
+    bulkGet: jest.fn(),
     add: jest.fn(),
     bulkCreate: jest.fn(),
     deleteAll: jest.fn(),
@@ -90,9 +91,11 @@ type UserActionsSubClientMock = jest.Mocked<UserActionsSubClient>;
 
 const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
   return {
+    find: jest.fn(),
     getAll: jest.fn(),
     getConnectors: jest.fn(),
-    find: jest.fn(),
+    stats: jest.fn(),
+    getUsers: jest.fn(),
   };
 };
 

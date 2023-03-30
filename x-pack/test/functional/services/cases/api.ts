@@ -13,11 +13,11 @@ import {
   createComment,
   updateCase,
   getCase,
-} from '../../../cases_api_integration/common/lib/utils';
+} from '../../../cases_api_integration/common/lib/api';
 import {
   loginUsers,
   suggestUserProfiles,
-} from '../../../cases_api_integration/common/lib/user_profiles';
+} from '../../../cases_api_integration/common/lib/api/user_profiles';
 import { User } from '../../../cases_api_integration/common/lib/authentication/types';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -36,8 +36,8 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
         ...generateRandomCaseWithoutConnector(),
         ...overwrites,
       } as CasePostRequest;
-      const res = await createCaseAPI(kbnSupertest, caseData);
-      return res;
+
+      return createCaseAPI(kbnSupertest, caseData);
     },
 
     async createNthRandomCases(amount: number = 3) {
@@ -45,17 +45,14 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
         { length: amount },
         () => generateRandomCaseWithoutConnector() as CasePostRequest
       );
-      await pMap(
-        cases,
-        (caseData) => {
-          return createCaseAPI(kbnSupertest, caseData);
-        },
-        { concurrency: 4 }
-      );
+
+      await pMap(cases, async (caseData) => createCaseAPI(kbnSupertest, caseData), {
+        concurrency: 4,
+      });
     },
 
     async deleteAllCases() {
-      deleteAllCaseItems(es);
+      await deleteAllCaseItems(es);
     },
 
     async createAttachment({

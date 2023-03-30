@@ -14,7 +14,7 @@ describe('ActionMenuContent', () => {
     const { getByRole, getByText } = render(<ActionMenuContent />);
 
     const settingsAnchor = getByRole('link', { name: 'Navigate to the Uptime settings page' });
-    expect(settingsAnchor.getAttribute('href')).toBe('/settings?dateRangeStart=now-24h');
+    expect(settingsAnchor.getAttribute('href')).toBe('/settings');
     expect(getByText('Settings'));
   });
 
@@ -25,7 +25,7 @@ describe('ActionMenuContent', () => {
       'Navigate to the "Explore Data" view to visualize Synthetics/User data'
     );
 
-    expect(analyzeAnchor.getAttribute('href')).toContain('/app/observability/exploratory-view');
+    expect(analyzeAnchor.getAttribute('href')).toContain('/app/exploratory-view');
     expect(getByText('Explore data'));
   });
 });

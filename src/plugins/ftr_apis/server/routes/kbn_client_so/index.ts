@@ -13,6 +13,7 @@ import { registerDeleteRoute } from './delete';
 import { registerFindRoute } from './find';
 import { registerGetRoute } from './get';
 import { registerUpdateRoute } from './update';
+import { registerCleanRoute } from './clean';
 
 export const registerKbnClientSoRoutes = (router: IRouter) => {
   registerBulkDeleteRoute(router);
@@ -21,4 +22,5 @@ export const registerKbnClientSoRoutes = (router: IRouter) => {
   registerFindRoute(router);
   registerGetRoute(router);
   registerUpdateRoute(router);
+  registerCleanRoute(router);
 };

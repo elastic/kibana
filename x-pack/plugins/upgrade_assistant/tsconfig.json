@@ -36,6 +36,7 @@
     "@kbn/security-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/utility-types",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

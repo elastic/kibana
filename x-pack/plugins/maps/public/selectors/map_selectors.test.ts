@@ -33,12 +33,16 @@ import {
   getDataFilters,
   getTimeFilters,
   getQueryableUniqueIndexPatternIds,
+  getSpatialFiltersLayer,
 } from './map_selectors';
 
 import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
+import { buildGeoShapeFilter } from '../../common/elasticsearch_util';
 import { ILayer } from '../classes/layers/layer';
 import { Filter } from '@kbn/es-query';
 import { ESSearchSource } from '../classes/sources/es_search_source';
+import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
+import { getDefaultMapSettings } from '../reducers/map/default_map_settings';
 
 describe('getDataFilters', () => {
   const mapExtent = {
@@ -67,6 +71,7 @@ describe('getDataFilters', () => {
     minLon: -0.25,
   };
   const isReadOnly = false;
+  const executionContext = {};
 
   test('should set buffer as searchSessionMapBuffer when using searchSessionId', () => {
     const dataFilters = getDataFilters.resultFunc(
@@ -80,7 +85,8 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       searchSessionMapBuffer,
-      isReadOnly
+      isReadOnly,
+      executionContext
     );
     expect(dataFilters.buffer).toEqual(searchSessionMapBuffer);
   });
@@ -97,7 +103,8 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       undefined,
-      isReadOnly
+      isReadOnly,
+      executionContext
     );
     expect(dataFilters.buffer).toEqual(mapBuffer);
   });
@@ -280,5 +287,64 @@ describe('getQueryableUniqueIndexPatternIds', () => {
     expect(
       getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
     ).toEqual(['foo', 'fbr']);
+  });
+});
+
+describe('getSpatialFiltersLayer', () => {
+  test('should include filters and embeddable search filters', () => {
+    const embeddableSearchContext = {
+      filters: [
+        buildGeoShapeFilter({
+          geometry: {
+            coordinates: [
+              [
+                [1, 0],
+                [1, 1],
+                [0, 1],
+                [0, 0],
+                [1, 0],
+              ],
+            ],
+            type: 'Polygon',
+          },
+          geometryLabel: 'myShape',
+          geoFieldNames: ['geo.coordinates'],
+        }),
+      ],
+    };
+    const geoJsonVectorLayer = getSpatialFiltersLayer.resultFunc(
+      [
+        buildGeoShapeFilter({
+          geometry: {
+            coordinates: [
+              [
+                [-101.21639, 48.1413],
+                [-101.21639, 41.84905],
+                [-90.95149, 41.84905],
+                [-90.95149, 48.1413],
+                [-101.21639, 48.1413],
+              ],
+            ],
+            type: 'Polygon',
+          },
+          geometryLabel: 'myShape',
+          geoFieldNames: ['geo.coordinates'],
+        }),
+      ],
+      embeddableSearchContext,
+      getDefaultMapSettings()
+    );
+    expect(geoJsonVectorLayer.isVisible()).toBe(true);
+    expect(
+      (geoJsonVectorLayer.getSource() as GeoJsonFileSource).getFeatureCollection().features.length
+    ).toBe(2);
+  });
+
+  test('should not show layer when showSpatialFilters is false', () => {
+    const geoJsonVectorLayer = getSpatialFiltersLayer.resultFunc([], undefined, {
+      ...getDefaultMapSettings(),
+      showSpatialFilters: false,
+    });
+    expect(geoJsonVectorLayer.isVisible()).toBe(false);
   });
 });

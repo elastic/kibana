@@ -110,17 +110,19 @@ const OsqueryEditorComponent = ({
     <>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {isEditMode ? (
-            <FormattedMessage
-              id="xpack.securitySolution.markdown.osquery.editModalTitle"
-              defaultMessage="Edit query"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.securitySolution.markdown.osquery.addModalTitle"
-              defaultMessage="Add query"
-            />
-          )}
+          <h1>
+            {isEditMode ? (
+              <FormattedMessage
+                id="xpack.securitySolution.markdown.osquery.editModalTitle"
+                defaultMessage="Edit query"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.markdown.osquery.addModalTitle"
+                defaultMessage="Add query"
+              />
+            )}
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

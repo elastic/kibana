@@ -380,7 +380,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
         await find.existsByCssSelector(
-          `.lnsDragDrop__extraDrop > [data-test-subj="lnsDragDrop-${metaToAction[metaKey]}"].lnsDragDrop-isActiveDropTarget`
+          `.domDragDrop__extraDrop > [data-test-subj="domDragDrop-dropTarget-${metaToAction[metaKey]}"].domDragDrop-isActiveDropTarget`
         );
       });
     },
@@ -405,7 +405,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await field.focus();
       await retry.try(async () => {
         await browser.pressKeys(browser.keys.ENTER);
-        await testSubjects.exists('.lnsDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+        await testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
       });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
@@ -477,7 +477,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async waitForLensDragDropToFinish() {
       await retry.try(async () => {
-        const exists = await find.existsByCssSelector('.lnsDragDrop-isActiveGroup');
+        const exists = await find.existsByCssSelector('.domDragDrop-isActiveGroup');
         if (exists) {
           throw new Error('UI still in drag/drop mode');
         }
@@ -525,7 +525,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param endIndex - the index of drop starting from 1
      * */
     async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
-      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
+      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .domDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await find.existsByCssSelector(dragging);
       await browser.html5DragAndDrop(dragging, dropping);
@@ -1470,7 +1470,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+        testSubjects.getCssSelector(`${to} > domDragDrop-dropTarget-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
     },
@@ -1491,7 +1491,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+        testSubjects.getCssSelector(`${to} > domDragDrop-dropTarget-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
     },
@@ -1600,40 +1600,45 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.missingOrFail('lens-editor-warning');
     },
 
-    async assertInlineWarning(warningText: string) {
-      await testSubjects.click('chart-inline-warning-button');
-      await testSubjects.existOrFail('chart-inline-warning');
-      const warnings = await testSubjects.findAll('chart-inline-warning');
+    /**
+     * Applicable both on the embeddable and in the editor. In both scenarios, a popover containing user messages (errors, warnings) is shown.
+     *
+     * If you're going to use this many times in your test consider retrieving all the messages in one go using getMessageListTexts
+     * and running your own assertions for performance reasons.
+     */
+    async assertMessageListContains(assertText: string, severity: 'warning' | 'error') {
+      await testSubjects.click('lens-message-list-trigger');
+      const messageSelector = `lens-message-list-${severity}`;
+      await testSubjects.existOrFail(messageSelector);
+      const messages = await testSubjects.findAll(messageSelector);
       let found = false;
-      for (const warning of warnings) {
-        const text = await warning.getVisibleText();
+      for (const message of messages) {
+        const text = await message.getVisibleText();
         log.info(text);
-        if (text === warningText) {
+        if (text === assertText) {
           found = true;
         }
       }
-      await testSubjects.click('chart-inline-warning-button');
+      await testSubjects.click('lens-message-list-trigger');
       if (!found) {
-        throw new Error(`Warning with text "${warningText}" not found`);
+        throw new Error(`Message with text "${assertText}" not found`);
       }
     },
 
-    async assertEditorWarning(warningText: string) {
-      await testSubjects.click('lens-editor-warning-button');
-      await testSubjects.existOrFail('lens-editor-warning');
-      const warnings = await testSubjects.findAll('lens-editor-warning');
-      let found = false;
-      for (const warning of warnings) {
-        const text = await warning.getVisibleText();
-        log.info(text);
-        if (text === warningText) {
-          found = true;
-        }
-      }
-      await testSubjects.click('lens-editor-warning-button');
-      if (!found) {
-        throw new Error(`Warning with text "${warningText}" not found`);
-      }
+    async getMessageListTexts(severity: 'warning' | 'error') {
+      await testSubjects.click('lens-message-list-trigger');
+
+      const messageSelector = `lens-message-list-${severity}`;
+
+      await testSubjects.existOrFail(messageSelector);
+
+      const messageEls = await testSubjects.findAll(messageSelector);
+
+      const messages = await Promise.all(messageEls.map((el) => el.getVisibleText()));
+
+      await testSubjects.click('lens-message-list-trigger');
+
+      return messages;
     },
 
     async getPaletteColorStops() {
@@ -1653,12 +1658,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async findFieldIdsByType(
-      type: 'string' | 'number' | 'date' | 'geo_point' | 'ip_range',
+      type: 'keyword' | 'number' | 'date' | 'geo_point' | 'ip_range',
       group: 'available' | 'empty' | 'meta' = 'available'
     ) {
       const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
       const allFieldsForType = await find.allByCssSelector(
-        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .lnsFieldItem--${type}`
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldItemButton--${type}`
       );
       // map to testSubjId
       return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));

@@ -64,6 +64,8 @@ const DataViewFlyoutContentContainer = ({
       }
 
       if (saveResponse && !(saveResponse instanceof Error)) {
+        await dataViews.refreshFields(saveResponse);
+
         if (persist) {
           const message = i18n.translate('indexPatternEditor.saved', {
             defaultMessage: "Saved '{indexPatternName}'",

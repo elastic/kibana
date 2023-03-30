@@ -16,6 +16,9 @@ import { TestProviders } from '../../mock';
 import { mockRuntimeMappings } from '../../containers/source/mock';
 import { dnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 jest.mock('../../containers/query_toggle');
 
@@ -29,10 +32,11 @@ jest.mock('../charts/barchart', () => ({
 
 jest.mock('../../containers/matrix_histogram');
 
-jest.mock('../visualization_actions', () => ({
-  VisualizationActions: jest.fn(({ className }: { className: string }) => (
-    <div data-test-subj="mock-viz-actions" className={className} />
-  )),
+jest.mock('../visualization_actions/actions');
+jest.mock('../visualization_actions/visualization_embeddable');
+
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
 jest.mock('./utils', () => ({
@@ -41,6 +45,7 @@ jest.mock('./utils', () => ({
 }));
 
 const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -78,8 +83,16 @@ describe('Matrix Histogram Component', () => {
   const mockUseMatrix = useMatrixHistogramCombined as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const mockSetToggle = jest.fn();
+  const getMockUseIsExperimentalFeatureEnabled =
+    (mockMapping?: Partial<ExperimentalFeatures>) =>
+    (flag: keyof typeof allowedExperimentalValues) =>
+      mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      getMockUseIsExperimentalFeatureEnabled({ chartEmbeddablesEnabled: false })
+    );
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
     mockUseMatrix.mockReturnValue([
       false,
@@ -176,9 +189,7 @@ describe('Matrix Histogram Component', () => {
   });
 
   describe('Inspect button', () => {
-    test("it doesn't render Inspect button by default on Host page", () => {
-      mockLocation.mockReturnValue({ pathname: '/hosts' });
-
+    test("it doesn't render Inspect button by default", () => {
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
         lensAttributes: dnsTopDomainsLensAttributes,
@@ -187,39 +198,11 @@ describe('Matrix Histogram Component', () => {
         wrappingComponent: TestProviders,
       });
       expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(false);
-    });
-
-    test("it doesn't render Inspect button by default on Network page", () => {
-      mockLocation.mockReturnValue({ pathname: '/network' });
-
-      const testProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
-      };
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
-      });
-      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(false);
-    });
-
-    test('it render Inspect button by default on other pages', () => {
-      mockLocation.mockReturnValue({ pathname: '/overview' });
-
-      const testProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
-      };
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
-      });
-      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(true);
     });
   });
 
   describe('VisualizationActions', () => {
-    test('it renders VisualizationActions on Host page if lensAttributes is provided', () => {
-      mockLocation.mockReturnValue({ pathname: '/hosts' });
-
+    test('it renders VisualizationActions if lensAttributes is provided', () => {
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
         lensAttributes: dnsTopDomainsLensAttributes,
@@ -227,40 +210,10 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').prop('className')).toEqual(
+      expect(wrapper.find('[data-test-subj="visualizationActions"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="visualizationActions"]').prop('className')).toEqual(
         'histogram-viz-actions'
       );
-    });
-
-    test('it renders VisualizationActions on Network page if lensAttributes is provided', () => {
-      mockLocation.mockReturnValue({ pathname: '/network' });
-
-      const testProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
-      };
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
-      });
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').prop('className')).toEqual(
-        'histogram-viz-actions'
-      );
-    });
-
-    test("it doesn't renders VisualizationActions except Host / Network pages", () => {
-      const testProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
-      };
-
-      mockLocation.mockReturnValue({ pathname: '/overview' });
-
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
-      });
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(false);
     });
   });
 
@@ -310,6 +263,33 @@ describe('Matrix Histogram Component', () => {
       });
 
       expect(mockUseMatrix.mock.calls[0][0].skip).toEqual(true);
+    });
+  });
+
+  describe('when the chartEmbeddablesEnabled experimental feature flag is enabled', () => {
+    beforeEach(() => {
+      const mockMapping: Partial<ExperimentalFeatures> = {
+        chartEmbeddablesEnabled: true,
+      };
+
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        getMockUseIsExperimentalFeatureEnabled(mockMapping)
+      );
+
+      wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
+        wrappingComponent: TestProviders,
+      });
+    });
+    test('it should not render VisualizationActions', () => {
+      expect(wrapper.find(`[data-test-subj="visualizationActions"]`).exists()).toEqual(false);
+    });
+
+    test('it should not fetch Matrix Histogram data', () => {
+      expect(mockUseMatrix.mock.calls[0][0].skip).toEqual(true);
+    });
+
+    test('it should render Lens Embeddable', () => {
+      expect(wrapper.find(`[data-test-subj="visualization-embeddable"]`).exists()).toEqual(true);
     });
   });
 });

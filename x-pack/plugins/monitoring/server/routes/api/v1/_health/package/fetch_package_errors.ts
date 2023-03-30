@@ -37,6 +37,7 @@ export const fetchPackageErrors = async ({
           MonitoredProduct.Elasticsearch,
           MonitoredProduct.Kibana,
           MonitoredProduct.Logstash,
+          MonitoredProduct.EnterpriseSearch,
         ],
         errorQueryType: 'packageErrorsQuery',
         errorQueryIsDataStream: true,

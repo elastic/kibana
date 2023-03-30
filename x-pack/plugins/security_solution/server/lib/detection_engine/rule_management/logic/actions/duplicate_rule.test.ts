@@ -76,6 +76,7 @@ describe('duplicateRule', () => {
     mutedInstanceIds: [],
     updatedAt: new Date(2021, 0),
     createdAt: new Date(2021, 0),
+    revision: 0,
     scheduledTaskId: undefined,
     executionStatus: {
       lastExecutionDate: new Date(2021, 0),

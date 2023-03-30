@@ -7,18 +7,28 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useCallback, useEffect } from 'react';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
+import { useSnapShotCount } from './use_snap_shot';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
+import { TLSParams } from '../../../../../../common/runtime_types/alerts/tls';
 import { AlertTlsComponent } from '../alert_tls';
-import { setAlertFlyoutVisible } from '../../../../state/actions';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import { getDynamicSettings } from '../../../../state/actions/dynamic_settings';
+import { AlertQueryBar } from '../alert_query_bar/query_bar';
+import { AlertMonitorCount } from '../monitor_status_alert/alert_monitor_status';
 
-export const AlertTls: React.FC<{}> = () => {
+export const AlertTls: React.FC<{
+  ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];
+  setRuleParams: RuleTypeParamsExpressionProps<TLSParams>['setRuleParams'];
+}> = ({ ruleParams, setRuleParams }) => {
   const dispatch = useDispatch();
-  const setFlyoutVisible = useCallback(
-    (value: boolean) => dispatch(setAlertFlyoutVisible(value)),
-    [dispatch]
-  );
+
   const { settings } = useSelector(selectDynamicSettings);
+
+  const { count, loading } = useSnapShotCount({
+    query: ruleParams.search ?? '',
+  });
 
   useEffect(() => {
     if (typeof settings === 'undefined') {
@@ -26,11 +36,35 @@ export const AlertTls: React.FC<{}> = () => {
     }
   }, [dispatch, settings]);
 
+  const onSearchChange = useCallback(
+    (value: string) => {
+      setRuleParams('search', value === '' ? undefined : value);
+    },
+    [setRuleParams]
+  );
+
   return (
-    <AlertTlsComponent
-      ageThreshold={settings?.certAgeThreshold}
-      expirationThreshold={settings?.certExpirationThreshold}
-      setAlertFlyoutVisible={setFlyoutVisible}
-    />
+    <>
+      <AlertMonitorCount count={count.total} loading={loading} />
+
+      <EuiSpacer size="s" />
+
+      <AlertQueryBar query={ruleParams.search || ''} onChange={onSearchChange} />
+
+      <AlertTlsComponent
+        ageThreshold={
+          ruleParams.certAgeThreshold ??
+          settings?.certAgeThreshold ??
+          DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
+        }
+        expirationThreshold={
+          ruleParams.certExpirationThreshold ??
+          settings?.certExpirationThreshold ??
+          DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
+        }
+        setAgeThreshold={(value) => setRuleParams('certAgeThreshold', Number(value))}
+        setExpirationThreshold={(value) => setRuleParams('certExpirationThreshold', Number(value))}
+      />
+    </>
   );
 };

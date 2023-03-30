@@ -51,7 +51,14 @@ function getOptions(
   const ignoreFieldNames = new Set(['_source', '_type', '_index', '_id', '_version', '_score']);
 
   const runtimeFieldsOptions = runtimeMappings
-    ? Object.keys(runtimeMappings).map((k) => ({ label: k, value: k }))
+    ? Object.entries(runtimeMappings).map(([fieldName, fieldMapping]) => ({
+        label: fieldName,
+        value: fieldName,
+        field: {
+          id: fieldName,
+          type: fieldMapping.type,
+        },
+      }))
     : [];
 
   const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = filteredDataViewFields
@@ -59,6 +66,10 @@ function getOptions(
     .map((v) => ({
       label: v.displayName,
       value: v.name,
+      field: {
+        id: v.name,
+        type: Array.isArray(v.esTypes) && v.esTypes?.length > 0 ? v.esTypes[0] : 'keyword',
+      },
     }));
 
   const runtimeFieldsSortOptions: Array<EuiComboBoxOptionOption<string>> = runtimeMappings
@@ -67,6 +78,10 @@ function getOptions(
         .map(([fieldName, fieldMapping]) => ({
           label: fieldName,
           value: fieldName,
+          field: {
+            id: fieldName,
+            type: fieldMapping.type,
+          },
         }))
     : [];
 
@@ -76,6 +91,10 @@ function getOptions(
     .map((v) => ({
       label: v.displayName,
       value: v.name,
+      field: {
+        id: v.name,
+        type: Array.isArray(v.esTypes) && v.esTypes?.length > 0 ? v.esTypes[0] : 'keyword',
+      },
     }));
 
   const sortByLabel = (a: EuiComboBoxOptionOption<string>, b: EuiComboBoxOptionOption<string>) =>

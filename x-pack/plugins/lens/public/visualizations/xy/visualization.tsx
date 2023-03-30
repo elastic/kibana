@@ -57,6 +57,7 @@ import {
   getAnnotationLayerErrors,
   injectReferences,
   isHorizontalChart,
+  isPersistedState,
 } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
@@ -210,10 +211,6 @@ export const getXyVisualization = ({
     return extractReferences(state);
   },
 
-  fromPersistableState(state, references, initialContext) {
-    return injectReferences(state, references, initialContext);
-  },
-
   getDescription,
 
   switchVisualizationType(seriesType: string, state: State) {
@@ -228,9 +225,13 @@ export const getXyVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
 
-  initialize(addNewLayer, state) {
+  initialize(addNewLayer, state, _, references, initialContext) {
+    const finalState =
+      state && isPersistedState(state)
+        ? injectReferences(state, references, initialContext)
+        : state;
     return (
-      state || {
+      finalState || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
         valueLabels: 'hide',
@@ -712,7 +713,7 @@ export const getXyVisualization = ({
           errors.push({
             severity: 'error',
             fixableInEditor: true,
-            displayLocations: [{ id: 'dimensionTrigger', dimensionId: annotation.id }],
+            displayLocations: [{ id: 'dimensionButton', dimensionId: annotation.id }],
             shortMessage: i18n.translate(
               'xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp',
               {
@@ -732,7 +733,7 @@ export const getXyVisualization = ({
               fixableInEditor: true,
               displayLocations: [
                 { id: 'visualization' },
-                { id: 'dimensionTrigger', dimensionId: annotation.id },
+                { id: 'dimensionButton', dimensionId: annotation.id },
               ],
               shortMessage: errorMessage,
               longMessage: (
@@ -889,17 +890,9 @@ export const getXyVisualization = ({
       state?.layers.filter(isAnnotationsLayer).map(({ indexPatternId }) => indexPatternId) ?? []
     );
   },
-  renderDimensionTrigger({ columnId, label, hideTooltip, invalid, invalidMessage }) {
+  renderDimensionTrigger({ columnId, label }) {
     if (label) {
-      return (
-        <DimensionTrigger
-          id={columnId}
-          hideTooltip={hideTooltip}
-          isInvalid={invalid}
-          invalidMessage={invalidMessage}
-          label={label || defaultAnnotationLabel}
-        />
-      );
+      return <DimensionTrigger id={columnId} label={label || defaultAnnotationLabel} />;
     }
     return null;
   },

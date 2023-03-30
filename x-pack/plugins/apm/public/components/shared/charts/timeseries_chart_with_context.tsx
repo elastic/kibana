@@ -77,8 +77,9 @@ export function TimeseriesChartWithContext({
   const annotationColor = theme.eui.euiColorSuccess;
   const { annotations } = useAnnotationsContext();
 
-  const getAnnotations = () => (
+  const timeseriesAnnotations = [
     <LineAnnotation
+      key="annotations"
       id="annotations"
       domainType={AnnotationDomainType.XDomain}
       dataValues={annotations.map((annotation) => ({
@@ -93,8 +94,8 @@ export function TimeseriesChartWithContext({
       }}
       marker={<EuiIcon type="dot" color={annotationColor} />}
       markerPosition={Position.Top}
-    />
-  );
+    />,
+  ];
   return (
     <TimeseriesChart
       id={id}
@@ -105,7 +106,7 @@ export function TimeseriesChartWithContext({
       yLabelFormat={yLabelFormat}
       yTickFormat={yTickFormat}
       showAnnotations={showAnnotations}
-      annotations={[getAnnotations()]}
+      annotations={timeseriesAnnotations}
       yDomain={yDomain}
       anomalyTimeseries={anomalyTimeseries}
       customTheme={customTheme}

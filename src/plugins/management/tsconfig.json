@@ -19,6 +19,7 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

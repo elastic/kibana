@@ -29,7 +29,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const ml = getService('ml');
   const toasts = getService('toasts');
 
-  const PageObjects = getPageObjects(['discover', 'timePicker']);
+  const pageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
     async clickNextButton() {
@@ -78,6 +78,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         selector = `~${selector}`;
       }
       await testSubjects.existOrFail(selector);
+    },
+
+    async assertIndexPreviewEmpty() {
+      await this.assertIndexPreviewExists('empty');
     },
 
     async assertIndexPreviewLoaded() {
@@ -374,6 +378,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await this.assertSelectedTransformFunction(transformFunction);
     },
 
+    async assertFieldStatsFlyoutContentFromUniqueKeysInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'transformWizardUniqueKeysSelector',
+        fieldName,
+        fieldType
+      );
+    },
+
     async assertUniqueKeysInputExists() {
       await testSubjects.existOrFail('transformWizardUniqueKeysSelector > comboBoxInput');
     },
@@ -401,6 +416,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       ]);
     },
 
+    async assertFieldStatFlyoutContentFromSortFieldInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'transformWizardSortFieldSelector',
+        fieldName,
+        fieldType
+      );
+    },
+
     async assertSortFieldInputExists() {
       await testSubjects.existOrFail('transformWizardSortFieldSelector > comboBoxInput');
     },
@@ -420,6 +446,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async setSortFieldValue(identificator: string, label: string) {
       await comboBox.set('transformWizardSortFieldSelector > comboBoxInput', identificator);
       await this.assertSortFieldInputValue(identificator);
+    },
+
+    async assertFieldStatFlyoutContentFromGroupByInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'transformGroupBySelection',
+        fieldName,
+        fieldType
+      );
     },
 
     async assertGroupByInputExists() {
@@ -479,6 +516,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       return `${parentSelector && `${parentSelector} > `}${
         parentSelector ? 'transformSubAggregationSelection' : 'transformAggregationSelection'
       } > comboBoxInput`;
+    },
+
+    async assertFieldStatFlyoutContentFromAggInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'transformAggregationSelection',
+        fieldName,
+        fieldType
+      );
     },
 
     async assertAggregationInputExists(parentSelector?: string) {
@@ -995,19 +1043,14 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async redirectToDiscover() {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.click('transformWizardCardDiscover');
-        await PageObjects.discover.isDiscoverAppOnScreen();
+        await pageObjects.discover.isDiscoverAppOnScreen();
       });
     },
 
-    async setDiscoverTimeRange(fromTime: string, toTime: string) {
-      await PageObjects.discover.isDiscoverAppOnScreen();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-    },
-
     async assertDiscoverContainField(field: string) {
-      await PageObjects.discover.isDiscoverAppOnScreen();
+      await pageObjects.discover.isDiscoverAppOnScreen();
       await retry.tryForTime(60 * 1000, async () => {
-        const allFields = await PageObjects.discover.getAllFieldNames();
+        const allFields = await pageObjects.discover.getAllFieldNames();
         if (Array.isArray(allFields)) {
           // For some reasons, Discover returns fields with dot (e.g '.avg') with extra space
           const fields = allFields.map((n) => n.replace('.​', '.'));

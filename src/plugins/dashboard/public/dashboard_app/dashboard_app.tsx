@@ -53,6 +53,7 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
@@ -115,11 +116,11 @@ export function DashboardApp({
    * Create options to pass into the dashboard renderer
    */
   const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
-  const getCreationOptions = useCallback((): DashboardCreationOptions => {
+  const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
 
-    return {
+    return Promise.resolve({
       incomingEmbeddable,
 
       // integrations
@@ -151,7 +152,7 @@ export function DashboardApp({
       },
 
       validateLoadedSavedObject: validateOutcome,
-    };
+    });
   }, [
     history,
     validateOutcome,
@@ -184,7 +185,7 @@ export function DashboardApp({
   }, [dashboardContainer, kbnUrlStateStorage]);
 
   return (
-    <>
+    <div className="dshAppWrapper">
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
@@ -197,6 +198,7 @@ export function DashboardApp({
           )}
 
           {getLegacyConflictWarning?.()}
+
           <DashboardContainerRenderer
             savedObjectId={savedDashboardId}
             getCreationOptions={getCreationOptions}
@@ -204,6 +206,6 @@ export function DashboardApp({
           />
         </>
       )}
-    </>
+    </div>
   );
 }

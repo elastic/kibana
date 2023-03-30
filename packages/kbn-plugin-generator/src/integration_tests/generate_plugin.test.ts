@@ -83,7 +83,6 @@ it('generates a plugin without UI', async () => {
     Array [
       <absolute path>/plugins/bar/.eslintrc.js,
       <absolute path>/plugins/bar/.gitignore,
-      <absolute path>/plugins/bar/.i18nrc.json,
       <absolute path>/plugins/bar/common/index.ts,
       <absolute path>/plugins/bar/kibana.json,
       <absolute path>/plugins/bar/package.json,

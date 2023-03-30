@@ -50,8 +50,14 @@ disabledPlugins
 webpackstats.json
 /config/*
 !/config/kibana.yml
+!/config/README.md
+!/config/serverless.yml
+!/config/serverless.es.yml
+!/config/serverless.oblt.yml
+!/config/serverless.security.yml
 !/config/node.options
 coverage
+!/test/common/fixtures/plugins/coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache

@@ -33,6 +33,7 @@ export enum ReadOperations {
   GetCaseIDsByAlertID = 'getCaseIDsByAlertID',
   GetCaseStatuses = 'getCaseStatuses',
   GetComment = 'getComment',
+  BulkGetAttachments = 'bulkGetAttachments',
   GetAllComments = 'getAllComments',
   FindComments = 'findComments',
   GetTags = 'getTags',
@@ -46,6 +47,8 @@ export enum ReadOperations {
   GetCaseMetrics = 'getCaseMetrics',
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
+  GetUserActionStats = 'getUserActionStats',
+  GetUserActionUsers = 'getUserActionUsers',
 }
 
 /**
@@ -60,6 +63,7 @@ export enum WriteOperations {
   UpdateCase = 'updateCase',
   PushCase = 'pushCase',
   CreateComment = 'createComment',
+  BulkCreateAttachments = 'bulkCreateAttachments',
   DeleteAllComments = 'deleteAllComments',
   DeleteComment = 'deleteComment',
   UpdateComment = 'updateComment',

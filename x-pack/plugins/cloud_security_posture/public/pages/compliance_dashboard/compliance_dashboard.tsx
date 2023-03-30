@@ -26,12 +26,13 @@ import {
   DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_CONTAINER,
 } from './test_subjects';
-import { useCspmStatsApi, useKspmStatsApi } from '../../common/api';
+import { useCspmStatsApi, useKspmStatsApi } from '../../common/api/use_stats_api';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
 
 const noDataOptions: Record<
   PosturePolicyTemplate,
@@ -39,7 +40,7 @@ const noDataOptions: Record<
 > = {
   kspm: {
     testId: KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
-    docsLink: 'https://ela.st/kspm',
+    docsLink: cspIntegrationDocsNavigation.kspm.overviewPath,
     actionTitle: i18n.translate(
       'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.buttonLabel',
       { defaultMessage: 'Add a KSPM integration' }
@@ -47,10 +48,10 @@ const noDataOptions: Record<
     actionDescription: (
       <FormattedMessage
         id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.description"
-        defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
+        defaultMessage="Use our {integrationFullName} (KSPM) integration to detect security misconfigurations in your Kubernetes clusters."
         values={{
           integrationFullName: (
-            <EuiLink href="https://ela.st/kspm">
+            <EuiLink href={cspIntegrationDocsNavigation.kspm.overviewPath} target="_blank">
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.integrationNameLabel"
                 defaultMessage="Kubernetes Security Posture Management"
@@ -64,7 +65,7 @@ const noDataOptions: Record<
   cspm: {
     testId: CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
     // TODO: CIS AWS - replace link or create the docs
-    docsLink: 'https://ela.st/cspm',
+    docsLink: cspIntegrationDocsNavigation.cspm.overviewPath,
     actionTitle: i18n.translate(
       'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.buttonLabel',
       { defaultMessage: 'Add a CSPM integration' }
@@ -72,11 +73,10 @@ const noDataOptions: Record<
     actionDescription: (
       <FormattedMessage
         id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.description"
-        defaultMessage="Use our {integrationFullName} (CSPM) integration to measure your Cloud account setup against CIS recommendations."
+        defaultMessage="Use our {integrationFullName} (CSPM) integration to detect security misconfigurations in your cloud infrastructure."
         values={{
           integrationFullName: (
-            // TODO: CIS AWS - replace link or create the docs
-            <EuiLink href="https://ela.st/cspm">
+            <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.integrationNameLabel"
                 defaultMessage="Cloud Security Posture Management"
@@ -128,7 +128,7 @@ const IntegrationPostureDashboard = ({
   }
 
   // integration is installed, but there are no findings for this integration
-  if (noFindings) {
+  if (noFindings && isIntegrationInstalled) {
     return (
       // height is calculated for the screen height minus the kibana header, page title, and tabs
       <div
@@ -166,9 +166,9 @@ const IntegrationPostureDashboard = ({
   // there are findings, displays dashboard even if integration is not installed
   return (
     <>
-      <SummarySection complianceData={complianceData} dashboardType={dashboardType} />
+      <SummarySection complianceData={complianceData!} dashboardType={dashboardType} />
       <EuiSpacer />
-      <BenchmarksSection complianceData={complianceData} dashboardType={dashboardType} />
+      <BenchmarksSection complianceData={complianceData!} dashboardType={dashboardType} />
       <EuiSpacer />
     </>
   );
@@ -177,23 +177,28 @@ const IntegrationPostureDashboard = ({
 export const ComplianceDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(CSPM_POLICY_TEMPLATE);
   const getSetupStatus = useCspSetupStatusApi();
-  const hasFindings = getSetupStatus.data?.status === 'indexed';
+  const hasFindingsKspm =
+    getSetupStatus.data?.kspm?.status === 'indexed' ||
+    getSetupStatus.data?.indicesDetails[0].status === 'not-empty';
+  const hasFindingsCspm =
+    getSetupStatus.data?.cspm?.status === 'indexed' ||
+    getSetupStatus.data?.indicesDetails[0].status === 'not-empty';
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
   const getCspmDashboardData = useCspmStatsApi({
-    enabled: hasFindings,
+    enabled: hasFindingsCspm,
   });
   const getKspmDashboardData = useKspmStatsApi({
-    enabled: hasFindings,
+    enabled: hasFindingsKspm,
   });
 
   useEffect(() => {
     const selectInitialTab = () => {
       const cspmTotalFindings = getCspmDashboardData.data?.stats.totalFindings;
       const kspmTotalFindings = getKspmDashboardData.data?.stats.totalFindings;
-      const installedPolicyTemplates = getSetupStatus.data?.installedPolicyTemplates;
-
+      const installedPolicyTemplatesCspm = getSetupStatus.data?.cspm?.status;
+      const installedPolicyTemplatesKspm = getSetupStatus.data?.kspm?.status;
       let preferredDashboard = CSPM_POLICY_TEMPLATE;
 
       // cspm has findings
@@ -205,21 +210,27 @@ export const ComplianceDashboard = () => {
         preferredDashboard = KSPM_POLICY_TEMPLATE;
       }
       // cspm is installed
-      else if (installedPolicyTemplates?.includes(CSPM_POLICY_TEMPLATE)) {
+      else if (
+        installedPolicyTemplatesCspm !== 'unprivileged' &&
+        installedPolicyTemplatesCspm !== 'not-installed'
+      ) {
         preferredDashboard = CSPM_POLICY_TEMPLATE;
       }
       // kspm is installed
-      else if (installedPolicyTemplates?.includes(KSPM_POLICY_TEMPLATE)) {
+      else if (
+        installedPolicyTemplatesKspm !== 'unprivileged' &&
+        installedPolicyTemplatesKspm !== 'not-installed'
+      ) {
         preferredDashboard = KSPM_POLICY_TEMPLATE;
       }
-
       setSelectedTab(preferredDashboard);
     };
     selectInitialTab();
   }, [
     getCspmDashboardData.data?.stats.totalFindings,
     getKspmDashboardData.data?.stats.totalFindings,
-    getSetupStatus.data?.installedPolicyTemplates,
+    getSetupStatus.data?.cspm?.status,
+    getSetupStatus.data?.kspm?.status,
   ]);
 
   const tabs = useMemo(
@@ -231,21 +242,28 @@ export const ComplianceDashboard = () => {
         isSelected: selectedTab === CSPM_POLICY_TEMPLATE,
         onClick: () => setSelectedTab(CSPM_POLICY_TEMPLATE),
         content: (
-          <CloudPosturePage query={getCspmDashboardData}>
-            <div data-test-subj={CLOUD_DASHBOARD_CONTAINER}>
-              <IntegrationPostureDashboard
-                dashboardType={CSPM_POLICY_TEMPLATE}
-                complianceData={getCspmDashboardData.data}
-                notInstalledConfig={getNotInstalledConfig(
-                  CSPM_POLICY_TEMPLATE,
-                  cspmIntegrationLink
-                )}
-                isIntegrationInstalled={getSetupStatus.data?.installedPolicyTemplates.includes(
-                  CSPM_POLICY_TEMPLATE
-                )}
-              />
-            </div>
-          </CloudPosturePage>
+          <>
+            {hasFindingsCspm ? (
+              <CloudPosturePage query={getCspmDashboardData}>
+                <div data-test-subj={CLOUD_DASHBOARD_CONTAINER}>
+                  <IntegrationPostureDashboard
+                    dashboardType={CSPM_POLICY_TEMPLATE}
+                    complianceData={getCspmDashboardData.data}
+                    notInstalledConfig={getNotInstalledConfig(
+                      CSPM_POLICY_TEMPLATE,
+                      cspmIntegrationLink
+                    )}
+                    isIntegrationInstalled={
+                      getSetupStatus.data?.cspm?.status !== 'unprivileged' &&
+                      getSetupStatus.data?.cspm?.status !== 'not-installed'
+                    }
+                  />
+                </div>
+              </CloudPosturePage>
+            ) : (
+              <NoFindingsStates posturetype={'cspm'} />
+            )}
+          </>
         ),
       },
       {
@@ -255,21 +273,28 @@ export const ComplianceDashboard = () => {
         isSelected: selectedTab === KSPM_POLICY_TEMPLATE,
         onClick: () => setSelectedTab(KSPM_POLICY_TEMPLATE),
         content: (
-          <CloudPosturePage query={getKspmDashboardData}>
-            <div data-test-subj={KUBERNETES_DASHBOARD_CONTAINER}>
-              <IntegrationPostureDashboard
-                dashboardType={KSPM_POLICY_TEMPLATE}
-                complianceData={getKspmDashboardData.data}
-                notInstalledConfig={getNotInstalledConfig(
-                  KSPM_POLICY_TEMPLATE,
-                  kspmIntegrationLink
-                )}
-                isIntegrationInstalled={getSetupStatus.data?.installedPolicyTemplates.includes(
-                  KSPM_POLICY_TEMPLATE
-                )}
-              />
-            </div>
-          </CloudPosturePage>
+          <>
+            {hasFindingsKspm ? (
+              <CloudPosturePage query={getKspmDashboardData}>
+                <div data-test-subj={KUBERNETES_DASHBOARD_CONTAINER}>
+                  <IntegrationPostureDashboard
+                    dashboardType={KSPM_POLICY_TEMPLATE}
+                    complianceData={getKspmDashboardData.data}
+                    notInstalledConfig={getNotInstalledConfig(
+                      KSPM_POLICY_TEMPLATE,
+                      kspmIntegrationLink
+                    )}
+                    isIntegrationInstalled={
+                      getSetupStatus.data?.kspm?.status !== 'unprivileged' &&
+                      getSetupStatus.data?.kspm?.status !== 'not-installed'
+                    }
+                  />
+                </div>
+              </CloudPosturePage>
+            ) : (
+              <NoFindingsStates posturetype={'kspm'} />
+            )}
+          </>
         ),
       },
     ],
@@ -277,13 +302,14 @@ export const ComplianceDashboard = () => {
       cspmIntegrationLink,
       getCspmDashboardData,
       getKspmDashboardData,
-      getSetupStatus.data?.installedPolicyTemplates,
+      getSetupStatus.data?.kspm?.status,
+      getSetupStatus.data?.cspm?.status,
       kspmIntegrationLink,
       selectedTab,
+      hasFindingsKspm,
+      hasFindingsCspm,
     ]
   );
-
-  if (!hasFindings) return <NoFindingsStates />;
 
   return (
     <CloudPosturePage query={selectedTab === 'cspm' ? getCspmDashboardData : getKspmDashboardData}>
@@ -292,7 +318,7 @@ export const ComplianceDashboard = () => {
         pageTitle={
           <CloudPosturePageTitle
             title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
-              defaultMessage: 'Cloud Posture',
+              defaultMessage: 'Cloud Security Posture',
             })}
           />
         }
@@ -302,7 +328,6 @@ export const ComplianceDashboard = () => {
       <div
         data-test-subj={DASHBOARD_CONTAINER}
         css={css`
-          max-width: 1600px;
           margin-left: auto;
           margin-right: auto;
           height: 100%;

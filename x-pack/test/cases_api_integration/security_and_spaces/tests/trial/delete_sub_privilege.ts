@@ -21,7 +21,7 @@ import {
   getSpaceUrlPrefix,
   updateComment,
   deleteAllComments,
-} from '../../../common/lib/utils';
+} from '../../../common/lib/api';
 import {
   superUser,
   secOnlyDelete,

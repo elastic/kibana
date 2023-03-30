@@ -11,5 +11,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Monitoring Endpoints', function () {
     loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./beats'));
+    loadTestFile(require.resolve('./elasticsearch'));
+    loadTestFile(require.resolve('./enterprisesearch'));
+    loadTestFile(require.resolve('./kibana'));
+    loadTestFile(require.resolve('./logstash'));
   });
 }

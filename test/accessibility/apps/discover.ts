@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/147186
-  describe.skip('Discover a11y tests', () => {
+  describe('Discover a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
@@ -139,6 +138,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         await testSubjects.click('euiFlyoutCloseButton');
+      });
+
+      await retry.try(async () => {
         await toasts.dismissAllToasts();
       });
 
@@ -170,13 +172,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
     });
 
-    it('a11y test for data grid sort panel', async () => {
+    // https://github.com/elastic/kibana/issues/148567
+    it.skip('a11y test for data grid sort panel', async () => {
       await testSubjects.click('dataGridColumnSortingButton');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
     });
-
-    it('a11y test for setting row height for display panel', async () => {
+    // https://github.com/elastic/kibana/issues/148567
+    it.skip('a11y test for setting row height for display panel', async () => {
       await testSubjects.click('dataGridDisplaySelectorPopover');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);

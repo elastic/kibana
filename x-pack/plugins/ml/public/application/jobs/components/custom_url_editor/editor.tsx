@@ -214,7 +214,6 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           label={
             <FormattedMessage id="xpack.ml.customUrlsEditor.labelLabel" defaultMessage="Label" />
           }
-          className="url-label"
           error={invalidLabelError}
           isInvalid={isInvalidLabel}
           display="rowCompressed"

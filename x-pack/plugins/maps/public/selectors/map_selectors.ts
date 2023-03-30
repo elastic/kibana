@@ -8,6 +8,7 @@
 import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
@@ -239,6 +240,10 @@ export function getDataRequestDescriptor(state: MapStoreState, layerId: string, 
   });
 }
 
+export function getExecutionContext(state: MapStoreState): KibanaExecutionContext {
+  return state.map.executionContext;
+}
+
 export const getDataFilters = createSelector(
   getMapExtent,
   getMapBuffer,
@@ -251,6 +256,7 @@ export const getDataFilters = createSelector(
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getIsReadOnly,
+  getExecutionContext,
   (
     mapExtent,
     mapBuffer,
@@ -262,7 +268,8 @@ export const getDataFilters = createSelector(
     embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
-    isReadOnly
+    isReadOnly,
+    executionContext
   ) => {
     return {
       extent: mapExtent,
@@ -275,17 +282,22 @@ export const getDataFilters = createSelector(
       embeddableSearchContext,
       searchSessionId,
       isReadOnly,
+      executionContext,
     };
   }
 );
 
 export const getSpatialFiltersLayer = createSelector(
   getFilters,
+  getEmbeddableSearchContext,
   getMapSettings,
-  (filters, settings) => {
+  (filters, embeddableSearchContext, settings) => {
     const featureCollection: FeatureCollection = {
       type: 'FeatureCollection',
-      features: extractFeaturesFromFilters(filters),
+      features: extractFeaturesFromFilters([
+        ...filters,
+        ...(embeddableSearchContext?.filters ?? []),
+      ]),
     };
     const geoJsonSourceDescriptor = GeoJsonFileSource.createDescriptor({
       __featureCollection: featureCollection,

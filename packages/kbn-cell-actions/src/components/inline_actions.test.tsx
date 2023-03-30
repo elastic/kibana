@@ -8,19 +8,20 @@
 
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { makeAction, makeActionContext } from '../mocks/helpers';
+import { makeAction } from '../mocks/helpers';
 import { InlineActions } from './inline_actions';
-import { CellActionsProvider } from '../context/cell_actions_context';
+import { CellActionExecutionContext } from '../types';
+import { CellActionsProvider } from '../context';
 
 describe('InlineActions', () => {
-  const actionContext = makeActionContext();
-
+  const actionContext = { trigger: { id: 'triggerId' } } as CellActionExecutionContext;
   it('renders', async () => {
     const getActionsPromise = Promise.resolve([]);
     const getActions = () => getActionsPromise;
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <InlineActions
+          disabledActionTypes={[]}
           visibleCellActions={5}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -47,6 +48,7 @@ describe('InlineActions', () => {
     const { queryAllByRole } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <InlineActions
+          disabledActionTypes={[]}
           visibleCellActions={5}
           actionContext={actionContext}
           showActionTooltips={false}

@@ -9,15 +9,19 @@ import * as rt from 'io-ts';
 import { CaseConnectorRt } from './connector';
 import { CaseExternalServiceBasicRt } from '../cases';
 
+const PushDetailsRt = rt.type({
+  latestUserActionPushDate: rt.string,
+  oldestUserActionPushDate: rt.string,
+  externalService: CaseExternalServiceBasicRt,
+});
+
 const CaseConnectorPushInfoRt = rt.intersection([
   rt.type({
     needsToBePushed: rt.boolean,
     hasBeenPushed: rt.boolean,
   }),
   rt.partial({
-    latestUserActionPushDate: rt.string,
-    oldestUserActionPushDate: rt.string,
-    externalService: CaseExternalServiceBasicRt,
+    details: PushDetailsRt,
   }),
 ]);
 
@@ -32,3 +36,4 @@ export const GetCaseConnectorsResponseRt = rt.record(
 );
 
 export type GetCaseConnectorsResponse = rt.TypeOf<typeof GetCaseConnectorsResponseRt>;
+export type GetCaseConnectorsPushDetails = rt.TypeOf<typeof PushDetailsRt>;

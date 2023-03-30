@@ -122,6 +122,9 @@ describe('BuilderEntryItem', () => {
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').at(0).text()).toEqual(
       i18n.CUSTOM_COMBOBOX_OPTION_TEXT
     );
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).props()).toEqual(
+      expect.objectContaining({ acceptsCustomOptions: true })
+    );
   });
 
   test('it does not render custom option text when "allowCustomOptions" is "true" and it is a nested entry', () => {
@@ -154,6 +157,78 @@ describe('BuilderEntryItem', () => {
     );
 
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).props()).toEqual(
+      expect.objectContaining({ acceptsCustomOptions: false })
+    );
+  });
+
+  test('it does not render custom option text when "allowCustomOptions" is "false"', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel
+        allowCustomOptions={false}
+      />
+    );
+
+    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).props()).toEqual(
+      expect.objectContaining({ acceptsCustomOptions: false })
+    );
+  });
+
+  test('it render mapping issues warning text when field has mapping conflicts', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('mapping issues'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel
+        allowCustomOptions
+      />
+    );
+
+    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toMatch(
+      /This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results./
+    );
   });
 
   test('it renders field values correctly when operator is "isOperator"', () => {
@@ -489,6 +564,44 @@ describe('BuilderEntryItem', () => {
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldWildcard"]').text()).toEqual(
       '1234*'
     );
+    // doesnt show warning label for non endpoint exception items
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcardLabel"] .euiFormHelpText')
+    ).toHaveLength(0);
+  });
+
+  test('it does not render matches filepath warning message for rule default list item', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('@tags'),
+          id: '123',
+          nested: undefined,
+          operator: matchesOperator,
+          parent: undefined,
+          value: '1234*',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="rule_default"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+      />
+    );
+
+    // doesnt show warning label for non endpoint exception items
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcardLabel"] .euiFormHelpText')
+    ).toHaveLength(0);
   });
 
   test('it renders field values correctly when operator is "doesNotMatchOperator"', () => {
@@ -879,7 +992,7 @@ describe('BuilderEntryItem', () => {
       ).onBlur();
     });
 
-    expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+    expect(mockSetErrorExists).toHaveBeenCalledWith({ '123': true });
   });
 
   test('it invokes "setErrorsExist" when invalid value inputted for field value input', async () => {
@@ -926,7 +1039,7 @@ describe('BuilderEntryItem', () => {
       ).onSearchChange('hellooo');
     });
 
-    expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+    expect(mockSetErrorExists).toHaveBeenCalledWith({ '123': true });
   });
 
   test('it invokes "setWarningsExist" when invalid value in field value input', async () => {

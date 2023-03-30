@@ -15,6 +15,7 @@ import {
   TickFormatter,
   XYBrushEvent,
 } from '@elastic/charts';
+import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +34,7 @@ import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-import { BucketSize } from '../../../../pages/overview';
+import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;
@@ -52,7 +53,7 @@ export function UptimeSection({ bucketSize }: Props) {
   const { data, status } = useFetcher(
     () => {
       if (bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler('synthetics')?.fetchData({
+        return getDataHandler('uptime')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
           timeZone,
@@ -74,14 +75,16 @@ export function UptimeSection({ bucketSize }: Props) {
     ]
   );
 
-  if (!hasDataMap.synthetics?.hasData) {
+  if (!hasDataMap.uptime?.hasData) {
     return null;
   }
 
   const min = moment.utc(absoluteStart).valueOf();
   const max = moment.utc(absoluteEnd).valueOf();
 
-  const formatter = niceTimeFormatter([min, max]);
+  const formatter = bucketSize?.dateFormat
+    ? timeFormatter(bucketSize?.dateFormat)
+    : niceTimeFormatter([min, max]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

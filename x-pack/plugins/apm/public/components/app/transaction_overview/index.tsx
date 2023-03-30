@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { isServerlessAgent } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -15,7 +16,6 @@ import { AggregatedTransactionsBadge } from '../../shared/aggregated_transaction
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
-import { isServerlessAgent } from '../../../../common/agent_name';
 
 export function TransactionOverview() {
   const {
@@ -32,8 +32,12 @@ export function TransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, fallbackToTransactions, serverlessType } =
-    useApmServiceContext();
+  const {
+    transactionType,
+    fallbackToTransactions,
+    serverlessType,
+    serviceName,
+  } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -57,6 +61,7 @@ export function TransactionOverview() {
         </>
       )}
       <TransactionCharts
+        serviceName={serviceName}
         kuery={kuery}
         environment={environment}
         start={start}
@@ -70,7 +75,7 @@ export function TransactionOverview() {
         <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}
-          showAggregationAccurateCallout
+          showMaxTransactionGroupsExceededWarning
           environment={environment}
           kuery={kuery}
           start={start}

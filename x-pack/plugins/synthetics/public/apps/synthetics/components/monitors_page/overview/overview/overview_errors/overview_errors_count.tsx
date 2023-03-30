@@ -15,14 +15,15 @@ interface MonitorErrorsCountProps {
   from: string;
   to: string;
   locationLabel?: string;
-  monitorId: string[];
+  monitorIds: string[];
+  locations?: string[];
 }
 
 export const OverviewErrorsCount = ({
-  monitorId,
+  monitorIds,
   from,
   to,
-  locationLabel,
+  locations,
 }: MonitorErrorsCountProps) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
@@ -32,6 +33,7 @@ export const OverviewErrorsCount = ({
 
   return (
     <ExploratoryViewEmbeddable
+      id="overviewErrorsCount"
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
@@ -39,8 +41,8 @@ export const OverviewErrorsCount = ({
         {
           time,
           reportDefinitions: {
-            'monitor.id': monitorId,
-            ...(locationLabel ? { 'observer.geo.name': [locationLabel] } : {}),
+            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
+            ...(locations?.length ? { 'observer.geo.name': locations } : {}),
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',

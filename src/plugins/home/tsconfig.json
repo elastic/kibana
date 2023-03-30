@@ -23,7 +23,6 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/utility-types",
     "@kbn/guided-onboarding",
-    "@kbn/core-ui-settings-browser-mocks",
     "@kbn/ui-theme",
     "@kbn/config-schema",
     "@kbn/utility-types-jest",

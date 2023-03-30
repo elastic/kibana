@@ -22,7 +22,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { getConnectorById } from '../utils';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 
 const initialCaseValue: FormProps = {
@@ -43,7 +43,7 @@ interface Props {
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
-  onSuccess?: (theCase: Case) => Promise<void>;
+  onSuccess?: (theCase: Case) => void;
   attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
@@ -55,7 +55,8 @@ export const FormContext: React.FC<Props> = ({
   attachments,
   initialValue,
 }) => {
-  const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
+  const { data: connectors = [], isLoading: isLoadingConnectors } =
+    useGetSupportedActionConnectors();
   const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
@@ -111,7 +112,7 @@ export const FormContext: React.FC<Props> = ({
         }
 
         if (onSuccess && updatedCase) {
-          await onSuccess(updatedCase);
+          onSuccess(updatedCase);
         }
       }
     },

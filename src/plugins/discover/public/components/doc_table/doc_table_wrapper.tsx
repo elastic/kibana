@@ -7,7 +7,7 @@
  */
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,7 +15,7 @@ import { Filter } from '@kbn/es-query';
 import { TableHeader } from './components/table_header/table_header';
 import { SHOW_MULTIFIELDS } from '../../../common';
 import { TableRow } from './components/table_row';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import { DocViewFilterFn, DocViewRenderProps } from '../../services/doc_views/doc_views_types';
 import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
@@ -85,6 +85,10 @@ export interface DocTableProps {
    * Remove column callback
    */
   onRemoveColumn?: (column: string) => void;
+  /**
+   * Doc viewer component
+   */
+  DocViewer: React.ComponentType<DocViewRenderProps>;
 }
 
 export interface DocTableRenderProps {
@@ -124,6 +128,7 @@ export const DocTableWrapper = forwardRef(
       sharedItemTitle,
       dataTestSubj,
       isLoading,
+      DocViewer,
     }: DocTableWrapperProps,
     ref
   ) => {
@@ -181,6 +186,7 @@ export const DocTableWrapper = forwardRef(
             shouldShowFieldHandler={shouldShowFieldHandler}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
+            DocViewer={DocViewer}
           />
         ));
       },
@@ -194,6 +200,7 @@ export const DocTableWrapper = forwardRef(
         shouldShowFieldHandler,
         onAddColumn,
         onRemoveColumn,
+        DocViewer,
       ]
     );
 
@@ -218,12 +225,22 @@ export const DocTableWrapper = forwardRef(
         {!rows.length && (
           <div className="kbnDocTable__error">
             <EuiText size="xs" color="subdued">
-              <EuiIcon type="visualizeApp" size="m" color="subdued" />
-              <EuiSpacer size="m" />
-              <FormattedMessage
-                id="discover.docTable.noResultsTitle"
-                defaultMessage="No results found"
-              />
+              {isLoading ? (
+                <>
+                  <EuiLoadingSpinner />
+                  <EuiSpacer size="m" />
+                  <FormattedMessage id="discover.loadingResults" defaultMessage="Loading results" />
+                </>
+              ) : (
+                <>
+                  <EuiIcon type="discoverApp" size="m" color="subdued" />
+                  <EuiSpacer size="m" />
+                  <FormattedMessage
+                    id="discover.docTable.noResultsTitle"
+                    defaultMessage="No results found"
+                  />
+                </>
+              )}
             </EuiText>
           </div>
         )}

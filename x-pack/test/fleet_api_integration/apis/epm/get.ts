@@ -151,7 +151,7 @@ export default function (providerContext: FtrProviderContext) {
       // not from the package registry. This is because they contain a field the registry
       // does not support
       const res = await supertest
-        .get(`/api/fleet/epm/packages/integration_to_input/0.9.1?prerelease=true`)
+        .get(`/api/fleet/epm/packages/integration_to_input/2.0.0`)
         .expect(200);
 
       const packageInfo = res.body.item;
@@ -214,7 +214,7 @@ export default function (providerContext: FtrProviderContext) {
       const pkgVersion = '8.6.0';
       await installPackage(pkg, pkgVersion);
       const response = await supertestWithoutAuth
-        .get(`/api/fleet/epm/packages/${pkg}`)
+        .get(`/api/fleet/epm/packages/${pkg}/${pkgVersion}`)
         .auth(
           testUsers.endpoint_integr_read_only_fleet_none.username,
           testUsers.endpoint_integr_read_only_fleet_none.password

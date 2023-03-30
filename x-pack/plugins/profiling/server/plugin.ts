@@ -59,10 +59,15 @@ export class ProfilingPlugin
           setup: deps,
         },
         services: {
-          createProfilingEsClient: ({ request, esClient: defaultEsClient }) => {
-            const esClient = profilingSpecificEsClient
-              ? profilingSpecificEsClient.asScoped(request).asInternalUser
-              : defaultEsClient;
+          createProfilingEsClient: ({
+            request,
+            esClient: defaultEsClient,
+            useDefaultAuth = false,
+          }) => {
+            const esClient =
+              profilingSpecificEsClient && !useDefaultAuth
+                ? profilingSpecificEsClient.asScoped(request).asInternalUser
+                : defaultEsClient;
 
             return createProfilingEsClient({ request, esClient });
           },

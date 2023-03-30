@@ -21,6 +21,7 @@ import {
   getSavedSearch,
   getSavedSearchFullPathUrl,
 } from '@kbn/saved-search-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { MainHistoryLocationState } from '../../../common/locator';
 import { getDiscoverStateContainer } from './services/discover_state';
 import { loadDataView, resolveDataView } from './utils/resolve_data_view';
@@ -63,6 +64,7 @@ export function DiscoverMainRoute(props: Props) {
   const [hasESData, setHasESData] = useState(false);
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
   const { id } = useParams<DiscoverLandingParams>();
 
   /**
@@ -100,7 +102,12 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const defaultDataView = await data.dataViews.getDefaultDataView();
+        let defaultDataView: DataView | null = null;
+        try {
+          defaultDataView = await data.dataViews.getDefaultDataView({ displayErrors: false });
+        } catch (e) {
+          //
+        }
 
         if (!defaultDataView) {
           setShowNoDataPage(true);
@@ -278,7 +285,7 @@ export function DiscoverMainRoute(props: Props) {
   }
 
   if (loading || !savedSearch) {
-    return <LoadingIndicator type="elastic" />;
+    return <LoadingIndicator type={hasCustomBranding ? 'spinner' : 'elastic'} />;
   }
 
   return <DiscoverMainAppMemoized dataViewList={dataViewList} savedSearch={savedSearch} />;

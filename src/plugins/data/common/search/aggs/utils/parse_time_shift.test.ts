@@ -119,6 +119,15 @@ describe('parse time shifts', () => {
           }
         }
       });
+
+      it('should validate against absolute time range values', () => {
+        expect(
+          validateAbsoluteTimeShift(`startAt(${futureDateString})`, {
+            from: 'now-1y',
+            to: 'now',
+          })
+        ).toBe(REASON_IDS.shiftAfterTimeRange);
+      });
     });
 
     describe('parseAbsoluteTimeShift', () => {

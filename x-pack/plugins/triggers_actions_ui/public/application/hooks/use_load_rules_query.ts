@@ -79,6 +79,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
     enabled,
     keepPreviousData: true,
     cacheTime: 0,
+    refetchOnWindowFocus: false,
   });
 
   const hasData = Boolean(rulesResponse && rulesResponse.data.length > 0);

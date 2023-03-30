@@ -17,7 +17,7 @@ import {
   Ping,
   PingType,
 } from '../../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
@@ -25,7 +25,7 @@ export interface FetchJourneyStepsParams {
 }
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
-  return apiService.post<ScreenshotBlockDoc[]>(API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
+  return apiService.post<ScreenshotBlockDoc[]>(SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
     hashes: params,
   });
 }
@@ -45,7 +45,11 @@ export async function fetchJourneysFailedSteps({
 }: {
   checkGroups: string[];
 }): Promise<FailedStepsApiResponse> {
-  return apiService.get(API_URLS.JOURNEY_FAILED_STEPS, { checkGroups }, FailedStepsApiResponseType);
+  return apiService.get(
+    SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
+    { checkGroups },
+    FailedStepsApiResponseType
+  );
 }
 
 export async function fetchLastSuccessfulCheck({
@@ -60,7 +64,7 @@ export async function fetchLastSuccessfulCheck({
   location?: string;
 }): Promise<Ping> {
   return await apiService.get(
-    API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
+    SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
     {
       monitorId,
       timestamp,
@@ -72,14 +76,26 @@ export async function fetchLastSuccessfulCheck({
 }
 
 export async function getJourneyScreenshot(
-  imgSrc: string
+  imgSrc: string,
+  shouldBackoff = true,
+  maxRetry = 15,
+  initialBackoff = 100
 ): Promise<ScreenshotImageBlob | ScreenshotRefImageData | null> {
   try {
-    const imgRequest = new Request(imgSrc);
+    let retryCount = 0;
 
-    const response = await fetch(imgRequest);
+    let response: Response | null = null;
+    let backoff = initialBackoff;
+    while (response?.status !== 200) {
+      const imgRequest = new Request(imgSrc);
 
-    if (response.status !== 200) {
+      response = await fetch(imgRequest);
+      if (!shouldBackoff || retryCount >= maxRetry || response.status !== 404) break;
+      await new Promise((r) => setTimeout(r, (backoff *= 2)));
+      retryCount++;
+    }
+
+    if (response?.status !== 200) {
       return null;
     }
 

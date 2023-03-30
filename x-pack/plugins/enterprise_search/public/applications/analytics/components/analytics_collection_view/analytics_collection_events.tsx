@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID } from '../../../../../common/constants';
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -37,10 +38,10 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
   const { navigateToUrl } = useValues(KibanaLogic);
 
   useEffect(() => {
-    analyticsEventsIndexExists(collection.id);
+    analyticsEventsIndexExists(collection.events_datastream);
 
     const interval = setInterval(() => {
-      analyticsEventsIndexExists(collection.id);
+      analyticsEventsIndexExists(collection.events_datastream);
     }, EVENTS_POLLING_INTERVAL);
 
     return () => clearInterval(interval);
@@ -82,7 +83,7 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
               onClick={() =>
                 navigateToUrl(
                   generateEncodedPath(COLLECTION_VIEW_PATH, {
-                    id: collection.id,
+                    id: collection.name,
                     section: 'integrate',
                   })
                 )
@@ -97,7 +98,7 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
             </EuiButton>
           }
           footer={
-            <EuiLink href="#" target="_blank">
+            <EuiLink href={docLinks.behavioralAnalytics} target="_blank">
               {i18n.translate(
                 'xpack.enterpriseSearch.analytics.collections.collectionsView.eventsTab.emptyState.footer',
                 {

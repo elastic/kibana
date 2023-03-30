@@ -24,6 +24,9 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import {
   RuleParams,
   ruleParamsRT,
@@ -43,12 +46,21 @@ import {
   RatioRuleParams,
   UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
+  ExecutionTimeRange,
 } from '../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
-import { getAlertDetailsUrl, getGroupByObject, UNGROUPED_FACTORY_KEY } from '../common/utils';
+import {
+  AdditionalContext,
+  flattenAdditionalContext,
+  getAlertDetailsUrl,
+  getContextForRecoveredAlerts,
+  getGroupByObject,
+  unflattenObject,
+  UNGROUPED_FACTORY_KEY,
+} from '../common/utils';
 import {
   getReasonMessageForGroupedCountAlert,
   getReasonMessageForGroupedRatioAlert,
@@ -72,7 +84,8 @@ export type LogThresholdAlertFactory = (
   reason: string,
   value: number,
   threshold: number,
-  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>
+  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>,
+  additionalContext?: AdditionalContext
 ) => LogThresholdAlert;
 export type LogThresholdAlertLimit = RuleExecutorServices<
   LogThresholdAlertState,
@@ -110,16 +123,25 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       scopedClusterClient,
       getAlertStartedDate,
       getAlertUuid,
+      getAlertByAlertUuid,
     } = services;
     const { basePath } = libs;
 
-    const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold, actions) => {
+    const alertFactory: LogThresholdAlertFactory = (
+      id,
+      reason,
+      value,
+      threshold,
+      actions,
+      additionalContext
+    ) => {
       const alert = alertWithLifecycle({
         id,
         fields: {
           [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_EVALUATION_VALUE]: value,
           [ALERT_REASON]: reason,
+          ...flattenAdditionalContext(additionalContext),
         },
       });
 
@@ -161,12 +183,13 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     };
 
     const [, , { logViews }] = await libs.getStartServices();
-    const { indices, timestampField, runtimeMappings } = await logViews
-      .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
-      .getResolvedLogView('default'); // TODO: move to params
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
+
+      const { indices, timestampField, runtimeMappings } = await logViews
+        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
+        .getResolvedLogView(validatedParams.logView);
 
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(
@@ -194,7 +217,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
 
       const { getRecoveredAlerts } = services.alertFactory.done();
       const recoveredAlerts = getRecoveredAlerts();
-      processRecoveredAlerts({
+      await processRecoveredAlerts({
         basePath,
         getAlertStartedDate,
         getAlertUuid,
@@ -202,6 +225,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         spaceId,
         startedAt,
         validatedParams,
+        getAlertByAlertUuid,
       });
     } catch (e) {
       throw new Error(e);
@@ -323,20 +347,23 @@ const getESQuery = (
   runtimeMappings: estypes.MappingRuntimeFields,
   executionTimestamp: number
 ) => {
+  const executionTimeRange = {
+    lte: executionTimestamp,
+  };
   return hasGroupBy(alertParams)
     ? getGroupedESQuery(
         alertParams,
         timestampField,
         indexPattern,
         runtimeMappings,
-        executionTimestamp
+        executionTimeRange
       )
     : getUngroupedESQuery(
         alertParams,
         timestampField,
         indexPattern,
         runtimeMappings,
-        executionTimestamp
+        executionTimeRange
       );
 };
 
@@ -348,6 +375,8 @@ export const processUngroupedResults = (
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
+  const additionalContextHits = results.aggregations?.additionalContext?.hits?.hits;
+  const additionalContext = formatFields(additionalContextHits?.[0]?.fields);
   const reasonMessage = getReasonMessageForUngroupedCountAlert(
     documentCount,
     count.value,
@@ -366,10 +395,18 @@ export const processUngroupedResults = (
           group: null,
           isRatio: false,
           reason: reasonMessage,
+          ...additionalContext,
         },
       },
     ];
-    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value, actions);
+    alertFactory(
+      UNGROUPED_FACTORY_KEY,
+      reasonMessage,
+      documentCount,
+      count.value,
+      actions,
+      additionalContext
+    );
     alertLimit.setLimitReached(alertLimit.getValue() <= 1);
   } else {
     alertLimit.setLimitReached(false);
@@ -387,6 +424,8 @@ export const processUngroupedRatioResults = (
 
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
+  const additionalContextHits = numeratorResults.aggregations?.additionalContext?.hits?.hits;
+  const additionalContext = formatFields(additionalContextHits?.[0]?.fields);
   const ratio = getRatio(numeratorCount, denominatorCount);
 
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
@@ -407,10 +446,18 @@ export const processUngroupedRatioResults = (
           group: null,
           isRatio: true,
           reason: reasonMessage,
+          ...additionalContext,
         },
       },
     ];
-    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value, actions);
+    alertFactory(
+      UNGROUPED_FACTORY_KEY,
+      reasonMessage,
+      ratio,
+      count.value,
+      actions,
+      additionalContext
+    );
     alertLimit.setLimitReached(alertLimit.getValue() <= 1);
   } else {
     alertLimit.setLimitReached(false);
@@ -427,6 +474,7 @@ const getRatio = (numerator: number, denominator: number) => {
 interface ReducedGroupByResult {
   name: string;
   documentCount: number;
+  context?: AdditionalContext;
 }
 
 type ReducedGroupByResults = ReducedGroupByResult[];
@@ -442,14 +490,21 @@ const getReducedGroupByResults = (
   if (isOptimizedGroupedSearchQueryResponse(results)) {
     for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      reducedGroupByResults.push({ name: groupName, documentCount: groupBucket.doc_count });
+      const additionalContextHits = groupBucket.additionalContext?.hits?.hits;
+      reducedGroupByResults.push({
+        name: groupName,
+        documentCount: groupBucket.doc_count,
+        context: formatFields(additionalContextHits?.[0]?.fields),
+      });
     }
   } else {
     for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
+      const additionalContextHits = groupBucket.filtered_results.additionalContext?.hits?.hits;
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
+        context: formatFields(additionalContextHits?.[0]?.fields),
       });
     }
   }
@@ -501,10 +556,11 @@ export const processGroupByResults = (
             groupByKeys: groupByKeysObjectMapping[group.name],
             isRatio: false,
             reason: reasonMessage,
+            ...group.context,
           },
         },
       ];
-      alertFactory(group.name, reasonMessage, documentCount, count.value, actions);
+      alertFactory(group.name, reasonMessage, documentCount, count.value, actions, group.context);
     }
   }
 
@@ -568,10 +624,18 @@ export const processGroupByRatioResults = (
             groupByKeys: groupByKeysObjectMapping[numeratorGroup.name],
             isRatio: true,
             reason: reasonMessage,
+            ...numeratorGroup.context,
           },
         },
       ];
-      alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value, actions);
+      alertFactory(
+        numeratorGroup.name,
+        reasonMessage,
+        ratio,
+        count.value,
+        actions,
+        numeratorGroup.context
+      );
     }
   }
 
@@ -581,17 +645,15 @@ export const processGroupByRatioResults = (
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
-  executionTimestamp: number
+  executionTimeRange?: ExecutionTimeRange
 ) => {
   const { timeSize, timeUnit, criteria } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMs = intervalAsSeconds * 1000;
-  const to = executionTimestamp;
-  const from = to - intervalAsMs;
+  const to = executionTimeRange?.lte || Date.now();
+  const from = executionTimeRange?.gte || to - intervalAsMs;
 
-  const positiveComparators = getPositiveComparators();
-  const negativeComparators = getNegativeComparators();
   const positiveCriteria = criteria.filter((criterion) =>
     positiveComparators.includes(criterion.comparator)
   );
@@ -641,7 +703,7 @@ export const getGroupedESQuery = (
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  executionTimestamp: number
+  executionTimeRange?: ExecutionTimeRange
 ): estypes.SearchRequest | undefined => {
   // IMPORTANT:
   // For the group by scenario we need to account for users utilizing "less than" configurations
@@ -663,7 +725,7 @@ export const getGroupedESQuery = (
   const { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField,
-    executionTimestamp
+    executionTimeRange
   );
 
   if (isOptimizableGroupedThreshold(comparator, value)) {
@@ -676,6 +738,9 @@ export const getGroupedESQuery = (
               terms: { field },
             },
           })),
+        },
+        aggregations: {
+          ...getContextAggregation(params),
         },
       },
     };
@@ -718,6 +783,9 @@ export const getGroupedESQuery = (
                 ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
               },
             },
+            aggregations: {
+              ...getContextAggregation(params),
+            },
           },
         },
       },
@@ -748,12 +816,12 @@ export const getUngroupedESQuery = (
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  executionTimestamp: number
+  executionTimeRange?: ExecutionTimeRange
 ): object => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField,
-    executionTimestamp
+    executionTimeRange
   );
 
   const body: estypes.SearchRequest['body'] = {
@@ -764,6 +832,9 @@ export const getUngroupedESQuery = (
         filter: [rangeFilter, ...mustFilters],
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
+    },
+    aggregations: {
+      ...getContextAggregation(params),
     },
     runtime_mappings: runtimeMappings,
     size: 0,
@@ -843,21 +914,21 @@ const buildCriterionQuery = (criterion: Criterion): estypes.QueryDslQueryContain
   }
 };
 
-export const getPositiveComparators = () => {
-  return [
-    Comparator.GT,
-    Comparator.GT_OR_EQ,
-    Comparator.LT,
-    Comparator.LT_OR_EQ,
-    Comparator.EQ,
-    Comparator.MATCH,
-    Comparator.MATCH_PHRASE,
-  ];
-};
+export const positiveComparators = [
+  Comparator.GT,
+  Comparator.GT_OR_EQ,
+  Comparator.LT,
+  Comparator.LT_OR_EQ,
+  Comparator.EQ,
+  Comparator.MATCH,
+  Comparator.MATCH_PHRASE,
+];
 
-export const getNegativeComparators = () => {
-  return [Comparator.NOT_EQ, Comparator.NOT_MATCH, Comparator.NOT_MATCH_PHRASE];
-};
+export const negativeComparators = [
+  Comparator.NOT_EQ,
+  Comparator.NOT_MATCH,
+  Comparator.NOT_MATCH_PHRASE,
+];
 
 export const queryMappings: {
   [key: string]: string;
@@ -909,7 +980,7 @@ type LogThresholdRecoveredAlert = {
   getId: () => string;
 } & LogThresholdAlert;
 
-const processRecoveredAlerts = ({
+const processRecoveredAlerts = async ({
   basePath,
   getAlertStartedDate,
   getAlertUuid,
@@ -917,6 +988,7 @@ const processRecoveredAlerts = ({
   spaceId,
   startedAt,
   validatedParams,
+  getAlertByAlertUuid,
 }: {
   basePath: IBasePath;
   getAlertStartedDate: (alertId: string) => string | null;
@@ -925,6 +997,9 @@ const processRecoveredAlerts = ({
   spaceId: string;
   startedAt: Date;
   validatedParams: RuleParams;
+  getAlertByAlertUuid: (
+    alertUuid: string
+  ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
@@ -936,7 +1011,8 @@ const processRecoveredAlerts = ({
     const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
     const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
     const alertUuid = getAlertUuid(recoveredAlertId);
-
+    const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+    const additionalContext = getContextForRecoveredAlerts(alertHits);
     const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
@@ -945,6 +1021,7 @@ const processRecoveredAlerts = ({
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
+      ...additionalContext,
     };
 
     if (isRatioRuleParams(validatedParams)) {
@@ -984,4 +1061,71 @@ export const FIRED_ACTIONS: ActionGroup<'logs.threshold.fired'> = {
   name: i18n.translate('xpack.infra.logs.alerting.threshold.fired', {
     defaultMessage: 'Fired',
   }),
+};
+
+const getContextAggregation = (
+  params: Pick<RuleParams, 'groupBy'> & { criteria: CountCriteria }
+) => {
+  const validPrefixForContext = ['host', 'cloud', 'orchestrator', 'container', 'labels', 'tags'];
+  const positiveCriteria = params.criteria.filter((criterion: Criterion) =>
+    positiveComparators.includes(criterion.comparator)
+  );
+
+  const fieldsFromGroupBy = params.groupBy
+    ? getFieldsSet(params.groupBy, validPrefixForContext)
+    : new Set<string>();
+  const fieldsFromCriteria = getFieldsSet(
+    positiveCriteria.map((criterion: Criterion) => criterion.field),
+    validPrefixForContext
+  );
+  const fieldsPrefixList = Array.from(
+    new Set<string>([...fieldsFromGroupBy, ...fieldsFromCriteria])
+  );
+  const fieldsList = fieldsPrefixList.map((prefix) => (prefix === 'tags' ? prefix : `${prefix}.*`));
+
+  const additionalContextAgg =
+    fieldsList.length > 0
+      ? {
+          additionalContext: {
+            top_hits: {
+              size: 1,
+              fields: fieldsList,
+              _source: false,
+            },
+          },
+        }
+      : null;
+
+  return additionalContextAgg;
+};
+
+const getFieldsSet = (groupBy: string[] | undefined, validPrefix: string[]): Set<string> => {
+  return new Set<string>(
+    groupBy
+      ?.map((currentGroupBy) => currentGroupBy.split('.')[0])
+      .filter((groupByPrefix) => validPrefix.includes(groupByPrefix))
+  );
+};
+
+const fieldsToExclude = ['disk', 'network', 'cpu', 'memory'];
+
+const formatFields = (
+  contextFields: AdditionalContext | undefined
+): AdditionalContext | undefined => {
+  if (!contextFields) return undefined;
+  const formattedContextFields: Record<string, any> = {};
+
+  Object.entries(contextFields).forEach(([key, value]) => {
+    if (key in ecsFieldMap && !excludeField(key)) {
+      formattedContextFields[key] = ecsFieldMap[key as keyof typeof ecsFieldMap].array
+        ? value
+        : value?.[0];
+    }
+  });
+
+  return unflattenObject(formattedContextFields);
+};
+
+const excludeField = (key: string): boolean => {
+  return fieldsToExclude.includes(key.split('.')?.[1]);
 };

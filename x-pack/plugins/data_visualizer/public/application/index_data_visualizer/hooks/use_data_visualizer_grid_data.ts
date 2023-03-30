@@ -98,7 +98,7 @@ export const useDataVisualizerGridData = (
   );
 
   /** Prepare required params to pass to search strategy **/
-  const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+  const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {
     const filterManager = data.query.filterManager;
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
@@ -123,6 +123,7 @@ export const useDataVisualizerGridData = (
       };
     } else {
       return {
+        queryOrAggregateQuery: searchData.queryOrAggregateQuery,
         searchQuery: searchData.searchQuery,
         searchString: searchData.searchString,
         searchQueryLanguage: searchData.queryLanguage,
@@ -391,7 +392,7 @@ export const useDataVisualizerGridData = (
   const createNonMetricCards = useCallback(() => {
     const allNonMetricFields = dataViewFields.filter((f) => {
       return (
-        f.type !== KBN_FIELD_TYPES.NUMBER &&
+        (f.type !== KBN_FIELD_TYPES.NUMBER || f.timeSeriesMetric === 'counter') &&
         f.displayName !== undefined &&
         isDisplayField(f.displayName) === true
       );
@@ -563,6 +564,7 @@ export const useDataVisualizerGridData = (
     progress: combinedProgress,
     overallStatsProgress,
     configs,
+    queryOrAggregateQuery,
     searchQueryLanguage,
     searchString,
     searchQuery,

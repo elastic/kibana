@@ -395,14 +395,21 @@ export const MonitorManagementListResultCodec = t.type({
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 
-export const MonitorOverviewItemCodec = t.interface({
-  name: t.string,
-  id: t.string,
-  configId: t.string,
-  location: MonitorServiceLocationCodec,
-  isEnabled: t.boolean,
-  isStatusAlertEnabled: t.boolean,
-});
+export const MonitorOverviewItemCodec = t.intersection([
+  t.interface({
+    name: t.string,
+    id: t.string,
+    configId: t.string,
+    location: MonitorServiceLocationCodec,
+    isEnabled: t.boolean,
+    isStatusAlertEnabled: t.boolean,
+    type: t.string,
+    tags: t.array(t.string),
+  }),
+  t.partial({
+    projectId: t.string,
+  }),
+]);
 
 export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
 

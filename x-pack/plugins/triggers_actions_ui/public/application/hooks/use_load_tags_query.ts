@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { loadRuleTags } from '../lib/rule_api';
+import { loadRuleTags } from '../lib/rule_api/aggregate';
 import { useKibana } from '../../common/lib/kibana';
 
 interface UseLoadTagsQueryProps {
@@ -45,6 +45,7 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
     queryFn,
     onError: onErrorFn,
     enabled,
+    refetchOnWindowFocus: false,
   });
 
   return {

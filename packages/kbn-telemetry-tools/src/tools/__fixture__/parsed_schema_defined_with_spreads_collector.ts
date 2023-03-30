@@ -10,7 +10,7 @@ import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedSchemaDefinedWithSpreadsCollector: ParsedUsageCollection = [
-  'src/fixtures/telemetry_collectors/schema_defined_with_spreads_collector.ts',
+  'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/schema_defined_with_spreads_collector.ts',
   {
     collectorName: 'schema_defined_with_spreads',
     schema: {
