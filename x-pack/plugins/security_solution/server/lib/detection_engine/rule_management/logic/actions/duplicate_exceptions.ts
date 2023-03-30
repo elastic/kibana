@@ -14,12 +14,14 @@ interface DuplicateExceptionsParams {
   ruleId: RuleParams['ruleId'];
   exceptionLists: RuleParams['exceptionsList'];
   exceptionsClient: ExceptionListClient | undefined;
+  includeExpiredExceptions: boolean;
 }
 
 export const duplicateExceptions = async ({
   ruleId,
   exceptionLists,
   exceptionsClient,
+  includeExpiredExceptions,
 }: DuplicateExceptionsParams): Promise<RuleParams['exceptionsList']> => {
   if (exceptionLists == null) {
     return [];
@@ -40,6 +42,7 @@ export const duplicateExceptions = async ({
     const ruleDefaultExceptionList = await exceptionsClient.duplicateExceptionListAndItems({
       listId: ruleDefaultList.list_id,
       namespaceType: ruleDefaultList.namespace_type,
+      includeExpiredExceptions,
     });
 
     if (ruleDefaultExceptionList == null) {

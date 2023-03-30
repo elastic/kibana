@@ -299,6 +299,8 @@ export interface DuplicateExceptionListOptions {
   listId: ListId;
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
+  /** determines whether exception items with an expired TTL are included in duplication */
+  includeExpiredExceptions: boolean;
 }
 
 /**

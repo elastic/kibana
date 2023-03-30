@@ -15,6 +15,7 @@ import {
   ListId,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
 import { bulkCreateExceptionListItems } from './bulk_create_exception_list_items';
@@ -26,19 +27,21 @@ const LISTS_ABLE_TO_DUPLICATE = [
   ExceptionListTypeEnum.RULE_DEFAULT.toString(),
 ];
 
-interface CreateExceptionListOptions {
+interface DuplicateExceptionListOptions {
   listId: ListId;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   user: string;
+  includeExpiredExceptions: boolean;
 }
 
 export const duplicateExceptionListAndItems = async ({
+  includeExpiredExceptions,
   listId,
   savedObjectsClient,
   namespaceType,
   user,
-}: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
+}: DuplicateExceptionListOptions): Promise<ExceptionListSchema> => {
   // Generate a new static listId
   const newListId = uuidv4();
 
@@ -63,7 +66,7 @@ export const duplicateExceptionListAndItems = async ({
     immutable: listToDuplicate.immutable,
     listId: newListId,
     meta: listToDuplicate.meta,
-    name: listToDuplicate.name,
+    name: `${listToDuplicate.name} [Duplicate]`,
     namespaceType: listToDuplicate.namespace_type,
     savedObjectsClient,
     tags: listToDuplicate.tags,
@@ -96,9 +99,15 @@ export const duplicateExceptionListAndItems = async ({
     });
     itemsToBeDuplicated = [...itemsToBeDuplicated, ...transformedItems];
   };
+  const savedObjectPrefix = getSavedObjectType({ namespaceType });
+  const filter = includeExpiredExceptions
+    ? []
+    : [
+        `(${savedObjectPrefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${savedObjectPrefix}.attributes.expire_time: *)`,
+      ];
   await findExceptionListsItemPointInTimeFinder({
     executeFunctionOnStream,
-    filter: [],
+    filter,
     listId: [listId],
     maxSize: 10000,
     namespaceType: [namespaceType],

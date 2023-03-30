@@ -51,7 +51,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { http, notifications } = services;
   const { navigateToApp } = services.application;
 
-  const { exportExceptionList, deleteExceptionList } = useApi(http);
+  const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
@@ -188,6 +188,31 @@ export const useListDetailsView = (exceptionListId: string) => {
       }
     },
     [list, exportExceptionList, handleErrorStatus, toasts]
+  );
+
+  const onDuplicateList = useCallback(
+    async (includeExpiredExceptions: boolean) => {
+      try {
+        if (!list) return;
+        await duplicateExceptionList({
+          listId: list.list_id,
+          includeExpiredExceptions,
+          namespaceType: list.namespace_type,
+          onError: (error: Error) => handleErrorStatus(error),
+          onSuccess: () => {
+            toasts?.addSuccess(i18n.EXCEPTION_LIST_DUPLICATED_SUCCESSFULLY(list.name));
+          },
+        });
+      } catch (error) {
+        handleErrorStatus(
+          error,
+          undefined,
+          i18n.EXCEPTION_DUPLICATE_ERROR,
+          i18n.EXCEPTION_DUPLICATE_ERROR_DESCRIPTION
+        );
+      }
+    },
+    [list, duplicateExceptionList, handleErrorStatus, toasts]
   );
 
   const handleOnDownload = useCallback(() => {
@@ -382,6 +407,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     handleDelete,
     onEditListDetails,
     onExportList,
+    onDuplicateList,
     onDeleteList,
     onManageRules,
     onSaveManageRules,

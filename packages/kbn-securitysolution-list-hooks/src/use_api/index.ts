@@ -17,6 +17,7 @@ import type {
   ApiListExportProps,
   ApiCallGetExceptionFilterFromIdsMemoProps,
   ApiCallGetExceptionFilterFromExceptionsMemoProps,
+  ApiListDuplicateProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as Api from '@kbn/securitysolution-list-api';
 
@@ -39,6 +40,7 @@ export interface ExceptionsApi {
   }) => Promise<ExceptionListItemSchema>;
   deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
   deleteExceptionList: (arg: ApiCallMemoProps) => Promise<void>;
+  duplicateExceptionList: (arg: ApiListDuplicateProps) => Promise<void>;
   getExceptionItem: (
     arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListItemSchema) => void }
   ) => Promise<void>;
@@ -102,6 +104,28 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
           await Api.deleteExceptionListById({
             http,
             id,
+            namespaceType,
+            signal: abortCtrl.signal,
+          });
+          onSuccess();
+        } catch (error) {
+          onError(error);
+        }
+      },
+      async duplicateExceptionList({
+        includeExpiredExceptions,
+        listId,
+        namespaceType,
+        onError,
+        onSuccess,
+      }: ApiListDuplicateProps): Promise<void> {
+        const abortCtrl = new AbortController();
+
+        try {
+          await Api.duplicateExceptionList({
+            http,
+            includeExpiredExceptions,
+            listId,
             namespaceType,
             signal: abortCtrl.signal,
           });

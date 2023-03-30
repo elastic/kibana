@@ -33,7 +33,7 @@ import { ListExceptionItems } from '../list_exception_items';
 import { useListDetailsView } from '../../hooks';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
 import { ManageRules } from '../manage_rules';
-import { ExportExceptionsListModal } from '../export_exceptions_list_modal';
+import { IncludeExpiredExceptionsModal } from '../expired_exceptions_list_modal';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -59,6 +59,17 @@ interface ExceptionsListCardProps {
     name: string;
     namespaceType: NamespaceType;
   }) => () => Promise<void>;
+  handleDuplicate: ({
+    includeExpiredExceptions,
+    listId,
+    name,
+    namespaceType,
+  }: {
+    includeExpiredExceptions: boolean;
+    listId: string;
+    name: string;
+    namespaceType: NamespaceType;
+  }) => () => Promise<void>;
   readOnly: boolean;
 }
 const buttonCss = css`
@@ -78,7 +89,7 @@ const ListHeaderContainer = styled(EuiFlexGroup)`
   text-align: initial;
 `;
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
-  ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
+  ({ exceptionsList, handleDelete, handleExport, handleDuplicate, readOnly }) => {
     const {
       linkedRules,
       showManageRulesFlyout,
@@ -120,13 +131,14 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       emptyViewerTitle,
       emptyViewerBody,
       emptyViewerButtonText,
-      handleCancelExportModal,
-      handleConfirmExportModal,
-      showExportModal,
+      handleCancelExpiredExceptionsModal,
+      handleConfirmExpiredExceptionsModal,
+      showIncludeExpiredExceptionsModal,
     } = useExceptionsListCard({
       exceptionsList,
       handleExport,
       handleDelete,
+      handleDuplicate,
       handleManageRules: onManageRules,
     });
 
@@ -256,10 +268,10 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             onRuleSelectionChange={onRuleSelectionChange}
           />
         ) : null}
-        {showExportModal ? (
-          <ExportExceptionsListModal
-            handleCloseModal={handleCancelExportModal}
-            onModalConfirm={handleConfirmExportModal}
+        {showIncludeExpiredExceptionsModal ? (
+          <IncludeExpiredExceptionsModal
+            handleCloseModal={handleCancelExpiredExceptionsModal}
+            onModalConfirm={handleConfirmExpiredExceptionsModal}
           />
         ) : null}
       </EuiFlexGroup>

@@ -25,7 +25,7 @@ import { AutoDownload } from '../../../common/components/auto_download/auto_down
 import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
-import { ExportExceptionsListModal } from '../../components/export_exceptions_list_modal';
+import { IncludeExpiredExceptionsModal } from '../../components/expired_exceptions_list_modal';
 
 export const ListsDetailViewComponent: FC = () => {
   const { detailName: exceptionListId } = useParams<{
@@ -53,6 +53,7 @@ export const ListsDetailViewComponent: FC = () => {
     disableManageButton,
     onEditListDetails,
     onExportList,
+    onDuplicateList,
     onManageRules,
     onSaveManageRules,
     onCancelManageRules,
@@ -63,18 +64,33 @@ export const ListsDetailViewComponent: FC = () => {
   } = useListDetailsView(exceptionListId);
 
   const [showExportModal, setShowExportModal] = useState(false);
+  const [modalActionType, setActionType] = useState('export');
 
   const onModalClose = useCallback(() => setShowExportModal(false), [setShowExportModal]);
 
-  const onModalOpen = useCallback(() => setShowExportModal(true), [setShowExportModal]);
+  const onModalOpen = useCallback(
+    (actionType: string) => {
+      setActionType(actionType);
+      setShowExportModal(true);
+    },
+    [setShowExportModal, setActionType]
+  );
 
   const handleExportList = useCallback(() => {
     if (list?.type === ExceptionListTypeEnum.ENDPOINT) {
       onExportList(true);
     } else {
-      onModalOpen();
+      onModalOpen('export');
     }
   }, [onModalOpen, list, onExportList]);
+
+  const handleDuplicateList = useCallback(() => {
+    if (list?.type === ExceptionListTypeEnum.ENDPOINT) {
+      onDuplicateList(true);
+    } else {
+      onModalOpen('duplicate');
+    }
+  }, [onModalOpen, list, onDuplicateList]);
 
   const detailsViewContent = useMemo(() => {
     if (viewerStatus === ViewerStatus.ERROR)
@@ -99,6 +115,7 @@ export const ListsDetailViewComponent: FC = () => {
           onExportList={handleExportList}
           onDeleteList={handleDelete}
           onManageRules={onManageRules}
+          onDuplicateList={handleDuplicateList}
           dataTestSubj="exceptionListManagement"
         />
 
@@ -126,46 +143,49 @@ export const ListsDetailViewComponent: FC = () => {
           />
         ) : null}
         {showExportModal && (
-          <ExportExceptionsListModal
-            onModalConfirm={onExportList}
+          <IncludeExpiredExceptionsModal
+            onModalConfirm={modalActionType === 'export' ? onExportList : onDuplicateList}
             handleCloseModal={onModalClose}
           />
         )}
       </>
     );
   }, [
-    canUserEditList,
-    disableManageButton,
-    exportedList,
-    handleOnDownload,
-    headerBackOptions,
-    invalidListId,
-    isLoading,
+    viewerStatus,
     isReadOnly,
-    linkedRules,
+    isLoading,
+    invalidListId,
+    listName,
     list,
     listDescription,
     listId,
-    listName,
+    linkedRules,
+    canUserEditList,
+    headerBackOptions,
+    onEditListDetails,
+    handleExportList,
+    handleDelete,
+    onManageRules,
+    handleDuplicateList,
+    exportedList,
+    handleOnDownload,
+    refreshExceptions,
     referenceModalState.contentText,
     referenceModalState.rulesReferences,
-    refreshExceptions,
-    showManageButtonLoader,
-    showManageRulesFlyout,
-    showReferenceErrorModal,
-    showExportModal,
-    viewerStatus,
-    onCancelManageRules,
-    onEditListDetails,
-    onExportList,
-    onManageRules,
-    onRuleSelectionChange,
-    onSaveManageRules,
     handleCloseReferenceErrorModal,
-    handleDelete,
     handleReferenceDelete,
+    showReferenceErrorModal,
+    showManageRulesFlyout,
+    showManageButtonLoader,
+    disableManageButton,
+    onSaveManageRules,
+    onCancelManageRules,
+    onRuleSelectionChange,
+    showExportModal,
+    modalActionType,
+    onExportList,
+    onDuplicateList,
     onModalClose,
-    handleExportList,
   ]);
   return (
     <>

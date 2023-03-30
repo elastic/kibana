@@ -84,6 +84,14 @@ export interface ApiListExportProps {
   onSuccess: (blob: Blob) => void;
 }
 
+export interface ApiListDuplicateProps {
+  includeExpiredExceptions: boolean;
+  listId: string;
+  namespaceType: NamespaceType;
+  onError: (err: Error) => void;
+  onSuccess: () => void;
+}
+
 export interface Sort {
   field: string;
   order: string;
@@ -132,6 +140,14 @@ export interface ApiCallGetExceptionFilterFromExceptionsMemoProps
 export interface ExportExceptionListProps {
   http: HttpStart;
   id: string;
+  listId: string;
+  namespaceType: NamespaceType;
+  includeExpiredExceptions: boolean;
+  signal: AbortSignal;
+}
+
+export interface DuplicateExceptionListProps {
+  http: HttpStart;
   listId: string;
   namespaceType: NamespaceType;
   includeExpiredExceptions: boolean;

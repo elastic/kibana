@@ -28,6 +28,12 @@ interface ExportListAction {
   namespaceType: NamespaceType;
   includeExpiredExceptions: boolean;
 }
+interface DuplicateListAction {
+  listId: string;
+  name: string;
+  namespaceType: NamespaceType;
+  includeExpiredExceptions: boolean;
+}
 interface ListAction {
   id: string;
   listId: string;
@@ -37,6 +43,7 @@ export const useExceptionsListCard = ({
   exceptionsList,
   handleExport,
   handleDelete,
+  handleDuplicate,
   handleManageRules,
 }: {
   exceptionsList: ExceptionListInfo;
@@ -47,6 +54,12 @@ export const useExceptionsListCard = ({
     namespaceType,
     includeExpiredExceptions,
   }: ExportListAction) => () => Promise<void>;
+  handleDuplicate: ({
+    listId,
+    name,
+    namespaceType,
+    includeExpiredExceptions,
+  }: DuplicateListAction) => () => Promise<void>;
   handleDelete: ({ id, listId, namespaceType }: ListAction) => () => Promise<void>;
   handleManageRules: () => void;
 }) => {
@@ -54,7 +67,12 @@ export const useExceptionsListCard = ({
   const [exceptionToEdit, setExceptionToEdit] = useState<ExceptionListItemSchema>();
   const [showAddExceptionFlyout, setShowAddExceptionFlyout] = useState(false);
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
-  const [showExportModal, setShowExportModal] = useState(false);
+  const [showIncludeExpiredExceptionsModalExport, setShowIncludeExpiredExceptionsModalExport] =
+    useState(false);
+  const [
+    showIncludeExpiredExceptionsModalDuplicate,
+    setShowIncludeExpiredExceptionsModalDuplicate,
+  ] = useState(false);
 
   const {
     name: listName,
@@ -135,7 +153,24 @@ export const useExceptionsListCard = ({
               includeExpiredExceptions: true,
             })();
           } else {
-            setShowExportModal(true);
+            setShowIncludeExpiredExceptionsModalExport(true);
+          }
+        },
+      },
+      {
+        key: 'Duplicate',
+        icon: 'copy',
+        label: i18n.DUPLICATE_EXCEPTION_LIST,
+        onClick: (e: React.MouseEvent<Element, MouseEvent>) => {
+          if (listType === ExceptionListTypeEnum.ENDPOINT) {
+            handleDuplicate({
+              listId: exceptionsList.list_id,
+              name: exceptionsList.name,
+              namespaceType: exceptionsList.namespace_type,
+              includeExpiredExceptions: true,
+            })();
+          } else {
+            setShowIncludeExpiredExceptionsModalDuplicate(true);
           }
         },
       },
@@ -163,16 +198,16 @@ export const useExceptionsListCard = ({
       },
     ],
     [
+      listCannotBeEdited,
+      listType,
+      handleExport,
       exceptionsList.id,
       exceptionsList.list_id,
       exceptionsList.name,
       exceptionsList.namespace_type,
+      handleDuplicate,
       handleDelete,
-      setShowExportModal,
-      listCannotBeEdited,
       handleManageRules,
-      handleExport,
-      listType,
     ]
   );
 
@@ -197,24 +232,42 @@ export const useExceptionsListCard = ({
   );
 
   const onExportListClick = useCallback(() => {
-    setShowExportModal(true);
-  }, [setShowExportModal]);
+    setShowIncludeExpiredExceptionsModalExport(true);
+  }, [setShowIncludeExpiredExceptionsModalExport]);
 
-  const handleCancelExportModal = () => {
-    setShowExportModal(false);
+  const handleCancelExpiredExceptionsModal = () => {
+    setShowIncludeExpiredExceptionsModalExport(false);
+    setShowIncludeExpiredExceptionsModalDuplicate(false);
   };
 
-  const handleConfirmExportModal = useCallback(
+  const handleConfirmExpiredExceptionsModal = useCallback(
     (includeExpiredExceptions: boolean): void => {
-      handleExport({
-        id: exceptionsList.id,
-        listId: exceptionsList.list_id,
-        name: exceptionsList.name,
-        namespaceType: exceptionsList.namespace_type,
-        includeExpiredExceptions,
-      })();
+      if (showIncludeExpiredExceptionsModalExport) {
+        handleExport({
+          id: exceptionsList.id,
+          listId: exceptionsList.list_id,
+          name: exceptionsList.name,
+          namespaceType: exceptionsList.namespace_type,
+          includeExpiredExceptions,
+        })();
+      } else {
+        handleDuplicate({
+          listId: exceptionsList.list_id,
+          name: exceptionsList.name,
+          namespaceType: exceptionsList.namespace_type,
+          includeExpiredExceptions,
+        })();
+      }
     },
-    [handleExport, exceptionsList]
+    [
+      showIncludeExpiredExceptionsModalExport,
+      handleExport,
+      exceptionsList.id,
+      exceptionsList.list_id,
+      exceptionsList.name,
+      exceptionsList.namespace_type,
+      handleDuplicate,
+    ]
   );
 
   // routes to x-pack/plugins/security_solution/public/exceptions/routes.tsx
@@ -255,9 +308,10 @@ export const useExceptionsListCard = ({
     emptyViewerTitle,
     emptyViewerBody,
     emptyViewerButtonText,
-    showExportModal,
+    showIncludeExpiredExceptionsModal:
+      showIncludeExpiredExceptionsModalDuplicate || showIncludeExpiredExceptionsModalExport,
     onExportListClick,
-    handleCancelExportModal,
-    handleConfirmExportModal,
+    handleCancelExpiredExceptionsModal,
+    handleConfirmExpiredExceptionsModal,
   };
 };

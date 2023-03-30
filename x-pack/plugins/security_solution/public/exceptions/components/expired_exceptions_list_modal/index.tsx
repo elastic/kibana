@@ -10,36 +10,36 @@ import React, { memo, useCallback, useState } from 'react';
 import { EuiConfirmModal, EuiSwitch } from '@elastic/eui';
 import * as i18n from '../../translations';
 
-interface ExportExceptionsListModalProps {
+interface IncludeExpiredExceptionsModalProps {
   handleCloseModal: () => void;
   onModalConfirm: (includeExpired: boolean) => void;
 }
 
-export const ExportExceptionsListModal = memo<ExportExceptionsListModalProps>(
+export const IncludeExpiredExceptionsModal = memo<IncludeExpiredExceptionsModalProps>(
   ({ handleCloseModal, onModalConfirm }) => {
-    const [exportExpired, setExportExpired] = useState(true);
+    const [includeExpired, setIncludeExpired] = useState(true);
 
     const handleSwitchChange = useCallback(() => {
-      setExportExpired(!exportExpired);
-    }, [setExportExpired, exportExpired]);
+      setIncludeExpired(!includeExpired);
+    }, [setIncludeExpired, includeExpired]);
 
     const handleConfirm = useCallback(() => {
-      onModalConfirm(exportExpired);
+      onModalConfirm(includeExpired);
       handleCloseModal();
-    }, [exportExpired, handleCloseModal, onModalConfirm]);
+    }, [includeExpired, handleCloseModal, onModalConfirm]);
 
     return (
       <EuiConfirmModal
-        title={i18n.EXPORT_MODAL_TITLE}
+        title={i18n.EXPIRED_EXCEPTIONS_MODAL_TITLE}
         onCancel={handleCloseModal}
         onConfirm={handleConfirm}
-        cancelButtonText={i18n.EXPORT_MODAL_CANCEL_BUTTON}
-        confirmButtonText={i18n.EXPORT_MODAL_CONFIRM_BUTTON}
+        cancelButtonText={i18n.EXPIRED_EXCEPTIONS_MODAL_CANCEL_BUTTON}
+        confirmButtonText={i18n.EXPIRED_EXCEPTIONS_MODAL_CONFIRM_BUTTON}
         defaultFocusedButton="confirm"
       >
         <EuiSwitch
-          label={i18n.EXPORT_MODAL_INCLUDE_SWITCH_LABEL}
-          checked={exportExpired}
+          label={i18n.EXPIRED_EXCEPTIONS_MODAL_INCLUDE_SWITCH_LABEL}
+          checked={includeExpired}
           onChange={handleSwitchChange}
         />
       </EuiConfirmModal>
@@ -47,4 +47,4 @@ export const ExportExceptionsListModal = memo<ExportExceptionsListModalProps>(
   }
 );
 
-ExportExceptionsListModal.displayName = 'ExportExceptionsListModal';
+IncludeExpiredExceptionsModal.displayName = ' IncludeExpiredExceptionsModal';
