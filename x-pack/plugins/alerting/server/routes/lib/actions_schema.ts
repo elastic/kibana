@@ -26,36 +26,6 @@ export const actionsSchema = schema.arrayOf(
         throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
       })
     ),
-    alerts_filter: schema.maybe(
-      schema.object({
-        query: schema.nullable(
-          schema.object({
-            kql: schema.string(),
-            dsl: schema.maybe(schema.string()),
-          })
-        ),
-        timeframe: schema.nullable(
-          schema.object({
-            timezone: schema.string(),
-            days: schema.arrayOf(
-              schema.oneOf([
-                schema.literal(1),
-                schema.literal(2),
-                schema.literal(3),
-                schema.literal(4),
-                schema.literal(5),
-                schema.literal(6),
-                schema.literal(7),
-              ])
-            ),
-            hours: schema.object({
-              start: schema.string(),
-              end: schema.string(),
-            }),
-          })
-        ),
-      })
-    ),
     uuid: schema.maybe(schema.string()),
     alerts_filter: schema.maybe(
       schema.object({
