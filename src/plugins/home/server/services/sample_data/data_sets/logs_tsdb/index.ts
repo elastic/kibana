@@ -21,6 +21,10 @@ const logsDescription = i18n.translate('home.sampleData.logsTsdbSpecDescription'
 
 export const GLOBE_ICON_PATH = '/plugins/home/assets/sample_data_resources/logs/icon.svg';
 export const logsTSDBSpecProvider = function (): SampleDatasetSchema {
+  const startDate = new Date();
+  const endDate = new Date();
+  startDate.setMonth(startDate.getMonth() - 1);
+  endDate.setMonth(endDate.getMonth() + 2);
   return {
     id: 'logstsdb',
     name: logsName,
@@ -43,8 +47,8 @@ export const logsTSDBSpecProvider = function (): SampleDatasetSchema {
           auto_expand_replicas: '0-1',
           mode: 'time_series',
           routing_path: 'request',
-          'time_series.start_time': '2022-11-01T00:00:00.000000Z',
-          'time_series.end_time': '2023-05-01T00:00:00.000000Z',
+          'time_series.start_time': startDate.toISOString(),
+          'time_series.end_time': endDate.toISOString(),
         },
       },
     ],
