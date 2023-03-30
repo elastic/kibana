@@ -24,10 +24,13 @@ export const Configurations = () => {
     getSetupStatus.data?.indicesDetails[0].status === 'not-empty' ||
     getSetupStatus.data?.kspm.status === 'indexed' ||
     getSetupStatus.data?.cspm.status === 'indexed';
-  if (!hasFindings) return <NoFindingsStates posturetype={'cspm'} />;
+
+  const noFindingsState = getSetupStatus.data?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
+
+  if (!hasFindings) return <NoFindingsStates posturetype={noFindingsState} />;
 
   return (
-    <CloudPosturePage query={dataViewQuery}>
+    <CloudPosturePage query={dataViewQuery} hasFindings={hasFindings}>
       <Switch>
         <Route
           exact
