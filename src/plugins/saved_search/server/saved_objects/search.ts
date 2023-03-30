@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { schema } from '@kbn/config-schema';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { VIEW_MODE } from '../../common';
 import { getAllMigrations } from './search_migrations';
 
 export function getSavedSearchObjectType(
@@ -33,43 +35,64 @@ export function getSavedSearchObjectType(
       },
     },
     mappings: {
+      dynamic: false,
       properties: {
-        columns: { type: 'keyword', index: false, doc_values: false },
         description: { type: 'text' },
-        viewMode: { type: 'keyword', index: false, doc_values: false },
-        hideChart: { type: 'boolean', index: false, doc_values: false },
-        isTextBasedQuery: { type: 'boolean', index: false, doc_values: false },
-        usesAdHocDataView: { type: 'boolean', index: false, doc_values: false },
-        hideAggregatedPreview: { type: 'boolean', index: false, doc_values: false },
-        hits: { type: 'integer', index: false, doc_values: false },
-        kibanaSavedObjectMeta: {
-          properties: {
-            searchSourceJSON: { type: 'text', index: false },
-          },
-        },
-        sort: { type: 'keyword', index: false, doc_values: false },
         title: { type: 'text' },
-        grid: { dynamic: false, properties: {} },
         version: { type: 'integer' },
-        rowHeight: { type: 'text' },
-        timeRestore: { type: 'boolean', index: false, doc_values: false },
-        timeRange: {
-          dynamic: false,
-          properties: {
-            from: { type: 'keyword', index: false, doc_values: false },
-            to: { type: 'keyword', index: false, doc_values: false },
-          },
-        },
-        refreshInterval: {
-          dynamic: false,
-          properties: {
-            pause: { type: 'boolean', index: false, doc_values: false },
-            value: { type: 'integer', index: false, doc_values: false },
-          },
-        },
-        rowsPerPage: { type: 'integer', index: false, doc_values: false },
-        breakdownField: { type: 'text' },
       },
+    },
+    schemas: {
+      '8.8.0': schema.object({
+        columns: schema.arrayOf(schema.string()),
+        description: schema.string(),
+        viewMode: schema.maybe(
+          schema.oneOf([
+            schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
+            schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
+          ])
+        ),
+        hideChart: schema.boolean(),
+        isTextBasedQuery: schema.boolean(),
+        usesAdHocDataView: schema.maybe(schema.boolean()),
+        hideAggregatedPreview: schema.maybe(schema.boolean()),
+        hits: schema.maybe(schema.number()),
+        kibanaSavedObjectMeta: schema.object({
+          searchSourceJSON: schema.string(),
+        }),
+        sort: schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 })),
+        title: schema.string(),
+        grid: schema.object({
+          columns: schema.maybe(
+            schema.recordOf(
+              schema.string(),
+              schema.object({
+                width: schema.maybe(schema.number()),
+              })
+            )
+          ),
+        }),
+        version: schema.maybe(schema.number()),
+        rowHeight: schema.maybe(schema.number()),
+        timeRestore: schema.maybe(schema.boolean()),
+        timeRange: schema.maybe(
+          schema.object({
+            from: schema.string(),
+            to: schema.string(),
+            mode: schema.maybe(
+              schema.oneOf([schema.literal('absolute'), schema.literal('relative')])
+            ),
+          })
+        ),
+        refreshInterval: schema.maybe(
+          schema.object({
+            pause: schema.boolean(),
+            value: schema.number(),
+          })
+        ),
+        rowsPerPage: schema.maybe(schema.number()),
+        breakdownField: schema.maybe(schema.string()),
+      }),
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
   };
