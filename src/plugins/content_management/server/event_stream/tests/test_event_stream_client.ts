@@ -142,6 +142,18 @@ export const testEventStreamClient = (clientPromise: Promise<EventStreamClient>)
       expect(result3.events.length).toBe(1);
     });
 
+    it('can select all results but one, and then the last result', async () => {
+      const client = await clientPromise;
+      const result1 = await client.filter({ limit: 6, cursor: '' });
+      const result2 = await client.filter({ limit: 106, cursor: result1.cursor });
+
+      expect(!!result1.cursor).toBe(true);
+      expect(!!result2.cursor).toBe(false);
+      expect(result1.events.length).toBe(6);
+      expect(result2.events.length).toBe(1);
+      expect(result2.events).toMatchObject([items[0]]);
+    });
+
     it('can limit starting time range of results', async () => {
       const client = await clientPromise;
       const result = await client.filter({

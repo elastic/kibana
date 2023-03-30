@@ -103,8 +103,10 @@ export class MemoryEventStreamClient implements EventStreamClient {
     const size = options.limit ?? 100;
     const offset = options.cursor ? JSON.parse(options.cursor) : 0;
 
-    if (events.length >= size) {
-      events = events.slice(offset, offset + size);
+    events = events.slice(offset);
+
+    if (events.length > size) {
+      events = events.slice(0, size);
     }
 
     let cursor: string = '';
