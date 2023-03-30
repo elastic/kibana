@@ -140,7 +140,12 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
         ))}
       </div>
       <EuiPopoverFooter>
-        <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="spaceBetween">
+        <EuiFlexGroup
+          gutterSize="s"
+          responsive={false}
+          justifyContent="spaceBetween"
+          alignItems="center"
+        >
           {fieldSearchText.length > 0 && (
             <>
               <EuiFlexItem grow={false}>
