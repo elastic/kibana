@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
 import './field_name.scss';
+import React, { Fragment } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import { getFieldTypeName } from '@kbn/unified-field-list-plugin/public';

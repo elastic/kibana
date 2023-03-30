@@ -12,14 +12,17 @@ import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
-import { DocViewFilterFn } from '../../../doc_views_types';
 
 interface TableActionsProps {
   field: string;
   isActive: boolean;
   flattenedField: unknown;
   fieldMapping?: DataViewField;
-  onFilter: DocViewFilterFn;
+  onFilter: (
+    mapping: DataViewField | string | undefined,
+    flattened: unknown,
+    mode: '+' | '-'
+  ) => void;
   onToggleColumn: (field: string) => void;
   ignoredValue: boolean;
 }

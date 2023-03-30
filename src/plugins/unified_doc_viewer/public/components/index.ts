@@ -7,4 +7,6 @@
  */
 
 export * from './doc_viewer_source';
+export * from './doc_viewer_table';
+export * from './doc_viewer_table_legacy';
 export * from './json_code_editor';

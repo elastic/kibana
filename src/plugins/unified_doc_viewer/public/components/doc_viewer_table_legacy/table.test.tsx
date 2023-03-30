@@ -9,9 +9,9 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { DocViewerLegacyTable } from './table';
+import { DocViewerTableLegacy } from './table';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { DocViewRenderProps } from '../../../doc_views_types';
+import type { DocViewRenderProps } from '../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../../build_services';
 import { buildDataTableRecord } from '../../../../../utils/build_data_record';
@@ -76,7 +76,7 @@ dataView.fields.getByName = (name: string) => {
 const mountComponent = (props: DocViewRenderProps, overrides?: Partial<DiscoverServices>) => {
   return mountWithIntl(
     <KibanaContextProvider services={{ ...services, ...overrides }}>
-      <DocViewerLegacyTable {...props} />{' '}
+      <DocViewerTableLegacy {...props} />{' '}
     </KibanaContextProvider>
   );
 };

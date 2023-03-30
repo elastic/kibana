@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldName } from '../../../../../components/field_name/field_name';
+import { FieldRecordLegacy } from '../../types';
+// TODO: Does this belong here?
+import { TableFieldValue } from '../doc_viewer_table/table_cell_value';
+import { FieldName } from '../field_name';
 import { TableActions } from './table_cell_actions';
-import { TableFieldValue } from '../table_cell_value';
-import { FieldRecordLegacy } from '../../../doc_views_types';
 
 export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecordLegacy> = {
   field: 'action',

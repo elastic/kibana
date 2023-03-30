@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Fragment, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { IgnoredReason } from '../../../../utils/get_ignored_reason';
+import { IgnoredReason } from '../../utils';
 import { FieldRecord } from './table';
-import { DocViewTableRowBtnCollapse } from './legacy/table_row_btn_collapse';
+// TODO: Does this belong in legacy or here?
+import { DocViewTableRowBtnCollapse } from '../doc_viewer_table_legacy/table_row_btn_collapse';
 
 const COLLAPSE_LINE_LENGTH = 350;
 

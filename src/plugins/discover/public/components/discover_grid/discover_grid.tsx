@@ -6,53 +6,53 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
-import classnames from 'classnames';
-import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
+import classnames from 'classnames';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiDataGridSorting,
   EuiDataGrid,
+  EuiDataGridRefProps,
+  EuiDataGridSorting,
+  EuiIcon,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
-  EuiLoadingSpinner,
-  EuiIcon,
-  EuiDataGridRefProps,
-  EuiLink,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { Filter } from '@kbn/es-query';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
-import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { getSchemaDetectors } from './discover_grid_schema';
-import { DiscoverGridFlyout } from './discover_grid_flyout';
-import { DiscoverGridContext } from './discover_grid_context';
-import { getRenderCellValueFn } from './get_render_cell_value';
-import { DiscoverGridSettings } from './types';
+import type { DataTableRecord, DocViewFilterFn } from '@kbn/unified-doc-viewer-plugin/public/types';
+import type { HttpStart, IUiSettingsClient, ToastsStart } from '@kbn/core/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getShouldShowFieldHandler } from '@kbn/unified-doc-viewer-plugin/public';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SAMPLE_SIZE_SETTING,
+  SHOW_MULTIFIELDS,
+} from '../../../common';
+import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
+import { ValueToStringConverter } from '../../types';
+import { getDisplayedColumns } from '../../utils/columns';
+import { convertValueToString } from '../../utils/convert_value_to_string';
+import { getDefaultRowsPerPage, getRowsPerPageOptions } from '../../utils/rows_per_page';
+import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
 } from './discover_grid_columns';
-import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
-import { getDisplayedColumns } from '../../utils/columns';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SAMPLE_SIZE_SETTING,
-  MAX_DOC_FIELDS_DISPLAYED,
-  SHOW_MULTIFIELDS,
-} from '../../../common';
+import { DiscoverGridContext } from './discover_grid_context';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
-import type { DataTableRecord, ValueToStringConverter } from '../../types';
-import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
-import { convertValueToString } from '../../utils/convert_value_to_string';
-import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
+import { DiscoverGridFlyout } from './discover_grid_flyout';
+import { getSchemaDetectors } from './discover_grid_schema';
+import { getRenderCellValueFn } from './get_render_cell_value';
+import type { DiscoverGridSettings } from './types';
 
 interface SortObj {
   id: string;
@@ -658,7 +658,7 @@ export const DiscoverGrid = ({
             dataView={dataView}
             hit={expandedDoc}
             hits={displayedRows}
-            // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+            // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
             columns={defaultColumns ? [] : displayedColumns}
             filters={filters}
             savedSearchId={savedSearchId}

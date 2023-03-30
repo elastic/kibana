@@ -73,10 +73,10 @@ import {
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 
 const DocViewerLegacyTable = React.lazy(
-  () => import('./services/doc_views/components/doc_viewer_table/legacy')
+  () => import('./services/doc_views/components/table_legacy')
 );
-const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
-const SourceViewer = React.lazy(() => import('./tmp'));
+const DocViewerTable = React.lazy(() => import('./services/doc_views/components/table'));
+const SourceViewer = React.lazy(() => import('./services/doc_views/components/source'));
 
 /**
  * @public

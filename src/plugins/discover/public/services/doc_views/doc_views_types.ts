@@ -6,33 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { DataTableRecord } from '../../types';
-import { IgnoredReason } from '../../utils/get_ignored_reason';
+import type {
+  DataTableRecord,
+  DocViewRenderProps,
+} from '@kbn/unified-doc-viewer-plugin/public/types';
 
-export interface FieldMapping {
-  filterable?: boolean;
-  scripted?: boolean;
-  rowCount?: number;
-  type: string;
-  name: string;
-  displayName?: string;
-}
-
-export type DocViewFilterFn = (
-  mapping: FieldMapping | string | undefined,
-  value: unknown,
-  mode: '+' | '-'
-) => void;
-
-export interface DocViewRenderProps {
-  hit: DataTableRecord;
-  dataView: DataView;
-  columns?: string[];
-  filter?: DocViewFilterFn;
-  onAddColumn?: (columnName: string) => void;
-  onRemoveColumn?: (columnName: string) => void;
-}
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,
@@ -64,23 +42,3 @@ export type DocView = DocViewInput & {
 };
 
 export type DocViewInputFn = () => DocViewInput;
-
-export interface FieldRecordLegacy {
-  action: {
-    isActive: boolean;
-    onFilter?: DocViewFilterFn;
-    onToggleColumn: (field: string) => void;
-    flattenedField: unknown;
-  };
-  field: {
-    displayName: string;
-    field: string;
-    scripted: boolean;
-    fieldType?: string;
-    fieldMapping?: DataViewField;
-  };
-  value: {
-    formattedValue: string;
-    ignored?: IgnoredReason;
-  };
-}

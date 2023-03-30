@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { JsonCodeEditorCommon } from './json_code_editor_common';
+import { JsonCodeEditor } from '../json_code_editor';
 
 export default {
-  component: JsonCodeEditorCommon,
-  title: 'JSON Code Editor Common',
+  component: JsonCodeEditor,
+  title: 'JSON Code Editor',
 };
 
 const MockContext = createKibanaReactContext<any>({
@@ -22,15 +22,10 @@ const MockContext = createKibanaReactContext<any>({
 });
 
 export function Default() {
-  const value = JSON.stringify({ foo: 'bar' });
+  const json = { foo: 'bar' };
   return (
     <MockContext.Provider>
-      <JsonCodeEditorCommon
-        jsonValue={value}
-        height={300}
-        width={500}
-        onEditorDidMount={() => {}}
-      />
+      <JsonCodeEditor json={json} height={300} width={500} hasLineNumbers={true} />
     </MockContext.Provider>
   );
 }

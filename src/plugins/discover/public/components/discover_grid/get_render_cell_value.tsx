@@ -8,6 +8,7 @@
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -22,14 +23,13 @@ import {
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
+import { formatFieldValue } from '@kbn/unified-doc-viewer-plugin/public';
+import { DataTableRecord } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { DiscoverGridContext } from './discover_grid_context';
 import { defaultMonacoEditorWidth } from './constants';
-import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
-import { DataTableRecord, EsHitRecord } from '../../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
-import { type ShouldShowFieldInTableHandler } from '../../utils/get_should_show_field_handler';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 
@@ -38,7 +38,7 @@ export const getRenderCellValueFn =
     dataView: DataView,
     rows: DataTableRecord[] | undefined,
     useNewFieldsApi: boolean,
-    shouldShowFieldHandler: ShouldShowFieldInTableHandler,
+    shouldShowFieldHandler: (fieldName: string) => boolean,
     maxDocFieldsDisplayed: number,
     closePopover: () => void
   ) =>
@@ -238,10 +238,10 @@ function renderPopoverContent({
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
 function getTopLevelObjectPairs(
-  row: EsHitRecord,
+  row: SearchHit,
   columnId: string,
   dataView: DataView,
-  shouldShowFieldHandler: ShouldShowFieldInTableHandler
+  shouldShowFieldHandler: (fieldName: string) => boolean
 ) {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first

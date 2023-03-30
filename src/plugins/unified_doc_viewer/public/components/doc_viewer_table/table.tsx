@@ -9,20 +9,20 @@
 import './table.scss';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
+  EuiI18n,
+  EuiSelectableMessage,
   EuiSpacer,
   EuiTable,
   EuiTableBody,
-  EuiTableRowCell,
-  EuiTableRow,
   EuiTableHeader,
   EuiTableHeaderCell,
-  EuiText,
   EuiTablePagination,
-  EuiSelectableMessage,
-  EuiI18n,
+  EuiTableRow,
+  EuiTableRowCell,
+  EuiText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,15 +30,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { usePager } from '../../../../hooks/use_pager';
-import { FieldName } from '../../../../components/field_name/field_name';
-import { SHOW_MULTIFIELDS } from '../../../../../common';
-import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
-import { getShouldShowFieldHandler } from '../../../../utils/get_should_show_field_handler';
-import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
-import { formatFieldValue } from '../../../../utils/format_value';
-import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
+import { usePager, useUnifiedDocViewerServices } from '../../hooks';
+import { FieldName } from '../field_name';
+import { DocViewRenderProps, FieldRecordLegacy } from '../../types';
+import {
+  formatFieldValue,
+  getIgnoredReason,
+  getShouldShowFieldHandler,
+  isNestedFieldParent,
+} from '../../utils';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
 
@@ -111,8 +111,9 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
 
-  const { storage, uiSettings, fieldFormats } = useDiscoverServices();
-  const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
+  const { storage, uiSettings, fieldFormats } = useUnifiedDocViewerServices();
+  // TODO: Import this const
+  const showMultiFields = uiSettings.get('discover:showMultiFields');
   const currentDataViewId = dataView.id!;
   const isSingleDocView = !filter;
 

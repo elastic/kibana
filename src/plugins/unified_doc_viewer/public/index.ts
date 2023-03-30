@@ -10,12 +10,16 @@ import { UnifiedDocViewerPlugin } from './plugin';
 
 export {
   DocViewerSource,
+  DocViewerTable,
+  DocViewerTableLegacy,
   JSONCodeEditorCommonMemoized,
   JsonCodeEditor,
   JsonCodeEditorCommon,
 } from './components';
 
-export { useEsDocSearch } from './hooks';
+export { useEsDocSearch, usePager } from './hooks';
+
+export { formatFieldValue, getShouldShowFieldHandler, isNestedFieldParent } from './utils';
 
 export function plugin() {
   return new UnifiedDocViewerPlugin();

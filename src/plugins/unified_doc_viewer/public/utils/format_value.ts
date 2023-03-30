@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type {
   FieldFormatsContentType,
   HtmlContextTypeOptions,
   TextContextTypeOptions,
-} from '@kbn/field-formats-plugin/common/types';
+} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
@@ -31,7 +31,7 @@ import type {
  */
 export function formatFieldValue(
   value: unknown,
-  hit: estypes.SearchHit,
+  hit: SearchHit,
   fieldFormats: FieldFormatsStart,
   dataView?: DataView,
   field?: DataViewField,

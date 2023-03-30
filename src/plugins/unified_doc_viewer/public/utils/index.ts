@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DocViewerTable } from './table';
-
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default DocViewerTable;
+export * from './format_value';
+export * from './get_ignored_reason';
+export * from './get_should_show_field_handler';
+export * from './nested_fields';

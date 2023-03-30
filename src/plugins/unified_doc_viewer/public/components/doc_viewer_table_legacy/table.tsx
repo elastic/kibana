@@ -6,29 +6,42 @@
  * Side Public License, v 1.
  */
 
-import '../table.scss';
+import './table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
-import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import { SHOW_MULTIFIELDS } from '../../../../../../common';
-import { DocViewRenderProps, FieldRecordLegacy } from '../../../doc_views_types';
+import { useUnifiedDocViewerServices } from '../../hooks';
+import { DataTableRecord, DocViewFilterFn, FieldRecordLegacy } from '../../types';
+import {
+  formatFieldValue,
+  getIgnoredReason,
+  getShouldShowFieldHandler,
+  isNestedFieldParent,
+} from '../../utils';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
-import { getShouldShowFieldHandler } from '../../../../../utils/get_should_show_field_handler';
-import { getIgnoredReason } from '../../../../../utils/get_ignored_reason';
-import { formatFieldValue } from '../../../../../utils/format_value';
-import { isNestedFieldParent } from '../../../../../application/main/utils/nested_fields';
 
-export const DocViewerLegacyTable = ({
-  columns,
-  hit,
+export interface DocViewRenderProps {
+  hit: DataTableRecord;
+  dataView: DataView;
+  columns?: string[];
+  filter?: DocViewFilterFn;
+  onAddColumn?: (columnName: string) => void;
+  onRemoveColumn?: (columnName: string) => void;
+}
+
+export const DocViewerTableLegacy = ({
   dataView,
-  filter,
-  onAddColumn,
+  hit,
+  columns,
   onRemoveColumn,
+  onAddColumn,
+  filter,
 }: DocViewRenderProps) => {
-  const { fieldFormats, uiSettings } = useDiscoverServices();
-  const showMultiFields = useMemo(() => uiSettings.get(SHOW_MULTIFIELDS), [uiSettings]);
+  const { fieldFormats, uiSettings } = useUnifiedDocViewerServices();
+
+  // TODO: Replace this constant
+  const showMultiFields = useMemo(() => uiSettings.get('discover:showMultiFields'), [uiSettings]);
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
   const tableColumns = useMemo(() => {

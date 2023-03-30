@@ -7,12 +7,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataTableRecord } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { i18n } from '@kbn/i18n';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord } from '../types';
-import { formatFieldValue } from './format_value';
-import { type ShouldShowFieldInTableHandler } from './get_should_show_field_handler';
+import { formatFieldValue } from '@kbn/unified-doc-viewer-plugin/public';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
 
@@ -29,7 +28,7 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
 export function formatHit(
   hit: DataTableRecord,
   dataView: DataView,
-  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
+  shouldShowFieldHandler: (fieldName: string) => boolean,
   maxEntries: number,
   fieldFormats: FieldFormatsStart
 ): FormattedHit {
