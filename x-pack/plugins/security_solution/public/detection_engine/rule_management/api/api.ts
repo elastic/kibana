@@ -58,7 +58,6 @@ import type {
   PrePackagedRulesStatusResponse,
   PreviewRulesProps,
   Rule,
-  RuleSnoozeSettings,
   RulesSnoozeSettingsResponse,
   UpdateRulesProps,
 } from '../logic/types';
