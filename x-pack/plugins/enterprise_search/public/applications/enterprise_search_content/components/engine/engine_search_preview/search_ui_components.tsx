@@ -65,12 +65,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
 
   const [, id] = JSON.parse(atob(encodedId));
 
-  const fields = {
-    ...Object.fromEntries(
-      Object.entries(otherFields).map(([name, { raw: value }]) => [name, value])
-    ),
-    id,
-  };
+  const fields = { ...otherFields, id };
   const results = convertResults(fields);
 
   const truncatedFields = results.slice(0, RESULT_FIELDS_TRUNCATE_AT);
@@ -105,7 +100,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
         'xpack.enterpriseSearch.content.engine.searchPreview.result.valueColumn',
         { defaultMessage: 'Value' }
       ),
-      render: (value: string) => (
+      render: (value: React.ReactNode) => (
         <EuiText>
           <code>{value}</code>
         </EuiText>

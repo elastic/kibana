@@ -45,9 +45,7 @@ export const DocumentFlyout: React.FC = () => {
     } = selectedDocument;
     const [, parsedId] = JSON.parse(atob(encodedId));
     const fields = {
-      ...Object.fromEntries(
-        Object.entries(otherFields).map(([key, { raw: value }]) => [key, value])
-      ),
+      ...otherFields,
       id: parsedId,
     };
     return [parsedId, addTypeToResults(convertResults(fields), fieldTypes)];
