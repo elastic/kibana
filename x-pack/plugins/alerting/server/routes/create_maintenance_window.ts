@@ -28,7 +28,7 @@ type MaintenanceWindowCreateBody = Omit<
   'events' | 'expirationDate' | 'enabled' | 'archived'
 >;
 
-const rewriteQueryReq: RewriteRequestCase<MaintenanceWindowCreateBody> = ({
+export const rewriteQueryReq: RewriteRequestCase<MaintenanceWindowCreateBody> = ({
   r_rule: rRule,
   ...rest
 }) => ({

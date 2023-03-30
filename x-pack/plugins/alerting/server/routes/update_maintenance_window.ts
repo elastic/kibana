@@ -35,7 +35,7 @@ interface MaintenanceWindowUpdateBody {
   rRule?: MaintenanceWindowSOProperties['rRule'];
 }
 
-const rewriteQueryReq: RewriteRequestCase<MaintenanceWindowUpdateBody> = ({
+export const rewriteQueryReq: RewriteRequestCase<MaintenanceWindowUpdateBody> = ({
   r_rule: rRule,
   ...rest
 }) => ({

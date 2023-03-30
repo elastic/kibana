@@ -9,7 +9,7 @@ import { RRule } from 'rrule';
 import { MaintenanceWindowSOAttributes } from '../../../common';
 
 export const getMockMaintenanceWindow = (
-  overwrites: Partial<MaintenanceWindowSOAttributes>
+  overwrites?: Partial<MaintenanceWindowSOAttributes>
 ): MaintenanceWindowSOAttributes => {
   return {
     title: 'test-title',
