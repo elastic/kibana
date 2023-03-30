@@ -10,6 +10,7 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
+import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import type { RulesTableState } from './rules_table_context';
 import { RulesTableContextProvider, useRulesTableContext } from './rules_table_context';
 import {
@@ -23,6 +24,7 @@ import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../rule_management/logic/use_find_rules');
+jest.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings');
 jest.mock('./use_rules_table_saved_state');
 
 function renderUseRulesTableContext(
@@ -37,6 +39,7 @@ function renderUseRulesTableContext(
     isLoading: false,
     isRefetching: false,
   });
+  (useFetchRulesSnoozeSettings as jest.Mock).mockReturnValue({ data: undefined, isError: false });
   (useUiSetting$ as jest.Mock).mockReturnValue([{ on: false, value: 0, idleTimeout: 0 }]);
   (useRulesTableSavedState as jest.Mock).mockReturnValue(savedState);
 
