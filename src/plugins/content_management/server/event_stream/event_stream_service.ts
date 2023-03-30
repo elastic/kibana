@@ -36,20 +36,20 @@ export class EventStreamService {
     this.#buffer = new TimedItemBuffer<EventStreamEvent>({
       flushOnMaxItems: 100,
       maxItemAge: 250,
-      onFlush: (events: EventStreamEvent[]): void => {
-        if (!this.client) {
-          const { logger } = this.ctx;
+      onFlush: async (events: EventStreamEvent[]) => {
+        const { logger } = this.ctx;
 
+        if (!this.client) {
           logger.error('EventStreamClient is not initialized, events will not be written.');
           return;
         }
 
-        this.client.writeEvents(events).catch((error) => {
-          const { logger } = this.ctx;
-
+        try {
+          await this.client.writeEvents(events);
+        } catch (error) {
           logger.error('Failed to write events to Event Stream.');
           logger.error(error);
-        });
+        }
       },
     });
   }
