@@ -35,7 +35,6 @@ export const serverUrlHint = i18n.translate(
 export const serviceEnvironmentHint = i18n.translate(
   'xpack.apm.tutorial.shared_clients.configure.commands.serviceEnvironmentHint',
   {
-    defaultMessage:
-      `The name of the environment this service is deployed in, e.g., "production" or "staging". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.`,
+    defaultMessage: `The name of the environment this service is deployed in, e.g., "production" or "staging". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.`,
   }
 );
