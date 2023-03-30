@@ -26,7 +26,7 @@ export function useFetchIndexPatternFields(
   const { http } = useKibana().services;
 
   const { isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: ['fetchIndices', indexPattern],
+    queryKey: ['fetchIndexPatternFields', indexPattern],
     queryFn: async ({ signal }) => {
       try {
         const response = await http.get<{ fields: Field[] }>(
