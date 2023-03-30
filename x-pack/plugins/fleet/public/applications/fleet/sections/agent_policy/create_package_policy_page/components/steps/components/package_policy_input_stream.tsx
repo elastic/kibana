@@ -108,7 +108,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       );
 
     // only show pipelines and mappings if the matching index template exists
-    // in the legacy case (e.g logs package pre 2.0.0) the index template will not exist 
+    // in the legacy case (e.g logs package pre 2.0.0) the index template will not exist
     // because we allowed dataset to be customized but didnt create a matching index template
     // for the new dataset.
     const showPipelinesAndMappings = !isLoadingIndexTemplate && indexTemplateExists;
