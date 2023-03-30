@@ -143,6 +143,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
                       });
                     }}
                     totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
+                    isDifferentialView={isDifferentialView}
                   />
                 </AsyncComponent>
               </EuiFlexItem>
@@ -172,6 +173,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
                       totalSeconds={
                         comparisonTimeRange.inSeconds.end - comparisonTimeRange.inSeconds.start
                       }
+                      isDifferentialView={isDifferentialView}
                     />
                   </AsyncComponent>
                 </EuiFlexItem>
