@@ -109,7 +109,7 @@ export function TransactionDetailLink({
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
             <FormattedMessage
               defaultMessage="The APM server has reached the maximum capacity that it can currently handle in terms of showing individual transaction groups. Please consider scaling-up your APM server capacity and/or tuning the application instrumentation in order to view all of the data."
-              id="xpack.apm.transactionDetail.maxGroups.message"
+              id="xpack.apm.transactionDetail.maxGroup.message"
             />
           </EuiText>
         </PopoverTooltip>

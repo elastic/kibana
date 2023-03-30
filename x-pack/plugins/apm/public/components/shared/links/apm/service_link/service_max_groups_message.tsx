@@ -14,7 +14,7 @@ export function ServiceMaxGroupsMessage() {
   return (
     <FormattedMessage
       defaultMessage="The APM server has reached the maximum capacity that it can currently handle in terms of showing individual services. Please consider scaling-up your APM server capacity and/or tuning the application instrumentation in order to view all of the data."
-      id="xpack.apm.serviceDetail.maxGroups.message"
+      id="xpack.apm.serviceDetail.maxGroup.message"
     />
   );
 }
