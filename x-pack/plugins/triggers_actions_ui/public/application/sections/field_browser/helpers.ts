@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash/fp';
+import { CASES } from '../translations';
 
 export const FIELD_BROWSER_WIDTH = 925;
 export const TABLE_HEIGHT = 260;
@@ -18,6 +20,14 @@ export const categoryHasFields = (category: Partial<BrowserField>): boolean =>
 /** Returns the count of fields in the specified category */
 export const getFieldCount = (category: Partial<BrowserField> | undefined): number =>
   category != null && category.fields != null ? Object.keys(category.fields).length : 0;
+
+const matchesSystemField = (field: string, searchTerm: string): boolean => {
+  const casesLabelI18n = CASES.toLocaleLowerCase();
+  const casesLabel = 'cases';
+  const term = searchTerm.toLocaleLowerCase();
+
+  return field === ALERT_CASE_IDS && (casesLabelI18n.includes(term) || casesLabel.includes(term));
+};
 
 /**
  * Filters the specified `BrowserFields` to return a new collection where every
@@ -59,7 +69,11 @@ export function filterBrowserFieldsByFieldName({
       }
 
       // Check if this field matches (via substring comparison) the passed substring
-      if (fieldNameFromDescriptor !== null && fieldNameFromDescriptor.includes(trimmedSubstring)) {
+      if (
+        fieldNameFromDescriptor !== null &&
+        (fieldNameFromDescriptor.includes(trimmedSubstring) ||
+          matchesSystemField(fieldNameFromDescriptor, trimmedSubstring))
+      ) {
         // this field is a match, so we should emit this category into the result object.
         hadAMatch = true;
 

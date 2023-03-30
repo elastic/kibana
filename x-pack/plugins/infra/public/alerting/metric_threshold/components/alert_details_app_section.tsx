@@ -8,12 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Rule } from '@kbn/alerting-plugin/common';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { MetricThresholdRuleTypeParams } from '..';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { ExpressionChart } from './expression_chart';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 interface AppSectionProps {
@@ -26,12 +25,8 @@ interface AppSectionProps {
 }
 
 export function AlertDetailsAppSection({ rule }: AppSectionProps) {
-  const { http, notifications } = useKibanaContextForPlugin().services;
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
-    sourceId: 'default',
-    fetch: http.fetch,
-    toastWarning: notifications.toasts.addWarning,
-  });
+  const { source, createDerivedIndexPattern } = useSourceContext();
+
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
@@ -58,4 +53,4 @@ export function AlertDetailsAppSection({ rule }: AppSectionProps) {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default AlertDetailsAppSection;
+export default withSourceProvider<AppSectionProps>(AlertDetailsAppSection)('default');
