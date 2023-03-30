@@ -138,6 +138,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
         )}
         checked={timeframeEnabled}
         onChange={toggleTimeframe}
+        data-test-subj="alertsFilterTimeframeToggle"
       />
       {timeframeEnabled && (
         <>
@@ -157,6 +158,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
                 idToSelectedMap={selectedWeekdays}
                 type="multi"
                 onChange={onToggleWeekday}
+                data-test-subj="alertsFilterTimeframeWeekdayButtons"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -169,6 +171,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
                     timeFormat={timeFormat}
                     selected={moment().set('hour', startH).set('minute', startM)}
                     onChange={onChangeHours('start')}
+                    data-test-subj="alertsFilterTimeframeStart"
                   />
                 }
                 endDateControl={
@@ -179,6 +182,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
                     timeFormat={timeFormat}
                     selected={moment().set('hour', endH).set('minute', endM)}
                     onChange={onChangeHours('end')}
+                    data-test-subj="alertsFilterTimeframeEnd"
                   />
                 }
               />
@@ -193,6 +197,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
                 selectedOptions={selectedTimezone}
                 onChange={onChangeTimezone}
                 isClearable={false}
+                data-test-subj="alertsFilterTimeframeTimezone"
               />
             </EuiFlexItem>
           </EuiFormRow>
