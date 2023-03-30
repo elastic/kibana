@@ -10,7 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DateRange } from '../../../../common';
+import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
