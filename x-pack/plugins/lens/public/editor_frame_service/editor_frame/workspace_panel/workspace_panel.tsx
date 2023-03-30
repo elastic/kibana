@@ -624,10 +624,24 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 });
 
-function dispatchRenderComplete(node: HTMLDivElement | null) {
-  if (node) {
-    node.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
-  }
+function useReportingState(errors: UserMessage[]): {
+  isRenderComplete: boolean;
+  hasDynamicError: boolean;
+  setIsRenderComplete: (state: boolean) => void;
+  setDynamicError: (state: boolean) => void;
+  nodeRef: React.RefObject<HTMLDivElement>;
+} {
+  const [isRenderComplete, setIsRenderComplete] = useState(Boolean(errors?.length));
+  const [hasDynamicError, setDynamicError] = useState(false);
+  const nodeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isRenderComplete && nodeRef.current) {
+      nodeRef.current.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
+    }
+  }, [isRenderComplete, errors]);
+
+  return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
 }
 
 export const VisualizationWrapper = ({
@@ -661,9 +675,8 @@ export const VisualizationWrapper = ({
 }) => {
   const context = useLensSelector(selectExecutionContext);
   // Used for reporting
-  const [isLoading, setIsLoading] = useState(!errors?.length);
-  const [hasDynamicError, setHasDynamicError] = useState(false);
-  const nodeRef = useRef<HTMLDivElement>(null);
+  const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
+    useReportingState(errors);
   const searchContext: ExecutionContextSearch = useMemo(
     () => ({
       query: context.query,
@@ -678,13 +691,7 @@ export const VisualizationWrapper = ({
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
-  useEffect(() => {
-    if (!isLoading) {
-      dispatchRenderComplete(nodeRef.current);
-    }
-  }, [isLoading, errors]);
-
-  if (errors?.length) {
+  if (errors.length) {
     const showExtraErrorsAction =
       !localState.expandError && errors.length > 1 ? (
         <EuiButtonEmpty
@@ -711,8 +718,7 @@ export const VisualizationWrapper = ({
         data-render-complete={true}
         data-shared-item=""
         data-render-error={i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
-          defaultMessage: ` {errors} {errors, plural, one {error} configuration {errors}}`,
-          values: { errors: errors.length },
+          defaultMessage: `A configuration error occurred`,
         })}
       >
         <EuiFlexItem>
@@ -746,7 +752,7 @@ export const VisualizationWrapper = ({
     <div
       className="lnsExpressionRenderer"
       data-shared-items-container
-      data-render-complete={!isLoading}
+      data-render-complete={isRenderComplete}
       data-shared-item=""
       data-render-error={
         hasDynamicError
@@ -767,7 +773,7 @@ export const VisualizationWrapper = ({
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
         onRender$={() => {
-          setIsLoading(false);
+          setIsRenderComplete(true);
           onRender$();
         }}
         inspectorAdapters={lensInspector.adapters}
@@ -781,7 +787,9 @@ export const VisualizationWrapper = ({
             ? [errorMessage]
             : [];
 
-          setHasDynamicError(true);
+          if (!hasDynamicError) {
+            setDynamicError(true);
+          }
 
           return (
             <EuiFlexGroup>
