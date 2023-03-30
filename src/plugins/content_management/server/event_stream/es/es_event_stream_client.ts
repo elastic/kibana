@@ -162,6 +162,7 @@ export class EsEventStreamClient implements EventStreamClient {
       query,
       sort,
       size,
+      track_total_hits: false,
     };
 
     if (options.cursor) {
