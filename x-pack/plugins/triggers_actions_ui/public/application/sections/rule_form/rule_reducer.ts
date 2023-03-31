@@ -24,7 +24,6 @@ interface CommandType<
     | 'setRuleActionParams'
     | 'setRuleActionProperty'
     | 'setRuleActionFrequency'
-    | 'clearRuleActionParams'
 > {
   type: T;
 }
@@ -85,10 +84,6 @@ export type RuleReducerAction =
   | {
       command: CommandType<'setRuleActionFrequency'>;
       payload: Payload<string, RuleActionParam>;
-    }
-  | {
-      command: CommandType<'clearRuleActionParams'>;
-      payload: { index: number };
     };
 
 export type InitialRuleReducer = Reducer<{ rule: InitialRule }, RuleReducerAction>;
@@ -101,26 +96,6 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
   const { rule } = state;
 
   switch (action.command.type) {
-    case 'clearRuleActionParams': {
-      const { index } = action.payload;
-      if (index === undefined || rule.actions[index] == null) {
-        return state;
-      } else {
-        const oldAction = rule.actions.splice(index, 1)[0];
-        const updatedAction = {
-          ...oldAction,
-          params: {},
-        };
-        rule.actions.splice(index, 0, updatedAction);
-        return {
-          ...state,
-          rule: {
-            ...rule,
-            actions: [...rule.actions],
-          },
-        };
-      }
-    }
     case 'setRule': {
       const { key, value } = action.payload as Payload<'rule', RulePhase>;
       if (key === 'rule') {
