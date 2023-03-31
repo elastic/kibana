@@ -44,7 +44,7 @@ describe('SyntheticsMonitorClient', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
