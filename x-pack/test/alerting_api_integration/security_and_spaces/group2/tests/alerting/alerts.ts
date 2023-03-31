@@ -1361,9 +1361,9 @@ instanceStateValue: true
 
         it('should filter alerts by hours', async () => {
           const now = new Date();
-          now.setHours(now.getHours() + 1);
-          const hour = padStart(now.getHours().toString(), 2, '0');
-          const minutes = padStart(now.getMinutes().toString(), 2, '0');
+          now.setHours(now.getUTCHours() + 1);
+          const hour = padStart(now.getUTCHours().toString(), 2, '0');
+          const minutes = padStart(now.getUTCMinutes().toString(), 2, '0');
 
           const start = `${hour}:${minutes}`;
           const end = `${hour}:${minutes}`;
