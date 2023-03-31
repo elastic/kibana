@@ -98,6 +98,31 @@ describe('<HighlightedFields />', () => {
     );
 
     getByTestId(HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID).click();
+    expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should navigate to table tab when clicking on the link button', () => {
+    const flyoutContextValue = {
+      openRightPanel: jest.fn(),
+    } as unknown as ExpandableFlyoutContext;
+    const panelContextValue = {
+      eventId: 'eventId',
+      indexName: 'indexName',
+      dataFormattedForFieldBrowser: [],
+      browserFields: {},
+    } as unknown as RightPanelContext;
+
+    const { getByTestId } = render(
+      <ThemeProvider theme={mockTheme}>
+        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+          <RightPanelContext.Provider value={panelContextValue}>
+            <HighlightedFields />
+          </RightPanelContext.Provider>
+        </ExpandableFlyoutContext.Provider>
+      </ThemeProvider>
+    );
+
+    getByTestId(HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID).click();
     getByTestId(HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK).click();
     expect(flyoutContextValue.openRightPanel).toHaveBeenCalledWith({
       id: RightPanelKey,
@@ -107,7 +132,6 @@ describe('<HighlightedFields />', () => {
         indexName: panelContextValue.indexName,
       },
     });
-    expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render empty component if dataFormattedForFieldBrowser is null', () => {

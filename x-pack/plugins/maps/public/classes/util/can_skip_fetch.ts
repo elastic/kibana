@@ -72,9 +72,8 @@ export async function canSkipSourceUpdate({
   const timeAware = await source.isTimeAware();
   const isFieldAware = source.isFieldAware();
   const isQueryAware = source.isQueryAware();
-  const isGeoGridPrecisionAware = source.isGeoGridPrecisionAware();
 
-  if (!timeAware && !extentAware && !isFieldAware && !isQueryAware && !isGeoGridPrecisionAware) {
+  if (!timeAware && !extentAware && !isFieldAware && !isQueryAware) {
     return !!prevDataRequest && prevDataRequest.hasDataOrRequestInProgress();
   }
 
@@ -128,16 +127,7 @@ export async function canSkipSourceUpdate({
     updateDueToSearchSessionId = prevMeta.searchSessionId !== nextRequestMeta.searchSessionId;
   }
 
-  let updateDueToPrecisionChange = false;
   let updateDueToExtentChange = false;
-
-  if (isGeoGridPrecisionAware) {
-    updateDueToPrecisionChange = !_.isEqual(
-      prevMeta.geogridPrecision,
-      nextRequestMeta.geogridPrecision
-    );
-  }
-
   if (extentAware) {
     updateDueToExtentChange = updateDueToExtent(prevMeta, nextRequestMeta);
   }
@@ -154,7 +144,6 @@ export async function canSkipSourceUpdate({
     !updateDueToFilters &&
     !updateDueToSourceQuery &&
     !updateDueToApplyGlobalQuery &&
-    !updateDueToPrecisionChange &&
     !updateDueToSourceMetaChange &&
     !updateDueToSearchSessionId
   );

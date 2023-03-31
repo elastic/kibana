@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import classNames from 'classnames';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -17,7 +18,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { EuiHorizontalRule, useResizeObserver } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -37,16 +38,11 @@ import './_dashboard_top_nav.scss';
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
-  onHeightChange: (height: number) => void;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
-export function DashboardTopNav({
-  embedSettings,
-  redirectTo,
-  onHeightChange,
-}: DashboardTopNavProps) {
+export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
 
@@ -121,16 +117,6 @@ export function DashboardTopNav({
   useEffect(() => {
     if (!embedSettings) setChromeVisibility(viewMode !== ViewMode.PRINT);
   }, [embedSettings, setChromeVisibility, viewMode]);
-
-  /**
-   * Keep track of the height of the top nav bar as it changes so that the padding at the top of the
-   * dashboard viewport can be adjusted dynamically as it changes
-   */
-  const resizeRef = useRef<HTMLDivElement>(null);
-  const dimensions = useResizeObserver(resizeRef.current);
-  useEffect(() => {
-    onHeightChange(dimensions.height);
-  }, [dimensions, onHeightChange]);
 
   /**
    * populate recently accessed, and set is chrome visible.
@@ -230,7 +216,11 @@ export function DashboardTopNav({
   });
 
   return (
-    <div ref={resizeRef} className={'dashboardTopNav'}>
+    <div
+      className={classNames('dashboardTopNav', {
+        'dashboardTopNav-fullscreenMode': fullScreenMode,
+      })}
+    >
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"

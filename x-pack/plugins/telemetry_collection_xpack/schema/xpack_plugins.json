@@ -5414,6 +5414,48 @@
                   "type": "date"
                 }
               }
+            },
+            "latestPackageVersion": {
+              "type": "keyword"
+            },
+            "cspm": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            },
+            "kspm": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            },
+            "vuln_mgmt": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -5467,6 +5509,9 @@
               "benchmark_version": {
                 "type": "keyword"
               },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
               "passed_findings_count": {
                 "type": "long"
               },
@@ -5489,6 +5534,9 @@
           "type": "array",
           "items": {
             "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
               "rule_id": {
                 "type": "keyword"
               },

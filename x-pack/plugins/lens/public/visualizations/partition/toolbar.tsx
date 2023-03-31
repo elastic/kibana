@@ -24,12 +24,8 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import {
-  LegendDisplay,
-  PieLayerState,
-  PieVisualizationState,
-  SharedPieLayerState,
-} from '../../../common';
+import { PieLayerState, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
+import { LegendDisplay } from '../../../common/constants';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../../types';
 import {
   ToolbarPopover,

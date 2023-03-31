@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React, { useState } from 'react';
@@ -21,24 +21,6 @@ import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 import { RedirectTo } from '../redirect_to';
 import { FlameGraphSearchPanel } from './flame_graph_search_panel';
 import { FlameGraphNormalizationOptions } from './normalization_menu';
-
-export function FlameGraphInformationWindowSwitch({
-  showInformationWindow,
-  onChange,
-}: {
-  showInformationWindow: boolean;
-  onChange: () => void;
-}) {
-  return (
-    <EuiSwitch
-      checked={showInformationWindow}
-      onChange={onChange}
-      label={i18n.translate('xpack.profiling.flameGraph.showInformationWindow', {
-        defaultMessage: 'Show information window',
-      })}
-    />
-  );
-}
 
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const {
@@ -174,8 +156,6 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
             comparisonMode={comparisonMode}
             normalizationMode={normalizationMode}
             normalizationOptions={normalizationOptions}
-            showInformationWindow={showInformationWindow}
-            onChangeShowInformationWindow={toggleShowInformationWindow}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -196,9 +176,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
                   : comparisonScale
               }
               showInformationWindow={showInformationWindow}
-              onInformationWindowClose={() => {
-                setShowInformationWindow(false);
-              }}
+              toggleShowInformationWindow={toggleShowInformationWindow}
             />
           </AsyncComponent>
           {children}

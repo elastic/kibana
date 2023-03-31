@@ -102,14 +102,13 @@ import {
   UserMessagesDisplayLocationId,
 } from '../types';
 
-import {
-  getEditPath,
-  DOC_TYPE,
-  type AllowedPartitionOverrides,
-  type AllowedSettingsOverrides,
-  type AllowedGaugeOverrides,
-  type AllowedXYOverrides,
-} from '../../common';
+import type {
+  AllowedPartitionOverrides,
+  AllowedSettingsOverrides,
+  AllowedGaugeOverrides,
+  AllowedXYOverrides,
+} from '../../common/types';
+import { getEditPath, DOC_TYPE } from '../../common/constants';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';

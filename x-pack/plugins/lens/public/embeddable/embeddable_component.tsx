@@ -31,7 +31,7 @@ import type {
   AllowedPartitionOverrides,
   AllowedSettingsOverrides,
   AllowedXYOverrides,
-} from '../../common';
+} from '../../common/types';
 import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
 import type { MetricVisualizationState } from '../visualizations/metric/types';
 import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';

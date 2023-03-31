@@ -29,7 +29,7 @@ export interface DateRange {
   toDate: string;
 }
 
-export interface PersistableFilterMeta extends FilterMeta {
+interface PersistableFilterMeta extends FilterMeta {
   indexRefName?: string;
 }
 
@@ -44,10 +44,10 @@ export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 export type ValueLabelConfig = 'hide' | 'show';
 
 export type PieChartType = $Values<typeof PieChartTypes>;
-export type CategoryDisplayType = $Values<typeof CategoryDisplay>;
-export type NumberDisplayType = $Values<typeof NumberDisplay>;
+type CategoryDisplayType = $Values<typeof CategoryDisplay>;
+type NumberDisplayType = $Values<typeof NumberDisplay>;
 
-export type LegendDisplayType = $Values<typeof LegendDisplay>;
+type LegendDisplayType = $Values<typeof LegendDisplay>;
 
 export enum EmptySizeRatios {
   SMALL = 0.3,
