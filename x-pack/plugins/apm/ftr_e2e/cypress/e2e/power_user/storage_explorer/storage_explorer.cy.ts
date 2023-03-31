@@ -155,9 +155,6 @@ describe('Storage Explorer', () => {
       );
       cy.contains('Update').click();
       cy.wait(mainAliasNames);
-
-      cy.contains('Refresh').click();
-      cy.wait(mainAliasNames);
     });
 
     it('with the correct lifecycle phase when changing the lifecycle phase', () => {
