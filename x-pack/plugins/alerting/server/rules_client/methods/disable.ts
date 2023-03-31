@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
-
 import type { SavedObjectReference } from '@kbn/core/server';
+
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
@@ -102,9 +102,9 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
       }),
       {
         version,
-        references: legacyActionsReferences.length
-          ? [...references, ...legacyActionsReferences]
-          : undefined,
+        ...(legacyActionsReferences.length
+          ? { references: [...references, ...legacyActionsReferences] }
+          : {}),
       }
     );
 

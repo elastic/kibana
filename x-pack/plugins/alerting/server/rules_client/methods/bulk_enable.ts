@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { SavedObjectsBulkUpdateObject, SavedObjectReference } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -26,6 +26,7 @@ import {
   scheduleTask,
   updateMeta,
   createNewAPIKeySet,
+  migrateLegacyActions,
 } from '../lib';
 import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
 
@@ -143,10 +144,24 @@ const bulkEnableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
             }
 
+            let legacyActions: RawRule['actions'] = [];
+            let legacyActionsReferences: SavedObjectReference[] = [];
+
+            // migrate legacy actions only for SIEM rules
+            if (rule.attributes.consumer === AlertConsumers.SIEM) {
+              const migratedActions = await migrateLegacyActions(context, {
+                ruleId: rule.id,
+              });
+
+              legacyActions = migratedActions.legacyActions;
+              legacyActionsReferences = migratedActions.legacyActionsReferences;
+            }
+
             const updatedAttributes = updateMeta(context, {
               ...rule.attributes,
               ...(!rule.attributes.apiKey &&
                 (await createNewAPIKeySet(context, { attributes: rule.attributes, username }))),
+              actions: [...rule.attributes.actions, ...legacyActions],
               enabled: true,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
@@ -182,6 +197,7 @@ const bulkEnableRulesWithOCC = async (
                 ...updatedAttributes,
                 ...(scheduledTaskId ? { scheduledTaskId } : undefined),
               },
+              references: [...rule.references, ...legacyActionsReferences],
             });
 
             context.auditLogger?.log(

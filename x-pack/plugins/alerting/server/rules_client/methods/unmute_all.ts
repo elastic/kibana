@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -11,7 +13,7 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { updateMeta } from '../lib';
+import { updateMeta, migrateLegacyActions } from '../lib';
 import { clearUnscheduledSnooze } from '../common';
 
 export async function unmuteAll(
@@ -26,10 +28,8 @@ export async function unmuteAll(
 }
 
 async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: string }) {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
-    'alert',
-    id
-  );
+  const { attributes, version, references } =
+    await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
 
   try {
     await context.authorization.ensureAuthorized({
@@ -63,14 +63,33 @@ async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: strin
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
+  let legacyActions: RawRule['actions'] = [];
+  let legacyActionsReferences: SavedObjectReference[] = [];
+
+  // migrate legacy actions only for SIEM rules
+  if (attributes.consumer === AlertConsumers.SIEM) {
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: id,
+    });
+
+    legacyActions = migratedActions.legacyActions;
+    legacyActionsReferences = migratedActions.legacyActionsReferences;
+  }
+
   const updateAttributes = updateMeta(context, {
     muteAll: false,
     mutedInstanceIds: [],
     snoozeSchedule: clearUnscheduledSnooze(attributes),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
+    ...(legacyActions.length ? { actions: [...attributes.actions, ...legacyActions] } : {}),
   });
-  const updateOptions = { version };
+  const updateOptions = {
+    version,
+    ...(legacyActionsReferences.length
+      ? { references: [...references, ...legacyActionsReferences] }
+      : {}),
+  };
 
   await partiallyUpdateAlert(
     context.unsecuredSavedObjectsClient,
