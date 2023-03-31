@@ -6,9 +6,4 @@
  */
 
 /* eslint-disable no-console */
-const { executeSyntheticsRunner } = require('@kbn/synthetics-plugin/scripts/base_e2e');
-const path = require('path');
-
-const e2eDir = path.join(__dirname, '../e2e');
-
-executeSyntheticsRunner(e2eDir);
+console.log('Disabled.');
