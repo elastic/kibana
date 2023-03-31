@@ -50,6 +50,8 @@ import {
   IntervalSchedule,
   RuleLastRun,
   SanitizedRule,
+  AlertsFilter,
+  AlertsFilterTimeframe,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -143,23 +145,23 @@ export interface GetSummarizedAlertsFnOpts {
   ruleId: string;
   spaceId: string;
   excludedAlertInstanceIds: string[];
+  alertsFilter?: AlertsFilter | null;
 }
 
 // TODO - add type for these alerts when we determine which alerts-as-data
 // fields will be made available in https://github.com/elastic/kibana/issues/143741
+
+interface SummarizedAlertsChunk {
+  count: number;
+  data: unknown[];
+}
 export interface SummarizedAlerts {
-  new: {
-    count: number;
-    data: unknown[];
-  };
-  ongoing: {
-    count: number;
-    data: unknown[];
-  };
-  recovered: {
-    count: number;
-    data: unknown[];
-  };
+  new: SummarizedAlertsChunk;
+  ongoing: SummarizedAlertsChunk;
+  recovered: SummarizedAlertsChunk;
+}
+export interface CombinedSummarizedAlerts extends SummarizedAlerts {
+  all: SummarizedAlertsChunk;
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
@@ -276,6 +278,14 @@ export type UntypedRuleType = RuleType<
   AlertInstanceContext
 >;
 
+export interface RawAlertsFilter extends AlertsFilter {
+  query: null | {
+    kql: string;
+    dsl: string;
+  };
+  timeframe: null | AlertsFilterTimeframe;
+}
+
 export interface RawRuleAction extends SavedObjectAttributes {
   uuid: string;
   group: string;
@@ -287,6 +297,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
   };
+  alertsFilter?: RawAlertsFilter;
 }
 
 export interface RuleMeta extends SavedObjectAttributes {

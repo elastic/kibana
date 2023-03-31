@@ -38,7 +38,7 @@ describe('SyntheticsService', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const getMockedService = (locationsNum: number = 1) => {
@@ -173,6 +173,51 @@ describe('SyntheticsService', () => {
           data: expect.objectContaining({ is_edit: true }),
         })
       );
+    });
+  });
+
+  describe('getSyntheticsParams', () => {
+    it('returns the params for all spaces', async () => {
+      const { service } = getMockedService();
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      const params = await service.getSyntheticsParams();
+
+      expect(params).toEqual({
+        '*': {
+          username: 'elastic',
+        },
+      });
+    });
+    it('returns the params for specific space', async () => {
+      const { service } = getMockedService();
+
+      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+
+      expect(params).toEqual({
+        '*': {
+          username: 'elastic',
+        },
+        default: {
+          username: 'elastic',
+        },
+      });
+    });
+    it('returns the space limited params', async () => {
+      const { service } = getMockedService();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO([
+        { attributes: { key: 'username', value: 'elastic' }, namespaces: ['default'] },
+      ]) as any;
+
+      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+
+      expect(params).toEqual({
+        default: {
+          username: 'elastic',
+        },
+      });
     });
   });
 });
