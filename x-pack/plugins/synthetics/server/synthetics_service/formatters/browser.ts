@@ -22,7 +22,6 @@ const throttlingFormatter: Formatter = (fields) => {
   if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return false;
 
   return {
-    label: 'no_throttling',
     download: parseInt(
       fields[ConfigKey.DOWNLOAD_SPEED] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.DOWNLOAD_SPEED],
       10
