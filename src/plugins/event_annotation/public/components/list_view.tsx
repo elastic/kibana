@@ -19,9 +19,11 @@ export const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 export const EventAnnotationGroupListView = ({
   uiSettings,
   eventAnnotationService,
+  visualizeCapabilities,
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
+  visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -56,7 +58,11 @@ export const EventAnnotationGroupListView = ({
       // for data exploration purposes
       // createItem={createNewGroup}
       findItems={fetchItems}
-      // deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
+      deleteItems={
+        visualizeCapabilities.delete
+          ? (items) => eventAnnotationService.deleteAnnotationGroups(items.map(({ id }) => id))
+          : undefined
+      }
       // editItem={visualizeCapabilities.save ? editItem : undefined}
       // customTableColumn={getCustomColumn()}
       listingLimit={listingLimit}
@@ -69,10 +75,10 @@ export const EventAnnotationGroupListView = ({
       // }}
       // emptyPrompt={noItemsFragment}
       entityName={i18n.translate('eventAnnotation.tableList.entityName', {
-        defaultMessage: 'visualization',
+        defaultMessage: 'annotation group',
       })}
       entityNamePlural={i18n.translate('eventAnnotation.tableList.entityNamePlural', {
-        defaultMessage: 'visualizations',
+        defaultMessage: 'annotation groups',
       })}
       tableListTitle={i18n.translate('eventAnnotation.tableList.listTitle', {
         defaultMessage: 'Annotation Library',

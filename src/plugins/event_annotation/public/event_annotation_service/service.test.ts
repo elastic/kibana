@@ -533,16 +533,15 @@ describe('Event Annotation Service', () => {
       `);
     });
   });
-  // describe.skip('deleteAnnotationGroup', () => {
-  //   it('deletes annotation group along with annotations that reference them', async () => {
-  //     await eventAnnotationService.deleteAnnotationGroup('multiAnnotations');
-  //     expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
-  //       { id: 'multiAnnotations', type: 'event-annotation-group' },
-  //       { id: 'annotation1', type: 'event-annotation' },
-  //       { id: 'annotation2', type: 'event-annotation' },
-  //     ]);
-  //   });
-  // });
+  describe('deleteAnnotationGroups', () => {
+    it('deletes annotation group along with annotations that reference them', async () => {
+      await eventAnnotationService.deleteAnnotationGroups(['id1', 'id2']);
+      expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
+        { id: 'id1', type: 'event-annotation-group' },
+        { id: 'id2', type: 'event-annotation-group' },
+      ]);
+    });
+  });
   describe('createAnnotationGroup', () => {
     it('creates annotation group along with annotations', async () => {
       const annotations = [

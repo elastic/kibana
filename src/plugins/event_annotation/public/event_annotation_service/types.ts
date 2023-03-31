@@ -20,7 +20,7 @@ export interface EventAnnotationServiceType {
     references?: SavedObjectsFindOptionsReference[],
     referencesToExclude?: SavedObjectsFindOptionsReference[]
   ) => Promise<{ total: number; hits: EventAnnotationGroupContent[] }>;
-  // deleteAnnotationGroup: (savedObjectId: string) => Promise<void>;
+  deleteAnnotationGroups: (ids: string[]) => Promise<void>;
   createAnnotationGroup: (group: EventAnnotationGroupConfig) => Promise<{ id: string }>;
   // updateAnnotations: (
   //   savedObjectId: string,

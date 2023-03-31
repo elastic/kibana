@@ -140,21 +140,18 @@ export function getEventAnnotationService(
     };
   };
 
-  // const deleteAnnotationGroup = async (savedObjectId: string): Promise<void> => {
-  //   const annotationsSOs = (
-  //     await client.find({
-  //       type: EVENT_ANNOTATION_TYPE,
-  //       hasReference: {
-  //         type: EVENT_ANNOTATION_GROUP_TYPE,
-  //         id: savedObjectId,
-  //       },
-  //     })
-  //   ).savedObjects.map((annotation) => ({ id: annotation.id, type: EVENT_ANNOTATION_TYPE }));
-  //   await client.bulkDelete([
-  //     { type: EVENT_ANNOTATION_GROUP_TYPE, id: savedObjectId },
-  //     ...annotationsSOs,
-  //   ]);
-  // };
+  const deleteAnnotationGroups = async (ids: string[]): Promise<void> => {
+    // const annotationsSOs = (
+    //   await client.find({
+    //     type: EVENT_ANNOTATION_TYPE,
+    //     hasReference: {
+    //       type: EVENT_ANNOTATION_GROUP_TYPE,
+    //       id: savedObjectId,
+    //     },
+    //   })
+    // ).savedObjects.map((annotation) => ({ id: annotation.id, type: EVENT_ANNOTATION_TYPE }));
+    await client.bulkDelete([...ids.map((id) => ({ type: EVENT_ANNOTATION_GROUP_TYPE, id }))]);
+  };
 
   const extractDataViewInformation = (group: EventAnnotationGroupConfig) => {
     let { dataViewSpec = null } = group;
@@ -254,7 +251,7 @@ export function getEventAnnotationService(
     // updateAnnotations,
     updateAnnotationGroup,
     createAnnotationGroup,
-    // deleteAnnotationGroup,
+    deleteAnnotationGroups,
     renderEventAnnotationGroupSavedObjectFinder: (props: {
       fixedPageSize: number;
       onChoose: (value: {

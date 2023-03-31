@@ -53,6 +53,7 @@ export const renderApp = (
               <EventAnnotationGroupListView
                 uiSettings={services.core.uiSettings}
                 eventAnnotationService={services.eventAnnotationService}
+                visualizeCapabilities={services.core.application.capabilities.visualize}
               />
             </TableListViewKibanaProvider>
           </services.core.i18n.Context>
