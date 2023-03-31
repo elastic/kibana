@@ -55,8 +55,8 @@ export const MonitorHistory = () => {
           <SyntheticsDatePicker fullWidth={true} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem grow={1}>
+          <EuiFlexGroup gutterSize="m" wrap={true}>
+            <EuiFlexItem css={{ flexBasis: '36%' }}>
               {/* @ts-expect-error Current @elastic/eui has the wrong types for the ref */}
               <EuiPanel hasShadow={false} hasBorder={true} panelRef={statsRef}>
                 <EuiTitle size="xs">
@@ -127,7 +127,7 @@ export const MonitorHistory = () => {
                 </EuiFlexGrid>
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem grow={2}>
+            <EuiFlexItem css={{ flexBasis: '60%', minWidth: 260 }}>
               <EuiPanel hasShadow={false} hasBorder={true}>
                 <EuiTitle size="xs">
                   <h3>{DURATION_TREND_LABEL}</h3>

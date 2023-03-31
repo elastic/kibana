@@ -21,6 +21,7 @@ import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
+import { SyntheticsPageTemplateComponent } from './components/common/page_template/synthetics_page_template';
 import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
 import { getStepDetailsRoute } from './components/step_details_page/route_config';
 import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
@@ -177,7 +178,7 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 };
 
 export const PageRouter: FC = () => {
-  const { application, observability } = useKibana<ClientPluginsStart>().services;
+  const { application } = useKibana<ClientPluginsStart>().services;
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
@@ -189,7 +190,6 @@ export const PageRouter: FC = () => {
     location,
     application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
   );
-  const PageTemplateComponent = observability.navigation.PageTemplate;
 
   apiService.addInspectorRequest = addInspectorRequest;
 
@@ -209,21 +209,21 @@ export const PageRouter: FC = () => {
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
-              <PageTemplateComponent
+              <SyntheticsPageTemplateComponent
                 pageHeader={isUnPrivileged ? undefined : pageHeader}
                 data-test-subj={'synthetics-page-template'}
                 isPageDataLoaded={true}
                 {...pageTemplateProps}
               >
                 {isUnPrivileged || <RouteComponent />}
-              </PageTemplateComponent>
+              </SyntheticsPageTemplateComponent>
             </div>
           </Route>
         )
       )}
       <Route
         component={() => (
-          <PageTemplateComponent>
+          <SyntheticsPageTemplateComponent>
             <NotFoundPrompt
               actions={[
                 <EuiButtonEmpty
@@ -240,7 +240,7 @@ export const PageRouter: FC = () => {
                 </EuiButtonEmpty>,
               ]}
             />
-          </PageTemplateComponent>
+          </SyntheticsPageTemplateComponent>
         )}
       />
     </Switch>
