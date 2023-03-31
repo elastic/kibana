@@ -33,7 +33,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  describe('alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/154127
+  // FLAKY: https://github.com/elastic/kibana/issues/154128
+  // FLAKY: https://github.com/elastic/kibana/issues/154129
+  // FLAKY: https://github.com/elastic/kibana/issues/154130
+  // FLAKY: https://github.com/elastic/kibana/issues/154131
+  describe.skip('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
     const objectRemover = new ObjectRemover(supertest);
@@ -1361,14 +1366,12 @@ instanceStateValue: true
 
         it('should filter alerts by hours', async () => {
           const now = new Date();
-          now.setMinutes(now.getMinutes() + 10);
-          const hour = padStart(now.getUTCHours().toString(), 2);
-          const minutesStart = padStart(now.getUTCMinutes().toString(), 2, '0');
-          now.setMinutes(now.getMinutes() + 1);
-          const minutesEnd = padStart(now.getUTCMinutes().toString(), 2, '0');
+          now.setHours(now.getHours() + 1);
+          const hour = padStart(now.getUTCHours().toString(), 2, '0');
+          const minutes = padStart(now.getUTCMinutes().toString(), 2, '0');
 
-          const start = `${hour}:${minutesStart}`;
-          const end = `${hour}:${minutesEnd}`;
+          const start = `${hour}:${minutes}`;
+          const end = `${hour}:${minutes}`;
 
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringSummaryAction({
