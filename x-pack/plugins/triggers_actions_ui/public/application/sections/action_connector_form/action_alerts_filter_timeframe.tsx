@@ -18,11 +18,10 @@ import {
   EuiDatePickerRange,
   EuiDatePicker,
   EuiComboBox,
-  EuiFormRow,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { AlertsFilterTimeframe, IsoWeekday } from '@kbn/alerting-plugin/common';
-import { I18N_WEEKDAY_OPTIONS, ISO_WEEKDAYS } from '../../../common/constants';
+import { I18N_WEEKDAY_OPTIONS_DDD, ISO_WEEKDAYS } from '../../../common/constants';
 
 interface ActionAlertsFilterTimeframeProps {
   state: AlertsFilterTimeframe | null;
@@ -30,6 +29,16 @@ interface ActionAlertsFilterTimeframeProps {
 }
 
 const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
+
+const useSortedWeekdayOptions = () => {
+  const kibanaDow: string = useUiSetting('dateFormat:dow');
+  const startDow = kibanaDow ?? 'Sunday';
+  const startDowIndex = I18N_WEEKDAY_OPTIONS_DDD.findIndex((o) => o.label.startsWith(startDow));
+  return [
+    ...I18N_WEEKDAY_OPTIONS_DDD.slice(startDowIndex),
+    ...I18N_WEEKDAY_OPTIONS_DDD.slice(0, startDowIndex),
+  ];
+};
 
 const useDefaultTimezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
@@ -66,6 +75,8 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
   const [selectedTimezone, setSelectedTimezone] = useState([{ label: timeframe.timezone }]);
 
   const timeframeEnabled = useMemo(() => Boolean(state), [state]);
+
+  const weekdayOptions = useSortedWeekdayOptions();
 
   useEffect(() => {
     const nextState = timeframeEnabled ? timeframe : null;
@@ -152,7 +163,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
                   defaultMessage: 'Days of week',
                 }
               )}
-              options={I18N_WEEKDAY_OPTIONS}
+              options={weekdayOptions}
               idToSelectedMap={selectedWeekdays}
               type="multi"
               onChange={onToggleWeekday}

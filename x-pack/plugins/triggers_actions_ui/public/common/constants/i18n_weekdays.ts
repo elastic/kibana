@@ -13,3 +13,8 @@ export const I18N_WEEKDAY_OPTIONS = ISO_WEEKDAYS.map((n) => ({
   id: String(n),
   label: moment().isoWeekday(n).format('dd'),
 }));
+
+export const I18N_WEEKDAY_OPTIONS_DDD = ISO_WEEKDAYS.map((n) => ({
+  id: String(n),
+  label: moment().isoWeekday(n).format('ddd'),
+}));
