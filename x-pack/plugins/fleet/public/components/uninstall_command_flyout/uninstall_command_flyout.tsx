@@ -16,7 +16,7 @@ import {
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PLATFORM_TYPE } from '../../hooks';
+import { REDUCED_PLATFORM_OPTIONS } from '../../hooks';
 
 import type { Commands } from './commands_for_platforms';
 import { CommandsForPlatforms } from './commands_for_platforms';
@@ -30,7 +30,7 @@ interface Props {
 const useCommands = (policyId: string | undefined): Commands => {
   const commands = useMemo(
     () =>
-      (['linux', 'deb', 'windows', 'mac', 'rpm'] as PLATFORM_TYPE[]).reduce<Commands>(
+      REDUCED_PLATFORM_OPTIONS.map(({ id }) => id).reduce<Commands>(
         (_commands, platform) => ({
           ..._commands,
           [platform]: policyId ? `${platform} command for ${policyId}` : `${platform} command`,
