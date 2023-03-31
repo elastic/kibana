@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import { ADD_INTEGRATION_POLICY_BTN } from '../screens/integrations';
-
-export {};
+import {
+  ADD_INTEGRATION_POLICY_BTN,
+  CREATE_PACKAGE_POLICY_SAVE_BTN,
+  INTEGRATION_NAME_LINK,
+  POLICY_EDITOR,
+} from '../screens/integrations';
+import { EXISTING_HOSTS_TAB } from '../screens/fleet';
+import { CONFIRM_MODAL } from '../screens/navigation';
 
 const TEST_PACKAGE = 'input_package-1.0.0';
-const agentPolicyId = 'test-input-package-policy-2';
-const agentPolicyName = 'Test input package policy-2';
-const inputPackagePolicyName = 'input-package-policy-2';
+const agentPolicyId = 'test-input-package-policy';
+const agentPolicyName = 'Test input package policy';
+const inputPackagePolicyName = 'input-package-policy';
 
 function editPackagePolicyandShowAdvanced() {
   cy.visit(`/app/integrations/detail/${TEST_PACKAGE}/policies`);
 
-  cy.getBySel('integrationNameLink').contains(inputPackagePolicyName).click();
+  cy.getBySel(INTEGRATION_NAME_LINK).contains(inputPackagePolicyName).click();
 
   cy.get('button').contains('Change defaults').click();
   cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
@@ -55,7 +60,7 @@ describe('Input package create and edit package policy', () => {
     cy.visit(`/app/integrations/detail/${TEST_PACKAGE}/overview`);
     cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
 
-    cy.getBySel('packagePolicyNameInput').click().clear().type(inputPackagePolicyName);
+    cy.getBySel(POLICY_EDITOR.POLICY_NAME_INPUT).click().clear().type(inputPackagePolicyName);
     cy.getBySel('multiTextInput-paths')
       .find('[data-test-subj="multiTextInputRow-0"]')
       .click()
@@ -66,28 +71,28 @@ describe('Input package create and edit package policy', () => {
       .click()
       .type('tag1');
 
-    cy.getBySel('datasetComboBox').click().type('testdataset');
+    cy.getBySel(POLICY_EDITOR.DATASET_SELECT).click().type('testdataset');
 
-    cy.getBySel('existingHostsTab').click();
+    cy.getBySel(EXISTING_HOSTS_TAB).click();
 
-    cy.getBySel('agentPolicySelect').click().get(`#${agentPolicyId}`).click();
+    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click().get(`#${agentPolicyId}`).click();
     cy.wait(500); // wait for policy id to be set
-    cy.getBySel('createPackagePolicySaveButton').click();
+    cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
 
-    cy.getBySel('confirmModalCancelButton').click();
+    cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();
   });
 
   it('should show pipelines editor with link to pipeline', () => {
     editPackagePolicyandShowAdvanced();
-    cy.getBySel('datastreamInspectPipelineBtn').click();
-    cy.getBySel('confirmModalConfirmButton').click();
+    cy.getBySel(POLICY_EDITOR.INSPECT_PIPELINES_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
     cy.get('body').should('not.contain', 'Pipeline not found');
     cy.get('body').should('contain', '"managed_by": "fleet"');
   });
   it('should show mappings editor with link to create custom template', () => {
     editPackagePolicyandShowAdvanced();
-    cy.getBySel('datastreamEditMappingsBtn').click();
-    cy.getBySel('confirmModalConfirmButton').click();
+    cy.getBySel(POLICY_EDITOR.EDIT_MAPPINGS_BTN).click();
+    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
     cy.get('body').should('contain', 'logs-testdataset@custom');
   });
 });
