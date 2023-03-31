@@ -129,12 +129,12 @@ describe('Service overview - header filters', () => {
         })
       );
       cy.contains('opbeans-java');
-      cy.getByTestSubj('headerFilterKuerybar').type('transaction.n');
+      cy.getByTestSubj('apmUnifiedSearchBar').type('transaction.n');
       cy.contains('transaction.name');
       cy.getByTestSubj('suggestionContainer').find('li').first().click();
-      cy.getByTestSubj('headerFilterKuerybar').type(':');
+      cy.getByTestSubj('apmUnifiedSearchBar').type(':');
       cy.getByTestSubj('suggestionContainer').find('li').first().click();
-      cy.getByTestSubj('headerFilterKuerybar').type('{enter}');
+      cy.getByTestSubj('apmUnifiedSearchBar').type('{enter}');
       cy.url().should('include', '&kuery=transaction.name');
     });
   });
