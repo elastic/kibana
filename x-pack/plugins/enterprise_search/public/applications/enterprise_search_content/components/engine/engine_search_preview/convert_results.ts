@@ -56,7 +56,7 @@ export const flattenObjectPreservingValues = (
   obj: Record<string, unknown>,
   prefix = ''
 ): Record<string, FieldValue> => {
-  if (isFieldValue(obj) && typeof obj.raw !== 'object') return { [prefix]: obj as FieldValue };
+  if (isFieldValue(obj) && typeof obj.raw !== 'object') return { [prefix]: obj };
 
   return Object.keys(obj).reduce((acc: Record<string, FieldValue>, key: string) => {
     const dot = prefix.length ? prefix + '.' : '';
@@ -70,7 +70,7 @@ export const flattenObjectPreservingValues = (
         )
       );
     } else {
-      acc[dot + key] = { raw: val } as FieldValue;
+      acc[dot + key] = { raw: val };
     }
     return acc;
   }, {});
