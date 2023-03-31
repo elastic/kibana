@@ -39,6 +39,7 @@ import {
   DiscoverAppState,
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
+  getInitialState,
   GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
@@ -120,7 +121,7 @@ export interface DiscoverStateContainer {
     /**
      * Load a saved search by id or create a new one that's not persisted yet
      * @param savedSearchId
-     * @param dataView
+     * @param LoadParams - optional parameters to load a saved search
      */
     loadSavedSearch: (param?: LoadParams) => Promise<SavedSearch | undefined>;
     /**
@@ -346,7 +347,8 @@ export function getDiscoverStateContainer({
       appState,
       savedSearchContainer,
     });
-    await appStateContainer.resetWithSavedSearch(nextSavedSearch);
+    const nextAppState = getInitialState(undefined, nextSavedSearch, services);
+    appStateContainer.set(appState ? { ...nextAppState, ...appState } : nextAppState);
 
     const savedSearchDataView = nextSavedSearch.searchSource.getField('index');
     if (savedSearchDataView) {

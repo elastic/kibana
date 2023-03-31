@@ -130,9 +130,6 @@ export function DiscoverMainRoute(props: Props) {
         // else it might be updated by the previous app state
         const isEmptyURL = stateContainer.appState.isEmptyURL();
         const isPersistedSearch = typeof id === 'string';
-        if (isEmptyURL) {
-          stateContainer.appState.set({});
-        }
         const useAppState = !isEmptyURL || !isPersistedSearch;
         const currentSavedSearch = await stateContainer.actions.loadSavedSearch({
           savedSearchId: id,

@@ -391,6 +391,15 @@ describe('actions', () => {
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
   });
+
+  test('loadSavedSearch ignoring hideChart in URL', async () => {
+    const url = '/#?_a=(hideChart:true,columns:!(message))&_g=()';
+    const { state } = await getState(url, savedSearchMock);
+    await state.actions.loadSavedSearch();
+    expect(state.savedSearchState.getState().hideChart).toBe(undefined);
+    expect(state.appState.getState().hideChart).toBe(undefined);
+  });
+
   test('loadSavedSearch data view handling', async () => {
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });

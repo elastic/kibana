@@ -57,11 +57,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    */
   replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => void;
   /**
-   * Resets the state by the given saved search
-   * @param savedSearch
-   */
-  resetWithSavedSearch: (savedSearch: SavedSearch) => void;
-  /**
    * Resets the current state to the initial state
    */
   resetInitialState: () => void;
@@ -248,12 +243,6 @@ export const getDiscoverAppStateContainer = ({
     };
   };
 
-  const resetWithSavedSearch = (nextSavedSearch: SavedSearch) => {
-    addLog('[appState] reset to saved search', { nextSavedSearch });
-    const nextAppState = getInitialState(stateStorage, nextSavedSearch, services);
-    appStateContainer.set(nextAppState);
-  };
-
   const update = (newPartial: DiscoverAppState, replace = false) => {
     addLog('[appState] update', { newPartial, replace });
     if (replace) {
@@ -276,7 +265,6 @@ export const getDiscoverAppStateContainer = ({
     getPrevious,
     hasChanged,
     initAndSync: initializeAndSync,
-    resetWithSavedSearch,
     resetInitialState,
     replaceUrlState,
     syncState: startAppStateUrlSync,
@@ -293,13 +281,12 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
 
 export const GLOBAL_STATE_URL_KEY = '_g';
 
-function getInitialState(
-  stateStorage: IKbnUrlStateStorage,
+export function getInitialState(
+  stateStorage: IKbnUrlStateStorage | undefined,
   savedSearch: SavedSearch,
   services: DiscoverServices
 ) {
-  const stateStorageURL = stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl;
-  const appStateFromUrl = cleanupUrlState(stateStorageURL);
+  const stateStorageURL = stateStorage?.get(APP_STATE_URL_KEY) as AppStateUrl;
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,
@@ -309,7 +296,7 @@ function getInitialState(
       ? defaultAppState
       : {
           ...defaultAppState,
-          ...appStateFromUrl,
+          ...cleanupUrlState(stateStorageURL),
         },
     services.uiSettings
   );
