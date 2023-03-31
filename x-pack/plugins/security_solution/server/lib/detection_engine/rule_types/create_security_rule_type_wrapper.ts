@@ -35,7 +35,7 @@ import {
   scheduleThrottledNotificationActions,
   getNotificationResultsLink,
 } from '../rule_actions_legacy';
-import { createResultObject, readLegacyActionsHook } from './utils';
+import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
@@ -71,7 +71,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
     return persistenceRuleType({
       ...type,
-      formatRules: readLegacyActionsHook,
       cancelAlertsOnRuleTimeout: false,
       useSavedObjectReferences: {
         extractReferences: (params) => extractReferences({ logger, params }),

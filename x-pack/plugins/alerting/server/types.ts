@@ -25,7 +25,7 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { type FieldMap } from '@kbn/alerts-as-data-utils';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { RulesClient, RulesClientContext } from './rules_client';
+import { RulesClient } from './rules_client';
 import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
 export * from '../common';
 import {
@@ -137,24 +137,6 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
-
-interface MigrateHookContext {
-  logger: RulesClientContext['logger'];
-  savedObjectsClient: RulesClientContext['unsecuredSavedObjectsClient'];
-  find: RulesClient['find'];
-  delete: RulesClient['delete'];
-  update: RulesClient['update'];
-  get?: RulesClient['get'];
-}
-
-type FormatRulesContext = Omit<MigrateHookContext, 'delete' | 'update'>;
-
-export type FormatRules = (
-  options: {
-    rules: SanitizedRule[];
-  },
-  context: FormatRulesContext
-) => Promise<SanitizedRule[]>;
 
 export interface GetSummarizedAlertsFnOpts {
   start?: Date;
@@ -288,8 +270,8 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
-  formatRules?: FormatRules;
 }
+
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
   RuleTypeState,

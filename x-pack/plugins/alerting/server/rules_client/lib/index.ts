@@ -15,7 +15,6 @@ export { checkAuthorizationAndGetTotal } from './check_authorization_and_get_tot
 export { scheduleTask } from './schedule_task';
 export { createNewAPIKeySet } from './create_new_api_key_set';
 export { recoverRuleAlerts } from './recover_rule_alerts';
-export { formatRulesHook } from './format_rules_hook';
 export { migrateLegacyActions } from './migrate_legacy_actions';
 export { formatLegacyActionsForSiemRules } from './format_legacy_actions_for_siem_rules';
 export { addGeneratedActionValues } from './add_generated_action_values';

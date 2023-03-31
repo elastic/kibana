@@ -30,7 +30,6 @@ export type {
   RuleParamsAndRefs,
   GetSummarizedAlertsFnOpts,
   ExecutorType,
-  FormatRules,
   IRuleTypeAlerts,
 } from './types';
 export { RuleNotifyWhen } from '../common';
