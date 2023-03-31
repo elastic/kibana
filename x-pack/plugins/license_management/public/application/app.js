@@ -17,6 +17,7 @@ import {
   EuiPageBody,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+import { UPLOAD_LICENSE_ROUTE } from '../locator';
 
 export const App = ({
   hasPermission,
@@ -102,7 +103,7 @@ export const App = ({
   return (
     <EuiPageBody>
       <Switch>
-        <Route path={`/upload_license`} component={withTelemetry(UploadLicense)} />
+        <Route path={`/${UPLOAD_LICENSE_ROUTE}`} component={withTelemetry(UploadLicense)} />
         <Route path={['/']} component={withTelemetry(LicenseDashboard)} />
       </Switch>
     </EuiPageBody>
