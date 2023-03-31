@@ -33,14 +33,13 @@ import {
   toExpression,
   toPreviewExpression,
 } from './to_expression';
+import { PieLayerState, PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  PieLayerState,
-  PieVisualizationState,
-} from '../../../common';
+} from '../../../common/constants';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';

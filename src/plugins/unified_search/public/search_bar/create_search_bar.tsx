@@ -232,6 +232,7 @@ export function createSearchBar({
             onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}
+            dataTestSubj={props.dataTestSubj}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

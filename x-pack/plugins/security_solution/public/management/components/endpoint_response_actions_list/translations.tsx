@@ -204,3 +204,8 @@ export const ARIA_LABELS = Object.freeze({
     defaultMessage: 'Expand',
   }),
 });
+
+export const EXECUTE_FILE_LINK_TITLE = i18n.translate(
+  'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
+  { defaultMessage: 'Click here to download full output' }
+);
