@@ -6,10 +6,12 @@
  */
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../../application/types';
@@ -24,9 +26,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
+    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana<ObservabilityAppServices>().services;
   const { hasWriteCapabilities } = useCapabilities();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
@@ -37,43 +41,73 @@ export function HeaderControl({ isLoading, slo }: Props) {
     }
   };
 
+  const onCloseAlertFlyout = useCallback(
+    () => setRuleFlyoutVisibility(false),
+    [setRuleFlyoutVisibility]
+  );
+
+  const handleOpenRuleFlyout = () => {
+    closePopover();
+    setRuleFlyoutVisibility(true);
+  };
+
   return (
-    <EuiPopover
-      data-test-subj="sloDetailsHeaderControlPopover"
-      button={
-        <EuiButton
-          data-test-subj="o11yHeaderControlActionsButton"
-          fill
-          iconSide="right"
-          iconType="arrowDown"
-          iconSize="s"
-          onClick={handleActionsClick}
-          disabled={isLoading || !slo}
-        >
-          {i18n.translate('xpack.observability.slo.sloDetails.headerControl.actions', {
-            defaultMessage: 'Actions',
-          })}
-        </EuiButton>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-    >
-      <EuiContextMenuPanel
-        size="s"
-        items={[
-          <EuiContextMenuItem
-            key="edit"
-            icon="pencil"
-            disabled={!hasWriteCapabilities}
-            onClick={handleEdit}
-            data-test-subj="sloDetailsHeaderControlPopoverEdit"
+    <>
+      <EuiPopover
+        data-test-subj="sloDetailsHeaderControlPopover"
+        button={
+          <EuiButton
+            data-test-subj="o11yHeaderControlActionsButton"
+            fill
+            iconSide="right"
+            iconType="arrowDown"
+            iconSize="s"
+            onClick={handleActionsClick}
+            disabled={isLoading || !slo}
           >
-            {i18n.translate('xpack.observability.slo.sloDetails.headerControl.edit', {
-              defaultMessage: 'Edit',
+            {i18n.translate('xpack.observability.slo.sloDetails.headerControl.actions', {
+              defaultMessage: 'Actions',
             })}
-          </EuiContextMenuItem>,
-        ]}
-      />
-    </EuiPopover>
+          </EuiButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+      >
+        <EuiContextMenuPanel
+          size="s"
+          items={[
+            <EuiContextMenuItem
+              key="edit"
+              disabled={!hasWriteCapabilities}
+              onClick={handleEdit}
+              data-test-subj="sloDetailsHeaderControlPopoverEdit"
+            >
+              {i18n.translate('xpack.observability.slo.sloDetails.headerControl.edit', {
+                defaultMessage: 'Edit',
+              })}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="createBurnRateRule"
+              disabled={!hasWriteCapabilities}
+              onClick={handleOpenRuleFlyout}
+              data-test-subj="sloDetailsHeaderControlPopoverCreateRule"
+            >
+              {i18n.translate('xpack.observability.slo.sloDetails.headerControl.createRule', {
+                defaultMessage: 'Create alert rule',
+              })}
+            </EuiContextMenuItem>,
+          ]}
+        />
+      </EuiPopover>
+      {!!slo && isRuleFlyoutVisible ? (
+        <AddRuleFlyout
+          consumer={sloFeatureId}
+          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          canChangeTrigger={false}
+          onClose={onCloseAlertFlyout}
+          initialValues={{ name: `${slo.name} burn rate` }}
+        />
+      ) : null}
+    </>
   );
 }
