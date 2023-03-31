@@ -18,7 +18,6 @@ import {
   EuiDatePickerRange,
   EuiDatePicker,
   EuiComboBox,
-  EuiFormRow,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { AlertsFilterTimeframe, IsoWeekday } from '@kbn/alerting-plugin/common';
