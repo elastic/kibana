@@ -9,7 +9,11 @@
 
 import expect from '@kbn/expect';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+  LIST_URL,
+} from '@kbn/securitysolution-list-constants';
 import type {
   RuleCreateProps,
   EqlRuleCreateProps,
@@ -837,14 +841,47 @@ export default ({ getService }: FtrProviderContext) => {
             const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
             expect(signalsOpen.hits.hits.length).equal(0);
           });
+          it('should Not allow deleting value list when there are references and ignoreReferences is false', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
+            const rule: QueryRuleCreateProps = {
+              ...getSimpleRule(),
+              query: 'host.name: "suricata-sensor-amsterdam"',
+            };
+            await createRuleWithExceptionEntries(supertest, log, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+
+            const deleteReferences = false;
+            const ignoreReferences = false;
+
+            // Delete the value list
+            await supertest
+              .delete(
+                `${LIST_URL}?deleteReferences=${deleteReferences}&id=${valueListId}&ignoreReferences=${ignoreReferences}`
+              )
+              .set('kbn-xsrf', 'true')
+              .send()
+              .expect(409);
+          });
         });
       });
     });
     describe('Synchronizations', () => {
       /*
-          This test to mimic if we have two browser tabs, and the user tried to 
-          edit an exception in a tab after deleting it in another 
-        */
+        This test to mimic if we have two browser tabs, and the user tried to 
+        edit an exception in a tab after deleting it in another 
+      */
       it('should Not edit an exception after being deleted', async () => {
         const { list_id: skippedListId, ...newExceptionItem } =
           getCreateExceptionListDetectionSchemaMock();
@@ -896,6 +933,83 @@ export default ({ getService }: FtrProviderContext) => {
           message: `exception list item id: "${list_id}" does not exist`,
           status_code: 404,
         });
+      });
+      /*
+        This test to mimic if we have two browser tabs, and the user tried to 
+        edit an exception with value-list was deleted in another tab
+      */
+      it('should Not allow editing an Exception with deleted ValueList', async () => {
+        await createListsIndex(supertest, log);
+
+        const valueListId = 'value-list-id';
+        await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
+        const rule: QueryRuleCreateProps = {
+          ...getSimpleRule(),
+          query: 'host.name: "suricata-sensor-amsterdam"',
+        };
+        const { exceptions_list: exceptionsList } = await createRuleWithExceptionEntries(
+          supertest,
+          log,
+          rule,
+          [
+            [
+              {
+                field: 'host.name',
+                operator: 'included',
+                type: 'list',
+                list: {
+                  id: valueListId,
+                  type: 'keyword',
+                },
+              },
+            ],
+          ]
+        );
+
+        const deleteReferences = false;
+        const ignoreReferences = true;
+
+        const { id, list_id, namespace_type } = exceptionsList[0];
+
+        // Delete the value list
+        await supertest
+          .delete(
+            `${LIST_URL}?deleteReferences=${deleteReferences}&id=${valueListId}&ignoreReferences=${ignoreReferences}`
+          )
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        // edit the exception with the deleted value list
+        await supertest
+          .put(`${EXCEPTION_LIST_ITEM_URL}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            id: list_id,
+            item_id: id,
+            name: 'edit',
+            entries: [
+              {
+                field: 'host.name',
+                operator: 'included',
+                type: 'list',
+                list: {
+                  id: valueListId,
+                  type: 'keyword',
+                },
+              },
+            ],
+            namespace_type,
+            description: 'Exception list item - Edit',
+            type: 'simple',
+          })
+          .expect(404);
+        // expect(signalsOpen.hits.hits.length).equal(0);
+        // expect(body).to.eql({
+        //   message: `exception list item id: "${list_id}" does not exist`,
+        //   status_code: 404,
+        // });
+        await deleteListsIndex(supertest, log);
       });
     });
   });
