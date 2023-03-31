@@ -360,7 +360,7 @@ describe('#createSavedObjects', () => {
   };
 
   describe('with an undefined namespace', () => {
-    test('calls bulkCreate once with input objects', async () => {
+    test('calls bulkCreate according to input objects and compatibilityMode option', async () => {
       await testBulkCreateObjects();
       await testBulkCreateObjects({ compatibilityMode: true });
     });
@@ -376,7 +376,7 @@ describe('#createSavedObjects', () => {
 
   describe('with a defined namespace', () => {
     const namespace = 'some-namespace';
-    test('calls bulkCreate once with input objects', async () => {
+    test('calls bulkCreate according to input objects and compatibilityMode option', async () => {
       await testBulkCreateObjects({ namespace });
       await testBulkCreateObjects({ namespace, compatibilityMode: true });
     });
