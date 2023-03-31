@@ -24,23 +24,21 @@ export const mockGetFieldsData = (field: string): string[] => {
 };
 
 /**
- * Mock an array that will allow rendering a correct header:
- * - rule name
- * - timestamp
+ * Mock an array of fields for an alert
  */
 export const mockDataFormattedForFieldBrowser = [
   {
     category: 'kibana',
     field: 'kibana.alert.rule.uuid',
-    values: ['123'],
-    originalValue: ['123'],
+    values: ['rule-uuid'],
+    originalValue: ['rule-uuid'],
     isObjectArray: false,
   },
   {
     category: 'kibana',
     field: 'kibana.alert.rule.name',
-    values: ['test'],
-    originalValue: ['test'],
+    values: ['rule-name'],
+    originalValue: ['rule-name'],
     isObjectArray: false,
   },
   {
@@ -50,4 +48,66 @@ export const mockDataFormattedForFieldBrowser = [
     originalValue: ['2023-01-01T01:01:01.000Z'],
     isObjectArray: false,
   },
+  {
+    category: 'kibana',
+    field: 'kibana.alert.rule.description',
+    values: ['rule-description'],
+    originalValue: ['rule-description'],
+    isObjectArray: false,
+  },
 ];
+
+/**
+ * Mock an object of nested properties for an alert
+ */
+export const mockDataAsNestedObject = {
+  _id: '123',
+  '@timestamp': ['2023-01-01T01:01:01.000Z'],
+  event: {
+    category: ['malware'],
+    kind: ['signal'],
+  },
+  host: {
+    name: ['host-name'],
+  },
+  kibana: {
+    alert: {
+      rule: {
+        name: ['rule-name'],
+      },
+      severity: ['low'],
+    },
+  },
+  process: {
+    name: ['process-name'],
+  },
+};
+
+/**
+ * Mock the document result of the search for an alert
+ */
+export const mockSearchHit = {
+  fields: {
+    'kibana.alert.rule.parameters': [
+      {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: '123',
+              reference: 'https://attack.mitre.org/tactics/123',
+              name: 'Tactic',
+            },
+            technique: [
+              {
+                id: '456',
+                reference: 'https://attack.mitre.org/techniques/456',
+                name: 'Technique',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+};
