@@ -218,11 +218,15 @@ export function buildRemoveAliasActions(
 /**
  * Given a document, creates a valid body to index the document using the Bulk API.
  */
-export const createBulkIndexOperationTuple = (doc: SavedObjectsRawDoc): BulkIndexOperationTuple => {
+export const createBulkIndexOperationTuple = (
+  doc: SavedObjectsRawDoc,
+  typeIndexMap: Record<string, string> = {}
+): BulkIndexOperationTuple => {
   return [
     {
       index: {
         _id: doc._id,
+        ...(typeIndexMap[doc._source.type] && { _index: typeIndexMap[doc._source.type] }),
         // use optimistic concurrency control to ensure that outdated
         // documents are only overwritten once with the latest version
         ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
@@ -271,3 +275,12 @@ export function getMigrationType({
 
   return MigrationType.Invalid;
 }
+
+/**
+ * Generate a temporary index name, to reindex documents into it
+ * @param index The name of the SO index
+ * @param kibanaVersion The current kibana version
+ * @returns A temporary index name to reindex documents
+ */
+export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): string =>
+  `${indexPrefix}_${kibanaVersion}_reindex_temp`;

@@ -56,6 +56,9 @@ export interface IndexMapping {
 }
 
 /** @internal */
+export type IndexTypesMap = Record<string, string[]>;
+
+/** @internal */
 export interface IndexMappingMeta {
   /**
    * A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
@@ -65,6 +68,12 @@ export interface IndexMappingMeta {
    * @remark: Only defined for indices using the v2 migration algorithm.
    */
   migrationMappingPropertyHashes?: { [k: string]: string };
+  /**
+   * A map that tells what are the SO types stored in each index
+   *
+   * @remark: Only defined for indices using the v2 migration algorithm.
+   */
+  indexTypesMap?: IndexTypesMap;
   /**
    * The current model versions of the mapping of the index.
    *

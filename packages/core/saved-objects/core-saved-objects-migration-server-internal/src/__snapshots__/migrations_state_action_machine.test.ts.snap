@@ -138,6 +138,20 @@ Object {
                 },
               },
               "indexPrefix": ".my-so-index",
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
               "legacyIndex": ".my-so-index",
@@ -154,6 +168,7 @@ Object {
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -167,6 +182,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -325,6 +356,20 @@ Object {
                 },
               },
               "indexPrefix": ".my-so-index",
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
               "legacyIndex": ".my-so-index",
@@ -345,6 +390,7 @@ Object {
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -358,6 +404,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -516,6 +578,20 @@ Object {
                 },
               },
               "indexPrefix": ".my-so-index",
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
               "legacyIndex": ".my-so-index",
@@ -540,6 +616,7 @@ Object {
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -553,6 +630,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -711,6 +804,20 @@ Object {
                 },
               },
               "indexPrefix": ".my-so-index",
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
               "legacyIndex": ".my-so-index",
@@ -739,6 +846,7 @@ Object {
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -752,6 +860,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -954,6 +1078,20 @@ Object {
                 },
               },
               "indexPrefix": ".my-so-index",
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
               "legacyIndex": ".my-so-index",
@@ -970,6 +1108,7 @@ Object {
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [
                 Object {
                   "_id": "1234",
@@ -988,6 +1127,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -1152,6 +1307,20 @@ Object {
                 },
               },
               "indexPrefix": ".my-so-index",
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
               "legacyIndex": ".my-so-index",
@@ -1172,6 +1341,7 @@ Object {
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [
                 Object {
                   "_id": "1234",
@@ -1190,6 +1360,22 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
+                "_meta": Object {
+                  "indexTypesMap": Object {
+                    ".kibana": Array [
+                      "typeA",
+                      "typeB",
+                      "typeC",
+                    ],
+                    ".kibana_cases": Array [
+                      "typeD",
+                      "typeE",
+                    ],
+                    ".kibana_task_manager": Array [
+                      "task",
+                    ],
+                  },
+                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",

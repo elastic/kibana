@@ -83,6 +83,9 @@ export { cleanupUnknownAndExcluded } from './cleanup_unknown_and_excluded';
 export { waitForDeleteByQueryTask } from './wait_for_delete_by_query_task';
 
 export type { CreateIndexParams, ClusterShardLimitExceeded } from './create_index';
+
+export { synchronizeMigrators } from './synchronize_migrators';
+
 export { createIndex } from './create_index';
 
 export { checkTargetMappings } from './check_target_mappings';

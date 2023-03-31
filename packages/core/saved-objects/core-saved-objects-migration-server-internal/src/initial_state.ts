@@ -14,28 +14,18 @@ import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-commo
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
+  IndexTypesMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
+import { getTempIndexName } from './model/helpers';
 
-/**
- * Construct the initial state for the model
- */
-export const createInitialState = ({
-  kibanaVersion,
-  waitForMigrationCompletion,
-  targetMappings,
-  preMigrationScript,
-  migrationVersionPerType,
-  indexPrefix,
-  migrationsConfig,
-  typeRegistry,
-  docLinks,
-  logger,
-}: {
+export interface CreateInitialStateParams {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
+  mustRelocateDocuments: boolean;
+  indexTypesMap: IndexTypesMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   migrationVersionPerType: SavedObjectsMigrationVersion;
@@ -44,7 +34,25 @@ export const createInitialState = ({
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
   logger: Logger;
-}): InitState => {
+}
+
+/**
+ * Construct the initial state for the model
+ */
+export const createInitialState = ({
+  kibanaVersion,
+  waitForMigrationCompletion,
+  mustRelocateDocuments,
+  indexTypesMap,
+  targetMappings,
+  preMigrationScript,
+  migrationVersionPerType,
+  indexPrefix,
+  migrationsConfig,
+  typeRegistry,
+  docLinks,
+  logger,
+}: CreateInitialStateParams): InitState => {
   const outdatedDocumentsQuery: QueryDslQueryContainer = {
     bool: {
       should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
@@ -117,18 +125,28 @@ export const createInitialState = ({
     );
   }
 
+  const targetIndexMappings: IndexMapping = {
+    ...targetMappings,
+    _meta: {
+      ...targetMappings._meta,
+      indexTypesMap,
+    },
+  };
+
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
+    mustRelocateDocuments,
+    indexTypesMap,
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
+    tempIndex: getTempIndexName(indexPrefix, kibanaVersion),
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
-    targetIndexMappings: targetMappings,
+    targetIndexMappings,
     tempIndexMappings: reindexTargetMappings,
     outdatedDocumentsQuery,
     retryCount: 0,

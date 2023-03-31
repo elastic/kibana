@@ -11,5 +11,6 @@ export type {
   SavedObjectsTypeMappingDefinitions,
   IndexMappingMeta,
   IndexMapping,
+  IndexTypesMap,
   IndexMappingMigrationStateMeta,
 } from './types';

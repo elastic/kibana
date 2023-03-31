@@ -65,10 +65,17 @@ export async function migrateKibanaIndex(kbnClient: KbnClient) {
 }
 
 /**
- * Migrations mean that the Kibana index will look something like:
- * .kibana, .kibana_1, .kibana_323, etc. This finds all indices starting
- * with .kibana, then filters out any that aren't actually Kibana's core
- * index (e.g. we don't want to remove .kibana_task_manager or the like).
+ * Check if the given index is a Kibana saved object index.
+ * This includes most .kibana_*
+ * but we must make sure that indices such as '.kibana_security_session_1' are NOT deleted.
+ *
+ * IMPORTANT
+ * After .kibana split, different SO types can go to different indices.
+ * This method also takes into account legacy indices: .kibana_1 and .kibana_task_manager_1.
+ * Thus, if any plugin registers a type using savedObjects.registerType() and binds it to a new
+ * index, this code MUST be updated for the cleanKibanaIndices() to take them into account.
+ * @param [index] the name of the index to check
+ * @returns boolean 'true' if the index is a Kibana saved object index.
  */
 function isKibanaIndex(index?: string): index is string {
   return Boolean(
@@ -107,7 +114,7 @@ export async function cleanKibanaIndices({
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: `.kibana,.kibana_task_manager`,
+        index: `.kibana,.kibana_task_manager,.kibana_ui,.kibana_cases`,
         body: {
           query: {
             bool: {
@@ -145,6 +152,9 @@ export async function cleanKibanaIndices({
   );
 
   stats.deletedIndex('.kibana');
+  stats.deletedIndex('.kibana_ui');
+  stats.deletedIndex('.kibana_cases');
+  stats.deletedIndex('.kibana_task_manager');
 }
 
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {

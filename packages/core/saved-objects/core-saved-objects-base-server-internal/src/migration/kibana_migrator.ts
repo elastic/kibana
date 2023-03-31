@@ -69,7 +69,11 @@ export type MigrationStatus =
 /** @internal */
 export type MigrationResult =
   | { status: 'skipped' }
-  | { status: 'patched' }
+  | {
+      status: 'patched';
+      destIndex: string;
+      elapsedMs: number;
+    }
   | {
       status: 'migrated';
       destIndex: string;
