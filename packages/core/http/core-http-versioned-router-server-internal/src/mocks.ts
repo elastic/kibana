@@ -9,5 +9,14 @@
 import { IRouter } from '@kbn/core-http-server';
 
 export function createRouter(): jest.Mocked<IRouter> {
-  return { delete: jest.fn(), get: jest.fn(), post: jest.fn(), put: jest.fn() } as any;
+  return {
+    delete: jest.fn(),
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    getRoutes: jest.fn(),
+    handleLegacyErrors: jest.fn(),
+    patch: jest.fn(),
+    routerPath: '',
+  };
 }
