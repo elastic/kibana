@@ -5,30 +5,21 @@
  * 2.0.
  */
 
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+
 export interface Comparator {
   text: string;
   value: string;
   requiredValues: number;
 }
 
-type AggregationTypeValidNormlizedTypes =
-  | 'string'
-  | 'number'
-  | 'date'
-  | 'boolean'
-  | 'ip'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'attachment'
-  | 'murmur3'
-  | 'histogram'
-  | 'unknown';
+type KbnFieldTypesString = Lowercase<keyof typeof KBN_FIELD_TYPES>;
 
 export interface AggregationType {
   text: string;
   fieldRequired: boolean;
   value: string;
-  validNormalizedTypes: AggregationTypeValidNormlizedTypes[];
+  validNormalizedTypes: KbnFieldTypesString[];
 }
 
 export interface GroupByType {
