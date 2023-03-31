@@ -105,16 +105,12 @@ export const EnginesList: React.FC = () => {
       <EngineListIndicesFlyout />
       {createEngineFlyoutOpen && <CreateEngineFlyout onClose={closeEngineCreate} />}
       <EnterpriseSearchEnginesPageTemplate
-        pageChrome={[
-          i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
-            defaultMessage: 'Search Applications',
-          }),
-        ]}
+        pageChrome={[]}
         pageHeader={{
           description: (
             <FormattedMessage
               id="xpack.enterpriseSearch.content.engines.description"
-              defaultMessage="Search Applications allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search {documentationUrl}"
+              defaultMessage="Search Applications allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how search applications work in Elasticsearch {documentationUrl}"
               values={{
                 documentationUrl: (
                   <EuiLink
@@ -157,13 +153,13 @@ export const EnginesList: React.FC = () => {
                 placeholder={i18n.translate(
                   'xpack.enterpriseSearch.content.engines.searchPlaceholder',
                   {
-                    defaultMessage: 'Search engines',
+                    defaultMessage: 'Search Applications',
                   }
                 )}
                 aria-label={i18n.translate(
                   'xpack.enterpriseSearch.content.engines.searchBar.ariaLabel',
                   {
-                    defaultMessage: 'Search engines',
+                    defaultMessage: 'Search Applications',
                   }
                 )}
                 fullWidth
@@ -177,7 +173,8 @@ export const EnginesList: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engines.searchPlaceholder.description',
                 {
-                  defaultMessage: 'Locate an engine via name or by its included indices.',
+                  defaultMessage:
+                    'Locate a search application via name or by its included indices.',
                 }
               )}
             </EuiText>
