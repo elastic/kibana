@@ -363,7 +363,7 @@ Apply a set of design options to the entire dashboard.
 
 . If you're in view mode, click *Edit* in the toolbar.
 
-. In the toolbar, *Options*, then use the following options:
+. In the toolbar, click *Settings*, to open the *Dashboard settings* flyout, then use the following options:
 
 * *Use margins between panels* &mdash; Adds a margin of space between each panel.
 

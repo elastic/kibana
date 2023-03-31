@@ -651,6 +651,175 @@ describe('bulkEdit()', () => {
 
       expect(result.rules[0]).toHaveProperty('revision', 1);
     });
+
+    test("should set timeframe in alertsFilter null if doesn't exist", async () => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'myType',
+        name: 'Test',
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'custom', name: 'Not the Default' },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        producer: 'alerts',
+        getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+      });
+      const existingAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '1',
+        params: {},
+        uuid: '111',
+        alertsFilter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}',
+          },
+          timeframe: {
+            days: [1],
+            hours: { start: '08:00', end: '17:00' },
+            timezone: 'UTC',
+          },
+        },
+      };
+      const newAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '2',
+        params: {},
+        uuid: '222',
+        alertsFilter: { query: { kql: 'test:1', dsl: 'test' } },
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  ...existingAction,
+                  actionRef: 'action_0',
+                },
+                {
+                  ...newAction,
+                  actionRef: 'action_1',
+                  uuid: '222',
+                  alertsFilter: {
+                    query: { kql: 'test:1', dsl: 'test' },
+                    timeframe: null,
+                  },
+                },
+              ],
+            },
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              {
+                name: 'action_1',
+                type: 'action',
+                id: '2',
+              },
+            ],
+          },
+        ],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [existingAction, newAction] as NormalizedAlertAction[],
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '111',
+                  alertsFilter: existingAction.alertsFilter,
+                },
+                {
+                  actionRef: '',
+                  actionTypeId: '',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '222',
+                  alertsFilter: {
+                    query: {
+                      dsl: '{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}',
+                      kql: 'test:1',
+                    },
+                    timeframe: null,
+                  },
+                },
+              ],
+              apiKey: null,
+              apiKeyOwner: null,
+              meta: { versionApiKeyLastmodified: 'v8.2.0' },
+              name: 'my rule name',
+              enabled: false,
+              updatedAt: '2019-02-12T21:01:22.479Z',
+              updatedBy: 'elastic',
+              tags: ['foo'],
+              revision: 1,
+            },
+            references: [{ id: '1', name: 'action_0', type: 'action' }],
+          },
+        ],
+        { overwrite: true }
+      );
+      expect(result.rules[0]).toEqual({
+        ...existingRule.attributes,
+        actions: [
+          existingAction,
+          {
+            ...newAction,
+            alertsFilter: {
+              query: {
+                dsl: 'test',
+                kql: 'test:1',
+              },
+              timeframe: null,
+            },
+          },
+        ],
+        id: existingRule.id,
+        snoozeSchedule: [],
+      });
+    });
   });
 
   describe('index pattern operations', () => {

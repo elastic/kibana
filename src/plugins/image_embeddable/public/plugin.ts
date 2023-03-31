@@ -12,6 +12,10 @@ import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from '@kbn/screenshot-mode-plugin/public';
 import { IMAGE_EMBEDDABLE_TYPE, ImageEmbeddableFactoryDefinition } from './image_embeddable';
 import { imageClickTrigger } from './actions';
 
@@ -20,6 +24,7 @@ export interface SetupDependencies {
   files: FilesSetup;
   security?: SecurityPluginSetup;
   uiActions: UiActionsSetup;
+  screenshotMode?: ScreenshotModePluginSetup;
 }
 
 export interface StartDependencies {
@@ -27,6 +32,7 @@ export interface StartDependencies {
   files: FilesStart;
   security?: SecurityPluginStart;
   uiActions: UiActionsStart;
+  screenshotMode?: ScreenshotModePluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -56,6 +62,7 @@ export class ImageEmbeddablePlugin
             return security ? await security.authc.getCurrentUser() : undefined;
           },
           uiActions: start().plugins.uiActions,
+          isScreenshotMode: () => plugins.screenshotMode?.isScreenshotMode() ?? false,
         }),
       })
     );
