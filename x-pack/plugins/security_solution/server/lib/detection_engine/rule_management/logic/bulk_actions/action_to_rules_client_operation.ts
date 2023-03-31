@@ -7,17 +7,10 @@
 
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
 
-import type {
-  BulkActionEditPayloadRuleActions,
-  BulkActionEditForRuleAttributes,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditForRuleAttributes } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import {
-  transformToAlertThrottle,
-  transformToNotifyWhen,
-  transformToFrequency,
-} from '../../normalization/rule_actions';
+import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
 
 const getThrottleOperation = (throttle: string) =>
   ({
@@ -32,19 +25,6 @@ const getNotifyWhenOperation = (throttle: string) =>
     operation: 'set',
     value: transformToNotifyWhen(throttle),
   } as const);
-
-const transformRuleActions = (bulkEdit: BulkActionEditPayloadRuleActions) => {
-  const throttle = bulkEdit.value.throttle;
-  let actions = bulkEdit.value.actions;
-  if (throttle && actions.length && !actions[0].frequency) {
-    const frequency = transformToFrequency(throttle);
-    actions = actions.map((action) => ({
-      ...action,
-      frequency,
-    }));
-  }
-  return actions;
-};
 
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
@@ -89,7 +69,7 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'add',
-          value: transformRuleActions(action),
+          value: action.value.actions,
         },
         ...(action.value.throttle
           ? [
@@ -104,7 +84,7 @@ export const bulkEditActionToRulesClientOperation = (
         {
           field: 'actions',
           operation: 'set',
-          value: transformRuleActions(action),
+          value: action.value.actions,
         },
         ...(action.value.throttle
           ? [

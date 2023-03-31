@@ -421,7 +421,7 @@ describe('rule helpers', () => {
             frequency: {
               summary: true,
               throttle: null,
-              notifyWhen: 'onActionGroupChange',
+              notifyWhen: 'onActiveAlert',
             },
           } as RuleAlertAction,
         ],
@@ -437,7 +437,7 @@ describe('rule helpers', () => {
             frequency: {
               summary: true,
               throttle: null,
-              notifyWhen: 'onActionGroupChange',
+              notifyWhen: 'onActiveAlert',
             },
           },
         ],

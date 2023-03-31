@@ -135,13 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(body);
         const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput(),
-          actions: [
-            {
-              ...action,
-              uuid: bodyToCompare.actions[0].uuid,
-              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
-            },
-          ],
+          actions: [{ ...action, uuid: bodyToCompare.actions[0].uuid }],
           throttle: 'rule',
         };
         expect(bodyToCompare).to.eql(ruleWithActions);
@@ -180,13 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(body);
         const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput(),
-          actions: [
-            {
-              ...action,
-              uuid: bodyToCompare.actions[0].uuid,
-              frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
-            },
-          ],
+          actions: [{ ...action, uuid: bodyToCompare.actions[0].uuid }],
           throttle: '1h', // <-- throttle makes this a scheduled action
         };
         expect(bodyToCompare).to.eql(ruleWithActions);
@@ -248,7 +236,6 @@ export default ({ getService }: FtrProviderContext) => {
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
                 action_type_id: hookAction.actionTypeId,
-                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
             throttle: '1h',

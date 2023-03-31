@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(ruleSO?.alert.actions).to.eql([]);
       expect(ruleSO?.alert.throttle).to.eql(null);
-      expect(ruleSO?.alert.notifyWhen).to.eql(null);
+      expect(ruleSO?.alert.notifyWhen).to.eql('onActiveAlert');
     });
 
     it('migrates legacy actions for rule with action run on every run', async () => {
@@ -122,15 +122,10 @@ export default ({ getService }: FtrProviderContext) => {
             to: ['test@test.com'],
           },
           uuid: ruleSO?.alert.actions[0].uuid,
-          frequency: {
-            summary: true,
-            notifyWhen: 'onActiveAlert',
-            throttle: null,
-          },
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql(null);
-      expect(ruleSO?.alert.notifyWhen).to.eql(null);
+      expect(ruleSO?.alert.notifyWhen).to.eql('onActiveAlert');
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
@@ -186,11 +181,6 @@ export default ({ getService }: FtrProviderContext) => {
           actionRef: 'action_0',
           group: 'default',
           uuid: ruleSO?.alert.actions[0].uuid,
-          frequency: {
-            summary: true,
-            notifyWhen: 'onThrottleInterval',
-            throttle: '1h',
-          },
         },
         {
           actionTypeId: '.slack',
@@ -200,15 +190,10 @@ export default ({ getService }: FtrProviderContext) => {
           actionRef: 'action_1',
           group: 'default',
           uuid: ruleSO?.alert.actions[1].uuid,
-          frequency: {
-            summary: true,
-            notifyWhen: 'onThrottleInterval',
-            throttle: '1h',
-          },
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql('1h');
-      expect(ruleSO?.alert.notifyWhen).to.eql(null);
+      expect(ruleSO?.alert.notifyWhen).to.eql('onThrottleInterval');
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
@@ -268,15 +253,10 @@ export default ({ getService }: FtrProviderContext) => {
             to: ['test@test.com'],
           },
           uuid: ruleSO?.alert.actions[0].uuid,
-          frequency: {
-            summary: true,
-            notifyWhen: 'onThrottleInterval',
-            throttle: '1d',
-          },
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql('1d');
-      expect(ruleSO?.alert.notifyWhen).to.eql(null);
+      expect(ruleSO?.alert.notifyWhen).to.eql('onThrottleInterval');
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
@@ -331,15 +311,10 @@ export default ({ getService }: FtrProviderContext) => {
             to: ['test@test.com'],
           },
           uuid: ruleSO?.alert.actions[0].uuid,
-          frequency: {
-            summary: true,
-            notifyWhen: 'onThrottleInterval',
-            throttle: '7d',
-          },
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql('7d');
-      expect(ruleSO?.alert.notifyWhen).to.eql(null);
+      expect(ruleSO?.alert.notifyWhen).to.eql('onThrottleInterval');
       expect(ruleSO?.references).to.eql([
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',

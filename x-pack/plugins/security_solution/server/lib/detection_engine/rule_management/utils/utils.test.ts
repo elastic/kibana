@@ -351,14 +351,7 @@ describe('utils', () => {
       const expected = {
         ...getOutputRuleAlertForRest(),
         throttle: '1h',
-        actions: actions.map((action) => ({
-          ...action,
-          frequency: {
-            summary: true,
-            throttle: '1h',
-            notifyWhen: 'onThrottleInterval',
-          },
-        })),
+        actions,
       };
       expect(output).toEqual({
         page: 1,

@@ -126,17 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [
-          {
-            ...action,
-            uuid: body.data[0].actions[0].uuid,
-            frequency: {
-              notifyWhen: 'onActiveAlert',
-              summary: true,
-              throttle: null,
-            },
-          },
-        ],
+        actions: [{ ...action, uuid: body.data[0].actions[0].uuid }],
         throttle: 'rule',
       };
 
@@ -181,17 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...getSimpleRuleOutput(),
-        actions: [
-          {
-            ...action,
-            uuid: body.data[0].actions[0].uuid,
-            frequency: {
-              notifyWhen: 'onThrottleInterval',
-              summary: true,
-              throttle: '1h',
-            },
-          },
-        ],
+        actions: [{ ...action, uuid: body.data[0].actions[0].uuid }],
         throttle: '1h', // <-- throttle makes this a scheduled action
       };
 
@@ -259,11 +239,6 @@ export default ({ getService }: FtrProviderContext): void => {
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
               action_type_id: hookAction.actionTypeId,
-              frequency: {
-                notifyWhen: 'onThrottleInterval',
-                summary: true,
-                throttle: '1h',
-              },
             },
           ],
           throttle: '1h',

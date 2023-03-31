@@ -23,11 +23,6 @@ export const getSimpleRuleOutputWithWebHookAction = (
         body: '{}',
       },
       uuid,
-      frequency: {
-        summary: true,
-        throttle: null,
-        notifyWhen: 'onActionGroupChange',
-      },
     },
   ],
 });

@@ -6,7 +6,6 @@
  */
 
 import type { RuleAction, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
-import type { RuleActionFrequency } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -18,14 +17,6 @@ import { transformAlertToRuleAction } from '../../../../../common/detection_engi
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type { RuleAlertType } from '../../rule_schema';
-
-export const transformToFrequency = (throttle: string | null | undefined): RuleActionFrequency => {
-  return {
-    summary: true,
-    notifyWhen: transformToNotifyWhen(throttle) ?? 'onActiveAlert',
-    throttle: transformToAlertThrottle(throttle),
-  };
-};
 
 /**
  * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen

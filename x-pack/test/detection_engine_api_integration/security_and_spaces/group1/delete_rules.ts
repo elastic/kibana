@@ -174,11 +174,6 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
-            frequency: {
-              summary: true,
-              throttle: '1h',
-              notifyWhen: 'onThrottleInterval',
-            },
           },
         ]);
       });
