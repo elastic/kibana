@@ -12,15 +12,10 @@ import {
   type CategorizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { showCategorizeFlyout } from './shared_flyout';
+import { AiopsPluginStartDeps } from './types';
 
-export const categorizeFieldAction = (
-  coreStart: CoreStart,
-  data: DataPublicPluginStart,
-  charts: ChartsPluginStart
-) =>
+export const categorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
   createAction<CategorizeFieldContext>({
     type: ACTION_CATEGORIZE_FIELD,
     id: ACTION_CATEGORIZE_FIELD,
@@ -33,6 +28,6 @@ export const categorizeFieldAction = (
     },
     execute: async (context: CategorizeFieldContext) => {
       const { field, dataView, onAddDSLFilter } = context;
-      showCategorizeFlyout(field, dataView, coreStart, data, charts, onAddDSLFilter);
+      showCategorizeFlyout(field, dataView, coreStart, plugins, onAddDSLFilter);
     },
   });

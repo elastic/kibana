@@ -29,7 +29,7 @@ export class AiopsPlugin
     }
     plugins.uiActions.addTriggerAction(
       CATEGORIZE_FIELD_TRIGGER,
-      categorizeFieldAction(core, plugins.data, plugins.charts)
+      categorizeFieldAction(core, plugins)
     );
 
     return {};

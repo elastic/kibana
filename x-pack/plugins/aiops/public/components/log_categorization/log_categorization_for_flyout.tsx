@@ -7,25 +7,16 @@
 import React, { FC, useState, useEffect, useCallback } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-// import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTitle, EuiLoadingContent, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
+import { EuiTitle, EuiFlyoutHeader, EuiFlyoutBody, EuiSkeletonText } from '@elastic/eui';
 
-// import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
-// import { FullTimeRangeSelector } from '../full_time_range_selector';
-// import { DatePickerWrapper } from '../date_picker_wrapper';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useData } from '../../hooks/use_data';
-// import { SearchPanel } from '../search_panel';
-import type { SearchQueryLanguage } from '../../application/utils/search_utils';
-// import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
-// import { DocumentCountChart } from './document_count_chart';
-// import { InformationText } from './information_text';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -49,22 +40,17 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   onAddFilter,
   onClose,
 }) => {
-  // const {
-  //   notifications: { toasts },
-  // } = useAiopsAppContext();
-
+  const {
+    notifications: { toasts },
+  } = useAiopsAppContext();
   const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
-  const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
+  const [aiopsListState /* , setAiopsListState*/] = useState(restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
-  // const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  // const [categories, setCategories] = useState<Category[] | null>(null);
-  const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
+  const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
   const [loading, setLoading] = useState(true);
-  // const [totalCount, setTotalCount] = useState(0);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
-  // const [sparkLines, setSparkLines] = useState<SparkLinesPerCategory>({});
   const [data, setData] = useState<{
     categories: Category[];
     sparkLines: SparkLinesPerCategory;
@@ -77,30 +63,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       };
     },
     [cancelRequest]
-  );
-
-  const setSearchParams = useCallback(
-    (searchParams: {
-      searchQuery: Query['query'];
-      searchString: Query['query'];
-      queryLanguage: SearchQueryLanguage;
-      filters: Filter[];
-    }) => {
-      // When the user loads saved search and then clear or modify the query
-      // we should remove the saved search and replace it with the index pattern id
-      if (selectedSavedSearch !== null) {
-        setSelectedSavedSearch(null);
-      }
-
-      setAiopsListState({
-        ...aiopsListState,
-        searchQuery: searchParams.searchQuery,
-        searchString: searchParams.searchString,
-        searchQueryLanguage: searchParams.queryLanguage,
-        filters: searchParams.filters,
-      });
-    },
-    [selectedSavedSearch, aiopsListState, setAiopsListState]
   );
 
   const {
@@ -131,42 +93,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.time), timefilter]);
 
-  // const fields = useMemo(
-  //   () =>
-  //     dataView.fields
-  //       .filter(
-  //         ({ displayName, esTypes, count }) =>
-  //           esTypes && esTypes.includes('text') && !['_id', '_index'].includes(displayName)
-  //       )
-  //       .map(({ displayName }) => ({
-  //         label: displayName,
-  //       })),
-  //   [dataView]
-  // );
-
-  // useEffect(
-  //   function setSingleFieldAsSelected() {
-  //     if (fields.length === 1) {
-  //       setSelectedField(fields[0].label);
-  //     }
-  //   },
-  //   [fields]
-  // );
-
-  useEffect(() => {
-    if (documentStats.documentCountStats?.buckets) {
-      setEventRate(
-        Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
-          key: +key,
-          docCount,
-        }))
-      );
-      // setCategories(null);
-      setData(null);
-      // setTotalCount(documentStats.totalCount);
-    }
-  }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery]);
-
   const loadCategories = useCallback(async () => {
     const { title: index, timeFieldName: timeField } = dataView;
 
@@ -177,7 +103,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     cancelRequest();
 
     setLoading(true);
-    // setCategories(null);
     setData(null);
 
     try {
@@ -192,14 +117,12 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       );
 
       setData({ categories: resp.categories, sparkLines: resp.sparkLinesPerCategory });
-      // setCategories(resp.categories);
-      // setSparkLines(resp.sparkLinesPerCategory);
     } catch (error) {
-      // toasts.addError(error, {
-      //   title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
-      //     defaultMessage: 'Error loading categories',
-      //   }),
-      // });
+      toasts.addError(error, {
+        title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
+          defaultMessage: 'Error loading categories',
+        }),
+      });
     }
 
     setLoading(false);
@@ -212,19 +135,29 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     runCategorizeRequest,
     cancelRequest,
     intervalMs,
-    // setLoading,
-    // toasts,
+    toasts,
   ]);
 
   useEffect(() => {
-    loadCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
-  //   setCategories(null);
-  //   setSelectedField(value && value.length ? value[0].label : undefined);
-  // };
+    if (documentStats.documentCountStats?.buckets) {
+      setEventRate(
+        Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
+          key: +key,
+          docCount,
+        }))
+      );
+      setData(null);
+      loadCategories();
+    }
+  }, [
+    documentStats,
+    earliest,
+    latest,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
+    loadCategories,
+  ]);
 
   return (
     <>
@@ -239,113 +172,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>
-        {/* <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}> */}
-        {/* <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
-            <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
-                <EuiTitle size="s">
-                  <h2>{dataView.getName()}</h2>
-                </EuiTitle>
-              </div>
-            </EuiPageContentHeaderSection>
-
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="aiopsTimeRangeSelectorSection"
-            >
-              {dataView.timeFieldName !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    dataView={dataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <DatePickerWrapper />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <SearchPanel
-            dataView={dataView}
-            searchString={searchString ?? ''}
-            searchQuery={searchQuery}
-            searchQueryLanguage={searchQueryLanguage}
-            setSearchParams={setSearchParams}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" /> */}
-        {/* <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false} css={{ minWidth: '410px' }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelect', {
-              defaultMessage: 'Category field',
-            })}
-          >
-            <EuiComboBox
-              isDisabled={loading === true}
-              options={fields}
-              onChange={onFieldChange}
-              selectedOptions={selectedField === undefined ? undefined : [{ label: selectedField }]}
-              singleSelection={{ asPlainText: true }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
-          {loading === false ? (
-            <EuiButton
-              disabled={selectedField === undefined}
-              onClick={() => {
-                loadCategories();
-              }}
-            >
-              <FormattedMessage
-                id="xpack.aiops.logCategorization.runButton"
-                defaultMessage="Run categorization"
-              />
-            </EuiButton>
-          ) : (
-            <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }} />
-        <EuiFlexItem />
-      </EuiFlexGroup> */}
-
-        {/* {eventRate.length ? (
-        <>
-          <EuiSpacer />
-          <DocumentCountChart
-            eventRate={eventRate}
-            pinnedCategory={pinnedCategory}
-            selectedCategory={selectedCategory}
-            sparkLines={sparkLines}
-            totalCount={totalCount}
-            documentCountStats={documentStats.documentCountStats}
-          />
-          <EuiSpacer />
-        </>
-      ) : null} */}
-        {loading === true ? <EuiLoadingContent lines={10} /> : null}
-
-        {/* <InformationText
-          loading={loading}
-          categoriesLength={categories?.length ?? null}
-          eventRateLength={eventRate.length}
-          fieldSelected={selectedField !== null}
-        /> */}
+        {loading === true ? <EuiSkeletonText lines={10} /> : null}
 
         {loading === false && data !== null && data.categories.length > 0 ? (
           <CategoryTable

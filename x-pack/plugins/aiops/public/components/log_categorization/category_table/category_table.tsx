@@ -12,7 +12,6 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   useEuiBackgroundColor,
   EuiButton,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -55,7 +54,7 @@ interface Props {
     type: '+' | '-',
     title?: string
   ) => void;
-  onClose: () => void;
+  onClose?: () => void;
   enableRowActions?: boolean;
 }
 
@@ -72,7 +71,7 @@ export const CategoryTable: FC<Props> = ({
   selectedCategory,
   setSelectedCategory,
   onAddFilter,
-  onClose,
+  onClose = () => {},
   enableRowActions = true,
 }) => {
   const euiTheme = useEuiTheme();
@@ -128,7 +127,7 @@ export const CategoryTable: FC<Props> = ({
       name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
         defaultMessage: 'Log rate',
       }),
-      sortable: true,
+      sortable: false,
       width: '100px',
       render: (_, { key }) => {
         const sparkLine = sparkLines[key];
@@ -157,24 +156,21 @@ export const CategoryTable: FC<Props> = ({
         defaultMessage: 'Examples',
       }),
       sortable: true,
-      style: { display: 'block' },
       render: (examples: string[]) => (
-        <div style={{ display: 'block' }}>
+        <>
           {examples.map((e) => (
-            <>
-              <EuiText size="s">
-                <EuiCode language="log" transparentBackground>
-                  {e}
-                </EuiCode>
-              </EuiText>
-              <EuiSpacer size="s" />
-            </>
+            <EuiText size="s" key={e}>
+              <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
+                {e}
+              </EuiCode>
+            </EuiText>
           ))}
-        </div>
+        </>
       ),
     },
     {
       name: 'Actions',
+      sortable: false,
       width: '60px',
       actions: [
         {
@@ -199,15 +195,6 @@ export const CategoryTable: FC<Props> = ({
           type: 'icon',
           onClick: (category) => openInDiscover(QUERY_MODE.EXCLUDE, category),
         },
-        // Disabled for now
-        // {
-        //   name: i18n.translate('xpack.aiops.logCategorization.openInDataViz', {
-        //     defaultMessage: 'Open in data visualizer',
-        //   }),
-        //   icon: 'stats',
-        //   type: 'icon',
-        //   onClick: () => {},
-        // },
       ],
     },
   ] as Array<EuiBasicTableColumn<Category>>;
