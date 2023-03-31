@@ -29,7 +29,10 @@ export function usePackagePolicyEditorPageUrl(dataStreamId?: string) {
   return `${baseUrl}${dataStreamId ? `?datastreamId=${encodeURIComponent(dataStreamId)}` : ''}`;
 }
 
-export function useIndexTemplateExists(templateName: string): {
+export function useIndexTemplateExists(
+  templateName: string,
+  enabled: boolean
+): {
   exists?: boolean;
   isLoading: boolean;
 } {
@@ -40,7 +43,7 @@ export function useIndexTemplateExists(templateName: string): {
         path: `/api/index_management/index_templates/${templateName}`,
         method: 'get',
       }),
-    { enabled: !!templateName }
+    { enabled: enabled || !!templateName }
   );
 
   if (isLoading) {

@@ -104,7 +104,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
         getRegistryDataStreamAssetBaseName({
           dataset: customDatasetVarValue,
           type: packageInputStream.data_stream.type,
-        })
+        }),
+        isPackagePolicyEdit
       );
 
     // only show pipelines and mappings if the matching index template exists
