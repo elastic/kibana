@@ -39,7 +39,14 @@ export const getSecuritySolutionTagsRoute = (
       });
 
       if (tags && !error) {
-        return response.ok({ body: tags });
+        return response.ok({
+          body: tags.map(({ id, attributes: { name, description, color } }) => ({
+            id,
+            name,
+            description,
+            color,
+          })),
+        });
       } else {
         return siemResponse.error({
           statusCode: error?.statusCode ?? 500,

@@ -49,7 +49,16 @@ describe('getSecuritySolutionTagsRoute', () => {
     const response = await server.inject(mockRequest, requestContextMock.convertContext(context));
 
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual(mockGetTagsResult);
+    expect(response.body).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "color": "#4bc922",
+          "description": "Security Solution auto-generated tag",
+          "id": "de7ad1f0-ccc8-11ed-9175-1b0d4269ff48",
+          "name": "Security Solution",
+        },
+      ]
+    `);
   });
 
   it('should return error', async () => {
