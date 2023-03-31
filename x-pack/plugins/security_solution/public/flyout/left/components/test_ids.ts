@@ -6,4 +6,6 @@
  */
 
 export const ANALYZER_GRAPH_TEST_ID = 'securitySolutionDocumentDetailsFlyoutAnalyzerGraph';
+export const ANALYZE_GRAPH_ERROR_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutAnalyzerGraphError';
 export const SESSION_VIEW_TEST_ID = 'securitySolutionDocumentDetailsFlyoutSessionView';

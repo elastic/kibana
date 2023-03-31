@@ -64,16 +64,14 @@ export type SelectorType = 'file' | 'process';
 export type SelectorConditionType = 'stringArray' | 'flag' | 'boolean';
 
 export type SelectorCondition =
+  | 'containerImageFullName'
   | 'containerImageName'
   | 'containerImageTag'
-  | 'fullContainerImageName'
-  | 'orchestratorClusterId'
-  | 'orchestratorClusterName'
-  | 'orchestratorNamespace'
-  | 'orchestratorResourceLabel'
-  | 'orchestratorResourceName'
-  | 'orchestratorResourceType'
-  | 'orchestratorType'
+  | 'kubernetesClusterId'
+  | 'kubernetesClusterName'
+  | 'kubernetesNamespace'
+  | 'kubernetesResourceLabel'
+  | 'kubernetesResourceName'
   | 'targetFilePath'
   | 'ignoreVolumeFiles'
   | 'ignoreVolumeMounts'
@@ -104,30 +102,28 @@ export type SelectorConditionsMapProps = {
 
 // used to determine UX control and allowed values for each condition
 export const SelectorConditionsMap: SelectorConditionsMapProps = {
-  containerImageName: {
-    type: 'stringArray',
-    pattern: '^[a-z0-9]+$',
-    not: ['fullContainerImageName'],
-  },
-  containerImageTag: { type: 'stringArray' },
-  fullContainerImageName: {
+  containerImageFullName: {
     type: 'stringArray',
     pattern:
       '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$',
     patternError: i18n.errorInvalidFullContainerImageName,
     not: ['containerImageName'],
   },
-  orchestratorClusterId: { type: 'stringArray' },
-  orchestratorClusterName: { type: 'stringArray' },
-  orchestratorNamespace: { type: 'stringArray' },
-  orchestratorResourceLabel: {
+  containerImageName: {
+    type: 'stringArray',
+    pattern: '^[a-z0-9]+$',
+    not: ['containerImageFullName'],
+  },
+  containerImageTag: { type: 'stringArray' },
+  kubernetesClusterId: { type: 'stringArray' },
+  kubernetesClusterName: { type: 'stringArray' },
+  kubernetesNamespace: { type: 'stringArray' },
+  kubernetesResourceName: { type: 'stringArray' },
+  kubernetesResourceLabel: {
     type: 'stringArray',
     pattern: '^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$',
     patternError: i18n.errorInvalidResourceLabel,
   },
-  orchestratorResourceName: { type: 'stringArray' },
-  orchestratorResourceType: { type: 'stringArray', values: ['node', 'pod'] },
-  orchestratorType: { type: 'stringArray', values: ['kubernetes'] },
   operation: {
     type: 'stringArray',
     values: {
@@ -152,13 +148,11 @@ export interface Selector {
   operation?: string[];
   containerImageName?: string[];
   containerImageTag?: string[];
-  orchestratorClusterId?: string[];
-  orchestratorClusterName?: string[];
-  orchestratorNamespace?: string[];
-  orchestratorResourceLabel?: string[];
-  orchestratorResourceName?: string[];
-  orchestratorResourceType?: string[];
-  orchestratorType?: string[];
+  kubernetesClusterId?: string[];
+  kubernetesClusterName?: string[];
+  kubernetesNamespace?: string[];
+  kubernetesResourceLabel?: string[];
+  kubernetesResourceName?: string[];
 
   // selector properties
   targetFilePath?: string[];

@@ -8,7 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
-import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../common/ml_inference_pipeline';
+import {
+  LANG_IDENT_MODEL_TYPE,
+  SUPPORTED_PYTORCH_TASKS,
+} from '../../../../../../common/ml_inference_pipeline';
 
 export const NLP_CONFIG_KEYS: string[] = Object.values(SUPPORTED_PYTORCH_TASKS);
 export const RECOMMENDED_FIELDS = ['body', 'body_content', 'title'];
@@ -16,6 +19,9 @@ export const RECOMMENDED_FIELDS = ['body', 'body_content', 'title'];
 export const NLP_DISPLAY_TITLES: Record<string, string | undefined> = {
   fill_mask: i18n.translate('xpack.enterpriseSearch.content.ml_inference.fill_mask', {
     defaultMessage: 'Fill Mask',
+  }),
+  lang_ident: i18n.translate('xpack.enterpriseSearch.content.ml_inference.lang_ident', {
+    defaultMessage: 'Language Identification',
   }),
   ner: i18n.translate('xpack.enterpriseSearch.content.ml_inference.ner', {
     defaultMessage: 'Named Entity Recognition',
@@ -44,7 +50,10 @@ export const NLP_DISPLAY_TITLES: Record<string, string | undefined> = {
 };
 
 export const isSupportedMLModel = (model: TrainedModelConfigResponse): boolean => {
-  return Object.keys(model.inference_config).some((key) => NLP_CONFIG_KEYS.includes(key));
+  return (
+    Object.keys(model.inference_config).some((key) => NLP_CONFIG_KEYS.includes(key)) ||
+    model.model_type === LANG_IDENT_MODEL_TYPE
+  );
 };
 
 export const sortSourceFields = (a: string, b: string): number => {
@@ -66,6 +75,7 @@ export const getMLType = (modelTypes: string[]): string => {
       return type;
     }
   }
+  if (modelTypes?.includes(LANG_IDENT_MODEL_TYPE)) return LANG_IDENT_MODEL_TYPE;
   return modelTypes?.[0] ?? '';
 };
 
