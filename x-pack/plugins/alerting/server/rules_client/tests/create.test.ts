@@ -3385,7 +3385,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
-            uuid: '149',
+            uuid: '151',
           },
         ],
         alertTypeId: '123',

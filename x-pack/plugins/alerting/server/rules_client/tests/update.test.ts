@@ -992,6 +992,7 @@ describe('update()', () => {
         ],
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": undefined,
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
         "enabled": true,
