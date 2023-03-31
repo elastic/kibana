@@ -20,13 +20,11 @@ const getAvailableVersions = async (log: ToolingLog) => {
   // Endpoint maintained by the web-team and hosted on the elastic website
   // See https://github.com/elastic/website-development/issues/9331
   const url = 'https://www.elastic.co/content/product_versions';
-  try {
-    log.info('Fetching Elastic Agent versions list');
-    const results = await fetch(url, options);
-    log.info(`Status: ${results.status}`);
+  log.info('Fetching Elastic Agent versions list');
+  const results = await fetch(url, options);
+  const rawBody = await results.text();
 
-    const rawBody = await results.text();
-    log.info(rawBody);
+  try {
     const jsonBody = JSON.parse(rawBody);
 
     const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
@@ -37,6 +35,8 @@ const getAvailableVersions = async (log: ToolingLog) => {
     return versions;
   } catch (error) {
     log.warning(`Failed to fetch versions list`);
+    log.info(`Status: ${results.status}`);
+    log.info(rawBody);
     throw new Error(error);
   }
   return [];
