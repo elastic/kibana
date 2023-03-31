@@ -23,6 +23,7 @@ import type { Mutable } from 'utility-types';
 import type { Method } from './types';
 
 import { validate } from './validate';
+import { isValidRouteVersion } from './is_valid_route_version';
 
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 
@@ -155,8 +156,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   };
 
   private validateVersion(version: string) {
-    const float = parseFloat(version);
-    if (!isFinite(float) || isNaN(float) || float <= 0 || Math.round(float) !== float) {
+    if (!isValidRouteVersion(version)) {
       throw new Error(
         `Invalid version number. Received "${version}", expected any finite, whole number greater than 0.`
       );
