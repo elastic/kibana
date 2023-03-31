@@ -7,22 +7,22 @@
 
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { debug } from '../../common/debug_log';
-import { Asset, AssetFilters } from '../../common/types_api';
+import { Asset, AssetFilters, Relation } from '../../common/types_api';
 import { ASSETS_INDEX_PREFIX } from '../constants';
 import { ElasticsearchAccessorOptions } from '../types';
 
-interface GetAssetsOptions extends ElasticsearchAccessorOptions {
+interface GetRelatedAssetsOptions extends ElasticsearchAccessorOptions {
   size?: number;
   filters?: AssetFilters;
-  from?: string;
-  to?: string;
+  relation: Relation;
 }
 
-export async function getAssets({
+export async function getRelatedAssets({
   esClient,
   size = 100,
   filters = {},
-}: GetAssetsOptions): Promise<Asset[]> {
+  relation,
+}: GetRelatedAssetsOptions): Promise<Asset[]> {
   // Maybe it makes the most sense to validate the filters here?
 
   const { from = 'now-24h', to = 'now' } = filters;
@@ -56,58 +56,24 @@ export async function getAssets({
   if (filters && Object.keys(filters).length > 0) {
     const musts: QueryDslQueryContainer[] = [];
 
-    if (typeof filters.collectionVersion === 'number') {
-      musts.push({
-        term: {
-          ['asset.collection_version']: filters.collectionVersion,
-        },
-      });
-    }
+    // How to enforce type and size limits when you sometimes need to skip a level to reach relevant information in the level after?
 
-    if (filters.type) {
+    if (relation === 'ancestors') {
       musts.push({
         terms: {
-          ['asset.type']: Array.isArray(filters.type) ? filters.type : [filters.type],
+          ['asset.children']: [filters.ean],
         },
       });
-    }
-
-    if (filters.kind) {
-      musts.push({
-        term: {
-          ['asset.kind']: filters.kind,
-        },
-      });
-    }
-
-    if (filters.ean) {
+    } else if (relation === 'descendants') {
       musts.push({
         terms: {
-          ['asset.ean']: Array.isArray(filters.ean) ? filters.ean : [filters.ean],
+          ['asset.parents']: [filters.ean],
         },
       });
-    }
-
-    if (filters.id) {
+    } else if (relation === 'references') {
       musts.push({
-        term: {
-          ['asset.id']: filters.id,
-        },
-      });
-    }
-
-    if (filters.typeLike) {
-      musts.push({
-        wildcard: {
-          ['asset.type']: filters.typeLike,
-        },
-      });
-    }
-
-    if (filters.eanLike) {
-      musts.push({
-        wildcard: {
-          ['asset.ean']: filters.eanLike,
+        terms: {
+          ['asset.references']: [filters.ean],
         },
       });
     }

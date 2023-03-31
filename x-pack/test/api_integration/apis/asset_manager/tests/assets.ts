@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
 
 const ASSETS_ENDPOINT = '/api/asset-manager/assets';
+const ANCESTORS_ENDPOINT = '/api/asset-manager/assets/ancestors';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -121,6 +122,22 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(getResponse.body).to.have.property('results');
         expect(getResponse.body.results.length).to.equal(samplesForFilteredTypes.length);
+      });
+    });
+
+    describe('GET /assets/ancestors', () => {
+      it('should return the full list of assets', async () => {
+        await createSampleAssets(supertest);
+
+        const from = new Date().toISOString();
+
+        const getResponse = await supertest
+          .get(ANCESTORS_ENDPOINT)
+          .query({ from, ean: 'k8s.pod:pod-200ugg9' })
+          .expect(200);
+
+        expect(getResponse.body).to.have.property('results');
+        expect(getResponse.body.results.length).to.equal(sampleAssetDocs.length);
       });
     });
   });

@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
+export const assetType = schema.oneOf([
+  schema.literal('k8s.pod'),
+  schema.literal('k8s.cluster'),
+  schema.literal('k8s.node'),
+]);
+export type AssetType = typeof assetType.type;
+
 export type AssetKind = 'unknown' | 'node';
-export type AssetType = 'k8s.pod' | 'k8s.cluster' | 'k8s.node';
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'
@@ -112,7 +120,7 @@ export interface K8sCluster extends WithTimestamp {
 export interface AssetFilters {
   type?: AssetType | AssetType[];
   kind?: AssetKind;
-  ean?: string;
+  ean?: string | string[];
   id?: string;
   typeLike?: string;
   eanLike?: string;
@@ -120,3 +128,5 @@ export interface AssetFilters {
   from?: string;
   to?: string;
 }
+
+export type Relation = 'ancestors' | 'descendants' | 'references';
