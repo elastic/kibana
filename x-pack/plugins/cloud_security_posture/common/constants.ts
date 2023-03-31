@@ -93,4 +93,7 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
   [CSPM_POLICY_TEMPLATE]: CSPM_POLICY_TEMPLATE,
   [VULN_MGMT_POLICY_TEMPLATE]: VULN_MGMT_POLICY_TEMPLATE,
   [POSTURE_TYPE_ALL]: POSTURE_TYPE_ALL,
-} as const;
+};
+
+export const VULNERABILITIES = 'vulnerabilities';
+export const CONFIGURATIONS = 'configurations';

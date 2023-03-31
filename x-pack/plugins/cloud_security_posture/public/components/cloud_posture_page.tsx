@@ -15,10 +15,20 @@ import {
   EuiFlexItem,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../common/constants';
+import { useLocation } from 'react-router-dom';
+import { BaseCspSetupStatus, CspStatusCode, IndexDetails } from '../../common/types';
+import {
+  CONFIGURATIONS,
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES,
+  VULN_MGMT_POLICY_TEMPLATE,
+} from '../../common/constants';
 import { SubscriptionNotAllowed } from './subscription_not_allowed';
 import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
@@ -27,13 +37,16 @@ import { CspLoadingState } from './csp_loading_state';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
-import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
+import { cspIntegrationDocsNavigation, findingsTabs } from '../common/navigation/constants';
+import { FindingsTabsType } from '../common/navigation/types';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
 export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
 export const CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_cspm_not_installed';
 export const KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_kspm_not_installed';
+export const VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT =
+  'cloud_posture_page_vuln_mgmt_not_installed';
 export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';
 export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
 
@@ -103,7 +116,7 @@ export const CspNoDataPage = ({
   );
 };
 
-const packageNotInstalledRenderer = ({
+export const ConfigurationFindingsInstalledEmptyPrompt = ({
   kspmIntegrationLink,
   cspmIntegrationLink,
 }: {
@@ -111,59 +124,141 @@ const packageNotInstalledRenderer = ({
   cspmIntegrationLink?: string;
 }) => {
   return (
+    <EuiEmptyPrompt
+      data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
+      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
+            defaultMessage="Detect security misconfigurations in your cloud infrastructure!"
+          />
+        </h2>
+      }
+      layout="horizontal"
+      color="plain"
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
+            defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible S3 buckets, with our Cloud and Kubernetes Security Posture Management solutions. {learnMore}"
+            values={{
+              learnMore: (
+                <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
+                  <FormattedMessage
+                    id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
+                    defaultMessage="Learn more about Cloud Security Posture"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      }
+      actions={
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton color="primary" fill href={cspmIntegrationLink}>
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
+                defaultMessage="Add CSPM Integration"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton color="primary" fill href={kspmIntegrationLink}>
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
+                defaultMessage="Add KSPM Integration"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
+  );
+};
+
+export const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
+  vulnMgmtIntegrationLink,
+}: {
+  vulnMgmtIntegrationLink?: string;
+}) => {
+  return (
+    <EuiEmptyPrompt
+      data-test-subj={VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT}
+      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+      title={
+        <h2>
+          <FormattedHTMLMessage
+            tagName="h2"
+            id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptTitle"
+            defaultMessage="Detect vulnerabilities <br/> in your cloud assets!"
+          />
+        </h2>
+      }
+      layout="horizontal"
+      color="plain"
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptDescription"
+            defaultMessage="Add the Elastic Vulnerability Management Integration to begin. {learnMore}."
+            values={{
+              learnMore: (
+                <EuiLink href={''} target="_blank">
+                  <FormattedMessage
+                    id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.learnMoreTitle"
+                    defaultMessage="Learn more about Elastic Vulnerability Management(VM) for Cloud"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      }
+      actions={
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton color="primary" fill href={vulnMgmtIntegrationLink}>
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
+                defaultMessage="Install Elastic Vulnerability Management for Cloud"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
+  );
+};
+
+interface PackageNotInstalledRenderer {
+  integrationLinksProps: {
+    kspmIntegrationLink?: string;
+    cspmIntegrationLink?: string;
+    vulnMgmtIntegrationLink?: string;
+  };
+  currentTab: FindingsTabsType;
+}
+
+const packageNotInstalledRenderer = ({
+  integrationLinksProps,
+  currentTab,
+}: PackageNotInstalledRenderer) => {
+  return (
     <FullSizeCenteredPage>
-      <EuiEmptyPrompt
-        data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
-        icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
-              defaultMessage="Detect security misconfigurations in your cloud infrastructure!"
-            />
-          </h2>
-        }
-        layout="horizontal"
-        color="plain"
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
-              defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible S3 buckets, with our Cloud and Kubernetes Security Posture Management solutions. {learnMore}"
-              values={{
-                learnMore: (
-                  <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
-                    <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
-                      defaultMessage="Learn more about Cloud Security Posture"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        }
-        actions={
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill href={cspmIntegrationLink}>
-                <FormattedMessage
-                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
-                  defaultMessage="Add CSPM Integration"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill href={kspmIntegrationLink}>
-                <FormattedMessage
-                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
-                  defaultMessage="Add KSPM Integration"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+      {currentTab === CONFIGURATIONS && (
+        <ConfigurationFindingsInstalledEmptyPrompt
+          kspmIntegrationLink={integrationLinksProps?.kspmIntegrationLink}
+          cspmIntegrationLink={integrationLinksProps?.cspmIntegrationLink}
+        />
+      )}
+      {currentTab === VULNERABILITIES && (
+        <VulnerabilitiesFindingsInstalledEmptyPrompt
+          vulnMgmtIntegrationLink={integrationLinksProps?.vulnMgmtIntegrationLink}
+        />
+      )}
     </FullSizeCenteredPage>
   );
 };
@@ -251,8 +346,22 @@ export const CloudPosturePage = <TData, TError>({
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
   const getSetupStatus = useCspSetupStatusApi();
+  const location = useLocation();
+
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+  const vulnMgmtIntegrationLink = useCspIntegrationLink(VULN_MGMT_POLICY_TEMPLATE);
+
+  const currentTab: FindingsTabsType = findingsTabs[location.pathname] ?? CONFIGURATIONS;
+
+  const showIntegrationInstalledPrompt =
+    showConfigurationIntegrationInstalledPrompt(getSetupStatus.data) ||
+    showVulnerabilitiesIntegrationInstalledPrompt(getSetupStatus.data, currentTab);
+
+  const integrationLinksProps =
+    currentTab === CONFIGURATIONS
+      ? { kspmIntegrationLink, cspmIntegrationLink }
+      : { vulnMgmtIntegrationLink };
 
   const render = () => {
     if (subscriptionStatus.isError) {
@@ -276,12 +385,8 @@ export const CloudPosturePage = <TData, TError>({
     }
 
     /* Checks if its a completely new user which means no integration has been installed and no latest findings default index has been found */
-    if (
-      getSetupStatus.data?.kspm?.status === 'not-installed' &&
-      getSetupStatus.data?.cspm?.status === 'not-installed' &&
-      getSetupStatus.data?.indicesDetails[0].status === 'empty'
-    ) {
-      return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
+    if (showIntegrationInstalledPrompt) {
+      return packageNotInstalledRenderer({ integrationLinksProps, currentTab });
     }
 
     if (!query) {
@@ -304,4 +409,41 @@ export const CloudPosturePage = <TData, TError>({
   };
 
   return <>{render()}</>;
+};
+
+const showConfigurationIntegrationInstalledPrompt = (
+  setupStatus: BaseCspSetupStatus | undefined
+): boolean => {
+  return (
+    !isIntegrationInstalled(setupStatus?.cspm?.status) &&
+    !isIntegrationInstalled(setupStatus?.kspm?.status) &&
+    !hasLatestFindings(setupStatus?.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS)
+  );
+};
+
+const showVulnerabilitiesIntegrationInstalledPrompt = (
+  setupStatus: BaseCspSetupStatus | undefined,
+  currentTab: FindingsTabsType
+): boolean => {
+  return (
+    !isIntegrationInstalled(setupStatus?.vuln_mgmt?.status) &&
+    !hasLatestFindings(setupStatus?.indicesDetails, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS) &&
+    currentTab === VULNERABILITIES
+  );
+};
+
+const hasLatestFindings = (
+  indexDetails: IndexDetails[] | undefined,
+  latestIndexTemplate: string
+): boolean => {
+  return indexDetails
+    ? indexDetails.some(
+        (indexTemplate) =>
+          indexTemplate?.index === latestIndexTemplate && indexTemplate?.status !== 'empty'
+      )
+    : false;
+};
+
+const isIntegrationInstalled = (integrationStatus: CspStatusCode | undefined) => {
+  return integrationStatus !== 'not-installed';
 };

@@ -14,6 +14,7 @@ import {
   LOADING_STATE_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
   SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
+  VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
 } from './cloud_posture_page';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';
@@ -25,12 +26,25 @@ import { CloudPosturePage } from './cloud_posture_page';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
+import {
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULN_MGMT_POLICY_TEMPLATE,
+} from '../../common/constants';
+import { useLocation } from 'react-router-dom';
+import { findingsNavigation } from '../common/navigation/constants';
 
 const chance = new Chance();
 
 jest.mock('../common/api/use_setup_status_api');
 jest.mock('../common/hooks/use_subscription_status');
 jest.mock('../common/navigation/use_csp_integration_link');
+
+const mockLocation = {
+  pathname: findingsNavigation.vulnerabilities.path,
+  search: '',
+  hash: '',
+  state: null,
+};
 
 describe('<CloudPosturePage />', () => {
   beforeEach(() => {
@@ -160,6 +174,38 @@ describe('<CloudPosturePage />', () => {
     renderCloudPosturePage({ children });
 
     expect(screen.getByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+  });
+
+  // Todo: fix this test once we have a way to mock the useLocation hook
+  xit('renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          kspm: { status: 'not-deployed' },
+          cspm: { status: 'not-deployed' },
+          [VULN_MGMT_POLICY_TEMPLATE]: { status: 'not-installed' },
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+            { index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' },
+          ],
+        },
+      })
+    );
+    (useLocation as jest.Mock).mockImplementation(() => mockLocation);
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    const children = chance.sentence();
+    renderCloudPosturePage({ children });
+
+    expect(
+      screen.getByTestId(VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT)
+    ).toBeInTheDocument();
     expect(screen.queryByText(children)).not.toBeInTheDocument();
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();

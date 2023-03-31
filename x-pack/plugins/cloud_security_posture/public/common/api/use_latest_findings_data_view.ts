@@ -8,21 +8,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import { CspClientPluginStartDeps } from '../../types';
 
 /**
  *  TODO: use perfected kibana data views
  */
-export const useLatestFindingsDataView = () => {
+export const useLatestFindingsDataView = (latestFindingsDataView: string) => {
   const {
     data: { dataViews },
   } = useKibana<CspClientPluginStartDeps>().services;
 
   const findDataView = async (): Promise<DataView> => {
-    const dataView = (await dataViews.find(CSP_LATEST_FINDINGS_DATA_VIEW))?.[0];
+    const dataView = (await dataViews.find(latestFindingsDataView))?.[0];
     if (!dataView) {
-      throw new Error('Findings data view not found');
+      throw new Error(`${latestFindingsDataView} Findings data view not found`);
     }
 
     return dataView;

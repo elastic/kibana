@@ -8,6 +8,7 @@ import React from 'react';
 import { Redirect, Switch, useLocation } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
@@ -18,7 +19,7 @@ import { LatestFindingsContainer } from './latest_findings/latest_findings_conta
 
 export const Configurations = () => {
   const location = useLocation();
-  const dataViewQuery = useLatestFindingsDataView();
+  const dataViewQuery = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
   const getSetupStatus = useCspSetupStatusApi();
   const hasFindings =
     getSetupStatus.data?.indicesDetails[0].status === 'not-empty' ||

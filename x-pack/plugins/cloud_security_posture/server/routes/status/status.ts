@@ -289,7 +289,7 @@ const getCspStatus = async ({
     installedPolicyTemplates
   );
 
-  const statusResponseInfo = getStatusResponse({
+  const statusResponseInfo: CspSetupStatus = getStatusResponse({
     statusCspm,
     statusKspm,
     statusVulnMgmt,
@@ -306,7 +306,7 @@ const getCspStatus = async ({
 
   if ((statusCspm && statusKspm && statusVulnMgmt) === 'not-installed') return statusResponseInfo;
 
-  const response = {
+  const response: CspSetupStatus = {
     ...statusResponseInfo,
     installedPackageVersion: installation?.install_version,
   };

@@ -31,3 +31,5 @@ export interface CspIntegrationDocNavigationItem {
   overviewPath: string;
   getStartedPath: string;
 }
+
+export type FindingsTabsType = 'configurations' | 'vulnerabilities';
