@@ -15,8 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointTestResources = getService('endpointTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/153855
-  describe.skip('Endpoint `execute` response action', () => {
+  describe('Endpoint `execute` response action', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
     let agentId = '';
 
@@ -25,8 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
       agentId = indexedData.hosts[0].agent.id;
     });
 
-    after(() => {
-      endpointTestResources.unloadEndpointData(indexedData);
+    after(async () => {
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     it('should not allow `execute` action without required privilege', async () => {

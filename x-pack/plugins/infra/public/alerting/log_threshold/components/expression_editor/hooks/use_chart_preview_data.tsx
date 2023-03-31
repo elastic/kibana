@@ -8,6 +8,7 @@
 import { useState, useMemo } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PersistedLogViewReference } from '../../../../../../common/log_views';
 import { ExecutionTimeRange } from '../../../../../types';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
@@ -20,14 +21,14 @@ import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../../common/http_api/log_alerts';
 
 interface Options {
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   ruleParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
   executionTimeRange?: ExecutionTimeRange;
 }
 
 export const useChartPreviewData = ({
-  sourceId,
+  logViewReference,
   ruleParams,
   buckets,
   executionTimeRange,
@@ -43,7 +44,7 @@ export const useChartPreviewData = ({
       createPromise: async () => {
         setHasError(false);
         return await callGetChartPreviewDataAPI(
-          sourceId,
+          logViewReference,
           http!.fetch,
           ruleParams,
           buckets,
@@ -58,7 +59,7 @@ export const useChartPreviewData = ({
         setHasError(true);
       },
     },
-    [sourceId, http, ruleParams, buckets]
+    [logViewReference, http, ruleParams, buckets]
   );
 
   const isLoading = useMemo(
@@ -75,7 +76,7 @@ export const useChartPreviewData = ({
 };
 
 export const callGetChartPreviewDataAPI = async (
-  sourceId: string,
+  logViewReference: PersistedLogViewReference,
   fetch: HttpHandler,
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number,
@@ -86,7 +87,7 @@ export const callGetChartPreviewDataAPI = async (
     body: JSON.stringify(
       getLogAlertsChartPreviewDataRequestPayloadRT.encode({
         data: {
-          logView: { type: 'log-view-reference', logViewId: sourceId },
+          logView: logViewReference,
           alertParams,
           buckets,
           executionTimeRange,

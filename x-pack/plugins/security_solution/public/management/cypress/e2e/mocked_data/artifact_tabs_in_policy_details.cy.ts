@@ -81,12 +81,12 @@ describe('Artifact tabs in Policy Details page', () => {
   });
 
   for (const testData of getArtifactsListTestsData()) {
-    beforeEach(() => {
-      login();
-      removeExceptionsList(testData.createRequestBody.list_id);
-    });
-
     describe(`${testData.title} tab`, () => {
+      beforeEach(() => {
+        login();
+        removeExceptionsList(testData.createRequestBody.list_id);
+      });
+
       it(`[NONE] User cannot see the tab for ${testData.title}`, () => {
         loginWithPrivilegeNone(testData.privilegePrefix);
         visitPolicyDetailsPage();
