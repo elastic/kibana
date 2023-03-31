@@ -112,7 +112,7 @@ export const useDataView = (): {
         const dataView = await getSourcererDataView(dataViewId, data.dataViews);
 
         if (needToBeInit) {
-          dispatch(sourcererActions.setDataView(dataView));
+          dispatch(sourcererActions.setDataView({ ...dataView, loading: false }));
         } else {
           if (needToBeInit && scopeId && !skipScopeUpdate) {
             dispatch(

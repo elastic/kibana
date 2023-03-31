@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';
 import type { SecuritySolutionDataViewBase } from '../../types';
@@ -62,6 +63,7 @@ export interface SourcererDataView extends KibanaDataView {
   browserFields: BrowserFields;
   /** comes from dataView.fields.toSpec() */
   indexFields: SecuritySolutionDataViewBase['fields'];
+  fields: DataViewFieldBase[];
   /** set when data view fields are fetched */
   loading: boolean;
   /**
@@ -127,6 +129,7 @@ export const initDataView = {
   browserFields: EMPTY_BROWSER_FIELDS,
   id: '',
   indexFields: EMPTY_INDEX_FIELDS,
+  fields: EMPTY_INDEX_FIELDS,
   loading: false,
   patternList: [],
   runtimeMappings: {},

@@ -24,6 +24,8 @@ export const getSourcererDataView = async (
   return {
     id: dataViewData.id ?? '',
     title: dataViewData.getIndexPattern(),
+    indexFields: dataViewData.fields,
+    fields: dataViewData.fields,
     patternList,
   };
 };
