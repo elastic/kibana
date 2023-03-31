@@ -133,3 +133,7 @@ const convertSourceIdToReference = (sourceId: string): PersistedLogViewReference
 // NOTE: Used by link-to components
 export const replaceLogViewInQueryString = (logViewReference: LogViewReference) =>
   replaceStateKeyInQueryString(defaultLogViewKey, logViewReference);
+
+export type InitializeFromUrl = ReturnType<typeof initializeFromUrl>;
+export type UpdateContextInUrl = ReturnType<typeof updateContextInUrl>;
+export type ListenForUrlChanges = ReturnType<typeof listenForUrlChanges>;
