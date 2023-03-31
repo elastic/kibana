@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { type Type, schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
 import type { v1 } from '../../common';
@@ -24,6 +24,11 @@ export const registerFindRoute = (
   const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   });
+  const sortFieldSchema: Type<keyof v1.SavedObjectWithMetadata> = schema.oneOf([
+    schema.literal('created_at'),
+    schema.literal('updated_at'),
+    schema.literal('type'),
+  ]);
 
   router.get(
     {
@@ -35,15 +40,12 @@ export const registerFindRoute = (
           type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
           search: schema.maybe(schema.string()),
           defaultSearchOperator: searchOperatorSchema,
-          sortField: schema.maybe(schema.string()),
+          sortField: schema.maybe(sortFieldSchema),
           sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
           hasReference: schema.maybe(
             schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
           ),
           hasReferenceOperator: searchOperatorSchema,
-          fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-            defaultValue: [],
-          }),
         }),
       },
     },
@@ -53,7 +55,6 @@ export const registerFindRoute = (
       const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const searchTypes = Array.isArray(query.type) ? query.type : [query.type];
-      const includedFields = Array.isArray(query.fields) ? query.fields : [query.fields];
 
       const importAndExportableTypes = searchTypes.filter((type) =>
         typeRegistry.isImportableAndExportable(type)
@@ -85,9 +86,6 @@ export const registerFindRoute = (
         saved_objects: savedObjects.map((so) => {
           const obj = injectMetaAttributes(so, managementService);
           const result = { ...obj, attributes: {} as Record<string, unknown> };
-          for (const field of includedFields) {
-            result.attributes[field] = (obj.attributes as Record<string, unknown>)[field];
-          }
           return result;
         }),
         total: findResponse.total,

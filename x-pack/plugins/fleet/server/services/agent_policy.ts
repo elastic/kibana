@@ -38,12 +38,16 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import { getAllowedOutputTypeForPolicy, packageToPackagePolicy } from '../../common/services';
+import {
+  getAllowedOutputTypeForPolicy,
+  packageToPackagePolicy,
+  policyHasFleetServer,
+  policyHasAPMIntegration,
+} from '../../common/services';
 import {
   agentPolicyStatuses,
   AGENT_POLICY_INDEX,
   UUID_V5_NAMESPACE,
-  FLEET_APM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
 } from '../../common/constants';
 import type {
@@ -186,10 +190,11 @@ class AgentPolicyService {
   }
 
   public hasAPMIntegration(agentPolicy: AgentPolicy) {
-    return (
-      agentPolicy.package_policies &&
-      agentPolicy.package_policies.some((p) => p.package?.name === FLEET_APM_PACKAGE)
-    );
+    return policyHasAPMIntegration(agentPolicy);
+  }
+
+  public hasFleetServerIntegration(agentPolicy: AgentPolicy) {
+    return policyHasFleetServer(agentPolicy);
   }
 
   public async create(
@@ -315,8 +320,14 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     options: ListWithKuery & {
       withPackagePolicies?: boolean;
+      fields?: string[];
     }
-  ): Promise<{ items: AgentPolicy[]; total: number; page: number; perPage: number }> {
+  ): Promise<{
+    items: AgentPolicy[];
+    total: number;
+    page: number;
+    perPage: number;
+  }> {
     const {
       page = 1,
       perPage = 20,
@@ -324,6 +335,7 @@ class AgentPolicyService {
       sortOrder = 'desc',
       kuery,
       withPackagePolicies = false,
+      fields,
     } = options;
 
     const baseFindParams = {
@@ -332,6 +344,7 @@ class AgentPolicyService {
       sortOrder,
       page,
       perPage,
+      ...(fields ? { fields } : {}),
     };
     const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
     let agentPoliciesSO;
@@ -1046,6 +1059,7 @@ class AgentPolicyService {
 
 export const agentPolicyService = new AgentPolicyService();
 
+// TODO: remove unused parameters
 export async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,

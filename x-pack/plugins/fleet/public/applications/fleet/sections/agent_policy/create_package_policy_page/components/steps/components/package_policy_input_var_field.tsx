@@ -17,10 +17,13 @@ import {
   EuiFieldPassword,
   EuiCodeBlock,
   EuiTextArea,
+  EuiComboBox,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+
+import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
@@ -56,7 +59,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     isEditPage = false,
   }) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
-    const { multi, required, type, title, name, description } = varDef;
+    const { multi, required, type, title, name, description, options } = varDef;
     const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
     const errors = isInvalid ? varErrors : null;
     const fieldLabel = title || name;
@@ -72,7 +75,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
           />
         );
       }
-      if (name === 'data_stream.dataset' && packageType === 'input') {
+      if (name === DATASET_VAR_NAME && packageType === 'input') {
         return (
           <DatasetComboBox
             pkgName={packageName}
@@ -152,6 +155,30 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               disabled={frozen}
             />
           );
+        case 'select':
+          const selectOptions = options?.map((option) => ({
+            value: option.value,
+            label: option.text,
+          }));
+          const selectedOptions =
+            value === undefined ? [] : selectOptions?.filter((option) => option.value === value);
+          return (
+            <EuiComboBox
+              placeholder={i18n.translate('xpack.fleet.packagePolicyField.selectPlaceholder', {
+                defaultMessage: 'Select an option',
+              })}
+              singleSelection={{ asPlainText: true }}
+              options={selectOptions}
+              selectedOptions={selectedOptions}
+              isClearable={true}
+              onChange={(newSelectedOptions: Array<{ label: string; value?: string }>) => {
+                const newValue =
+                  newSelectedOptions.length === 0 ? undefined : newSelectedOptions[0].value;
+                return onChange(newValue);
+              }}
+              onBlur={() => setIsDirty(true)}
+            />
+          );
         default:
           return (
             <EuiFieldText
@@ -176,6 +203,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
       isEditPage,
       isInvalid,
       fieldLabel,
+      options,
     ]);
 
     // Boolean cannot be optional by default set to false

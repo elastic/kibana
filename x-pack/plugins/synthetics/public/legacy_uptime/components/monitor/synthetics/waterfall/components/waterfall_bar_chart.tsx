@@ -17,6 +17,7 @@ import {
   Settings,
   TickFormatter,
   TooltipInfo,
+  TooltipContainer,
 } from '@elastic/charts';
 import { BAR_HEIGHT } from './constants';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
@@ -43,14 +44,16 @@ const Tooltip = (tooltipInfo: TooltipInfo) => {
       );
     });
     return relevantItems.length ? (
-      <WaterfallChartTooltip>
-        {sidebarItem && (
-          <WaterfallTooltipContent
-            text={formatTooltipHeading(sidebarItem.index + 1, sidebarItem.url)}
-            url={sidebarItem.url}
-          />
-        )}
-      </WaterfallChartTooltip>
+      <TooltipContainer>
+        <WaterfallChartTooltip>
+          {sidebarItem && (
+            <WaterfallTooltipContent
+              text={formatTooltipHeading(sidebarItem.index + 1, sidebarItem.url)}
+              url={sidebarItem.url}
+            />
+          )}
+        </WaterfallChartTooltip>
+      </TooltipContainer>
     ) : null;
   }, [data, sidebarItems, tooltipInfo.header?.value]);
 };

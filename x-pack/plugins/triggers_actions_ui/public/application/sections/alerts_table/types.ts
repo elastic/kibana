@@ -4,9 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, ALERT_CASE_IDS, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { Alert, AlertsTableProps } from '../../../types';
 
 export interface Consumer {
   id: AlertConsumers;
   name: string;
+}
+
+export type ServerError = IHttpFetchError<ResponseErrorBody>;
+
+export interface CellComponentProps {
+  alert: Alert;
+  cases: AlertsTableProps['cases']['data'];
+  columnId: SystemCellId;
+  isLoading: boolean;
+  showAlertStatusWithFlapping: boolean;
+}
+
+export type CellComponent = React.FC<CellComponentProps>;
+
+export interface SystemCellComponentMap {
+  [ALERT_STATUS]: CellComponent;
+  [ALERT_CASE_IDS]: CellComponent;
+}
+
+export type SystemCellId = keyof SystemCellComponentMap;
+
+type CaseHooks = (props?: Record<string, unknown>) => {
+  open: ({ attachments }: { attachments: any[] }) => void;
+  close: () => void;
+};
+
+export interface CasesService {
+  ui: {
+    getCasesContext: () => React.FC<any>;
+  };
+  hooks: {
+    useCasesAddToNewCaseFlyout: CaseHooks;
+    useCasesAddToExistingCaseModal: CaseHooks;
+  };
+  helpers: {
+    groupAlertsByRule: (items?: any[]) => any[];
+    canUseCases: (owners: string[]) => Record<string, unknown>;
+  };
 }

@@ -15,11 +15,15 @@ import {
 } from '../../../common/constants';
 import type { PostureInput } from '../../../common/types';
 
-export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS);
-export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA);
-export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS);
+export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws');
+export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
+export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks');
 
-const getPolicyMock = (type: PostureInput): NewPackagePolicy => {
+const getPolicyMock = (
+  type: PostureInput,
+  posture: string,
+  deployment: string
+): NewPackagePolicy => {
   const mockPackagePolicy = createNewPackagePolicyMock();
 
   const awsVarsMock = {
@@ -44,10 +48,10 @@ const getPolicyMock = (type: PostureInput): NewPackagePolicy => {
     },
     vars: {
       posture: {
-        value: type === CLOUDBEAT_VANILLA || type === CLOUDBEAT_EKS ? 'kspm' : 'cspm',
+        value: posture,
         type: 'text',
       },
-      deployment: { value: type, type: 'text' },
+      deployment: { value: deployment, type: 'text' },
     },
     inputs: [
       {

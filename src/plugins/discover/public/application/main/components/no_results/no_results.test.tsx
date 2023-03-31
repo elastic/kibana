@@ -45,7 +45,6 @@ async function mountAndFindSubjects(
     component = await mountWithIntl(
       <KibanaContextProvider services={services}>
         <DiscoverNoResults
-          data={services.data}
           isTimeBased={props.dataView.isTimeBased()}
           onDisableFilters={() => {}}
           {...props}
@@ -139,30 +138,6 @@ describe('DiscoverNoResults', () => {
         });
         expect(result).toHaveProperty('adjustFilters', true);
         expect(result).toHaveProperty('disableFiltersButton', true);
-      });
-    });
-
-    describe('error message', () => {
-      test('renders error message', async () => {
-        const error = new Error('Fatal error');
-        const result = await mountAndFindSubjects({
-          dataView: stubDataView,
-          error,
-          query: { language: 'lucene', query: '' },
-          filters: [{} as Filter],
-        });
-        expect(result).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": false,
-            "checkIndices": false,
-            "disableFiltersButton": false,
-            "errorMsg": true,
-            "mainMsg": false,
-            "viewMatchesButton": false,
-          }
-        `);
       });
     });
   });

@@ -22,5 +22,6 @@
     "@kbn/rule-data-utils",
     "@kbn/data-plugin",
     "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
   ]
 }

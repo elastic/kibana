@@ -51,6 +51,18 @@ describe('createRuleRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
+        alertsFilter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"must": {"term": { "name": "test" }}}',
+          },
+          timeframe: {
+            days: [1],
+            hours: { start: '08:00', end: '17:00' },
+            timezone: 'UTC',
+          },
+        },
       },
     ],
     enabled: true,
@@ -67,6 +79,7 @@ describe('createRuleRoute', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    revision: 0,
   };
 
   const ruleToCreate: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
@@ -78,6 +91,10 @@ describe('createRuleRoute', () => {
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
+        alerts_filter: {
+          query: { kql: mockedAlert.actions[0].alertsFilter!.query!.kql },
+          timeframe: mockedAlert.actions[0].alertsFilter?.timeframe!,
+        },
       },
     ],
   };
@@ -92,6 +109,7 @@ describe('createRuleRoute', () => {
     created_at: mockedAlert.createdAt,
     updated_at: mockedAlert.updatedAt,
     id: mockedAlert.id,
+    revision: mockedAlert.revision,
     execution_status: {
       status: mockedAlert.executionStatus.status,
       last_execution_date: mockedAlert.executionStatus.lastExecutionDate,
@@ -99,7 +117,12 @@ describe('createRuleRoute', () => {
     actions: [
       {
         ...ruleToCreate.actions[0],
+        alerts_filter: {
+          query: mockedAlert.actions[0].alertsFilter?.query!,
+          timeframe: mockedAlert.actions[0].alertsFilter!.timeframe!,
+        },
         connector_type_id: 'test',
+        uuid: '123-456',
       },
     ],
   };
@@ -142,6 +165,21 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                    "timezone": "UTC",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -223,6 +261,21 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                    "timezone": "UTC",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -305,6 +358,21 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                    "timezone": "UTC",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -387,6 +455,21 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                    "timezone": "UTC",
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {

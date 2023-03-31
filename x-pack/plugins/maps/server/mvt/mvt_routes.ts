@@ -15,12 +15,12 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  APP_ID,
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
 } from '../../common/constants';
-import { makeExecutionContext } from '../../common/execution_context';
 import { getAggsTileRequest, getHitsTileRequest } from '../../common/mvt_request_body';
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
@@ -44,11 +44,13 @@ export function initMVTRoutes({
           z: schema.number(),
         }),
         query: schema.object({
+          buffer: schema.maybe(schema.number()),
           geometryFieldName: schema.string(),
           hasLabels: schema.boolean(),
           requestBody: schema.string(),
           index: schema.string(),
           token: schema.maybe(schema.string()),
+          executionContextId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -68,6 +70,7 @@ export function initMVTRoutes({
       };
       try {
         tileRequest = getHitsTileRequest({
+          buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
           encodedRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
           hasLabels: query.hasLabels as boolean,
@@ -86,8 +89,11 @@ export function initMVTRoutes({
         context,
         core,
         executionContext: makeExecutionContext({
+          type: 'server',
+          name: APP_ID,
           description: 'mvt:get_hits_tile',
           url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+          id: query.executionContextId,
         }),
         logger,
         path: tileRequest.path,
@@ -107,6 +113,7 @@ export function initMVTRoutes({
           z: schema.number(),
         }),
         query: schema.object({
+          buffer: schema.maybe(schema.number()),
           geometryFieldName: schema.string(),
           hasLabels: schema.boolean(),
           requestBody: schema.string(),
@@ -114,6 +121,7 @@ export function initMVTRoutes({
           renderAs: schema.string(),
           token: schema.maybe(schema.string()),
           gridPrecision: schema.number(),
+          executionContextId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -133,6 +141,7 @@ export function initMVTRoutes({
       };
       try {
         tileRequest = getAggsTileRequest({
+          buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
           encodedRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
           gridPrecision: parseInt(query.gridPrecision, 10),
@@ -153,8 +162,11 @@ export function initMVTRoutes({
         context,
         core,
         executionContext: makeExecutionContext({
+          type: 'server',
+          name: APP_ID,
           description: 'mvt:get_aggs_tile',
           url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+          id: query.executionContextId,
         }),
         logger,
         path: tileRequest.path,
@@ -265,4 +277,33 @@ function makeAbortController(
     abortController.abort();
   });
   return abortController;
+}
+
+function makeExecutionContext({
+  type,
+  name,
+  description,
+  url,
+  id,
+}: {
+  type: string;
+  name: string;
+  description: string;
+  url: string;
+  id?: string;
+}): KibanaExecutionContext {
+  return id !== undefined
+    ? {
+        type,
+        name,
+        description,
+        url,
+        id,
+      }
+    : {
+        type,
+        name,
+        description,
+        url,
+      };
 }

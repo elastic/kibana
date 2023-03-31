@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
-import { useOverviewStatus } from './use_overview_status';
 import {
   fetchMonitorListAction,
   quietFetchMonitorListAction,
@@ -26,8 +25,6 @@ export function useMonitorList() {
 
   const { pageState, loading, loaded, error, data } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
-
-  const { status: overviewStatus } = useOverviewStatus();
 
   const { handleFilterChange } = useMonitorFiltersState();
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -50,17 +47,20 @@ export function useMonitorList() {
   }, [lastRefresh]);
 
   // On initial mount, load the page
-  useEffect(() => {
-    if (isInitialMount.current) {
-      if (loaded) {
-        dispatch(quietFetchMonitorListAction(pageState));
-      } else {
-        dispatch(fetchMonitorListAction.get(pageState));
+  useDebounce(
+    () => {
+      if (isInitialMount.current) {
+        if (loaded) {
+          dispatch(quietFetchMonitorListAction(pageState));
+        } else {
+          dispatch(fetchMonitorListAction.get(pageState));
+        }
       }
-    }
+    },
+    100,
     // we don't use pageState here, for pageState, useDebounce will handle it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+    [dispatch]
+  );
 
   useDebounce(
     () => {
@@ -86,7 +86,6 @@ export function useMonitorList() {
     loadPage,
     reloadPage,
     absoluteTotal: data.absoluteTotal ?? 0,
-    overviewStatus,
     handleFilterChange,
   };
 }

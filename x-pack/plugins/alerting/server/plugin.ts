@@ -87,7 +87,12 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
-import { AlertsService } from './alerts_service/alerts_service';
+import {
+  AlertsService,
+  type PublicFrameworkAlertsService,
+  type InitializationPromise,
+  errorResult,
+} from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
@@ -126,6 +131,7 @@ export interface PluginSetupContract {
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;
   getConfig: () => AlertingRulesConfig;
+  frameworkAlerts: PublicFrameworkAlertsService;
 }
 
 export interface PluginStartContract {
@@ -188,7 +194,7 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
-  private alertsService?: AlertsService;
+  private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -196,6 +202,7 @@ export class AlertingPlugin {
     this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
+    this.alertsService = null;
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
@@ -244,11 +251,11 @@ export class AlertingPlugin {
       this.alertsService = new AlertsService({
         logger: this.logger,
         pluginStop$: this.pluginStop$,
+        kibanaVersion: this.kibanaVersion,
         elasticsearchClientPromise: core
           .getStartServices()
           .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       });
-      this.alertsService!.initialize();
     }
 
     const ruleTypeRegistry = new RuleTypeRegistry({
@@ -385,6 +392,19 @@ export class AlertingPlugin {
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
+      frameworkAlerts: {
+        enabled: () => this.config.enableFrameworkAlerts,
+        getContextInitializationPromise: (
+          context: string,
+          namespace: string
+        ): Promise<InitializationPromise> => {
+          if (this.alertsService) {
+            return this.alertsService.getContextInitializationPromise(context, namespace);
+          }
+
+          return Promise.resolve(errorResult(`Framework alerts service not available`));
+        },
+      },
     };
   }
 
@@ -485,6 +505,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
+      alertsService: this.alertsService,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,

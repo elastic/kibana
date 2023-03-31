@@ -119,6 +119,7 @@ Any modifications made to this file will be overwritten.
   "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
   "rule_type_id" : "monitoring_alert_cluster_health",
   "tags" : [ "tags", "tags" ],
+  "running" : true,
   "api_key_owner" : "elastic",
   "schedule" : {
     "interval" : "1m"
@@ -141,11 +142,23 @@ Any modifications made to this file will be overwritten.
     "params" : {
       "key" : ""
     },
+    "connector_type_id" : ".server-log",
+    "frequency" : {
+      "summary" : true,
+      "throttle" : "10m",
+      "notify_when" : "onActiveAlert"
+    },
     "group" : "default"
   }, {
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
+    },
+    "connector_type_id" : ".server-log",
+    "frequency" : {
+      "summary" : true,
+      "throttle" : "10m",
+      "notify_when" : "onActiveAlert"
     },
     "group" : "default"
   } ],
@@ -402,6 +415,7 @@ Any modifications made to this file will be overwritten.
     "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
     "rule_type_id" : "monitoring_alert_cluster_health",
     "tags" : [ "tags", "tags" ],
+    "running" : true,
     "api_key_owner" : "elastic",
     "schedule" : {
       "interval" : "1m"
@@ -424,11 +438,23 @@ Any modifications made to this file will be overwritten.
       "params" : {
         "key" : ""
       },
+      "connector_type_id" : ".server-log",
+      "frequency" : {
+        "summary" : true,
+        "throttle" : "10m",
+        "notify_when" : "onActiveAlert"
+      },
       "group" : "default"
     }, {
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
+      },
+      "connector_type_id" : ".server-log",
+      "frequency" : {
+        "summary" : true,
+        "throttle" : "10m",
+        "notify_when" : "onActiveAlert"
       },
       "group" : "default"
     } ],
@@ -455,6 +481,7 @@ Any modifications made to this file will be overwritten.
     "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
     "rule_type_id" : "monitoring_alert_cluster_health",
     "tags" : [ "tags", "tags" ],
+    "running" : true,
     "api_key_owner" : "elastic",
     "schedule" : {
       "interval" : "1m"
@@ -477,11 +504,23 @@ Any modifications made to this file will be overwritten.
       "params" : {
         "key" : ""
       },
+      "connector_type_id" : ".server-log",
+      "frequency" : {
+        "summary" : true,
+        "throttle" : "10m",
+        "notify_when" : "onActiveAlert"
+      },
       "group" : "default"
     }, {
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
+      },
+      "connector_type_id" : ".server-log",
+      "frequency" : {
+        "summary" : true,
+        "throttle" : "10m",
+        "notify_when" : "onActiveAlert"
       },
       "group" : "default"
     } ],
@@ -638,6 +677,7 @@ Any modifications made to this file will be overwritten.
   "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
   "rule_type_id" : "monitoring_alert_cluster_health",
   "tags" : [ "tags", "tags" ],
+  "running" : true,
   "api_key_owner" : "elastic",
   "schedule" : {
     "interval" : "1m"
@@ -660,11 +700,23 @@ Any modifications made to this file will be overwritten.
     "params" : {
       "key" : ""
     },
+    "connector_type_id" : ".server-log",
+    "frequency" : {
+      "summary" : true,
+      "throttle" : "10m",
+      "notify_when" : "onActiveAlert"
+    },
     "group" : "default"
   }, {
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
+    },
+    "connector_type_id" : ".server-log",
+    "frequency" : {
+      "summary" : true,
+      "throttle" : "10m",
+      "notify_when" : "onActiveAlert"
     },
     "group" : "default"
   } ],
@@ -1983,6 +2035,7 @@ Any modifications made to this file will be overwritten.
   "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
   "rule_type_id" : "monitoring_alert_cluster_health",
   "tags" : [ "tags", "tags" ],
+  "running" : true,
   "api_key_owner" : "elastic",
   "schedule" : {
     "interval" : "1m"
@@ -2005,11 +2058,23 @@ Any modifications made to this file will be overwritten.
     "params" : {
       "key" : ""
     },
+    "connector_type_id" : ".server-log",
+    "frequency" : {
+      "summary" : true,
+      "throttle" : "10m",
+      "notify_when" : "onActiveAlert"
+    },
     "group" : "default"
   }, {
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
+    },
+    "connector_type_id" : ".server-log",
+    "frequency" : {
+      "summary" : true,
+      "throttle" : "10m",
+      "notify_when" : "onActiveAlert"
     },
     "group" : "default"
   } ],
@@ -2049,6 +2114,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#Legacy_update_alert_request_properties_actions_inner"><code>Legacy_update_alert_request_properties_actions_inner</code> - </a></li>
     <li><a href="#Legacy_update_alert_request_properties_schedule"><code>Legacy_update_alert_request_properties_schedule</code> - </a></li>
     <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
+    <li><a href="#actions_inner_frequency"><code>actions_inner_frequency</code> - </a></li>
     <li><a href="#alert_response_properties"><code>alert_response_properties</code> - Legacy alert response properties</a></li>
     <li><a href="#alert_response_properties_executionStatus"><code>alert_response_properties_executionStatus</code> - </a></li>
     <li><a href="#alert_response_properties_schedule"><code>alert_response_properties_schedule</code> - </a></li>
@@ -2177,9 +2243,20 @@ Any modifications made to this file will be overwritten.
     <h3><a name="actions_inner"><code>actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
+      <div class="param">connector_type_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. This property appears in responses but cannot be set in requests. </div>
+<div class="param">frequency (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_frequency">actions_inner_frequency</a></span>  </div>
+<div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
 <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
 <div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_frequency"><code>actions_inner_frequency</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when <code>notify_when</code> or <code>throttle</code> are defined at the rule level.</div>
+    <div class="field-items">
+      <div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">summary </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the action is a summary. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2230,7 +2307,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application or feature that owns the rule. For example: <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
 <div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether you want to run the rule on an interval basis after it is created. </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule. </div>
-<div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
 <div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
@@ -2537,9 +2614,10 @@ Any modifications made to this file will be overwritten.
 <div class="param">mute_all </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. </div>
 <div class="param">next_run (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
 <div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the type of rule. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
+<div class="param">running (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule is running. </div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
 <div class="param">scheduled_task_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
@@ -2590,7 +2668,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. </div>
-<div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
 <div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
 <div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>

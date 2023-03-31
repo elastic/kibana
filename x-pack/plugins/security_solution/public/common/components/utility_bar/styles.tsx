@@ -129,7 +129,6 @@ export const BarAction = styled.div.attrs({
 })`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
   `}
 `;
 BarAction.displayName = 'BarAction';

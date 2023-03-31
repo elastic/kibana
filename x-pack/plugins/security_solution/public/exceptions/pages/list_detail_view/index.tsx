@@ -14,6 +14,7 @@ import {
 } from '@kbn/securitysolution-exception-list-components';
 import { EuiLoadingContent } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
@@ -39,6 +40,7 @@ export const ListsDetailViewComponent: FC = () => {
     listId,
     linkedRules,
     exportedList,
+    handleOnDownload,
     viewerStatus,
     listName,
     listDescription,
@@ -66,6 +68,14 @@ export const ListsDetailViewComponent: FC = () => {
 
   const onModalOpen = useCallback(() => setShowExportModal(true), [setShowExportModal]);
 
+  const handleExportList = useCallback(() => {
+    if (list?.type === ExceptionListTypeEnum.ENDPOINT) {
+      onExportList(true);
+    } else {
+      onModalOpen();
+    }
+  }, [onModalOpen, list, onExportList]);
+
   const detailsViewContent = useMemo(() => {
     if (viewerStatus === ViewerStatus.ERROR)
       return <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />;
@@ -86,12 +96,13 @@ export const ListsDetailViewComponent: FC = () => {
           backOptions={headerBackOptions}
           securityLinkAnchorComponent={ListDetailsLinkAnchor}
           onEditListDetails={onEditListDetails}
-          onExportList={onModalOpen}
+          onExportList={handleExportList}
           onDeleteList={handleDelete}
           onManageRules={onManageRules}
+          dataTestSubj="exceptionListManagement"
         />
 
-        <AutoDownload blob={exportedList} name={listId} />
+        <AutoDownload blob={exportedList} name={`${listId}.ndjson`} onDownload={handleOnDownload} />
         <ListWithSearch list={list} refreshExceptions={refreshExceptions} isReadOnly={isReadOnly} />
         <ReferenceErrorModal
           cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
@@ -126,6 +137,7 @@ export const ListsDetailViewComponent: FC = () => {
     canUserEditList,
     disableManageButton,
     exportedList,
+    handleOnDownload,
     headerBackOptions,
     invalidListId,
     isLoading,
@@ -153,7 +165,7 @@ export const ListsDetailViewComponent: FC = () => {
     handleDelete,
     handleReferenceDelete,
     onModalClose,
-    onModalOpen,
+    handleExportList,
   ]);
   return (
     <>

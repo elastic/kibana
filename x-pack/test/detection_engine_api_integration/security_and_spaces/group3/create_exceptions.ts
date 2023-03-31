@@ -22,25 +22,26 @@ import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/commo
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   downgradeImmutableRule,
   createRule,
-  waitForRuleSuccessOrStatus,
-  installPrePackagedRules,
+  waitForRuleSuccess,
+  installMockPrebuiltRules,
   getRule,
   createExceptionList,
   createExceptionListItem,
   waitForSignalsToBePresent,
   getSignalsByIds,
   findImmutableRuleById,
-  getPrePackagedRulesStatus,
+  getPrebuiltRulesAndTimelinesStatus,
   getOpenSignals,
   createRuleWithExceptionEntries,
   getEqlRuleForSignalTesting,
@@ -53,10 +54,7 @@ import {
   importFile,
 } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-import {
-  ELASTIC_SECURITY_RULE_ID,
-  SAMPLE_PREBUILT_RULES,
-} from '../../utils/create_prebuilt_rule_saved_objects';
+import { SAMPLE_PREBUILT_RULES } from '../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -82,7 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
         await deleteAllExceptions(supertest, log);
       });
 
@@ -147,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const rule = await createRule(supertest, log, ruleWithException);
-          await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+          await waitForRuleSuccess({ supertest, log, id: rule.id });
           const bodyToCompare = removeServerGeneratedProperties(rule);
 
           const expected = {
@@ -166,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should allow removing an exception list from an immutable rule through patch', async () => {
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
@@ -184,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should allow adding a second exception list to an immutable rule through patch', async () => {
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
@@ -220,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should override any updates to pre-packaged rules if the user removes the exception list through the API but the new version of a rule has an exception list again', async () => {
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           // This rule has an existing exceptions_list that we are going to use
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
@@ -233,7 +231,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           await downgradeImmutableRule(es, log, ELASTIC_SECURITY_RULE_ID);
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
           const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
           // We should have a length of 1 and it should be the same as our original before we tried to remove it using patch
@@ -242,7 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should merge back an exceptions_list if it was removed from the immutable rule through PATCH', async () => {
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
@@ -272,7 +270,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           await downgradeImmutableRule(es, log, ELASTIC_SECURITY_RULE_ID);
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
           const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
           expect(immutableRuleSecondTime.exceptions_list).to.eql([
@@ -287,14 +285,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should NOT add an extra exceptions_list that already exists on a rule during an upgrade', async () => {
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
           const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
           expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
 
           await downgradeImmutableRule(es, log, ELASTIC_SECURITY_RULE_ID);
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
@@ -306,7 +304,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should NOT allow updates to pre-packaged rules to overwrite existing exception based rules when the user adds an additional exception list', async () => {
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
@@ -336,7 +334,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           await downgradeImmutableRule(es, log, ELASTIC_SECURITY_RULE_ID);
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
           const immutableRuleSecondTime = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
           // It should be the same as what the user added originally
@@ -352,7 +350,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not remove any exceptions added to a pre-packaged/immutable rule during an update if that rule has no existing exception lists', async () => {
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           // Create a new exception list
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -391,7 +389,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           await downgradeImmutableRule(es, log, ruleId);
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
           const immutableRuleSecondTime = await getRule(supertest, log, ruleId);
 
           expect(immutableRuleSecondTime.exceptions_list).to.eql([
@@ -405,7 +403,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not change the immutable tags when adding a second exception list to an immutable rule through patch', async () => {
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
@@ -445,7 +443,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not change count of prepacked rules when adding a second exception list to an immutable rule through patch. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
-          await installPrePackagedRules(supertest, es, log);
+          await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
@@ -475,7 +473,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          const status = await getPrePackagedRulesStatus(supertest, log);
+          const status = await getPrebuiltRulesAndTimelinesStatus(supertest);
           expect(status.rules_not_installed).to.eql(0);
         });
       });
@@ -525,7 +523,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest, log);
-          await deleteAllAlerts(supertest, log);
+          await deleteAllRules(supertest, log);
           await deleteAllExceptions(supertest, log);
         });
 
@@ -570,7 +568,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
           const { id: createdId } = await createRule(supertest, log, ruleWithException);
-          await waitForRuleSuccessOrStatus(supertest, log, createdId);
+          await waitForRuleSuccess({ supertest, log, id: createdId });
           await waitForSignalsToBePresent(supertest, log, 10, [createdId]);
           const signalsOpen = await getSignalsByIds(supertest, log, [createdId]);
           expect(signalsOpen.hits.hits.length).equal(10);

@@ -8,11 +8,10 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
 import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
 
 const Subtext = styled.div`
@@ -27,6 +26,7 @@ interface GetRowItemsWithActionsParams {
   render?: (item: string) => JSX.Element;
   displayCount?: number;
   maxOverflow?: number;
+  aggregatable: boolean;
 }
 
 export const getRowItemsWithActions = ({
@@ -37,25 +37,27 @@ export const getRowItemsWithActions = ({
   render,
   displayCount = 5,
   maxOverflow = 5,
+  aggregatable,
 }: GetRowItemsWithActionsParams): JSX.Element => {
   if (values != null && values.length > 0) {
     const visibleItems = values.slice(0, displayCount).map((value, index) => {
       const id = escapeDataProviderId(`${idPrefix}-${fieldName}-${value}-${index}`);
       return (
-        <CellActions
+        <SecurityCellActions
           key={id}
           mode={CellActionsMode.HOVER}
           visibleCellActions={5}
           showActionTooltips
-          triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+          triggerId={SecurityCellActionsTrigger.DEFAULT}
           field={{
             name: fieldName,
             value,
             type: fieldType,
+            aggregatable,
           }}
         >
           <>{render ? render(value) : defaultToEmptyTag(value)}</>
-        </CellActions>
+        </SecurityCellActions>
       );
     });
 
@@ -69,6 +71,7 @@ export const getRowItemsWithActions = ({
           idPrefix={idPrefix}
           maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
+          isAggregatable={aggregatable}
         />
       </>
     ) : (
@@ -82,6 +85,7 @@ export const getRowItemsWithActions = ({
 interface RowItemOverflowProps {
   fieldName: string;
   fieldType: string;
+  isAggregatable?: boolean;
   values: string[];
   idPrefix: string;
   maxOverflowItems: number;
@@ -92,6 +96,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   fieldName,
   values,
   fieldType,
+  isAggregatable,
   idPrefix,
   maxOverflowItems = 5,
   overflowIndexStart = 5,
@@ -104,6 +109,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
             <MoreContainer
               fieldName={fieldName}
               idPrefix={idPrefix}
+              isAggregatable={isAggregatable}
               fieldType={fieldType}
               values={values}
               overflowIndexStart={overflowIndexStart}

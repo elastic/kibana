@@ -45,7 +45,7 @@ export function getTraceListColumns({
 }): Array<ITableColumn<TraceGroup>> {
   return [
     {
-      field: 'name',
+      field: 'transactionName',
       name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),

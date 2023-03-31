@@ -51,7 +51,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                 'xpack.enterpriseSearch.index.connector.syncRules.validatingDescription',
                 {
                   defaultMessage:
-                    'Draft rules need to be validated before they can take effect. This may take a few minutes.',
+                    'Draft rules need to be validated before they can be activated. This may take a few minutes.',
                 }
               )}
             </EuiFlexItem>
@@ -90,7 +90,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                 'xpack.enterpriseSearch.index.connector.syncRules.invalidDescription',
                 {
                   defaultMessage:
-                    'Draft rules did not validate. Edit the draft rules before they can take effect.',
+                    'Draft rules did not validate. Edit the draft rules before they can be activated.',
                 }
               )}
             </EuiFlexItem>
@@ -128,7 +128,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
               {i18n.translate(
                 'xpack.enterpriseSearch.index.connector.syncRules.validatedDescription',
                 {
-                  defaultMessage: 'Apply draft rules to take effect on the next sync.',
+                  defaultMessage: 'Activate draft rules to take effect on the next sync.',
                 }
               )}
             </EuiFlexItem>
@@ -145,7 +145,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                       {i18n.translate(
                         'xpack.enterpriseSearch.index.connector.syncRules.successCallout.applyDraftRulesTitle',
                         {
-                          defaultMessage: 'Apply draft rules',
+                          defaultMessage: 'Activate draft rules',
                         }
                       )}
                     </EuiButton>

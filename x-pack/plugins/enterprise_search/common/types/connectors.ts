@@ -7,7 +7,8 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string | null;
+  order?: number | null;
+  value: string | number | boolean | null;
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
@@ -169,7 +170,7 @@ export interface ConnectorSyncJob {
   completed_at: string | null;
   connector: {
     configuration: ConnectorConfiguration;
-    filtering: FilteringRules[] | null;
+    filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
     language: string;

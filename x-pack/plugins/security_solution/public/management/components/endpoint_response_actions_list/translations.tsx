@@ -180,3 +180,20 @@ export const FILTER_NAMES = Object.freeze({
     defaultMessage: 'Filter by username',
   }),
 });
+
+export const ARIA_LABELS = Object.freeze({
+  collapse: i18n.translate(
+    'xpack.securitySolution.responseActionsList.list.expandButton.collapse',
+    {
+      defaultMessage: 'Collapse',
+    }
+  ),
+  expand: i18n.translate('xpack.securitySolution.responseActionsList.list.expandButton.expand', {
+    defaultMessage: 'Expand',
+  }),
+});
+
+export const EXECUTE_FILE_LINK_TITLE = i18n.translate(
+  'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
+  { defaultMessage: 'Click here to download full output' }
+);

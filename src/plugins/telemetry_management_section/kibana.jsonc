@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/telemetry-management-section-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "telemetryManagementSection",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "advancedSettings",
+      "telemetry"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "usageCollection"
+    ]
+  }
+}

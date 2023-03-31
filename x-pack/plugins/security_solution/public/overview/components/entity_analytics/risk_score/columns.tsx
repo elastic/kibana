@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { get } from 'lodash/fp';
+import styled from 'styled-components';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
@@ -22,13 +22,24 @@ import type {
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import { EntityAnalyticsHoverActions } from '../common/entity_hover_actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+  SecurityCellActionType,
+} from '../../../../common/components/cell_actions';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
+const StyledCellActions = styled(SecurityCellActions)`
+  padding-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+type OpenEntityOnAlertsPage = (entityName: string) => void;
+
 export const getRiskScoreColumns = (
   riskEntity: RiskScoreEntity,
-  openEntityInTimeline: (entityName: string, oldestAlertTimestamp?: string) => void
+  openEntityOnAlertsPage: OpenEntityOnAlertsPage
 ): HostRiskScoreColumns => [
   {
     field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
@@ -40,19 +51,36 @@ export const getRiskScoreColumns = (
         return riskEntity === RiskScoreEntity.host ? (
           <>
             <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
-            <EntityAnalyticsHoverActions
-              idPrefix={`hosts-risk-table-${entityName}`}
-              fieldName={'host.name'}
-              fieldValue={entityName}
+            <StyledCellActions
+              field={{
+                name: 'host.name',
+                value: entityName,
+                type: 'keyword',
+              }}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              mode={CellActionsMode.INLINE}
+              visibleCellActions={2}
+              disabledActionTypes={[
+                SecurityCellActionType.FILTER,
+                SecurityCellActionType.SHOW_TOP_N,
+              ]}
             />
           </>
         ) : (
           <>
             <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
-            <EntityAnalyticsHoverActions
-              idPrefix={`users-risk-table-${entityName}`}
-              fieldName={'user.name'}
-              fieldValue={entityName}
+            <StyledCellActions
+              field={{
+                name: 'user.name',
+                value: entityName,
+                type: 'keyword',
+              }}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              mode={CellActionsMode.INLINE}
+              disabledActionTypes={[
+                SecurityCellActionType.FILTER,
+                SecurityCellActionType.SHOW_TOP_N,
+              ]}
             />
           </>
         );
@@ -87,7 +115,7 @@ export const getRiskScoreColumns = (
     name: (
       <EuiToolTip content={i18n.ENTITY_RISK_TOOLTIP(riskEntity)}>
         <>
-          {i18n.ENTITY_RISK(riskEntity)}
+          {i18n.ENTITY_RISK_CLASSIFICATION(riskEntity)}
           <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
@@ -112,9 +140,8 @@ export const getRiskScoreColumns = (
         data-test-subj="risk-score-alerts"
         disabled={alertCount === 0}
         onClick={() =>
-          openEntityInTimeline(
-            get('host.name', risk) ?? get('user.name', risk),
-            risk.oldestAlertTimestamp
+          openEntityOnAlertsPage(
+            riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
           )
         }
       >

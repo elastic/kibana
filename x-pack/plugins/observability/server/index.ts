@@ -29,13 +29,7 @@ const configSchema = schema.object({
     index: schema.string({ defaultValue: 'observability-annotations' }),
   }),
   unsafe: schema.object({
-    slo: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-    }),
     alertDetails: schema.object({
-      apm: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
       metrics: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),

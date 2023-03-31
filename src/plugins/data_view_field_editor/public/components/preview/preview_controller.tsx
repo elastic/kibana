@@ -71,7 +71,6 @@ export class PreviewController {
   private search: ISearchStart;
   private fieldFormats: FieldFormatsStart;
 
-  private state: PreviewState = previewStateDefault;
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;
 
@@ -90,19 +89,14 @@ export class PreviewController {
   previewCount = 0;
 
   private updateState = (newState: Partial<PreviewState>) => {
-    this.state = { ...this.state, ...newState };
-    this.publishState();
-  };
-
-  private publishState = () => {
-    // todo try removing object copy
-    this.internalState$.next({ ...this.state });
+    this.internalState$.next({ ...this.state$.getValue(), ...newState });
   };
 
   togglePinnedField = (fieldName: string) => {
+    const currentState = this.state$.getValue();
     const pinnedFields = {
-      ...this.state.pinnedFields,
-      [fieldName]: !this.state.pinnedFields[fieldName],
+      ...currentState.pinnedFields,
+      [fieldName]: !currentState.pinnedFields[fieldName],
     };
 
     this.updateState({ pinnedFields });
@@ -121,18 +115,20 @@ export class PreviewController {
   };
 
   goToNextDocument = () => {
-    if (this.state.currentIdx >= this.state.documents.length - 1) {
+    const currentState = this.state$.getValue();
+    if (currentState.currentIdx >= currentState.documents.length - 1) {
       this.updateState({ currentIdx: 0 });
     } else {
-      this.updateState({ currentIdx: this.state.currentIdx + 1 });
+      this.updateState({ currentIdx: currentState.currentIdx + 1 });
     }
   };
 
   goToPreviousDocument = () => {
-    if (this.state.currentIdx === 0) {
-      this.updateState({ currentIdx: this.state.documents.length - 1 });
+    const currentState = this.state$.getValue();
+    if (currentState.currentIdx === 0) {
+      this.updateState({ currentIdx: currentState.documents.length - 1 });
     } else {
-      this.updateState({ currentIdx: this.state.currentIdx - 1 });
+      this.updateState({ currentIdx: currentState.currentIdx - 1 });
     }
   };
 
@@ -145,7 +141,9 @@ export class PreviewController {
   };
 
   setPreviewError = (error: PreviewState['previewResponse']['error']) => {
-    this.updateState({ previewResponse: { ...this.state.previewResponse, error } });
+    this.updateState({
+      previewResponse: { ...this.internalState$.getValue().previewResponse, error },
+    });
   };
 
   setPreviewResponse = (previewResponse: PreviewState['previewResponse']) => {
@@ -153,7 +151,7 @@ export class PreviewController {
   };
 
   clearPreviewError = (errorCode: ScriptErrorCodes) => {
-    const { previewResponse: prev } = this.state;
+    const { previewResponse: prev } = this.internalState$.getValue();
     const error = prev.error === null || prev.error?.code === errorCode ? null : prev.error;
     this.updateState({
       previewResponse: {

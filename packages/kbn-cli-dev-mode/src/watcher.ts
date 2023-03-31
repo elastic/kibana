@@ -15,19 +15,17 @@ import { makeMatcher } from '@kbn/picomatcher';
 
 import { Log } from './log';
 
-const packageMatcher = makeMatcher(['**/*', '!**/.*']);
+const packageMatcher = makeMatcher([
+  '**/*',
+  '!**/.*',
+  '!x-pack/plugins/screenshotting/chromium/**',
+  '!x-pack/plugins/canvas/shareable_runtime/**',
+]);
 
 /**
  * Any code that is outside of a package must match this in order to trigger a restart
  */
-const nonPackageMatcher = makeMatcher([
-  'config/**/*.yml',
-  'src/**',
-  '!src/{dev,fixtures}/**',
-  'x-pack/plugins/**',
-  '!x-pack/plugins/screenshotting/chromium/**',
-  '!x-pack/plugins/canvas/shareable_runtime/**',
-]);
+const nonPackageMatcher = makeMatcher(['config/**/*.yml']);
 
 export interface Options {
   enabled: boolean;
@@ -84,6 +82,7 @@ export class Watcher {
           if (result.type === 'common package' || result.type === 'server package') {
             return packageMatcher(result.repoRel) && fire(result.repoRel);
           }
+
           if (result.type === 'non-package') {
             return nonPackageMatcher(result.repoRel) && fire(result.repoRel);
           }

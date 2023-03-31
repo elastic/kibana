@@ -50,6 +50,7 @@ import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import {
   type DashboardAppLocator,
@@ -63,6 +64,7 @@ import {
 } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import { DashboardMountContextProps } from './dashboard_app/types';
+import type { FindDashboardsService } from './services/dashboard_saved_object/types';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -89,6 +91,7 @@ export interface DashboardStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   screenshotMode: ScreenshotModePluginStart;
   share?: SharePluginStart;
@@ -108,6 +111,7 @@ export interface DashboardSetup {
 export interface DashboardStart {
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
+  findDashboardsService: () => Promise<FindDashboardsService>;
 }
 
 export class DashboardPlugin
@@ -306,6 +310,13 @@ export class DashboardPlugin
     return {
       locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
+      findDashboardsService: async () => {
+        const { pluginServices } = await import('./services/plugin_services');
+        const {
+          dashboardSavedObject: { findDashboards },
+        } = pluginServices.getServices();
+        return findDashboards;
+      },
     };
   }
 

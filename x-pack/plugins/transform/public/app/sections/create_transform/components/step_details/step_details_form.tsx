@@ -524,7 +524,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
             <>
               <EuiSpacer size={'m'} />
-              <EuiCallOut color="warning" iconType="alert" size="m">
+              <EuiCallOut color="warning" iconType="warning" size="m">
                 <p>
                   <FormattedMessage
                     id="xpack.transform.stepDetailsForm.destinationIndexWarning"
@@ -793,7 +793,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               }
               helpText={i18n.translate('xpack.transform.stepDetailsForm.frequencyHelpText', {
                 defaultMessage:
-                  'The interval to check for changes in source indices when the transformation runs continuously.',
+                  'The interval to check for changes in source indices when the transform runs continuously.',
               })}
             >
               <EuiFieldText

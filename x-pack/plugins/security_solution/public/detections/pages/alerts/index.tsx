@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';

@@ -30,6 +30,9 @@
     "@kbn/data-plugin",
     "@kbn/core-overlays-browser-mocks",
     "@kbn/core-theme-browser-mocks",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/saved-objects-finder-plugin",
   ],
   "exclude": [
     "target/**/*",

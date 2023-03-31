@@ -195,7 +195,7 @@ describe('createPluginInitializerContext', () => {
         opaqueId,
         manifest: createPluginManifest(),
         instanceInfo,
-        nodeInfo: { roles: { backgroundTasks: false, ui: true } },
+        nodeInfo: { roles: { backgroundTasks: false, ui: true, migrator: false } },
       });
       expect(pluginInitializerContext.node.roles.backgroundTasks).toBe(false);
       expect(pluginInitializerContext.node.roles.ui).toBe(true);

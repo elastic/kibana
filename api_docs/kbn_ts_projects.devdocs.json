@@ -198,15 +198,16 @@
           },
           {
             "parentPluginId": "@kbn/ts-projects",
-            "id": "def-common.TsProject.pkgInfo",
+            "id": "def-common.TsProject.pkg",
             "type": "Object",
             "tags": [],
-            "label": "pkgInfo",
+            "label": "pkg",
             "description": [
               "the package this tsconfig file is within, if any"
             ],
             "signature": [
-              "{ id: string; repoRel: string; } | undefined"
+              "Package",
+              " | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
@@ -318,7 +319,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "name of this project"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -651,7 +654,9 @@
             "section": "def-common.TsProject",
             "text": "TsProject"
           },
-          " & { rootImportReq: string; }"
+          " & { rootImportReq: string; pkg: ",
+          "Package",
+          "; }"
         ],
         "path": "packages/kbn-ts-projects/ts_project.ts",
         "deprecated": false,

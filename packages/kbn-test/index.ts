@@ -30,8 +30,9 @@ export {
   createRemoteEsClientForFtrConfig,
 } from './src/es';
 
+export { kbnTestConfig } from './kbn_test_config';
+
 export {
-  kbnTestConfig,
   kibanaServerTestUser,
   kibanaTestUser,
   adminTestUser,
@@ -54,3 +55,5 @@ export { runJest } from './src/jest/run';
 export * from './src/kbn_archiver_cli';
 
 export * from './src/kbn_client';
+
+export * from './src/find_test_plugin_paths';

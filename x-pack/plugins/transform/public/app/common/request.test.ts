@@ -11,11 +11,11 @@ import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
 import { PivotGroupByConfig } from '.';
 
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
-import { PivotAggsConfig } from './pivot_aggs';
+import type { PivotAggsConfig } from './pivot_aggs';
 import {
   defaultQuery,
   getPreviewTransformRequestBody,
@@ -30,7 +30,7 @@ import {
   matchAllQuery,
   type TransformConfigQuery,
 } from './request';
-import { LatestFunctionConfigUI } from '../../../common/types/transform';
+import type { LatestFunctionConfigUI } from '../../../common/types/transform';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 const simpleQuery: TransformConfigQuery = { query_string: { query: 'airline:AAL' } };
@@ -101,6 +101,34 @@ describe('Transform: Common', () => {
       source: {
         index: ['the-data-view-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-query' } },
+      },
+    });
+  });
+
+  test('getPreviewTransformRequestBody() with time field and default query', () => {
+    const query = { query_string: { query: '*', default_operator: 'AND' } };
+
+    const request = getPreviewTransformRequestBody(
+      {
+        getIndexPattern: () => 'the-data-view-title',
+        timeFieldName: 'the-time-field-name',
+      } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      }
+    );
+
+    expect(request).toEqual({
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      source: {
+        index: ['the-data-view-title'],
       },
     });
   });

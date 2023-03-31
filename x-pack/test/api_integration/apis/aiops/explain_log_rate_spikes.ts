@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { sortBy } from 'lodash';
 import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
@@ -54,12 +55,12 @@ export default ({ getService }: FtrProviderContext) => {
             expect(typeof d.type).to.be('string');
           });
 
-          const addChangePointsActions = data.filter(
-            (d) => d.type === testData.expected.changePointFilter
+          const addSignificantTermsActions = data.filter(
+            (d) => d.type === testData.expected.significantTermFilter
           );
-          expect(addChangePointsActions.length).to.greaterThan(0);
+          expect(addSignificantTermsActions.length).to.greaterThan(0);
 
-          const changePoints = addChangePointsActions
+          const significantTerms = addSignificantTermsActions
             .flatMap((d) => d.payload)
             .sort(function (a, b) {
               if (a.fieldName === b.fieldName) {
@@ -68,22 +69,25 @@ export default ({ getService }: FtrProviderContext) => {
               return a.fieldName > b.fieldName ? 1 : -1;
             });
 
-          expect(changePoints.length).to.eql(
-            testData.expected.changePoints.length,
-            `Expected 'changePoints.length' to be ${testData.expected.changePoints.length}, got ${changePoints.length}.`
+          expect(significantTerms.length).to.eql(
+            testData.expected.significantTerms.length,
+            `Expected 'significantTerms.length' to be ${testData.expected.significantTerms.length}, got ${significantTerms.length}.`
           );
-          changePoints.forEach((cp, index) => {
-            const ecp = testData.expected.changePoints[index];
+          significantTerms.forEach((cp, index) => {
+            const ecp = testData.expected.significantTerms[index];
             expect(cp.fieldName).to.eql(ecp.fieldName);
             expect(cp.fieldValue).to.eql(ecp.fieldValue);
-            expect(cp.doc_count).to.eql(ecp.doc_count);
+            expect(cp.doc_count).to.eql(
+              ecp.doc_count,
+              `Expected doc_count for '${cp.fieldName}:${cp.fieldValue}' to be ${ecp.doc_count}, got ${cp.doc_count}`
+            );
             expect(cp.bg_count).to.eql(ecp.bg_count);
           });
 
           const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
           const histograms = histogramActions.flatMap((d) => d.payload);
-          // for each change point we should get a histogram
-          expect(histogramActions.length).to.be(changePoints.length);
+          // for each significant term we should get a histogram
+          expect(histogramActions.length).to.be(significantTerms.length);
           // each histogram should have a length of 20 items.
           histograms.forEach((h, index) => {
             expect(h.histogram.length).to.be(20);
@@ -92,8 +96,8 @@ export default ({ getService }: FtrProviderContext) => {
           const groupActions = data.filter((d) => d.type === testData.expected.groupFilter);
           const groups = groupActions.flatMap((d) => d.payload);
 
-          expect(groups).to.eql(
-            testData.expected.groups,
+          expect(sortBy(groups, 'id')).to.eql(
+            sortBy(testData.expected.groups, 'id'),
             'Grouping result does not match expected values.'
           );
 
@@ -101,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
             (d) => d.type === testData.expected.groupHistogramFilter
           );
           const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
-          // for each change point group we should get a histogram
+          // for each significant terms group we should get a histogram
           expect(groupHistograms.length).to.be(groups.length);
           // each histogram should have a length of 20 items.
           groupHistograms.forEach((h, index) => {

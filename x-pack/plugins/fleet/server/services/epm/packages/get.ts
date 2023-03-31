@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import pMap from 'p-map';
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import {
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
 import type {
@@ -72,10 +74,35 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+  const MAX_PKGS_TO_LOAD_TITLE = 10;
 
-  const packagesNotInRegistry = packageSavedObjects.saved_objects
-    .filter((pkg) => !registryItems.some((item) => item.name === pkg.id))
-    .map((pkg) => createInstallableFrom({ ...pkg.attributes, title: nameAsTitle(pkg.id) }, pkg));
+  const packagesNotInRegistry = packageSavedObjects.saved_objects.filter(
+    (pkg) => !registryItems.some((item) => item.name === pkg.id)
+  );
+
+  const uploadedPackagesNotInRegistry = await pMap(
+    packagesNotInRegistry.entries(),
+    async ([i, pkg]) => {
+      // fetching info of uploaded packages to populate title, description
+      // limit to 10 for performance
+      if (i < MAX_PKGS_TO_LOAD_TITLE) {
+        const packageInfo = await withSpan({ name: 'get-package-info', type: 'package' }, () =>
+          getPackageInfo({
+            savedObjectsClient,
+            pkgName: pkg.id,
+            pkgVersion: pkg.attributes.version,
+          })
+        );
+        return createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
+      } else {
+        return createInstallableFrom(
+          { ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id },
+          pkg
+        );
+      }
+    },
+    { concurrency: 10 }
+  );
 
   const packageList = registryItems
     .map((item) =>
@@ -84,7 +111,7 @@ export async function getPackages(
         packageSavedObjects.saved_objects.find(({ id }) => id === item.name)
       )
     )
-    .concat(packagesNotInRegistry as Installable<any>)
+    .concat(uploadedPackagesNotInRegistry as Installable<any>)
     .sort(sortByName);
 
   if (!excludeInstallStatus) {
@@ -137,6 +164,7 @@ export async function getPackageSavedObjects(
   return savedObjectsClient.find<Installation>({
     ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
   });
 }
 

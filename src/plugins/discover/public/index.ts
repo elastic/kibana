@@ -26,7 +26,4 @@ export {
   getSavedSearchUrl,
   getSavedSearchUrlConflictMessage,
   throwErrorOnSavedSearchUrlConflict,
-  VIEW_MODE,
-  type DiscoverGridSettings,
-  type DiscoverGridSettingsColumn,
 } from '@kbn/saved-search-plugin/public';

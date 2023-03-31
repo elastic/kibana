@@ -53,7 +53,7 @@ export const ApiTotalStats: React.FC = () => {
       {stats.map((item, index) => (
         <EuiFlexItem key={index}>
           <EuiPanel color={index === 0 ? 'primary' : 'subdued'} hasShadow={false} paddingSize="l">
-            <EuiStat {...item} />
+            <EuiStat titleSize="m" {...item} />
           </EuiPanel>
         </EuiFlexItem>
       ))}

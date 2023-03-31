@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import { EuiLinkColor } from '@elastic/eui';
 import { ExperimentalBadge } from './experimental_badge';
 
+type OnClickEvent = React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>;
 interface Props {
   color?: EuiLinkColor;
   'data-test-subj'?: string;
@@ -20,7 +21,7 @@ interface Props {
   label: string;
   link: LinkDescriptor;
   hideBadge?: boolean;
-  onClick?: () => void;
+  onClick?: (e?: OnClickEvent) => void;
 }
 export const TryItButton = ({
   label,
@@ -33,6 +34,11 @@ export const TryItButton = ({
 }: Props) => {
   const linkProps = useLinkProps({ ...link });
 
+  const handleClick = (event: OnClickEvent) => {
+    if (linkProps.onClick) linkProps.onClick(event);
+    if (onClick) onClick(event);
+  };
+
   return (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
       {!hideBadge && (
@@ -40,7 +46,7 @@ export const TryItButton = ({
           <EuiLink
             data-test-subj={`${props['data-test-subj']}-badge`}
             {...linkProps}
-            onClick={onClick}
+            onClick={handleClick}
           >
             <EuiBetaBadge
               css={css`
@@ -60,7 +66,7 @@ export const TryItButton = ({
           data-test-subj={props['data-test-subj']}
           {...linkProps}
           color={color}
-          onClick={onClick}
+          onClick={handleClick}
         >
           <EuiFlexGroup wrap={false} responsive={false} gutterSize="m" alignItems="center">
             {experimental && (

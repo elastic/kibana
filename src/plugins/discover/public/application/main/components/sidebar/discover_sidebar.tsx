@@ -14,9 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSideBar_Deprecated as EuiPageSideBar,
-  htmlIdGenerator,
 } from '@elastic/eui';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
@@ -26,14 +24,13 @@ import {
   FieldListGroupedProps,
   FieldsGroupNames,
   GroupedFieldsParams,
-  triggerVisualizeActionsTextBasedLanguages,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
-import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
+import { FIELDS_LIMIT_SETTING } from '../../../../../common';
 import {
   getSelectedFields,
   shouldShowField,
@@ -41,11 +38,8 @@ import {
   INITIAL_SELECTED_FIELDS_RESULT,
 } from './lib/group_fields';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
-import { getUiActions } from '../../../../kibana_services';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../services/discover_data_state_container';
-
-const fieldSearchDescriptionId = htmlIdGenerator()();
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -130,7 +124,6 @@ export function DiscoverSidebarComponent({
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
-  const query = useAppStateSelector((state) => state.query);
 
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
@@ -176,7 +169,7 @@ export function DiscoverSidebarComponent({
               },
               fieldName,
               onDelete: async () => {
-                await onFieldEdited();
+                await onFieldEdited({ removedFieldName: fieldName });
               },
             });
             if (setFieldEditorRef) {
@@ -196,17 +189,6 @@ export function DiscoverSidebarComponent({
       dataViewFieldEditor,
     ]
   );
-
-  const visualizeAggregateQuery = useCallback(() => {
-    const aggregateQuery = query && isOfAggregateQueryType(query) ? query : undefined;
-    triggerVisualizeActionsTextBasedLanguages(
-      getUiActions(),
-      columns,
-      PLUGIN_ID,
-      selectedDataView,
-      aggregateQuery
-    );
-  }, [columns, selectedDataView, query]);
 
   const popularFieldsLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
   const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
@@ -326,7 +308,6 @@ export function DiscoverSidebarComponent({
               <FieldListGrouped
                 {...fieldListGroupedProps}
                 renderFieldItem={renderFieldItem}
-                screenReaderDescriptionId={fieldSearchDescriptionId}
                 localStorageKeyPrefix="discover"
               />
             ) : (
@@ -342,20 +323,6 @@ export function DiscoverSidebarComponent({
                 >
                   {i18n.translate('discover.fieldChooser.addField.label', {
                     defaultMessage: 'Add a field',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-            {isPlainRecord && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="lensApp"
-                  data-test-subj="textBased-visualize"
-                  onClick={visualizeAggregateQuery}
-                  size="s"
-                >
-                  {i18n.translate('discover.textBasedLanguages.visualize.label', {
-                    defaultMessage: 'Visualize in Lens',
                   })}
                 </EuiButton>
               </EuiFlexItem>

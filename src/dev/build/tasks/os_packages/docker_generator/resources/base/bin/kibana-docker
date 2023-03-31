@@ -101,6 +101,7 @@ kibana_vars=(
     logging.root
     logging.root.appenders
     logging.root.level
+    map.emsUrl
     map.includeElasticMapsService
     map.tilemap.options.attribution
     map.tilemap.options.maxZoom
@@ -139,6 +140,7 @@ kibana_vars=(
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes
+    savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
     server.compression.enabled
@@ -299,8 +301,6 @@ kibana_vars=(
     xpack.ingestManager.fleet.tlsCheckDisabled
     xpack.ingestManager.registryUrl
     xpack.observability.annotations.index
-    xpack.observability.unsafe.slo.enabled
-    xpack.observability.unsafe.alertDetails.apm.enabled
     xpack.observability.unsafe.alertDetails.metrics.enabled
     xpack.observability.unsafe.alertDetails.logs.enabled
     xpack.observability.unsafe.alertDetails.uptime.enabled

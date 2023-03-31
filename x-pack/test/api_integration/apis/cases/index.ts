@@ -10,7 +10,7 @@ import {
   deleteUsersAndRoles,
 } from '../../../cases_api_integration/common/lib/authentication';
 
-import { loginUsers } from '../../../cases_api_integration/common/lib/user_profiles';
+import { loginUsers } from '../../../cases_api_integration/common/lib/api/user_profiles';
 import { casesAllUser, obsCasesAllUser, secAllUser, users } from './common/users';
 import { roles } from './common/roles';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -34,5 +34,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./privileges'));
     loadTestFile(require.resolve('./suggest_user_profiles'));
     loadTestFile(require.resolve('./bulk_get_user_profiles'));
+    loadTestFile(require.resolve('./files'));
   });
 }

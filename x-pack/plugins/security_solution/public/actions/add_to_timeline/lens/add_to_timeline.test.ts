@@ -9,7 +9,7 @@ import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embedd
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import type { SecurityAppStore } from '../../../common/store/types';
-import { createAddToTimelineAction } from './add_to_timeline';
+import { createAddToTimelineLensAction } from './add_to_timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../common/constants';
 import { Subject } from 'rxjs';
@@ -54,8 +54,8 @@ const context = {
   embeddable: lensEmbeddable,
 } as unknown as ActionExecutionContext<CellValueContext>;
 
-describe('Lens createAddToTimelineAction', () => {
-  const addToTimelineAction = createAddToTimelineAction({ store, order: 1 });
+describe('createAddToTimelineLensAction', () => {
+  const addToTimelineAction = createAddToTimelineLensAction({ store, order: 1 });
 
   beforeEach(() => {
     currentAppId$.next(APP_UI_ID);

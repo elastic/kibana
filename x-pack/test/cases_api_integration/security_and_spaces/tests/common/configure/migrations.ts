@@ -12,7 +12,7 @@ import {
   getConfiguration,
   getConfigureSavedObjectsFromES,
   getConnectorMappingsFromES,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

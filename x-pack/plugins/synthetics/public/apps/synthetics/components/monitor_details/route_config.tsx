@@ -10,17 +10,18 @@ import React from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { EuiIcon, EuiPageHeaderProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RefreshButton } from '../common/components/refresh_button';
 import { MonitorNotFoundPage } from './monitor_not_found_page';
 import { MonitorDetailsPageTitle } from './monitor_details_page_title';
-import { EditMonitorLink } from '../common/links/edit_monitor';
 import { RunTestManually } from './run_test_manually';
 import { MonitorDetailsLastRun } from './monitor_details_last_run';
 import { MonitorDetailsStatus } from './monitor_details_status';
 import { MonitorDetailsLocation } from './monitor_details_location';
 import { MonitorErrors } from './monitor_errors/monitor_errors';
+import { MonitorErrorsIcon } from './monitor_errors/errors_icon';
 import { MonitorHistory } from './monitor_history/monitor_history';
 import { MonitorSummary } from './monitor_summary/monitor_summary';
-import { MonitorDetailsPage } from './monitor_details_page';
+import { EditMonitorLink } from './monitor_summary/edit_monitor_link';
 import {
   MONITOR_ERRORS_ROUTE,
   MONITOR_HISTORY_ROUTE,
@@ -42,11 +43,7 @@ export const getMonitorDetailsRoute = (
         values: { baseTitle },
       }),
       path: MONITOR_ROUTE,
-      component: () => (
-        <MonitorDetailsPage>
-          <MonitorSummary />
-        </MonitorDetailsPage>
-      ),
+      component: MonitorSummary,
       dataTestSubj: 'syntheticsMonitorDetailsPage',
       pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'overview'),
     },
@@ -56,11 +53,7 @@ export const getMonitorDetailsRoute = (
         values: { baseTitle },
       }),
       path: MONITOR_HISTORY_ROUTE,
-      component: () => (
-        <MonitorDetailsPage>
-          <MonitorHistory />
-        </MonitorDetailsPage>
-      ),
+      component: MonitorHistory,
       dataTestSubj: 'syntheticsMonitorHistoryPage',
       pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'history'),
     },
@@ -70,11 +63,7 @@ export const getMonitorDetailsRoute = (
         values: { baseTitle },
       }),
       path: MONITOR_ERRORS_ROUTE,
-      component: () => (
-        <MonitorDetailsPage>
-          <MonitorErrors />
-        </MonitorDetailsPage>
-      ),
+      component: MonitorErrors,
       dataTestSubj: 'syntheticsMonitorHistoryPage',
       pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'errors'),
     },
@@ -84,7 +73,7 @@ export const getMonitorDetailsRoute = (
         values: { baseTitle },
       }),
       path: MONITOR_NOT_FOUND_ROUTE,
-      component: () => <MonitorNotFoundPage />,
+      component: MonitorNotFoundPage,
       dataTestSubj: 'syntheticsMonitorNotFoundPage',
       pageHeader: {
         breadcrumbs: [getMonitorsBreadcrumb(syntheticsPath)],
@@ -127,6 +116,7 @@ const getMonitorSummaryHeader = (
     pageTitle: <MonitorDetailsPageTitle />,
     breadcrumbs: [getMonitorsBreadcrumb(syntheticsPath)],
     rightSideItems: [
+      <RefreshButton />,
       <EditMonitorLink />,
       <RunTestManually />,
       <MonitorDetailsLastRun />,
@@ -154,7 +144,7 @@ const getMonitorSummaryHeader = (
         label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
           defaultMessage: 'Errors',
         }),
-        prepend: <EuiIcon type="alert" color="danger" />,
+        prepend: <MonitorErrorsIcon />,
         isSelected: selectedTab === 'errors',
         href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
         'data-test-subj': 'syntheticsMonitorErrorsTab',

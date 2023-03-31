@@ -18,7 +18,7 @@ import {
   deleteAllCaseItems,
   superUserSpace1Auth,
   extractWarningValueFromWarningHeader,
-} from '../../../../../common/lib/utils';
+} from '../../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,

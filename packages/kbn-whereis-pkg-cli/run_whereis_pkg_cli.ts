@@ -8,19 +8,20 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { getPkgMap } from '@kbn/repo-packages';
+import { getPkgsById } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const locatePkgsByID = function (inputFilters: string[], log: ToolingLog) {
-  const packagesMap = getPkgMap();
+  const packagesMap = getPkgsById(REPO_ROOT);
   let missingPkgsCount = 0;
 
   inputFilters.forEach((filterInput) => {
     const pkgId = filterInput.toLowerCase();
+    const pkg = packagesMap.get(pkgId);
 
-    if (packagesMap.has(pkgId)) {
-      const pkgLocation = packagesMap.get(pkgId);
-      log.success(`pkg ${pkgId} location => ${pkgLocation}`);
+    if (pkg) {
+      log.success(`pkg ${pkgId} location => ${pkg.normalizedRepoRelativeDir}`);
     } else {
       missingPkgsCount++;
       // fail

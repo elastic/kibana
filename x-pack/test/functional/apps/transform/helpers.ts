@@ -30,6 +30,14 @@ export interface BaseTransformTestData {
   destinationDataViewTimeField?: string;
   discoverAdjustSuperDatePicker: boolean;
   numFailureRetries?: string;
+  fieldStatsEntries?: Array<{
+    fieldName: string;
+    type: 'keyword' | 'number' | 'date';
+    isGroupByInput?: boolean;
+    isAggInput?: boolean;
+    isUniqueKeyInput?: boolean;
+    isSortFieldInput?: boolean;
+  }>;
 }
 
 export interface PivotTransformTestData extends BaseTransformTestData {
@@ -52,11 +60,14 @@ export function isLatestTransformTestData(arg: any): arg is LatestTransformTestD
 
 export function getPivotTransformConfig(
   prefix: string,
-  continuous?: boolean
+  continuous?: boolean,
+  unattended?: boolean
 ): TransformPivotConfig {
   const timestamp = Date.now();
   return {
-    id: `ec_${prefix}_pivot_${timestamp}_${continuous ? 'cont' : 'batch'}`,
+    id: `ec_${prefix}_pivot_${timestamp}_${continuous ? 'cont' : 'batch'}${
+      unattended ? '_unattended' : ''
+    }`,
     source: { index: ['ft_ecommerce'] },
     pivot: {
       group_by: { category: { terms: { field: 'category.keyword' } } },
@@ -67,6 +78,7 @@ export function getPivotTransformConfig(
     } transform with avg(products.base_price) grouped by terms(category.keyword)`,
     dest: { index: `user-ec_2_${timestamp}` },
     ...(continuous ? { sync: { time: { field: 'order_date', delay: '60s' } } } : {}),
+    ...(unattended ? { settings: { unattended: true } } : {}),
   };
 }
 

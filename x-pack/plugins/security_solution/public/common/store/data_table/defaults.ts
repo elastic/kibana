@@ -14,6 +14,7 @@ import * as i18n from './translations';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
 
+import { VIEW_SELECTION } from '../../../../common/constants';
 export const defaultHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -88,6 +89,11 @@ export const tableDefaults: SubsetDataTableModel = {
   queryFields: [],
   title: '',
   totalCount: 0,
+  viewMode: VIEW_SELECTION.gridView,
+  additionalFilters: {
+    showBuildingBlockAlerts: false,
+    showOnlyThreatIndicatorAlerts: false,
+  },
 };
 
 export const getDataTableManageDefaults = (id: string) => ({

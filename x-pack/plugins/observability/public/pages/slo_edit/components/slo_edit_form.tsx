@@ -5,224 +5,179 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import {
-  EuiAvatar,
-  EuiButton,
-  EuiFormLabel,
-  EuiPanel,
-  EuiSelect,
-  EuiSpacer,
-  EuiTimeline,
-  EuiTimelineItem,
-  EuiTitle,
-} from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
+import { EuiButton, EuiFlexGroup, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
-import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial_validities';
-import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
-import { SloEditFormDescription } from './slo_edit_form_description';
-import { SloEditFormObjectives } from './slo_edit_form_objectives';
+import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
+import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
+import { useSectionFormValidation } from '../helpers/use_section_form_validation';
+import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
+import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 import {
   transformValuesToCreateSLOInput,
   transformSloResponseToCreateSloInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
-import { paths } from '../../../config';
-import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { paths } from '../../../config/paths';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
+import { useShowSections } from '../hooks/use_show_sections';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
 }
 
-const maxWidth = 775;
+export const maxWidth = 775;
 
 export function SloEditForm({ slo }: Props) {
-  const isEditMode = slo !== undefined;
   const {
     application: { navigateToUrl },
     http: { basePath },
     notifications: { toasts },
   } = useKibana().services;
+  const isEditMode = slo !== undefined;
 
-  const { control, watch, getFieldState, getValues, formState } = useForm({
+  const methods = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });
+  const { watch, getFieldState, getValues, formState, trigger } = methods;
 
-  const { isDefinitionValid, isDescriptionValid, isObjectiveValid } = useCheckFormPartialValidities(
-    { getFieldState, formState }
+  const { isIndicatorSectionValid, isObjectiveSectionValid, isDescriptionSectionValid } =
+    useSectionFormValidation({
+      getFieldState,
+      getValues,
+      formState,
+      watch,
+    });
+
+  const { showDescriptionSection, showObjectiveSection } = useShowSections(
+    isEditMode,
+    formState.isValidating,
+    isIndicatorSectionValid,
+    isObjectiveSectionValid
   );
 
-  const { loading, success, error, createSlo, updateSlo } = useCreateOrUpdateSlo();
+  const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
+  const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const isValid = await trigger();
+    if (!isValid) {
+      return;
+    }
+
     const values = getValues();
+
     if (isEditMode) {
-      const processedValues = transformValuesToUpdateSLOInput(values);
-      updateSlo(slo.id, processedValues);
+      try {
+        const processedValues = transformValuesToUpdateSLOInput(values);
+
+        await updateSlo({ sloId: slo.id, slo: processedValues });
+
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.sloEdit.update.success', {
+            defaultMessage: 'Successfully updated {name}',
+            values: { name: getValues().name },
+          })
+        );
+
+        navigateToUrl(basePath.prepend(paths.observability.slos));
+      } catch (error) {
+        toasts.addError(new Error(error), {
+          title: i18n.translate('xpack.observability.slo.sloEdit.creation.error', {
+            defaultMessage: 'Something went wrong',
+          }),
+        });
+      }
     } else {
-      const processedValues = transformValuesToCreateSLOInput(values);
-      createSlo(processedValues);
+      try {
+        const processedValues = transformValuesToCreateSLOInput(values);
+
+        await createSlo({ slo: processedValues });
+
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.sloEdit.creation.success', {
+            defaultMessage: 'Successfully created {name}',
+            values: { name: getValues().name },
+          })
+        );
+        navigateToUrl(basePath.prepend(paths.observability.slos));
+      } catch (error) {
+        toasts.addError(new Error(error), {
+          title: i18n.translate('xpack.observability.slo.sloEdit.creation.error', {
+            defaultMessage: 'Something went wrong',
+          }),
+        });
+      }
     }
   };
 
-  useEffect(() => {
-    if (success) {
-      toasts.addSuccess(
-        isEditMode
-          ? i18n.translate('xpack.observability.slos.sloEdit.update.success', {
-              defaultMessage: 'Successfully updated {name}',
-              values: { name: getValues().name },
-            })
-          : i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
-              defaultMessage: 'Successfully created {name}',
-              values: { name: getValues().name },
-            })
-      );
-
-      navigateToUrl(basePath.prepend(paths.observability.slos));
-    }
-
-    if (error) {
-      toasts.addError(new Error(error), {
-        title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
-          defaultMessage: 'Something went wrong',
-        }),
-      });
-    }
-  }, [success, error, toasts, isEditMode, getValues, navigateToUrl, basePath]);
-
   return (
-    <EuiTimeline data-test-subj="sloForm">
-      <EuiTimelineItem
-        verticalAlign="top"
-        icon={
-          <EuiAvatar
-            name={isDefinitionValid ? 'Check' : '1'}
-            iconType={isDefinitionValid ? 'check' : ''}
-            color={isDefinitionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
-          />
-        }
-      >
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-          <EuiTitle>
-            <h2>
-              {i18n.translate('xpack.observability.slos.sloEdit.definition.title', {
+    <FormProvider {...methods}>
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="sloForm">
+        <EuiSteps
+          steps={[
+            {
+              title: i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
                 defaultMessage: 'Define SLI',
-              })}
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="xl" />
-
-          <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.definition.sliType', {
-              defaultMessage: 'SLI type',
-            })}
-          </EuiFormLabel>
-
-          <Controller
-            name="indicator.type"
-            control={control}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <EuiSelect
-                data-test-subj="sloFormIndicatorTypeSelect"
-                {...field}
-                options={SLI_OPTIONS}
-              />
-            )}
-          />
-
-          <EuiSpacer size="xxl" />
-
-          {watch('indicator.type') === 'sli.kql.custom' ? (
-            <SloEditFormDefinitionCustomKql control={control} watch={watch} />
-          ) : null}
-
-          <EuiSpacer size="m" />
-        </EuiPanel>
-      </EuiTimelineItem>
-
-      <EuiTimelineItem
-        verticalAlign="top"
-        icon={
-          <EuiAvatar
-            name={isObjectiveValid ? 'Check' : '2'}
-            iconType={isObjectiveValid ? 'check' : ''}
-            color={isObjectiveValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
-          />
-        }
-      >
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-          <EuiTitle>
-            <h2>
-              {i18n.translate('xpack.observability.slos.sloEdit.objectives.title', {
+              }),
+              children: <SloEditFormIndicatorSection />,
+              status: isIndicatorSectionValid ? 'complete' : 'incomplete',
+            },
+            {
+              title: i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
                 defaultMessage: 'Set objectives',
-              })}
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="xl" />
-
-          <SloEditFormObjectives control={control} watch={watch} />
-
-          <EuiSpacer size="xl" />
-        </EuiPanel>
-      </EuiTimelineItem>
-
-      <EuiTimelineItem
-        verticalAlign="top"
-        icon={
-          <EuiAvatar
-            name={isDescriptionValid ? 'Check' : '3'}
-            iconType={isDescriptionValid ? 'check' : ''}
-            color={isDescriptionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
-          />
-        }
-      >
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-          <EuiTitle>
-            <h2>
-              {i18n.translate('xpack.observability.slos.sloEdit.description.title', {
+              }),
+              children: showObjectiveSection ? <SloEditFormObjectiveSection /> : null,
+              status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
+            },
+            {
+              title: i18n.translate('xpack.observability.slo.sloEdit.description.title', {
                 defaultMessage: 'Describe SLO',
-              })}
-            </h2>
-          </EuiTitle>
+              }),
+              children: showDescriptionSection ? <SloEditFormDescriptionSection /> : null,
+              status:
+                showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
+            },
+          ]}
+        />
 
-          <EuiSpacer size="xl" />
-
-          <SloEditFormDescription control={control} />
-
-          <EuiSpacer size="xl" />
-
+        <EuiFlexGroup direction="row" gutterSize="s">
           <EuiButton
-            fill
             color="primary"
             data-test-subj="sloFormSubmitButton"
+            fill
+            isLoading={isCreateSloLoading || isUpdateSloLoading}
             onClick={handleSubmit}
-            disabled={!formState.isValid}
-            isLoading={loading && !error}
           >
             {isEditMode
-              ? i18n.translate('xpack.observability.slos.sloEdit.editSloButton', {
+              ? i18n.translate('xpack.observability.slo.sloEdit.editSloButton', {
                   defaultMessage: 'Update SLO',
                 })
-              : i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
+              : i18n.translate('xpack.observability.slo.sloEdit.createSloButton', {
                   defaultMessage: 'Create SLO',
                 })}
           </EuiButton>
 
-          <EuiSpacer size="xl" />
-        </EuiPanel>
-      </EuiTimelineItem>
-    </EuiTimeline>
+          <EuiButton
+            color="ghost"
+            data-test-subj="sloFormCancelButton"
+            fill
+            disabled={isCreateSloLoading || isUpdateSloLoading}
+            onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
+          >
+            {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButton>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    </FormProvider>
   );
 }

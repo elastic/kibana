@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
@@ -42,14 +43,16 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
     const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
 
     try {
-      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
+      const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
+        id: DEFAULT_SPACE_ID,
+      };
 
       const { keep_stale: keepStale, project: projectId } = request.body || {};
-      const { publicLocations, privateLocations } = await getAllLocations(
+      const { publicLocations, privateLocations } = await getAllLocations({
         server,
         syntheticsMonitorClient,
-        savedObjectsClient
-      );
+        savedObjectsClient,
+      });
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
@@ -79,7 +82,7 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
       });
     } catch (error) {
       if (error?.output?.statusCode === 404) {
-        const spaceId = server.spaces.spacesService.getSpaceId(request);
+        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
         subject?.next(`Unable to create monitors. Kibana space '${spaceId}' does not exist.`);
         subject?.next({ failedMonitors: monitors.map((m) => m.id) });
       } else {

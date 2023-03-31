@@ -9,11 +9,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import type { ConfigType } from '../../../../config';
-import type { SignalSource, SimpleHit } from '../../signals/types';
+import type { SignalSource, SimpleHit } from '../types';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
-import { generateId } from '../../signals/utils';
+import { generateId } from '../utils/utils';
 import { buildBulkBody } from './utils/build_bulk_body';
-import type { BuildReasonMessage } from '../../signals/reason_formatters';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,

@@ -11,15 +11,18 @@ import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { createCase, deleteAllCaseItems, pushCase, updateCase } from '../../../../common/lib/utils';
 import { postCaseReq } from '../../../../common/lib/mock';
 import {
   createCaseWithConnector,
   createConnector,
   getJiraConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/connectors';
-import { getCaseUserActionStats } from '../../../../common/lib/user_actions';
+  getCaseUserActionStats,
+  createCase,
+  deleteAllCaseItems,
+  pushCase,
+  updateCase,
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
