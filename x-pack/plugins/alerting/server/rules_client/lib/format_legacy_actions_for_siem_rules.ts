@@ -105,6 +105,22 @@ const legacyGetBulkRuleActionsSavedObject = async ({
   }, {});
 };
 
+/**
+ * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen
+ * on their saved object.
+ * @params throttle The throttle from a "security_solution" rule
+ * @returns The correct "NotifyWhen" for a Kibana alerting.
+ */
+export const transformToNotifyWhen = (throttle: string | null | undefined): string | null => {
+  if (throttle == null || throttle === 'no_actions') {
+    return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
+  } else if (throttle === 'rule') {
+    return 'onActiveAlert';
+  } else {
+    return 'onThrottleInterval';
+  }
+};
+
 export const formatLegacyActionsForSiemRules = async <T extends Rule>(
   rules: T[],
   { logger, savedObjectsClient }: Omit<LegacyGetBulkRuleActionsSavedObject, 'alertIds'>
@@ -116,11 +132,18 @@ export const formatLegacyActionsForSiemRules = async <T extends Rule>(
   });
 
   return rules.map((rule) => {
-    const legacyRuleActions = res[rule.id]?.legacyRuleActions ?? [];
+    const legacyRuleActionsMatch = res[rule.id];
+    if (!legacyRuleActionsMatch) {
+      return rule;
+    }
+
+    const { legacyRuleActions, ruleThrottle } = legacyRuleActionsMatch;
     return {
       ...rule,
-      actions: [...rule.actions, ...legacyRuleActions],
-      throttle: legacyRuleActions.length ? res[rule.id]?.ruleThrottle : rule.throttle,
+      // TODO: investigate failure
+      actions: legacyRuleActions,
+      throttle: (legacyRuleActions.length ? ruleThrottle : rule.throttle) ?? 'no_actions',
+      notifyWhen: transformToNotifyWhen(ruleThrottle),
       // muteAll property is disregarded in further rule processing in Security Solution when legacy actions are present.
       // So it should be safe to set it as false, so it won't be displayed to user as w/o actions see transformFromAlertThrottle method
       muteAll: legacyRuleActions.length ? false : rule.muteAll,
