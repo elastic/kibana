@@ -51,4 +51,7 @@ PageTitleWithCustomAction.args = {
 };
 
 export const PageTitleUsedWithinPageTemplate = TemplateWithPageTemplate.bind({});
-PageTitleUsedWithinPageTemplate.args = defaultProps;
+PageTitleUsedWithinPageTemplate.args = {
+  ...defaultProps,
+  titleAction: 'breached',
+};
