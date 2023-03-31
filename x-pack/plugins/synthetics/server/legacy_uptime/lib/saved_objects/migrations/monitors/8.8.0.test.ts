@@ -7,80 +7,19 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migration880 } from './8.8.0';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import {
-  DataStream,
-  SourceType,
-  FormMonitorType,
-  ConfigKey,
-  ScheduleUnit,
-} from '../../../../../../common/runtime_types';
+import { ConfigKey, ScheduleUnit } from '../../../../../../common/runtime_types';
 import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../../../../common/constants/monitor_defaults';
+import {
+  browserUI,
+  browserProject,
+  browserUptimeUI,
+  tcpUptimeUI,
+  icmpUptimeUI,
+  httpUptimeUI,
+} from './test_fixtures/8.7.0';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
-
-const testMonitor = {
-  type: 'synthetics-monitor',
-  id: '625bedf7-2cbd-4454-aa2c-4e8cc08a9683',
-  attributes: {
-    type: DataStream.BROWSER,
-    form_monitor_type: FormMonitorType.MULTISTEP,
-    enabled: true,
-    alert: { status: { enabled: true } },
-    schedule: { unit: 'm', number: '10' },
-    'service.name': '',
-    config_id: '625bedf7-2cbd-4454-aa2c-4e8cc08a9683',
-    tags: [],
-    timeout: null,
-    name: 'https://elastic.co',
-    locations: [
-      {
-        id: 'us_central',
-        label: 'North America - US Central',
-        geo: { lat: 41.25, lon: -95.86 },
-        isServiceManaged: true,
-      },
-    ],
-    namespace: 'default',
-    origin: SourceType.UI,
-    journey_id: '',
-    hash: '',
-    id: '625bedf7-2cbd-4454-aa2c-4e8cc08a9683',
-    project_id: '',
-    playwright_options: '',
-    __ui: {
-      script_source: { is_generated_script: false, file_name: '' },
-      is_zip_url_tls_enabled: false,
-    },
-    'url.port': null,
-    'source.zip_url.url': '',
-    'source.zip_url.folder': '',
-    'source.zip_url.proxy_url': '',
-    playwright_text_assertion: '',
-    urls: 'https://elastic.co',
-    screenshots: 'on',
-    'filter_journeys.match': '',
-    'filter_journeys.tags': [],
-    ignore_https_errors: false,
-    'throttling.is_enabled': true,
-    'throttling.download_speed': '5',
-    'throttling.upload_speed': '3',
-    'throttling.latency': '20',
-    'throttling.config': '5d/3u/20l',
-    'ssl.certificate_authorities': '',
-    'ssl.certificate': '',
-    'ssl.verification_mode': 'full',
-    'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-    revision: 1,
-    secrets:
-      '{"params":"","source.inline.script":"step(\'Go to https://elastic.co\', async () => {\\n  await page.goto(\'https://elastic.co\');\\n});","source.project.content":"","synthetics_args":[],"ssl.key":"","ssl.key_passphrase":""}',
-  },
-  references: [],
-  coreMigrationVersion: '8.8.0',
-  typeMigrationVersion: '8.6.0',
-  updated_at: '2023-03-29T19:28:31.360Z',
-  created_at: '2023-03-29T19:28:31.360Z',
-};
 
 describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
   const testSchedules = [
@@ -111,105 +50,341 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
     encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
   });
 
-  it('removes all top level zip url fields', () => {
-    expect(
-      Object.keys(testMonitor.attributes).some((key: string) => key.includes('zip_url'))
-    ).toEqual(true);
-    const actual = migration880(encryptedSavedObjectsSetup)(testMonitor, context);
-    expect(actual).toEqual({
-      attributes: {
-        __ui: {
-          script_source: {
-            file_name: '',
-            is_generated_script: false,
-          },
-        },
-        alert: {
-          status: {
-            enabled: true,
-          },
-        },
-        config_id: '625bedf7-2cbd-4454-aa2c-4e8cc08a9683',
-        enabled: true,
-        'filter_journeys.match': '',
-        'filter_journeys.tags': [],
-        form_monitor_type: 'multistep',
-        hash: '',
-        id: '625bedf7-2cbd-4454-aa2c-4e8cc08a9683',
-        ignore_https_errors: false,
-        journey_id: '',
-        locations: [
-          {
-            geo: {
-              lat: 41.25,
-              lon: -95.86,
-            },
-            id: 'us_central',
-            isServiceManaged: true,
-            label: 'North America - US Central',
-          },
-        ],
-        name: 'https://elastic.co',
-        namespace: 'default',
-        origin: 'ui',
-        playwright_options: '',
-        playwright_text_assertion: '',
-        project_id: '',
-        revision: 1,
-        schedule: {
-          number: '10',
-          unit: 'm',
-        },
-        screenshots: 'on',
-        secrets:
-          '{"params":"","source.inline.script":"step(\'Go to https://elastic.co\', async () => {\\n  await page.goto(\'https://elastic.co\');\\n});","source.project.content":"","synthetics_args":[],"ssl.key":"","ssl.key_passphrase":""}',
-        'service.name': '',
-        'ssl.certificate': '',
-        'ssl.certificate_authorities': '',
-        'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-        'ssl.verification_mode': 'full',
-        tags: [],
-        'throttling.config': '5d/3u/20l',
-        'throttling.download_speed': '5',
-        'throttling.is_enabled': true,
-        'throttling.latency': '20',
-        'throttling.upload_speed': '3',
-        timeout: null,
-        type: 'browser',
-        'url.port': null,
-        urls: 'https://elastic.co',
-      },
-      coreMigrationVersion: '8.8.0',
-      created_at: '2023-03-29T19:28:31.360Z',
-      id: '625bedf7-2cbd-4454-aa2c-4e8cc08a9683',
-      references: [],
-      type: 'synthetics-monitor',
-      typeMigrationVersion: '8.6.0',
-      updated_at: '2023-03-29T19:28:31.360Z',
+  describe('config hash', () => {
+    it('sets config hash back to empty string', () => {
+      expect(browserProject.attributes[ConfigKey.CONFIG_HASH]).toBeTruthy();
+      const actual = migration880(encryptedSavedObjectsSetup)(browserProject, context);
+      expect(actual.attributes[ConfigKey.CONFIG_HASH]).toEqual('');
     });
-    expect(Object.keys(actual.attributes).some((key: string) => key.includes('zip_url'))).toEqual(
-      false
-    );
   });
 
-  it.each(testSchedules)(
-    'handles migrating schedule with invalid schedules',
-    (previous, migrated) => {
-      const testMonitorWithSchedule = {
-        ...testMonitor,
+  describe('zip url deprecation', () => {
+    it('removes all top level zip url fields for synthetics UI monitor', () => {
+      expect(
+        Object.keys(browserUI.attributes).some((key: string) => key.includes('zip_url'))
+      ).toEqual(true);
+      const actual = migration880(encryptedSavedObjectsSetup)(browserUI, context);
+      expect(actual).toEqual({
         attributes: {
-          ...testMonitor.attributes,
+          __ui: {
+            script_source: {
+              file_name: '',
+              is_generated_script: false,
+            },
+          },
+          alert: {
+            status: {
+              enabled: true,
+            },
+          },
+          config_id: '311cf324-2fc9-4453-9ba5-5e745fd81722',
+          enabled: true,
+          'filter_journeys.match': '',
+          'filter_journeys.tags': [],
+          form_monitor_type: 'multistep',
+          hash: '',
+          id: '311cf324-2fc9-4453-9ba5-5e745fd81722',
+          ignore_https_errors: false,
+          journey_id: '',
+          locations: [
+            {
+              geo: {
+                lat: 41.25,
+                lon: -95.86,
+              },
+              id: 'us_central',
+              isServiceManaged: true,
+              label: 'North America - US Central',
+            },
+          ],
+          name: 'https://elastic.co',
+          namespace: 'default',
+          origin: 'ui',
+          playwright_options: '',
+          playwright_text_assertion: '',
+          project_id: '',
+          revision: 1,
+          schedule: {
+            number: '10',
+            unit: 'm',
+          },
+          screenshots: 'on',
+          secrets:
+            '{"params":"","source.inline.script":"step(\'Go to https://elastic.co\', async () => {\\n  await page.goto(\'https://elastic.co\');\\n});","source.project.content":"","synthetics_args":[],"ssl.key":"","ssl.key_passphrase":""}',
+          'service.name': '',
+          'ssl.certificate': '',
+          'ssl.certificate_authorities': '',
+          'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+          'ssl.verification_mode': 'full',
+          tags: [],
+          'throttling.config': '5d/3u/20l',
+          'throttling.download_speed': '5',
+          'throttling.is_enabled': true,
+          'throttling.latency': '20',
+          'throttling.upload_speed': '3',
+          timeout: null,
+          type: 'browser',
+          'url.port': null,
+          urls: 'https://elastic.co',
+        },
+        coreMigrationVersion: '8.8.0',
+        created_at: '2023-03-31T20:31:24.177Z',
+        id: '311cf324-2fc9-4453-9ba5-5e745fd81722',
+        references: [],
+        type: 'synthetics-monitor',
+        typeMigrationVersion: '8.6.0',
+        updated_at: '2023-03-31T20:31:24.177Z',
+      });
+      expect(Object.keys(actual.attributes).some((key: string) => key.includes('zip_url'))).toEqual(
+        false
+      );
+    });
+
+    it.each([browserUptimeUI, browserProject])(
+      'removes all top level zip url fields for Uptime and Project monitors',
+      (testMonitor) => {
+        expect(
+          Object.keys(testMonitor.attributes).some((key: string) => key.includes('zip_url'))
+        ).toEqual(true);
+        const actual = migration880(encryptedSavedObjectsSetup)(testMonitor, context);
+        expect(
+          Object.keys(actual.attributes).some((key: string) => key.includes('zip_url'))
+        ).toEqual(false);
+      }
+    );
+
+    it('returns the original doc if an error occurs removing zip url fields', () => {
+      const invalidTestMonitor = {
+        ...browserUI,
+        attributes: {
+          ...browserUI.attributes,
+          name: null,
+        },
+      };
+      // @ts-ignore specificially testing monitors with invalid values
+      const actual = migration880(encryptedSavedObjectsSetup)(invalidTestMonitor, context);
+      expect(actual).toEqual(invalidTestMonitor);
+    });
+  });
+
+  describe('schedule migration', () => {
+    it.each(testSchedules)(
+      'handles migrating schedule with invalid schedules - browser',
+      (previous, migrated) => {
+        const testMonitorWithSchedule = {
+          ...browserUptimeUI,
+          attributes: {
+            ...browserUptimeUI.attributes,
+            [ConfigKey.SCHEDULE]: {
+              unit: ScheduleUnit.MINUTES,
+              number: previous,
+            },
+          },
+        };
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(false);
+        const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+        expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(migrated);
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+      }
+    );
+
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+      'handles migrating schedule with valid schedules - browser',
+      (validSchedule) => {
+        const testMonitorWithSchedule = {
+          ...browserUptimeUI,
+          attributes: {
+            ...browserUptimeUI.attributes,
+            [ConfigKey.SCHEDULE]: {
+              unit: ScheduleUnit.MINUTES,
+              number: validSchedule,
+            },
+          },
+        };
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+        expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+      }
+    );
+
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+      'handles migrating schedule with valid schedules - http',
+      (validSchedule) => {
+        const testMonitorWithSchedule = {
+          ...httpUptimeUI,
+          attributes: {
+            ...httpUptimeUI.attributes,
+            [ConfigKey.SCHEDULE]: {
+              unit: ScheduleUnit.MINUTES,
+              number: validSchedule,
+            },
+          },
+        };
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+        expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+      }
+    );
+
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+      'handles migrating schedule with valid schedules - tcp',
+      (validSchedule) => {
+        const testMonitorWithSchedule = {
+          ...tcpUptimeUI,
+          attributes: {
+            ...tcpUptimeUI.attributes,
+            [ConfigKey.SCHEDULE]: {
+              unit: ScheduleUnit.MINUTES,
+              number: validSchedule,
+            },
+          },
+        };
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+        expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+      }
+    );
+
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+      'handles migrating schedule with valid schedules - icmp',
+      (validSchedule) => {
+        const testMonitorWithSchedule = {
+          ...icmpUptimeUI,
+          attributes: {
+            ...icmpUptimeUI.attributes,
+            [ConfigKey.SCHEDULE]: {
+              unit: ScheduleUnit.MINUTES,
+              number: validSchedule,
+            },
+          },
+        };
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+        expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+      }
+    );
+
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+      'handles migrating schedule with valid schedules - project',
+      (validSchedule) => {
+        const testMonitorWithSchedule = {
+          ...browserProject,
+          attributes: {
+            ...browserProject.attributes,
+            [ConfigKey.SCHEDULE]: {
+              unit: ScheduleUnit.MINUTES,
+              number: validSchedule,
+            },
+          },
+        };
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+        expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+      }
+    );
+
+    // handles invalid values stored in saved object
+    it.each([null, undefined, {}, []])(
+      'handles migrating schedule with invalid values - browser',
+      (invalidSchedule) => {
+        const testMonitorWithSchedule = {
+          ...browserUptimeUI,
+          attributes: {
+            ...browserUptimeUI.attributes,
+            [ConfigKey.SCHEDULE]: {
+              unit: ScheduleUnit.MINUTES,
+              number: invalidSchedule,
+            },
+          },
+        };
+        // @ts-ignore specificially testing monitors with invalid values for full coverage
+        const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
+        expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual('1');
+        expect(
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(
+            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
+          )
+        ).toBe(true);
+        expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+      }
+    );
+
+    // handles
+    it.each([
+      [5, '5'],
+      [4, '3'],
+      [2.5, '3'],
+    ])('handles migrating schedule numeric values - browser', (invalidSchedule, migrated) => {
+      const testMonitorWithSchedule = {
+        ...browserUptimeUI,
+        attributes: {
+          ...browserUptimeUI.attributes,
           [ConfigKey.SCHEDULE]: {
             unit: ScheduleUnit.MINUTES,
-            number: previous,
+            number: invalidSchedule,
           },
         },
       };
-      expect(
-        ALLOWED_SCHEDULES_IN_MINUTES.includes(
-          parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
-        )
-      ).toBe(false);
+      // @ts-ignore specificially testing monitors with invalid values for full coverage
       const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
       expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(migrated);
       expect(
@@ -218,97 +393,6 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         )
       ).toBe(true);
       expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
-    }
-  );
-
-  it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
-    'handles migrating schedule with valid schedules',
-    (validSchedule) => {
-      const testMonitorWithSchedule = {
-        ...testMonitor,
-        attributes: {
-          ...testMonitor.attributes,
-          [ConfigKey.SCHEDULE]: {
-            unit: ScheduleUnit.MINUTES,
-            number: validSchedule,
-          },
-        },
-      };
-      expect(
-        ALLOWED_SCHEDULES_IN_MINUTES.includes(
-          parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
-        )
-      ).toBe(true);
-      const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
-      expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
-      expect(
-        ALLOWED_SCHEDULES_IN_MINUTES.includes(
-          parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-        )
-      ).toBe(true);
-      expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
-    }
-  );
-
-  // handles invalid values stored in saved object
-  it.each([null, undefined, {}, []])(
-    'handles migrating schedule with invalid values',
-    (invalidSchedule) => {
-      const testMonitorWithSchedule = {
-        ...testMonitor,
-        attributes: {
-          ...testMonitor.attributes,
-          [ConfigKey.SCHEDULE]: {
-            unit: ScheduleUnit.MINUTES,
-            number: invalidSchedule,
-          },
-        },
-      };
-      const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
-      expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual('1');
-      expect(
-        ALLOWED_SCHEDULES_IN_MINUTES.includes(
-          parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-        )
-      ).toBe(true);
-      expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
-    }
-  );
-
-  // handles
-  it.each([
-    [5, '5'],
-    [4, '3'],
-    [2.5, '3'],
-  ])('handles migrating schedule numeric values', (invalidSchedule, migrated) => {
-    const testMonitorWithSchedule = {
-      ...testMonitor,
-      attributes: {
-        ...testMonitor.attributes,
-        [ConfigKey.SCHEDULE]: {
-          unit: ScheduleUnit.MINUTES,
-          number: invalidSchedule,
-        },
-      },
-    };
-    const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
-    expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(migrated);
-    expect(
-      ALLOWED_SCHEDULES_IN_MINUTES.includes(
-        parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-      )
-    ).toBe(true);
-    expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
+    });
   });
-
-  // it('project monitors - adds custom heartbeat id to id field', () => {
-  //   expect(migration880(encryptedSavedObjectsSetup)(monitor850Project, context)).toEqual({
-  //     ...monitor850Project,
-  //     attributes: {
-  //       ...monitor850Project.attributes,
-  //       [ConfigKey.MONITOR_QUERY_ID]: monitor850Project.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
-  //       [ConfigKey.CONFIG_ID]: monitor850Project.id,
-  //     },
-  //   });
-  // });
 });

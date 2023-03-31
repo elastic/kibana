@@ -33,7 +33,8 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
       return true;
     },
     migration: (
-      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>
+      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>,
+      logger
     ): SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets> => {
       let migrated = doc;
       migrated = {
@@ -44,14 +45,26 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
             number: getNearestSupportedSchedule(migrated.attributes[ConfigKey.SCHEDULE].number),
             unit: ScheduleUnit.MINUTES,
           },
+          // when any action to change a project monitor configuration is taken
+          // outside of the synthetics agent cli, we should set the config hash back
+          // to an empty string so that the project monitors configuration
+          // will be updated on next push
+          [ConfigKey.CONFIG_HASH]: '',
         },
       };
       if (migrated.attributes.type === 'browser') {
-        const normalizedDoc = normalizeSecrets(migrated);
-        migrated = {
-          ...migrated,
-          attributes: omitZipUrlFields(normalizedDoc.attributes as BrowserFields),
-        };
+        try {
+          const normalizedDoc = normalizeSecrets(migrated);
+          migrated = {
+            ...migrated,
+            attributes: omitZipUrlFields(normalizedDoc.attributes as BrowserFields),
+          };
+        } catch (e) {
+          logger.log.warn(
+            `Failed to remove ZIP URL fields from legacy Synthetics monitor: ${e.message}`
+          );
+          return migrated;
+        }
       }
       return migrated;
     },
@@ -92,7 +105,9 @@ const omitZipUrlFields = (fields: BrowserFields) => {
   } as MonitorFields);
 
   if (!validationResult.valid || !validationResult.decodedMonitor) {
-    throw new Error('Monitor is not valid');
+    throw new Error(
+      `Monitor is not valid: ${validationResult.reason}. ${validationResult.details}`
+    );
   }
 
   return formatSecrets(validationResult.decodedMonitor);
