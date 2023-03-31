@@ -122,7 +122,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
       <EuiButton
         data-test-subj="cases-files-add"
         iconType="plusInCircle"
-        isDisabled={isLoading || !permissions.create}
+        isDisabled={isLoading || !permissions.create || !permissions.update}
         isLoading={isLoading}
         onClick={showModal}
       >
