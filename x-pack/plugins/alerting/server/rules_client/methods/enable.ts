@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
@@ -13,8 +13,7 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../authorizatio
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { updateMeta, createNewAPIKeySet, scheduleTask } from '../lib';
-import { migrateLegacyActions } from '../lib';
+import { updateMeta, createNewAPIKeySet, scheduleTask, migrateLegacyActions } from '../lib';
 
 export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -81,10 +80,18 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
-    const { legacyActions, legacyActionsReferences } = await migrateLegacyActions(context, {
-      ruleId: id,
-      consumer: attributes.consumer,
-    });
+    let legacyActions: RawRule['actions'] = [];
+    let legacyActionsReferences: SavedObjectReference[] = [];
+
+    // migrate legacy actions only for SIEM rules
+    if (attributes.consumer === AlertConsumers.SIEM) {
+      const migratedActions = await migrateLegacyActions(context, {
+        ruleId: id,
+      });
+
+      legacyActions = migratedActions.legacyActions;
+      legacyActionsReferences = migratedActions.legacyActionsReferences;
+    }
 
     const username = await context.getUserName();
     const now = new Date();

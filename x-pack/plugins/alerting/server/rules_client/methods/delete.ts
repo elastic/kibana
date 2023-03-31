@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
@@ -63,7 +64,10 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     throw error;
   }
 
-  await migrateLegacyActions(context, { ruleId: id, consumer: attributes.consumer });
+  // migrate legacy actions only for SIEM rules
+  if (attributes.consumer === AlertConsumers.SIEM) {
+    await migrateLegacyActions(context, { ruleId: id });
+  }
 
   context.auditLogger?.log(
     ruleAuditEvent({

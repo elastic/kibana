@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -2732,47 +2733,84 @@ describe('update()', () => {
     );
   });
 
-  test('should call migrateLegacyActions', async () => {
-    actionsClient.getBulk.mockReset();
-    actionsClient.isPreconfigured.mockReset();
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        enabled: true,
-        schedule: { interval: '1m' },
-        params: {
-          bar: true,
+  describe('legacy actions migration for SIEM', () => {
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          notifyWhen: 'onActiveAlert',
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         },
-        actions: [],
-        notifyWhen: 'onActiveAlert',
-        scheduledTaskId: 'task-123',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      references: [],
+        references: [],
+      });
     });
 
-    await rulesClient.update({
-      id: '1',
-      data: {
-        schedule: { interval: '1m' },
-        name: 'abc',
-        tags: ['foo'],
-        params: {
-          bar: true,
-          risk_score: 40,
-          severity: 'low',
+    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+      const existingDecryptedSiemAlert = {
+        ...existingDecryptedAlert,
+        attributes: { ...existingDecryptedAlert, consumer: AlertConsumers.SIEM },
+      };
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        existingDecryptedSiemAlert
+      );
+
+      actionsClient.getBulk.mockReset();
+      actionsClient.isPreconfigured.mockReset();
+
+      await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+            risk_score: 40,
+            severity: 'low',
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [],
         },
-        throttle: null,
-        notifyWhen: 'onActiveAlert',
-        actions: [],
-      },
+      });
+
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: '1',
+      });
     });
 
-    expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-      ruleId: '1',
-      consumer: 'myApp',
+    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
+      actionsClient.getBulk.mockReset();
+      actionsClient.isPreconfigured.mockReset();
+
+      await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+            risk_score: 40,
+            severity: 'low',
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [],
+        },
+      });
+
+      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 });

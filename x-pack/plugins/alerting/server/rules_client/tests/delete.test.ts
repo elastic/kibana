@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
+
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -206,12 +208,28 @@ describe('delete()', () => {
     );
   });
 
-  test('should call migrateLegacyActions', async () => {
-    await rulesClient.delete({ id: '1' });
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+      const existingDecryptedSiemAlert = {
+        ...existingDecryptedAlert,
+        attributes: { ...existingDecryptedAlert, consumer: AlertConsumers.SIEM },
+      };
 
-    expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-      ruleId: '1',
-      consumer: 'myApp',
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        existingDecryptedSiemAlert
+      );
+
+      await rulesClient.delete({ id: '1' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: '1',
+      });
+    });
+
+    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
+      await rulesClient.delete({ id: '1' });
+
+      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SavedObjectReference } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { RawRule, RuleSnoozeSchedule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -15,7 +16,7 @@ import { validateSnoozeStartDate } from '../../lib/validate_snooze_date';
 import { RuleMutedError } from '../../lib/errors/rule_muted';
 import { RulesClientContext } from '../types';
 import { getSnoozeAttributes, verifySnoozeScheduleLimit } from '../common';
-import { updateMeta } from '../lib';
+import { updateMeta, migrateLegacyActions } from '../lib';
 
 export interface SnoozeParams {
   id: string;
@@ -48,10 +49,8 @@ async function snoozeWithOCC(
     snoozeSchedule: RuleSnoozeSchedule;
   }
 ) {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
-    'alert',
-    id
-  );
+  const { attributes, version, references } =
+    await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
 
   try {
     await context.authorization.ensureAuthorized({
@@ -93,12 +92,31 @@ async function snoozeWithOCC(
     throw Boom.badRequest(error.message);
   }
 
+  let legacyActions: RawRule['actions'] = [];
+  let legacyActionsReferences: SavedObjectReference[] = [];
+
+  // migrate legacy actions only for SIEM rules
+  if (attributes.consumer === AlertConsumers.SIEM) {
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: id,
+    });
+
+    legacyActions = migratedActions.legacyActions;
+    legacyActionsReferences = migratedActions.legacyActionsReferences;
+  }
+
   const updateAttributes = updateMeta(context, {
     ...newAttrs,
+    ...(legacyActions.length ? { actions: [...attributes.actions, ...legacyActions] } : {}),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
-  const updateOptions = { version };
+  const updateOptions = {
+    version,
+    ...(legacyActionsReferences.length
+      ? { references: [...references, ...legacyActionsReferences] }
+      : {}),
+  };
 
   await partiallyUpdateAlert(
     context.unsecuredSavedObjectsClient,

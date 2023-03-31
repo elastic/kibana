@@ -10,6 +10,7 @@ import {
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
+  SavedObjectReference,
 } from '@kbn/core/server';
 import { RawRule } from '../types';
 
@@ -20,6 +21,7 @@ export type PartiallyUpdateableAlertAttributes = Partial<
 >;
 
 export interface PartiallyUpdateAlertSavedObjectOptions {
+  references?: SavedObjectReference[];
   refresh?: SavedObjectsUpdateOptions['refresh'];
   version?: string;
   ignore404?: boolean;

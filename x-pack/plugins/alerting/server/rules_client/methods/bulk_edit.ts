@@ -14,6 +14,7 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
+  SavedObjectReference,
 } from '@kbn/core/server';
 import { BulkActionSkipResult } from '../../../common/bulk_edit';
 import {
@@ -442,10 +443,18 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
-    const { legacyActions, legacyActionsReferences } = await migrateLegacyActions(context, {
-      ruleId: rule.id,
-      consumer: rule.attributes.consumer,
-    });
+    let legacyActions: RawRule['actions'] = [];
+    let legacyActionsReferences: SavedObjectReference[] = [];
+
+    // migrate legacy actions only for SIEM rules
+    if (rule.attributes.consumer === AlertConsumers.SIEM) {
+      const migratedActions = await migrateLegacyActions(context, {
+        ruleId: rule.id,
+      });
+
+      legacyActions = migratedActions.legacyActions;
+      legacyActionsReferences = migratedActions.legacyActionsReferences;
+    }
 
     if (legacyActions.length && legacyActionsReferences?.length) {
       rule.attributes.actions = [...rule.attributes.actions, ...legacyActions];

@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SavedObjectReference } from '@kbn/core/server';
 
-import { Rule, RawRule } from '../../types';
+import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { MuteOptions } from '../types';
 import { RulesClientContext } from '../types';
-import { updateMeta } from '../lib';
+import { updateMeta, migrateLegacyActions } from '../lib';
 
 export async function unmuteInstance(
   context: RulesClientContext,
@@ -34,10 +36,8 @@ async function unmuteInstanceWithOCC(
     alertInstanceId: string;
   }
 ) {
-  const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
-    'alert',
-    alertId
-  );
+  const { attributes, version, references } =
+    await context.unsecuredSavedObjectsClient.get<RawRule>('alert', alertId);
 
   try {
     await context.authorization.ensureAuthorized({
@@ -72,6 +72,19 @@ async function unmuteInstanceWithOCC(
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
+    let legacyActions: RawRule['actions'] = [];
+    let legacyActionsReferences: SavedObjectReference[] = [];
+
+    // migrate legacy actions only for SIEM rules
+    if (attributes.consumer === AlertConsumers.SIEM) {
+      const migratedActions = await migrateLegacyActions(context, {
+        ruleId: alertId,
+      });
+
+      legacyActions = migratedActions.legacyActions;
+      legacyActionsReferences = migratedActions.legacyActionsReferences;
+    }
+
     await context.unsecuredSavedObjectsClient.update<RawRule>(
       'alert',
       alertId,
@@ -79,8 +92,14 @@ async function unmuteInstanceWithOCC(
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
         mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
+        ...(legacyActions.length ? { actions: [...attributes.actions, ...legacyActions] } : {}),
       }),
-      { version }
+      {
+        version,
+        ...(legacyActionsReferences.length
+          ? { references: [...references, ...legacyActionsReferences] }
+          : {}),
+      }
     );
   }
 }
