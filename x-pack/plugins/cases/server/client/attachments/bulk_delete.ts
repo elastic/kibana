@@ -14,6 +14,7 @@ import pMap from 'p-map';
 import { partition } from 'lodash';
 import type { File } from '@kbn/files-plugin/common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
+import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
 import { BulkDeleteFileAttachmentsRequestRt, excess, throwErrors } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
@@ -85,9 +86,16 @@ export const bulkDeleteFileAttachments = async (
       user,
     });
   } catch (error) {
+    let errorToTrack = error;
+
+    // if it's an error from the file service let's put it in a boom so we don't loose the status code of a 404
+    if (error instanceof FileNotFoundError) {
+      errorToTrack = Boom.notFound(error.message);
+    }
+
     throw createCaseError({
       message: `Failed to delete file attachments for case: ${caseId}: ${error}`,
-      error,
+      error: errorToTrack,
       logger,
     });
   }

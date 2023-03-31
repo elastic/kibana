@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { CaseResponse } from '@kbn/cases-plugin/common';
 import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
 import { Owner } from '@kbn/cases-plugin/common/constants/types';
+import { CASES_TEST_FIXTURE_FILE_KIND_ID } from '@kbn/cases-api-integration-test-plugin/server/files';
 import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -74,12 +75,58 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
+      it('returns a 400 when attempting to delete a file with a file kind that is not within a case plugin', async () => {
+        const postedSecCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolution' }),
+          200,
+          {
+            user: superUser,
+            space: 'space1',
+          }
+        );
+
+        const create = await createFile({
+          supertest: supertestWithoutAuth,
+          params: {
+            name: 'testfile',
+            kind: CASES_TEST_FIXTURE_FILE_KIND_ID,
+            mimeType: 'text/plain',
+            meta: {
+              caseIds: [postedSecCase.id],
+              owner: ['securitySolution'],
+            },
+          },
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await bulkCreateAttachments({
+          supertest: supertestWithoutAuth,
+          caseId: postedSecCase.id,
+          params: [
+            getFilesAttachmentReq({
+              externalReferenceId: create.file.id,
+              owner: 'securitySolution',
+            }),
+          ],
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await bulkDeleteFileAttachments({
+          supertest: supertestWithoutAuth,
+          caseId: postedSecCase.id,
+          fileIds: [create.file.id],
+          auth: { user: superUser, space: 'space1' },
+          expectedHttpCode: 400,
+        });
+      });
+
       it('fails to delete a file when the file does not exist', async () => {
         await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
           fileIds: ['abc'],
-          expectedHttpCode: 500,
+          expectedHttpCode: 404,
         });
       });
 
@@ -101,8 +148,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('returns a 400 when there are 501 ids being deleted', async () => {
-        const ids = Array.from(Array(501).keys()).map((item) => item.toString());
+      it('returns a 400 when there are 51 ids being deleted', async () => {
+        const ids = Array.from(Array(51).keys()).map((item) => item.toString());
         await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,
