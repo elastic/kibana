@@ -125,7 +125,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
 
   const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
 
-  const closeFlyout = () => setHostFlyoutOpen({ isFlyoutOpen: false, clickedItemId: '' });
+  const closeFlyout = () => setHostFlyoutOpen({ clickedItemId: '' });
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -150,7 +150,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
             name: toggleDialogActionLabel,
             description: toggleDialogActionLabel,
             icon: ({ id }) =>
-              hostFlyoutOpen.isFlyoutOpen && id === hostFlyoutOpen.clickedItemId
+              hostFlyoutOpen.clickedItemId && id === hostFlyoutOpen.clickedItemId
                 ? 'minimize'
                 : 'expand',
             type: 'icon',
@@ -159,10 +159,10 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
               setHostFlyoutOpen({
                 clickedItemId: id,
               });
-              if (hostFlyoutOpen.isFlyoutOpen && id === hostFlyoutOpen.clickedItemId) {
-                setHostFlyoutOpen({ isFlyoutOpen: false, clickedItemId: '' });
+              if (id === hostFlyoutOpen.clickedItemId) {
+                setHostFlyoutOpen({ clickedItemId: '' });
               } else {
-                setHostFlyoutOpen({ isFlyoutOpen: true, clickedItemId: String(id) });
+                setHostFlyoutOpen({ clickedItemId: id });
               }
             },
           },
@@ -238,20 +238,14 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         align: 'right',
       },
     ],
-    [
-      hostFlyoutOpen.clickedItemId,
-      hostFlyoutOpen.isFlyoutOpen,
-      reportHostEntryClick,
-      setHostFlyoutOpen,
-      time,
-    ]
+    [hostFlyoutOpen.clickedItemId, reportHostEntryClick, setHostFlyoutOpen, time]
   );
 
   return {
     columns,
     items,
     clickedItemId: hostFlyoutOpen.clickedItemId,
-    isFlyoutOpen: hostFlyoutOpen.isFlyoutOpen,
+    isFlyoutOpen: !!hostFlyoutOpen.clickedItemId,
     closeFlyout,
   };
 };

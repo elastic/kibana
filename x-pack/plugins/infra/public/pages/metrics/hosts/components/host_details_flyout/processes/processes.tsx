@@ -17,21 +17,33 @@ import {
   EuiIconTip,
   Query,
 } from '@elastic/eui';
-import { getFieldByType } from '../../../../../../../../common/inventory_models';
+import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
+import { getFieldByType } from '../../../../../../../common/inventory_models';
+import { parseSearchString } from '../../../../inventory_view/components/node_details/tabs/processes/parse_search_string';
+import { ProcessesTable } from '../../../../inventory_view/components/node_details/tabs/processes/processes_table';
+import { STATE_NAMES } from '../../../../inventory_view/components/node_details/tabs/processes/states';
+import { SummaryTable } from '../../../../inventory_view/components/node_details/tabs/processes/summary_table';
+import { TabContent } from '../../../../inventory_view/components/node_details/tabs/shared';
 import {
-  useProcessList,
   SortBy,
+  useProcessList,
   ProcessListContextProvider,
-} from '../../../../hooks/use_process_list';
-import { TabContent, TabProps } from '../shared';
-import { STATE_NAMES } from './states';
-import { SummaryTable } from './summary_table';
-import { ProcessesTable } from './processes_table';
-import { parseSearchString } from './parse_search_string';
+} from '../../../../inventory_view/hooks/use_process_list';
+import type { HostNodeRow } from '../../../hooks/use_hosts_table';
+import { useHostFlyoutOpen } from '../../../hooks/use_host_flyout_open_url_state';
 
-const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
-  const [searchBarState, setSearchBarState] = useState<Query>(Query.MATCH_ALL);
-  const [searchFilter, setSearchFilter] = useState<string>('');
+interface ProcessesProps {
+  node: HostNodeRow;
+  nodeType: InventoryItemType;
+  currentTime: number;
+}
+
+export const Processes = ({ currentTime, node, nodeType }: ProcessesProps) => {
+  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+  const [searchBarState, setSearchBarState] = useState<Query>(
+    hostFlyoutOpen.searchFilter ? Query.parse(hostFlyoutOpen.searchFilter) : Query.MATCH_ALL
+  );
+
   const [sortBy, setSortBy] = useState<SortBy>({
     name: 'cpu',
     isAscending: false,
@@ -47,11 +59,15 @@ const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(searchFilter));
+  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(hostFlyoutOpen.searchFilter));
 
   const debouncedSearchOnChange = useMemo(
-    () => debounce<(queryText: string) => void>((queryText) => setSearchFilter(queryText), 500),
-    [setSearchFilter]
+    () =>
+      debounce<(queryText: string) => void>(
+        (queryText) => setHostFlyoutOpen({ searchFilter: queryText }),
+        500
+      ),
+    [setHostFlyoutOpen]
   );
 
   const searchBarOnChange = useCallback(
@@ -64,8 +80,8 @@ const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
 
   const clearSearchBar = useCallback(() => {
     setSearchBarState(Query.MATCH_ALL);
-    setSearchFilter('');
-  }, [setSearchBarState, setSearchFilter]);
+    setHostFlyoutOpen({ searchFilter: '' });
+  }, [setHostFlyoutOpen]);
 
   return (
     <TabContent>
@@ -160,12 +176,4 @@ const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
       </ProcessListContextProvider>
     </TabContent>
   );
-};
-
-export const ProcessesTab = {
-  id: 'processes',
-  name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
-    defaultMessage: 'Processes',
-  }),
-  content: TabComponent,
 };

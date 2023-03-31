@@ -18,7 +18,7 @@ import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/li
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
 import { LogsTab } from './tabs/logs';
-import { ProcessesTabInventory } from './tabs/processes';
+import { ProcessesTab } from './tabs/processes';
 import { PropertiesTab } from './tabs/properties';
 import { AnomaliesTab } from './tabs/anomalies/anomalies';
 import { OsqueryTab } from './tabs/osquery';
@@ -47,14 +47,7 @@ export const NodeContextPopover = ({
   openAlertFlyout,
 }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tabConfigs = [
-    MetricsTab,
-    LogsTab,
-    ProcessesTabInventory,
-    PropertiesTab,
-    AnomaliesTab,
-    OsqueryTab,
-  ];
+  const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab, AnomaliesTab, OsqueryTab];
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   const { application, share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>().services;

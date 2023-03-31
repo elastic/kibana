@@ -11,9 +11,15 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { useUrlState } from '../../../../utils/use_url_state';
 
+export enum FlyoutTabIds {
+  METADATA = 'metadata',
+  PROCESSES = 'processes',
+}
+
 export const GET_DEFAULT_TABLE_PROPERTIES = {
-  isFlyoutOpen: false,
   clickedItemId: '',
+  selectedTabId: FlyoutTabIds.METADATA,
+  searchFilter: '',
 };
 const HOST_TABLE_PROPERTIES_URL_STATE_KEY = 'hostFlyoutOpen';
 
@@ -33,22 +39,28 @@ export const useHostFlyoutOpen = (): [HostFlyoutOpen, SetNewHostFlyoutOpen] => {
   return [urlState, setHostFlyoutOpen];
 };
 
+const FlyoutTabIdRT = rt.union([rt.literal('metadata'), rt.literal('processes')]);
 const ClickedItemIdRT = rt.string;
-const IsFlyoutOpenRT = rt.boolean;
+const SearchFilterRT = rt.string;
 
-const SetIsFlyoutOpenRT = rt.partial({
-  isFlyoutOpen: IsFlyoutOpenRT,
+const SetFlyoutTabId = rt.partial({
+  selectedTabId: FlyoutTabIdRT,
 });
 
 const SetClickedItemIdRT = rt.partial({
   clickedItemId: ClickedItemIdRT,
 });
 
-const ActionRT = rt.intersection([SetIsFlyoutOpenRT, SetClickedItemIdRT]);
+const SetSearchFilterRT = rt.partial({
+  searchFilter: SearchFilterRT,
+});
+
+const ActionRT = rt.intersection([SetClickedItemIdRT, SetFlyoutTabId, SetSearchFilterRT]);
 
 const HostFlyoutOpenRT = rt.type({
   clickedItemId: ClickedItemIdRT,
-  isFlyoutOpen: IsFlyoutOpenRT,
+  selectedTabId: FlyoutTabIdRT,
+  searchFilter: SearchFilterRT,
 });
 
 type HostFlyoutOpen = rt.TypeOf<typeof HostFlyoutOpenRT>;

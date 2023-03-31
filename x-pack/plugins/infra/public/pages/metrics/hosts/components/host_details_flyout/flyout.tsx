@@ -14,9 +14,9 @@ import type { InventoryItemType } from '../../../../../../common/inventory_model
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { processesTab } from './processes';
-import { useFlyoutTabId, FlyoutTabIds } from '../../hooks/use_flyout_tab_id';
 import { Metadata } from './metadata/metadata';
-import { TabComponent } from '../../../inventory_view/components/node_details/tabs/processes';
+import { Processes } from './processes/processes';
+import { FlyoutTabIds, useHostFlyoutOpen } from '../../hooks/use_host_flyout_open_url_state';
 
 interface Props {
   node: HostNodeRow;
@@ -34,10 +34,11 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
     interval: '1m',
   };
 
-  const [selectedTabId, setSelectedTabId] = useFlyoutTabId(flyoutTabs[0].id);
+  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+
   // This map allow to keep track of which tabs content have been rendered the first time.
   // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
-  const renderedTabsSet = useLazyRef(() => new Set([selectedTabId]));
+  const renderedTabsSet = useLazyRef(() => new Set([hostFlyoutOpen.selectedTabId]));
 
   const tabEntries = flyoutTabs.map((tab) => (
     <EuiTab
@@ -45,9 +46,9 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
       key={tab.id}
       onClick={() => {
         renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
-        setSelectedTabId(tab.id);
+        setHostFlyoutOpen({ selectedTabId: tab.id });
       }}
-      isSelected={tab.id === selectedTabId}
+      isSelected={tab.id === hostFlyoutOpen.selectedTabId}
     >
       {tab.name}
     </EuiTab>
@@ -66,13 +67,13 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {renderedTabsSet.current.has(FlyoutTabIds.METADATA) && (
-          <div hidden={selectedTabId !== FlyoutTabIds.METADATA}>
+          <div hidden={hostFlyoutOpen.selectedTabId !== FlyoutTabIds.METADATA}>
             <Metadata currentTimeRange={currentTimeRange} node={node} nodeType={NODE_TYPE} />
           </div>
         )}
         {renderedTabsSet.current.has(FlyoutTabIds.PROCESSES) && (
-          <div hidden={selectedTabId !== FlyoutTabIds.PROCESSES}>
-            <TabComponent node={node} nodeType={NODE_TYPE} currentTime={currentTimeRange.to} />
+          <div hidden={hostFlyoutOpen.selectedTabId !== FlyoutTabIds.PROCESSES}>
+            <Processes node={node} nodeType={NODE_TYPE} currentTime={currentTimeRange.to} />
           </div>
         )}
       </EuiFlyoutBody>

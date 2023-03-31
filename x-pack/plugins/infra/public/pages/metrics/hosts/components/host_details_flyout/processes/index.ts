@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FlyoutTabIds } from '../../../hooks/use_flyout_tab_id';
+import { FlyoutTabIds } from '../../../hooks/use_host_flyout_open_url_state';
 
 export const processesTab = {
   id: FlyoutTabIds.PROCESSES,
