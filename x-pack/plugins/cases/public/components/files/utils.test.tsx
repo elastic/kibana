@@ -57,10 +57,6 @@ describe('isValidFileExternalReferenceMetadata', () => {
     expect(isValidFileExternalReferenceMetadata({ files: 'bar' })).toBeFalsy();
   });
 
-  it('should return false if file.length !== 1', () => {
-    expect(isValidFileExternalReferenceMetadata({ files: ['foo', 'bar'] })).toBeFalsy();
-  });
-
   it('should return false if files is not an array of file metadata', () => {
     expect(isValidFileExternalReferenceMetadata({ files: [3] })).toBeFalsy();
   });

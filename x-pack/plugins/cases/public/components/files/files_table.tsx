@@ -15,6 +15,7 @@ import * as i18n from './translations';
 import { useFilesTableColumns } from './use_files_table_columns';
 import { FilePreview } from './file_preview';
 import { AddFile } from './add_file';
+import { useFilePreview } from './use_file_preview';
 
 const EmptyFilesTable = ({ caseId }: { caseId: string }) => (
   <EuiEmptyPrompt
@@ -36,16 +37,16 @@ interface FilesTableProps {
 }
 
 export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: FilesTableProps) => {
-  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
+
   const [selectedFile, setSelectedFile] = useState<FileJSON>();
 
-  const closePreview = () => setIsPreviewVisible(false);
-  const showPreview = (file: FileJSON) => {
+  const displayPreview = (file: FileJSON) => {
     setSelectedFile(file);
-    setIsPreviewVisible(true);
+    showPreview();
   };
 
-  const columns = useFilesTableColumns({ showPreview });
+  const columns = useFilesTableColumns({ showPreview: displayPreview });
 
   return isLoading ? (
     <>

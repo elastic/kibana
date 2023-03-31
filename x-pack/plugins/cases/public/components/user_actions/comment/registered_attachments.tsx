@@ -15,15 +15,17 @@ import React, { Suspense } from 'react';
 import { memoize } from 'lodash';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner } from '@elastic/eui';
+
 import type {
   AttachmentType,
-  ExternalReferenceAttachmentViewProps,
+  AttachmentViewObject,
 } from '../../../client/attachment_framework/types';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { CommentResponse } from '../../../../common/api';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
-import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
+
+import { UserActionTimestamp } from '../timestamp';
 import { ATTACHMENT_NOT_REGISTERED_ERROR, DEFAULT_EVENT_ATTACHMENT_TITLE } from './translations';
 import { UserActionContentToolbar } from '../content_toolbar';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
@@ -43,14 +45,10 @@ type BuilderArgs<C, R> = Pick<
 /**
  * Provides a render function for attachment type
  */
-const getAttachmentRenderer = memoize((attachmentType: AttachmentType<unknown>) => {
+const getAttachmentRenderer = memoize((attachmentViewObject: AttachmentViewObject) => {
   let AttachmentElement: React.ReactElement;
 
   const renderCallback = (props: object) => {
-    const attachmentViewObject = attachmentType.getAttachmentViewObject(
-      props as ExternalReferenceAttachmentViewProps
-    );
-
     if (!attachmentViewObject.children) return;
 
     if (!AttachmentElement) {
@@ -109,15 +107,15 @@ export const createRegisteredAttachmentUserActionBuilder = <
     }
 
     const attachmentType = registry.get(attachmentTypeId);
-    const renderer = getAttachmentRenderer(attachmentType);
 
     const props = {
       ...getAttachmentViewProps(),
       caseData: { id: caseData.id, title: caseData.title },
     };
-    const attachmentViewObject = attachmentType.getAttachmentViewObject(
-      props as ExternalReferenceAttachmentViewProps
-    );
+
+    const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
+
+    const renderer = getAttachmentRenderer(attachmentViewObject);
 
     return [
       {

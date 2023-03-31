@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
@@ -19,16 +19,14 @@ import { FileNameLink } from './file_name_link';
 import { FilePreview } from './file_preview';
 import * as i18n from './translations';
 import { isImage, isValidFileExternalReferenceMetadata } from './utils';
+import { useFilePreview } from './use_file_preview';
 
 interface FileAttachmentEventProps {
   file: FileJSON;
 }
 
 const FileAttachmentEvent = ({ file }: FileAttachmentEventProps) => {
-  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
-
-  const closePreview = () => setIsPreviewVisible(false);
-  const showPreview = () => setIsPreviewVisible(true);
+  const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
 
   return (
     <>
@@ -71,7 +69,7 @@ const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps
 
 export const getFileType = (): ExternalReferenceAttachmentType => ({
   id: FILE_ATTACHMENT_TYPE,
-  icon: 'image',
+  icon: 'document',
   displayName: 'File Attachment Type',
   getAttachmentViewObject: getFileAttachmentViewObject,
 });
