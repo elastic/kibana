@@ -290,7 +290,7 @@ describe('healthRoute', () => {
     expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.degraded,
       summary:
-        'Task Manager is unhealthy - Reason:  / setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)',
+        'Task Manager is unhealthy - Reason: setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)',
     });
 
     expect(logHealthMetrics).toBeCalledTimes(4);
@@ -375,7 +375,7 @@ describe('healthRoute', () => {
     expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.degraded,
       summary:
-        'Task Manager is unhealthy - Reason:  / setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)',
+        'Task Manager is unhealthy - Reason: setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)',
     });
 
     expect(logHealthMetrics).toBeCalledTimes(4);

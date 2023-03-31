@@ -27,23 +27,11 @@ export function calculateHealthStatus(
   // times a multiplier, consider the system unhealthy
   const requiredColdStatsFreshness: number = config.monitored_aggregated_stats_refresh_rate * 1.5;
 
-  const collectReasonsByStatusType = (stats: RawMonitoringStats['stats'], status: HealthStatus) =>
-    Object.values(stats)
-      .reduce(
-        (acc, stat) => {
-          if (stat.status === status && stat.reason) {
-            return acc.concat([stat.reason]);
-          } else {
-            return acc;
-          }
-        },
-        ['']
-      )
-      .join(' / ');
-
   if (hasStatus(summarizedStats.stats, HealthStatus.Error)) {
-    const errorReasons = collectReasonsByStatusType(summarizedStats.stats, HealthStatus.Error);
-    return { status: HealthStatus.Error, reason: errorReasons };
+    return {
+      status: HealthStatus.Error,
+      reason: summarizedStats.stats.capacity_estimation?.reason,
+    };
   }
 
   // Hot timestamps look at runtime stats which are not available when tasks are not running
@@ -62,8 +50,10 @@ export function calculateHealthStatus(
   }
 
   if (hasStatus(summarizedStats.stats, HealthStatus.Warning)) {
-    const warningReasons = collectReasonsByStatusType(summarizedStats.stats, HealthStatus.Warning);
-    return { status: HealthStatus.Warning, reason: warningReasons };
+    return {
+      status: HealthStatus.Warning,
+      reason: summarizedStats.stats.capacity_estimation?.reason,
+    };
   }
 
   return { status: HealthStatus.OK };
