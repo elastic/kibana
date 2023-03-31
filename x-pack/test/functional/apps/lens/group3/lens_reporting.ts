@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -62,82 +62,86 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     for (const type of ['PNG', 'PDF'] as const) {
-      it('should not allow to download PNG reports for incomplete visualization', async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVisType('lens');
-        await PageObjects.lens.goToTimeRange();
+      describe(`${type} report`, () => {
+        it(`should not allow to download reports for incomplete visualization`, async () => {
+          await PageObjects.visualize.gotoVisualizationLandingPage();
+          await PageObjects.visualize.navigateToNewVisualization();
+          await PageObjects.visualize.clickVisType('lens');
+          await PageObjects.lens.goToTimeRange();
 
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        });
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'average',
-          field: 'bytes',
-        });
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+            operation: 'date_histogram',
+            field: '@timestamp',
+          });
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+            operation: 'average',
+            field: 'bytes',
+          });
 
-        // now remove a dimension to make it incomplete
-        await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
-        // open the share menu and check that reporting is disabled
-        await PageObjects.lens.clickShareMenu();
+          // now remove a dimension to make it incomplete
+          await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
+          // open the share menu and check that reporting is disabled
+          await PageObjects.lens.clickShareMenu();
 
-        expect(await PageObjects.lens.isShareActionEnabled(`${type}Reports`));
-      });
-
-      it('should be able to download PNG report of the current visualization', async () => {
-        // make the configuration complete
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'average',
-          field: 'bytes',
+          expect(await PageObjects.lens.isShareActionEnabled(`${type}Reports`));
         });
 
-        await PageObjects.lens.openReportingShare(type);
-        await PageObjects.reporting.clickGenerateReportButton();
-        const url = await PageObjects.reporting.getReportURL(60000);
-        expect(url).to.be.ok();
-      });
+        it(`should be able to download report of the current visualization`, async () => {
+          // make the configuration complete
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+            operation: 'average',
+            field: 'bytes',
+          });
 
-      it('should show a warning message for curl reporting of unsaved visualizations', async () => {
-        await PageObjects.lens.openReportingShare(type);
-        await testSubjects.click('shareReportingAdvancedOptionsButton');
-        await testSubjects.existOrFail('shareReportingUnsavedState');
-        expect(await testSubjects.getVisibleText('shareReportingUnsavedState')).to.eql(
-          'Unsaved work\nSave your work before copying this URL.'
-        );
-      });
+          await PageObjects.lens.openReportingShare(type);
+          await PageObjects.reporting.clickGenerateReportButton();
+          const url = await PageObjects.reporting.getReportURL(60000);
+          expect(url).to.be.ok();
+        });
 
-      it('should enable curl reporting if the visualization is saved', async () => {
-        await PageObjects.lens.save(`ASavedVisualizationToShareIn${type}`);
+        it(`should show a warning message for curl reporting of unsaved visualizations`, async () => {
+          await PageObjects.lens.openReportingShare(type);
+          await testSubjects.click('shareReportingAdvancedOptionsButton');
+          await testSubjects.existOrFail('shareReportingUnsavedState');
+          expect(await testSubjects.getVisibleText('shareReportingUnsavedState')).to.eql(
+            'Unsaved work\nSave your work before copying this URL.'
+          );
+        });
 
-        await PageObjects.lens.openReportingShare(type);
-        await testSubjects.click('shareReportingAdvancedOptionsButton');
-        await testSubjects.existOrFail('shareReportingCopyURL');
-        expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('Copy POST URL');
-      });
+        it(`should enable curl reporting if the visualization is saved`, async () => {
+          await PageObjects.lens.save(`ASavedVisualizationToShareIn${type}`);
 
-      it('should produce a valid URL for reporting', async () => {
-        await PageObjects.reporting.clickGenerateReportButton();
-        await PageObjects.reporting.getReportURL(60000);
-        // navigate to the reporting page
-        await PageObjects.common.navigateToUrl('management', '/insightsAndAlerting');
-        await testSubjects.click('reporting');
-        // find the latest Lens report
-        await testSubjects.click('reportJobRow > euiCollapsedItemActionsButton');
-        // click on Open in Kibana and check that all is ok
-        await testSubjects.click('reportOpenInKibanaApp');
+          await PageObjects.lens.openReportingShare(type);
+          await testSubjects.click('shareReportingAdvancedOptionsButton');
+          await testSubjects.existOrFail('shareReportingCopyURL');
+          expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql(
+            'Copy POST URL'
+          );
+        });
 
-        const [reportingWindowHandler, lensWindowHandle] = await browser.getAllWindowHandles();
-        await browser.switchToWindow(lensWindowHandle);
-        // verify some configuration
-        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-          'Average of bytes'
-        );
-        await browser.closeCurrentWindow();
-        await browser.switchToWindow(reportingWindowHandler);
+        it(`should produce a valid URL for reporting`, async () => {
+          await PageObjects.reporting.clickGenerateReportButton();
+          await PageObjects.reporting.getReportURL(60000);
+          // navigate to the reporting page
+          await PageObjects.common.navigateToUrl('management', '/insightsAndAlerting');
+          await testSubjects.click('reporting');
+          // find the latest Lens report
+          await testSubjects.click('reportJobRow > euiCollapsedItemActionsButton');
+          // click on Open in Kibana and check that all is ok
+          await testSubjects.click('reportOpenInKibanaApp');
+
+          const [reportingWindowHandler, lensWindowHandle] = await browser.getAllWindowHandles();
+          await browser.switchToWindow(lensWindowHandle);
+          // verify some configuration
+          expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+            'Average of bytes'
+          );
+          await browser.closeCurrentWindow();
+          await browser.switchToWindow(reportingWindowHandler);
+        });
       });
     }
   });
