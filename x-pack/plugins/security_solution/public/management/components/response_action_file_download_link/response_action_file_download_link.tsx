@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo, type CSSProperties } from 'react';
 import { EuiButtonEmpty, EuiSkeletonText, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
@@ -33,6 +32,32 @@ export const FILE_NO_LONGER_AVAILABLE_MESSAGE = i18n.translate(
   { defaultMessage: 'File has expired and is no longer available for download.' }
 );
 
+export const FILE_DELETED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.responseActionFileDownloadLink.deleteNotice',
+  {
+    defaultMessage:
+      'Files are periodically deleted to clear storage space. Download and save file locally if needed.',
+  }
+);
+
+export const FILE_PASSCODE_INFO_MESSAGE = i18n.translate(
+  'xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo',
+  {
+    defaultMessage: '(ZIP file passcode: {passcode}).',
+    values: {
+      passcode: 'elastic',
+    },
+  }
+);
+
+export const FILE_TRUNCATED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.responseActionFileDownloadLink.fileTruncated',
+  {
+    defaultMessage:
+      'Output data in the provided zip file is truncated due to file size limitations.',
+  }
+);
+
 const FileDownloadLinkContainer = styled.div`
   & > * {
     vertical-align: middle;
@@ -45,6 +70,7 @@ export interface ResponseActionFileDownloadLinkProps {
   agentId?: string;
   buttonTitle?: string;
   canAccessFileDownloadLink: boolean;
+  isTruncatedFile?: boolean;
   'data-test-subj'?: string;
   textSize?: 's' | 'xs';
 }
@@ -61,8 +87,9 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     agentId,
     buttonTitle = DEFAULT_BUTTON_TITLE,
     canAccessFileDownloadLink,
-    'data-test-subj': dataTestSubj,
+    isTruncatedFile = false,
     textSize = 's',
+    'data-test-subj': dataTestSubj,
   }) => {
     const action = _action as ActionDetails; // cast to remove `Immutable`
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -123,20 +150,16 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           data-test-subj={getTestId('passcodeMessage')}
           className="eui-displayInline"
         >
-          <FormattedMessage
-            id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
-            defaultMessage="(ZIP file passcode: {passcode})."
-            values={{
-              passcode: 'elastic',
-            }}
-          />
+          {FILE_PASSCODE_INFO_MESSAGE}
         </EuiText>
         <EuiText size={textSize} data-test-subj={getTestId('fileDeleteMessage')}>
-          <FormattedMessage
-            id="xpack.securitySolution.responseActionFileDownloadLink.deleteNotice"
-            defaultMessage="Files are periodically deleted to clear storage space. Download and save file locally if needed."
-          />
+          {FILE_DELETED_MESSAGE}
         </EuiText>
+        {isTruncatedFile && (
+          <EuiText size={textSize} data-test-subj={getTestId('fileTruncatedMessage')}>
+            {FILE_TRUNCATED_MESSAGE}
+          </EuiText>
+        )}
       </FileDownloadLinkContainer>
     );
   }
