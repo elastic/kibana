@@ -107,7 +107,7 @@ export async function cleanKibanaIndices({
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: `.kibana`,
+        index: `.kibana,.kibana_task_manager`,
         body: {
           query: {
             bool: {
