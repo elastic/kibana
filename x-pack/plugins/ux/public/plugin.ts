@@ -30,7 +30,10 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
+import {
+  ExploratoryViewPublicSetup,
+  ExploratoryViewPublicStart,
+} from '@kbn/exploratory-view-plugin/public';
 import { MapsStartApi } from '@kbn/maps-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -56,6 +59,7 @@ export interface ApmPluginStartDeps {
   maps?: MapsStartApi;
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
+  exploratoryView: ExploratoryViewPublicStart;
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
 }
