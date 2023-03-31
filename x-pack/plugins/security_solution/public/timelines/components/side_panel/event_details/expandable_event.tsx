@@ -86,7 +86,10 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
       path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
     });
 
-    const { isOnAlertsPage, alertDetailsLink } = useGetAlertDetailsFlyoutLink({ timestamp });
+    const { isOnAlertsPage, alertDetailsLink } = useGetAlertDetailsFlyoutLink({
+      _id: eventId,
+      timestamp,
+    });
 
     return (
       <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
