@@ -569,7 +569,10 @@ export class Embeddable
         },
         visualizationMap: this.deps.visualizationMap,
         activeDatasource: this.activeDatasource,
-        activeDatasourceState: { state: this.activeDatasourceState },
+        activeDatasourceState: {
+          isLoading: Boolean(this.activeDatasourceState),
+          state: this.activeDatasourceState,
+        },
         dataViews: {
           indexPatterns: this.indexPatterns,
           indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
