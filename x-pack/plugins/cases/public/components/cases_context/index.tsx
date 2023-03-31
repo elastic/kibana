@@ -26,11 +26,11 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attac
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
-import { DEFAULT_FEATURES } from '../../../common/constants';
+import { constructFileKindIdByOwner, DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
 import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
-import { isRegisteredOwner, CASES_FILE_KINDS } from '../../files';
+import { isRegisteredOwner } from '../../files';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
@@ -132,7 +132,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 
       if (isRegisteredOwner(owner[0])) {
         return (
-          <FilesContext client={getFilesClient(CASES_FILE_KINDS[owner[0]].id)}>
+          <FilesContext client={getFilesClient(constructFileKindIdByOwner(owner[0]))}>
             {contextChildren}
           </FilesContext>
         );
