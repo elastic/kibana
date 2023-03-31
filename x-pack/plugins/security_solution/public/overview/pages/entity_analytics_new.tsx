@@ -90,8 +90,8 @@ const EntityAnalyticsPageNewComponent = () => {
             configId={`securitySolution-riskScores`}
             globalQuery={query}
             loadingEventIds={[]}
-            globalFilters={filters}
-            inputFilters={[
+            globalFilters={[...filters]}
+            defaultFilters={[
               {
                 meta: {
                   alias: null,
@@ -105,6 +105,9 @@ const EntityAnalyticsPageNewComponent = () => {
                 },
               },
             ]}
+            // inputFilters={[
+
+            // ]}
             tableId={row.identifierValue}
             from={range.from}
             to={range.to}
