@@ -76,7 +76,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
       appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      category: DEFAULT_APP_CATEGORIES.elasticsearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
@@ -99,7 +99,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
       euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
       appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      category: DEFAULT_APP_CATEGORIES.elasticsearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
@@ -124,7 +124,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       searchable: true,
       navLinkStatus: AppNavLinkStatus.default,
       appRoute: ANALYTICS_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      category: DEFAULT_APP_CATEGORIES.elasticsearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
@@ -145,7 +145,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       title: ELASTICSEARCH_PLUGIN.NAME,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
       appRoute: ELASTICSEARCH_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      category: DEFAULT_APP_CATEGORIES.elasticsearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
@@ -233,7 +233,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.registerSolution({
         id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
         title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
-        icon: 'logoEnterpriseSearch',
+        icon: 'logoElastic',
         description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
         path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
         order: 100,
