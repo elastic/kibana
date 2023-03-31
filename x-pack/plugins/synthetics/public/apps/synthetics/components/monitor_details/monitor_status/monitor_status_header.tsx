@@ -13,7 +13,6 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
-import { useGetUrlParams } from '../../../hooks';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
@@ -27,14 +26,10 @@ export const MonitorStatusHeader = ({
   showViewHistoryButton,
 }: MonitorStatusPanelProps) => {
   const { basePath } = useSyntheticsSettingsContext();
-  const params = useGetUrlParams();
   const { monitor } = useSelectedMonitor();
   const selectedLocation = useSelectedLocation();
   const search = stringifyUrlParams({
-    ...params,
     locationId: selectedLocation?.id,
-    absoluteDateRangeStart: Date.now() - 24 * 60 * 60 * 1000,
-    absoluteDateRangeEnd: Date.now(),
     dateRangeStart: 'now-24h',
     dateRangeEnd: 'now',
   });
