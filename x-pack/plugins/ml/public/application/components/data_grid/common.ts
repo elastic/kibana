@@ -121,6 +121,10 @@ export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
 }
 
+export function isCounterTimeSeriesMetric(field: DataViewField) {
+  return field.timeSeriesMetric === 'counter';
+}
+
 export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, resultsField: string) => {
   return Object.keys(fieldTypes).map((field) => {
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
@@ -218,8 +222,9 @@ export const getDataGridSchemaFromKibanaFieldType = (
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
   let schema;
+  if (!field) return;
 
-  switch (field?.type) {
+  switch (field.type) {
     case KBN_FIELD_TYPES.BOOLEAN:
       schema = 'boolean';
       break;
@@ -239,7 +244,8 @@ export const getDataGridSchemaFromKibanaFieldType = (
   }
 
   if (
-    (schema === undefined && field?.aggregatable === false) ||
+    (schema === undefined && field.aggregatable === false) ||
+    field.timeSeriesMetric === 'counter' ||
     (schema === 'numeric' &&
       field?.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE))
   ) {

@@ -28,7 +28,7 @@ export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = 
   } = useContext(PivotConfigurationContext)!;
 
   const sortFieldOptions = fields
-    .filter((v) => TOP_METRICS_SORT_FIELD_TYPES.includes(v.type))
+    .filter((v) => (TOP_METRICS_SORT_FIELD_TYPES as string[]).includes(v.type))
     .map(({ name }) => ({ text: name, value: name }));
 
   Object.values(TOP_METRICS_SPECIAL_SORT_FIELDS).forEach((v) => {

@@ -34,7 +34,7 @@ export interface ErrorMessage {
 
 export interface Field {
   name: EsFieldName;
-  type: KBN_FIELD_TYPES;
+  type: KBN_FIELD_TYPES | 'counter';
 }
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
