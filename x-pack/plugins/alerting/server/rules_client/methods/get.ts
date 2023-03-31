@@ -11,7 +11,7 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import { RulesClientContext } from '../types';
-import { formatLegacyActionsForSiemRules } from '../lib/read_legacy_rules';
+import { formatLegacyActionsForSiemRules } from '../lib';
 
 export interface GetParams {
   id: string;
