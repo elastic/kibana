@@ -10,8 +10,6 @@ import { HOSTS_URL } from '../urls/navigation';
 import { waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
-import { createRule } from './api_calls/rules';
-import { getNewRule } from '../objects/rule';
 
 export const openSourcerer = (sourcererScope?: string) => {
   if (sourcererScope != null && sourcererScope === 'timeline') {
