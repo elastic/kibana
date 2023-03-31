@@ -62,7 +62,7 @@ describe('Versioned route', () => {
     );
   });
 
-  it('only allows versions that are numbers great than 0', () => {
+  it('only allows versions that are numbers greater than 0', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
     expect(() =>
       versionedRouter
