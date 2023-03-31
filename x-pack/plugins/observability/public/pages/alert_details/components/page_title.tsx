@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ALERT_DURATION,
   ALERT_FLAPPING,
+  ALERT_RULE_CATEGORY,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   TIMESTAMP,
@@ -33,6 +34,14 @@ export interface PageTitleProps {
   alert: TopAlert | null;
 }
 
+const BREACHED = i18n.translate('xpack.observability.pages.alertDetails.pageTitle.breached', {
+  defaultMessage: 'breached',
+});
+
+const DETECTED = i18n.translate('xpack.observability.pages.alertDetails.pageTitle.detected', {
+  defaultMessage: 'detected',
+});
+
 export function PageTitle({ alert }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -40,7 +49,14 @@ export function PageTitle({ alert }: PageTitleProps) {
 
   return (
     <div data-test-subj="page-title-container">
-      {alert.reason}
+      <FormattedMessage
+        id="xpack.observability.pages.alertDetails.pageTitle.title"
+        values={{
+          ruleCategory: alert.fields[ALERT_RULE_CATEGORY],
+          action: alert.fields[ALERT_RULE_CATEGORY] === 'Anomaly' ? DETECTED : BREACHED,
+        }}
+        defaultMessage="{ruleCategory} {action}"
+      />
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
@@ -53,7 +69,7 @@ export function PageTitle({ alert }: PageTitleProps) {
           <EuiFlexGroup gutterSize="none">
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.observability.pages.alertDetails.alertSummary.triggered"
+                id="xpack.observability.pages.alertDetails.pageTitle.triggered"
                 defaultMessage="Triggered"
               />
               :&nbsp;
@@ -72,7 +88,7 @@ export function PageTitle({ alert }: PageTitleProps) {
           <EuiFlexGroup gutterSize="none">
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.observability.pages.alertDetails.alertSummary.duration"
+                id="xpack.observability.pages.alertDetails.pageTitle.duration"
                 defaultMessage="Duration"
               />
               :&nbsp;
@@ -91,7 +107,7 @@ export function PageTitle({ alert }: PageTitleProps) {
           <EuiFlexGroup gutterSize="none">
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
+                id="xpack.observability.pages.alertDetails.pageTitle.lastStatusUpdate"
                 defaultMessage="Last status update"
               />
               :&nbsp;
