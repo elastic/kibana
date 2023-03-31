@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { journey, step, expect, after, Page } from '@elastic/synthetics';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { recordVideo } from '../../helpers/record_video';
 import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor_management';
 
 journey('MonitorDetails', async ({ page, params }: { page: Page; params: any }) => {
