@@ -10,11 +10,23 @@ import { i18n } from '@kbn/i18n';
 import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
 
+const ELASTICSEARCH_PRODUCT_NAME = i18n.translate(
+  'xpack.enterpriseSearch.elasticsearch.productName',
+  {
+    defaultMessage: 'Elasticsearch',
+  }
+);
+
+export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate(
+  'xpack.enterpriseSearch.content.productName',
+  {
+    defaultMessage: 'Enterprise Search',
+  }
+);
+
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
-  NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
+  NAME: ELASTICSEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
     defaultMessage: 'Overview',
   }),
@@ -22,23 +34,21 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
   URL: '/app/enterprise_search/overview',
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElastic',
 };
 
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
-  ID: 'enterpriseSearchContent',
-  NAME: i18n.translate('xpack.enterpriseSearch.content.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
-    defaultMessage: 'Content',
-  }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.content.description', {
     defaultMessage:
       'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
   }),
+  ID: 'enterpriseSearchContent',
+  LOGO: 'logoElastic',
+  NAME: ELASTICSEARCH_PRODUCT_NAME,
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
+    defaultMessage: 'Content',
+  }),
   URL: '/app/enterprise_search/content',
-  LOGO: 'logoEnterpriseSearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
@@ -62,9 +72,7 @@ export const ANALYTICS_PLUGIN = {
 
 export const ELASTICSEARCH_PLUGIN = {
   ID: 'elasticsearch',
-  NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
-    defaultMessage: 'Elasticsearch',
-  }),
+  NAME: ELASTICSEARCH_PRODUCT_NAME,
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productDescription', {
     defaultMessage: 'Low-level tools for creating performant and relevant search experiences.',
   }),
@@ -124,7 +132,7 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
 
 export const ENGINES_PLUGIN = {
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
-    defaultMessage: 'Engines',
+    defaultMessage: 'Search Applications',
   }),
 };
 

@@ -7,6 +7,7 @@
 
 import {
   generateTitle,
+  elasticsearchProductTitle,
   enterpriseSearchTitle,
   appSearchTitle,
   workplaceSearchTitle,
@@ -57,5 +58,17 @@ describe('workplaceSearchTitle', () => {
   it('falls back to product name', () => {
     const title = workplaceSearchTitle();
     expect(title).toEqual('Workplace Search');
+  });
+});
+
+describe('elasticsearchProductTitle', () => {
+  it('automatically appends the Workplace Search product onto the pages array', () => {
+    const title = elasticsearchProductTitle(['Setup Guide']);
+    expect(title).toEqual('Setup Guide - Elasticsearch');
+  });
+
+  it('falls back to product name', () => {
+    const title = elasticsearchProductTitle();
+    expect(title).toEqual('Elasticsearch');
   });
 });

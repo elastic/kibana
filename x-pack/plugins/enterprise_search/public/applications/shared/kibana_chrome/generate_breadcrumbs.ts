@@ -12,6 +12,7 @@ import { EuiBreadcrumb } from '@elastic/eui';
 import {
   ENGINES_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_PRODUCT_NAME,
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
@@ -101,6 +102,16 @@ export const useEuiBreadcrumbs = (breadcrumbs: Breadcrumbs): EuiBreadcrumb[] => 
 export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
+      text: ENTERPRISE_SEARCH_PRODUCT_NAME,
+      path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      shouldNotCreateHref: true,
+    },
+    ...breadcrumbs,
+  ]);
+
+export const useElasticsearchProductBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEuiBreadcrumbs([
+    {
       text: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
       path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       shouldNotCreateHref: true,
@@ -109,10 +120,10 @@ export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   ]);
 
 export const useAnalyticsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useEnterpriseSearchBreadcrumbs([{ text: ANALYTICS_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+  useElasticsearchProductBreadcrumbs([{ text: ANALYTICS_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
 
 export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useEnterpriseSearchBreadcrumbs([
+  useElasticsearchProductBreadcrumbs([
     { text: 'Getting started with Elasticsearch', path: '/' },
     ...breadcrumbs,
   ]);
@@ -127,7 +138,7 @@ export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   ]);
 
 export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useEnterpriseSearchBreadcrumbs([
+  useElasticsearchProductBreadcrumbs([
     { text: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE, path: '/' },
     ...breadcrumbs,
   ]);
@@ -139,7 +150,7 @@ export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =
   ]);
 
 export const useEnterpriseSearchEnginesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useEnterpriseSearchBreadcrumbs([
+  useElasticsearchProductBreadcrumbs([
     { text: ENGINES_PLUGIN.NAV_TITLE, path: '/engines' },
     ...breadcrumbs,
   ]);

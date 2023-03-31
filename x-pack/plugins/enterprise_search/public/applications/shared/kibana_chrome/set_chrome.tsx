@@ -18,6 +18,7 @@ import {
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
   useElasticsearchBreadcrumbs,
+  useElasticsearchProductBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
   BreadcrumbTrail,
@@ -178,6 +179,23 @@ export const SetEnterpriseSearchEnginesChrome: React.FC<SetChromeProps> = ({ tra
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useEnterpriseSearchEnginesBreadcrumbs(crumbs);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
+export const SetSearchOverviewChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = enterpriseSearchTitle(title);
+
+  const crumbs = useGenerateBreadcrumbs(trail);
+  const breadcrumbs = useElasticsearchProductBreadcrumbs(crumbs);
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

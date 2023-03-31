@@ -6,6 +6,7 @@
  */
 
 import {
+  ENTERPRISE_SEARCH_PRODUCT_NAME,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
@@ -32,7 +33,7 @@ export const generateTitle = (pages: Title) => pages.join(' - ');
  */
 
 export const enterpriseSearchTitle = (page: Title = []) =>
-  generateTitle([...page, ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME]);
+  generateTitle([...page, ENTERPRISE_SEARCH_PRODUCT_NAME]);
 
 export const analyticsTitle = (page: Title = []) => generateTitle([...page, ANALYTICS_PLUGIN.NAME]);
 
@@ -47,3 +48,6 @@ export const workplaceSearchTitle = (page: Title = []) =>
 
 export const searchExperiencesTitle = (page: Title = []) =>
   generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);
+
+export const elasticsearchProductTitle = (page: Title = []) =>
+  generateTitle([...page, ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME]);

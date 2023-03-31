@@ -43,7 +43,7 @@ import './search_indices.scss';
 
 export const baseBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.breadcrumb', {
-    defaultMessage: 'Elasticsearch indices',
+    defaultMessage: 'Indices',
   }),
 ];
 

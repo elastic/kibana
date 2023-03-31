@@ -30,7 +30,7 @@ import {
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
-import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetSearchOverviewChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
@@ -363,7 +363,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       restrictWidth
       pageHeader={{
         pageTitle: i18n.translate('xpack.enterpriseSearch.overview.pageTitle', {
-          defaultMessage: 'Welcome to Enterprise Search',
+          defaultMessage: 'Welcome to Elasticsearch',
         }),
       }}
     >
