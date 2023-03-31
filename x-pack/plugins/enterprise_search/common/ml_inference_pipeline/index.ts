@@ -31,11 +31,10 @@ export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
 
 export interface MlInferencePipelineParams {
   description?: string;
-  destinationField: string;
+  fieldMappings: Record<string, string>;
   inferenceConfig?: InferencePipelineInferenceConfig;
   model: MlTrainedModelConfig;
   pipelineName: string;
-  sourceField: string;
 }
 
 /**
@@ -45,16 +44,18 @@ export interface MlInferencePipelineParams {
  */
 export const generateMlInferencePipelineBody = ({
   description,
-  destinationField,
+  fieldMappings,
   inferenceConfig,
   model,
   pipelineName,
-  sourceField,
 }: MlInferencePipelineParams): MlInferencePipeline => {
   // if model returned no input field, insert a placeholder
   const modelInputField =
     model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
 
+  // For now this only works for a single field mapping
+  const sourceField = Object.keys(fieldMappings)[0];
+  const destinationField = Object.values(fieldMappings)[0];
   const inferenceType = Object.keys(model.inference_config)[0];
   const remove = getRemoveProcessorForInferenceType(destinationField, inferenceType);
   const set = getSetProcessorForInferenceType(destinationField, inferenceType);
