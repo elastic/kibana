@@ -31,7 +31,7 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
 };
 
 const disableCommonProtections = (policy: PolicyConfig) => {
-  return Object.keys(policy).reduce((acc, item) => {
+  return Object.keys(policy).reduce<PolicyConfig>((acc, item) => {
     const os = item as keyof PolicyConfig;
     if (os === 'meta') {
       return acc;
