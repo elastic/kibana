@@ -16,33 +16,34 @@ interface ActionsLogWithRuleToggleProps {
   dataTestSubj?: string;
 }
 
-const ActionsLogWithRuleToggleContent = ({
-  isFlyout,
-  dataTestSubj,
-}: ActionsLogWithRuleToggleProps) => {
-  const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
+export const ActionsLogWithRuleToggle = React.memo(
+  ({ isFlyout, dataTestSubj }: ActionsLogWithRuleToggleProps) => {
+    const responseActionsEnabled = useIsExperimentalFeatureEnabled(
+      'endpointResponseActionsEnabled'
+    );
 
-  const { withAutomatedActions: withAutomatedActionsUrlParam, setUrlWithAutomatedActions } =
-    useActionHistoryUrlParams();
+    const { withAutomatedActions: withAutomatedActionsUrlParam, setUrlWithAutomatedActions } =
+      useActionHistoryUrlParams();
 
-  const onClick = useCallback(() => {
-    if (!isFlyout) {
-      // set and show `withAutomatedActions` URL param on history page
-      setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
-    }
-  }, [isFlyout, setUrlWithAutomatedActions, withAutomatedActionsUrlParam]);
+    const onClick = useCallback(() => {
+      if (!isFlyout) {
+        // set and show `withAutomatedActions` URL param on history page
+        setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
+      }
+    }, [isFlyout, setUrlWithAutomatedActions, withAutomatedActionsUrlParam]);
 
-  if (!responseActionsEnabled) return null;
+    if (!responseActionsEnabled) return null;
 
-  return (
-    <EuiFilterButton
-      hasActiveFilters={withAutomatedActionsUrlParam}
-      onClick={onClick}
-      data-test-subj={`${dataTestSubj}-automated-responses-filter`}
-    >
-      {FILTER_NAMES.automated}
-    </EuiFilterButton>
-  );
-};
+    return (
+      <EuiFilterButton
+        hasActiveFilters={withAutomatedActionsUrlParam}
+        onClick={onClick}
+        data-test-subj={`${dataTestSubj}-automated-responses-filter`}
+      >
+        {FILTER_NAMES.automated}
+      </EuiFilterButton>
+    );
+  }
+);
 
-export const ActionsLogWithRuleToggle = React.memo(ActionsLogWithRuleToggleContent);
+ActionsLogWithRuleToggle.displayName = 'ActionsLogWithRuleToggle';
