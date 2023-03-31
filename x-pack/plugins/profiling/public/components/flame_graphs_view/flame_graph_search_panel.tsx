@@ -6,7 +6,6 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { FlameGraphInformationWindowSwitch } from '.';
 import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../../common/flamegraph';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -21,8 +20,6 @@ interface Props {
   comparisonMode: FlameGraphComparisonMode;
   normalizationMode: FlameGraphNormalizationMode;
   normalizationOptions: FlameGraphNormalizationOptions;
-  showInformationWindow: boolean;
-  onChangeShowInformationWindow: () => void;
 }
 
 export function FlameGraphSearchPanel({
@@ -30,8 +27,6 @@ export function FlameGraphSearchPanel({
   normalizationMode,
   isDifferentialView,
   normalizationOptions,
-  showInformationWindow,
-  onChangeShowInformationWindow,
 }: Props) {
   const { path, query } = useProfilingParams('/flamegraphs/*');
   const routePath = useProfilingRoutePath();
@@ -102,12 +97,6 @@ export function FlameGraphSearchPanel({
             )}
           </>
         )}
-        <EuiFlexItem grow style={{ alignItems: 'flex-end' }}>
-          <FlameGraphInformationWindowSwitch
-            showInformationWindow={showInformationWindow}
-            onChange={onChangeShowInformationWindow}
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
