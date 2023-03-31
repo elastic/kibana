@@ -34111,7 +34111,7 @@
     "xpack.stackConnectors.components.serviceNowSIR.correlationIDHelpLabel": "用于更新事件的标识符",
     "xpack.stackConnectors.components.serviceNowSIR.selectMessageText": "在 ServiceNow SecOps 中创建事件。",
     "xpack.stackConnectors.components.serviceNowSIR.title": "安全事件",
-    "xpack.stackConnectors.components.slack.error.requiredSlackMessageText": "“消息”必填。",
+    "xpack.stackConnectors.components.slack..error.requiredSlackMessageText": "“消息”必填。",
     "xpack.stackConnectors.components.slack.connectorTypeTitle": "发送到 Slack",
     "xpack.stackConnectors.components.slack.error.invalidWebhookUrlText": "Webhook URL 无效。",
     "xpack.stackConnectors.components.slack.messageTextAreaFieldLabel": "消息",
