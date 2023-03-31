@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { omit, padStart } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
@@ -35,7 +35,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
   describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
-    const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -47,7 +46,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await es.indices.delete({ index: alertAsDataIndex });
     });
 
     for (const scenario of UserAtSpaceScenarios) {
