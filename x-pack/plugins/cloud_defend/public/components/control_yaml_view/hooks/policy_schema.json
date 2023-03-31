@@ -66,31 +66,25 @@
           "required": ["containerImageName"]
         },
         {
-          "required": ["fullContainerImageName"]
+          "required": ["containerImageFullName"]
         },
         {
           "required": ["containerImageTag"]
         },
         {
-          "required": ["orchestratorClusterId"]
+          "required": ["kubernetesClusterId"]
         },
         {
-          "required": ["orchestratorClusterName"]
+          "required": ["kubernetesClusterName"]
         },
         {
-          "required": ["orchestratorNamespace"]
+          "required": ["kubernetesNamespace"]
         },
         {
-          "required": ["orchestratorResourceLabel"]
+          "required": ["kubernetesResourceLabel"]
         },
         {
-          "required": ["orchestratorResourceName"]
-        },
-        {
-          "required": ["orchestratorResourceType"]
-        },
-        {
-          "required": ["orchestratorType"]
+          "required": ["kubernetesResourceName"]
         },
         {
           "required": ["targetFilePath"]
@@ -129,53 +123,40 @@
             "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
           }
         },
-        "orchestratorClusterId": {
+        "kubernetesClusterId": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
           }
         },
-        "orchestratorClusterName": {
+        "kubernetesClusterName": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
           }
         },
-        "orchestratorNamespace": {
+        "kubernetesNamespace": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
           }
         },
-        "orchestratorResourceLabel": {
+        "kubernetesResourceLabel": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
+          }
+        },
+        "kubernetesResourceName": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
-          }
-        },
-        "orchestratorResourceName": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string"
-          }
-        },
-        "orchestratorResourceType": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": ["node", "pod"]
-          }
-        },
-        "orchestratorType": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": ["kubernetes"]
           }
         },
         "operation": {
@@ -238,25 +219,19 @@
           "required": ["containerImageTag"]
         },
         {
-          "required": ["orchestratorClusterId"]
+          "required": ["kubernetesClusterId"]
         },
         {
-          "required": ["orchestratorClusterName"]
+          "required": ["kubernetesClusterName"]
         },
         {
-          "required": ["orchestratorNamespace"]
+          "required": ["kubernetesNamespace"]
         },
         {
-          "required": ["orchestratorResourceLabel"]
+          "required": ["kubernetesResourceLabel"]
         },
         {
-          "required": ["orchestratorResourceName"]
-        },
-        {
-          "required": ["orchestratorResourceType"]
-        },
-        {
-          "required": ["orchestratorType"]
+          "required": ["kubernetesResourceName"]
         },
         {
           "required": ["processExecutable"]
@@ -301,53 +276,40 @@
             "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
           }
         },
-        "orchestratorClusterId": {
+        "kubernetesClusterId": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
           }
         },
-        "orchestratorClusterName": {
+        "kubernetesClusterName": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
           }
         },
-        "orchestratorNamespace": {
+        "kubernetesNamespace": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
           }
         },
-        "orchestratorResourceLabel": {
+        "kubernetesResourceLabel": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
+          }
+        },
+        "kubernetesResourceName": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
-          }
-        },
-        "orchestratorResourceName": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string"
-          }
-        },
-        "orchestratorResourceType": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": ["node", "pod"]
-          }
-        },
-        "orchestratorType": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": ["kubernetes"]
           }
         },
         "operation": {
@@ -371,13 +333,6 @@
             "type": "string"
           }
         },
-        "processUserName": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string"
-          }
-        },
         "processUserId": {
           "type": "array",
           "minItems": 1,
@@ -392,7 +347,8 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 8
           }
         }
       },

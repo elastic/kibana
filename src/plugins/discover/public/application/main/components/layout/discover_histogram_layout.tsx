@@ -46,6 +46,7 @@ export const DiscoverHistogramLayout = ({
     inspectorAdapters,
     savedSearchFetch$: stateContainer.dataState.fetch$,
     searchSessionId,
+    isPlainRecord,
     ...commonProps,
   });
 

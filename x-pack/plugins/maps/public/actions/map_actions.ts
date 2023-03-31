@@ -11,6 +11,7 @@ import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { Geometry, Position } from 'geojson';
@@ -44,6 +45,7 @@ import {
   MAP_READY,
   ROLLBACK_MAP_SETTINGS,
   SET_EMBEDDABLE_SEARCH_CONTEXT,
+  SET_EXECUTION_CONTEXT,
   SET_GOTO,
   SET_MAP_INIT_ERROR,
   SET_MAP_SETTINGS,
@@ -169,9 +171,6 @@ export function mapReady() {
     });
 
     const waitingForMapReadyLayerList = getWaitingForMapReadyLayerListRaw(getState());
-    dispatch({
-      type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
-    });
 
     if (getMapSettings(getState()).initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
@@ -183,6 +182,12 @@ export function mapReady() {
         dispatch(addLayer(layerDescriptor));
       });
     }
+
+    // clear waiting list after transfer to avoid state condition
+    // where waiting list is empty and layers have not been added to layerList
+    dispatch({
+      type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
+    });
   };
 }
 
@@ -351,6 +356,13 @@ export function setEmbeddableSearchContext({
   return {
     type: SET_EMBEDDABLE_SEARCH_CONTEXT,
     embeddableSearchContext: { filters, query },
+  };
+}
+
+export function setExecutionContext(executionContext: KibanaExecutionContext) {
+  return {
+    type: SET_EXECUTION_CONTEXT,
+    executionContext,
   };
 }
 

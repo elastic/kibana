@@ -44,7 +44,7 @@ For example, is your app spending time in external calls, database processing, o
 +
 The time a transaction took to complete is also recorded and displayed on the chart under the "app" label.
 "app" indicates that something was happening within the application, but we're not sure exactly what.
-This could be a sign that the agent does not have auto-instrumentation for whatever was happening during that time.
+This could be a sign that the APM agent does not have auto-instrumentation for whatever was happening during that time.
 +
 It's important to note that if you have asynchronous spans, the sum of all span times may exceed the duration of the transaction.
 
@@ -71,7 +71,7 @@ If there's a particular endpoint you're worried about, you can click on it to vi
 [IMPORTANT]
 ====
 If you only see one route in the Transactions table, or if you have transactions named "unknown route",
-it could be a symptom that the agent either wasn't installed correctly or doesn't support your framework.
+it could be a symptom that the APM agent either wasn't installed correctly or doesn't support your framework.
 
 For further details, including troubleshooting and custom implementation instructions,
 refer to the documentation for each {apm-agents-ref}[APM Agent] you've implemented.
@@ -81,7 +81,7 @@ refer to the documentation for each {apm-agents-ref}[APM Agent] you've implement
 [[rum-transaction-overview]]
 === RUM Transaction overview
 
-The transaction overview page is customized for the JavaScript RUM Agent.
+The transaction overview page is customized for the JavaScript RUM agent.
 Specifically, the page highlights *page load times* for your service:
 
 [role="screenshot"]
@@ -144,13 +144,13 @@ NOTE: More information on timeline waterfalls is available in <<spans, spans>>.
 
 Learn more about a trace sample in the *Metadata* tab:
 
-* Labels - Custom labels added by agents
+* Labels - Custom labels added by APM agents
 * HTTP request/response information
 * Host information
 * Container information
-* Service - The service/application runtime, agent, name, etc..
+* Service - The service/application runtime, APM agent, name, etc..
 * Process - The process id that served up the request.
-* Agent information
+* APM agent information
 * URL
 * User - Requires additional configuration, but allows you to see which user experienced the current transaction.
 * FaaS information, like cold start, AWS request ID, trigger type, and trigger request ID
