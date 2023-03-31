@@ -77,6 +77,9 @@ export const ELASTICSEARCH_PLUGIN = {
     defaultMessage: 'Low-level tools for creating performant and relevant search experiences.',
   }),
   LOGO: 'logoElastic',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.elasticsearch.navTitle', {
+    defaultMessage: 'Getting started',
+  }),
   URL: '/app/enterprise_search/elasticsearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',
 };

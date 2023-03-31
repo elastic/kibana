@@ -48,9 +48,7 @@ export const useEnterpriseSearchNav = () => {
       items: [
         {
           id: 'elasticsearch',
-          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
-            defaultMessage: 'Getting started',
-          }),
+          name: ELASTICSEARCH_PLUGIN.NAV_TITLE,
           ...generateNavLink({
             shouldNotCreateHref: true,
             to: ELASTICSEARCH_PLUGIN.URL,
