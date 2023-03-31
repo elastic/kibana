@@ -48,10 +48,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api', () 
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => {
-    console.log('defaultValue', defaultValue);
-    return defaultValue;
-  }),
+  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
 }));
 
 const initLegacyShims = () => {
