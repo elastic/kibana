@@ -10,6 +10,8 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { isApmIndicatorType } from '../../../utils/slo/indicator';
+import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
@@ -51,8 +53,29 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const handleManageRules = () => {
-    navigateToUrl(basePath.prepend(paths.observability.rules));
+  const handleNavigateToApm = () => {
+    if (
+      slo?.indicator.type === 'sli.apm.transactionDuration' ||
+      slo?.indicator.type === 'sli.apm.transactionErrorRate'
+    ) {
+      const {
+        indicator: {
+          params: { environment, filter, service, transactionName, transactionType },
+        },
+        timeWindow: { duration },
+      } = slo;
+
+      const url = convertSliApmParamsToApmAppDeeplinkUrl({
+        duration,
+        environment,
+        filter,
+        service,
+        transactionName,
+        transactionType,
+      });
+
+      navigateToUrl(basePath.prepend(url));
+    }
   };
 
   return (
@@ -103,17 +126,24 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 }
               )}
             </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              key="manageRules"
-              disabled={!hasWriteCapabilities}
-              onClick={handleManageRules}
-              data-test-subj="sloDetailsHeaderControlPopoverManageRules"
-            >
-              {i18n.translate('xpack.observability.slo.sloDetails.headerControl.manageRules', {
-                defaultMessage: 'Manage rules',
-              })}
-            </EuiContextMenuItem>,
-          ]}
+          ].concat(
+            !!slo && isApmIndicatorType(slo.indicator.type)
+              ? [
+                  <EuiContextMenuItem
+                    key="exploreInApm"
+                    onClick={handleNavigateToApm}
+                    data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
+                  >
+                    {i18n.translate(
+                      'xpack.observability.slos.sloDetails.headerControl.exploreInApm',
+                      {
+                        defaultMessage: 'Explore in APM',
+                      }
+                    )}
+                  </EuiContextMenuItem>,
+                ]
+              : []
+          )}
         />
       </EuiPopover>
       {!!slo && isRuleFlyoutVisible ? (
