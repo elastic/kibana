@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
@@ -43,10 +43,9 @@ export function HeaderControl({ isLoading, slo }: Props) {
     }
   };
 
-  const onCloseRuleFlyout = useCallback(
-    () => setRuleFlyoutVisibility(false),
-    [setRuleFlyoutVisibility]
-  );
+  const onCloseRuleFlyout = () => {
+    setRuleFlyoutVisibility(false);
+  };
 
   const handleOpenRuleFlyout = () => {
     closePopover();
