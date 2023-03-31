@@ -24,75 +24,113 @@ const defaultProps = {
 };
 
 describe('<EntityPanel />', () => {
-  describe('panel is not expandable', () => {
+  describe('panel is not expandable by default', () => {
     it('should render non-expandable panel by default for host type', () => {
-      const { getByTestId } = render(<EntityPanel {...defaultProps} />);
+      const { getByTestId, queryByTestId } = render(<EntityPanel {...defaultProps} />);
 
       expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
       expect(getByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).toHaveTextContent('test content');
 
-      expect(getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
-      expect(getByTestId(ENTITY_PANEL_ICON_TEST_ID)).toHaveAttribute('entity-icon-host');
+      expect(queryByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+      expect(getByTestId(ENTITY_PANEL_ICON_TEST_ID).firstChild).toHaveAttribute(
+        'data-euiicon-type',
+        'storage'
+      );
     });
 
     it('should render non-expandable panel by default for user type', () => {
-      const { getByTestId } = render(<EntityPanel {...defaultProps} type={'user' as EntityType} />);
+      const { getByTestId, queryByTestId } = render(
+        <EntityPanel {...defaultProps} type={'user' as EntityType} />
+      );
 
       expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
       expect(getByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).toHaveTextContent('test content');
 
-      expect(getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
-      expect(getByTestId(ENTITY_PANEL_ICON_TEST_ID)).toHaveAttribute('entity-icon-user');
+      expect(queryByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+      expect(getByTestId(ENTITY_PANEL_ICON_TEST_ID).firstChild).toHaveAttribute(
+        'data-euiicon-type',
+        'user'
+      );
     });
 
     it('should not render content when content is null', () => {
-      const { getByTestId } = render(<EntityPanel {...defaultProps} content={null} />);
+      const { queryByTestId } = render(<EntityPanel {...defaultProps} content={null} />);
 
-      expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
-      expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
-
-      expect(getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).not.toBeInTheDocument();
     });
   });
 
   describe('panel is expandable', () => {
-    it('should render expandable panel for host type', () => {
-      const { getByTestId } = render(<EntityPanel {...defaultProps} expandable={true} />);
-
-      expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
-      expect(getByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).toHaveTextContent('test content');
-
-      expect(getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).toHaveAttribute('arrowRight');
-      expect(getByTestId(ENTITY_PANEL_ICON_TEST_ID)).toHaveAttribute('entity-icon-host');
-    });
-
-    it('should render expandable panel for user type', () => {
-      const { getByTestId } = render(
-        <EntityPanel {...defaultProps} type={'user' as EntityType} expandable={true} />
+    it('should render panel with toggle and collapsed by default', () => {
+      const { getByTestId, queryByTestId } = render(
+        <EntityPanel {...defaultProps} expandable={true} />
       );
 
       expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
-      expect(getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).toHaveAttribute('arrowRight');
+      expect(queryByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
+    });
 
-      expect(getByTestId(ENTITY_PANEL_ICON_TEST_ID)).toHaveAttribute('entity-icon-user');
+    it('click toggle button should expand the panel', () => {
+      const { getByTestId } = render(<EntityPanel {...defaultProps} expandable={true} />);
+
+      const toggle = getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID);
+      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowRight');
+      toggle.click();
+
       expect(getByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).toHaveTextContent('test content');
+      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowDown');
     });
 
     it('should not render content when content is null', () => {
+      const { getByTestId, queryByTestId } = render(
+        <EntityPanel {...defaultProps} content={null} expandable={true} />
+      );
+      const toggle = getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID);
+      toggle.click();
+      expect(queryByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('panel is expandable and expanded by default', () => {
+    it('should render header and content', () => {
       const { getByTestId } = render(
+        <EntityPanel {...defaultProps} expandable={true} expanded={true} />
+      );
+
+      expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
+      expect(getByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).toHaveTextContent('test content');
+      expect(getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('click toggle button should collapse the panel', () => {
+      const { getByTestId, queryByTestId } = render(
+        <EntityPanel {...defaultProps} expandable={true} expanded={true} />
+      );
+
+      const toggle = getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID);
+      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowDown');
+      expect(getByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).toBeInTheDocument();
+
+      toggle.click();
+      expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowRight');
+      expect(queryByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should not render content when content is null', () => {
+      const { getByTestId, queryByTestId } = render(
         <EntityPanel {...defaultProps} content={null} expandable={true} />
       );
 
-      expect(getByTestId(ENTITY_PANEL_HEADER_TEST_ID)).toHaveTextContent('test');
-      expect(getByTestId(ENTITY_PANEL_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
+      const toggle = getByTestId(ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID);
+
+      toggle.click();
+      expect(queryByTestId(ENTITY_PANEL_CONTENT_TEST_ID)).not.toBeInTheDocument();
     });
   });
 });

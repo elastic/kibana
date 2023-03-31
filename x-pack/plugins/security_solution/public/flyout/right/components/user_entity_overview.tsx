@@ -6,8 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
+import styled from 'styled-components';
 import type { DescriptionList } from '../../../../common/utility_types';
 import {
   buildUserNamesFilter,
@@ -23,18 +24,27 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
-import * as i18n from '../../../overview/components/user_overview/translations';
-
 import { useUserDetails } from '../../../explore/users/containers/users/details';
-// import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import * as i18n from '../../../overview/components/user_overview/translations';
+import { TECHNICAL_PREVIEW_TITLE, TECHNICAL_PREVIEW_MESSAGE } from './translations';
+import {
+  TECHNICAL_PREVIEW_ICON_TEST_ID,
+  ENTITIES_USER_OVERVIEW_TEST_ID,
+  ENTITIES_USER_OVERVIEW_IP_TEST_ID,
+  ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
+} from './test_ids';
+
+const StyledEuiBetaBadge = styled(EuiBetaBadge)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
+`;
 
 const CONTEXT_ID = `flyout-host-entity-overview`;
 
-export interface UserEntityContentProps {
+export interface UserEntityOverviewProps {
   userName: string;
 }
 
-export const UserEntityContent: React.FC<UserEntityContentProps> = ({ userName }) => {
+export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -50,56 +60,17 @@ export const UserEntityContent: React.FC<UserEntityContentProps> = ({ userName }
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
+  const [_, { userDetails: data }] = useUserDetails({
+    endDate: to,
+    userName,
+    indexNames: selectedPatterns,
+    startDate: from,
+  });
 
   const { data: userRisk, isLicenseValid } = useRiskScore({
     filterQuery,
     riskEntity: RiskScoreEntity.user,
     timerange,
-  });
-
-  const [userRiskScore, userRiskLevel] = useMemo(() => {
-    const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-
-    return [
-      {
-        title: i18n.USER_RISK_SCORE,
-        //   (<RiskScoreHeaderTitle
-        //     title={i18n.HOST_RISK_SCORE}
-        //     riskScoreEntity={RiskScoreEntity.host}
-        //   />),
-        description: (
-          <>
-            {userRiskData
-              ? Math.round(userRiskData.user.risk.calculated_score_norm)
-              : getEmptyTagValue()}
-          </>
-        ),
-      },
-      {
-        title: i18n.USER_RISK_CLASSIFICATION,
-        //   (<RiskScoreHeaderTitle
-        //     title={i18n.USER_RISK_CLASSIFICATION}
-        //     riskScoreEntity={RiskScoreEntity.host}
-        //   />),
-        description: (
-          <>
-            {userRiskData ? (
-              <RiskScore severity={userRiskData.user.risk.calculated_level} />
-            ) : (
-              <RiskScore severity={RiskSeverity.unknown} />
-              // getEmptyTagValue()
-            )}
-          </>
-        ),
-      },
-    ];
-  }, [userRisk]);
-
-  const [loading, { userDetails: data }] = useUserDetails({
-    endDate: to,
-    userName,
-    indexNames: selectedPatterns,
-    startDate: from,
   });
 
   const descriptionList: DescriptionList[] = useMemo(
@@ -120,14 +91,57 @@ export const UserEntityContent: React.FC<UserEntityContentProps> = ({ userName }
     [data]
   );
 
+  const [userRiskLevel] = useMemo(() => {
+    const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+
+    return [
+      {
+        title: (
+          <>
+            {i18n.USER_RISK_CLASSIFICATION}
+            <StyledEuiBetaBadge
+              label={TECHNICAL_PREVIEW_TITLE}
+              size="s"
+              iconType="beaker"
+              tooltipContent={TECHNICAL_PREVIEW_MESSAGE}
+              tooltipPosition="bottom"
+              data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
+            />
+          </>
+        ),
+
+        description: (
+          <>
+            {userRiskData ? (
+              <RiskScore severity={userRiskData.user.risk.calculated_level} />
+            ) : (
+              <RiskScore severity={RiskSeverity.unknown} />
+            )}
+          </>
+        ),
+      },
+    ];
+  }, [userRisk]);
+
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}>
       <EuiFlexItem>
-        <OverviewDescriptionList descriptionList={descriptionList} key={'0'} />
+        <OverviewDescriptionList
+          dataTestSubj={ENTITIES_USER_OVERVIEW_IP_TEST_ID}
+          descriptionList={descriptionList}
+          key={'0'}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
-        {isLicenseValid && <DescriptionListStyled listItems={[userRiskLevel]} />}
+        {isLicenseValid && (
+          <DescriptionListStyled
+            data-test-subj={ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID}
+            listItems={[userRiskLevel]}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+UserEntityOverview.displayName = 'UserEntityOverview';

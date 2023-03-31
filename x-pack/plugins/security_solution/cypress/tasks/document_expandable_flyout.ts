@@ -26,6 +26,10 @@ import {
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON,
 } from '../screens/document_expandable_flyout';
 import { EXPAND_ALERT_BTN } from '../screens/alerts';
 import { getClassSelector } from '../helpers/common';
@@ -118,6 +122,31 @@ export const openGraphAnalyzer = () =>
 export const openInsightsTab = () =>
   cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).should('be.visible').click();
 
+/**
+ * Open the Entities tab under the Insights tab in the document details expandable flyout left section
+ */
+export const openEntities = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON).should('be.visible').click();
+/**
+ * Open the Threat intelligence tab under the Insights tab in the document details expandable flyout left section
+ */
+export const openThreatIntelligence = () =>
+  cy
+    .get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON)
+    .should('be.visible')
+    .click();
+
+/**
+ * Open the Prevalence tab under the Visuablize tab in the document details expandable flyout left section
+ */
+export const openPrevalence = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON).should('be.visible').click();
+
+/**
+ * Open the Correlations tab  under the Visuablize tab in the document details expandable flyout left section
+ */
+export const openCorrelations = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON).should('be.visible').click();
 /**
  * Open the Investigations tab in the document details expandable flyout left section
  */

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
 
-export const ENTITIES_DETAILS_ID = 'entities-details';
+export const ENTITIES_TAB_ID = 'entities-details';
 
 /**
  * Entities displayed in the document details expandable flyout left section under the Insights tab

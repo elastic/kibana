@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { PREVALENCE_DETAILS_TEST_ID } from './test_ids';
 
-export const PREVALENCE_DETAILS_ID = 'prevalence-details';
+export const PREVALENCE_TAB_ID = 'prevalence-details';
 
 /**
  * Prevalence displayed in the document details expandable flyout left section under the Insights tab

@@ -110,3 +110,16 @@ export const INSIGHTS_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.insightsTitle',
   { defaultMessage: 'Insights' }
 );
+
+export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
+  { defaultMessage: 'Technical Preview' }
+);
+
+export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);

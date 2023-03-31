@@ -62,3 +62,17 @@ export const ENTITY_PANEL_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderTitle';
 export const ENTITY_PANEL_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelContent';
+export const TECHNICAL_PREVIEW_ICON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
+export const ENTITIES_USER_OVERVIEW_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
+export const ENTITIES_USER_OVERVIEW_IP_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverviewIP';
+export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverviewRiskLevel';
+export const ENTITIES_HOST_OVERVIEW_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverview';
+export const ENTITIES_HOST_OVERVIEW_IP_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewIP';
+export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewRiskLevel';
