@@ -439,59 +439,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows more actions on button click', async () => {
-        const firstUpdate = await cases.api.generateUserActions({
-          caseId: createdCase.id,
-          caseVersion: createdCase.version,
-          params: {
-            title: 'first title update',
-            description: 'first description update',
-            severity: CaseSeverity.MEDIUM,
-            status: CaseStatuses['in-progress'],
-            tags: ['one'],
-          },
-        });
-
-        await header.waitUntilLoadingHasFinished();
-
-        const secondUpdate = await cases.api.generateUserActions({
-          caseId: createdCase.id,
-          caseVersion: firstUpdate[0].version,
-          params: {
-            title: 'second title update',
-            description: 'second description update',
-            severity: CaseSeverity.HIGH,
-            status: CaseStatuses.open,
-            tags: ['two'],
-          },
-        });
-
-        await header.waitUntilLoadingHasFinished();
-
-        const thirdUpdate = await cases.api.generateUserActions({
-          caseId: createdCase.id,
-          caseVersion: secondUpdate[0].version,
-          params: {
-            title: 'third title update',
-            description: 'third description update',
-            severity: CaseSeverity.CRITICAL,
-            status: CaseStatuses['in-progress'],
-            tags: ['third'],
-          },
-        });
-
-        await header.waitUntilLoadingHasFinished();
-
         await cases.api.generateUserActions({
           caseId: createdCase.id,
-          caseVersion: thirdUpdate[0].version,
-          params: {
-            title: 'fourth title update',
-            description: 'fourth description update',
-            severity: CaseSeverity.LOW,
-            status: CaseStatuses.open,
-            tags: ['fourth'],
-          },
+          caseVersion: createdCase.version,
+          totalUpdates: 4,
         });
+
+        await header.waitUntilLoadingHasFinished();
+
 
         await testSubjects.click('case-refresh');
 
@@ -507,7 +462,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(await userActionsLists[0].findAllByClassName('euiComment')).length(10);
 
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(6);
+        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
 
         testSubjects.click('cases-show-more-user-actions');
 
@@ -515,7 +470,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(await userActionsLists[0].findAllByClassName('euiComment')).length(20);
 
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(6);
+        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
       });
     });
 

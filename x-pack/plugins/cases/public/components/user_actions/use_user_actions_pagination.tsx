@@ -8,19 +8,17 @@
 import { useMemo } from 'react';
 
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
-import type { CaseUserActions, CaseUserActionsStats } from '../../containers/types';
+import type { CaseUserActions } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
 interface UserActionsPagination {
   userActivityQueryParams: UserActivityParams;
-  userActionsStats: CaseUserActionsStats;
   caseId: string;
   lastPage: number;
 }
 
 export const useUserActionsPagination = ({
   userActivityQueryParams,
-  userActionsStats,
   caseId,
   lastPage,
 }: UserActionsPagination) => {

@@ -20,12 +20,6 @@ const userActivityQueryParams: UserActivityParams = {
   perPage: 10,
 };
 
-const userActionsStats = {
-  total: 25,
-  totalComments: 9,
-  totalOtherActions: 16,
-};
-
 jest.mock('../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../common/lib/kibana');
 
@@ -40,7 +34,6 @@ describe('useUserActionsPagination', () => {
   it('renders expandable option correctly when user actions are more than 10', async () => {
     const { result, waitFor } = renderHook(() =>
       useUserActionsPagination({
-        userActionsStats,
         userActivityQueryParams,
         caseId: basicCase.id,
         lastPage: 3,
@@ -71,7 +64,6 @@ describe('useUserActionsPagination', () => {
   it('renders less than 10 user actions correctly', async () => {
     const { result, waitFor } = renderHook(() =>
       useUserActionsPagination({
-        userActionsStats: { total: 9, totalComments: 3, totalOtherActions: 6 },
         userActivityQueryParams,
         caseId: basicCase.id,
         lastPage: 1,
@@ -102,7 +94,6 @@ describe('useUserActionsPagination', () => {
 
     const { result, waitFor } = renderHook(() =>
       useUserActionsPagination({
-        userActionsStats,
         userActivityQueryParams,
         caseId: basicCase.id,
         lastPage: 3,
@@ -135,7 +126,6 @@ describe('useUserActionsPagination', () => {
 
     const { result, waitFor } = renderHook(() =>
       useUserActionsPagination({
-        userActionsStats,
         userActivityQueryParams,
         caseId: basicCase.id,
         lastPage: 3,
@@ -173,7 +163,6 @@ describe('useUserActionsPagination', () => {
 
     const { result, waitFor } = renderHook(() =>
       useUserActionsPagination({
-        userActionsStats: { total: 9, totalComments: 3, totalOtherActions: 6 },
         userActivityQueryParams,
         caseId: basicCase.id,
         lastPage: 1,

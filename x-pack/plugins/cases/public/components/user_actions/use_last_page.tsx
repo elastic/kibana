@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { assertNever } from '@elastic/eui';
+import { useMemo } from 'react';
 
 import type { CaseUserActionsStats } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
@@ -20,21 +20,27 @@ export const useLastPage = ({
 }) => {
   const lastPage = useMemo(() => {
     if (!userActionsStats) {
-      return 0;
+      return 1;
     }
 
     const perPage = userActivityQueryParams.perPage;
+    let lastPageType = 1;
 
     switch (userActivityQueryParams.type) {
       case 'action':
-        return Math.ceil(userActionsStats.totalOtherActions / perPage);
+        lastPageType = Math.ceil(userActionsStats.totalOtherActions / perPage);
+        break;
       case 'user':
-        return Math.ceil(userActionsStats.totalComments / perPage);
+        lastPageType = Math.ceil(userActionsStats.totalComments / perPage);
+        break;
       case 'all':
-        return Math.ceil(userActionsStats.total / perPage);
+        lastPageType = Math.ceil(userActionsStats.total / perPage);
+        break;
       default:
-        assertNever(userActivityQueryParams.type);
+        return assertNever(userActivityQueryParams.type);
     }
+
+    return Math.max(lastPageType, 1);
   }, [userActionsStats, userActivityQueryParams]);
 
   return { lastPage };

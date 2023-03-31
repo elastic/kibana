@@ -46,40 +46,28 @@ const getIconsCss = (
   const blockSize = `${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
   ${customSize.marginBottomShowMoreSectionSize}`;
   return `
-          ${
-            showBottomList
-              ? `.commentList--hasShowMore
+          .commentList--hasShowMore
             [class*='euiTimelineItem-center']:last-child:not(:only-child)
             > [class*='euiTimelineItemIcon-']::before {
             block-size: calc(
               100% + ${blockSize}
             );
-          }`
-              : ''
           }
-          ${
-            showBottomList
-              ? `.commentList--hasShowMore
+          .commentList--hasShowMore
             [class*='euiTimelineItem-center']:first-child
             > [class*='euiTimelineItemIcon-']::before {
             inset-block-start: 0%;
             block-size: calc(
               100% + ${blockSize}
             );
-          }`
-              : ''
           }
-          ${
-            showBottomList
-              ? `.commentList--hasShowMore
+          .commentList--hasShowMore
               [class*='euiTimelineItem-']
               > [class*='euiTimelineItemIcon-']::before {
               block-size: calc(
                 100% + ${blockSize}
               );
-              }`
-              : ''
-          }
+              }
         `;
 };
 
@@ -104,7 +92,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     showBottomList,
   } = useUserActionsPagination({
     userActivityQueryParams,
-    userActionsStats,
     caseId: caseData.id,
     lastPage,
   });
@@ -185,9 +172,13 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       }
     >
       <EuiFlexItem
-        css={css`
-          ${getIconsCss(showBottomList, hasNextPage, euiTheme)}
-        `}
+        {...(showBottomList
+          ? {
+              css: css`
+                ${getIconsCss(showBottomList, hasNextPage, euiTheme)}
+              `,
+            }
+          : {})}
       >
         <UserActionsList
           {...props}

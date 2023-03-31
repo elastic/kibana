@@ -107,34 +107,39 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
     async generateUserActions({
       caseId,
       caseVersion,
-      params,
+      totalUpdates = 1,
     }: {
       caseId: string;
       caseVersion: string;
-      params: {
-        title: string;
-        description: string;
-        severity: CaseSeverity;
-        status: 'open' | 'in-progress' | 'closed';
-        tags: string[];
-      };
+      totalUpdates: number;
     }) {
-      return await updateCase({
-        supertest: kbnSupertest,
-        params: {
-          cases: [
-            {
-              id: caseId,
-              version: caseVersion,
-              title: params.title,
-              description: params.description,
-              severity: params.severity,
-              status: CaseStatuses[params.status],
-              tags: params.tags,
-            },
-          ],
-        },
-      });
+      let latestVersion = caseVersion;
+      const severities = Object.values(CaseSeverity);
+      const statuses = Object.values(CaseStatuses);
+
+      for (let index = 0; index < totalUpdates; index++) {
+        const severity = severities[index % severities.length];
+        const status = statuses[index % statuses.length];
+
+        const theCase = await updateCase({
+          supertest: kbnSupertest,
+          params: {
+            cases: [
+              {
+                id: caseId,
+                version: latestVersion,
+                title: `Title update ${index}`,
+                description: `Desc update ${index}`,
+                severity,
+                status,
+                tags: [`tag-${index}`],
+              },
+            ],
+          },
+        });
+
+        latestVersion = theCase[0].version;
+      }
     },
   };
 }

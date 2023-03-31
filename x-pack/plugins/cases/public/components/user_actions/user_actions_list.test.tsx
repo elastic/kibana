@@ -16,38 +16,16 @@ import { UserActionsList } from './user_actions_list';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { Actions } from '../../../common/api';
-import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { getMockBuilderArgs } from './mock';
 
-const fetchUserActions = jest.fn();
-const updateCase = jest.fn();
-const onShowAlertDetails = jest.fn();
+const builderArgs = getMockBuilderArgs();
 
 const defaultProps = {
   caseUserActions,
+  ...builderArgs,
   caseConnectors: getCaseConnectorsMockResponse(),
-  userProfiles: new Map(),
-  currentUserProfile: undefined,
-  connectors: connectorsMock,
-  actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
-  getRuleDetailsHref: jest.fn(),
-  onRuleDetailsClick: jest.fn(),
   data: basicCase,
-  fetchUserActions,
-  isLoadingUserActions: false,
-  selectedAlertPatterns: ['some-test-pattern'],
-  updateCase,
-  alerts: {},
-  onShowAlertDetails,
-  loadingCommentIds: [],
-  commentRefs: { current: {} },
-  manageMarkdownEditIds: [],
-  handleManageMarkdownEditId: jest.fn(),
-  selectedOutlineCommentId: '',
-  handleOutlineComment: jest.fn(),
-  handleSaveComment: jest.fn(),
-  handleDeleteComment: jest.fn(),
-  handleManageQuote: jest.fn(),
-  loadingAlertData: false,
   manualAlertsData: { 'some-id': { _id: 'some-id' } },
 };
 

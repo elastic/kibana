@@ -31,58 +31,46 @@ describe('useLastPage', () => {
   });
 
   it('returns correctly', async () => {
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLastPage({
         userActionsStats,
         userActivityQueryParams,
       })
     );
 
-    await waitFor(() => {
-      expect(result.current).toEqual(
-        expect.objectContaining({
-          lastPage: 1,
-        })
-      );
+    expect(result.current).toEqual({
+      lastPage: 1,
     });
   });
 
-  it('returns 0 when actions stats are 0', async () => {
-    const { result, waitFor } = renderHook(() =>
+  it('returns 1 when actions stats are 0', async () => {
+    const { result } = renderHook(() =>
       useLastPage({
         userActionsStats: { total: 0, totalComments: 0, totalOtherActions: 0 },
         userActivityQueryParams,
       })
     );
 
-    await waitFor(() => {
-      expect(result.current).toEqual(
-        expect.objectContaining({
-          lastPage: 0,
-        })
-      );
+    expect(result.current).toEqual({
+      lastPage: 1,
     });
   });
 
   it('returns correct last page when filter type is all', async () => {
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLastPage({
         userActionsStats: { total: 38, totalComments: 17, totalOtherActions: 21 },
         userActivityQueryParams,
       })
     );
 
-    await waitFor(() => {
-      expect(result.current).toEqual(
-        expect.objectContaining({
-          lastPage: 4,
-        })
-      );
+    expect(result.current).toEqual({
+      lastPage: 4,
     });
   });
 
   it('returns correct last page when filter type is user', async () => {
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLastPage({
         userActionsStats: { total: 38, totalComments: 17, totalOtherActions: 21 },
         userActivityQueryParams: {
@@ -92,17 +80,13 @@ describe('useLastPage', () => {
       })
     );
 
-    await waitFor(() => {
-      expect(result.current).toEqual(
-        expect.objectContaining({
-          lastPage: 2,
-        })
-      );
+    expect(result.current).toEqual({
+      lastPage: 2,
     });
   });
 
   it('returns correct last page when filter type is action', async () => {
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLastPage({
         userActionsStats: { total: 38, totalComments: 17, totalOtherActions: 21 },
         userActivityQueryParams: {
@@ -112,12 +96,8 @@ describe('useLastPage', () => {
       })
     );
 
-    await waitFor(() => {
-      expect(result.current).toEqual(
-        expect.objectContaining({
-          lastPage: 3,
-        })
-      );
+    expect(result.current).toEqual({
+      lastPage: 3,
     });
   });
 });

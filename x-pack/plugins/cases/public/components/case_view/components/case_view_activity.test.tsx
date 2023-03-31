@@ -209,6 +209,7 @@ describe.skip('Case View Page activity tab', () => {
 
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
+    expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
