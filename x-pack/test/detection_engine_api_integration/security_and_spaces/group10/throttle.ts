@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
    * https://www.elastic.co/guide/en/kibana/current/mute-all-alerts-api.html
    * https://www.elastic.co/guide/en/security/current/rules-api-create.html
    */
-  describe('ievgen_throttle', () => {
+  describe('throttle', () => {
     describe('adding actions', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);

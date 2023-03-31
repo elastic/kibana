@@ -156,7 +156,6 @@ export const getUpdatedActionsParams = ({
   // If rule has an action on any other interval (other than on every
   // rule run), need to move the action info from the sidecar/legacy action
   // into the rule itself
-
   return {
     ...restOfRule,
     actions: actions.reduce<RuleAction[]>((acc, action) => {
