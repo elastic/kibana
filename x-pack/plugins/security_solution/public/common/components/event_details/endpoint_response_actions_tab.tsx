@@ -37,7 +37,7 @@ export const useEndpointResponseActionsTab = ({
   } = useGetEndpointActionList(
     {
       alertId: [rawEventData?._id ?? ''],
-      withRuleActions: true,
+      withAutomatedActions: true,
     },
     { retry: false, enabled: rawEventData && responseActionsEnabled }
   );
@@ -87,7 +87,7 @@ export const useEndpointResponseActionsTab = ({
               loading={isFetching}
               onChange={() => null}
               totalItemCount={totalItemCount}
-              queryParams={{ withRuleActions: true }}
+              queryParams={{ withAutomatedActions: true }}
               showHostNames
             />
           ) : null}

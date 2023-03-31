@@ -53,7 +53,7 @@ export const ResponseActionsLog = memo<
       startDate: startDateFromUrl,
       endDate: endDateFromUrl,
       users: usersFromUrl,
-      withRuleActions: withRuleActionsFromUrl,
+      withAutomatedActions: withAutomatedActionsFromUrl,
       withOutputs: withOutputsFromUrl,
       setUrlWithOutputs,
     } = useActionHistoryUrlParams();
@@ -71,7 +71,7 @@ export const ResponseActionsLog = memo<
       statuses: [],
       userIds: [],
       withOutputs: [],
-      withRuleActions: true,
+      withAutomatedActions: true,
     });
 
     // update query state from URL params
@@ -88,7 +88,7 @@ export const ResponseActionsLog = memo<
             : prevState.statuses,
           userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
           withOutputs: withOutputsFromUrl?.length ? withOutputsFromUrl : prevState.withOutputs,
-          withRuleActions: !!withRuleActionsFromUrl,
+          withAutomatedActions: !!withAutomatedActionsFromUrl,
         }));
       }
     }, [
@@ -99,7 +99,7 @@ export const ResponseActionsLog = memo<
       setQueryParams,
       usersFromUrl,
       withOutputsFromUrl,
-      withRuleActionsFromUrl,
+      withAutomatedActionsFromUrl,
     ]);
 
     // date range picker state and handlers

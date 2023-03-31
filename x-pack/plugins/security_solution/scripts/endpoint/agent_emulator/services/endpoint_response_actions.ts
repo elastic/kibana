@@ -46,7 +46,7 @@ export const sleep = (ms: number = 1000) => new Promise((r) => setTimeout(r, ms)
 
 export const fetchEndpointActionList = async (
   kbn: KbnClient,
-  options: EndpointActionListRequestQuery = { withRuleActions: true }
+  options: EndpointActionListRequestQuery = { withAutomatedActions: true }
 ): Promise<ActionListApiResponse> => {
   try {
     return (

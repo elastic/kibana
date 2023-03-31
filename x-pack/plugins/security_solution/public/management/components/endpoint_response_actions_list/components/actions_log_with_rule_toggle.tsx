@@ -22,21 +22,21 @@ const ActionsLogWithRuleToggleContent = ({
 }: ActionsLogWithRuleToggleProps) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
-  const { withRuleActions: withRuleActionsUrlParam, setUrlWithRuleActions } =
+  const { withAutomatedActions: withAutomatedActionsUrlParam, setUrlWithAutomatedActions } =
     useActionHistoryUrlParams();
 
   const onClick = useCallback(() => {
     if (!isFlyout) {
-      // set and show `withRuleActions` URL param on history page
-      setUrlWithRuleActions(!withRuleActionsUrlParam);
+      // set and show `withAutomatedActions` URL param on history page
+      setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
     }
-  }, [isFlyout, setUrlWithRuleActions, withRuleActionsUrlParam]);
+  }, [isFlyout, setUrlWithAutomatedActions, withAutomatedActionsUrlParam]);
 
   if (!responseActionsEnabled) return null;
 
   return (
     <EuiFilterButton
-      hasActiveFilters={withRuleActionsUrlParam}
+      hasActiveFilters={withAutomatedActionsUrlParam}
       onClick={onClick}
       data-test-subj={`${dataTestSubj}-automated-responses-filter`}
     >

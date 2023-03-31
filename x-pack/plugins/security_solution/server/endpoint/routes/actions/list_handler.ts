@@ -57,7 +57,7 @@ export const actionListHandler = (
         commands,
         statuses,
         withOutputs,
-        withRuleActions,
+        withAutomatedActions,
         alertId,
       },
     } = req;
@@ -77,7 +77,7 @@ export const actionListHandler = (
       const requestParams = {
         withOutputs: formatStringIds(withOutputs),
         alertId: formatStringIds(alertId),
-        withRuleActions,
+        withAutomatedActions,
         commands: formatCommandValues(commands),
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),

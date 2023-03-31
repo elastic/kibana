@@ -36,7 +36,7 @@ export const getActions = async ({
   startDate,
   userIds,
   unExpiredOnly,
-  withRuleActions,
+  withAutomatedActions,
   alertId,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
@@ -82,7 +82,7 @@ export const getActions = async ({
   ];
 
   const mustNot: SearchRequest =
-    withRuleActions === false
+    withAutomatedActions === false
       ? {
           must_not: {
             exists: {

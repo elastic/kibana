@@ -151,7 +151,7 @@ export const EndpointActionListRequestSchema = {
         }),
       ])
     ),
-    withRuleActions: schema.boolean({ defaultValue: true }),
+    withAutomatedActions: schema.boolean({ defaultValue: true }),
     alertId: schema.maybe(
       schema.oneOf([
         schema.arrayOf(schema.string({ minLength: 1 }), {
