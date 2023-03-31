@@ -19,15 +19,6 @@ import { get } from 'lodash';
 interface DateAndTimeFieldProps {
   field: FieldHook;
   showTimeSelect?: boolean;
-  display?:
-    | 'row'
-    | 'rowCompressed'
-    | 'columnCompressed'
-    | 'center'
-    | 'centerCompressed'
-    | 'columnCompressedSwitch'
-    | undefined;
-  style?: Record<string, string>;
   'data-test-subj'?: string;
 }
 

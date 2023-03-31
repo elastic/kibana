@@ -19,11 +19,6 @@ import './recurring_schedule.scss';
 const UseField = getUseField({ component: Field });
 
 export const CustomRecurringSchedule: React.FC = React.memo(() => {
-  const displayProps = {
-    display: 'columnCompressed',
-    style: { alignItems: 'center' },
-  };
-
   const [{ date, recurringSchedule }] = useFormData({
     watch: [
       'date',
@@ -62,8 +57,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
         <>
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-            <EuiFlexItem grow={2} />
-            <EuiFlexItem grow={4}>
+            <EuiFlexItem>
               <UseField
                 path="recurringSchedule.interval"
                 className="recurringScheduleFlexField"
@@ -73,21 +67,18 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
                     type: 'number',
                     min: 1,
                     prepend: i18n.CREATE_FORM_INTERVAL_EVERY,
-                    compressed: true,
                   },
                 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={4}>
+            <EuiFlexItem>
               <UseField
                 path="recurringSchedule.customFrequency"
                 componentProps={{
                   'data-test-subj': 'custom-frequency-field',
                   euiFieldProps: {
                     options: frequencyOptions,
-                    compressed: true,
                   },
-                  display: 'rowCompressed',
                 }}
               />
             </EuiFlexItem>
@@ -98,7 +89,6 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
       {recurringSchedule?.customFrequency === Frequency.WEEKLY ||
       recurringSchedule?.frequency === Frequency.DAILY ? (
         <UseField
-          className="recurringScheduleField"
           path="recurringSchedule.byweekday"
           config={{ label: ' ', validations: [], defaultValue: defaultByWeekday }}
           component={ButtonGroupField}
@@ -107,14 +97,12 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
             legend: 'Repeat on weekday',
             options: WEEKDAY_OPTIONS,
             type: 'multi',
-            ...displayProps,
           }}
         />
       ) : null}
 
       {recurringSchedule?.customFrequency === Frequency.MONTHLY ? (
         <UseField
-          className="recurringScheduleField"
           path="recurringSchedule.bymonth"
           config={{ label: ' ', validations: [], defaultValue: 'day' }}
           component={ButtonGroupField}
@@ -122,7 +110,6 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
             'data-test-subj': 'bymonth-field',
             legend: 'Repeat on weekday or month day',
             options: bymonthOptions,
-            ...displayProps,
           }}
         />
       ) : null}

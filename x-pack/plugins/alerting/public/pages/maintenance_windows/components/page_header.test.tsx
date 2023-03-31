@@ -19,9 +19,18 @@ describe('PageHeader', () => {
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(<PageHeader title="Test title" />);
+    const result = appMockRenderer.render(
+      <PageHeader title="Test title" description="test description" />
+    );
 
     expect(result.getByText('Test title')).toBeInTheDocument();
+    expect(result.getByText('test description')).toBeInTheDocument();
+  });
+
+  test('it does not render the description when not provided', () => {
+    const result = appMockRenderer.render(<PageHeader title="Test title" />);
+
+    expect(result.queryByTestId('description')).not.toBeInTheDocument();
   });
 
   test('it renders the back link when provided', () => {

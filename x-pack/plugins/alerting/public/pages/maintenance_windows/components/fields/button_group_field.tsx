@@ -19,15 +19,6 @@ interface ButtonGroupFieldProps {
   legend: string;
   options: EuiButtonGroupOptionProps[];
   type?: 'single' | 'multi';
-  display?:
-    | 'row'
-    | 'rowCompressed'
-    | 'columnCompressed'
-    | 'center'
-    | 'centerCompressed'
-    | 'columnCompressedSwitch'
-    | undefined;
-  style?: Record<string, string>;
   'data-test-subj'?: string;
 }
 

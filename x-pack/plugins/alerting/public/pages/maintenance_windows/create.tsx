@@ -21,7 +21,11 @@ export const MaintenanceWindowsCreatePage = React.memo(() => {
 
   return (
     <EuiPageSection restrictWidth={true}>
-      <PageHeader showBackButton={true} title={i18n.CREATE_MAINTENANCE_WINDOW_TITLE} />
+      <PageHeader
+        showBackButton={true}
+        title={i18n.CREATE_MAINTENANCE_WINDOW_TITLE}
+        description={i18n.CREATE_MAINTENANCE_WINDOW_DESCRIPTION}
+      />
       <EuiSpacer size="xl" />
       <CreateMaintenanceWindowForm
         onCancel={navigateToMaintenanceWindows}

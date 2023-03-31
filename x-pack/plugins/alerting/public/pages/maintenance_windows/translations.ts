@@ -55,6 +55,14 @@ export const CREATE_MAINTENANCE_WINDOW_TITLE = i18n.translate(
   }
 );
 
+export const CREATE_MAINTENANCE_WINDOW_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.create.description',
+  {
+    defaultMessage:
+      'Schedule a single or recurring period in which rule notifications cease. Alerts change from active to maintenance status.',
+  }
+);
+
 export const MAINTENANCE_WINDOWS_RETURN_LINK = i18n.translate(
   'xpack.alerting.maintenanceWindows.returnLink',
   {
@@ -73,34 +81,6 @@ export const CREATE_FORM_NAME_REQUIRED = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.nameFieldRequiredError',
   {
     defaultMessage: 'A name is required.',
-  }
-);
-
-export const CREATE_FORM_DESC_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.describeTitle',
-  {
-    defaultMessage: 'Describe your maintenance window',
-  }
-);
-
-export const CREATE_FORM_DESC_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.describeDescription',
-  {
-    defaultMessage: 'This will be used to reference the maintenance window.',
-  }
-);
-
-export const CREATE_FORM_SCHEDULE_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.scheduleTitle',
-  {
-    defaultMessage: 'Schedule',
-  }
-);
-
-export const CREATE_FORM_SCHEDULE_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.scheduleDescription',
-  {
-    defaultMessage: 'Define when and how often you would like actions to be snoozed.',
   }
 );
 

@@ -13,16 +13,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import {
-  EuiButtonEmpty,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 
 import { FormProps, schema } from './schema';
 import * as i18n from '../translations';
@@ -82,94 +73,64 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     });
     const isRecurring = recurring || false;
 
-    interface SectionTitleProps {
-      title: string;
-      description: string;
-    }
-    const SectionTitle = React.memo<SectionTitleProps>(({ title, description }) => {
-      return (
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h5>{title}</h5>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued" size="s">
-            <p>{description}</p>
-          </EuiText>
-        </EuiFlexItem>
-      );
-    });
-
     return (
       <Form form={form}>
-        <EuiFlexGroup gutterSize="l" responsive={false}>
+        <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
           <EuiFlexItem>
-            <EuiFlexGrid columns={2} alignItems="start">
-              <SectionTitle
-                title={i18n.CREATE_FORM_DESC_TITLE}
-                description={i18n.CREATE_FORM_DESC_DESCRIPTION}
-              />
+            <UseField
+              path="title"
+              componentProps={{
+                'data-test-subj': 'title-field',
+                euiFieldProps: {
+                  autoFocus: true,
+                  fullWidth: true,
+                },
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <UseField
-                  path="title"
-                  componentProps={{
-                    'data-test-subj': 'title-field',
-                    euiFieldProps: {
-                      autoFocus: true,
-                      fullWidth: true,
-                    },
-                  }}
-                />
-              </EuiFlexItem>
-              <SectionTitle
-                title={i18n.CREATE_FORM_SCHEDULE_TITLE}
-                description={i18n.CREATE_FORM_SCHEDULE_DESCRIPTION}
-              />
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column">
-                  <EuiFlexItem>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={4}>
-                        <UseField
-                          path="date"
-                          component={DateAndTimeField}
-                          componentProps={{
-                            'data-test-subj': 'date-field',
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={2}>
-                        <UseField
-                          path="duration"
-                          componentProps={{
-                            'data-test-subj': 'duration-field',
-                            euiFieldProps: {
-                              autoFocus: false,
-                              fullWidth: false,
-                              type: 'number',
-                              min: 1,
-                              max: 24,
-                              append: i18n.CREATE_FORM_DURATION_HOURS,
-                            },
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={4}>
                     <UseField
-                      path="recurring"
+                      path="date"
+                      component={DateAndTimeField}
                       componentProps={{
-                        'data-test-subj': 'recurring-field',
+                        'data-test-subj': 'date-field',
                       }}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    {isRecurring ? <RecurringSchedule data-test-subj="recurring-form" /> : null}
+                  <EuiFlexItem grow={2}>
+                    <UseField
+                      path="duration"
+                      componentProps={{
+                        'data-test-subj': 'duration-field',
+                        euiFieldProps: {
+                          autoFocus: false,
+                          fullWidth: false,
+                          type: 'number',
+                          min: 1,
+                          max: 24,
+                          append: i18n.CREATE_FORM_DURATION_HOURS,
+                        },
+                      }}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            </EuiFlexGrid>
+              <EuiFlexItem>
+                <UseField
+                  path="recurring"
+                  componentProps={{
+                    'data-test-subj': 'recurring-field',
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {isRecurring ? <RecurringSchedule data-test-subj="recurring-form" /> : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xl" />

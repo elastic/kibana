@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isString } from 'lodash';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -26,15 +26,24 @@ export const styles = {
 
 interface TitleProps {
   title: string | React.ReactNode;
+  description?: string | React.ReactNode;
 }
-const Title = React.memo<TitleProps>(({ title }) => {
+const Title = React.memo<TitleProps>(({ title, description }) => {
   return (
-    <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+    <EuiFlexGroup direction="column" alignItems="baseline" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="l">
           <h1>{isString(title) ? <TruncatedText text={title} /> : title}</h1>
         </EuiTitle>
       </EuiFlexItem>
+      {description ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiFlexItem data-test-subj="description">
+            <div>{isString(description) ? <TruncatedText text={description} /> : description}</div>
+          </EuiFlexItem>
+        </>
+      ) : null}
     </EuiFlexGroup>
   );
 });
@@ -43,28 +52,31 @@ Title.displayName = 'Title';
 export interface PageHeaderProps {
   showBackButton?: boolean;
   title: string | React.ReactNode;
+  description?: string | React.ReactNode;
 }
 
-export const PageHeader = React.memo<PageHeaderProps>(({ showBackButton = false, title }) => {
-  const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
+export const PageHeader = React.memo<PageHeaderProps>(
+  ({ showBackButton = false, title, description }) => {
+    const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
 
-  const navigateToMaintenanceWindowsClick = useCallback(() => {
-    navigateToMaintenanceWindows();
-  }, [navigateToMaintenanceWindows]);
+    const navigateToMaintenanceWindowsClick = useCallback(() => {
+      navigateToMaintenanceWindows();
+    }, [navigateToMaintenanceWindows]);
 
-  return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={false}>
-        {showBackButton && (
-          <div data-test-subj="link-back" css={styles.linkBack}>
-            <LinkIcon onClick={navigateToMaintenanceWindowsClick} iconType="arrowLeft">
-              {i18n.MAINTENANCE_WINDOWS_RETURN_LINK}
-            </LinkIcon>
-          </div>
-        )}
-        <Title title={title} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+    return (
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          {showBackButton && (
+            <div data-test-subj="link-back" css={styles.linkBack}>
+              <LinkIcon onClick={navigateToMaintenanceWindowsClick} iconType="arrowLeft">
+                {i18n.MAINTENANCE_WINDOWS_RETURN_LINK}
+              </LinkIcon>
+            </div>
+          )}
+          <Title title={title} description={description} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 PageHeader.displayName = 'PageHeader';

@@ -23,16 +23,10 @@ import { DateAndTimeField } from '../fields/date_and_time_field';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { recurringSummary } from '../../helpers/recurring_summary';
 import { getPresets } from '../../helpers/get_presets';
-import './recurring_schedule.scss';
 
 const UseField = getUseField({ component: Field });
 
 export const RecurringSchedule: React.FC = React.memo(() => {
-  const displayProps = {
-    display: 'columnCompressed',
-    style: { alignItems: 'center' },
-  };
-
   const [{ date, recurringSchedule }] = useFormData({
     watch: [
       'date',
@@ -86,7 +80,6 @@ export const RecurringSchedule: React.FC = React.memo(() => {
     <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
       <EuiSplitPanel.Inner color="subdued">
         <UseField
-          className="recurringScheduleField"
           path="recurringSchedule.frequency"
           componentProps={{
             'data-test-subj': 'frequency-field',
@@ -95,7 +88,6 @@ export const RecurringSchedule: React.FC = React.memo(() => {
               compressed: true,
               fullWidth: true,
             },
-            ...displayProps,
           }}
         />
         {recurringSchedule?.frequency === Frequency.DAILY ||
@@ -103,31 +95,26 @@ export const RecurringSchedule: React.FC = React.memo(() => {
           <CustomRecurringSchedule data-test-subj="custom-recurring-form" />
         ) : null}
         <UseField
-          className="recurringScheduleField"
           path="recurringSchedule.ends"
           component={ButtonGroupField}
           componentProps={{
             'data-test-subj': 'ends-field',
             legend: 'Recurrence ends',
             options: RECURRENCE_END_OPTIONS,
-            ...displayProps,
           }}
         />
         {recurringSchedule?.ends === EndsOptions.ON_DATE ? (
           <UseField
-            className="recurringScheduleField"
             path="recurringSchedule.until"
             component={DateAndTimeField}
             componentProps={{
               'data-test-subj': 'until-field',
               showTimeSelect: false,
-              ...displayProps,
             }}
           />
         ) : null}
         {recurringSchedule?.ends === EndsOptions.AFTER_X ? (
           <UseField
-            className="recurringScheduleField"
             path="recurringSchedule.count"
             componentProps={{
               'data-test-subj': 'count-field',
@@ -139,7 +126,6 @@ export const RecurringSchedule: React.FC = React.memo(() => {
                 append: i18n.CREATE_FORM_COUNT_OCCURRENCE,
                 compressed: true,
               },
-              ...displayProps,
             }}
           />
         ) : null}
