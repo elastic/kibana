@@ -116,7 +116,7 @@ export async function cleanKibanaIndices({
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: `.kibana,.kibana_task_manager`,
+        index: `.kibana,.kibana_task_manager,.kibana_ui,.kibana_cases`,
         body: {
           query: {
             bool: {
@@ -154,6 +154,9 @@ export async function cleanKibanaIndices({
   );
 
   stats.deletedIndex('.kibana');
+  stats.deletedIndex('.kibana_ui');
+  stats.deletedIndex('.kibana_cases');
+  stats.deletedIndex('.kibana_task_manager');
 }
 
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
