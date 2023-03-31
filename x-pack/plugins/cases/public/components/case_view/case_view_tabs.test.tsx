@@ -8,23 +8,28 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
-import '../../common/mock/match_media';
-import { useCaseViewNavigation } from '../../common/navigation/hooks';
 import type { UseGetCase } from '../../containers/use_get_case';
+import type { CaseViewTabsProps } from './case_view_tabs';
+
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
+import '../../common/mock/match_media';
+import { createAppMockRenderer } from '../../common/mock';
+import { useCaseViewNavigation } from '../../common/navigation/hooks';
 import { useGetCase } from '../../containers/use_get_case';
 import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
-import type { CaseViewTabsProps } from './case_view_tabs';
-import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
+import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
+jest.mock('../../containers/use_get_case_file_stats');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -45,6 +50,9 @@ export const caseProps: CaseViewTabsProps = {
 
 describe('CaseViewTabs', () => {
   let appMockRenderer: AppMockRenderer;
+  const data = { total: 3 };
+
+  useGetCaseFileStatsMock.mockReturnValue({ data });
 
   beforeEach(() => {
     mockGetCase();
@@ -90,6 +98,22 @@ describe('CaseViewTabs', () => {
       'aria-selected',
       'true'
     );
+  });
+
+  it('shows the files tab with the correct count and colour', async () => {
+    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />);
+
+    expect(
+      (await screen.findByTestId('case-view-files-stats-badge')).getAttribute('class')
+    ).toMatch(/accent/);
+  });
+
+  it('the files tab count has a different colour if the tab is not active', async () => {
+    appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />);
+
+    expect(
+      (await screen.findByTestId('case-view-files-stats-badge')).getAttribute('class')
+    ).not.toMatch(/accent/);
   });
 
   it('navigates to the activity tab when the activity tab is clicked', async () => {

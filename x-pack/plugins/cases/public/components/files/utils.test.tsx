@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { JsonValue } from '@kbn/utility-types';
 
 import { imageMimeTypes, textMimeTypes } from '../../../common/constants/mime_types';
@@ -13,15 +12,11 @@ import { isImage, isValidFileExternalReferenceMetadata, parseMimeType } from './
 
 describe('isImage', () => {
   it('should return true for allowed image mime types', () => {
-    isImage({ mimeType: imageMimeTypes[0] } as FileJSON);
-
     // @ts-ignore
     expect(imageMimeTypes.reduce((acc, curr) => acc && isImage({ mimeType: curr }))).toBeTruthy();
   });
 
   it('should return false for allowed non-image mime types', () => {
-    isImage({ mimeType: imageMimeTypes[0] } as FileJSON);
-
     // @ts-ignore
     expect(textMimeTypes.reduce((acc, curr) => acc && isImage({ mimeType: curr }))).toBeFalsy();
   });

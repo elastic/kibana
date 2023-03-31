@@ -108,9 +108,19 @@ describe('AddFile', () => {
     expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
   });
 
-  it('add button disable if user has no creat permission', async () => {
+  it('AddFile is disabled if user has no create permission', async () => {
     appMockRender = createAppMockRenderer({
       permissions: buildCasesPermissions({ create: false }),
+    });
+
+    appMockRender.render(<AddFile caseId={'foobar'} />);
+
+    expect(await screen.findByTestId('cases-files-add')).toBeDisabled();
+  });
+
+  it('AddFile is if user has no update permission', async () => {
+    appMockRender = createAppMockRenderer({
+      permissions: buildCasesPermissions({ update: false }),
     });
 
     appMockRender.render(<AddFile caseId={'foobar'} />);
