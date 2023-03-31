@@ -164,8 +164,8 @@ export const EndpointActionListRequestSchema = {
         }),
         schema.string({
           minLength: 1,
-          validate: (actionId) => {
-            if (!actionId.trim().length) {
+          validate: (alertId) => {
+            if (!alertId.trim().length) {
               return 'alertId cannot be an empty string';
             }
           },
