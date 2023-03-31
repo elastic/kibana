@@ -87,4 +87,6 @@ export interface Accessors {
   goal?: string;
 }
 
-export type AllowedGaugeOverrides = Record<'gauge', Simplify<MakeOverridesSerializable<GoalProps>>>;
+export type AllowedGaugeOverrides = Partial<
+  Record<'gauge', Simplify<MakeOverridesSerializable<GoalProps>>>
+>;

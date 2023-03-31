@@ -7,6 +7,8 @@
  */
 import type { SettingsProps } from '@elastic/charts';
 
+type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
+
 // Overrides should not expose Functions, React nodes and children props
 // So filter out any type which is not serializable
 export type MakeOverridesSerializable<T> = {
@@ -27,14 +29,16 @@ export type MakeOverridesSerializable<T> = {
 export type AllowedSettingsOverrides = Partial<
   Record<
     'settings',
-    MakeOverridesSerializable<
-      Omit<
-        SettingsProps,
-        | 'onRenderChange'
-        | 'onPointerUpdate'
-        | 'orderOrdinalBinsBy'
-        | 'baseTheme'
-        | 'legendColorPicker'
+    Simplify<
+      MakeOverridesSerializable<
+        Omit<
+          SettingsProps,
+          | 'onRenderChange'
+          | 'onPointerUpdate'
+          | 'orderOrdinalBinsBy'
+          | 'baseTheme'
+          | 'legendColorPicker'
+        >
       >
     >
   >
