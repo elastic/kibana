@@ -143,26 +143,27 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
       {timeframeEnabled && (
         <>
           <EuiSpacer size="s" />
+          <EuiFlexItem>
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate(
+                'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeWeekdays',
+                {
+                  defaultMessage: 'Days of week',
+                }
+              )}
+              options={I18N_WEEKDAY_OPTIONS}
+              idToSelectedMap={selectedWeekdays}
+              type="multi"
+              onChange={onToggleWeekday}
+              data-test-subj="alertsFilterTimeframeWeekdayButtons"
+            />
+          </EuiFlexItem>
+          <EuiSpacer size="s" />
           <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <EuiButtonGroup
-                buttonSize="compressed"
-                isFullWidth
-                legend={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeWeekdays',
-                  {
-                    defaultMessage: 'Days of week',
-                  }
-                )}
-                options={I18N_WEEKDAY_OPTIONS}
-                idToSelectedMap={selectedWeekdays}
-                type="multi"
-                onChange={onToggleWeekday}
-                data-test-subj="alertsFilterTimeframeWeekdayButtons"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={2}>
               <EuiDatePickerRange
+                fullWidth
                 startDateControl={
                   <EuiDatePicker
                     showTimeSelect
@@ -187,11 +188,12 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
                 }
               />
             </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFormRow label="Timezone">
-            <EuiFlexItem>
+            <EuiFlexItem grow={1}>
               <EuiComboBox
-                compressed
+                prepend={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeTimezoneLabel',
+                  { defaultMessage: 'Timezone' }
+                )}
                 singleSelection={{ asPlainText: true }}
                 options={TIMEZONE_OPTIONS}
                 selectedOptions={selectedTimezone}
@@ -200,7 +202,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
                 data-test-subj="alertsFilterTimeframeTimezone"
               />
             </EuiFlexItem>
-          </EuiFormRow>
+          </EuiFlexGroup>
         </>
       )}
     </>
