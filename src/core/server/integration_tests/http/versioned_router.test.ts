@@ -77,4 +77,33 @@ describe('Routing versioned requests', () => {
 
     await supertest.get('/my-path').set('Elastic-Api-Version', '2').expect(406);
   });
+
+  it('handles missing version header', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+    const supertest = Supertest(innerServer.listener);
+
+    router.versioned
+      .get({ path: '/my-path', access: 'internal' })
+      .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
+        return res.ok({ body: { v: '1' } });
+      })
+      .addVersion({ validate: false, version: '2' }, async (ctx, req, res) => {
+        return res.ok({ body: { v: '2' } });
+      });
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .expect(406)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        message:
+          'Version expected at [get] [/my-path]. Please specify a version using the "elastic-api-version" header. Available versions are: "1,2"',
+      })
+    );
+  });
 });
