@@ -58,6 +58,9 @@ import { UsageCollector } from './usage/usage_collector';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
+    logs: schema.object({
+      app_target: schema.string({ defaultValue: 'logs-ui' }),
+    }),
     alerting: schema.object({
       inventory_threshold: schema.object({
         group_by_page_size: schema.number({ defaultValue: 5_000 }),
