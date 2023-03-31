@@ -98,10 +98,23 @@ describe('FieldSuggestions', () => {
       expect(http.fetch).not.toHaveBeenCalled();
     });
 
-    it('should otherwise request suggestions', async () => {
+    it('should request suggestions for strings', async () => {
       const [field] = stubFields.filter(
-        ({ type, aggregatable }) => (type === 'string' || type === 'ip') && aggregatable
+        ({ type, aggregatable }) => type === 'string' && aggregatable
       );
+
+      await getValueSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+        useTimeRange: false,
+      });
+
+      expect(http.fetch).toHaveBeenCalled();
+    });
+
+    it('should request suggestions for ips', async () => {
+      const [field] = stubFields.filter(({ type, aggregatable }) => type === 'ip' && aggregatable);
 
       await getValueSuggestions({
         indexPattern: stubIndexPattern,
