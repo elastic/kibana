@@ -25586,8 +25586,6 @@
     "xpack.observability..synthetics.addDataButtonLabel": "添加 Synthetics 数据",
     "xpack.observability.alertDetails.actionsButtonLabel": "操作",
     "xpack.observability.alertDetails.addToCase": "添加到案例",
-    "xpack.observability.alertDetails.alertActiveState": "活动",
-    "xpack.observability.alertDetails.alertRecoveredState": "已恢复",
     "xpack.observability.alertDetails.editSnoozeRule": "暂停规则",
     "xpack.observability.alertDetails.errorPromptBody": "加载告警详情时出错。",
     "xpack.observability.alertDetails.errorPromptTitle": "无法加载告警详情",
