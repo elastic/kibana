@@ -40,16 +40,26 @@ function setup({
   const setQuerySpy = jest.fn();
   const getQuerySpy = jest.fn();
   const clearQuerySpy = jest.fn();
+  const setTimeSpy = jest.fn();
 
   const KibanaReactContext = createKibanaReactContext({
-    usageCollection: { reportUiCounter: () => {} },
-    dataViews: { get: async () => {} },
+    usageCollection: {
+      reportUiCounter: () => {},
+    },
+    dataViews: {
+      get: async () => {},
+    },
     data: {
       query: {
         queryString: {
           setQuery: setQuerySpy,
           getQuery: getQuerySpy,
           clearQuery: clearQuerySpy,
+        },
+        timefilter: {
+          timefilter: {
+            setTime: setTimeSpy,
+          },
         },
       },
     },
@@ -72,7 +82,7 @@ function setup({
     </KibanaReactContext.Provider>
   );
 
-  return { wrapper, setQuerySpy, getQuerySpy, clearQuerySpy };
+  return { wrapper, setQuerySpy, getQuerySpy, clearQuerySpy, setTimeSpy };
 }
 
 describe('when kuery is already present in the url, the search bar must reflect the same', () => {
@@ -99,10 +109,15 @@ describe('when kuery is already present in the url, the search bar must reflect 
       language: 'kuery',
     };
 
+    const expectedTimeRange = {
+      from: 'now-15m',
+      to: 'now',
+    };
+
     const urlParams = {
       kuery: expectedQuery.query,
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
+      rangeFrom: expectedTimeRange.from,
+      rangeTo: expectedTimeRange.to,
       environment: 'ENVIRONMENT_ALL',
       comparisonEnabled: true,
       serviceGroup: '',
@@ -112,11 +127,12 @@ describe('when kuery is already present in the url, the search bar must reflect 
       .spyOn(useApmParamsHook, 'useApmParams')
       .mockReturnValue({ query: urlParams, path: {} });
 
-    const { setQuerySpy } = setup({
+    const { setQuerySpy, setTimeSpy } = setup({
       history,
       urlParams,
     });
 
     expect(setQuerySpy).toBeCalledWith(expectedQuery);
+    expect(setTimeSpy).toBeCalledWith(expectedTimeRange);
   });
 });
