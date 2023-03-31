@@ -128,8 +128,8 @@ export interface LogsEndpointAction {
     id: string;
   };
   rule?: {
-    id?: string;
-    name?: string;
+    id: string;
+    name: string;
   };
 }
 

@@ -119,10 +119,9 @@ export class ActionCreateService {
       user: {
         id: payload.user ? payload.user.username : 'unknown',
       },
-      rule: {
-        ...(payload.rule_id ? { id: payload.rule_id } : {}),
-        ...(payload.rule_name ? { name: payload.rule_name } : {}),
-      },
+      ...(payload.rule_id && payload.rule_name
+        ? { rule: { id: payload.rule_id, name: payload.rule_name } }
+        : {}),
     };
 
     // if .logs-endpoint.actions data stream exists
