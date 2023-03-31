@@ -7,27 +7,31 @@
 
 import React from 'react';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 
 interface Props {
-  alertStarted: number;
+  alertStart: number;
   color: string;
   dateFormat: string;
   id: string;
-  title: string;
 }
 
-export function AlertAnnotation({ alertStarted, color, dateFormat, id, title }: Props) {
+const ANNOTATION_TITLE = i18n.translate('observabilityAlertDetails.alertAnnotationTitle', {
+  defaultMessage: 'Alert started',
+});
+
+export function AlertAnnotation({ alertStart, color, dateFormat, id }: Props) {
   return (
     <LineAnnotation
       id={id}
       domainType={AnnotationDomainType.XDomain}
       dataValues={[
         {
-          dataValue: alertStarted,
-          header: moment(alertStarted).format(dateFormat),
-          details: title,
+          dataValue: alertStart,
+          header: moment(alertStart).format(dateFormat),
+          details: ANNOTATION_TITLE,
         },
       ]}
       style={{

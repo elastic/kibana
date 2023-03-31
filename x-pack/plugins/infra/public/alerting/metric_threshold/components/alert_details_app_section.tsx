@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
@@ -49,13 +48,10 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   const annotations = [
     <AlertAnnotation
       key={ALERT_START_ANNOTATION_ID}
-      alertStarted={alert.start}
+      alertStart={alert.start}
       color={euiTheme.colors.danger}
       dateFormat={uiSettings.get('dateFormat') || DEFAULT_DATE_FORMAT}
       id={ALERT_START_ANNOTATION_ID}
-      title={i18n.translate('xpack.infra.metrics.alertDetails.alertAnnotationTitle', {
-        defaultMessage: 'Alert started',
-      })}
     />,
   ];
 

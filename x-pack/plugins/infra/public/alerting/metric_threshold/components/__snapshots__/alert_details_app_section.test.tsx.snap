@@ -5,11 +5,10 @@ Array [
   Object {
     "annotations": Array [
       <AlertAnnotation
-        alertStarted={1678716383695}
+        alertStart={1678716383695}
         color="#BD271E"
         dateFormat="YYYY-MM-DD HH:mm"
         id="annotation_alert_start"
-        title="Alert started"
       />,
     ],
     "chartType": "line",
