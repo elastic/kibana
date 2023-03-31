@@ -21,7 +21,7 @@ export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
     services: { cases },
   } = useMlKibana();
 
-  const selectCaseModal = cases?.hooks.getUseCasesAddToExistingCaseModal();
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
 
   return useCallback(
     (persistableState: Partial<Omit<MappedEmbeddableTypeOf<EmbeddableType>, 'id'>>) => {
