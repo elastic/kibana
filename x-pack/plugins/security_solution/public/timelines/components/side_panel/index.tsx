@@ -36,6 +36,7 @@ interface DetailsPanelProps {
   isReadOnly?: boolean;
 }
 
+// Both event detail and timeline on detection are rendered in a portal, we need to set the z-index to be below the timeline
 const flyoutZIndexStyle = { zIndex: euiThemeVars.euiZLevel1 - 1 };
 
 /**
