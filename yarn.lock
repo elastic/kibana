@@ -1543,10 +1543,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@76.3.0":
-  version "76.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-76.3.0.tgz#65ab0d106a6da4ed962454c59148a9743f61f1e4"
-  integrity sha512-faSemLNfRvOcNFRYk6t7f9sep8ekOawppEGs2opKiSPDBefd5JNawMzluHYpnmIJuHqlCRVjP/Ph6yWvJwWfQg==
+"@elastic/eui@76.4.0":
+  version "76.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-76.4.0.tgz#be7d8afadd3848cf1513c095e68a9e4db8fcbac7"
+  integrity sha512-0b3w6CloIZZ8B+URDSYLQsyTtc/GadkbNcoDg+20SeRuB8q339S+n6tbq+sVX+uk/RtRu1T/068mAd6nZZmqIg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -4558,6 +4558,10 @@
   uid ""
 
 "@kbn/ml-query-utils@link:x-pack/packages/ml/query_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-route-utils@link:x-pack/packages/ml/route_utils":
   version "0.0.0"
   uid ""
 

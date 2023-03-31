@@ -24,12 +24,6 @@ import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/
 
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
-export const collectionViewBreadcrumbs = [
-  i18n.translate('xpack.enterpriseSearch.analytics.collectionsView.breadcrumb', {
-    defaultMessage: 'View collection',
-  }),
-];
-
 export const AnalyticsCollectionView: React.FC = () => {
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);
   const { setTimeRange } = useActions(AnalyticsCollectionToolbarLogic);
@@ -45,7 +39,8 @@ export const AnalyticsCollectionView: React.FC = () => {
     <EnterpriseSearchAnalyticsPageTemplate
       restrictWidth
       isLoading={isLoading}
-      pageChrome={[...collectionViewBreadcrumbs]}
+      pageChrome={[analyticsCollection?.name]}
+      analyticsName={analyticsCollection?.name}
       pageViewTelemetry={`View Analytics Collection - ${section}`}
       pageHeader={{
         bottomBorder: false,
