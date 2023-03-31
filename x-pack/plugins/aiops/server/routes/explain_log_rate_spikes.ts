@@ -22,6 +22,7 @@ import type {
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
+import { createExecutionContext } from '@kbn/ml-route-utils';
 
 import {
   addSignificantTermsAction,
@@ -78,11 +79,8 @@ export const defineExplainLogRateSpikesRoute = (
         return response.forbidden();
       }
 
-      const [executionContext, contextCore] = await Promise.all([
-        createExecutionContext(coreStart, request.route.path),
-        context.core,
-      ]);
-      const client = contextCore.elasticsearch.client.asCurrentUser;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
+      const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
 
       return await coreStart.executionContext.withContext(executionContext, () => {
         let logMessageCounter = 1;
@@ -679,14 +677,3 @@ export const defineExplainLogRateSpikesRoute = (
     }
   );
 };
-
-async function createExecutionContext(coreStart: CoreStart, id?: string) {
-  const labels = coreStart.executionContext.getAsLabels();
-  const page = labels.page as string;
-  return {
-    type: 'application',
-    name: PLUGIN_ID,
-    id: id ?? page,
-    page,
-  };
-}
