@@ -33,6 +33,11 @@ export const getCpmStatus = (cpmStatusData: CspSetupStatus | undefined) => {
   const isCspmIntegrationInstalled = isCspmInstalled && isCspmPrivileged;
   const isKspmIntegrationInstalled = isKspmInstalled && isKspmPrivileged;
 
+  const isEmptyData =
+    cpmStatusData?.kspm?.status === 'not-installed' &&
+    cpmStatusData?.cspm?.status === 'not-installed' &&
+    cpmStatusData?.indicesDetails[0].status === 'empty';
+
   return {
     hasFindings,
     hasKspmFindings,
@@ -43,5 +48,6 @@ export const getCpmStatus = (cpmStatusData: CspSetupStatus | undefined) => {
     isCspmPrivileged,
     isCspmIntegrationInstalled,
     isKspmIntegrationInstalled,
+    isEmptyData,
   };
 };

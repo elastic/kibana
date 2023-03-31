@@ -21,11 +21,11 @@ export const Configurations = () => {
   const location = useLocation();
   const dataViewQuery = useLatestFindingsDataView();
   const { data: getSetupStatus } = useCspSetupStatusApi();
-  const status = getCpmStatus(getSetupStatus);
+  const { hasFindings, isCspmInstalled } = getCpmStatus(getSetupStatus);
 
-  const noFindingsState = getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
+  const noFindingsForPostureType = isCspmInstalled ? 'cspm' : 'kspm';
 
-  if (!status.hasFindings) return <NoFindingsStates posturetype={noFindingsState} />;
+  if (!hasFindings) return <NoFindingsStates posturetype={noFindingsForPostureType} />;
 
   return (
     <CloudPosturePage query={dataViewQuery}>

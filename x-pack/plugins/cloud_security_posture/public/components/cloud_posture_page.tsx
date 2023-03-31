@@ -238,7 +238,6 @@ const subscriptionNotAllowedRenderer = () => (
 interface CloudPosturePageProps<TData, TError> {
   children: React.ReactNode;
   query?: UseQueryResult<TData, TError>;
-  hasFindings?: boolean;
   loadingRender?: () => React.ReactNode;
   errorRender?: (error: TError) => React.ReactNode;
   noDataRenderer?: () => React.ReactNode;
@@ -255,7 +254,7 @@ export const CloudPosturePage = <TData, TError>({
   const { data: getSetupStatus, isLoading, isError, error } = useCspSetupStatusApi();
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
-  const status = getCpmStatus(getSetupStatus);
+  const { isEmptyData, hasFindings } = getCpmStatus(getSetupStatus);
 
   const render = () => {
     if (subscriptionStatus.isError) {
@@ -279,15 +278,11 @@ export const CloudPosturePage = <TData, TError>({
     }
 
     /* Checks if its a completely new user which means no integration has been installed and no latest findings default index has been found */
-    if (
-      getSetupStatus?.kspm?.status === 'not-installed' &&
-      getSetupStatus?.cspm?.status === 'not-installed' &&
-      getSetupStatus?.indicesDetails[0].status === 'empty'
-    ) {
+    if (isEmptyData) {
       return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
     }
 
-    if (!status.hasFindings) {
+    if (!hasFindings) {
       return children;
     }
 
