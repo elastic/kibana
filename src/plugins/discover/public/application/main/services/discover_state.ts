@@ -69,9 +69,22 @@ interface DiscoverStateContainerParams {
 }
 
 export interface LoadParams {
+  /**
+   * the id of the saved search to load, if undefined, a new saved search will be created
+   */
   savedSearchId?: string;
+  /**
+   * the data view to use, if undefined, the saved search's data view will be used
+   */
   dataView?: DataView;
+  /**
+   * the data view spec to use, if undefined, the saved search's data view will be used
+   */
   dataViewSpec?: DataViewSpec;
+  /**
+   * determins if AppState should be used to update the saved search
+   * URL is overwriting savedSearch params in this case
+   */
   useAppState?: boolean;
 }
 
@@ -337,6 +350,11 @@ export function getDiscoverStateContainer({
   const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
     const { savedSearchId, dataView, dataViewSpec, useAppState } = params ?? {};
     const appState = useAppState ? appStateContainer.getState() : undefined;
+    if (!useAppState) {
+      appStateContainer.set({});
+      services.filterManager.setAppFilters([]);
+      services.data.query.queryString.clearQuery();
+    }
     const actualDataView = dataView
       ? dataView
       : (await loadAndResolveDataView(appState?.index, dataViewSpec)).dataView;
@@ -388,7 +406,7 @@ export function getDiscoverStateContainer({
       await savedSearchContainer.update({
         nextDataView: internalStateContainer.getState().dataView,
         nextState: appStateContainer.getState(),
-        filterAndQuery: true,
+        updateByFilterAndQuery: true,
       });
       fetchData();
     });

@@ -25,9 +25,18 @@ import { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from '../utils/get_state_defaults';
 
 export interface UpdateParams {
+  /**
+   * The next data view to be used
+   */
   nextDataView?: DataView | undefined;
+  /**
+   * The next AppState that should be used for updating the saved search
+   */
   nextState?: DiscoverAppState | undefined;
-  filterAndQuery?: boolean;
+  /**
+   * use filter and query services to update the saved search
+   */
+  updateByFilterAndQuery?: boolean;
 }
 
 /**
@@ -160,7 +169,7 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
-  const update = ({ nextDataView, nextState, filterAndQuery }: UpdateParams) => {
+  const update = ({ nextDataView, nextState, updateByFilterAndQuery }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
     const previousSavedSearch = getState();
@@ -175,7 +184,7 @@ export function getSavedSearchContainer({
         state: nextState || {},
         services,
       },
-      !filterAndQuery
+      updateByFilterAndQuery
     );
 
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);

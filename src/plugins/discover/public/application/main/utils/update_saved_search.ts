@@ -24,20 +24,20 @@ export function updateSavedSearch(
     state?: DiscoverAppState;
     services: DiscoverServices;
   },
-  initial: boolean = false
+  updateByFilterAndQuery: boolean = false
 ) {
   if (dataView) {
     savedSearch.searchSource.setField('index', dataView);
     savedSearch.usesAdHocDataView = !dataView.isPersisted();
   }
-  if (!initial || !state) {
+  if (updateByFilterAndQuery || !state) {
     savedSearch.searchSource
       .setField('query', services.data.query.queryString.getQuery() || null)
-      .setField('filter', services.data.query.filterManager.getFilters());
+      .setField('filter', services.data.query.filterManager.getFilters() || []);
   } else {
     savedSearch.searchSource
       .setField('query', state.query)
-      .setField('filter', cloneDeep(state.filters));
+      .setField('filter', cloneDeep(state.filters) || []);
   }
   if (state) {
     savedSearch.columns = state.columns || [];

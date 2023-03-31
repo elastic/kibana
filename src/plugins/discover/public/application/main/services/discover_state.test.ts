@@ -537,6 +537,17 @@ describe('actions', () => {
     unsubscribe();
   });
 
+  test('onOpenSavedSearch - cleanup of previous filter', async () => {
+    const { state } = await getState(
+      "/#?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))&_a=(columns:!(customer_first_name),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,key:customer_first_name,negate:!f,params:(query:Mary),type:phrase),query:(match_phrase:(customer_first_name:Mary)))),hideChart:!f,index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,interval:auto,query:(language:kuery,query:''),sort:!())",
+      savedSearchMock
+    );
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id, useAppState: true });
+    expect(state.appState.get().filters).toHaveLength(1);
+    await state.actions.loadSavedSearch({ useAppState: false });
+    expect(state.appState.get().filters).toHaveLength(0);
+  });
+
   test('onCreateDefaultAdHocDataView', async () => {
     discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
       ...dataViewMock,

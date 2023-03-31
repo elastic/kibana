@@ -254,7 +254,8 @@ export const getDiscoverAppStateContainer = ({
   };
 
   const isEmptyURL = () => {
-    return stateStorage.get(APP_STATE_URL_KEY) === null;
+    const urlValue = stateStorage.get(APP_STATE_URL_KEY);
+    return urlValue === undefined || urlValue === null;
   };
 
   const getPrevious = () => previousState;
