@@ -28,6 +28,7 @@ export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
         name: WORKPLACE_SEARCH_PLUGIN.NAME,
         items: useWorkplaceSearchNav(),
       }}
+      solutionNavIcon={WORKPLACE_SEARCH_PLUGIN.LOGO}
       setPageChrome={pageChrome && <SetWorkplaceSearchChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (

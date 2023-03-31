@@ -26,6 +26,7 @@ export const EnterpriseSearchSearchExperiencesPageTemplate: React.FC<PageTemplat
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
         items: useEnterpriseSearchNav(),
       }}
+      solutionNavIcon={ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO}
       setPageChrome={pageChrome && <SetSearchExperiencesChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (

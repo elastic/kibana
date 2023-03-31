@@ -42,6 +42,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   // Used by product-specific page templates
   pageChrome?: BreadcrumbTrail;
   pageViewTelemetry?: string;
+  solutionNavIcon?: string;
 };
 
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
@@ -54,12 +55,13 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   emptyState,
   setPageChrome,
   solutionNav,
+  solutionNavIcon,
   ...pageTemplateProps
 }) => {
   const { readOnlyMode } = useValues(HttpLogic);
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
-
+  const navIcon = solutionNavIcon ?? 'logoEnterpriseSearch';
   return (
     <KibanaPageTemplate
       restrictWidth={false}
@@ -73,7 +75,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         ),
       }}
       isEmptyState={isEmptyState && !isLoading}
-      solutionNav={solutionNav ? { icon: 'logoEnterpriseSearch', ...solutionNav } : undefined}
+      solutionNav={solutionNav ? { icon: navIcon, ...solutionNav } : undefined}
     >
       {setPageChrome}
       {readOnlyMode && (

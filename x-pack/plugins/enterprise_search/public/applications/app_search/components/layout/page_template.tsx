@@ -27,6 +27,7 @@ export const AppSearchPageTemplate: React.FC<PageTemplateProps> = ({
         name: APP_SEARCH_PLUGIN.NAME,
         items: useAppSearchNav(),
       }}
+      solutionNavIcon={APP_SEARCH_PLUGIN.LOGO}
       setPageChrome={pageChrome && <SetAppSearchChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && <SendAppSearchTelemetry action="viewed" metric={pageViewTelemetry} />}

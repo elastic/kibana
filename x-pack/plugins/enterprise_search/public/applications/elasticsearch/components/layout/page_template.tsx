@@ -26,6 +26,7 @@ export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplatePro
         name: ELASTICSEARCH_PLUGIN.NAME,
         items: useEnterpriseSearchNav(),
       }}
+      solutionNavIcon={ELASTICSEARCH_PLUGIN.LOGO}
       setPageChrome={pageChrome && <SetElasticsearchChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (

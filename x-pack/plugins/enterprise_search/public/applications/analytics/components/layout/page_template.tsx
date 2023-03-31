@@ -49,6 +49,7 @@ export const EnterpriseSearchAnalyticsPageTemplate: React.FC<
         ),
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
+      solutionNavIcon={ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO}
       setPageChrome={pageChrome && <SetAnalyticsChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (

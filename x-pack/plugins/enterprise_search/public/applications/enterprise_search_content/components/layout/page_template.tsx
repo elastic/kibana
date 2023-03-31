@@ -26,6 +26,7 @@ export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = 
         items: useEnterpriseSearchNav(),
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
+      solutionNavIcon={ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO}
       restrictWidth
       setPageChrome={pageChrome && <SetEnterpriseSearchContentChrome trail={pageChrome} />}
     >

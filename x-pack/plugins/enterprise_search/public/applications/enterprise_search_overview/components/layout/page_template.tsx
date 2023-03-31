@@ -26,7 +26,7 @@ export const EnterpriseSearchOverviewPageTemplate: React.FC<PageTemplateProps> =
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
         items: useEnterpriseSearchNav(),
       }}
-      setPageChrome={pageChrome && <SetEnterpriseSearchChrome trail={pageChrome} />}
+      solutionNavIcon={ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO}
     >
       {pageViewTelemetry && (
         <SendEnterpriseSearchTelemetry action="viewed" metric={pageViewTelemetry} />
