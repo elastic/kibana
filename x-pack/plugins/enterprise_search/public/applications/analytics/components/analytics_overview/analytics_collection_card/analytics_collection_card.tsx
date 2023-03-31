@@ -104,7 +104,6 @@ export const AnalyticsCollectionCard: React.FC<
   const CARD_THEME = getCardTheme(euiTheme)[status];
   const collectionViewUrl = generateEncodedPath(COLLECTION_VIEW_PATH, {
     name: collection.name,
-    section: 'events',
   });
   const handleCardClick = (event: MouseEvent) => {
     event?.preventDefault();
