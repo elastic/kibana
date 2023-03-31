@@ -125,11 +125,21 @@ export function DiscoverMainRoute(props: Props) {
       }
       try {
         await stateContainer.actions.loadDataViewList();
-        const currentSavedSearch = await stateContainer.actions.loadSavedSearch(
-          id,
-          nextDataView,
-          historyLocationState?.dataViewSpec
-        );
+        // reset appState in case a saved search with id is loaded and the url is empty
+        // so the saved search is loaded in a clean state
+        // else it might be updated by the previous app state
+        const isEmptyURL = stateContainer.appState.isEmptyURL();
+        const isPersistedSearch = typeof id === 'string';
+        if (isEmptyURL && isPersistedSearch) {
+          stateContainer.appState.set({});
+        }
+        const useAppState = !isEmptyURL || !isPersistedSearch;
+        const currentSavedSearch = await stateContainer.actions.loadSavedSearch({
+          savedSearchId: id,
+          dataView: nextDataView,
+          dataViewSpec: historyLocationState?.dataViewSpec,
+          useAppState,
+        });
         if (currentSavedSearch?.id) {
           chrome.recentlyAccessed.add(
             getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -171,7 +181,7 @@ export function DiscoverMainRoute(props: Props) {
     },
     [
       checkData,
-      stateContainer.actions,
+      stateContainer,
       id,
       historyLocationState?.dataViewSpec,
       chrome,

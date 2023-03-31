@@ -67,6 +67,13 @@ interface DiscoverStateContainerParams {
   services: DiscoverServices;
 }
 
+export interface LoadParams {
+  savedSearchId?: string;
+  dataView?: DataView;
+  dataViewSpec?: DataViewSpec;
+  useAppState?: boolean;
+}
+
 export interface DiscoverStateContainer {
   /**
    * App state, the _a part of the URL
@@ -115,11 +122,7 @@ export interface DiscoverStateContainer {
      * @param savedSearchId
      * @param dataView
      */
-    loadSavedSearch: (
-      savedSearchId?: string | undefined,
-      dataView?: DataView | undefined,
-      dataViewSpec?: DataViewSpec
-    ) => Promise<SavedSearch | undefined>;
+    loadSavedSearch: (param?: LoadParams) => Promise<SavedSearch | undefined>;
     /**
      * Create and select a ad-hoc data view by a given index pattern
      * @param pattern
@@ -330,53 +333,42 @@ export function getDiscoverStateContainer({
     return persistedDataView;
   };
 
-  const loadSavedSearch = async (
-    id?: string,
-    nextDataView?: DataView,
-    dataViewSpec?: DataViewSpec
-  ): Promise<SavedSearch> => {
-    const { dataView } = nextDataView
-      ? { dataView: nextDataView }
-      : id
-      ? { dataView: undefined }
-      : await loadAndResolveDataView(appStateContainer.getState().index, dataViewSpec);
+  const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
+    const { savedSearchId, dataView, dataViewSpec, useAppState } = params ?? {};
+    const appState = useAppState ? appStateContainer.getState() : undefined;
+    const actualDataView = dataView
+      ? dataView
+      : (await loadAndResolveDataView(appState?.index, dataViewSpec)).dataView;
 
-    const nextSavedSearch = await loadNextSavedSearch(id, dataView, {
-      appStateContainer,
+    const nextSavedSearch = await loadNextSavedSearch({
+      id: savedSearchId,
+      dataView: actualDataView,
+      appState,
       savedSearchContainer,
     });
+    await appStateContainer.resetWithSavedSearch(nextSavedSearch);
 
-    if (
-      id &&
-      appStateContainer.getState().index &&
-      appStateContainer.getState().index !== nextSavedSearch.searchSource.getField('index')
-    ) {
-      const { dataView: appStateDataView } = await loadAndResolveDataView(
-        appStateContainer.getState().index,
-        dataViewSpec
-      );
-      if (appStateDataView) {
-        nextSavedSearch.searchSource.setField('index', appStateDataView);
-      }
-    }
-
-    const actualDataView = nextSavedSearch.searchSource.getField('index');
-    if (actualDataView) {
-      setDataView(actualDataView);
+    const savedSearchDataView = nextSavedSearch.searchSource.getField('index');
+    if (savedSearchDataView) {
+      setDataView(savedSearchDataView);
       if (!actualDataView.isPersisted()) {
-        internalStateContainer.transitions.appendAdHocDataViews(actualDataView);
+        internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
       }
     }
+
     dataStateContainer.reset(nextSavedSearch);
     return nextSavedSearch;
   };
 
   const initializeAndSync = () => {
+    /**
+     * state containers initializing and starting to notify each other about changes
+     */
     const unsubscribeData = dataStateContainer.subscribe();
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
       savedSearchContainer.getState()
     );
-
+    // updates saved search when app state changes, triggers data fetching if required
     const appStateUnsubscribe = appStateContainer.subscribe(
       buildStateSubscribe({
         appState: appStateContainer,
@@ -386,7 +378,7 @@ export function getDiscoverStateContainer({
         setDataView,
       })
     );
-
+    // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(
       services.data.query.queryString.getUpdates$(),
       services.filterManager.getFetches$()
@@ -424,6 +416,7 @@ export function getDiscoverStateContainer({
     isUpdate?: boolean
   ) => {
     if (isUpdate === false) {
+      // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       dataStateContainer.fetch();
     }

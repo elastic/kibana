@@ -7,40 +7,42 @@
  */
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DiscoverAppStateContainer } from './discover_app_state_container';
+import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { addLog } from '../../../utils/add_log';
 
-export const loadSavedSearch = async (
-  id: string | undefined,
-  dataView: DataView | undefined,
-  {
-    appStateContainer,
-    savedSearchContainer,
-  }: {
-    appStateContainer: DiscoverAppStateContainer;
-    savedSearchContainer: DiscoverSavedSearchContainer;
-  }
-): Promise<SavedSearch> => {
+export const loadSavedSearch = async ({
+  id,
+  dataView,
+  appState,
+  savedSearchContainer,
+}: {
+  id: string | undefined;
+  dataView: DataView | undefined;
+  appState: DiscoverAppState | undefined;
+  savedSearchContainer: DiscoverSavedSearchContainer;
+}): Promise<SavedSearch> => {
   addLog('[discoverState] loadSavedSearch');
-  const isEmptyURL = appStateContainer.isEmptyURL();
-  const isPersistedSearch = typeof id === 'string';
-  if (isEmptyURL && isPersistedSearch) {
-    appStateContainer.set({});
-  }
-  const appState = !isEmptyURL ? appStateContainer.getState() : undefined;
-  let nextSavedSearch = isPersistedSearch
-    ? await savedSearchContainer.load(id, dataView)
+  let nextSavedSearch = id
+    ? await savedSearchContainer.load(id)
     : await savedSearchContainer.new(dataView);
 
   if (appState) {
+    if (
+      id &&
+      dataView &&
+      appState.index &&
+      appState.index !== nextSavedSearch.searchSource.getField('index')?.id
+    ) {
+      // given a saved search is loaded, but the state in URL has a different data view selected
+      nextSavedSearch.searchSource.setField('index', dataView);
+    }
+
     nextSavedSearch = savedSearchContainer.update({
       nextDataView: nextSavedSearch.searchSource.getField('index'),
       nextState: appState,
     });
   }
-
-  await appStateContainer.resetWithSavedSearch(nextSavedSearch);
 
   return nextSavedSearch;
 };
