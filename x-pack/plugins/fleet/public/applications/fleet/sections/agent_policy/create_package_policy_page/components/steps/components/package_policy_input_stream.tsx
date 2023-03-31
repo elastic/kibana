@@ -266,6 +266,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
                         onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                         flush="left"
+                        data-test-subj={`advancedStreamOptionsToggle-${packagePolicyInputStream.id}`}
                       >
                         <FormattedMessage
                           id="xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
