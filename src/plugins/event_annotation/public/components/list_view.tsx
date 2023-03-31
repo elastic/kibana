@@ -51,42 +51,42 @@ export const EventAnnotationGroupListView = ({
   );
 
   return (
-    <TableListView
-      id="annotation"
-      headingId="eventAnnotationGroupsListingHeading"
-      // we allow users to create visualizations even if they can't save them
-      // for data exploration purposes
-      // createItem={createNewGroup}
-      findItems={fetchItems}
-      deleteItems={
-        visualizeCapabilities.delete
-          ? (items) => eventAnnotationService.deleteAnnotationGroups(items.map(({ id }) => id))
-          : undefined
-      }
-      // editItem={visualizeCapabilities.save ? editItem : undefined}
-      // customTableColumn={getCustomColumn()}
-      listingLimit={listingLimit}
-      initialPageSize={initialPageSize}
-      initialFilter={''}
-      // contentEditor={{
-      //   isReadonly: !visualizeCapabilities.save,
-      //   onSave: onContentEditorSave,
-      //   customValidators: contentEditorValidators,
-      // }}
-      // emptyPrompt={noItemsFragment}
-      entityName={i18n.translate('eventAnnotation.tableList.entityName', {
-        defaultMessage: 'annotation group',
-      })}
-      entityNamePlural={i18n.translate('eventAnnotation.tableList.entityNamePlural', {
-        defaultMessage: 'annotation groups',
-      })}
-      tableListTitle={i18n.translate('eventAnnotation.tableList.listTitle', {
-        defaultMessage: 'Annotation Library',
-      })}
-      onClickTitle={() => {}}
-      // getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-      //   getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
-      // }
-    />
+    <div data-test-id="annotationLibraryListingView">
+      <TableListView
+        // we allow users to create visualizations even if they can't save them
+        // for data exploration purposes
+        // createItem={createNewGroup}
+        findItems={fetchItems}
+        deleteItems={
+          visualizeCapabilities.delete
+            ? (items) => eventAnnotationService.deleteAnnotationGroups(items.map(({ id }) => id))
+            : undefined
+        }
+        // editItem={visualizeCapabilities.save ? editItem : undefined}
+        // customTableColumn={getCustomColumn()}
+        listingLimit={listingLimit}
+        initialPageSize={initialPageSize}
+        initialFilter={''}
+        // contentEditor={{
+        //   isReadonly: !visualizeCapabilities.save,
+        //   onSave: onContentEditorSave,
+        //   customValidators: contentEditorValidators,
+        // }}
+        // emptyPrompt={noItemsFragment}
+        entityName={i18n.translate('eventAnnotation.tableList.entityName', {
+          defaultMessage: 'annotation group',
+        })}
+        entityNamePlural={i18n.translate('eventAnnotation.tableList.entityNamePlural', {
+          defaultMessage: 'annotation groups',
+        })}
+        tableListTitle={i18n.translate('eventAnnotation.tableList.listTitle', {
+          defaultMessage: 'Annotation Library',
+        })}
+        onClickTitle={() => {}}
+        // getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
+        //   getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
+        // }
+      />
+    </div>
   );
 };

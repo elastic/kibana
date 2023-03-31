@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const find = getService('find');
   const retry = getService('retry');
+  const browser = getService('browser');
   const toastsService = getService('toasts');
   const testSubjects = getService('testSubjects');
   const from = 'Sep 19, 2015 @ 06:31:44.000';
@@ -156,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toastContents = await toastsService.getToastContent(1);
 
         expect(toastContents).to.be(
-          `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library`
+          `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library.`
         );
 
         await PageObjects.lens.save(FIRST_VIS_TITLE);

@@ -27,6 +27,7 @@ import {
 } from '../common';
 import { getFetchEventAnnotations } from './fetch_event_annotations';
 import type { EventAnnotationAppServices } from './render_app';
+import { ANNOTATION_LIBRARY_APP_ID } from '../common/constants';
 
 export interface EventAnnotationStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
@@ -60,7 +61,7 @@ export class EventAnnotationPlugin
     );
 
     core.application.register({
-      id: 'annotations',
+      id: ANNOTATION_LIBRARY_APP_ID,
       title: 'Event Annotation Library',
       order: 8000,
       euiIconType: 'logoKibana',

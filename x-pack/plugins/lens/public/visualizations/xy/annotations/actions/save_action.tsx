@@ -17,7 +17,7 @@ import {
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { LayerAction, StateSetter } from '../../../../types';
@@ -133,6 +133,7 @@ export const onSave = async ({
   toasts,
   modalOnSaveProps: { newTitle, newDescription, newTags, closeModal, newCopyOnSave },
   dataViews,
+  goToAnnotationLibrary,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -141,6 +142,7 @@ export const onSave = async ({
   toasts: ToastsStart;
   modalOnSaveProps: ModalOnSaveProps;
   dataViews: DataViewsContract;
+  goToAnnotationLibrary: () => Promise<void>;
 }) => {
   let savedInfo: Awaited<ReturnType<typeof saveAnnotationGroupToLibrary>>;
   try {
@@ -196,9 +198,21 @@ export const onSave = async ({
         <div>
           <FormattedMessage
             id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
-            defaultMessage="View or manage in the {link}"
+            defaultMessage="View or manage in the {link}."
             values={{
-              link: <a href="#">annotation library</a>,
+              link: (
+                <EuiLink
+                  data-test-subj="lnsAnnotationLibraryLink"
+                  onClick={() => goToAnnotationLibrary()}
+                >
+                  {i18n.translate(
+                    'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.annotationLibrary',
+                    {
+                      defaultMessage: 'annotation library',
+                    }
+                  )}
+                </EuiLink>
+              ),
             }}
           />
         </div>,
@@ -215,6 +229,7 @@ export const getSaveLayerAction = ({
   toasts,
   savedObjectsTagging,
   dataViews,
+  goToAnnotationLibrary,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -223,6 +238,7 @@ export const getSaveLayerAction = ({
   toasts: ToastsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   dataViews: DataViewsContract;
+  goToAnnotationLibrary: () => Promise<void>;
 }): LayerAction => {
   const neverSaved = !isByReferenceAnnotationsLayer(layer);
 
@@ -249,6 +265,7 @@ export const getSaveLayerAction = ({
                 toasts,
                 modalOnSaveProps: props,
                 dataViews,
+                goToAnnotationLibrary,
               });
             }}
             title={neverSaved ? '' : layer.__lastSaved.title}
