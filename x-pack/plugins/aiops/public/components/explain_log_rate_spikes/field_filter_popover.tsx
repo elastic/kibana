@@ -19,7 +19,9 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiSpacer,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -94,7 +96,6 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
           data-test-subj="aiopsFieldFilterButton"
           onClick={onFieldSelectionButtonClick}
           disabled={disabled}
-          // disabled={!groupResults || isRunning}
           size="s"
           iconType="arrowDown"
           iconSide="right"
@@ -110,6 +111,13 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
       closePopover={closePopover}
     >
       <EuiPopoverTitle>
+        <EuiText size="xs" color="subdued" style={{ maxWidth: '400px' }}>
+          <FormattedMessage
+            id="xpack.aiops.explainLogRateSpikesPage.fieldFilterHelpText"
+            defaultMessage="To remove non-relevant fields from groups, deselect them below and click the Apply button to rerun the grouping. The search bar can be used to filter the list of fields and is useful to select/deselect in bulk with the actions below the list."
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
         <EuiFieldText
           compressed
           placeholder={i18n.translate('xpack.aiops.analysis.fieldSelectorPlaceholder', {
@@ -146,36 +154,48 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
           justifyContent="spaceBetween"
           alignItems="center"
         >
-          {fieldSearchText.length > 0 && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  flush="left"
-                  onClick={() => setFieldsFilter(filteredUniqueFieldNames, true)}
-                  data-test-subj="aiopsFieldSelectorEnableAllSelectedButton"
-                >
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                onClick={() => setFieldsFilter(filteredUniqueFieldNames, true)}
+                data-test-subj="aiopsFieldSelectorEnableAllSelectedButton"
+              >
+                {fieldSearchText.length > 0 ? (
                   <FormattedMessage
-                    id="xpack.aiops.explainLogRateSpikesPage.enableAllSelected"
+                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.enableAllSearchedFields"
                     defaultMessage="Enable filtered fields"
                   />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  flush="right"
-                  onClick={() => setFieldsFilter(filteredUniqueFieldNames, false)}
-                  data-test-subj="aiopsFieldSelectorDisableAllSelectedButton"
-                >
+                ) : (
                   <FormattedMessage
-                    id="xpack.aiops.explainLogRateSpikesPage.disableAllSelected"
+                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.enableAllFields"
+                    defaultMessage="Enable all fields"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="right"
+                onClick={() => setFieldsFilter(filteredUniqueFieldNames, false)}
+                data-test-subj="aiopsFieldSelectorDisableAllSelectedButton"
+              >
+                {fieldSearchText.length > 0 ? (
+                  <FormattedMessage
+                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.disableAllSearchFields"
                     defaultMessage="Disable filtered fields"
                   />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </>
-          )}
+                ) : (
+                  <FormattedMessage
+                    id="xpack.aiops.explainLogRateSpikesPage.fieldSelector.disableAllFields"
+                    defaultMessage="Disable all fields"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
           <EuiFlexItem grow={false}>
             <FieldFilterApplyButton
               onClick={() => {

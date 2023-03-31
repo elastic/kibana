@@ -79,6 +79,7 @@ export const ProgressControls: FC<ProgressControlProps> = ({
             size="s"
             onClick={onRefresh}
             color={shouldRerunAnalysis ? 'warning' : 'primary'}
+            fill
           >
             <EuiFlexGroup>
               <EuiFlexItem>
