@@ -15,6 +15,7 @@ import {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
   ChangePointType,
+  FieldConfig,
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
@@ -107,6 +108,7 @@ function getChangePointDetectionRequestBody(
 const CHARTS_PER_PAGE = 6;
 
 export function useChangePointResults(
+  fieldConfig: FieldConfig,
   requestParams: ChangePointDetectionRequestParams,
   query: QueryDslQueryContainer,
   splitFieldCardinality: number | null
@@ -123,7 +125,7 @@ export function useChangePointResults(
   const [activePage, setActivePage] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
 
-  const isSingleMetric = !isDefined(requestParams.splitField);
+  const isSingleMetric = !isDefined(fieldConfig.splitField);
 
   const totalAggPages = useMemo<number>(() => {
     return Math.ceil(
@@ -151,11 +153,11 @@ export function useChangePointResults(
         const requestPayload = getChangePointDetectionRequestBody(
           {
             index: dataView.getIndexPattern(),
-            fn: requestParams.fn,
+            fn: fieldConfig.fn,
             timeInterval: requestParams.interval,
-            metricField: requestParams.metricField,
+            metricField: fieldConfig.metricField,
             timeField: dataView.timeFieldName!,
-            splitField: requestParams.splitField,
+            splitField: fieldConfig.splitField,
             afterKey,
           },
           query
@@ -188,7 +190,7 @@ export function useChangePointResults(
               ? {}
               : {
                   group: {
-                    name: requestParams.splitField,
+                    name: fieldConfig.splitField,
                     value: v.key.splitFieldTerm,
                   },
                 }),
@@ -232,7 +234,7 @@ export function useChangePointResults(
         });
       }
     },
-    [runRequest, requestParams, query, dataView, totalAggPages, toasts, isSingleMetric]
+    [runRequest, requestParams, fieldConfig, query, dataView, totalAggPages, toasts, isSingleMetric]
   );
 
   useEffect(
@@ -244,7 +246,16 @@ export function useChangePointResults(
         cancelRequest();
       };
     },
-    [requestParams, query, splitFieldCardinality, fetchResults, reset, cancelRequest, refresh]
+    [
+      requestParams,
+      fieldConfig,
+      query,
+      splitFieldCardinality,
+      fetchResults,
+      reset,
+      cancelRequest,
+      refresh,
+    ]
   );
 
   const pagination = useMemo(() => {

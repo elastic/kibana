@@ -17,21 +17,23 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   type ChangePointAnnotation,
   useChangePointDetectionContext,
+  FieldConfig,
 } from './change_point_detection_context';
 import { fnOperationTypeMapping } from './constants';
 
 export interface ChartComponentProps {
+  fieldConfig: FieldConfig;
   annotation: ChangePointAnnotation;
 }
 
-export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation }) => {
+export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation, fieldConfig }) => {
   const {
     lens: { EmbeddableComponent },
   } = useAiopsAppContext();
 
   const timeRange = useTimeRangeUpdates();
   const { dataView } = useDataSource();
-  const { requestParams, bucketInterval } = useChangePointDetectionContext();
+  const { bucketInterval } = useChangePointDetectionContext();
 
   const filters = useMemo(() => {
     return annotation.group
@@ -175,10 +177,10 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
                     },
                   },
                   'e9f26d17-fb36-4982-8539-03f1849cbed0': {
-                    label: `${requestParams.fn}(${requestParams.metricField})`,
+                    label: `${fieldConfig.fn}(${fieldConfig.metricField})`,
                     dataType: 'number',
-                    operationType: fnOperationTypeMapping[requestParams.fn],
-                    sourceField: requestParams.metricField,
+                    operationType: fnOperationTypeMapping[fieldConfig.fn],
+                    sourceField: fieldConfig.metricField,
                     isBucketed: false,
                     scale: 'ratio',
                     params: {
@@ -202,7 +204,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
         adHocDataViews: {},
       },
     };
-  }, [dataView.id, dataView.timeFieldName, annotation, requestParams, filters, bucketInterval]);
+  }, [dataView.id, dataView.timeFieldName, annotation, fieldConfig, filters, bucketInterval]);
 
   return (
     <EmbeddableComponent

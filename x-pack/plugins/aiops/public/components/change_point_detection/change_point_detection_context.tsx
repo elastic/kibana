@@ -21,14 +21,13 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { DEFAULT_AGG_FUNCTION } from './constants';
-import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useChangePointResults } from './use_change_point_agg_request';
 import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
@@ -38,10 +37,14 @@ export interface ChangePointDetectionPageUrlState {
   pageUrlState: ChangePointDetectionRequestParams;
 }
 
-export interface ChangePointDetectionRequestParams {
+export interface FieldConfig {
   fn: string;
   splitField?: string;
   metricField: string;
+}
+
+export interface ChangePointDetectionRequestParams {
+  fieldConfigs: FieldConfig[];
   interval: string;
   query: Query;
   filters: Filter[];
@@ -55,37 +58,21 @@ export const ChangePointDetectionContext = createContext<{
   metricFieldOptions: DataViewField[];
   splitFieldsOptions: DataViewField[];
   updateRequestParams: (update: Partial<ChangePointDetectionRequestParams>) => void;
-  isLoading: boolean;
-  annotations: ChangePointAnnotation[];
   resultFilters: Filter[];
   updateFilters: (update: Filter[]) => void;
   resultQuery: Query;
-  progress: number;
-  pagination: {
-    activePage: number;
-    pageCount: number;
-    updatePagination: (newPage: number) => void;
-  };
-  splitFieldCardinality: number | null;
+  combinedQuery: QueryDslQueryContainer;
 }>({
-  isLoading: false,
   splitFieldsOptions: [],
   metricFieldOptions: [],
   requestParams: {} as ChangePointDetectionRequestParams,
   timeBuckets: {} as TimeBuckets,
   bucketInterval: {} as TimeBucketsInterval,
   updateRequestParams: () => {},
-  annotations: [],
   resultFilters: [],
   updateFilters: () => {},
   resultQuery: { query: '', language: 'kuery' },
-  progress: 0,
-  pagination: {
-    activePage: 0,
-    pageCount: 1,
-    updatePagination: () => {},
-  },
-  splitFieldCardinality: null,
+  combinedQuery: {},
 });
 
 export type ChangePointType =
@@ -185,11 +172,13 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   const requestParams = useMemo(() => {
     const params = { ...requestParamsFromUrl };
-    if (!params.fn) {
-      params.fn = DEFAULT_AGG_FUNCTION;
-    }
-    if (!params.metricField && metricFieldOptions.length > 0) {
-      params.metricField = metricFieldOptions[0].name;
+    if (!params.fieldConfigs) {
+      params.fieldConfigs = [
+        {
+          fn: DEFAULT_AGG_FUNCTION,
+          metricField: metricFieldOptions[0].name,
+        },
+      ];
     }
     params.interval = bucketInterval?.expression!;
     return params;
@@ -247,32 +236,19 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return mergedQuery;
   }, [resultFilters, resultQuery, uiSettings, dataView, timeRange]);
 
-  const splitFieldCardinality = useSplitFieldCardinality(requestParams.splitField, combinedQuery);
-
-  const {
-    results: annotations,
-    isLoading: annotationsLoading,
-    progress,
-    pagination,
-  } = useChangePointResults(requestParams, combinedQuery, splitFieldCardinality);
-
   if (!bucketInterval) return null;
 
   const value = {
-    isLoading: annotationsLoading,
-    progress,
     timeBuckets,
     requestParams,
     updateRequestParams,
     metricFieldOptions,
     splitFieldsOptions,
-    annotations,
     bucketInterval,
     resultFilters,
     updateFilters,
     resultQuery,
-    pagination,
-    splitFieldCardinality,
+    combinedQuery,
   };
 
   return (
