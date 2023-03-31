@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit, pick } from 'lodash';
-import { SavedObject } from '@kbn/core/server';
+import { SavedObject, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { secretKeys } from '../../../common/constants/monitor_management';
 import {
   ConfigKey,
@@ -25,8 +25,10 @@ export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWith
 }
 
 export function normalizeSecrets(
-  monitor: SavedObject<SyntheticsMonitorWithSecrets>
-): SavedObject<SyntheticsMonitor> {
+  monitor:
+    | SavedObject<SyntheticsMonitorWithSecrets>
+    | SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>
+): SavedObject<SyntheticsMonitor> | SavedObjectUnsanitizedDoc<SyntheticsMonitor> {
   const defaultFields = DEFAULT_FIELDS[monitor.attributes[ConfigKey.MONITOR_TYPE]];
   const normalizedMonitor = {
     ...monitor,

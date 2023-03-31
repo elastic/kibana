@@ -11,7 +11,7 @@
   "tags": [],
   "timeout": "16",
   "__ui": {
-    "is_tls_enabled": true,
+    "is_tls_enabled": true
   },
   "hosts": "example-host:40",
   "urls": "example-host:40",

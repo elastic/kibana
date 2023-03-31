@@ -135,6 +135,7 @@ export const testMonitorPolicy = {
             'service.name': { type: 'text' },
             timeout: { type: 'text' },
             tags: { type: 'yaml' },
+            'source.inline.script': { type: 'yaml' },
             params: { type: 'yaml' },
             screenshots: { type: 'text' },
             synthetics_args: { type: 'text' },
