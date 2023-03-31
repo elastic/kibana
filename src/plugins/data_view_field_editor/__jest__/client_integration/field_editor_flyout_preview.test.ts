@@ -345,6 +345,7 @@ describe('Field editor Preview panel', () => {
         await toggleFormRow('format', 'on');
         await toggleFormRow('value', 'off');
 
+        await new Promise((e) => setTimeout(e, 1000));
         // Fallback to _source value when "Set value" is turned off and we have a format
         expect(getRenderedFieldsPreview()).toEqual([
           { key: 'description', value: 'First doc - description' },
