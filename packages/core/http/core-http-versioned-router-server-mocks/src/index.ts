@@ -8,10 +8,10 @@
 
 import type { VersionedRouter, VersionedRoute } from '@kbn/core-http-server';
 
-const createMockVersionedRoute = (): VersionedRoute =>
-  new (class MockedVersionRoute {
-    addVersion = jest.fn(() => this);
-  })();
+const createMockVersionedRoute = (): VersionedRoute => {
+  const api: VersionedRoute = { addVersion: jest.fn(() => api) };
+  return api;
+};
 
 export const createVersionedRouterMock = (): jest.Mocked<VersionedRouter> => ({
   delete: jest.fn((_) => createMockVersionedRoute()),
