@@ -20,12 +20,13 @@ const getAvailableVersions = async (log: ToolingLog) => {
   // Endpoint maintained by the web-team and hosted on the elastic website
   // See https://github.com/elastic/website-development/issues/9331
   const url = 'https://www.elastic.co/content/product_versions';
+  let rawBody: string;
   try {
     log.info('Fetching Elastic Agent versions list');
     const results = await fetch(url, options);
     log.info(`Status: ${results.status}`);
 
-    const rawBody = await results.text();
+    rawBody = await results.text();
     const jsonBody = JSON.parse(rawBody);
 
     const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
