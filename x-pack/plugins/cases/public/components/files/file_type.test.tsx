@@ -22,7 +22,7 @@ describe('getFileType', () => {
   it('invalid props return blank FileAttachmentViewObject', () => {
     expect(fileType).toStrictEqual({
       id: FILE_ATTACHMENT_TYPE,
-      icon: 'image',
+      icon: 'document',
       displayName: 'File Attachment Type',
       getAttachmentViewObject: expect.any(Function),
     });
