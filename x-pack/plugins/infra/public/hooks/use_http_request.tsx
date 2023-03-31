@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpHandler } from '@kbn/core/public';
 import { ToastInput } from '@kbn/core/public';
@@ -83,7 +83,7 @@ export function useHTTPRequest<Response>(
     };
   }, [abortable]);
 
-  const [request, makeRequest] = useTrackedPromise<any, Response>(
+  const [request, makeRequest, resetRequestState] = useTrackedPromise<any, Response>(
     {
       cancelPreviousOn: 'resolution',
       createPromise: () => {
@@ -117,17 +117,13 @@ export function useHTTPRequest<Response>(
     [pathname, body, method, fetch, toast, onError]
   );
 
-  const loading = useMemo(() => {
-    if (request.state === 'resolved' && response === null) {
-      return true;
-    }
-    return request.state === 'pending';
-  }, [request.state, response]);
+  const loading = request.state === 'uninitialized' || request.state === 'pending';
 
   return {
     response,
     error,
     loading,
     makeRequest,
+    resetRequestState,
   };
 }
