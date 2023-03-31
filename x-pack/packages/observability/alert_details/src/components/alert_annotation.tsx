@@ -18,7 +18,7 @@ interface Props {
   id: string;
 }
 
-const ANNOTATION_TITLE = i18n.translate('observabilityAlertDetails.alertAnnotationTitle', {
+const ANNOTATION_TITLE = i18n.translate('observabilityAlertDetails.alertAnnotation.title', {
   defaultMessage: 'Alert started',
 });
 
