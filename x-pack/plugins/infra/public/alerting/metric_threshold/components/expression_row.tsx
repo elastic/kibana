@@ -434,7 +434,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.CARDINALITY,
-    validNormalizedTypes: ['number'],
+    validNormalizedTypes: ['number', 'string'],
   },
   rate: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.rate', {
