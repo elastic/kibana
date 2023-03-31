@@ -87,6 +87,7 @@ export interface State {
     maxNumThreads: undefined | number;
     maxOptimizationRoundsPerHyperparameter: undefined | number;
     maxTrees: undefined | number;
+    _meta: undefined | Record<string, any>;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
@@ -171,6 +172,7 @@ export const getInitialState = (): State => ({
     maxNumThreads: DEFAULT_MAX_NUM_THREADS,
     maxOptimizationRoundsPerHyperparameter: undefined,
     maxTrees: undefined,
+    _meta: undefined,
     method: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
@@ -221,6 +223,7 @@ export const getJobConfigFromFormState = (
 ): DeepPartial<DataFrameAnalyticsConfig> => {
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
     description: formState.description,
+    _meta: formState._meta,
     source: {
       // If a Kibana data view name includes commas, we need to split
       // the into an array of indices to be in the correct format for
@@ -363,6 +366,7 @@ export function getFormStateFromJobConfig(
   const resultState: Partial<State['form']> = {
     jobType,
     description: analyticsJobConfig.description ?? '',
+    _meta: analyticsJobConfig._meta ?? {},
     resultsField: analyticsJobConfig.dest.results_field,
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')

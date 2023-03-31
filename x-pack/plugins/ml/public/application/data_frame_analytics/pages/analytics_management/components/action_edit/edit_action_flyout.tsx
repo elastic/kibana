@@ -157,8 +157,9 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       );
       await updateDataFrameAnalytics(updateConfig);
     } else if (activeTabId === 'custom-urls') {
+      const meta = analyticsJob._meta ?? {};
       const updateConfig: UpdateDataFrameAnalyticsConfig = {
-        _meta: { custom_urls: customUrls },
+        _meta: { ...meta, custom_urls: [...(meta.custom_urls ?? []), ...customUrls] },
       };
       await updateDataFrameAnalytics(updateConfig);
     }

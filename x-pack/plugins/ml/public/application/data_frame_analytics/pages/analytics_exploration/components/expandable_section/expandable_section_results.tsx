@@ -25,6 +25,8 @@ import {
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+import type { KibanaUrlConfig } from '../../../../../../../common/types/custom_urls';
+import type { DataGridItem } from '../../../../../components/data_grid';
 import {
   isClassificationAnalysis,
   isRegressionAnalysis,
@@ -49,6 +51,11 @@ import {
   SEARCH_SIZE,
   getAnalysisType,
 } from '../../../../common';
+
+import {
+  replaceTokensInDFAUrlValue,
+  openCustomUrlWindow,
+} from '../../../../../util/custom_url_utils';
 
 import { ExpandableSection, ExpandableSectionProps, HEADER_ITEMS_LOADING } from '.';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
@@ -130,7 +137,12 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   searchQuery,
 }) => {
   const {
-    services: { application, share, data },
+    services: {
+      application,
+      share,
+      data,
+      http: { basePath },
+    },
   } = useMlKibana();
 
   const dataViewId = indexPattern?.id;
@@ -217,6 +229,20 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     [indexData?.visibleColumns, discoverLocator, dataViewId, resultsField, tableItems, data]
   );
 
+  const openCustomUrl = (item: DataGridItem, customUrl: KibanaUrlConfig) => {
+    // eslint-disable-next-line no-console
+    console.log('Data Frame Analytics Results Table - open customUrl for record:', item);
+    // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
+
+    // TODO: update item type here - getUrlForRecord should not just accept anomlay records - needs generic record type
+    const urlPath = replaceTokensInDFAUrlValue(
+      customUrl,
+      item as any,
+      data.query.timefilter.timefilter.getTime()
+    );
+    openCustomUrlWindow(urlPath, customUrl, basePath.get());
+  };
+
   const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = [
     {
       id: 'actions',
@@ -228,7 +254,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
         />
       ),
       rowCellRender: function RowCellRender({ rowIndex }) {
-        // const item = tableItems[rowIndex];
+        const item = tableItems[rowIndex];
         const [isPopoverVisible, setIsPopoverVisible] = useState(false);
         const closePopover = () => setIsPopoverVisible(false);
 
@@ -260,21 +286,15 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
           </EuiContextMenuItem>,
         ];
 
-        // TO TEST - REMOVE ONCE REAL CUSTOM URLS ARE AVAILABLE
-        // jobConfig._meta?.customUrls = [];
-        // END TO TEST
-
-        // @ts-ignore - can be removed once _meta field is added to DataFrameAnalyticsConfig
-        if (jobConfig && jobConfig._meta?.customUrls !== undefined) {
-          // @ts-ignore
-          jobConfig._meta.customUrls.forEach((customUrl, index) => {
+        if (jobConfig && jobConfig._meta && Array.isArray(jobConfig._meta.custom_urls)) {
+          jobConfig?._meta.custom_urls.forEach((customUrl, index) => {
             actions.push(
               <EuiContextMenuItem
                 key={`custom_url_${index}`}
                 icon="popout"
                 onClick={() => {
                   closePopover();
-                  // openCustomUrl(customUrl);
+                  openCustomUrl(item, customUrl);
                 }}
                 data-test-subj={`mlExplorationDataGridRowActionCustomUrlButton_${index}`}
               >

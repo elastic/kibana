@@ -29,7 +29,6 @@ const TIME_RANGE_AUTO = 'auto';
 export function replaceTokensInDFAUrlValue(
   customUrlConfig: UrlConfig | KibanaUrlConfig,
   doc: AnomalyRecordDoc,
-  // timeFieldName?: string,
   timeRange?: TimeRange
 ) {
   // If urlValue contains $earliest$ and $latest$ tokens, add in times to the test doc.
