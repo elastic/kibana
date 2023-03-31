@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { euiDarkVars } from '@kbn/ui-theme';
-import { ThemeProvider } from 'styled-components';
 
 /* eslint-disable no-console */
 
@@ -27,7 +27,7 @@ export interface AppMockRenderer {
 }
 
 export const createAppMockRenderer = (): AppMockRenderer => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+  const theme$ = of({ eui: euiDarkVars, darkMode: true });
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -49,11 +49,11 @@ export const createAppMockRenderer = (): AppMockRenderer => {
   const services = { ...core };
   const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
     <I18nProvider>
-      <ThemeProvider theme={theme}>
+      <KibanaThemeProvider theme$={theme$}>
         <KibanaContextProvider services={services}>
           <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         </KibanaContextProvider>
-      </ThemeProvider>
+      </KibanaThemeProvider>
     </I18nProvider>
   ));
 
