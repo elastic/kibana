@@ -17,7 +17,7 @@ import {
   EuiFieldPassword,
   EuiCodeBlock,
   EuiTextArea,
-  EuiSelect,
+  EuiComboBox,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -156,8 +156,28 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             />
           );
         case 'select':
+          const selectOptions = options?.map((option) => ({
+            value: option.value,
+            label: option.text,
+          }));
+          const selectedOptions =
+            value === undefined ? [] : selectOptions?.filter((option) => option.value === value);
           return (
-            <EuiSelect options={options} value={value} onChange={(e) => onChange(e.target.value)} />
+            <EuiComboBox
+              placeholder={i18n.translate('xpack.fleet.packagePolicyField.selectPlaceholder', {
+                defaultMessage: 'Select an option',
+              })}
+              singleSelection={{ asPlainText: true }}
+              options={selectOptions}
+              selectedOptions={selectedOptions}
+              isClearable={true}
+              onChange={(newSelectedOptions: Array<{ label: string; value?: string }>) => {
+                const newValue =
+                  newSelectedOptions.length === 0 ? undefined : newSelectedOptions[0].value;
+                return onChange(newValue);
+              }}
+              onBlur={() => setIsDirty(true)}
+            />
           );
         default:
           return (

@@ -286,6 +286,117 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(secondRule).toEqual(outputRule2);
       });
 
+      it('should export actions connectors with the rule', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const action = {
+          group: 'default',
+          id: hookAction.id,
+          action_type_id: hookAction.actionTypeId,
+          params: {},
+        };
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action],
+        };
+
+        await createRule(supertest, log, rule1);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const connectorsObjectParsed = JSON.parse(body.toString().split(/\n/)[1]);
+        const exportDetailsParsed = JSON.parse(body.toString().split(/\n/)[2]);
+
+        expect(connectorsObjectParsed).toEqual(
+          expect.objectContaining({
+            attributes: {
+              actionTypeId: '.webhook',
+              config: {
+                hasAuth: true,
+                headers: null,
+                method: 'post',
+                url: 'http://localhost',
+              },
+              isMissingSecrets: true,
+              name: 'Some connector',
+              secrets: {},
+            },
+            references: [],
+            type: 'action',
+          })
+        );
+        expect(exportDetailsParsed).toEqual({
+          exported_exception_list_count: 0,
+          exported_exception_list_item_count: 0,
+          exported_count: 2,
+          exported_rules_count: 1,
+          missing_exception_list_item_count: 0,
+          missing_exception_list_items: [],
+          missing_exception_lists: [],
+          missing_exception_lists_count: 0,
+          missing_rules: [],
+          missing_rules_count: 0,
+          excluded_action_connection_count: 0,
+          excluded_action_connections: [],
+          exported_action_connector_count: 1,
+          missing_action_connection_count: 0,
+          missing_action_connections: [],
+        });
+      });
+      it('should export rule without the action connector if it is Preconfigured Connector', async () => {
+        const action = {
+          group: 'default',
+          id: 'my-test-email',
+          action_type_id: '.email',
+          params: {},
+        };
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [action],
+        };
+
+        await createRule(supertest, log, rule1);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportDetailsParsed = JSON.parse(body.toString().split(/\n/)[1]);
+
+        expect(exportDetailsParsed).toEqual({
+          exported_exception_list_count: 0,
+          exported_exception_list_item_count: 0,
+          exported_count: 1,
+          exported_rules_count: 1,
+          missing_exception_list_item_count: 0,
+          missing_exception_list_items: [],
+          missing_exception_lists: [],
+          missing_exception_lists_count: 0,
+          missing_rules: [],
+          missing_rules_count: 0,
+          excluded_action_connection_count: 0,
+          excluded_action_connections: [],
+          exported_action_connector_count: 0,
+          missing_action_connection_count: 0,
+          missing_action_connections: [],
+        });
+      });
+
       /**
        * Tests the legacy actions to ensure we can export legacy notifications
        * @deprecated Once the legacy notification system is removed, remove this test too.

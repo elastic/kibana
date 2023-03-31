@@ -55,14 +55,20 @@ import {
   API_KEY_GENERATE_CONCURRENCY,
 } from '../common/constants';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { getAlertFromRaw, extractReferences, validateActions, updateMeta, addUuid } from '../lib';
+import {
+  getAlertFromRaw,
+  extractReferences,
+  validateActions,
+  updateMeta,
+  addGeneratedActionValues,
+} from '../lib';
 import {
   NormalizedAlertAction,
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
   CreateAPIKeyResult,
-  NormalizedAlertActionWithUuid,
+  NormalizedAlertActionWithGeneratedValues,
 } from '../types';
 
 export type BulkEditFields = keyof Pick<
@@ -280,6 +286,9 @@ export async function bulkEdit<Params extends RuleTypeParams>(
       attributes.alertTypeId as string,
       attributes as RawRule,
       references,
+      false,
+      false,
+      false,
       false
     );
   });
@@ -484,7 +493,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     } = await extractReferences(
       context,
       ruleType,
-      ruleActions.actions as NormalizedAlertActionWithUuid[],
+      ruleActions.actions as NormalizedAlertActionWithGeneratedValues[],
       validatedMutatedAlertTypeParams
     );
 
@@ -578,7 +587,7 @@ async function getUpdatedAttributesFromOperations(
       case 'actions': {
         const updatedOperation = {
           ...operation,
-          value: addUuid(operation.value),
+          value: addGeneratedActionValues(operation.value),
         };
 
         try {
