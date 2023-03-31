@@ -11436,7 +11436,6 @@
     "xpack.enterpriseSearch.analytics.collectionsCreate.form.subtitle": "分析集合为您正在构建的任何给定搜索应用程序提供了一个用于存储分析事件的位置。在下面为其提供好记的名称。",
     "xpack.enterpriseSearch.analytics.collectionsCreate.form.title": "创建分析集合",
     "xpack.enterpriseSearch.analytics.collectionsDelete.action.successMessage": "已成功删除此集合",
-    "xpack.enterpriseSearch.analytics.collectionsView.breadcrumb": "查看集合",
     "xpack.enterpriseSearch.analytics.productCardDescription": "用于对最终用户行为进行可视化并评估搜索应用程序性能的仪表板和工具。",
     "xpack.enterpriseSearch.analytics.productDescription": "用于对最终用户行为进行可视化并评估搜索应用程序性能的仪表板和工具。",
     "xpack.enterpriseSearch.analytics.productName": "行为分析",
