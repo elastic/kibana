@@ -26,7 +26,7 @@ jest.mock('./fleet_server_host');
 const mockListFleetServerHosts = listFleetServerHosts as jest.MockedFunction<
   typeof listFleetServerHosts
 >;
-const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
@@ -191,7 +191,7 @@ describe('saveSettings', () => {
 
       await saveSettings(soClient, newData);
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: GLOBAL_SETTINGS_ID,
         savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -217,7 +217,7 @@ describe('saveSettings', () => {
 
         await saveSettings(soClient, newData);
 
-        expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
           action: 'create',
           id: GLOBAL_SETTINGS_ID,
           savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,

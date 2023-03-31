@@ -214,7 +214,7 @@ export async function getAgentActions(esClient: ElasticsearchClient, actionId: s
 
   for (const hit of res.hits.hits) {
     auditLoggingService.writeCustomAuditLog({
-      message: `User retrieved Fleet action [id=${hit._id}]}]`,
+      message: `User retrieved Fleet action [id=${hit._source?.action_id}]`,
     });
 
     result.push({
@@ -259,7 +259,7 @@ export async function getUnenrollAgentActions(
 
   for (const hit of res.hits.hits) {
     auditLoggingService.writeCustomAuditLog({
-      message: `User retrieved Fleet action [id=${hit._id}]}]`,
+      message: `User retrieved Fleet action [id=${hit._source?.action_id}]`,
     });
 
     result.push({
@@ -295,7 +295,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
 
     for (const hit of res.hits.hits) {
       auditLoggingService.writeCustomAuditLog({
-        message: `User retrieved Fleet action [id=${hit._id}]}]`,
+        message: `User retrieved Fleet action [id=${hit._source?.action_id}]}]`,
       });
     }
 
@@ -416,7 +416,7 @@ async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: st
 
   for (const hit of res.hits.hits) {
     auditLoggingService.writeCustomAuditLog({
-      message: `User retrieved Fleet action [id=${hit._id}]}]`,
+      message: `User retrieved Fleet action [id=${hit._source?.action_id}]`,
     });
 
     result.push({

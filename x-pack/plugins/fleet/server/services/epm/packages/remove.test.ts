@@ -28,7 +28,7 @@ jest.mock('../..', () => {
 });
 jest.mock('../../audit_logging');
 
-const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 describe('removeInstallation', () => {
@@ -81,7 +81,7 @@ describe('removeInstallation', () => {
       force: true,
     });
 
-    expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+    expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'delete',
       id: 'system',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,

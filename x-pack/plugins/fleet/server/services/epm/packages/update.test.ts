@@ -20,7 +20,7 @@ import { getPackageInfo, getInstallationObject } from './get';
 jest.mock('./get');
 jest.mock('../../audit_logging');
 
-const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockGetPackageInfo = getPackageInfo as jest.MockedFunction<typeof getPackageInfo>;
 const mockGetInstallationObject = getInstallationObject as jest.MockedFunction<
   typeof getInstallationObject
@@ -70,7 +70,7 @@ describe('updatePackage', () => {
       keepPoliciesUpToDate: true,
     });
 
-    expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+    expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'update',
       id: 'test-package',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,

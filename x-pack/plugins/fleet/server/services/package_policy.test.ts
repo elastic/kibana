@@ -194,7 +194,7 @@ jest.mock('./upgrade_sender', () => {
 });
 
 jest.mock('./audit_logging');
-const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
@@ -225,7 +225,7 @@ describe('Package policy service', () => {
 
     // `jest.resetAllMocks` breaks a ton of tests in this file 🤷‍♂️
     mockAgentPolicyService.get.mockReset();
-    mockAuditLoggingService.writeCustomSoAuditLog.mockReset();
+    mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
   });
 
   describe('create', () => {
@@ -256,7 +256,7 @@ describe('Package policy service', () => {
         { id: 'test-package-policy', skipUniqueNameVerification: true }
       );
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'create',
         id: 'test-package-policy',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -307,13 +307,13 @@ describe('Package policy service', () => {
         },
       ]);
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'create',
         id: 'test-package-policy-1',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'create',
         id: 'test-package-policy-2',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -333,7 +333,7 @@ describe('Package policy service', () => {
 
       await packagePolicyService.get(soClient, 'test-package-policy');
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'get',
         id: 'test-package-policy',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -366,13 +366,13 @@ describe('Package policy service', () => {
         'test-package-policy-2',
       ]);
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'get',
         id: 'test-package-policy-1',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'get',
         id: 'test-package-policy-2',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -411,13 +411,13 @@ describe('Package policy service', () => {
         kuery: '',
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'find',
         id: 'test-package-policy-1',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'find',
         id: 'test-package-policy-2',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -1615,7 +1615,7 @@ describe('Package policy service', () => {
         inputs: [],
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
         id: 'test-package-policy',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -2427,7 +2427,7 @@ describe('Package policy service', () => {
 
       await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'delete',
         id: 'test-package-policy',
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,

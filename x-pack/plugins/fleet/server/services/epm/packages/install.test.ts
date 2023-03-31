@@ -71,7 +71,7 @@ jest.mock('../archive', () => {
 jest.mock('../../audit_logging');
 
 const mockGetBundledPackages = getBundledPackages as jest.MockedFunction<typeof getBundledPackages>;
-const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 describe('createInstallation', () => {
   const soClient = savedObjectsClientMock.create();
@@ -96,7 +96,7 @@ describe('createInstallation', () => {
         spaceId: DEFAULT_SPACE_ID,
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-package',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -113,7 +113,7 @@ describe('createInstallation', () => {
         spaceId: DEFAULT_SPACE_ID,
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-package',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,

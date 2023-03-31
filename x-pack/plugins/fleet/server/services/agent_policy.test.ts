@@ -83,7 +83,7 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockOutputsHelpers = outputsHelpers as jest.Mocked<typeof outputsHelpers>;
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
@@ -178,7 +178,7 @@ describe('agent policy', () => {
         { id: 'test-agent-policy' }
       );
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-agent-policy',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -200,7 +200,7 @@ describe('agent policy', () => {
 
       await agentPolicyService.get(soClient, 'test-agent-policy', false);
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'get',
         id: 'test-agent-policy',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -231,13 +231,13 @@ describe('agent policy', () => {
 
       await agentPolicyService.getByIDs(soClient, ['test-agent-policy-1', 'test-agent-policy-2']);
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'get',
         id: 'test-agent-policy-1',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'get',
         id: 'test-agent-policy-2',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -277,13 +277,13 @@ describe('agent policy', () => {
         kuery: '',
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'find',
         id: 'test-agent-policy-1',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'find',
         id: 'test-agent-policy-2',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -339,7 +339,7 @@ describe('agent policy', () => {
     it('should call audit logger', async () => {
       await agentPolicyService.delete(soClient, esClient, 'mocked');
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'delete',
         id: 'mocked',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -582,7 +582,7 @@ describe('agent policy', () => {
         is_managed: false,
       });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
         id: 'test-agent-policy',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,

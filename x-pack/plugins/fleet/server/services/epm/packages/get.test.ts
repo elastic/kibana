@@ -30,7 +30,7 @@ jest.mock('../../audit_logging');
 
 const MockRegistry = jest.mocked(Registry);
 
-const mockAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 const mockGetSettings = getSettings as jest.Mock;
 mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
@@ -333,7 +333,7 @@ owner: elastic`,
 
       await getPackages({ savedObjectsClient: soClient });
 
-      expect(mockAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'elasticsearch',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
