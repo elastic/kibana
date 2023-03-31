@@ -52,6 +52,22 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
         type: 'date',
       },
     },
+    latestPackageVersion: { type: 'keyword' },
+    cspm: {
+      status: { type: 'keyword' },
+      installedPackagePolicies: { type: 'long' },
+      healthyAgents: { type: 'long' },
+    },
+    kspm: {
+      status: { type: 'keyword' },
+      installedPackagePolicies: { type: 'long' },
+      healthyAgents: { type: 'long' },
+    },
+    vuln_mgmt: {
+      status: { type: 'keyword' },
+      installedPackagePolicies: { type: 'long' },
+      healthyAgents: { type: 'long' },
+    },
   },
   resources_stats: {
     type: 'array',
