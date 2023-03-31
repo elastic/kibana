@@ -2384,7 +2384,7 @@
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
-              "<never>, \"id\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+              "<never>, \"id\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\" | \"revision\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -9148,7 +9148,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<never>, \"id\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "<never>, \"id\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\" | \"revision\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
