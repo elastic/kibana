@@ -431,6 +431,11 @@ describe('get_export_by_object_ids', () => {
               message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             action_type_id: '.email',
+            frequency: {
+              summary: true,
+              throttle: null,
+              notifyWhen: 'onActiveAlert',
+            },
           },
         ],
         building_block_type: 'default',
