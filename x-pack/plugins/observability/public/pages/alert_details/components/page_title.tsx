@@ -32,17 +32,14 @@ import { TopAlert } from '../../../typings/alerts';
 
 export interface PageTitleProps {
   alert: TopAlert | null;
+  titleAction?: string;
 }
 
 const BREACHED = i18n.translate('xpack.observability.pages.alertDetails.pageTitle.breached', {
   defaultMessage: 'breached',
 });
 
-const DETECTED = i18n.translate('xpack.observability.pages.alertDetails.pageTitle.detected', {
-  defaultMessage: 'detected',
-});
-
-export function PageTitle({ alert }: PageTitleProps) {
+export function PageTitle({ alert, titleAction = BREACHED }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
   if (!alert) return <EuiLoadingSpinner />;
@@ -53,7 +50,7 @@ export function PageTitle({ alert }: PageTitleProps) {
         id="xpack.observability.pages.alertDetails.pageTitle.title"
         values={{
           ruleCategory: alert.fields[ALERT_RULE_CATEGORY],
-          action: alert.fields[ALERT_RULE_CATEGORY] === 'Anomaly' ? DETECTED : BREACHED,
+          action: titleAction,
         }}
         defaultMessage="{ruleCategory} {action}"
       />

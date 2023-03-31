@@ -56,6 +56,7 @@ export function AlertDetails() {
     http,
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
+  const [titleAction, setTitleAction] = useState<string>();
 
   useEffect(() => {
     if (alert) {
@@ -75,7 +76,7 @@ export function AlertDetails() {
     return <CenterJustifiedSpinner />;
   }
 
-  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
+  // Redirect to the 404 page when the user hit the page url directly in the browser while the feature flag is off.
   if (alert && !isAlertDetailsEnabledPerApp(alert, config)) {
     return <PageNotFound />;
   }
@@ -108,7 +109,7 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle alert={alert} />,
+        pageTitle: <PageTitle alert={alert} titleAction={titleAction} />,
         rightSideItems: [
           <CasesContext
             owner={[observabilityFeatureId]}
@@ -130,6 +131,7 @@ export function AlertDetails() {
           rule={rule}
           timeZone={timeZone}
           setAlertSummaryFields={setSummaryFields}
+          setTitleAction={setTitleAction}
         />
       )}
     </ObservabilityPageTemplate>
