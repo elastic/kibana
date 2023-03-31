@@ -447,7 +447,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-
         await testSubjects.click('case-refresh');
 
         await header.waitUntilLoadingHasFinished();
