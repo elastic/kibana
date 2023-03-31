@@ -106,7 +106,7 @@ import {
   getEditPath,
   DOC_TYPE,
   type AllowedPartitionOverrides,
-  type AllowedSettingsOverriddes,
+  type AllowedSettingsOverrides,
   type AllowedGaugeOverrides,
   type AllowedXYOverrides,
 } from '../../common';

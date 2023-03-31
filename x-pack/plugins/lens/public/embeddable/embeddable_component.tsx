@@ -29,7 +29,7 @@ import type {
   LegacyMetricState,
   AllowedGaugeOverrides,
   AllowedPartitionOverrides,
-  AllowedSettingsOverriddes,
+  AllowedSettingsOverrides,
   AllowedXYOverrides,
 } from '../../common';
 import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
@@ -72,7 +72,7 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes' | 'overr
    * "ignore" string as override value (i.e. onBrushEnd: "ignore")
    */
   overrides?:
-    | AllowedSettingsOverriddes
+    | AllowedSettingsOverrides
     | AllowedXYOverrides
     | AllowedPartitionOverrides
     | AllowedGaugeOverrides;

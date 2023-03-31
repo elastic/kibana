@@ -14,7 +14,7 @@ import {
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension, prepareLogTable } from '@kbn/visualizations-plugin/common';
-import type { AllowedSettingsOverriddes, CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { AllowedSettingsOverrides, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VisParams, visType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
@@ -40,7 +40,7 @@ export interface MetricVisRenderConfig {
   visType: typeof visType;
   visData: Datatable;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
-  overrides?: AllowedSettingsOverriddes;
+  overrides?: AllowedSettingsOverrides;
 }
 
 export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition<

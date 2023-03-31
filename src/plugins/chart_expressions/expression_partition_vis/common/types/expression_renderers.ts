@@ -7,7 +7,7 @@
  */
 
 import { Position } from '@elastic/charts';
-import type { AllowedSettingsOverriddes } from '@kbn/charts-plugin/common';
+import type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -118,7 +118,7 @@ export interface PartitionChartProps {
   visConfig: PartitionVisParams;
   syncColors: boolean;
   canNavigateToLens?: boolean;
-  overrides?: AllowedPartitionOverrides & AllowedSettingsOverriddes;
+  overrides?: AllowedPartitionOverrides & AllowedSettingsOverrides;
 }
 
 export enum LabelPositions {

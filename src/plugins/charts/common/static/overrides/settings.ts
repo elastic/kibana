@@ -24,7 +24,7 @@ export type MakeOverridesSerializable<T> = {
     : NonNullable<T[KeyType]>;
 };
 
-export type AllowedSettingsOverriddes = Partial<
+export type AllowedSettingsOverrides = Partial<
   Record<
     'settings',
     MakeOverridesSerializable<
