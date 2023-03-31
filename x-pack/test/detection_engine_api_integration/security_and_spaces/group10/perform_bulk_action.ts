@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
   const createSlackConnector = () => createConnector(getSlackAction());
 
-  describe('perform_bulk_action', () => {
+  describe('ievgen_perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
     });
@@ -177,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
             frequency: {
               summary: true,
               throttle: null,
-              notifyWhen: 'onActionGroupChange',
+              notifyWhen: 'onActiveAlert',
             },
           },
         ],
@@ -1427,6 +1427,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
+                },
               },
             ];
 
@@ -1484,6 +1489,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
+                },
               },
             ];
 
@@ -1577,6 +1587,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
+                },
               },
             ];
 
@@ -1631,12 +1646,25 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             const expectedRuleActions = [
-              { ...defaultRuleAction, uuid: body.attributes.results.updated[0].actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: {
+                  summary: true,
+                  throttle: '1d',
+                  notifyWhen: 'onThrottleInterval',
+                },
+              },
               {
                 ...webHookActionMock,
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[1].uuid,
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
+                },
               },
             ];
 
@@ -1699,12 +1727,25 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             const expectedRuleActions = [
-              { ...defaultRuleAction, uuid: body.attributes.results.updated[0].actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: {
+                  summary: true,
+                  throttle: '1d',
+                  notifyWhen: 'onThrottleInterval',
+                },
+              },
               {
                 ...slackConnectorMockProps,
                 id: slackConnector.id,
                 action_type_id: '.slack',
                 uuid: body.attributes.results.updated[0].actions[1].uuid,
+                frequency: {
+                  summary: true,
+                  throttle: '1h',
+                  notifyWhen: 'onThrottleInterval',
+                },
               },
             ];
 
@@ -1755,14 +1796,30 @@ export default ({ getService }: FtrProviderContext): void => {
 
             // Check that the updated rule is returned with the response
             expect(body.attributes.results.updated[0].actions).to.eql([
-              { ...defaultRuleAction, uuid: createdRule.actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: createdRule.actions[0].uuid,
+                frequency: {
+                  summary: true,
+                  throttle: '1d',
+                  notifyWhen: 'onThrottleInterval',
+                },
+              },
             ]);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
             expect(readRule.actions).to.eql([
-              { ...defaultRuleAction, uuid: createdRule.actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: createdRule.actions[0].uuid,
+                frequency: {
+                  summary: true,
+                  throttle: '1d',
+                  notifyWhen: 'onThrottleInterval',
+                },
+              },
             ]);
           });
 
@@ -1856,6 +1913,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   id: webHookConnector.id,
                   action_type_id: '.webhook',
                   uuid: editedRule.actions[0].uuid,
+                  frequency: {
+                    summary: true,
+                    throttle: '1h',
+                    notifyWhen: 'onThrottleInterval',
+                  },
                 },
               ]);
               // version of prebuilt rule should not change
@@ -1870,6 +1932,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   id: webHookConnector.id,
                   action_type_id: '.webhook',
                   uuid: readRule.actions[0].uuid,
+                  frequency: {
+                    summary: true,
+                    throttle: '1h',
+                    notifyWhen: 'onThrottleInterval',
+                  },
                 },
               ]);
               expect(prebuiltRule.version).to.be(readRule.version);

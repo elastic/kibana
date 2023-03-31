@@ -34,6 +34,10 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
   const setup = isPrebuilt ? '' : rule.params.setup;
 
+  // We cannot have both per-action frequency and rule level frequency (throttle & notifyWhen) set
+  const throttle =
+    !rule.actions.length || !rule.actions[0].frequency ? { throttle: null, notifyWhen: null } : {};
+
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
     tags: rule.tags,
@@ -51,7 +55,6 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
     schedule: rule.schedule,
     enabled: false,
     actions: rule.actions,
-    throttle: null,
-    notifyWhen: null,
+    ...throttle,
   };
 };

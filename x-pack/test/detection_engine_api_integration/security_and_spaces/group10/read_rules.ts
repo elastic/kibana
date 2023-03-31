@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               ...action,
               uuid: bodyToCompare.actions[0].uuid,
-              frequency: { summary: true, throttle: null, notifyWhen: 'onActionGroupChange' },
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
             },
           ],
           throttle: 'rule',

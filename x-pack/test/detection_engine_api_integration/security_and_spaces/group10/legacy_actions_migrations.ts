@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           uuid: ruleSO?.alert.actions[0].uuid,
           frequency: {
             summary: true,
-            notifyWhen: 'onActionGroupChange',
+            notifyWhen: 'onActiveAlert',
             throttle: null,
           },
         },

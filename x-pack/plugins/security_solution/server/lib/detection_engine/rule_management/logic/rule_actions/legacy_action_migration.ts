@@ -22,7 +22,11 @@ import type {
   LegacyRuleAlertSavedObjectAction,
 } from '../../../rule_actions_legacy';
 
-import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
+import {
+  // transformToAlertThrottle,
+  transformToFrequency,
+  // transformToNotifyWhen,
+} from '../../normalization/rule_actions';
 
 export interface LegacyMigrateParams {
   rulesClient: RulesClient;
@@ -138,7 +142,7 @@ export const getUpdatedActionsParams = ({
   actions: LegacyRuleAlertSavedObjectAction[];
   references: SavedObjectReference[];
 }): Omit<RuleAlertType, 'id'> => {
-  const { id, ...restOfRule } = rule;
+  const { id, notifyWhen, throttle, ...restOfRule } = rule;
 
   const actionReference = references.reduce<Record<string, SavedObjectReference>>(
     (acc, reference) => {
@@ -156,6 +160,8 @@ export const getUpdatedActionsParams = ({
   // If rule has an action on any other interval (other than on every
   // rule run), need to move the action info from the sidecar/legacy action
   // into the rule itself
+
+  const frequency = transformToFrequency(ruleThrottle);
   return {
     ...restOfRule,
     actions: actions.reduce<RuleAction[]>((acc, action) => {
@@ -169,10 +175,13 @@ export const getUpdatedActionsParams = ({
           ...resOfAction,
           id: actionReference[actionRef].id,
           actionTypeId,
+          frequency,
         },
       ];
     }, []),
-    throttle: transformToAlertThrottle(ruleThrottle),
-    notifyWhen: transformToNotifyWhen(ruleThrottle),
+
+    // TODO: [Frequency Integration] this while file will be removed with Vitalii's changes
+    // throttle: transformToAlertThrottle(ruleThrottle),
+    // notifyWhen: transformToNotifyWhen(ruleThrottle),
   };
 };

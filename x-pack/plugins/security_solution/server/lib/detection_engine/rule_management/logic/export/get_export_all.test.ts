@@ -247,6 +247,11 @@ describe('getExportAll', () => {
             message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           action_type_id: '.slack',
+          frequency: {
+            summary: true,
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+          },
         },
       ],
       building_block_type: 'default',
