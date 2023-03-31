@@ -10,24 +10,46 @@ import { useRef, useCallback } from 'react';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
+import { buildRandomSamplerAggregation } from '@kbn/ml-agg-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
 
-interface CatResponse {
+const USE_RANDOM_SAMPLING = true;
+const randomSamplerProbability = 0.1;
+// const randomSamplerProbability = 0.001;
+// const samplerShardSize = 200;
+
+interface CategoriesAgg {
+  categories: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      hit: { hits: { hits: Array<{ _source: { message: string } }> } };
+      sparkline: {
+        buckets: Array<{ key_as_string: string; key: number; doc_count: number }>;
+      };
+    }>;
+  };
+}
+
+interface CatSampleResponse {
   rawResponse: {
     aggregations: {
-      categories: {
-        buckets: Array<{
-          key: string;
-          doc_count: number;
-          hit: { hits: { hits: Array<{ _source: { message: string } }> } };
-          sparkline: { buckets: Array<{ key_as_string: string; key: number; doc_count: number }> };
-        }>;
-      };
+      sample: CategoriesAgg;
     };
   };
+}
+
+interface CatResponse {
+  rawResponse: {
+    aggregations: CategoriesAgg;
+  };
+}
+
+export function isCatSampleResponse(resp: any): resp is CatSampleResponse {
+  return resp.rawResponse.aggregations.sample !== undefined;
 }
 
 export interface Category {
@@ -134,52 +156,61 @@ function createCategoryRequest(
       },
     },
   });
+
+  const aggs = {
+    categories: {
+      categorize_text: {
+        field,
+        size: CATEGORY_LIMIT,
+      },
+      aggs: {
+        hit: {
+          top_hits: {
+            size: EXAMPLE_LIMIT,
+            sort: [timeField],
+            _source: field,
+          },
+        },
+        ...(intervalMs
+          ? {
+              sparkline: {
+                date_histogram: {
+                  field: timeField,
+                  fixed_interval: `${intervalMs}ms`,
+                },
+              },
+            }
+          : {}),
+      },
+    },
+  };
+
   return {
     params: {
       index,
       size: 0,
       body: {
         query,
-        aggs: {
-          categories: {
-            categorize_text: {
-              field,
-              size: CATEGORY_LIMIT,
-            },
-            aggs: {
-              hit: {
-                top_hits: {
-                  size: EXAMPLE_LIMIT,
-                  sort: [timeField],
-                  _source: field,
-                },
-              },
-              ...(intervalMs
-                ? {
-                    sparkline: {
-                      date_histogram: {
-                        field: timeField,
-                        fixed_interval: `${intervalMs}ms`,
-                      },
-                    },
-                  }
-                : {}),
-            },
-          },
-        },
+        aggs: USE_RANDOM_SAMPLING
+          ? buildRandomSamplerAggregation(aggs, randomSamplerProbability)
+          : aggs,
       },
     },
   };
 }
 
-function processCategoryResults(result: CatResponse, field: string) {
+function processCategoryResults(result: CatResponse | CatSampleResponse, field: string) {
   const sparkLinesPerCategory: SparkLinesPerCategory = {};
 
   if (result.rawResponse.aggregations === undefined) {
     throw new Error('processCategoryResults failed, did not return aggregations.');
   }
 
-  const categories: Category[] = result.rawResponse.aggregations.categories.buckets.map((b) => {
+  const buckets = isCatSampleResponse(result)
+    ? result.rawResponse.aggregations.sample.categories.buckets
+    : result.rawResponse.aggregations.categories.buckets;
+
+  const categories: Category[] = buckets.map((b) => {
     sparkLinesPerCategory[b.key] =
       b.sparkline === undefined
         ? {}
