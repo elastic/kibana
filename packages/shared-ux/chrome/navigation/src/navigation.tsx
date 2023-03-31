@@ -19,13 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
-import {
-  ANALYTICS_SECTION_KEY,
-  DEVTOOLS_SECTION_KEY,
-  MANAGEMENT_SECTION_KEY,
-  ML_SECTION_KEY,
-  RECENTS_SECTION_KEY,
-} from '../constants';
+import { PLATFORM_SECTIONS } from '../constants';
 import { ILocatorDefinition, NavigationProps, NavItemProps, RecentItem } from '../types';
 import { ElasticMark } from './elastic_mark';
 import './header_logo.scss';
@@ -89,11 +83,11 @@ export const Navigation = (props: NavigationProps) => {
     iconType: IconType,
     title: React.ReactNode,
     items: NavItemProps[],
-    bucketKey: keyof NavigationProps['sections'] | undefined,
+    platformSection?: keyof NavigationProps['platformSections'],
     solutionKey?: string
   ) => {
     // ability to turn off bucket completely with {[bucketKey]: { enabled: false }}
-    if (bucketKey && props.sections?.[bucketKey]?.enabled === false) {
+    if (platformSection && props.platformSections?.[platformSection]?.enabled === false) {
       return null;
     }
 
@@ -103,7 +97,7 @@ export const Navigation = (props: NavigationProps) => {
           title={title}
           iconType={iconType}
           isCollapsible={true}
-          initialIsOpen={isOpen(bucketKey ?? solutionKey)}
+          initialIsOpen={isOpen(platformSection ?? solutionKey)}
         >
           <EuiSideNav items={items} style={{ paddingLeft: '45px' }} />
         </EuiCollapsibleNavGroup>
@@ -136,6 +130,7 @@ export const Navigation = (props: NavigationProps) => {
     ? convertSolutionNavItemsToEuiSideNavItems(props.items)
     : [];
 
+  const { ANALYTICS, MACHINE_LEARNING, DEVTOOLS, MANAGEMENT } = PLATFORM_SECTIONS;
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -150,21 +145,14 @@ export const Navigation = (props: NavigationProps) => {
 
             {navIsOpen ? <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} /> : null}
           </EuiCollapsibleNavGroup>
-          {euiSideNavRecentItems
-            ? renderBucket('clock', 'Recent', euiSideNavRecentItems, RECENTS_SECTION_KEY)
-            : null}
+          {euiSideNavRecentItems ? renderBucket('clock', 'Recent', euiSideNavRecentItems) : null}
           {renderBucket(icon, name, euiSideNavSolutionItems, undefined, id)}
-          {renderBucket(
-            'stats',
-            'Data exploration',
-            navItems.dataExploration,
-            ANALYTICS_SECTION_KEY
-          )}
+          {renderBucket('stats', 'Data exploration', navItems.dataExploration, ANALYTICS)}
           {renderBucket(
             'indexMapping',
             'Machine learning',
             navItems.machineLearning,
-            ML_SECTION_KEY
+            MACHINE_LEARNING
           )}
         </EuiFlexItem>
 
@@ -173,13 +161,8 @@ export const Navigation = (props: NavigationProps) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          {renderBucket(
-            'editorCodeBlock',
-            'Developer tools',
-            navItems.devTools,
-            DEVTOOLS_SECTION_KEY
-          )}
-          {renderBucket('gear', 'Management', navItems.management, MANAGEMENT_SECTION_KEY)}
+          {renderBucket('editorCodeBlock', 'Developer tools', navItems.devTools, DEVTOOLS)}
+          {renderBucket('gear', 'Management', navItems.management, MANAGEMENT)}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

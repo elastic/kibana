@@ -113,10 +113,7 @@ export interface NavigationProps {
      */
     icon: IconType;
   };
-  sections: {
-    recents?: {
-      enabled?: boolean; // default: true
-    };
+  platformSections: {
     analytics?: {
       enabled?: boolean; // default: true
     };

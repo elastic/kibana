@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const RECENTS_SECTION_KEY = 'recents';
-export const ANALYTICS_SECTION_KEY = 'analytics';
-export const ML_SECTION_KEY = 'ml';
-export const DEVTOOLS_SECTION_KEY = 'devTools';
-export const MANAGEMENT_SECTION_KEY = 'management';
+export enum PLATFORM_SECTIONS {
+  RECENTS = 'recents',
+  ANALYTICS = 'analytics',
+  MACHINE_LEARNING = 'ml',
+  DEVTOOLS = 'devTools',
+  MANAGEMENT = 'management',
+}

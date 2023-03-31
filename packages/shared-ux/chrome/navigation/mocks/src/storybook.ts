@@ -13,7 +13,10 @@ import { NavigationProps, NavigationServices } from '../../types';
 import { getMockNavItems, mockLocatorId } from './nav_items';
 
 type Arguments = NavigationProps & NavigationServices;
-export type Params = Pick<Arguments, 'navIsOpen' | 'recentItems' | 'initiallyOpenSections'>;
+export type Params = Pick<
+  Arguments,
+  'navIsOpen' | 'recentItems' | 'initiallyOpenSections' | 'platformSections'
+>;
 
 export class StorybookMock extends AbstractStorybookMock<NavigationProps, NavigationServices> {
   propArguments = {};
@@ -29,31 +32,29 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
 
   getServices(params: Params): NavigationServices {
     const { navIsOpen, recentItems } = params;
+
     const navAction = action('Navigation');
+    const navigateSync = (locatorParams?: SerializableRecord) => {
+      navAction(`Locator: ${mockLocatorId} / Params: ${JSON.stringify(locatorParams)}`);
+    };
+    const getLocator = (_locatorId: string) => ({ navigateSync });
 
     return {
-      getLocator(_locatorId: string) {
-        return {
-          navigateSync(locatorParams?: SerializableRecord) {
-            // show nav info with storybook add-on
-            navAction(`Locator: ${mockLocatorId} / Params: ${JSON.stringify(locatorParams)}`);
-          },
-        };
-      },
+      getLocator,
       navIsOpen,
       recentItems,
     };
   }
 
   getProps(params: Params): NavigationProps {
-    const { initiallyOpenSections } = params;
+    const { initiallyOpenSections, platformSections } = params;
     return {
       id: 'example_project',
       title: {
         name: 'Example Project',
         icon: 'logoObservability',
       },
-      sections: {},
+      platformSections,
       items: getMockNavItems(),
       initiallyOpenSections,
     };

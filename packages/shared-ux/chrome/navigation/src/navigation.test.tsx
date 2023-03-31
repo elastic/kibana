@@ -22,7 +22,7 @@ describe('<Navigation />', () => {
 
     render(
       <NavigationProvider getLocator={getLocator} navIsOpen={true} recentItems={recentItems}>
-        <Navigation id="navigation_testing" title={title} sections={{}} />
+        <Navigation id="navigation_testing" title={title} platformSections={{}} />
       </NavigationProvider>,
       div
     );

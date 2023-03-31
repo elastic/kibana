@@ -16,9 +16,9 @@ const Context = React.createContext<NavigationServices | null>(null);
  * A Context Provider that provides services to the component and its dependencies.
  */
 export const NavigationProvider: FC<NavigationServices> = ({ children, ...services }) => {
-  const { getLocator, navIsOpen, recentItems } = services;
+  const { getLocator, recentItems, navIsOpen } = services;
   return (
-    <Context.Provider value={{ getLocator, navIsOpen, recentItems }}>{children}</Context.Provider>
+    <Context.Provider value={{ getLocator, recentItems, navIsOpen }}>{children}</Context.Provider>
   );
 };
 
@@ -29,19 +29,18 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
-  const navIsOpen = useObservable(dependencies.core.chrome.getProjectNavIsOpen$(), true);
-  const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
-
   // FIXME
   // const recentItems$ = dependencies.core.chrome.recentlyAccessed.get$();
   // const recentItems = useObservable(recentItems$, []);
+  const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
+
+  const getLocator = (id: string) => dependencies.share.url.locators.get(id);
+  const navIsOpen = useObservable(dependencies.core.chrome.getProjectNavIsOpen$(), true);
 
   const value: NavigationServices = {
-    navIsOpen,
     recentItems,
-    getLocator(id: string) {
-      return dependencies.share.url.locators.get(id);
-    },
+    getLocator,
+    navIsOpen,
   };
 
   return (
