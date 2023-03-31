@@ -881,32 +881,28 @@ export class DiscoverPageObject extends FtrService {
   }
 
   /**
-   * Drags field to add as a column or as a breakdown
+   * Drags field to add as a column
    *
    * @param fieldName
-   * @param destination
    * */
-  public async dragAndDropField(fieldName: string, destination?: 'chart') {
+  public async dragFieldToTable(fieldName: string) {
     await this.waitUntilSidebarHasLoaded();
 
     const from = `dscFieldListPanelField-${fieldName}`;
     await this.find.existsByCssSelector(from);
     await this.browser.html5DragAndDrop(
       this.testSubjects.getCssSelector(from),
-      this.testSubjects.getCssSelector(
-        destination === 'chart' ? 'unifiedHistogramChartDropZone' : 'dscMainContent'
-      )
+      this.testSubjects.getCssSelector('dscMainContent')
     );
     await this.waitForDropToFinish();
   }
 
   /**
-   * Drags field with keyboard actions to add as a column or as a breakdown
+   * Drags field with keyboard actions to add as a column
    *
    * @param fieldName
-   * @param destination
    * */
-  public async dragAndDropFieldWithKeyboard(fieldName: string, destination?: 'chart') {
+  public async dragFieldWithKeyboardToTable(fieldName: string) {
     const field = await this.find.byCssSelector(
       `[data-test-subj="domDragDrop_draggable-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
     );
@@ -916,9 +912,6 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
     });
     await this.browser.pressKeys(this.browser.keys.RIGHT);
-    if (destination === 'chart') {
-      await this.browser.pressKeys(this.browser.keys.RIGHT);
-    }
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.waitForDropToFinish();
   }

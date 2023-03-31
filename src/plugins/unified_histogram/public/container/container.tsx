@@ -27,7 +27,6 @@ import {
   querySelector,
   timeRangeSelector,
   topPanelHeightSelector,
-  dragDropContextSelector,
 } from './utils/state_selectors';
 
 type LayoutProps = Pick<
@@ -89,7 +88,6 @@ export type UnifiedHistogramInitializedApi = {
   | 'setTimeInterval'
   | 'setRequestParams'
   | 'setTotalHits'
-  | 'setDragDropContext'
 >;
 
 /**
@@ -146,8 +144,7 @@ export const UnifiedHistogramContainer = forwardRef<
         'setColumns',
         'setTimeInterval',
         'setRequestParams',
-        'setTotalHits',
-        'setDragDropContext'
+        'setTotalHits'
       ),
     }),
     [initialized, input$, stateService]
@@ -164,7 +161,6 @@ export const UnifiedHistogramContainer = forwardRef<
   const columns = useStateSelector(stateService?.state$, columnsSelector);
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
-  const dragDropContext = useStateSelector(stateService?.state$, dragDropContextSelector);
 
   // Don't render anything until the container is initialized
   if (!layoutProps || !dataView || !lensSuggestionsApi) {
@@ -183,7 +179,6 @@ export const UnifiedHistogramContainer = forwardRef<
       columns={columns}
       currentSuggestion={currentSuggestion}
       topPanelHeight={topPanelHeight}
-      dragDropContext={dragDropContext}
       input$={input$}
       lensSuggestionsApi={lensSuggestionsApi}
     />

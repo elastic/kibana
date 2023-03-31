@@ -83,10 +83,6 @@ interface BaseProps {
    */
   draggable?: boolean;
   /**
-   * Custom Drag & Drop context if RootDragDropProvider cannot be accessed
-   */
-  dragDropContext?: DragContextState;
-  /**
    * Whether to include a drag handle (your component should provide a slot for `dragHandle` prop)
    */
   withDragHandle?: boolean;
@@ -174,8 +170,6 @@ const REORDER_OFFSET = REORDER_ITEM_MARGIN / 2;
  * @constructor
  */
 export const DragDrop = (props: BaseProps) => {
-  const defaultDragDropContext = useContext(DragContext);
-  const currentDragDropContext = props.dragDropContext || defaultDragDropContext;
   const {
     dragging,
     setDragging,
@@ -188,7 +182,7 @@ export const DragDrop = (props: BaseProps) => {
     setA11yMessage,
     dataTestSubjPrefix,
     onTrackUICounterEvent,
-  } = currentDragDropContext;
+  } = useContext(DragContext);
 
   if (props.isDisabled) {
     return props.children;

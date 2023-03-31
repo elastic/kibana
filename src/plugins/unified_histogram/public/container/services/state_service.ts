@@ -10,7 +10,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import type { DragContextState } from '@kbn/dom-drag-drop';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices } from '../../types';
@@ -87,10 +86,6 @@ export interface UnifiedHistogramState {
    * The current result of the hits count request
    */
   totalHitsResult: number | Error | undefined;
-  /**
-   * Drag & drop context
-   */
-  dragDropContext?: DragContextState;
 }
 
 /**
@@ -143,10 +138,6 @@ export interface UnifiedHistogramStateService {
    * Sets the current time interval
    */
   setTimeInterval: (timeInterval: string) => void;
-  /**
-   * Sets the current Drag & Drop context
-   */
-  setDragDropContext: (dragDropContext?: DragContextState) => void;
   /**
    * Sets the current request parameters
    */
@@ -248,10 +239,6 @@ export const createStateService = (
 
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
-    },
-
-    setDragDropContext: (dragDropContext) => {
-      updateState({ dragDropContext });
     },
 
     setRequestParams: (requestParams: {
