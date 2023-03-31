@@ -16,7 +16,8 @@ import type { PluginStartDependencies } from './types';
 export const TRANSFORM_PLUGIN_ID = 'transform' as const;
 
 export const setupCapabilities = (
-  core: Pick<CoreSetup<PluginStartDependencies>, 'capabilities' | 'getStartServices'>
+  core: Pick<CoreSetup<PluginStartDependencies>, 'capabilities' | 'getStartServices'>,
+  isSecurityPluginEnabled: boolean
 ) => {
   core.capabilities.registerProvider(() => {
     return {
@@ -25,7 +26,7 @@ export const setupCapabilities = (
   });
 
   core.capabilities.registerSwitcher(async (request, capabilities, useDefaultCapabilities) => {
-    if (useDefaultCapabilities) {
+    if (!isSecurityPluginEnabled || useDefaultCapabilities) {
       return capabilities;
     }
     const startServices = await core.getStartServices();
@@ -44,10 +45,14 @@ export const setupCapabilities = (
       },
     });
 
-    const clusterPrivileges = privileges.elasticsearch.cluster.reduce((acc, p) => {
-      acc[p.privilege] = p.authorized;
-      return acc;
-    }, {} as Record<string, boolean>);
+    const clusterPrivileges: Record<string, boolean> = Array.isArray(
+      privileges?.elasticsearch?.cluster
+    )
+      ? privileges.elasticsearch.cluster.reduce((acc, p) => {
+          acc[p.privilege] = p.authorized;
+          return acc;
+        }, {} as Record<string, boolean>)
+      : {};
 
     const hasOneIndexWithAllPrivileges = false;
 
