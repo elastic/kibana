@@ -19,9 +19,10 @@ import { tlsFormatters } from './tls';
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 const throttlingFormatter: Formatter = (fields) => {
-  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return false;
+  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return;
 
   return {
+    label: 'no_throttling',
     download: parseInt(
       fields[ConfigKey.DOWNLOAD_SPEED] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.DOWNLOAD_SPEED],
       10

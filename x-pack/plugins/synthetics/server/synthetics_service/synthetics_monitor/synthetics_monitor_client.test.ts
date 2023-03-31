@@ -233,7 +233,7 @@ const deletePayload = [
     ],
     max_redirects: '0',
     name: 'my mon',
-    params: '',
+    params: '{"username":"elastic"}',
     password: '',
     proxy_url: '',
     schedule: { number: '3', unit: 'm' },
