@@ -28,7 +28,6 @@ import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
-import type { CaseFileKinds } from './files/types';
 
 /**
  * @public
@@ -41,10 +40,6 @@ export class CasesUiPlugin
   private readonly storage = new Storage(localStorage);
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  // The reason this is protected is because we'll get type collisions otherwise because we're using a type guard assert
-  // to ensure the options member is instantiated before using it in various places
-  // See for more info: https://stackoverflow.com/questions/66206180/typescript-typeguard-attribut-with-method
-  protected fileKinds: CaseFileKinds | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -59,7 +54,7 @@ export class CasesUiPlugin
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
 
     const config = this.initializerContext.config.get<CasesUiConfigType>();
-    this.fileKinds = registerCaseFileKinds(config.files, plugins.files);
+    registerCaseFileKinds(config.files, plugins.files);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -111,8 +106,6 @@ export class CasesUiPlugin
   }
 
   public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
-    this.ensureFieldsInitializedInSetup();
-
     const config = this.initializerContext.config.get<CasesUiConfigType>();
 
     KibanaServices.init({
@@ -120,7 +113,6 @@ export class CasesUiPlugin
       ...plugins,
       kibanaVersion: this.kibanaVersion,
       config,
-      fileKinds: this.fileKinds,
     });
 
     /**
@@ -174,12 +166,6 @@ export class CasesUiPlugin
         groupAlertsByRule,
       },
     };
-  }
-
-  private ensureFieldsInitializedInSetup(): asserts this is this & { fileKinds: CaseFileKinds } {
-    if (this.fileKinds == null) {
-      throw new Error('Cases failed to initialize file kinds');
-    }
   }
 
   public stop() {}

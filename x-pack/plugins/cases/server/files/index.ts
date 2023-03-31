@@ -11,6 +11,8 @@ import {
   APP_ID,
   constructFileKindIdByOwner,
   constructFilesHttpOperationTag,
+  MAX_FILE_SIZE,
+  MAX_IMAGE_FILE_SIZE,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
@@ -49,17 +51,24 @@ const buildTag = (owner: Owner, operation: HttpApiTagOperation) => {
 export const createMaxCallback =
   (config: FilesConfig) =>
   (file: FileJSON): number => {
+    // if the user set a max size, always return that
+    if (config.maxSize != null) {
+      return config.maxSize;
+    }
+
     const allowedMimeTypesSet = new Set(config.allowedMimeTypes);
 
+    // if we have the mime type for the file and it exists within the allowed types and it is an image then return the
+    // image size
     if (
       file.mimeType != null &&
       allowedMimeTypesSet.has(file.mimeType) &&
       IMAGE_MIME_TYPES.has(file.mimeType)
     ) {
-      return config.maxImageSize;
+      return MAX_IMAGE_FILE_SIZE;
     }
 
-    return config.maxSize;
+    return MAX_FILE_SIZE;
   };
 
 /**

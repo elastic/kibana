@@ -7,17 +7,15 @@
 
 import type { FilesSetup } from '@kbn/files-plugin/public';
 import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
-import { ALLOWED_MIME_TYPES } from '../../common/constants/mime_types';
-import { constructFileKindIdByOwner, MAX_FILE_SIZE } from '../../common/constants';
+import { constructFileKindIdByOwner, MAX_FILE_SIZE, OWNERS } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
-import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common';
 import type { CaseFileKinds, FilesConfig } from './types';
 
 const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
   return {
     id: constructFileKindIdByOwner(owner),
-    allowedMimeTypes: ALLOWED_MIME_TYPES,
-    maxSizeBytes: MAX_FILE_SIZE,
+    allowedMimeTypes: config.allowedMimeTypes,
+    maxSizeBytes: config.maxSize ?? MAX_FILE_SIZE,
   };
 };
 
@@ -25,22 +23,19 @@ const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
  * The file kind definition for interacting with the file service for the UI
  */
 const createFileKinds = (config: FilesConfig): CaseFileKinds => {
-  return {
-    [APP_ID]: buildFileKind(config, APP_ID),
-    [SECURITY_SOLUTION_OWNER]: buildFileKind(config, SECURITY_SOLUTION_OWNER),
-    [OBSERVABILITY_OWNER]: buildFileKind(config, OBSERVABILITY_OWNER),
-  };
-};
+  const caseFileKinds = new Map<Owner, FileKindBrowser>();
 
-export const registerCaseFileKinds = (
-  config: FilesConfig,
-  filesSetupPlugin: FilesSetup
-): CaseFileKinds => {
-  const fileKinds = createFileKinds(config);
-
-  for (const fileKind of Object.values(fileKinds)) {
-    filesSetupPlugin.registerFileKind(fileKind);
+  for (const owner of OWNERS) {
+    caseFileKinds.set(owner, buildFileKind(config, owner));
   }
 
-  return fileKinds;
+  return caseFileKinds;
+};
+
+export const registerCaseFileKinds = (config: FilesConfig, filesSetupPlugin: FilesSetup) => {
+  const fileKinds = createFileKinds(config);
+
+  for (const fileKind of fileKinds.values()) {
+    filesSetupPlugin.registerFileKind(fileKind);
+  }
 };

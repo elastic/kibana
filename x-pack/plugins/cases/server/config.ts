@@ -7,7 +7,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { MAX_FILE_SIZE, MAX_IMAGE_FILE_SIZE } from '../common/constants';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 
 export const ConfigSchema = schema.object({
@@ -18,8 +17,8 @@ export const ConfigSchema = schema.object({
     allowedMimeTypes: schema.arrayOf(schema.string({ minLength: 1 }), {
       defaultValue: ALLOWED_MIME_TYPES,
     }),
-    maxSize: schema.number({ defaultValue: MAX_FILE_SIZE, min: 0 }),
-    maxImageSize: schema.number({ defaultValue: MAX_IMAGE_FILE_SIZE, min: 0 }),
+    // intentionally not setting a default here so that we can determine if the user set it
+    maxSize: schema.maybe(schema.number({ min: 0 })),
   }),
 });
 

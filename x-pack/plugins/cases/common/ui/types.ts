@@ -53,7 +53,8 @@ export interface CasesUiConfigType {
     lens: boolean;
   };
   files: {
-    maxSize: number;
+    maxSize?: number;
+    allowedMimeTypes: string[];
   };
 }
 

@@ -102,7 +102,6 @@ describe('config validation', () => {
               "application/x-tar",
               "application/pdf",
             ],
-            "maxImageSize": 10485760,
             "maxSize": 104857600,
           },
           "markdownPlugins": Object {

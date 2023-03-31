@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_FILE_SIZE, MAX_IMAGE_FILE_SIZE } from '../../common/constants';
 import { createFilesSetupMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { createMaxCallback, registerCaseFileKinds } from '.';
@@ -19,39 +20,50 @@ describe('server files', () => {
     });
 
     describe('file sizes', () => {
-      const schema = ConfigSchema.validate({
-        files: {
-          maxImageSize: 0,
-          maxSize: 1,
-        },
-      });
+      it('sets the max image file size to 10 mb', () => {
+        const schema = ConfigSchema.validate({});
 
-      const maxFileSizeFn = createMaxCallback(schema.files);
+        const maxFileSizeFn = createMaxCallback(schema.files);
 
-      it('sets the max image file size to 0', () => {
         expect(
           maxFileSizeFn({
             mimeType: 'image/png',
           } as unknown as FileJSON)
-        ).toEqual(0);
+        ).toEqual(MAX_IMAGE_FILE_SIZE);
       });
 
-      it('sets the max non-image file size to 1', () => {
-        registerCaseFileKinds(schema.files, mockFilesSetup);
+      it('sets the max file size to 1 when an image is passed but the configuration was specified', () => {
+        const schema = ConfigSchema.validate({
+          files: {
+            maxSize: 1,
+          },
+        });
+
+        const maxFileSizeFn = createMaxCallback(schema.files);
+
+        expect(
+          maxFileSizeFn({
+            mimeType: 'image/png',
+          } as unknown as FileJSON)
+        ).toEqual(1);
+      });
+
+      it('sets the max non-image file size to default 100 mb', () => {
+        const schema = ConfigSchema.validate({});
+
+        const maxFileSizeFn = createMaxCallback(schema.files);
 
         expect(
           maxFileSizeFn({
             mimeType: 'text/plain',
           } as unknown as FileJSON)
-        ).toEqual(1);
+        ).toEqual(MAX_FILE_SIZE);
       });
 
-      it('returns the non-image size when images are not allowed in the mime type', () => {
+      it('returns 100 mb when images are not allowed in the mime type and an image is passed', () => {
         const schemaNoImages = ConfigSchema.validate({
           files: {
             allowedMimeTypes: ['abc/123'],
-            maxImageSize: 0,
-            maxSize: 1,
           },
         });
 
@@ -61,15 +73,13 @@ describe('server files', () => {
           maxFn({
             mimeType: 'image/png',
           } as unknown as FileJSON)
-        ).toEqual(1);
+        ).toEqual(MAX_FILE_SIZE);
       });
 
-      it('returns the non-image size when the mime type is not recognized', () => {
+      it('returns 100 mb when the mime type is not recognized', () => {
         const schemaNoImages = ConfigSchema.validate({
           files: {
             allowedMimeTypes: ['abc/123'],
-            maxImageSize: 0,
-            maxSize: 1,
           },
         });
 
@@ -79,15 +89,13 @@ describe('server files', () => {
           maxFn({
             mimeType: 'hi/bye',
           } as unknown as FileJSON)
-        ).toEqual(1);
+        ).toEqual(MAX_FILE_SIZE);
       });
 
-      it('returns the non-image size when the mime type is undefined', () => {
+      it('returns 100 mb when the mime type is undefined', () => {
         const schemaNoImages = ConfigSchema.validate({
           files: {
             allowedMimeTypes: ['abc/123'],
-            maxImageSize: 0,
-            maxSize: 1,
           },
         });
 
@@ -97,7 +105,7 @@ describe('server files', () => {
           maxFn({
             mimeType: undefined,
           } as unknown as FileJSON)
-        ).toEqual(1);
+        ).toEqual(MAX_FILE_SIZE);
       });
     });
 

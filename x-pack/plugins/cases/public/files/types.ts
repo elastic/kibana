@@ -11,4 +11,4 @@ import type { CasesUiConfigType } from '../containers/types';
 
 export type FilesConfig = CasesUiConfigType['files'];
 
-export type CaseFileKinds = Record<Owner, FileKindBrowser>;
+export type CaseFileKinds = Map<Owner, FileKindBrowser>;
