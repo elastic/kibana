@@ -18,8 +18,6 @@ import {
   AppLinkData,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
-
-import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
 import {
   createListRoute,
   createInstallRoute,
@@ -28,6 +26,13 @@ import {
   createDeleteLargeDatasetRoute,
   createCustomDatasetRoute,
 } from './routes';
+import {
+  flightsSpecProvider,
+  logsSpecProvider,
+  ecommerceSpecProvider,
+  logsTSDBSpecProvider,
+} from './data_sets';
+
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
 import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
@@ -67,7 +72,8 @@ export class SampleDataRegistry {
   public setup(
     core: CoreSetup,
     usageCollections: UsageCollectionSetup | undefined,
-    customIntegrations?: CustomIntegrationsPluginSetup
+    customIntegrations?: CustomIntegrationsPluginSetup,
+    isDevMode?: boolean
   ) {
     if (usageCollections) {
       const kibanaIndex = core.savedObjects.getKibanaIndex();
@@ -90,6 +96,9 @@ export class SampleDataRegistry {
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);
     this.registerSampleDataSet(ecommerceSpecProvider);
+    if (isDevMode) {
+      this.registerSampleDataSet(logsTSDBSpecProvider);
+    }
     if (customIntegrations && core) {
       registerSampleDatasetWithIntegration(customIntegrations, core);
     }
