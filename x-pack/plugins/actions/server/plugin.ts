@@ -39,10 +39,6 @@ import {
   IEventLogService,
 } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import {
-  ensureCleanupFailedExecutionsTaskScheduled,
-  registerCleanupFailedExecutionsTaskDefinition,
-} from './cleanup_failed_executions';
 
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -343,18 +339,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       usageCounter: this.usageCounter,
     });
 
-    // Cleanup failed execution task definition
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      registerCleanupFailedExecutionsTaskDefinition(plugins.taskManager, {
-        actionTypeRegistry,
-        logger: this.logger,
-        coreStartServices: core.getStartServices(),
-        config: this.actionsConfig.cleanupFailedExecutionsTask,
-        kibanaIndex: this.kibanaIndex,
-        taskManagerIndex: plugins.taskManager.index,
-      });
-    }
-
     return {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -538,15 +522,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         client: core.elasticsearch.client.asInternalUser,
         logger: this.logger,
       });
-    }
-
-    // Cleanup failed execution task
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      ensureCleanupFailedExecutionsTaskScheduled(
-        plugins.taskManager,
-        this.logger,
-        this.actionsConfig.cleanupFailedExecutionsTask
-      );
     }
 
     return {
