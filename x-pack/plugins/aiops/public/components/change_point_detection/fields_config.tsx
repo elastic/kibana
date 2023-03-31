@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ChangePointsTable } from './change_points_table';
 import { ChartComponent } from './chart_component';
 import { SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
 import { FunctionPicker } from './function_picker';
@@ -72,13 +73,8 @@ export const FieldsConfig: FC = () => {
     <>
       {fieldConfigs.map((fieldConfig, index) => {
         return (
-          <>
-            <EuiPanel
-              paddingSize="s"
-              hasBorder
-              hasShadow={false}
-              key={`${fieldConfig.fn}_${index}`}
-            >
+          <React.Fragment key={`${fieldConfig.fn}_${index}`}>
+            <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
               <EuiAccordion
                 id={'temp_id'}
                 buttonElement={'div'}
@@ -122,7 +118,7 @@ export const FieldsConfig: FC = () => {
               </EuiAccordion>
             </EuiPanel>
             <EuiSpacer size="s" />
-          </>
+          </React.Fragment>
         );
       })}
       <EuiButton onClick={onAdd}>Add</EuiButton>
@@ -249,6 +245,8 @@ export const FieldCon: FC<FieldConProps> = ({ fieldConfig, onChange }) => {
           />
         </>
       ) : null}
+
+      <ChangePointsTable annotations={annotations} fieldConfig={fieldConfig} />
 
       <EuiFlexGrid columns={annotations.length >= 2 ? 2 : 1} responsive gutterSize={'m'}>
         {annotations.map((v) => {
