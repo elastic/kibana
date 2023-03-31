@@ -20,10 +20,10 @@ import { getCpmStatus } from '../../common/utils/get_cpm_status';
 export const Configurations = () => {
   const location = useLocation();
   const dataViewQuery = useLatestFindingsDataView();
-  const getSetupStatus = useCspSetupStatusApi();
+  const { data: getSetupStatus } = useCspSetupStatusApi();
   const status = getCpmStatus(getSetupStatus);
 
-  const noFindingsState = getSetupStatus.data?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
+  const noFindingsState = getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
   if (!status.hasFindings) return <NoFindingsStates posturetype={noFindingsState} />;
 

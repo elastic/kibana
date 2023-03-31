@@ -5,41 +5,43 @@
  * 2.0.
  */
 
+import { CspSetupStatus } from '../../../common/types';
+
 // Cloud Posture Management Status
-export const getCpmStatus = (cpmStatusData : any) => {
-    // if has findings in any of the integrations.
-    const hasFindings =
-    cpmStatusData.data?.indicesDetails[0].status === 'not-empty' ||
-    cpmStatusData.data?.kspm.status === 'indexed' ||
-    cpmStatusData.data?.cspm.status === 'indexed';
-  
-    // kspm
-    const hasKspmFindings =
-    cpmStatusData.data?.kspm?.status === 'indexed' ||
-    cpmStatusData.data?.indicesDetails[0].status === 'not-empty';
-  
-    // cspm
-    const hasCspmFindings =
-    cpmStatusData.data?.cspm?.status === 'indexed' ||
-    cpmStatusData.data?.indicesDetails[0].status === 'not-empty';
+export const getCpmStatus = (cpmStatusData: CspSetupStatus | undefined) => {
+  // if has findings in any of the integrations.
+  const hasFindings =
+    cpmStatusData?.indicesDetails[0].status === 'not-empty' ||
+    cpmStatusData?.kspm.status === 'indexed' ||
+    cpmStatusData?.cspm.status === 'indexed';
 
-    const isKspmInstalled = cpmStatusData.data?.kspm?.status !== 'not-installed';
-    const isCspmInstalled = cpmStatusData.data?.cspm?.status !== 'not-installed';
-    const isKspmPrivileged = cpmStatusData.data?.kspm?.status !== 'unprivileged';
-    const isCspmPrivileged = cpmStatusData.data?.cspm?.status !== 'unprivileged';
+  // kspm
+  const hasKspmFindings =
+    cpmStatusData?.kspm?.status === 'indexed' ||
+    cpmStatusData?.indicesDetails[0].status === 'not-empty';
 
-    const isCspmIntegrationInstalled = isCspmInstalled && isCspmPrivileged;
-    const isKspmIntegrationInstalled = isKspmInstalled && isKspmPrivileged;
-  
-    return {
-      hasFindings,
-      hasKspmFindings,
-      hasCspmFindings,
-      isCspmInstalled,
-      isKspmInstalled,
-      isKspmPrivileged,
-      isCspmPrivileged,
-      isCspmIntegrationInstalled,
-      isKspmIntegrationInstalled
-    };
+  // cspm
+  const hasCspmFindings =
+    cpmStatusData?.cspm?.status === 'indexed' ||
+    cpmStatusData?.indicesDetails[0].status === 'not-empty';
+
+  const isKspmInstalled = cpmStatusData?.kspm?.status !== 'not-installed';
+  const isCspmInstalled = cpmStatusData?.cspm?.status !== 'not-installed';
+  const isKspmPrivileged = cpmStatusData?.kspm?.status !== 'unprivileged';
+  const isCspmPrivileged = cpmStatusData?.cspm?.status !== 'unprivileged';
+
+  const isCspmIntegrationInstalled = isCspmInstalled && isCspmPrivileged;
+  const isKspmIntegrationInstalled = isKspmInstalled && isKspmPrivileged;
+
+  return {
+    hasFindings,
+    hasKspmFindings,
+    hasCspmFindings,
+    isCspmInstalled,
+    isKspmInstalled,
+    isKspmPrivileged,
+    isCspmPrivileged,
+    isCspmIntegrationInstalled,
+    isKspmIntegrationInstalled,
   };
+};

@@ -252,7 +252,7 @@ export const CloudPosturePage = <TData, TError>({
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
-  const getSetupStatus = useCspSetupStatusApi();
+  const { data: getSetupStatus, isLoading, isError, error } = useCspSetupStatusApi();
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const status = getCpmStatus(getSetupStatus);
@@ -270,19 +270,19 @@ export const CloudPosturePage = <TData, TError>({
       return subscriptionNotAllowedRenderer();
     }
 
-    if (getSetupStatus.isError) {
-      return defaultErrorRenderer(getSetupStatus.error);
+    if (isError) {
+      return defaultErrorRenderer(error);
     }
 
-    if (getSetupStatus.isLoading) {
+    if (isLoading) {
       return defaultLoadingRenderer();
     }
 
     /* Checks if its a completely new user which means no integration has been installed and no latest findings default index has been found */
     if (
-      getSetupStatus.data?.kspm?.status === 'not-installed' &&
-      getSetupStatus.data?.cspm?.status === 'not-installed' &&
-      getSetupStatus.data?.indicesDetails[0].status === 'empty'
+      getSetupStatus?.kspm?.status === 'not-installed' &&
+      getSetupStatus?.cspm?.status === 'not-installed' &&
+      getSetupStatus?.indicesDetails[0].status === 'empty'
     ) {
       return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
     }

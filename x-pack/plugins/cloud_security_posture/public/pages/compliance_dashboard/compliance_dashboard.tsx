@@ -124,6 +124,7 @@ const IntegrationPostureDashboard = ({
   dashboardType: PosturePolicyTemplate;
 }) => {
   const noFindings = !complianceData || complianceData.stats.totalFindings === 0;
+
   // integration is not installed, and there are no findings for this integration
   if (noFindings && !isIntegrationInstalled) {
     return <CspNoDataPage {...notInstalledConfig} />;
@@ -178,8 +179,8 @@ const IntegrationPostureDashboard = ({
 
 export const ComplianceDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(CSPM_POLICY_TEMPLATE);
-  const getSetupStatus = useCspSetupStatusApi();
-  const status: any = getCpmStatus(getSetupStatus);
+  const { data: getSetupStatus } = useCspSetupStatusApi();
+  const status = getCpmStatus(getSetupStatus);
   const hasFindingsKspm = status.hasKspmFindings;
   const hasFindingsCspm = status.hasCspmFindings;
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
@@ -202,8 +203,8 @@ export const ComplianceDashboard = () => {
     const selectInitialTab = () => {
       const cspmTotalFindings = getCspmDashboardData.data?.stats.totalFindings;
       const kspmTotalFindings = getKspmDashboardData.data?.stats.totalFindings;
-      const installedPolicyTemplatesCspm = getSetupStatus.data?.cspm?.status;
-      const installedPolicyTemplatesKspm = getSetupStatus.data?.kspm?.status;
+      const installedPolicyTemplatesCspm = getSetupStatus?.cspm?.status;
+      const installedPolicyTemplatesKspm = getSetupStatus?.kspm?.status;
       let preferredDashboard = CSPM_POLICY_TEMPLATE;
 
       // cspm has findings
@@ -234,8 +235,8 @@ export const ComplianceDashboard = () => {
   }, [
     getCspmDashboardData.data?.stats.totalFindings,
     getKspmDashboardData.data?.stats.totalFindings,
-    getSetupStatus.data?.cspm?.status,
-    getSetupStatus.data?.kspm?.status,
+    getSetupStatus?.cspm?.status,
+    getSetupStatus?.kspm?.status,
   ]);
 
   const tabs = useMemo(
