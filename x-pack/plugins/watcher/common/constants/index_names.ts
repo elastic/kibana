@@ -6,6 +6,5 @@
  */
 
 export const INDEX_NAMES: { [key: string]: string } = {
-  WATCHES: '.watches',
   WATCHER_HISTORY: '.watcher-history-*',
 };
