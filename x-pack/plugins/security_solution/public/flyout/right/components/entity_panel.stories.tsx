@@ -45,12 +45,12 @@ export const Expandable: Story<void> = () => {
   );
 };
 
-export const ExpandableDefaultClosed: Story<void> = () => {
+export const ExpandableDefaultOpen: Story<void> = () => {
   return (
     <>
-      <EntityPanel {...defaultProps} expandable={true} expanded={false} />
+      <EntityPanel {...defaultProps} expandable={true} expanded={true} />
       <EuiSpacer size="m" />
-      <EntityPanel {...defaultProps} expandable={true} expanded={false} type={USER as EntityType} />
+      <EntityPanel {...defaultProps} expandable={true} expanded={true} type={USER as EntityType} />
     </>
   );
 };

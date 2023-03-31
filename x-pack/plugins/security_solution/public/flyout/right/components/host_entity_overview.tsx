@@ -6,8 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
+import styled from 'styled-components';
 import type { DescriptionList } from '../../../../common/utility_types';
 import {
   buildHostNamesFilter,
@@ -23,18 +24,26 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
-import * as i18n from '../../../overview/components/host_overview/translations';
-
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
-// import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import * as i18n from '../../../overview/components/host_overview/translations';
+import { TECHNICAL_PREVIEW_TITLE, TECHNICAL_PREVIEW_MESSAGE } from './translations';
+import {
+  TECHNICAL_PREVIEW_ICON_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_IP_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
+} from './test_ids';
 
+const StyledEuiBetaBadge = styled(EuiBetaBadge)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
+`;
 const CONTEXT_ID = `flyout-user-entity-overview`;
 
-export interface HostEntityContentProps {
+export interface HostEntityOverviewProps {
   hostName: string;
 }
 
-export const HostEntityContent: React.FC<HostEntityContentProps> = ({ hostName }) => {
+export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -58,36 +67,37 @@ export const HostEntityContent: React.FC<HostEntityContentProps> = ({ hostName }
     timerange,
   });
 
-  const [hostRiskScore, hostRiskLevel] = useMemo(() => {
+  const [_, { hostDetails }] = useHostDetails({
+    hostName,
+    indexNames: selectedPatterns,
+    startDate: from,
+    endDate: to,
+  });
+
+  const [hostRiskLevel] = useMemo(() => {
     const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
     return [
       {
-        title: i18n.HOST_RISK_SCORE,
-        //   <RiskScoreHeaderTitle
-        //     title={i18n.HOST_RISK_SCORE}
-        //     riskScoreEntity={RiskScoreEntity.host}
-        //   />
-        description: (
+        title: (
           <>
-            {hostRiskData
-              ? Math.round(hostRiskData.host.risk.calculated_score_norm)
-              : getEmptyTagValue()}
+            {i18n.HOST_RISK_CLASSIFICATION}
+            <StyledEuiBetaBadge
+              label={TECHNICAL_PREVIEW_TITLE}
+              size="s"
+              alignment="baseline"
+              iconType="beaker"
+              tooltipContent={TECHNICAL_PREVIEW_MESSAGE}
+              tooltipPosition="bottom"
+              data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
+            />
           </>
         ),
-      },
-      {
-        title: i18n.HOST_RISK_CLASSIFICATION,
-        // (<RiskScoreHeaderTitle
-        //     title={i18n.HOST_RISK_CLASSIFICATION}
-        //     riskScoreEntity={RiskScoreEntity.host}
-        //   />),
         description: (
           <>
             {hostRiskData ? (
               <RiskScore severity={hostRiskData.host.risk.calculated_level} />
             ) : (
               <RiskScore severity={RiskSeverity.unknown} />
-              // getEmptyTagValue()
             )}
           </>
         ),
@@ -95,20 +105,13 @@ export const HostEntityContent: React.FC<HostEntityContentProps> = ({ hostName }
     ];
   }, [hostRisk]);
 
-  const [loading, { hostDetails: data }] = useHostDetails({
-    endDate: to,
-    hostName,
-    indexNames: selectedPatterns,
-    startDate: from,
-  });
-
   const descriptionList: DescriptionList[] = useMemo(
     () => [
       {
         title: i18n.IP_ADDRESSES,
         description: (
           <DefaultFieldRenderer
-            rowItems={getOr([], 'host.ip', data)}
+            rowItems={getOr([], 'host.ip', hostDetails)}
             attrName={'host.ip'}
             idPrefix={CONTEXT_ID}
             isDraggable={false}
@@ -117,17 +120,28 @@ export const HostEntityContent: React.FC<HostEntityContentProps> = ({ hostName }
         ),
       },
     ],
-    [data]
+    [hostDetails]
   );
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}>
       <EuiFlexItem>
-        <OverviewDescriptionList descriptionList={descriptionList} key={'0'} />
+        <OverviewDescriptionList
+          dataTestSubj={ENTITIES_HOST_OVERVIEW_IP_TEST_ID}
+          descriptionList={descriptionList}
+          key={'0'}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
-        {isLicenseValid && <DescriptionListStyled listItems={[hostRiskLevel]} />}
+        {isLicenseValid && (
+          <DescriptionListStyled
+            data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
+            listItems={[hostRiskLevel]}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+HostEntityOverview.displayName = 'HostEntityOverview';

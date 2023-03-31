@@ -38,7 +38,7 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
   type,
   content,
   expandable = false,
-  expanded = true,
+  expanded = false,
 }) => {
   const [toggleStatus, setToggleStatus] = useState(expanded);
   const toggleQuery = useCallback(() => {
@@ -75,6 +75,13 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
     );
   }, [type]);
 
+  const showContent = useMemo(() => {
+    if (!content) {
+      return false;
+    }
+    return !expandable || (expandable && toggleStatus);
+  }, [content, expandable, toggleStatus]);
+
   const panelHeader = useMemo(() => {
     return (
       <EuiFlexGroup
@@ -84,7 +91,7 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
       >
         {expandable && toggleIcon}
         <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
             <EuiText>{title}</EuiText>
           </EuiTitle>
@@ -98,11 +105,13 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
       <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="xs">
         {panelHeader}
       </EuiSplitPanel.Inner>
-      {content && (
-        <EuiSplitPanel.Inner paddingSize="none" data-test-subj={ENTITY_PANEL_CONTENT_TEST_ID}>
-          {!expandable || (expandable && toggleStatus) ? <EuiPanel>{content}</EuiPanel> : null}
+      {showContent && (
+        <EuiSplitPanel.Inner paddingSize="none">
+          <EuiPanel data-test-subj={ENTITY_PANEL_CONTENT_TEST_ID}>{content}</EuiPanel>
         </EuiSplitPanel.Inner>
       )}
     </EuiSplitPanel.Outer>
   );
 };
+
+EntityPanel.displayName = 'EntityPanel';

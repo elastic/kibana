@@ -15,23 +15,23 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+
 import { i18n } from '@kbn/i18n';
 import { useRightPanelContext } from '../context';
 import { ENTITIES_TEST_ID } from './test_ids';
 import { ENTITIES_TITLE } from './translations';
 import { EntityPanel } from './entity_panel';
 import { ENTITY_TYPE, getField } from './utils';
-import { HostEntityContent } from './host_entity_content';
-import { UserEntityContent } from './user_entity_content';
+import { HostEntityOverview } from './host_entity_overview';
+import { UserEntityOverview } from './user_entity_overview';
 import { VIEW_ALL } from '../../shared/translations';
 import { LeftPanelKey, LeftPanelEntitiesTabPath } from '../../left';
 
-export const Entities: React.FC = () => {
+export const EntitiesOverview: React.FC = () => {
   const { eventId, getFieldsData, indexName } = useRightPanelContext();
-
-  const hostName = getField(getFieldsData('host.name'));
-  const userName = getField(getFieldsData('user.name'), '-');
   const { openLeftPanel } = useExpandableFlyoutContext();
+  const hostName = getField(getFieldsData('host.name'));
+  const userName = getField(getFieldsData('user.name'));
 
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
@@ -44,7 +44,7 @@ export const Entities: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName]);
 
-  if (!eventId) {
+  if (!eventId || (!userName && !hostName)) {
     return null;
   }
 
@@ -60,7 +60,7 @@ export const Entities: React.FC = () => {
             <EntityPanel
               title={userName}
               type={ENTITY_TYPE.user}
-              content={<UserEntityContent userName={userName} />}
+              content={<UserEntityOverview userName={userName} />}
               expandable={false}
             />
           )}
@@ -70,14 +70,14 @@ export const Entities: React.FC = () => {
             <EntityPanel
               title={hostName}
               type={ENTITY_TYPE.host}
-              content={<HostEntityContent hostName={hostName} />}
+              content={<HostEntityOverview hostName={hostName} />}
               expandable={false}
             />
           )}
         </EuiFlexItem>
         <EuiButtonEmpty onClick={goToEntitiesTab} iconType="arrowStart" iconSide="left" size="s">
           {VIEW_ALL(
-            i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab', {
+            i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.Entities', {
               defaultMessage: 'entities',
             })
           )}
@@ -86,3 +86,5 @@ export const Entities: React.FC = () => {
     </>
   );
 };
+
+EntitiesOverview.displayName = 'EntitiesOverview';
