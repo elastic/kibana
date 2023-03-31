@@ -67,7 +67,7 @@ export class DataViewsStorage implements ContentStorage {
       throw Boom.badRequest(`Invalid payload. ${resultValidationError.message}`);
     }
 
-    return { value, aliasPurpose, aliasTargetId, outcome };
+    return value;
   }
 
   async bulkGet(ctx: StorageContext, ids: string[], options: unknown): Promise<any> {

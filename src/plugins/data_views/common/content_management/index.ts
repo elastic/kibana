@@ -23,6 +23,6 @@ export type {
   DataViewSearchIn,
   DataViewSearchOut,
   DataViewSearchQuery,
-} from './types';
+} from './v1/types';
 
 export { DataViewContentType } from './constants';
