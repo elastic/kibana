@@ -92,7 +92,7 @@ export class UpsellingService {
   ) {
     return new Map<T, React.ComponentType>(
       [...upsellConfigsMap]
-        .filter(([_id, { hasCapability }]) => hasCapability === false) // filtered out if hasCapability is not defined
+        .filter(([_id, { hasCapability }]) => !hasCapability)
         .map(([id, page]) => [id, page.component])
     );
   }

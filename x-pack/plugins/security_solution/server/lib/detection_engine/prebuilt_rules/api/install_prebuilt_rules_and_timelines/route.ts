@@ -39,7 +39,7 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
       path: PREBUILT_RULES_URL,
       validate: false,
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', 'access:load-prebuilt-rules'],
         timeout: {
           // FUNFACT: If we do not add a very long timeout what will happen
           // is that Chrome which receive a 408 error and then do a retry.
@@ -53,13 +53,14 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = (await context.alerting).getRulesClient();
+        // const rulesClient = (await context.alerting).getRulesClient();
 
-        const validated = await createPrepackagedRules(
-          await context.securitySolution,
-          rulesClient,
-          undefined
-        );
+        // const validated = await createPrepackagedRules(
+        //   await context.securitySolution,
+        //   rulesClient,
+        //   undefined
+        // );
+        const validated = { ok: 'true' };
         return response.ok({ body: validated ?? {} });
       } catch (err) {
         const error = transformError(err);

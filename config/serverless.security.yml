@@ -4,6 +4,6 @@ xpack.observability.enabled: false
 xpack.uptime.enabled: false
 
 xpack.serverless.security.enabled: true
-xpack.serverless.security.projectTier: 'cloudEssentials'
+xpack.serverless.security.projectSkus: ['endpointEssentials']
 
 uiSettings.overrides.defaultRoute: /app/security/get_started

@@ -7,7 +7,7 @@
 
 import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 import { ServerlessSecurityConfig } from './config';
-import { capabilitiesSwitcher } from './lib/capabilities';
+import { getProjectSkusFeatures } from './sku/sku_features';
 
 import {
   ServerlessSecurityPluginSetup,
@@ -25,14 +25,12 @@ export class ServerlessSecurityPlugin
       ServerlessSecurityPluginStartDependencies
     >
 {
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    // this.logger = this.initializerContext.logger.get();
-  }
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(coreSetup: CoreSetup) {
+  public setup(_coreSetup: CoreSetup, pluginsSetup: ServerlessSecurityPluginSetupDependencies) {
     const config = this.initializerContext.config.get<ServerlessSecurityConfig>();
+    pluginsSetup.securitySolution.setAppFeatures(getProjectSkusFeatures(config.projectSkus));
 
-    coreSetup.capabilities.registerSwitcher(capabilitiesSwitcher(config.projectTier));
     return {};
   }
 

@@ -17,7 +17,7 @@ export const registerUpsellings = (upselling: UpsellingService) => {
 
   upselling.registerSections({
     load_prebuilt_rules: {
-      capabilities: ['siem.prebuilt_rules'],
+      capabilities: ['siem.prebuilt-rules'],
       component: PrebuiltRulesTooltipUpselling,
     },
   });

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { capabilitiesSwitcher } from './switcher';
+export type { AppFeatureKeys, AppFeatureKey } from './types';
+export { AppFeatures } from './app_features';

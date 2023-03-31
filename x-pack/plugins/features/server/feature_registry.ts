@@ -39,6 +39,16 @@ export class FeatureRegistry {
     this.kibanaFeatures[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
   }
 
+  public unregisterKibanaFeature(featureId: string) {
+    if (this.locked) {
+      throw new Error(
+        `Features are locked, can't register new features. Attempt to unregister ${featureId} failed.`
+      );
+    }
+
+    delete this.kibanaFeatures[featureId];
+  }
+
   public registerElasticsearchFeature(feature: ElasticsearchFeatureConfig) {
     if (this.locked) {
       throw new Error(

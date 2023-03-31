@@ -16,6 +16,17 @@ export const CasesUpselling: React.FC = React.memo(() => {
       body={
         <>
           Get <b>EndpointComplete</b> to use Cases
+          <br />
+          <br />
+          <iframe
+            title="money"
+            src="https://giphy.com/embed/px8O7NANzzaqk"
+            width="480"
+            height="283"
+            frameBorder="0"
+            className="giphy-embed"
+            allowFullScreen
+          />
         </>
       }
       actions={<EuiLink href="#">Purchase Endpoint Complete</EuiLink>}

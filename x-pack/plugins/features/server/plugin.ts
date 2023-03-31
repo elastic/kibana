@@ -40,6 +40,7 @@ import {
  */
 export interface PluginSetupContract {
   registerKibanaFeature(feature: KibanaFeatureConfig): void;
+  unregisterKibanaFeature(featureId: string): void;
   registerElasticsearchFeature(feature: ElasticsearchFeatureConfig): void;
   /**
    * Calling this function during setup will crash Kibana.
@@ -113,6 +114,9 @@ export class FeaturesPlugin
 
     return deepFreeze({
       registerKibanaFeature: this.featureRegistry.registerKibanaFeature.bind(this.featureRegistry),
+      unregisterKibanaFeature: this.featureRegistry.unregisterKibanaFeature.bind(
+        this.featureRegistry
+      ),
       registerElasticsearchFeature: this.featureRegistry.registerElasticsearchFeature.bind(
         this.featureRegistry
       ),

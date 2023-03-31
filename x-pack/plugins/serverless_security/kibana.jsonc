@@ -7,15 +7,13 @@
     "id": "serverlessSecurity",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "serverless",
-      "security"
-    ],
+    "configPath": ["xpack", "serverless", "security"],
     "requiredPlugins": [
       "serverless",
       "security",
       "securitySolution",
+      "cases",
+      "features",
       "kibanaReact"
     ],
     "optionalPlugins": [],

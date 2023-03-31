@@ -269,6 +269,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     licenseService.start(plugins.licensing.license$);
+    // console.log(core.application.capabilities);
     this.upsellingService.start(core.application.capabilities);
 
     if (plugins.fleet) {

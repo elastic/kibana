@@ -10,20 +10,23 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 
 export * from './types';
 
+const projectSku = schema.oneOf([
+  schema.literal('endpointEssentials'),
+  schema.literal('cloudEssentials'),
+]);
+export type ServerlessSecuritySku = TypeOf<typeof projectSku>;
+
+const projectSkus = schema.arrayOf<ServerlessSecuritySku>(projectSku, {
+  defaultValue: ['endpointEssentials'],
+});
+export type ServerlessSecuritySkus = TypeOf<typeof projectSkus>;
+
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  projectTier: schema.oneOf(
-    [schema.literal('endpointEssentials'), schema.literal('cloudEssentials')],
-    {
-      defaultValue: 'endpointEssentials',
-    }
-  ),
+  projectSkus,
 });
+export type ServerlessSecurityConfig = TypeOf<typeof configSchema>;
 
-type ConfigType = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<ConfigType> = {
+export const config: PluginConfigDescriptor<ServerlessSecurityConfig> = {
   schema: configSchema,
 };
-
-export type ServerlessSecurityConfig = TypeOf<typeof configSchema>;
