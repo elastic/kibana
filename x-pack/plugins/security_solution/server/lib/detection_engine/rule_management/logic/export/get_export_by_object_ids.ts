@@ -13,6 +13,7 @@ import type { ISavedObjectsExporter, KibanaRequest, Logger } from '@kbn/core/ser
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
 import { isAlertType } from '../../../rule_schema';
@@ -47,7 +48,8 @@ export const getExportByObjectIds = async (
   objects: Array<{ rule_id: string }>,
   logger: Logger,
   actionsExporter: ISavedObjectsExporter,
-  request: KibanaRequest
+  request: KibanaRequest,
+  actionsClient: ActionsClient
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
@@ -71,7 +73,8 @@ export const getExportByObjectIds = async (
   const { actionConnectors, actionConnectorDetails } = await getRuleActionConnectorsForExport(
     rules,
     actionsExporter,
-    request
+    request,
+    actionsClient
   );
 
   const rulesNdjson = transformDataToNdjson(rules);
