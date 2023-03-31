@@ -59,7 +59,9 @@ import { UsageCollector } from './usage/usage_collector';
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
     logs: schema.object({
-      app_target: schema.string({ defaultValue: 'logs-ui' }),
+      app_target: schema.oneOf([schema.literal('logs-ui'), schema.literal('discover')], {
+        defaultValue: 'logs-ui',
+      }),
     }),
     alerting: schema.object({
       inventory_threshold: schema.object({

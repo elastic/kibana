@@ -18,7 +18,7 @@ export interface InfraConfig {
     compositeSize: number;
   };
   logs: {
-    app_target: string;
+    app_target: 'logs-ui' | 'discover';
   };
   sources?: {
     default?: {

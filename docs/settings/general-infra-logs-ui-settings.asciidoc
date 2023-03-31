@@ -7,3 +7,6 @@ Controls the size of the composite aggregations used by the Inventory Threshold 
 
 `xpack.infra.alerting.metric_threshold.group_by_page_size`::
 Controls the size of the composite aggregations used by the Metric Threshold group by feature. Defaults to `10_000`.
+
+`xpack.infra.logs.app_target`::
+Controls the target app for the logs client routing. Accepted values: `logs-ui | discover`. Defaults to `logs-ui`. 
