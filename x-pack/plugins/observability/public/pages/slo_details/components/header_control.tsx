@@ -41,7 +41,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     }
   };
 
-  const onCloseAlertFlyout = useCallback(
+  const onCloseRuleFlyout = useCallback(
     () => setRuleFlyoutVisibility(false),
     [setRuleFlyoutVisibility]
   );
@@ -49,6 +49,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const handleOpenRuleFlyout = () => {
     closePopover();
     setRuleFlyoutVisibility(true);
+  };
+
+  const handleManageRules = () => {
+    navigateToUrl(basePath.prepend(paths.observability.rules));
   };
 
   return (
@@ -92,8 +96,21 @@ export function HeaderControl({ isLoading, slo }: Props) {
               onClick={handleOpenRuleFlyout}
               data-test-subj="sloDetailsHeaderControlPopoverCreateRule"
             >
-              {i18n.translate('xpack.observability.slo.sloDetails.headerControl.createRule', {
-                defaultMessage: 'Create alert rule',
+              {i18n.translate(
+                'xpack.observability.slo.sloDetails.headerControl.createBurnRateRule',
+                {
+                  defaultMessage: 'Create alert rule',
+                }
+              )}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="manageRules"
+              disabled={!hasWriteCapabilities}
+              onClick={handleManageRules}
+              data-test-subj="sloDetailsHeaderControlPopoverManageRules"
+            >
+              {i18n.translate('xpack.observability.slo.sloDetails.headerControl.manageRules', {
+                defaultMessage: 'Manage rules',
               })}
             </EuiContextMenuItem>,
           ]}
@@ -104,7 +121,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           consumer={sloFeatureId}
           ruleTypeId={SLO_BURN_RATE_RULE_ID}
           canChangeTrigger={false}
-          onClose={onCloseAlertFlyout}
+          onClose={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate` }}
         />
       ) : null}
