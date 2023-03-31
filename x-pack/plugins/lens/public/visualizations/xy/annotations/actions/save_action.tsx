@@ -109,7 +109,7 @@ const saveAnnotationGroupToLibrary = async (
     title: newTitle,
     description: newDescription,
     tags: newTags,
-    dataViewSpec: dataView.isPersisted() ? undefined : dataView.toSpec(),
+    dataViewSpec: dataView.isPersisted() ? undefined : dataView.toSpec(false),
   };
 
   if (saveAsNew) {
