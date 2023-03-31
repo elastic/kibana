@@ -9,9 +9,9 @@ import { useFetcher } from '@kbn/observability-plugin/public';
 import { useKibanaServices } from './use_kibana_services';
 
 export function useStaticDataView() {
-  const { observability } = useKibanaServices();
+  const { exploratoryView } = useKibanaServices();
   const { data, loading } = useFetcher(async () => {
-    return observability.getAppDataView('ux');
+    return exploratoryView.getAppDataView('ux');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
