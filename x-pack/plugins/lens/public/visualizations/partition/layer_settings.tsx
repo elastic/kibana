@@ -8,7 +8,7 @@
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { PieChartTypes } from '../../../common';
+import { PieChartTypes } from '../../../common/constants';
 import { PieVisualizationState } from '../..';
 import { VisualizationLayerSettingsProps } from '../../types';
 
