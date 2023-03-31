@@ -129,30 +129,6 @@ export const TableActions = ({
     [closePopover]
   );
 
-  // Categorize exists
-  const categorizeLabel = i18n.translate(
-    'discover.docViews.table.filterForFieldPresentButtonTooltip',
-    { defaultMessage: 'Categorize field' }
-  );
-  const categorizeAriaLabel = i18n.translate(
-    'discover.docViews.table.filterForFieldPresentButtonAriaLabel',
-    { defaultMessage: 'Categorize field' }
-  );
-  const categorizeDisabled = !fieldMapping || !fieldMapping.filterable;
-  const categorizeToolTip =
-    (filtersExistsDisabled &&
-      (fieldMapping && fieldMapping.scripted
-        ? i18n.translate(
-            'discover.docViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip',
-            {
-              defaultMessage: 'Unable to filter for presence of scripted fields',
-            }
-          )
-        : i18n.translate('discover.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip', {
-            defaultMessage: 'Unable to filter for presence of meta fields',
-          }))) ||
-    undefined;
-
   const panels = [
     {
       id: 0,
@@ -181,15 +157,6 @@ export const TableActions = ({
           toolTipContent: filtersExistsToolTip,
           icon: 'filter',
           disabled: filtersExistsDisabled,
-          'data-test-subj': `addExistsFilterButton-${field}`,
-          onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
-        },
-        {
-          name: categorizeLabel,
-          'aria-label': categorizeAriaLabel,
-          toolTipContent: categorizeToolTip,
-          icon: 'editorOrderedList',
-          disabled: categorizeDisabled,
           'data-test-subj': `addExistsFilterButton-${field}`,
           onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
         },

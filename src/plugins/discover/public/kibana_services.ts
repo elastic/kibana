@@ -32,9 +32,6 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<UrlTracker>('ur
 export const [getDocViewsRegistry, setDocViewsRegistry] =
   createGetterSetter<DocViewsRegistry>('DocViewsRegistry');
 
-export const [getExtraFieldActions, setExtraFieldActions] =
-  createGetterSetter<DocViewsRegistry>('DocViewsRegistry');
-
 /**
  * Makes sure discover and context are using one instance of history.
  */

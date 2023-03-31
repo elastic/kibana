@@ -275,7 +275,7 @@ export const DocViewerTable = ({
       <EuiTableHeaderCell
         key="header-cell-actions"
         align="left"
-        width={showActionsInsideTableCell ? 170 : 62}
+        width={showActionsInsideTableCell ? 150 : 62}
         isSorted={false}
       >
         <EuiText size="xs">
