@@ -42,9 +42,7 @@ export const DimensionTrigger = ({
     >
       <EuiFlexItem grow={true}>
         <span>
-          <span className="lnsLayerPanel__triggerTextLabel domDragDrop__enableTextSelection">
-            {label}
-          </span>
+          <span className="lnsLayerPanel__triggerTextLabel">{label}</span>
         </span>
       </EuiFlexItem>
     </EuiText>

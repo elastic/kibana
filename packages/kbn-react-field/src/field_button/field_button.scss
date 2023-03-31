@@ -31,9 +31,6 @@
 .kbnFieldButton__name {
   flex-grow: 1;
   word-break: break-word;
-}
-
-.kbnFieldButton__nameInner {
   padding: 0 $euiSizeS;
 }
 
@@ -62,7 +59,6 @@
 // Reduce text size and spacing for the small size
 .kbnFieldButton--xs {
   font-size: $euiFontSizeXS;
-  padding: 0 $euiSizeXS;
 
   .kbnFieldButton__button {
     padding: $euiSizeXS 0;

@@ -345,11 +345,10 @@ function DiscoverFieldComponent({
       button={
         <DragDrop
           draggable
-          withDragHandle
           order={order}
           value={value}
           onDragStart={closePopover}
-          isDisabled={alwaysShowActionButton || groupName === FieldsGroupNames.SelectedFields}
+          isDisabled={alwaysShowActionButton}
           dataTestSubj={`dscFieldListPanelField-${field.name}`}
         >
           <FieldItemButton
@@ -360,7 +359,7 @@ function DiscoverFieldComponent({
             isActive={infoIsOpen}
             flush={alwaysShowActionButton ? 'both' : undefined}
             shouldAlwaysShowAction={alwaysShowActionButton}
-            onClick={isDocumentRecord && field.type !== '_source' ? togglePopover : undefined}
+            onClick={field.type !== '_source' ? togglePopover : undefined}
             {...getCommonFieldItemButtonProps({ field, isSelected, toggleDisplay })}
           />
         </DragDrop>
@@ -378,7 +377,7 @@ function DiscoverFieldComponent({
           {...customPopoverHeaderProps}
         />
       )}
-      renderContent={renderPopover}
+      renderContent={isDocumentRecord ? renderPopover : undefined}
     />
   );
 }

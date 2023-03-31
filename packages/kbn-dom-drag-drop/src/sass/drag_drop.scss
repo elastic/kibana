@@ -25,7 +25,13 @@
 // Draggable item
 .domDragDrop-isDraggable {
   @include mixinDomDraggable;
-  cursor: grab;
+  @include mixinDomDragDropHover;
+
+  // Include a possible nested button like when using FieldButton
+  & .kbnFieldButton__button,
+  & .euiLink {
+    cursor: grab;
+  }
 
   &:focus {
     @include euiFocusRing;
@@ -233,14 +239,5 @@ $reorderItemMargin: 8px;
 
   .domDragDrop-isActiveDropTarget & {
     @include mixinDomDroppableActiveHover;
-  }
-}
-
-.domDragDrop__enableTextSelection {
-  user-select: text;
-  cursor: default;
-
-  button & {
-    cursor: pointer;
   }
 }

@@ -13,11 +13,20 @@ $domDragDropZLevel3: 3;
 @mixin mixinDomDraggable {
   @include euiSlightShadow;
   background: $euiColorEmptyShade;
+  cursor: grab;
 }
 
 // Static styles for a drop area
 @mixin mixinDomDroppable {
   border: $euiBorderWidthThin dashed $euiBorderColor !important;
+}
+
+// Hovering state for drag item and drop area
+@mixin mixinDomDragDropHover {
+  &:hover {
+    transform: translateX(4px);
+    transition: transform .4s ease-out;
+  }
 }
 
 // Style for drop area when there's an item being dragged

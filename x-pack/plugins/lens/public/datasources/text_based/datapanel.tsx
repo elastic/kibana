@@ -132,7 +132,6 @@ export function TextBasedDataPanel({
       return (
         <DragDrop
           draggable
-          withDragHandle
           order={order}
           value={value}
           dataTestSubj={`lnsFieldListPanelField-${field.name}`}
