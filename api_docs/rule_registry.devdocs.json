@@ -1544,7 +1544,7 @@
         "label": "createGetSummarizedAlertsFn",
         "description": [],
         "signature": [
-          "(opts: CreateGetSummarizedAlertsFnOpts) => () => ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, }: ",
+          "(opts: CreateGetSummarizedAlertsFnOpts) => () => ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -1889,7 +1889,7 @@
             "section": "def-common.WithoutReservedActionGroups",
             "text": "WithoutReservedActionGroups"
           },
-          "<TActionGroupIds, never>>) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, }: ",
+          "<TActionGroupIds, never>>) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
           {
             "pluginId": "alerting",
             "scope": "server",
