@@ -63,9 +63,6 @@ export class PreviewController {
   private search: ISearchStart;
   private fieldFormats: FieldFormatsStart;
 
-  // todo examine this
-  private state: PreviewState = previewStateDefault;
-
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;
 
@@ -122,7 +119,9 @@ export class PreviewController {
   };
 
   setPreviewError = (error: PreviewState['previewResponse']['error']) => {
-    this.updateState({ previewResponse: { ...this.state.previewResponse, error } });
+    this.updateState({
+      previewResponse: { ...this.internalState$.getValue().previewResponse, error },
+    });
   };
 
   setPreviewResponse = (previewResponse: PreviewState['previewResponse']) => {
@@ -130,7 +129,7 @@ export class PreviewController {
   };
 
   clearPreviewError = (errorCode: ScriptErrorCodes) => {
-    const { previewResponse: prev } = this.state;
+    const { previewResponse: prev } = this.internalState$.getValue();
     const error = prev.error === null || prev.error?.code === errorCode ? null : prev.error;
     this.updateState({
       previewResponse: {
