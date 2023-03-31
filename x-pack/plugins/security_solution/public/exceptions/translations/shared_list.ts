@@ -394,7 +394,15 @@ export const EXPIRED_EXCEPTIONS_MODAL_CANCEL_BUTTON = i18n.translate(
 export const EXPIRED_EXCEPTIONS_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.expiredExceptionModalTitle',
   {
-    defaultMessage: 'Expired exception item options',
+    defaultMessage: 'Include expired exception items?',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalIncludeDescription',
+  {
+    defaultMessage:
+      'Exception items may contain expiration dates - select whether you would like expired items to be included.',
   }
 );
 

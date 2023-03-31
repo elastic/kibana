@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useState } from 'react';
 
-import { EuiConfirmModal, EuiSwitch } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import * as i18n from '../../translations';
 
 interface IncludeExpiredExceptionsModalProps {
@@ -36,7 +36,10 @@ export const IncludeExpiredExceptionsModal = memo<IncludeExpiredExceptionsModalP
         cancelButtonText={i18n.EXPIRED_EXCEPTIONS_MODAL_CANCEL_BUTTON}
         confirmButtonText={i18n.EXPIRED_EXCEPTIONS_MODAL_CONFIRM_BUTTON}
         defaultFocusedButton="confirm"
+        data-test-subj="includeExpiredExceptionsConfirmationModal"
       >
+        <EuiText>{i18n.EXPIRED_EXCEPTIONS_MODAL_DESCRIPTION}</EuiText>
+        <EuiSpacer size="s" />
         <EuiSwitch
           label={i18n.EXPIRED_EXCEPTIONS_MODAL_INCLUDE_SWITCH_LABEL}
           checked={includeExpired}

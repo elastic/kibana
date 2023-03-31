@@ -32,7 +32,6 @@ describe('duplicate_exceptionList_query_schema', () => {
     const message = pipe(checked, foldLeftRight);
 
     expect(message.schema).toEqual({
-      id: 'uuid_here',
       include_expired_exceptions: 'true',
       list_id: 'some-list-id',
       namespace_type: 'single',

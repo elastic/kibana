@@ -54,7 +54,7 @@ export const duplicateExceptionListAndItems = async ({
   });
 
   if (listToDuplicate == null) {
-    throw new Error(`Exception list to duplicat of list_id:${listId} not found.`);
+    throw new Error(`Exception list to duplicate of list_id:${listId} not found.`);
   }
 
   if (!LISTS_ABLE_TO_DUPLICATE.includes(listToDuplicate.type)) {

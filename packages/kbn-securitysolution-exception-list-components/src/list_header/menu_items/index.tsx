@@ -107,6 +107,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
               onClick: () => {
                 if (typeof onDuplicateList === 'function') onDuplicateList();
               },
+              disabled: !canUserEditList,
             },
             {
               key: '3',

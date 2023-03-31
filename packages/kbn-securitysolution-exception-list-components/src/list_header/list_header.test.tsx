@@ -17,6 +17,7 @@ const onExportList = jest.fn();
 const onDeleteList = jest.fn();
 const onManageRules = jest.fn();
 const onNavigate = jest.fn();
+const onDuplicateList = jest.fn();
 jest.mock('./use_list_header');
 
 describe('ExceptionListHeader', () => {
@@ -40,6 +41,7 @@ describe('ExceptionListHeader', () => {
         onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
@@ -70,6 +72,7 @@ describe('ExceptionListHeader', () => {
         onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
@@ -93,6 +96,7 @@ describe('ExceptionListHeader', () => {
         onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
@@ -123,6 +127,7 @@ describe('ExceptionListHeader', () => {
         onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
@@ -148,6 +153,7 @@ describe('ExceptionListHeader', () => {
         onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
         backOptions={{ pageId: '', path: 'test-path', onNavigate }}
       />
     );

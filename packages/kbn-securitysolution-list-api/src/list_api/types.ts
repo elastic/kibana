@@ -6,18 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { HttpStart } from '@kbn/core-http-browser';
+
 import type {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
-
-// TODO: Replace these with kbn packaged versions once we have those available to us
-// These originally came from this location below before moving them to this hacked "any" types:
-// import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
-interface HttpStart {
-  fetch: <T>(...args: any) => any;
-}
 
 export interface ApiParams {
   http: HttpStart;
