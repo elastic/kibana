@@ -23,8 +23,10 @@ const getAvailableVersions = async (log: ToolingLog) => {
   try {
     log.info('Fetching Elastic Agent versions list');
     const results = await fetch(url, options);
+    log.info(`Status: ${results.status}`);
 
-    const jsonBody = await results.json();
+    const rawBody = await results.text();
+    const jsonBody = JSON.parse(rawBody);
 
     const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
       .filter((item: any) => item?.title?.includes('Elastic Agent'))
@@ -33,7 +35,8 @@ const getAvailableVersions = async (log: ToolingLog) => {
     log.info(`Retrieved available versions`);
     return versions;
   } catch (error) {
-    log.warning(`Failed to fetch versions list`);
+    log.warning(`Failed to fetch versions list from:`);
+    log.warning(rawBody);
     throw new Error(error);
   }
   return [];
