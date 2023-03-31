@@ -33,7 +33,6 @@ const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ lab
 
 const useDefaultTimezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
-  console.log('kibanaTz', kibanaTz);
   if (!kibanaTz || kibanaTz === 'Browser') return moment.tz?.guess() ?? 'UTC';
   return kibanaTz;
 };
