@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-export function isValidRouteVersion(version: string): boolean {
-  const float = parseFloat(version);
-  return isFinite(float) && !isNaN(float) && float > 0 && Math.round(float) === float;
-}
+import { isValidRouteVersion } from './is_valid_route_version';
+
+describe('isValidRouteVersion', () => {
+  test('valid numbers return "true"', () => {
+    expect(isValidRouteVersion('1')).toBe(true);
+  });
+
+  test.each([['1.1'], [''], ['abc']])('%p returns "false"', (value: string) => {
+    expect(isValidRouteVersion(value)).toBe(false);
+  });
+});
