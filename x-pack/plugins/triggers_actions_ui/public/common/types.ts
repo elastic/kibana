@@ -11,11 +11,24 @@ export interface Comparator {
   requiredValues: number;
 }
 
+type AggregationTypeValidNormlizedTypes =
+  | 'string'
+  | 'number'
+  | 'date'
+  | 'boolean'
+  | 'ip'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'attachment'
+  | 'murmur3'
+  | 'histogram'
+  | 'unknown';
+
 export interface AggregationType {
   text: string;
   fieldRequired: boolean;
   value: string;
-  validNormalizedTypes: string[];
+  validNormalizedTypes: AggregationTypeValidNormlizedTypes[];
 }
 
 export interface GroupByType {
