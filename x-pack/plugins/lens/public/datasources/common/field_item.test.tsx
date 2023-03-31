@@ -9,16 +9,15 @@ import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
-import { InnerFieldItem, FieldItemProps } from './field_item';
+import { InnerFieldItem, FieldItemIndexPatternFieldProps } from './field_item';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { IndexPattern } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { documentField } from './document_field';
+import { documentField } from '../form_based/document_field';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -31,8 +30,6 @@ import { FieldStats, FieldVisualizeButton } from '@kbn/unified-field-list-plugin
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
 }));
-
-const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
 const clickField = async (wrapper: ReactWrapper, field: string) => {
   await act(async () => {
@@ -47,6 +44,7 @@ const mockedServices = {
   dataViews: dataViewPluginMocks.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   charts: chartPluginMock.createSetupContract(),
+  uiActions: uiActionsPluginMock.createStartContract(),
   uiSettings: coreMock.createStart().uiSettings,
   share: {
     url: {
@@ -64,7 +62,7 @@ const mockedServices = {
   },
 };
 
-const InnerFieldItemWrapper: React.FC<FieldItemProps> = (props) => {
+const InnerFieldItemWrapper: React.FC<FieldItemIndexPatternFieldProps> = (props) => {
   return (
     <KibanaContextProvider services={mockedServices}>
       <InnerFieldItem {...props} />
@@ -72,7 +70,7 @@ const InnerFieldItemWrapper: React.FC<FieldItemProps> = (props) => {
   );
 };
 
-async function getComponent(props: FieldItemProps) {
+async function getComponent(props: FieldItemIndexPatternFieldProps) {
   const instance = await mountWithIntl(<InnerFieldItemWrapper {...props} />);
   // wait for lazy modules
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -80,8 +78,8 @@ async function getComponent(props: FieldItemProps) {
   return instance;
 }
 
-describe('IndexPattern Field Item', () => {
-  let defaultProps: FieldItemProps;
+describe('Lens Field Item', () => {
+  let defaultProps: FieldItemIndexPatternFieldProps;
   let indexPattern: IndexPattern;
   let dataView: DataView;
 
@@ -146,13 +144,6 @@ describe('IndexPattern Field Item', () => {
 
     defaultProps = {
       indexPattern,
-      fieldFormats: {
-        ...fieldFormatsServiceMock.createStartContract(),
-        getDefaultInstance: jest.fn(() => ({
-          convert: jest.fn((s: unknown) => JSON.stringify(s)),
-        })),
-      } as unknown as FieldFormatsStart,
-      core: coreMock.createStart(),
       highlight: '',
       dateRange: {
         fromDate: 'now-7d',
@@ -168,17 +159,17 @@ describe('IndexPattern Field Item', () => {
         searchable: true,
       },
       exists: true,
-      chartsThemeService,
       groupIndex: 0,
       itemIndex: 0,
       dropOntoWorkspace: () => {},
       hasSuggestionForField: () => false,
-      uiActions: uiActionsPluginMock.createStartContract(),
     };
 
     dataView = {
       ...indexPattern,
-      getFormatterForField: defaultProps.fieldFormats.getDefaultInstance,
+      getFormatterForField: jest.fn(() => ({
+        convert: jest.fn((s: unknown) => JSON.stringify(s)),
+      })),
     } as unknown as DataView;
 
     (mockedServices.dataViews.get as jest.Mock).mockImplementation(() => {

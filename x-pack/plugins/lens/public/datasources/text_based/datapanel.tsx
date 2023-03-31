@@ -16,7 +16,6 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
-  FieldItemButton,
   FieldList,
   FieldListFilters,
   FieldListGrouped,
@@ -25,11 +24,11 @@ import {
   GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
-import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
+import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
-import { getFieldItemActions } from '../common/get_field_item_actions';
+import { FieldItem } from '../common/field_item';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
@@ -116,38 +115,17 @@ export function TextBasedDataPanel({
         return <></>;
       }
 
-      const value = {
-        field: field.name,
-        id: field.id,
-        humanData: { label: field.name },
-      };
-      const order = [0, groupIndex, itemIndex];
-      const { buttonAddFieldToWorkspaceProps, onAddFieldToWorkspace } =
-        getFieldItemActions<DatatableColumn>({
-          value,
-          hasSuggestionForField,
-          dropOntoWorkspace,
-        });
-
       return (
-        <DragDrop
-          draggable
-          order={order}
-          value={value}
-          dataTestSubj={`lnsFieldListPanelField-${field.name}`}
-        >
-          <FieldItemButton<DatatableColumn>
-            isSelected={false} // multiple selections are allowed
-            isEmpty={false}
-            isActive={false}
-            field={field}
-            fieldSearchHighlight={fieldSearchHighlight}
-            getCustomFieldType={getCustomFieldType}
-            onClick={undefined}
-            buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
-            onAddFieldToWorkspace={onAddFieldToWorkspace}
-          />
-        </DragDrop>
+        <FieldItem
+          field={field}
+          exists
+          hideDetails
+          itemIndex={itemIndex}
+          groupIndex={groupIndex}
+          dropOntoWorkspace={dropOntoWorkspace}
+          hasSuggestionForField={hasSuggestionForField}
+          highlight={fieldSearchHighlight}
+        />
       );
     },
     [hasSuggestionForField, dropOntoWorkspace]

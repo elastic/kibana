@@ -8,6 +8,7 @@
 import { type DragDropIdentifier } from '@kbn/dom-drag-drop';
 import type { FieldItemButtonProps, FieldListItem } from '@kbn/unified-field-list-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
 
 interface GetFieldItemActionsParams<T extends FieldListItem> {
   value: DragDropIdentifier;
@@ -18,7 +19,7 @@ interface GetFieldItemActionsParams<T extends FieldListItem> {
 
 interface GetFieldItemActionsResult<T extends FieldListItem> {
   buttonAddFieldToWorkspaceProps: FieldItemButtonProps<T>['buttonAddFieldToWorkspaceProps'];
-  onAddFieldToWorkspace: FieldItemButtonProps<T>['onAddFieldToWorkspace'];
+  onAddFieldToWorkspace: FieldItemButtonProps<T | DataViewField>['onAddFieldToWorkspace'];
 }
 
 export function getFieldItemActions<T extends FieldListItem>({
