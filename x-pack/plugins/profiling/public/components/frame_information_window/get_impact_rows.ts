@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asDuration } from '../../utils/formatters/as_duration';
 import { asNumber } from '../../utils/formatters/as_number';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
-import { calculateImpactEstimates } from './calculate_impact_estimates';
 
 export function getImpactRows({
   countInclusive,
