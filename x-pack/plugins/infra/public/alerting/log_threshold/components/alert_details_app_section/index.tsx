@@ -44,7 +44,10 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
           <EuiFlexItem key={`${chartCriterion.field}${idx}`}>
             <CriterionPreview
               ruleParams={rule.params}
-              sourceId={rule.params.logView.logViewId}
+              logViewReference={{
+                type: 'log-view-reference',
+                logViewId: rule.params.logView.logViewId,
+              }}
               chartCriterion={chartCriterion}
               showThreshold={true}
               executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}

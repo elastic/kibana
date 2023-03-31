@@ -21,6 +21,7 @@ import {
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PersistedLogViewReference } from '../../../../../common/log_views';
 import { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,
@@ -55,7 +56,7 @@ const GROUP_LIMIT = 5;
 interface Props {
   ruleParams: PartialRuleParams;
   chartCriterion: Partial<Criterion>;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
@@ -64,7 +65,7 @@ interface Props {
 export const CriterionPreview: React.FC<Props> = ({
   ruleParams,
   chartCriterion,
-  sourceId,
+  logViewReference,
   showThreshold,
   executionTimeRange,
   annotations,
@@ -107,7 +108,7 @@ export const CriterionPreview: React.FC<Props> = ({
           ? NUM_BUCKETS
           : NUM_BUCKETS / 4
       } // Display less data for groups due to space limitations
-      sourceId={sourceId}
+      logViewReference={logViewReference}
       threshold={ruleParams.count}
       chartAlertParams={chartAlertParams}
       showThreshold={showThreshold}
@@ -119,7 +120,7 @@ export const CriterionPreview: React.FC<Props> = ({
 
 interface ChartProps {
   buckets: number;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   threshold?: Threshold;
   chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   showThreshold: boolean;
@@ -129,7 +130,7 @@ interface ChartProps {
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
   buckets,
-  sourceId,
+  logViewReference,
   threshold,
   chartAlertParams,
   showThreshold,
@@ -146,7 +147,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     hasError,
     chartPreviewData: series,
   } = useChartPreviewData({
-    sourceId,
+    logViewReference,
     ruleParams: chartAlertParams,
     buckets,
     executionTimeRange,
