@@ -21,7 +21,7 @@ import {
   GetHostsResponsePayloadRT,
 } from '../../../common/http_api/hosts';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getHosts } from '../../lib/hosts/get_hosts';
+import { getHostsList } from './lib/get_hosts_list';
 
 interface HostsBatchRequest {
   request: {
@@ -46,14 +46,14 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
     },
     async (context, request, response) => {
       const [{ savedObjects }, { data }] = await libs.getStartServices();
-      const params = request.body;
+      const params: GetHostsRequestParams = request.body;
 
-      const search = data.search.asScoped(request);
+      const serchClient = data.search.asScoped(request);
       const soClient = savedObjects.getScopedClient(request);
       const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
 
       try {
-        const hosts = await getHosts(search, source, params);
+        const hosts = await getHostsList({ searchClient: serchClient, source, params });
 
         return response.ok({
           body: GetHostsResponsePayloadRT.encode(hosts.rawResponse),
@@ -82,14 +82,14 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
           const [{ executionContext, savedObjects }, { data }] = await libs.getStartServices();
           const { id } = requestData;
 
-          const search = data.search.asScoped(request);
+          const searchClient = data.search.asScoped(request);
           const soClient = savedObjects.getScopedClient(request);
           const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
 
           const { executionContext: ctx, ...restOptions } = options || {};
 
           return executionContext.withContext(ctx, async () => {
-            return getHosts(search, source, params, restOptions, id);
+            return getHostsList({ searchClient, source, params, options: restOptions, id });
           });
         },
       };

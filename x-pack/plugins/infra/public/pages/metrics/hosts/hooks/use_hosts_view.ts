@@ -14,17 +14,18 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import createContainer from 'constate';
-import { HttpSetup } from '@kbn/core-http-browser';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   GetHostsRequestParams,
   GetHostsResponsePayload,
   HostMetricType,
+  HostSortField,
 } from '../../../../../common/http_api/hosts';
 import { InfraClientCoreStart } from '../../../../types';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { useTableProperties } from './use_table_properties_url_state';
 
 const HOST_TABLE_METRICS: Array<{ type: HostMetricType }> = [
   { type: 'rx' },
@@ -40,18 +41,20 @@ type HostsRequest = Omit<GetHostsRequestParams, 'limit'> & { limit: number };
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const { http } = useKibana<InfraClientCoreStart>().services;
-  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const { buildQuery, getDateRangeAsTimestamp, searchCriteria } = useUnifiedSearchContext();
+  const [{ sorting }] = useTableProperties();
 
-  const hostRequest = useMemo<HostsRequest & { requestTs: number }>(
+  const hostRequest = useMemo<HostsRequest>(
     () => ({
-      limit: 20,
+      limit: searchCriteria.limit,
       metrics: HOST_TABLE_METRICS,
-      query: JSON.stringify(buildQuery()),
-      sourceId,
+      query: buildQuery(),
       timeRange: getDateRangeAsTimestamp(),
-      requestTs: Date.now(),
+      sourceId,
+      sortField: sorting.field as HostSortField,
+      sortDirection: sorting.direction,
     }),
-    [buildQuery, getDateRangeAsTimestamp, sourceId]
+    [searchCriteria.limit, sorting, buildQuery, getDateRangeAsTimestamp, sourceId]
   );
 
   const abortCtrlRef = useRef(new AbortController());
@@ -59,10 +62,9 @@ export const useHostsView = () => {
     (requestBody: HostsRequest) => {
       abortCtrlRef.current.abort();
       abortCtrlRef.current = new AbortController();
-      return fetchAlertsCount({
-        http,
+      return http.post<GetHostsResponsePayload>(`/api/metrics/hosts`, {
         signal: abortCtrlRef.current.signal,
-        requestBody,
+        body: JSON.stringify(requestBody),
       });
     },
     [http],
@@ -71,9 +73,14 @@ export const useHostsView = () => {
 
   const fetch = useCallback(
     (newData?: Partial<HostsRequest>) => {
-      refetch({ ...hostRequest, ...newData });
+      return refetch({ ...hostRequest, ...newData });
     },
     [hostRequest, refetch]
+  );
+
+  const getSortedHostNames = useCallback(
+    () => (value?.hosts ?? []).map((p) => p.name).sort(),
+    [value?.hosts]
   );
 
   useEffect(() => {
@@ -84,31 +91,10 @@ export const useHostsView = () => {
     fetch,
     loading,
     error,
-    requestTs: hostRequest.requestTs,
+    getSortedHostNames,
     hostNodes: value?.hosts ?? [],
   };
 };
 
 export const HostsView = createContainer(useHostsView);
 export const [HostsViewProvider, useHostsViewContext] = HostsView;
-
-/**
- * Helpers
- */
-
-interface FetchAlertsCountParams {
-  http: HttpSetup;
-  signal: AbortSignal;
-  requestBody: HostsRequest;
-}
-
-async function fetchAlertsCount({
-  http,
-  signal,
-  requestBody,
-}: FetchAlertsCountParams): Promise<GetHostsResponsePayload> {
-  return http.post<GetHostsResponsePayload>(`/api/metrics/hosts`, {
-    signal,
-    body: JSON.stringify(requestBody),
-  });
-}

@@ -16,6 +16,7 @@ import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
+import { HostLimitOptions } from '../types';
 
 const DEFAULT_QUERY = {
   language: 'kuery',
@@ -25,6 +26,7 @@ const DEFAULT_FROM_MINUTES_VALUE = 15;
 const DEFAULT_FROM_IN_MILLISECONDS = DEFAULT_FROM_MINUTES_VALUE * 60000;
 
 export const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
+const INITIAL_SELECTED_LIMIT: HostLimitOptions = 20;
 
 const getDefaultFromTimestamp = () => Date.now() - DEFAULT_FROM_IN_MILLISECONDS;
 const getDefaultToTimestamp = () => Date.now();
@@ -35,6 +37,7 @@ const INITIAL_HOSTS_STATE: HostsState = {
   panelFilters: [],
   // for unified search
   dateRange: INITIAL_DATE_RANGE,
+  limit: INITIAL_SELECTED_LIMIT,
 };
 
 type Action =
@@ -51,10 +54,11 @@ const reducer = (state: HostsState, action: Action): HostsState => {
     case 'setQuery':
       const payload = Object.fromEntries(Object.entries(action.payload).filter(([_, v]) => !!v));
 
-      return {
+      const ttt = {
         ...state,
         ...payload,
       };
+      return ttt;
     default:
       throw new Error();
   }
@@ -135,6 +139,7 @@ const HostsStateRT = rt.type({
   panelFilters: HostsFiltersRT,
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
+  limit: rt.number,
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;

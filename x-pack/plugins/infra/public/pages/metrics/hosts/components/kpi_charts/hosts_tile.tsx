@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { type ChartBaseProps, KPIChart, AcceptedType } from './kpi_chart';
@@ -14,15 +14,24 @@ export interface HostsTileProps extends Omit<ChartBaseProps, 'type'> {
 }
 
 export const HostsTile = ({ type, ...props }: HostsTileProps) => {
+  const renderedRef = useRef(false);
   const { hostNodes, loading } = useHostsViewContext();
+
+  const hostsCount = useMemo(() => hostNodes.length, [hostNodes.length]);
+
+  useEffect(() => {
+    if (!loading && !renderedRef.current) {
+      renderedRef.current = true;
+    }
+  }, [loading]);
 
   return (
     <KPIChart
       id={`$metric-${type}`}
       type={type}
       nodes={[]}
-      loading={loading}
-      overrideValue={hostNodes?.length}
+      loading={!renderedRef.current}
+      overrideValue={hostsCount}
       {...props}
     />
   );

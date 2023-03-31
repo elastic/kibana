@@ -21,15 +21,15 @@ const cloudIcons: Record<CloudProvider, IconType> = {
 interface HostsTableEntryTitleProps {
   onClick: () => void;
   time: TimeRange;
-  title: HostNodeRow['title'];
+  title: HostNodeRow['name'];
 }
 
 export const HostsTableEntryTitle = ({ onClick, time, title }: HostsTableEntryTitleProps) => {
-  const { name, cloudProvider } = title;
+  const { name: hostName, cloudProvider } = title;
 
   const link = useLinkProps({
     app: 'metrics',
-    pathname: `/detail/host/${name}`,
+    pathname: `/detail/host/${hostName}`,
     search: {
       _a: encode({ time: { ...time, interval: '>=1m' } }),
     },
@@ -47,17 +47,17 @@ export const HostsTableEntryTitle = ({ onClick, time, title }: HostsTableEntryTi
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip delay="long" content={providerName}>
-          <EuiIcon type={iconType} size="m" title={name} />
+          <EuiIcon type={iconType} size="m" title={hostName} />
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-textTruncate" onClick={onClick}>
-        <EuiToolTip delay="long" content={name}>
+        <EuiToolTip delay="long" content={hostName}>
           <EuiLink
             data-test-subj="infraHostsTableEntryTitleLink"
             className="eui-displayBlock eui-textTruncate"
             {...link}
           >
-            {name}
+            {hostName}
           </EuiLink>
         </EuiToolTip>
       </EuiFlexItem>

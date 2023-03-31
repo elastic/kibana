@@ -6,27 +6,31 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import {
-  IKibanaSearchResponse,
-  ISearchClient,
-  ISearchOptionsSerializable,
-} from '@kbn/data-plugin/common';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { ESSearchRequest } from '@kbn/es-types';
 import { catchError, map, Observable } from 'rxjs';
-import { decodeOrThrow } from '../../../common/runtime_types';
-import { GetHostsRequestParams } from '../../../common/http_api/hosts';
-import { parseFilterQuery } from '../../utils/serialized_query';
-import { InfraSource } from '../sources';
-import { FilteredHostsAggregationResponse, FilteredHostsAggregationResponseRT } from './types';
+
+import { decodeOrThrow } from '../../../../common/runtime_types';
+import { InfraSource } from '../../../../common/source_configuration/source_configuration';
+import { GetHostsRequestParams } from '../../../../common/http_api/hosts';
+import {
+  FilteredHostsAggregationResponse,
+  FilteredHostsAggregationResponseRT,
+  GetHostsArgs,
+} from './types';
 import { BUCKET_KEY, MAX_FILTERED_HOST_SIZE } from './constants';
+import { parseFilters } from './utils';
+
+type QueryResponse = IKibanaSearchResponse<FilteredHostsAggregationResponse | undefined>;
 
 const createFilters = (params: GetHostsRequestParams): estypes.QueryDslQueryContainer => {
-  const parsedFilters = parseFilterQuery(params.query) as estypes.QueryDslQueryContainer;
+  const parsedFilters = parseFilters(params.query);
+
   return {
     bool: {
       ...parsedFilters.bool,
       filter: [
-        ...(Array.isArray(parsedFilters.bool?.filter) ? parsedFilters.bool?.filter ?? [] : []),
+        ...(Array.isArray(parsedFilters.bool.filter) ? parsedFilters.bool.filter ?? [] : []),
         {
           range: {
             '@timestamp': {
@@ -46,7 +50,7 @@ const createFilters = (params: GetHostsRequestParams): estypes.QueryDslQueryCont
   };
 };
 
-const createQueryParams = (params: GetHostsRequestParams, source: InfraSource): ESSearchRequest => {
+const createQuery = (params: GetHostsRequestParams, source: InfraSource): ESSearchRequest => {
   return {
     allow_no_indices: true,
     ignore_unavailable: true,
@@ -79,30 +83,30 @@ const createQueryParams = (params: GetHostsRequestParams, source: InfraSource): 
   };
 };
 
-export const getFilteredHosts = (
-  serchClient: ISearchClient,
-  source: InfraSource,
-  params: GetHostsRequestParams,
-  options?: ISearchOptionsSerializable,
-  id?: string
-): Observable<IKibanaSearchResponse<FilteredHostsAggregationResponse | null>> => {
-  const queryParams = createQueryParams(params, source);
+export const getFilteredHosts = ({
+  searchClient,
+  source,
+  params,
+  options,
+  id,
+}: GetHostsArgs): Observable<QueryResponse> => {
+  const queryRequest = createQuery(params, source);
   const { executionContext: ctx, ...restOptions } = options || {};
 
-  return serchClient
-    .search<{ id?: string; params: any }, IKibanaSearchResponse<estypes.SearchResponse>>(
+  return searchClient
+    .search(
       {
         id,
-        params: queryParams,
+        params: queryRequest,
       },
       restOptions
     )
     .pipe(
       map((res) => ({
         ...res,
-        rawResponse: res.rawResponse.aggregations
-          ? decodeOrThrow(FilteredHostsAggregationResponseRT)(res.rawResponse.aggregations)
-          : null,
+        rawResponse: decodeOrThrow(FilteredHostsAggregationResponseRT)(
+          res.rawResponse.aggregations
+        ),
       })),
       catchError((err) => {
         const error = {

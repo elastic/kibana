@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
 import {
   GetHostsRequestParams,
   GetHostsResponsePayload,
   HostMetadata,
   HostMetrics,
-} from '../../../common/http_api/hosts';
-import { BasicMetricValueRT, TopMetricsTypeRT } from '../metrics/types';
+} from '../../../../common/http_api/hosts';
+
 import {
   FilteredMetricsTypeRT,
   HostsMetricsSearchAggregationResponse,
@@ -83,9 +84,9 @@ export const convertBucketsToRows = (
 
 export const mapToApiResponse = (
   params: GetHostsRequestParams,
-  aggregations: HostsMetricsSearchAggregationResponse | null
+  aggregations?: HostsMetricsSearchAggregationResponse | null
 ): GetHostsResponsePayload => {
-  if (!aggregations) {
+  if (!aggregations?.groupings) {
     return {
       hosts: [],
     };

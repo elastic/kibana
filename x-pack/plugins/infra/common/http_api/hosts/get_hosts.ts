@@ -60,7 +60,7 @@ export const GetHostsRequestParamsRT = rt.intersection([
   rt.type({
     limit: LimitBrandRT,
     metrics: rt.array(rt.type({ type: HostMetricTypeRT })),
-    query: rt.union([rt.string, rt.null]),
+    query: rt.UnknownRecord,
     sourceId: rt.string,
     timeRange: TimerangeRT,
   }),

@@ -6,7 +6,7 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { buildEsQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import { map, skip, startWith } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
@@ -38,6 +38,7 @@ const buildQuerySubmittedPayload = (
 export const useUnifiedSearch = () => {
   const { state, dispatch, getTime, getDateRangeAsTimestamp } = useHostsUrlState();
   const { dataView } = useMetricsDataViewContext();
+  const [submitTimestamp, setSubmitTimestamp] = useState(Date.now());
   const querySettings = useKibanaQuerySettings();
   const { services } = useKibana<InfraClientStartDeps>();
   const {
@@ -57,10 +58,12 @@ export const useUnifiedSearch = () => {
       dateRange?: TimeRange;
       filters?: Filter[];
       panelFilters?: Filter[];
+      limit?: number;
     }) => {
       const {
         panelFilters,
         query,
+        limit,
         // Makes sure default values are set in case `onSubmit` is called outside the unified search observables subscription
         // and prevents their state values from being cleared.
         dateRange = getTime(),
@@ -74,10 +77,13 @@ export const useUnifiedSearch = () => {
           filters,
           dateRange,
           panelFilters,
+          limit,
         },
       });
+
+      setSubmitTimestamp(Date.now());
     },
-    [dispatch, filterManagerService, getTime]
+    [dispatch, filterManagerService, getTime, setSubmitTimestamp]
   );
 
   const loadFiltersFromState = useCallback(() => {
@@ -147,19 +153,23 @@ export const useUnifiedSearch = () => {
     );
   }, [getDateRangeAsTimestamp, state, telemetry]);
 
-  const getAllFilters = useCallback(
-    () => [...state.filters, ...state.panelFilters],
-    [state.filters, state.panelFilters]
-  );
   const buildQuery = useCallback(() => {
-    return buildEsQuery(dataView, state.query, getAllFilters(), querySettings);
-  }, [dataView, state.query, getAllFilters, querySettings]);
+    return buildEsQuery(
+      dataView,
+      state.query,
+      [...state.filters, ...state.panelFilters],
+      querySettings
+    );
+  }, [dataView, state.query, state.filters, state.panelFilters, querySettings]);
 
   return {
     buildQuery,
     onSubmit,
     getDateRangeAsTimestamp,
-    searchCriteria: { ...state },
+    submitTimestamp,
+    searchCriteria: {
+      ...state,
+    },
   };
 };
 

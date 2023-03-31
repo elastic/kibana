@@ -52,3 +52,5 @@ export const ALERT_STATUS_QUERY = {
   [ACTIVE_ALERTS.status]: ACTIVE_ALERTS.query,
   [RECOVERED_ALERTS.status]: RECOVERED_ALERTS.query,
 };
+
+export const HOST_LIMIT_OPTIONS = [10, 20, 50, 100] as const;

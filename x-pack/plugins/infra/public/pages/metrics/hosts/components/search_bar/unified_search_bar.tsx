@@ -7,21 +7,19 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  type Filter,
-  type Query,
-  type TimeRange,
-} from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { InfraClientStartDeps } from '../../../../types';
-import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
+import type { InfraClientStartDeps } from '../../../../../types';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
-import { useMetricsDataViewContext } from '../hooks/use_data_view';
+import { useMetricsDataViewContext } from '../../hooks/use_data_view';
+import { LimitOptions } from './limit_options';
+import { HostLimitOptions } from '../../types';
 
 export const UnifiedSearchBar = () => {
   const {
@@ -33,19 +31,23 @@ export const UnifiedSearchBar = () => {
   const { SearchBar } = unifiedSearch.ui;
 
   const onPanelFiltersChange = (panelFilters: Filter[]) => {
-    if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
-      onQueryChange({ panelFilters });
-    }
+    onQueryChange({ panelFilters });
+  };
+
+  const onLimitChange = (limit: number) => {
+    onQueryChange({ limit });
   };
 
   const onQueryChange = ({
     payload,
     panelFilters,
+    limit,
   }: {
     payload?: { dateRange: TimeRange; query?: Query };
     panelFilters?: Filter[];
+    limit?: number;
   }) => {
-    onSubmit({ query: payload?.query, dateRange: payload?.dateRange, panelFilters });
+    onSubmit({ query: payload?.query, dateRange: payload?.dateRange, panelFilters, limit });
   };
 
   const handleRefresh = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
@@ -72,13 +74,21 @@ export const UnifiedSearchBar = () => {
         showQueryMenu
         useDefaultBehaviors
       />
-      <ControlsContent
-        timeRange={searchCriteria.dateRange}
-        dataView={dataView}
-        query={searchCriteria.query}
-        filters={searchCriteria.filters}
-        onFiltersChange={onPanelFiltersChange}
-      />
+      <EuiFlexGroup direction="row" alignItems="center">
+        <EuiFlexItem>
+          <ControlsContent
+            timeRange={searchCriteria.dateRange}
+            dataView={dataView}
+            query={searchCriteria.query}
+            filters={searchCriteria.filters}
+            selectedOptions={searchCriteria.panelFilters}
+            onFiltersChange={onPanelFiltersChange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LimitOptions limit={searchCriteria.limit as HostLimitOptions} onChange={onLimitChange} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiHorizontalRule margin="none" />
     </StickyContainer>
   );

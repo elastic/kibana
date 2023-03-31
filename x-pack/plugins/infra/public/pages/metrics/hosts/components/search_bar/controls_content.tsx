@@ -8,17 +8,18 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { ControlGroupContainer, type ControlGroupInput } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { Subscription } from 'rxjs';
+import { skipWhile, Subscription } from 'rxjs';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
-import { useControlPanels } from '../hooks/use_control_panels_url_state';
+import { useControlPanels } from '../../hooks/use_control_panels_url_state';
 
 interface Props {
   dataView: DataView | undefined;
   timeRange: TimeRange;
   filters: Filter[];
   query: Query;
+  selectedOptions: Filter[];
   onFiltersChange: (filters: Filter[]) => void;
 }
 
@@ -27,6 +28,7 @@ export const ControlsContent: React.FC<Props> = ({
   filters,
   query,
   timeRange,
+  selectedOptions,
   onFiltersChange,
 }) => {
   const [controlPanels, setControlPanels] = useControlPanels(dataView);
@@ -51,15 +53,21 @@ export const ControlsContent: React.FC<Props> = ({
 
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupContainer) => {
-      inputSubscription.current = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
-        onFiltersChange(newFilters);
-      });
+      inputSubscription.current = controlGroup.onFiltersPublished$
+        .pipe(
+          skipWhile((newFilters) =>
+            compareFilters(selectedOptions, newFilters, COMPARE_ALL_OPTIONS)
+          )
+        )
+        .subscribe((newFilters) => {
+          onFiltersChange(newFilters);
+        });
 
       filterSubscription.current = controlGroup
         .getInput$()
         .subscribe(({ panels }) => setControlPanels(panels));
     },
-    [onFiltersChange, setControlPanels]
+    [onFiltersChange, selectedOptions, setControlPanels]
   );
 
   useEffect(() => {

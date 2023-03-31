@@ -10,18 +10,13 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 
-import { Criteria } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import {
-  HostMetrics,
-  HostMetricsResponse,
-  HostSortField,
-} from '../../../../../common/http_api/hosts';
+import { CriteriaWithPagination } from '@elastic/eui';
+import { HostMetrics, HostMetricsResponse } from '../../../../../common/http_api/hosts';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
 import { useTableProperties } from './use_table_properties_url_state';
-import { useHostsViewContext } from './use_hosts_view';
 
 const METADATA_ATTRIBUTE_NAME = {
   'cloud.provider': 'cloudProvider',
@@ -125,7 +120,6 @@ const toggleDialogActionLabel = i18n.translate(
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableParams) => {
-  const { fetch } = useHostsViewContext();
   const [properties, setProperties] = useTableProperties();
   const {
     services: { telemetry },
@@ -244,9 +238,9 @@ export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableP
   );
 
   const onTableChange = useCallback(
-    async ({ page, sort }: Criteria<HostNodeRow>) => {
-      const { index: pageIndex, size: pageSize } = page ?? {};
-      const { field, direction } = sort ?? {};
+    async ({ page, sort }: CriteriaWithPagination<HostNodeRow>) => {
+      const { index: pageIndex, size: pageSize } = page;
+      const { field } = sort ?? {};
 
       const pagination = { pageIndex, pageSize };
       // This isn't safe, but when only pagination happens,
@@ -255,11 +249,6 @@ export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableP
       const isSorting = sortableFields.has(field ?? '');
 
       if (isSorting && !isEqual(properties.sorting, sort)) {
-        await fetch({
-          sortDirection: direction,
-          sortField: field as HostSortField,
-        });
-
         setProperties({
           sorting: sort,
         });
@@ -269,7 +258,7 @@ export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableP
         });
       }
     },
-    [fetch, properties.pagination, properties.sorting, setProperties, sortableFields]
+    [properties.pagination, properties.sorting, setProperties, sortableFields]
   );
 
   return {
