@@ -32,10 +32,12 @@ export const RuleActionParams = saved_object_attributes;
 export const RuleActionAlertsFilter = t.strict({
   query: t.union([
     t.null,
-    t.strict({
-      kql: t.string,
-      dsl: t.union([t.undefined, t.string]),
-    }),
+    t.intersection([
+      t.strict({
+        kql: t.string,
+      }),
+      t.partial({ dsl: t.string }),
+    ]),
   ]),
   timeframe: t.union([
     t.null,
