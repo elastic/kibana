@@ -254,6 +254,6 @@ export const formatMlPipelineBody = async (
     pipelineName,
     fieldMappings: {
       [sourceField]: destinationField,
-    }
+    },
   });
 };
