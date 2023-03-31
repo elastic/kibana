@@ -878,7 +878,7 @@ export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [
 export const findCaseUserActionsResponse: FindCaseUserActions = {
   page: 1,
   perPage: 10,
-  total: 20,
+  total: 30,
   userActions: [...caseUserActionsWithRegisteredAttachments],
 };
 

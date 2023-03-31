@@ -469,7 +469,7 @@ describe('Cases API', () => {
     const findCaseUserActionsSnake = {
       page: 1,
       perPage: 10,
-      total: 20,
+      total: 30,
       userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
     };
     const filterActionType: CaseUserActionTypeWithAll = 'all';
