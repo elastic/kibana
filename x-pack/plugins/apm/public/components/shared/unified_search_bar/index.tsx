@@ -11,6 +11,9 @@ import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSkeletonRectangle } from '@elastic/eui';
+import qs from 'query-string';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { TimePickerTimeDefaults } from '../date_picker/typings';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmDataView } from '../../../hooks/use_apm_data_view';
@@ -31,6 +34,22 @@ function useKueryParams(defaultKuery?: string) {
     language: 'kuery',
   };
 }
+
+function useUrlTimeRange(defaultTimeRange: TimeRange) {
+  const location = useLocation();
+  const query = qs.parse(location.search);
+
+  const isDateRangeSet = 'rangeFrom' in query && 'rangeTo' in query;
+
+  if (isDateRangeSet) {
+    return {
+      from: query.rangeFrom,
+      to: query.rangeTo,
+    };
+  }
+  return defaultTimeRange;
+}
+
 function useSearchBarPlaceholder(searchbarPlaceholder?: string) {
   const processorEvent = useProcessorEvent();
   const examples = {
@@ -76,26 +95,35 @@ export function UnifiedSearchBar({
     unifiedSearch: {
       ui: { SearchBar },
     },
+    core,
   } = useApmPluginContext();
   const { services } = useKibana<ApmPluginStartDeps>();
 
   const {
     data: {
-      query: { queryString: queryStringService },
+      query: { queryString: queryStringService, timefilter: timeFilterService },
     },
   } = services;
 
   const urlQuery = useKueryParams(value);
+  const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
+  const urlTimeRange = useUrlTimeRange(timePickerTimeDefaults);
   const [displaySearchBar, setDisplaySearchBar] = useState(false);
 
   const syncSearchBarWithUrl = useCallback(() => {
+    // Sync Kuery params with Search Bar
     if (urlQuery && !deepEqual(queryStringService.getQuery(), urlQuery)) {
       queryStringService.setQuery(urlQuery);
     }
+    // On page navigation the search bar persists the state where as the url is cleared, hence we need to clear the search bar
     if (!urlQuery) {
       queryStringService.clearQuery();
     }
-  }, [queryStringService, urlQuery]);
+    // Sync Time Range with Search Bar
+    timeFilterService.timefilter.setTime(urlTimeRange as TimeRange);
+  }, [urlQuery, queryStringService, timeFilterService, urlTimeRange]);
 
   useEffect(() => {
     syncSearchBarWithUrl();

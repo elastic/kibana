@@ -81,7 +81,9 @@ describe('Errors page', () => {
 
       it('clicking on type adds a filter in the searchbar', () => {
         cy.visitKibana(javaServiceErrorsPageHref);
-        cy.getByTestSubj('apmUnifiedSearchBar').should('be.empty');
+        cy.getByTestSubj('apmUnifiedSearchBar')
+          .invoke('val')
+          .should('be.empty');
         // `force: true` because Cypress says the element is 0x0
         cy.contains('exception 0').click({
           force: true,
