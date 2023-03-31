@@ -42,6 +42,11 @@ const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = 
         name: 'ipid',
         type: 'index-pattern',
       },
+      {
+        id: 'some-tag',
+        name: 'some-tag',
+        type: 'tag',
+      },
     ],
   } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
   multiAnnotations: {
@@ -479,7 +484,9 @@ describe('Event Annotation Service', () => {
           "description": "",
           "ignoreGlobalFilters": false,
           "indexPatternId": "ipid",
-          "tags": Array [],
+          "tags": Array [
+            "some-tag",
+          ],
           "title": "groupTitle",
         }
       `);
@@ -551,7 +558,7 @@ describe('Event Annotation Service', () => {
       await eventAnnotationService.createAnnotationGroup({
         title: 'newGroupTitle',
         description: 'my description',
-        tags: ['my', 'many', 'tags'],
+        tags: ['tag1', 'tag2', 'tag3'],
         indexPatternId: 'ipid',
         ignoreGlobalFilters: false,
         annotations,
@@ -561,7 +568,6 @@ describe('Event Annotation Service', () => {
         {
           title: 'newGroupTitle',
           description: 'my description',
-          tags: ['my', 'many', 'tags'],
           ignoreGlobalFilters: false,
           dataViewSpec: null,
           annotations,
@@ -572,6 +578,21 @@ describe('Event Annotation Service', () => {
               id: 'ipid',
               name: 'event-annotation-group_dataView-ref-ipid',
               type: 'index-pattern',
+            },
+            {
+              id: 'tag1',
+              name: 'tag1',
+              type: 'tag',
+            },
+            {
+              id: 'tag2',
+              name: 'tag2',
+              type: 'tag',
+            },
+            {
+              id: 'tag3',
+              name: 'tag3',
+              type: 'tag',
             },
           ],
         }
@@ -597,7 +618,6 @@ describe('Event Annotation Service', () => {
         {
           title: 'newTitle',
           description: '',
-          tags: [],
           annotations: [],
           dataViewSpec: null,
           ignoreGlobalFilters: false,

@@ -25,6 +25,11 @@ Object {
           "name": "ipid",
           "type": "index-pattern",
         },
+        Object {
+          "id": "some-tag",
+          "name": "some-tag",
+          "type": "tag",
+        },
       ],
       "type": "event-annotation-group",
       "updatedAt": "",
@@ -67,7 +72,7 @@ Object {
   "description": undefined,
   "ignoreGlobalFilters": undefined,
   "indexPatternId": "ipid",
-  "tags": undefined,
+  "tags": Array [],
   "title": "groupTitle",
 }
 `;

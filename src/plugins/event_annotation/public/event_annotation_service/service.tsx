@@ -61,7 +61,7 @@ export function getEventAnnotationService(
     return {
       title: savedObject.attributes.title,
       description: savedObject.attributes.description,
-      tags: savedObject.attributes.tags,
+      tags: savedObject.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
       ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
       indexPatternId: adHocDataViewSpec
         ? adHocDataViewSpec.id!
@@ -181,20 +181,35 @@ export function getEventAnnotationService(
     return { references, dataViewSpec };
   };
 
-  const createAnnotationGroup = async (
+  const getAnnotationGroupAttributesAndReferences = (
     group: EventAnnotationGroupConfig
-  ): Promise<{ id: string }> => {
+  ): { attributes: EventAnnotationGroupAttributes; references: SavedObjectReference[] } => {
     const { references, dataViewSpec } = extractDataViewInformation(group);
     const { title, description, tags, ignoreGlobalFilters, annotations } = group;
 
+    references.push(
+      ...tags.map((tag) => ({
+        id: tag,
+        name: tag,
+        type: 'tag',
+      }))
+    );
+
+    return {
+      attributes: { title, description, ignoreGlobalFilters, annotations, dataViewSpec },
+      references,
+    };
+  };
+
+  const createAnnotationGroup = async (
+    group: EventAnnotationGroupConfig
+  ): Promise<{ id: string }> => {
+    const { attributes, references } = getAnnotationGroupAttributesAndReferences(group);
+
     const groupSavedObjectId = (
-      await client.create(
-        EVENT_ANNOTATION_GROUP_TYPE,
-        { title, description, tags, ignoreGlobalFilters, annotations, dataViewSpec },
-        {
-          references,
-        }
-      )
+      await client.create(EVENT_ANNOTATION_GROUP_TYPE, attributes, {
+        references,
+      })
     ).id;
 
     return { id: groupSavedObjectId };
@@ -204,17 +219,11 @@ export function getEventAnnotationService(
     group: EventAnnotationGroupConfig,
     annotationGroupId: string
   ): Promise<void> => {
-    const { references, dataViewSpec } = extractDataViewInformation(group);
-    const { title, description, tags, ignoreGlobalFilters, annotations } = group;
+    const { attributes, references } = getAnnotationGroupAttributesAndReferences(group);
 
-    await client.update(
-      EVENT_ANNOTATION_GROUP_TYPE,
-      annotationGroupId,
-      { title, description, tags, ignoreGlobalFilters, annotations, dataViewSpec },
-      {
-        references,
-      }
-    );
+    await client.update(EVENT_ANNOTATION_GROUP_TYPE, annotationGroupId, attributes, {
+      references,
+    });
   };
 
   // const updateAnnotations = async (
