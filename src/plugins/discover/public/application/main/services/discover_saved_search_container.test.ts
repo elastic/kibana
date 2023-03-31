@@ -175,28 +175,6 @@ describe('DiscoverSavedSearchContainer', () => {
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
     });
 
-    it('Error thrown on persistence layer bubbling up, no changes to the initial saved search ', async () => {
-      mockSaveSavedSearch.mockImplementation(() => {
-        throw new Error('oh-noes');
-      });
-
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-      });
-      savedSearchContainer.set(savedSearch);
-      savedSearchContainer.update({ nextState: { hideChart: true } });
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      try {
-        await savedSearchContainer.persist(savedSearch, saveOptions);
-      } catch (e) {
-        // intentional error
-      }
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      expect(savedSearchContainer.getInitial$().getValue().title).not.toBe(
-        'My updated saved search'
-      );
-    });
-
     it('takes care of persisting timeRestore correctly ', async () => {
       discoverServiceMock.timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
       discoverServiceMock.timefilter.getRefreshInterval = jest.fn(() => ({
@@ -219,6 +197,28 @@ describe('DiscoverSavedSearchContainer', () => {
         value: 0,
         pause: true,
       });
+    });
+
+    it('Error thrown on persistence layer bubbling up, no changes to the initial saved search ', async () => {
+      mockSaveSavedSearch.mockImplementation(() => {
+        throw new Error('oh-noes');
+      });
+
+      const savedSearchContainer = getSavedSearchContainer({
+        services: discoverServiceMock,
+      });
+      savedSearchContainer.set(savedSearch);
+      savedSearchContainer.update({ nextState: { hideChart: true } });
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
+      try {
+        await savedSearchContainer.persist(savedSearch, saveOptions);
+      } catch (e) {
+        // intentional error
+      }
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
+      expect(savedSearchContainer.getInitial$().getValue().title).not.toBe(
+        'My updated saved search'
+      );
     });
   });
 
