@@ -215,7 +215,7 @@ export async function generateEnrollmentAPIKey(
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
 
   auditLoggingService.writeCustomAuditLog({
-    message: `User creating API enrollment key [name=${name}] [policy_id=${agentPolicyId}]`,
+    message: `User creating enrollment API key [name=${name}] [policy_id=${agentPolicyId}]`,
   });
 
   const key = await esClient.security
