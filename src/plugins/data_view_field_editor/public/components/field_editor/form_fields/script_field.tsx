@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
 import { PainlessLang, PainlessContext, monaco } from '@kbn/monaco';
+import { debounce } from 'lodash';
 
 import {
   UseField,
@@ -211,6 +212,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
     <UseField<string> path="script.source" validationDataProvider={validationDataProvider}>
       {({ value, setValue, label, isValid, getErrorsMessages }) => {
         let errorMessage = getErrorsMessages();
+        const setValDebounced = debounce((val: string) => setValue(val), 500);
 
         if (error) {
           errorMessage = error.error.reason!;
@@ -259,7 +261,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
                 width="99%"
                 height="210px"
                 value={value}
-                onChange={setValue}
+                onChange={setValDebounced}
                 editorDidMount={onEditorDidMount}
                 options={{
                   fontSize: 12,
