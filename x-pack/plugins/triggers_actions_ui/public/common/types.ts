@@ -13,7 +13,15 @@ export interface Comparator {
   requiredValues: number;
 }
 
-type KbnFieldTypesString = Lowercase<keyof typeof KBN_FIELD_TYPES>;
+type KbnFieldTypesString = `${Exclude<
+  KBN_FIELD_TYPES,
+  | KBN_FIELD_TYPES.UNKNOWN
+  | KBN_FIELD_TYPES.MISSING
+  | KBN_FIELD_TYPES._SOURCE
+  | KBN_FIELD_TYPES.ATTACHMENT
+  | KBN_FIELD_TYPES.CONFLICT
+  | KBN_FIELD_TYPES.NESTED
+>}`;
 
 export interface AggregationType {
   text: string;
