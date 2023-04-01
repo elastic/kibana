@@ -24,6 +24,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
 import { changeDataView } from '../hooks/utils/change_data_view';
@@ -366,7 +367,9 @@ export function getDiscoverStateContainer({
       savedSearchContainer,
     });
     const nextAppState = getInitialState(undefined, nextSavedSearch, services);
-    appStateContainer.set(appState ? { ...nextAppState, ...appState } : nextAppState);
+    appStateContainer.set(
+      appState ? { ...nextAppState, ...cleanupUrlState({ ...appState }) } : nextAppState
+    );
 
     const savedSearchDataView = nextSavedSearch.searchSource.getField('index');
     if (savedSearchDataView) {
