@@ -29,7 +29,7 @@ import {
   deleteComments,
   createCase,
   createComment,
-  deleteComment,
+  deleteAllComments,
   superUserSpace1Auth,
 } from '../../../../common/lib/api';
 import {
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('delete_comment', () => {
+  describe('delete_comments', () => {
     afterEach(async () => {
       await deleteCasesByESQuery(es);
       await deleteComments(es);
@@ -63,17 +63,18 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('happy path', () => {
-      it('should delete a comment', async () => {
+      it('should delete all comments', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
+
+        await createComment({
           supertest,
           caseId: postedCase.id,
           params: postCommentUserReq,
         });
-        const comment = await deleteComment({
+
+        const comment = await deleteAllComments({
           supertest,
           caseId: postedCase.id,
-          commentId: patchedCase.comments![0].id,
         });
 
         expect(comment).to.eql({});
@@ -83,30 +84,19 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('unhappy path', () => {
       it('404s when comment belongs to different case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
+        await createComment({
           supertest,
           caseId: postedCase.id,
           params: postCommentUserReq,
         });
-        const error = (await deleteComment({
+
+        const error = (await deleteAllComments({
           supertest,
           caseId: 'fake-id',
-          commentId: patchedCase.comments![0].id,
           expectedHttpCode: 404,
         })) as Error;
 
-        expect(error.message).to.be(
-          `This comment ${patchedCase.comments![0].id} does not exist in fake-id.`
-        );
-      });
-
-      it('404s when comment is not there', async () => {
-        await deleteComment({
-          supertest,
-          caseId: 'fake-id',
-          commentId: 'fake-id',
-          expectedHttpCode: 404,
-        });
+        expect(error.message).to.be('No comments found for fake-id.');
       });
     });
 
@@ -176,12 +166,10 @@ export default ({ getService }: FtrProviderContext): void => {
         }
 
         const caseToDelete = updatedCases[indexOfCaseToDelete];
-        const commentId = caseToDelete.comments![0].id;
 
-        await deleteComment({
+        await deleteAllComments({
           supertest: supertestWithoutAuth,
           caseId: caseToDelete.id,
-          commentId,
           expectedHttpCode,
           auth: deleteCommentAuth,
         });
@@ -226,7 +214,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
-        it('removes a case from the alert schema when deleting an alert attachment', async () => {
+        it('removes a case from the alert schema when deleting all alert attachments', async () => {
           await createCaseAttachAlertAndDeleteAlert({
             totalCases: 1,
             indexOfCaseToDelete: 0,
@@ -312,7 +300,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
         });
 
-        it('removes a case from the alert schema when deleting an alert attachment', async () => {
+        it('removes a case from the alert schema when deleting all alert attachments', async () => {
           await createCaseAttachAlertAndDeleteAlert({
             totalCases: 1,
             indexOfCaseToDelete: 0,
@@ -363,7 +351,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
-      it('should delete a comment from the appropriate owner', async () => {
+      it('should delete multiple comments from the appropriate owner', async () => {
         const secCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
@@ -371,17 +359,23 @@ export default ({ getService }: FtrProviderContext): void => {
           { user: secOnly, space: 'space1' }
         );
 
-        const commentResp = await createComment({
+        await createComment({
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
           params: postCommentUserReq,
           auth: { user: secOnly, space: 'space1' },
         });
 
-        await deleteComment({
+        await createComment({
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
-          commentId: commentResp.comments![0].id,
+          params: postCommentUserReq,
+          auth: { user: secOnly, space: 'space1' },
+        });
+
+        await deleteAllComments({
+          supertest: supertestWithoutAuth,
+          caseId: secCase.id,
           auth: { user: secOnly, space: 'space1' },
         });
       });
@@ -394,17 +388,16 @@ export default ({ getService }: FtrProviderContext): void => {
           { user: secOnly, space: 'space1' }
         );
 
-        const commentResp = await createComment({
+        await createComment({
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
           params: postCommentUserReq,
           auth: { user: secOnly, space: 'space1' },
         });
 
-        await deleteComment({
+        await deleteAllComments({
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
-          commentId: commentResp.comments![0].id,
           auth: { user: obsOnly, space: 'space1' },
           expectedHttpCode: 403,
         });
@@ -413,7 +406,7 @@ export default ({ getService }: FtrProviderContext): void => {
       for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
         it(`User ${
           user.username
-        } with role(s) ${user.roles.join()} - should NOT delete a comment`, async () => {
+        } with role(s) ${user.roles.join()} - should NOT delete all comments`, async () => {
           const postedCase = await createCase(
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
@@ -421,17 +414,16 @@ export default ({ getService }: FtrProviderContext): void => {
             superUserSpace1Auth
           );
 
-          const commentResp = await createComment({
+          await createComment({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
             params: postCommentUserReq,
             auth: superUserSpace1Auth,
           });
 
-          await deleteComment({
+          await deleteAllComments({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
-            commentId: commentResp.comments![0].id,
             auth: { user, space: 'space1' },
             expectedHttpCode: 403,
           });
@@ -446,17 +438,16 @@ export default ({ getService }: FtrProviderContext): void => {
           { user: superUser, space: 'space2' }
         );
 
-        const commentResp = await createComment({
+        await createComment({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           params: postCommentUserReq,
           auth: { user: superUser, space: 'space2' },
         });
 
-        await deleteComment({
+        await deleteAllComments({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          commentId: commentResp.comments![0].id,
           auth: { user: secOnly, space: 'space2' },
           expectedHttpCode: 403,
         });
@@ -470,17 +461,16 @@ export default ({ getService }: FtrProviderContext): void => {
           { user: superUser, space: 'space2' }
         );
 
-        const commentResp = await createComment({
+        await createComment({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           params: postCommentUserReq,
           auth: { user: superUser, space: 'space2' },
         });
 
-        await deleteComment({
+        await deleteAllComments({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          commentId: commentResp.comments![0].id,
           auth: { user: secOnly, space: 'space1' },
           expectedHttpCode: 404,
         });
