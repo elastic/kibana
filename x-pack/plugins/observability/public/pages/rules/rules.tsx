@@ -32,6 +32,20 @@ export function RulesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+      href: http.basePath.prepend('/app/observability/alerts'),
+    },
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
+    },
+  ]);
+
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
@@ -48,46 +62,40 @@ export function RulesPage() {
     useHashQuery: false,
   });
 
-  const { lastResponse, status, type } = urlStateStorage.get<{
+  const { lastResponse, search, status, type } = urlStateStorage.get<{
     lastResponse: string[];
+    search: string;
     status: RuleStatus[];
     type: string[];
-  }>('_a') || { lastResponse: [], status: [], type: [] };
+  }>('_a') || { lastResponse: [], search: '', status: [], type: [] };
 
-  const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
   const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
+  const [stateSearch, setSearch] = useState<string>(search);
+  const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
   const [stateType, setType] = useState<string[]>(type);
 
   const [stateRefresh, setRefresh] = useState(new Date());
 
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-      href: http.basePath.prepend('/app/observability/alerts'),
-    },
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
-      }),
-    },
-  ]);
-
   const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
     setStatus(newStatus);
-    urlStateStorage.set('_a', { lastResponse, status: newStatus, type });
-    return { lastResponse: stateLastResponse || [], status: newStatus, type: stateType };
+    urlStateStorage.set('_a', { lastResponse, search, status: newStatus, type });
+    return {
+      lastResponse: stateLastResponse || [],
+      search: search || '',
+      status: newStatus,
+      type: stateType,
+    };
   };
 
   const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
     setRefresh(new Date());
     setLastResponse(newLastResponse);
-    urlStateStorage.set('_a', { lastResponse: newLastResponse, status, type });
+    urlStateStorage.set('_a', { lastResponse: newLastResponse, search, status, type });
     return {
       lastResponse: newLastResponse,
+      search: search || '',
       status: stateStatus || [],
       type: stateType || [],
     };
@@ -95,11 +103,23 @@ export function RulesPage() {
 
   const handleTypeFilterChange = (newType: string[]) => {
     setType(newType);
-    urlStateStorage.set('_a', { lastResponse, status, type: newType });
+    urlStateStorage.set('_a', { lastResponse, search, status, type: newType });
     return {
       lastResponse: stateLastResponse,
+      search: search || '',
       status: stateStatus || [],
       type: newType || [],
+    };
+  };
+
+  const handleSearchFilterChange = (newSearch: string) => {
+    setSearch(newSearch);
+    urlStateStorage.set('_a', { lastResponse, search: newSearch, status, type });
+    return {
+      lastResponse: lastResponse || [],
+      search: newSearch,
+      status: stateStatus || [],
+      type: stateType || [],
     };
   };
 
@@ -149,6 +169,7 @@ export function RulesPage() {
             rulesListKey="observability_rulesListColumns"
             showActionFilter={false}
             statusFilter={stateStatus}
+            searchFilter={stateSearch}
             typeFilter={stateType}
             visibleColumns={[
               'ruleName',
@@ -158,6 +179,7 @@ export function RulesPage() {
               'ruleExecutionState',
             ]}
             onLastRunOutcomeFilterChange={handleLastRunOutcomeFilterChange}
+            onSearchFilterChange={handleSearchFilterChange}
             onStatusFilterChange={handleStatusFilterChange}
             onTypeFilterChange={handleTypeFilterChange}
           />

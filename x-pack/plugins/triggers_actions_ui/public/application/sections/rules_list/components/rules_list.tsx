@@ -107,7 +107,9 @@ const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 interface RulesPageContainerState {
   lastResponse: string[];
+  search: string;
   status: RuleStatus[];
+  type: string[];
 }
 
 export interface RulesListProps {
@@ -124,6 +126,8 @@ export interface RulesListProps {
   onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
   typeFilter?: string[];
   onTypeFilterChange?: (type: string[]) => RulesPageContainerState;
+  searchFilter?: string;
+  onSearchFilterChange?: (search: string) => RulesPageContainerState;
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: string[];
@@ -154,6 +158,8 @@ export const RulesList = ({
   onLastResponseFilterChange,
   lastRunOutcomeFilter,
   onLastRunOutcomeFilterChange,
+  searchFilter = '',
+  onSearchFilterChange,
   typeFilter,
   onTypeFilterChange,
   setHeaderActions,
@@ -173,11 +179,11 @@ export const RulesList = ({
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>('');
+  const [inputText, setInputText] = useState<string>(searchFilter);
 
   const [filters, setFilters] = useState<RulesListFilters>(() => ({
-    searchText: '',
-    types: [],
+    searchText: searchFilter || '',
+    types: typeFilter || [],
     actionTypes: [],
     ruleExecutionStatuses: lastResponseFilter || [],
     ruleLastRunOutcomes: lastRunOutcomeFilter || [],
@@ -358,8 +364,12 @@ export const RulesList = ({
         case 'ruleLastRunOutcomes':
           onLastRunOutcomeFilterChange?.(value as string[]);
           break;
+        case 'searchText':
+          onSearchFilterChange?.(value as string);
+          break;
         case 'types':
           onTypeFilterChange?.(value as string[]);
+          break;
         default:
           break;
       }
@@ -368,6 +378,7 @@ export const RulesList = ({
       onStatusFilterChange,
       onLastResponseFilterChange,
       onLastRunOutcomeFilterChange,
+      onSearchFilterChange,
       onTypeFilterChange,
       onClearSelection,
     ]
@@ -402,6 +413,12 @@ export const RulesList = ({
       updateFilters({ filter: 'ruleLastRunOutcomes', value: lastRunOutcomeFilter });
     }
   }, [lastRunOutcomeFilter]);
+
+  useEffect(() => {
+    if (typeof searchFilter === 'string') {
+      updateFilters({ filter: 'searchText', value: searchFilter });
+    }
+  }, [searchFilter]);
 
   useEffect(() => {
     if (typeFilter) {
@@ -688,6 +705,7 @@ export const RulesList = ({
   };
 
   const numberRulesToDelete = rulesToBulkEdit.length || numberOfSelectedItems;
+
   return (
     <>
       <RulesListPrompts
