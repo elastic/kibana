@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { first, firstValueFrom } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
@@ -63,7 +63,8 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   const [scriptFieldController] = useState(
     () =>
       new ScriptFieldController({
-        defaultValue: mapReturnTypeToPainlessContext(schema.type.defaultValue![0].value!),
+        painlessContext: mapReturnTypeToPainlessContext(schema.type.defaultValue![0].value!),
+        existingConcreteFields,
       })
   );
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -73,10 +74,6 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   const { error, isLoadingPreview, isPreviewAvailable, controller } = useFieldPreviewContext();
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
   const isFetchingDoc = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
-  const painlessContext = useStateSelector(
-    scriptFieldController.state$,
-    (painlessCxt) => painlessCxt
-  );
   const [validationData$, nextValidationData$] = useBehaviorSubject<
     | {
         isFetchingDoc: boolean;
@@ -87,11 +84,6 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   >(undefined);
 
   const currentDocId = currentDocument?._id;
-
-  const suggestionProvider = useMemo(
-    () => PainlessLang.getSuggestionProvider(painlessContext, existingConcreteFields),
-    [painlessContext, existingConcreteFields]
-  );
 
   const { validateFields } = useFormContext();
 
@@ -140,49 +132,43 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
     return validationData!.error;
   }, [validationData$]);
 
-  const onEditorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor) => {
-      monacoEditor.current = editor;
+  const onEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    monacoEditor.current = editor;
 
-      if (editorValidationSubscription.current) {
-        editorValidationSubscription.current.unsubscribe();
+    if (editorValidationSubscription.current) {
+      editorValidationSubscription.current.unsubscribe();
+    }
+
+    editorValidationSubscription.current = PainlessLang.validation$().subscribe(
+      ({ isValid, isValidating, errors }) => {
+        controller.setScriptEditorValidation({
+          isValid,
+          isValidating,
+          message: errors[0]?.message ?? null,
+        });
       }
+    );
+  };
 
-      editorValidationSubscription.current = PainlessLang.validation$().subscribe(
-        ({ isValid, isValidating, errors }) => {
-          controller.setScriptEditorValidation({
-            isValid,
-            isValidating,
-            message: errors[0]?.message ?? null,
-          });
-        }
-      );
-    },
-    [controller]
-  );
-
-  const updateMonacoMarkers = useCallback((markers: monaco.editor.IMarkerData[]) => {
+  const updateMonacoMarkers = (markers: monaco.editor.IMarkerData[]) => {
     const model = monacoEditor.current?.getModel();
     if (model) {
       monaco.editor.setModelMarkers(model, PainlessLang.ID, markers);
     }
-  }, []);
+  };
 
-  const displayPainlessScriptErrorInMonaco = useCallback(
-    (painlessError: RuntimeFieldPainlessError) => {
-      const model = monacoEditor.current?.getModel();
+  const displayPainlessScriptErrorInMonaco = (painlessError: RuntimeFieldPainlessError) => {
+    const model = monacoEditor.current?.getModel();
 
-      if (painlessError.position !== null && Boolean(model)) {
-        const { offset } = painlessError.position;
-        // Get the monaco Position (lineNumber and colNumber) from the ES Painless error position
-        const errorStartPosition = model!.getPositionAt(offset);
-        const markerData = painlessErrorToMonacoMarker(painlessError, errorStartPosition);
-        const errorMarkers = markerData ? [markerData] : [];
-        updateMonacoMarkers(errorMarkers);
-      }
-    },
-    [updateMonacoMarkers]
-  );
+    if (painlessError.position !== null && Boolean(model)) {
+      const { offset } = painlessError.position;
+      // Get the monaco Position (lineNumber and colNumber) from the ES Painless error position
+      const errorStartPosition = model!.getPositionAt(offset);
+      const markerData = painlessErrorToMonacoMarker(painlessError, errorStartPosition);
+      const errorMarkers = markerData ? [markerData] : [];
+      updateMonacoMarkers(errorMarkers);
+    }
+  };
 
   // Whenever we navigate to a different doc we validate the script
   // field as it could be invalid against the new document.
@@ -202,7 +188,8 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
     } else if (error === null) {
       updateMonacoMarkers([]);
     }
-  }, [error, displayPainlessScriptErrorInMonaco, updateMonacoMarkers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   useEffect(() => {
     return () => {
@@ -259,7 +246,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
             >
               <CodeEditor
                 languageId={PainlessLang.ID}
-                suggestionProvider={suggestionProvider}
+                suggestionProvider={scriptFieldController.state$.getValue().suggestionProvider}
                 // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
                 width="99%"
                 height="210px"
@@ -296,4 +283,4 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   );
 };
 
-export const ScriptField = React.memo(ScriptFieldComponent);
+export const ScriptField = ScriptFieldComponent;

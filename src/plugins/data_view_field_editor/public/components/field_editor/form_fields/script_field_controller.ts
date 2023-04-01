@@ -8,21 +8,52 @@
 
 import { PainlessContext } from '@kbn/monaco';
 import { BehaviorSubject } from 'rxjs';
+import { PainlessLang } from '@kbn/monaco';
 import { BehaviorObservable } from '../../../state_utils';
 
-type ScriptedFieldState = PainlessContext;
+interface ScriptFieldControllerArgs {
+  painlessContext: PainlessContext;
+  existingConcreteFields:
+    | Array<{
+        name: string;
+        type: string;
+      }>
+    | undefined;
+}
+
+interface ScriptFieldState {
+  // not used externally
+  painlessContext: PainlessContext;
+  suggestionProvider: any; // poor typying in @kbn/monaco
+}
 
 export class ScriptFieldController {
-  constructor({ defaultValue }: { defaultValue: ScriptedFieldState }) {
-    this.internalState$ = new BehaviorSubject<ScriptedFieldState>(defaultValue);
+  constructor({ painlessContext, existingConcreteFields }: ScriptFieldControllerArgs) {
+    this.internalState$ = new BehaviorSubject<ScriptFieldState>({
+      painlessContext,
+      suggestionProvider: PainlessLang.getSuggestionProvider(
+        painlessContext,
+        existingConcreteFields
+      ),
+    });
 
-    this.state$ = this.internalState$ as BehaviorObservable<ScriptedFieldState>;
-    console.log('CONTSRUCTOR');
+    this.state$ = this.internalState$ as BehaviorObservable<ScriptFieldState>;
+
+    this.existingConcreteFields = existingConcreteFields;
   }
-  private internalState$: BehaviorSubject<ScriptedFieldState>;
-  state$: BehaviorObservable<ScriptedFieldState>;
 
-  setPainlessContext = (painlessContext: ScriptedFieldState) => {
-    this.internalState$.next(painlessContext);
+  private internalState$: BehaviorSubject<ScriptFieldState>;
+  state$: BehaviorObservable<ScriptFieldState>;
+
+  existingConcreteFields: ScriptFieldControllerArgs['existingConcreteFields'];
+
+  setPainlessContext = (painlessContext: PainlessContext) => {
+    this.internalState$.next({
+      painlessContext,
+      suggestionProvider: PainlessLang.getSuggestionProvider(
+        painlessContext,
+        this.existingConcreteFields
+      ),
+    });
   };
 }
