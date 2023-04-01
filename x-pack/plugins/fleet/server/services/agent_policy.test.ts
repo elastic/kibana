@@ -829,4 +829,18 @@ describe('agent policy', () => {
       ]);
     });
   });
+
+  describe('deleteFleetServerPoliciesForPolicyId', () => {
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.deleteByQuery.mockResolvedValueOnce({} as any);
+
+      await agentPolicyService.deleteFleetServerPoliciesForPolicyId(esClient, 'test-agent-policy');
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: 'User deleting policy [id=test-agent-policy]',
+      });
+    });
+  });
 });
