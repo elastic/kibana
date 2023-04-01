@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const SLACK_CONNECTOR_ID = '.slack';
-export const SLACK_URL = 'https://slack.com/api/';
+export { createExecutionContext } from './src/create_execution_context';
