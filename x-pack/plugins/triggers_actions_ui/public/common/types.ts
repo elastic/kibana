@@ -13,7 +13,7 @@ export interface Comparator {
   requiredValues: number;
 }
 
-type KbnFieldTypesString = `${Exclude<
+export type ValidNormalizedTypes = `${Exclude<
   KBN_FIELD_TYPES,
   | KBN_FIELD_TYPES.UNKNOWN
   | KBN_FIELD_TYPES.MISSING
@@ -27,7 +27,7 @@ export interface AggregationType {
   text: string;
   fieldRequired: boolean;
   value: string;
-  validNormalizedTypes: KbnFieldTypesString[];
+  validNormalizedTypes: ValidNormalizedTypes[];
 }
 
 export interface GroupByType {
