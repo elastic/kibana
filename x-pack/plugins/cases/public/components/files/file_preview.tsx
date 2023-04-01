@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiOverlayMask, EuiFocusTrap, EuiImage } from '@elastic/eui';
+import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import type { Owner } from '../../../common/constants/types';
 
@@ -18,7 +19,6 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface FilePreviewProps {
   closePreview: () => void;
-  getDownloadHref: (args: Pick<FileJSON<unknown>, 'id' | 'fileKind'>) => string;
   selectedFile: FileJSON;
 }
 
@@ -32,7 +32,8 @@ const StyledOverlayMask = styled(EuiOverlayMask)`
   }
 `;
 
-export const FilePreview = ({ closePreview, selectedFile, getDownloadHref }: FilePreviewProps) => {
+export const FilePreview = ({ closePreview, selectedFile }: FilePreviewProps) => {
+  const { client: filesClient } = useFilesContext();
   const { owner } = useCasesContext();
 
   return (
@@ -41,7 +42,7 @@ export const FilePreview = ({ closePreview, selectedFile, getDownloadHref }: Fil
         <EuiImage
           alt={selectedFile.name}
           size="original"
-          src={getDownloadHref({
+          src={filesClient.getDownloadHref({
             id: selectedFile.id || '',
             fileKind: constructFileKindIdByOwner(owner[0] as Owner),
           })}

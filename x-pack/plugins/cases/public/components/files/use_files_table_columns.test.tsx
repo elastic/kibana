@@ -16,7 +16,6 @@ describe('useCasesColumns ', () => {
 
   const useCasesColumnsProps: FilesTableColumnsProps = {
     showPreview: () => {},
-    getDownloadHref: jest.fn(),
   };
 
   beforeEach(() => {

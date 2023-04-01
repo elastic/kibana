@@ -28,6 +28,7 @@ import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
+import { registerInternalAttachments } from './internal_attachments';
 
 /**
  * @public
@@ -53,6 +54,7 @@ export class CasesUiPlugin
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
 
+    registerInternalAttachments(externalReferenceAttachmentTypeRegistry);
     registerCaseFileKinds(plugins.files);
 
     if (plugins.home) {

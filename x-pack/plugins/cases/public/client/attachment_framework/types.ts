@@ -18,6 +18,7 @@ export interface AttachmentViewObject<Props = {}> {
   actions?: EuiCommentProps['actions'];
   event?: EuiCommentProps['event'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
+  hideDefaultActions?: boolean;
 }
 
 export interface CommonAttachmentViewProps {
@@ -38,7 +39,7 @@ export interface AttachmentType<Props> {
   id: string;
   icon: IconType;
   displayName: string;
-  getAttachmentViewObject: () => AttachmentViewObject<Props>;
+  getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;

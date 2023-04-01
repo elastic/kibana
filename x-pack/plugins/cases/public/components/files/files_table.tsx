@@ -10,12 +10,12 @@ import type { Pagination, EuiBasicTableProps } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiBasicTable, EuiLoadingContent, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
-import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import * as i18n from './translations';
 import { useFilesTableColumns } from './use_files_table_columns';
 import { FilePreview } from './file_preview';
 import { AddFile } from './add_file';
+import { useFilePreview } from './use_file_preview';
 
 const EmptyFilesTable = ({ caseId }: { caseId: string }) => (
   <EuiEmptyPrompt
@@ -37,20 +37,16 @@ interface FilesTableProps {
 }
 
 export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: FilesTableProps) => {
-  const { client: filesClient } = useFilesContext();
-  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
+
   const [selectedFile, setSelectedFile] = useState<FileJSON>();
 
-  const closePreview = () => setIsPreviewVisible(false);
-  const showPreview = (file: FileJSON) => {
+  const displayPreview = (file: FileJSON) => {
     setSelectedFile(file);
-    setIsPreviewVisible(true);
+    showPreview();
   };
 
-  const columns = useFilesTableColumns({
-    showPreview,
-    getDownloadHref: filesClient.getDownloadHref,
-  });
+  const columns = useFilesTableColumns({ showPreview: displayPreview });
 
   return isLoading ? (
     <>
@@ -78,11 +74,7 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
         noItemsMessage={<EmptyFilesTable caseId={caseId} />}
       />
       {isPreviewVisible && selectedFile !== undefined && (
-        <FilePreview
-          closePreview={closePreview}
-          getDownloadHref={filesClient.getDownloadHref}
-          selectedFile={selectedFile}
-        />
+        <FilePreview closePreview={closePreview} selectedFile={selectedFile} />
       )}
     </>
   );

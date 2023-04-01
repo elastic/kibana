@@ -44,7 +44,7 @@ describe('FilesTable', () => {
     expect(await screen.findByTestId('cases-files-table-filename')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-filetype')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-date-added')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-table-action-download')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-action-delete')).toBeInTheDocument();
   });
 
@@ -128,7 +128,7 @@ describe('FilesTable', () => {
       id: basicFileMock.id,
     });
 
-    expect(await screen.findByTestId('cases-files-table-action-download')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
   });
 
   it('go to next page calls onTableChange with correct values', async () => {
