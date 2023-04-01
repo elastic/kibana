@@ -7,8 +7,8 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { AGENTS_INDEX } from '../../constants';
 
+import { AGENTS_INDEX } from '../../constants';
 import type { Agent } from '../../types';
 
 import { auditLoggingService } from '../audit_logging';
