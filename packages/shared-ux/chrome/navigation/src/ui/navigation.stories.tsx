@@ -10,20 +10,22 @@ import { EuiButtonIcon, EuiCollapsibleNav, EuiThemeProvider } from '@elastic/eui
 import { action } from '@storybook/addon-actions';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
-import { PLATFORM_SECTIONS } from '../constants';
-import { NavigationStorybookMock } from '../mocks';
-import mdx from '../README.mdx';
-import { NavigationProps, NavigationServices } from '../types';
+import { mocks, NavigationStorybookMock } from '../../mocks';
+import mdx from '../../README.mdx';
+import { NavigationProps, NavigationServices } from '../../types';
+import { Platform } from '../model';
+import { NavigationProvider } from '../services';
 import { Navigation as Component } from './navigation';
-import { NavigationProvider } from './services';
 
-const mock = new NavigationStorybookMock();
+const { locatorId, ...solutionProperties } = mocks;
+
+const storybookMock = new NavigationStorybookMock();
 let colorMode = '';
 colorMode = 'LIGHT';
 
 const Template = (args: NavigationProps & NavigationServices) => {
-  const services = mock.getServices(args);
-  const props = mock.getProps(args);
+  const services = storybookMock.getServices(args);
+  const props = storybookMock.getProps(args);
 
   const { navIsOpen } = services;
   const collapseAction = action('setNavIsOpen');
@@ -86,39 +88,37 @@ export default {
 
 export const SingleExpanded: ComponentStory<typeof Template> = Template.bind({});
 SingleExpanded.args = {
-  initiallyOpenSections: ['example_project'],
+  activeNavItemId: 'example_project.root.get_started',
+  solutions: [solutionProperties],
 };
-SingleExpanded.argTypes = mock.getArgumentTypes();
+SingleExpanded.argTypes = storybookMock.getArgumentTypes();
 
 export const WithRecentItems: ComponentStory<typeof Template> = Template.bind({});
 WithRecentItems.args = {
-  initiallyOpenSections: ['example_project'],
-  recentItems: [
-    { id: 'recent_1', label: 'The Elder Scrolls: Morrowind', link: 'testo' },
-    { id: 'recent_1', label: 'TIE Fighter', link: 'testo' },
-    { id: 'recent_1', label: 'Quake II', link: 'testo' },
-  ],
+  activeNavItemId: 'example_project.root.get_started',
+  recentItems: [{ id: 'recent_1', label: 'This is a test recent link', link: 'testo' }],
+  solutions: [solutionProperties],
 };
-WithRecentItems.argTypes = mock.getArgumentTypes();
+WithRecentItems.argTypes = storybookMock.getArgumentTypes();
 
 export const ReducedSections: ComponentStory<typeof Template> = Template.bind({});
 ReducedSections.args = {
-  platformSections: {
-    [PLATFORM_SECTIONS.ANALYTICS]: { enabled: false },
-    [PLATFORM_SECTIONS.MACHINE_LEARNING]: { enabled: false },
-    [PLATFORM_SECTIONS.DEVTOOLS]: { enabled: false },
-    [PLATFORM_SECTIONS.MANAGEMENT]: { enabled: false },
+  activeNavItemId: 'example_project.root.get_started',
+  platformConfig: {
+    [Platform.Analytics]: { enabled: false },
+    [Platform.MachineLearning]: { enabled: false },
+    [Platform.DevTools]: { enabled: false },
+    [Platform.Management]: {
+      properties: {
+        management_stack_monitoring: {
+          enabled: false,
+        },
+        management_integration_management: {
+          enabled: false,
+        },
+      },
+    },
   },
+  solutions: [solutionProperties],
 };
-ReducedSections.argTypes = mock.getArgumentTypes();
-
-/**
-// Home button
-// Spaces menu
-export const WithClassicBuckets: ComponentStory<typeof Template> = Template.bind({});
-WithClassicBuckets.args = {};
-WithClassicBuckets.argTypes = mock.getArgumentTypes();
-
-// With banner?
-// with bottom bar?
- **/
+ReducedSections.argTypes = storybookMock.getArgumentTypes();

@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { Navigation } from './src/navigation';
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
+export { Navigation } from './src/ui/navigation';
 export type { NavigationProps, NavigationServices, NavItemProps } from './types';

@@ -8,21 +8,28 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { getServicesMock } from '../mocks/src/jest';
+import { getServicesMock } from '../../mocks/src/jest';
+import { NavigationProvider } from '../services';
 import { Navigation } from './navigation';
-import { NavigationProvider } from './services';
 
 describe('<Navigation />', () => {
   test('renders with minimal props', () => {
     const div = document.createElement('div');
     const { getLocator } = getServicesMock();
-    const title = { name: 'Navigation testing', icon: 'gear' };
 
     const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
+    const platformSections = {};
+    const solutions = [
+      {
+        id: 'navigation_testing',
+        name: 'Navigation testing',
+        icon: 'gear',
+      },
+    ];
 
     render(
       <NavigationProvider getLocator={getLocator} navIsOpen={true} recentItems={recentItems}>
-        <Navigation id="navigation_testing" title={title} platformSections={{}} />
+        <Navigation platformConfig={platformSections} solutions={solutions} />
       </NavigationProvider>,
       div
     );

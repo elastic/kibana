@@ -13,9 +13,7 @@ export const getServicesMock = (): NavigationServices => {
 
   return {
     getLocator() {
-      return {
-        navigateSync: jest.fn(),
-      };
+      return { navigateSync: jest.fn() };
     },
     navIsOpen: true,
     recentItems,

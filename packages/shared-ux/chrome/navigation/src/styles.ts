@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export enum PLATFORM_SECTIONS {
-  RECENTS = 'recents',
-  ANALYTICS = 'analytics',
-  MACHINE_LEARNING = 'ml',
-  DEVTOOLS = 'devTools',
-  MANAGEMENT = 'management',
-}
+import { css } from '@emotion/react';
+
+export const navigationStyles = {
+  euiSideNavItems: css`
+    padding-left: 45px;
+  `,
+};

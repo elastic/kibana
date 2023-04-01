@@ -7,5 +7,6 @@
  */
 
 export { getServicesMock as getNavigationServicesMock } from './src/jest';
+export { mocks } from './src/mocks';
 export { StorybookMock as NavigationStorybookMock } from './src/storybook';
 export type { Params as NavigationStorybookParams } from './src/storybook';

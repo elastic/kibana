@@ -10,13 +10,13 @@ import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { SerializableRecord } from '@kbn/utility-types';
 import { action } from '@storybook/addon-actions';
 import { NavigationProps, NavigationServices } from '../../types';
-import { getMockNavItems, mockLocatorId } from './nav_items';
 
 type Arguments = NavigationProps & NavigationServices;
 export type Params = Pick<
   Arguments,
-  'navIsOpen' | 'recentItems' | 'initiallyOpenSections' | 'platformSections'
->;
+  'navIsOpen' | 'recentItems' | 'activeNavItemId' | 'platformConfig' | 'solutions'
+> &
+  Arguments['platformConfig'];
 
 export class StorybookMock extends AbstractStorybookMock<NavigationProps, NavigationServices> {
   propArguments = {};
@@ -34,10 +34,12 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
     const { navIsOpen, recentItems } = params;
 
     const navAction = action('Navigation');
-    const navigateSync = (locatorParams?: SerializableRecord) => {
-      navAction(`Locator: ${mockLocatorId} / Params: ${JSON.stringify(locatorParams)}`);
-    };
-    const getLocator = (_locatorId: string) => ({ navigateSync });
+
+    const getLocator = (locatorId: string) => ({
+      navigateSync: (locatorParams?: SerializableRecord) => {
+        navAction(`Locator: ${locatorId} / Params: ${JSON.stringify(locatorParams)}`);
+      },
+    });
 
     return {
       getLocator,
@@ -47,16 +49,10 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
   }
 
   getProps(params: Params): NavigationProps {
-    const { initiallyOpenSections, platformSections } = params;
+    const { activeNavItemId: initiallyOpenSections } = params;
     return {
-      id: 'example_project',
-      title: {
-        name: 'Example Project',
-        icon: 'logoObservability',
-      },
-      platformSections,
-      items: getMockNavItems(),
-      initiallyOpenSections,
+      ...params,
+      activeNavItemId: initiallyOpenSections,
     };
   }
 }
