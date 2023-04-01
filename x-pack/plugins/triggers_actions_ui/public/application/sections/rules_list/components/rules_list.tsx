@@ -122,6 +122,8 @@ export interface RulesListProps {
   onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
   lastRunOutcomeFilter?: string[];
   onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
+  typeFilter?: string[];
+  onTypeFilterChange?: (type: string[]) => RulesPageContainerState;
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: string[];
@@ -152,6 +154,8 @@ export const RulesList = ({
   onLastResponseFilterChange,
   lastRunOutcomeFilter,
   onLastRunOutcomeFilterChange,
+  typeFilter,
+  onTypeFilterChange,
   setHeaderActions,
   refresh,
   rulesListKey,
@@ -354,6 +358,8 @@ export const RulesList = ({
         case 'ruleLastRunOutcomes':
           onLastRunOutcomeFilterChange?.(value as string[]);
           break;
+        case 'types':
+          onTypeFilterChange?.(value as string[]);
         default:
           break;
       }
@@ -362,6 +368,7 @@ export const RulesList = ({
       onStatusFilterChange,
       onLastResponseFilterChange,
       onLastRunOutcomeFilterChange,
+      onTypeFilterChange,
       onClearSelection,
     ]
   );
@@ -395,6 +402,12 @@ export const RulesList = ({
       updateFilters({ filter: 'ruleLastRunOutcomes', value: lastRunOutcomeFilter });
     }
   }, [lastRunOutcomeFilter]);
+
+  useEffect(() => {
+    if (typeFilter) {
+      updateFilters({ filter: 'types', value: typeFilter });
+    }
+  }, [typeFilter]);
 
   useEffect(() => {
     if (cloneRuleId.current) {

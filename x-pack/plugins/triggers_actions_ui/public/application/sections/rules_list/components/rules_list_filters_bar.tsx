@@ -67,7 +67,6 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     onRefreshRules,
     onToggleRuleErrors,
   } = props;
-
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
   const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');

@@ -48,13 +48,16 @@ export function RulesPage() {
     useHashQuery: false,
   });
 
-  const { status, lastResponse } = urlStateStorage.get<{
-    status: RuleStatus[];
+  const { lastResponse, status, type } = urlStateStorage.get<{
     lastResponse: string[];
-  }>('_a') || { status: [], lastResponse: [] };
+    status: RuleStatus[];
+    type: string[];
+  }>('_a') || { lastResponse: [], status: [], type: [] };
 
   const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
   const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
+  const [stateType, setType] = useState<string[]>(type);
+
   const [stateRefresh, setRefresh] = useState(new Date());
 
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
@@ -75,15 +78,29 @@ export function RulesPage() {
 
   const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
     setStatus(newStatus);
-    urlStateStorage.set('_a', { status: newStatus, lastResponse });
-    return { lastResponse: stateLastResponse || [], status: newStatus };
+    urlStateStorage.set('_a', { lastResponse, status: newStatus, type });
+    return { lastResponse: stateLastResponse || [], status: newStatus, type: stateType };
   };
 
   const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
     setRefresh(new Date());
     setLastResponse(newLastResponse);
-    urlStateStorage.set('_a', { status, lastResponse: newLastResponse });
-    return { lastResponse: newLastResponse, status: stateStatus || [] };
+    urlStateStorage.set('_a', { lastResponse: newLastResponse, status, type });
+    return {
+      lastResponse: newLastResponse,
+      status: stateStatus || [],
+      type: stateType || [],
+    };
+  };
+
+  const handleTypeFilterChange = (newType: string[]) => {
+    setType(newType);
+    urlStateStorage.set('_a', { lastResponse, status, type: newType });
+    return {
+      lastResponse: stateLastResponse,
+      status: stateStatus || [],
+      type: newType || [],
+    };
   };
 
   return (
@@ -132,6 +149,7 @@ export function RulesPage() {
             rulesListKey="observability_rulesListColumns"
             showActionFilter={false}
             statusFilter={stateStatus}
+            typeFilter={stateType}
             visibleColumns={[
               'ruleName',
               'ruleExecutionStatusLastDate',
@@ -141,6 +159,7 @@ export function RulesPage() {
             ]}
             onLastRunOutcomeFilterChange={handleLastRunOutcomeFilterChange}
             onStatusFilterChange={handleStatusFilterChange}
+            onTypeFilterChange={handleTypeFilterChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
