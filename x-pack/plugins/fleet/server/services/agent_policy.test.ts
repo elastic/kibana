@@ -6,20 +6,16 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { PackagePolicyRestrictionRelatedError } from '../errors';
-
 import type {
   AgentPolicy,
   FullAgentPolicy,
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
 } from '../types';
-
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { AGENT_POLICY_INDEX } from '../../common';
@@ -710,47 +706,72 @@ describe('agent policy', () => {
       );
     });
 
-    describe('ensurePreconfiguredAgentPolicy', () => {
-      it('should use preconfigured id if provided for policy', async () => {
-        const soClient = savedObjectsClientMock.create();
-        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = savedObjectsClientMock.create();
 
-        const preconfiguredAgentPolicy: PreconfiguredAgentPolicy = {
-          id: 'my-unique-id',
-          name: 'My Preconfigured Policy',
-          package_policies: [
-            {
-              name: 'my-package-policy',
-              id: 'my-package-policy-id',
-              package: {
-                name: 'test-package',
-              },
-            },
-          ],
-        };
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValueOnce('default-output');
 
-        soClient.find.mockResolvedValueOnce({ total: 0, saved_objects: [], page: 1, per_page: 10 });
-        soClient.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError());
-
-        soClient.create.mockResolvedValueOnce({
-          id: 'my-unique-id',
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {},
-          references: [],
-        });
-
-        await agentPolicyService.ensurePreconfiguredAgentPolicy(
-          soClient,
-          esClient,
-          preconfiguredAgentPolicy
-        );
-
-        expect(soClient.create).toHaveBeenCalledWith(
-          AGENT_POLICY_SAVED_OBJECT_TYPE,
-          expect.anything(),
-          expect.objectContaining({ id: 'my-unique-id' })
-        );
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: {},
+            references: [],
+            id: 'test-agent-policy',
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
       });
+
+      await agentPolicyService.deployPolicy(soClient, 'test-agent-policy');
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `User deploying policy [id=test-agent-policy]`,
+      });
+    });
+  });
+
+  describe('ensurePreconfiguredAgentPolicy', () => {
+    it('should use preconfigured id if provided for policy', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const preconfiguredAgentPolicy: PreconfiguredAgentPolicy = {
+        id: 'my-unique-id',
+        name: 'My Preconfigured Policy',
+        package_policies: [
+          {
+            name: 'my-package-policy',
+            id: 'my-package-policy-id',
+            package: {
+              name: 'test-package',
+            },
+          },
+        ],
+      };
+
+      soClient.find.mockResolvedValueOnce({ total: 0, saved_objects: [], page: 1, per_page: 10 });
+      soClient.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'my-unique-id',
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {},
+        references: [],
+      });
+
+      await agentPolicyService.ensurePreconfiguredAgentPolicy(
+        soClient,
+        esClient,
+        preconfiguredAgentPolicy
+      );
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        AGENT_POLICY_SAVED_OBJECT_TYPE,
+        expect.anything(),
+        expect.objectContaining({ id: 'my-unique-id' })
+      );
     });
   });
 
