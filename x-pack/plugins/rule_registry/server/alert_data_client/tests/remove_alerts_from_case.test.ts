@@ -13,7 +13,7 @@ import { ALERT_CASE_IDS, ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID } from '@kbn/ru
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
-describe('removeAlertsFromCase', () => {
+describe('removeCaseIdFromAlerts', () => {
   const alertingAuthMock = alertingAuthorizationMock.create();
   const esClientMock = elasticsearchClientMock.createElasticsearchClient();
   const auditLogger = auditLoggerMock.create();
@@ -54,7 +54,7 @@ describe('removeAlertsFromCase', () => {
 
   it('removes alerts from a case', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    await alertsClient.removeAlertsFromCase({ caseId, alerts });
+    await alertsClient.removeCaseIdFromAlerts({ caseId, alerts });
 
     expect(esClientMock.mget).toHaveBeenCalledWith({
       docs: [{ _id: 'alert-id', _index: 'alert-index' }],
@@ -72,9 +72,9 @@ describe('removeAlertsFromCase', () => {
           Object {
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.case_ids'] != null && ctx._source['kibana.alert.case_ids'].length > 0) {
+              "source": "if (ctx._source['kibana.alert.case_ids'] != null) {
               for (int i=0; i < ctx._source['kibana.alert.case_ids'].length; i++) {
-                  if (ctx._source['kibana.alert.case_ids'][i] == 'test-case') {
+                  if (ctx._source['kibana.alert.case_ids'][i].equals('test-case')) {
                       ctx._source['kibana.alert.case_ids'].remove(i);
                   }
               }
@@ -89,7 +89,7 @@ describe('removeAlertsFromCase', () => {
 
   it('calls ensureAllAlertsAuthorized correctly', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    await alertsClient.removeAlertsFromCase({ caseId, alerts });
+    await alertsClient.removeCaseIdFromAlerts({ caseId, alerts });
 
     expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
       consumer: 'apm',
@@ -101,7 +101,7 @@ describe('removeAlertsFromCase', () => {
 
   it('does not do any calls if there are no alerts', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    await alertsClient.removeAlertsFromCase({ caseId, alerts: [] });
+    await alertsClient.removeCaseIdFromAlerts({ caseId, alerts: [] });
 
     expect(alertingAuthMock.ensureAuthorized).not.toHaveBeenCalled();
     expect(esClientMock.bulk).not.toHaveBeenCalled();

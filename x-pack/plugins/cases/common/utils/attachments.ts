@@ -6,8 +6,6 @@
  */
 
 import type {
-  AttributesTypeAlerts,
-  CommentAttributes,
   CommentRequest,
   CommentRequestExternalReferenceType,
   CommentRequestPersistableStateType,
@@ -31,7 +29,3 @@ export const isCommentRequestTypePersistableState = (
 ): context is CommentRequestPersistableStateType => {
   return context.type === CommentType.persistableState;
 };
-
-export const isAlertAttachment = (
-  attachment: CommentAttributes
-): attachment is AttributesTypeAlerts => attachment.type === CommentType.alert;

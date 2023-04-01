@@ -234,7 +234,7 @@ export class AlertService {
     }
   }
 
-  public async removeAlertsFromCase({
+  public async removeCaseIdFromAlerts({
     alerts,
     caseId,
   }: RemoveAlertsFromCaseRequest): Promise<void> {
@@ -245,13 +245,13 @@ export class AlertService {
         return;
       }
 
-      await this.alertsClient.removeAlertsFromCase({
+      await this.alertsClient.removeCaseIdFromAlerts({
         alerts: nonEmptyAlerts,
         caseId,
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to remove alerts from case ${caseId}: ${error}`,
+        message: `Failed to remove case ${caseId} from alerts: ${error}`,
         error,
         logger: this.logger,
       });

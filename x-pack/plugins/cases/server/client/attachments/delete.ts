@@ -11,8 +11,7 @@ import pMap from 'p-map';
 import type { SavedObject } from '@kbn/core/server';
 import type { CommentAttributes } from '../../../common/api';
 import { Actions, ActionTypes } from '../../../common/api';
-import { isAlertAttachment } from '../../../common/utils/attachments';
-import { getAlertInfoFromComments } from '../../common/utils';
+import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
@@ -151,11 +150,11 @@ interface HandleAlertsArgs {
 }
 
 const handleAlerts = async ({ alertsService, attachment, caseId }: HandleAlertsArgs) => {
-  if (!isAlertAttachment(attachment)) {
+  if (!isCommentRequestTypeAlert(attachment)) {
     return;
   }
 
   const alerts = getAlertInfoFromComments([attachment]);
   await alertsService.ensureAlertsAuthorized({ alerts });
-  await alertsService.removeAlertsFromCase({ alerts, caseId });
+  await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
 };

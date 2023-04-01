@@ -28,7 +28,7 @@ describe('deleteComment', () => {
         alerts: [{ id: 'test-id', index: 'test-index' }],
       });
 
-      expect(clientArgs.services.alertsService.removeAlertsFromCase).toHaveBeenCalledWith({
+      expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).toHaveBeenCalledWith({
         alerts: [{ id: 'test-id', index: 'test-index' }],
         caseId: 'mock-id-4',
       });
@@ -40,7 +40,7 @@ describe('deleteComment', () => {
 
       expect(clientArgs.services.alertsService.ensureAlertsAuthorized).not.toHaveBeenCalledWith();
 
-      expect(clientArgs.services.alertsService.removeAlertsFromCase).not.toHaveBeenCalledWith();
+      expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalledWith();
     });
   });
 });

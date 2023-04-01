@@ -112,101 +112,113 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alerts', () => {
-      describe('security_solution', () => {
-        const createCaseAttachAlertAndDeleteAlert = async ({
-          totalCases,
-          indexOfCaseToDelete,
-          expectedHttpCode = 204,
-          auth = { user: superUser, space: 'space1' },
-        }: {
-          totalCases: number;
-          indexOfCaseToDelete: number;
-          expectedHttpCode?: number;
-          auth?: { user: User; space: string | null };
-        }) => {
-          const cases = await Promise.all(
-            [...Array(totalCases).keys()].map((index) =>
-              createCase(
-                supertestWithoutAuth,
-                {
-                  ...postCaseReq,
-                  settings: { syncAlerts: false },
-                },
-                200,
-                { user: superUser, space: 'space1' }
-              )
-            )
-          );
+      type Alerts = Array<{ _id: string; _index: string }>;
 
-          const signals = await createSecuritySolutionAlerts(supertest, log);
-          const alerts = [signals.hits.hits[0], signals.hits.hits[1]];
-          const updatedCases = [];
-
-          for (const theCase of cases) {
-            const updatedCase = await createComment({
-              supertest: supertestWithoutAuth,
-              caseId: theCase.id,
-              params: {
-                alertId: alerts.map((alert) => alert._id),
-                index: alerts.map((alert) => alert._index),
-                rule: {
-                  id: 'id',
-                  name: 'name',
-                },
-                owner: 'securitySolutionFixture',
-                type: CommentType.alert,
+      const createCaseAttachAlertAndDeleteAlert = async ({
+        totalCases,
+        indexOfCaseToDelete,
+        owner,
+        expectedHttpCode = 204,
+        deleteCommentAuth = { user: superUser, space: 'space1' },
+        alerts,
+        getAlerts,
+      }: {
+        totalCases: number;
+        indexOfCaseToDelete: number;
+        owner: string;
+        expectedHttpCode?: number;
+        deleteCommentAuth?: { user: User; space: string | null };
+        alerts: Alerts;
+        getAlerts: (alerts: Alerts) => Promise<Array<Record<string, unknown>>>;
+      }) => {
+        const cases = await Promise.all(
+          [...Array(totalCases).keys()].map((index) =>
+            createCase(
+              supertestWithoutAuth,
+              {
+                ...postCaseReq,
+                owner,
+                settings: { syncAlerts: false },
               },
-              auth: { user: superUser, space: 'space1' },
-            });
+              200,
+              { user: superUser, space: 'space1' }
+            )
+          )
+        );
 
-            updatedCases.push(updatedCase);
-          }
+        const updatedCases = [];
 
-          const caseIds = updatedCases.map((theCase) => theCase.id);
+        for (const theCase of cases) {
+          const updatedCase = await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: theCase.id,
+            params: {
+              alertId: alerts.map((alert) => alert._id),
+              index: alerts.map((alert) => alert._index),
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner,
+              type: CommentType.alert,
+            },
+            auth: { user: superUser, space: 'space1' },
+          });
 
-          await es.indices.refresh({ index: alerts.map((alert) => alert._index) });
+          updatedCases.push(updatedCase);
+        }
+
+        const caseIds = updatedCases.map((theCase) => theCase.id);
+
+        const updatedAlerts = await getAlerts(alerts);
+
+        for (const alert of updatedAlerts) {
+          expect(alert[ALERT_CASE_IDS]).eql(caseIds);
+        }
+
+        const caseToDelete = updatedCases[indexOfCaseToDelete];
+        const commentId = caseToDelete.comments![0].id;
+
+        await deleteComment({
+          supertest: supertestWithoutAuth,
+          caseId: caseToDelete.id,
+          commentId,
+          expectedHttpCode,
+          auth: deleteCommentAuth,
+        });
+
+        const alertAfterDeletion = await getAlerts(alerts);
+
+        const caseIdsWithoutRemovedCase =
+          expectedHttpCode === 204
+            ? updatedCases
+                .filter((theCase) => theCase.id !== caseToDelete.id)
+                .map((theCase) => theCase.id)
+            : updatedCases.map((theCase) => theCase.id);
+
+        for (const alert of alertAfterDeletion) {
+          expect(alert[ALERT_CASE_IDS]).eql(caseIdsWithoutRemovedCase);
+        }
+      };
+
+      describe('security_solution', () => {
+        let alerts: Alerts = [];
+
+        const getAlerts = async (_alerts: Alerts) => {
+          await es.indices.refresh({ index: _alerts.map((alert) => alert._index) });
           const updatedAlerts = await getSecuritySolutionAlerts(
             supertest,
             alerts.map((alert) => alert._id)
           );
 
-          for (const alert of updatedAlerts.hits.hits) {
-            expect(alert._source?.[ALERT_CASE_IDS]).eql(caseIds);
-          }
-
-          const caseToDelete = updatedCases[indexOfCaseToDelete];
-          const commentId = caseToDelete.comments![0].id;
-
-          await deleteComment({
-            supertest: supertestWithoutAuth,
-            caseId: caseToDelete.id,
-            commentId,
-            expectedHttpCode,
-            auth,
-          });
-
-          await es.indices.refresh({ index: updatedAlerts.hits.hits.map((alert) => alert._index) });
-
-          const alertAfterDeletion = await getSecuritySolutionAlerts(
-            supertest,
-            updatedAlerts.hits.hits.map((alert) => alert._id)
-          );
-
-          const caseIdsWithoutRemovedCase =
-            expectedHttpCode === 204
-              ? updatedCases
-                  .filter((theCase) => theCase.id !== caseToDelete.id)
-                  .map((theCase) => theCase.id)
-              : updatedCases.map((theCase) => theCase.id);
-
-          for (const alert of alertAfterDeletion.hits.hits) {
-            expect(alert._source?.[ALERT_CASE_IDS]).eql(caseIdsWithoutRemovedCase);
-          }
+          return updatedAlerts.hits.hits.map((alert) => ({ ...alert._source }));
         };
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
           await createSignalsIndex(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          alerts = [signals.hits.hits[0], signals.hits.hits[1]];
         });
 
         afterEach(async () => {
@@ -219,6 +231,9 @@ export default ({ getService }: FtrProviderContext): void => {
           await createCaseAttachAlertAndDeleteAlert({
             totalCases: 1,
             indexOfCaseToDelete: 0,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
           });
         });
 
@@ -226,6 +241,9 @@ export default ({ getService }: FtrProviderContext): void => {
           await createCaseAttachAlertAndDeleteAlert({
             totalCases: 3,
             indexOfCaseToDelete: 1,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
           });
         });
 
@@ -233,8 +251,11 @@ export default ({ getService }: FtrProviderContext): void => {
           await createCaseAttachAlertAndDeleteAlert({
             totalCases: 1,
             indexOfCaseToDelete: 0,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
             expectedHttpCode: 204,
-            auth: { user: secOnlyReadAlerts, space: 'space1' },
+            deleteCommentAuth: { user: secOnlyReadAlerts, space: 'space1' },
           });
         });
 
@@ -242,8 +263,11 @@ export default ({ getService }: FtrProviderContext): void => {
           await createCaseAttachAlertAndDeleteAlert({
             totalCases: 1,
             indexOfCaseToDelete: 0,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
             expectedHttpCode: 403,
-            auth: { user: obsSec, space: 'space1' },
+            deleteCommentAuth: { user: obsSec, space: 'space1' },
           });
         });
 
@@ -251,69 +275,24 @@ export default ({ getService }: FtrProviderContext): void => {
           await createCaseAttachAlertAndDeleteAlert({
             totalCases: 1,
             indexOfCaseToDelete: 0,
+            owner: 'securitySolutionFixture',
+            alerts,
+            getAlerts,
             expectedHttpCode: 204,
-            auth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
+            deleteCommentAuth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
           });
         });
       });
 
       describe('observability', () => {
-        const createCaseAttachAlertAndDeleteAlert = async ({
-          totalCases,
-          indexOfCaseToDelete,
-          expectedHttpCode = 204,
-          auth = { user: superUser, space: 'space1' },
-        }: {
-          totalCases: number;
-          indexOfCaseToDelete: number;
-          expectedHttpCode?: number;
-          auth?: { user: User; space: string | null };
-        }) => {
-          const cases = await Promise.all(
-            [...Array(totalCases).keys()].map((index) =>
-              createCase(
-                supertestWithoutAuth,
-                {
-                  ...postCaseReq,
-                  owner: 'observabilityFixture',
-                  settings: { syncAlerts: false },
-                },
-                200,
-                { user: superUser, space: 'space1' }
-              )
-            )
-          );
+        const alerts = [
+          { _id: 'NoxgpHkBqbdrfX07MqXV', _index: '.alerts-observability.apm.alerts' },
+          { _id: 'space1alert', _index: '.alerts-observability.apm.alerts' },
+        ];
 
-          const alerts = [
-            { _id: 'NoxgpHkBqbdrfX07MqXV', _index: '.alerts-observability.apm.alerts' },
-            { _id: 'space1alert', _index: '.alerts-observability.apm.alerts' },
-          ];
-          const updatedCases = [];
-
-          for (const theCase of cases) {
-            const updatedCase = await createComment({
-              supertest: supertestWithoutAuth,
-              caseId: theCase.id,
-              params: {
-                alertId: alerts.map((alert) => alert._id),
-                index: alerts.map((alert) => alert._index),
-                rule: {
-                  id: 'id',
-                  name: 'name',
-                },
-                owner: 'observabilityFixture',
-                type: CommentType.alert,
-              },
-              auth: { user: superUser, space: 'space1' },
-            });
-
-            updatedCases.push(updatedCase);
-          }
-
-          const caseIds = updatedCases.map((theCase) => theCase.id);
-
+        const getAlerts = async (_alerts: Alerts) => {
           const updatedAlerts = await Promise.all(
-            alerts.map((alert) =>
+            _alerts.map((alert) =>
               getAlertById({
                 supertest: supertestWithoutAuth,
                 id: alert._id,
@@ -323,42 +302,7 @@ export default ({ getService }: FtrProviderContext): void => {
             )
           );
 
-          for (const alert of updatedAlerts) {
-            expect(alert[ALERT_CASE_IDS]).eql(caseIds);
-          }
-
-          const caseToDelete = updatedCases[indexOfCaseToDelete];
-          const commentId = caseToDelete.comments![0].id;
-
-          await deleteComment({
-            supertest: supertestWithoutAuth,
-            caseId: caseToDelete.id,
-            commentId,
-            expectedHttpCode,
-            auth,
-          });
-
-          const alertAfterDeletion = await Promise.all(
-            alerts.map((alert) =>
-              getAlertById({
-                supertest: supertestWithoutAuth,
-                id: alert._id,
-                index: alert._index,
-                auth: { user: superUser, space: 'space1' },
-              })
-            )
-          );
-
-          const caseIdsWithoutRemovedCase =
-            expectedHttpCode === 204
-              ? updatedCases
-                  .filter((theCase) => theCase.id !== caseToDelete.id)
-                  .map((theCase) => theCase.id)
-              : updatedCases.map((theCase) => theCase.id);
-
-          for (const alert of alertAfterDeletion) {
-            expect(alert[ALERT_CASE_IDS]).eql(caseIdsWithoutRemovedCase);
-          }
+          return updatedAlerts as Array<Record<string, unknown>>;
         };
 
         beforeEach(async () => {
@@ -373,6 +317,9 @@ export default ({ getService }: FtrProviderContext): void => {
           await createCaseAttachAlertAndDeleteAlert({
             totalCases: 1,
             indexOfCaseToDelete: 0,
+            owner: 'observabilityFixture',
+            alerts,
+            getAlerts,
           });
         });
 
@@ -380,6 +327,9 @@ export default ({ getService }: FtrProviderContext): void => {
           await createCaseAttachAlertAndDeleteAlert({
             totalCases: 3,
             indexOfCaseToDelete: 1,
+            owner: 'observabilityFixture',
+            alerts,
+            getAlerts,
           });
         });
 
@@ -388,7 +338,10 @@ export default ({ getService }: FtrProviderContext): void => {
             totalCases: 1,
             indexOfCaseToDelete: 0,
             expectedHttpCode: 204,
-            auth: { user: obsOnlyReadAlerts, space: 'space1' },
+            owner: 'observabilityFixture',
+            alerts,
+            getAlerts,
+            deleteCommentAuth: { user: obsOnlyReadAlerts, space: 'space1' },
           });
         });
 
@@ -397,7 +350,10 @@ export default ({ getService }: FtrProviderContext): void => {
             totalCases: 1,
             indexOfCaseToDelete: 0,
             expectedHttpCode: 403,
-            auth: { user: obsSec, space: 'space1' },
+            owner: 'observabilityFixture',
+            alerts,
+            getAlerts,
+            deleteCommentAuth: { user: obsSec, space: 'space1' },
           });
         });
       });

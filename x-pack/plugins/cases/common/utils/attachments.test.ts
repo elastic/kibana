@@ -7,26 +7,53 @@
 
 import type { CommentAttributes } from '../api';
 import { CommentType } from '../api';
-import { isAlertAttachment } from './attachments';
+import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from './attachments';
 
-describe('isAlertAttachment', () => {
-  const alert = {
-    type: CommentType.alert as const,
-  } as CommentAttributes;
-
-  const commentTypeWithoutAlert = Object.values(CommentType).filter(
-    (type) => type !== CommentType.alert
-  );
-
-  it('returns false for type: alert', () => {
-    expect(isAlertAttachment(alert)).toBe(true);
-  });
-
-  it.each(commentTypeWithoutAlert)('returns false for type: %s', (type) => {
-    const attachment = {
-      type,
+describe('attachments utils', () => {
+  describe('isCommentRequestTypeExternalReference', () => {
+    const externalReferenceAttachment = {
+      type: CommentType.externalReference as const,
     } as CommentAttributes;
 
-    expect(isAlertAttachment(attachment)).toBe(false);
+    const commentTypeWithoutAlert = Object.values(CommentType).filter(
+      (type) => type !== CommentType.externalReference
+    );
+
+    it('returns false for type: externalReference', () => {
+      expect(isCommentRequestTypeExternalReference(externalReferenceAttachment)).toBe(true);
+    });
+
+    it.each(commentTypeWithoutAlert)('returns false for type: %s', (type) => {
+      const attachment = {
+        type,
+      } as CommentAttributes;
+
+      expect(isCommentRequestTypeExternalReference(attachment)).toBe(false);
+    });
+  });
+
+  describe('isCommentRequestTypePersistableState', () => {
+    const persistableStateAttachment = {
+      type: CommentType.persistableState as const,
+    } as CommentAttributes;
+
+    const commentTypeWithoutAlert = Object.values(CommentType).filter(
+      (type) => type !== CommentType.persistableState
+    );
+
+    it('returns false for type: persistableState', () => {
+      expect(isCommentRequestTypePersistableState(persistableStateAttachment)).toBe(true);
+    });
+
+    it.each(commentTypeWithoutAlert)('returns false for type: %s', (type) => {
+      const attachment = {
+        type,
+      } as CommentAttributes;
+
+      expect(isCommentRequestTypePersistableState(attachment)).toBe(false);
+    });
   });
 });

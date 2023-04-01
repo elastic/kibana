@@ -851,7 +851,7 @@ export class AlertsClient {
     });
   }
 
-  public async removeAlertsFromCase({ caseId, alerts }: RemoveAlertsFromCaseOptions) {
+  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveAlertsFromCaseOptions) {
     try {
       if (alerts.length === 0) {
         return;
@@ -862,9 +862,9 @@ export class AlertsClient {
         operation: ReadOperations.Get,
       });
 
-      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null && ctx._source['${ALERT_CASE_IDS}'].length > 0) {
+      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null) {
         for (int i=0; i < ctx._source['${ALERT_CASE_IDS}'].length; i++) {
-            if (ctx._source['${ALERT_CASE_IDS}'][i] == '${caseId}') {
+            if (ctx._source['${ALERT_CASE_IDS}'][i].equals('${caseId}')) {
                 ctx._source['${ALERT_CASE_IDS}'].remove(i);
             }
         }
@@ -891,7 +891,7 @@ export class AlertsClient {
         body: bulkUpdateRequest,
       });
     } catch (error) {
-      this.logger.error(`Error removing alerts from case ${caseId}: ${error}`);
+      this.logger.error(`Error to remove case ${caseId} from alerts: ${error}`);
       throw error;
     }
   }
