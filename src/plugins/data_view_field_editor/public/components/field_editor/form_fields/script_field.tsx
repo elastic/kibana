@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
 import { PainlessLang, PainlessContext, monaco } from '@kbn/monaco';
+import { ScriptFieldController } from './script_field_controller';
 
 import {
   UseField,
@@ -59,6 +60,12 @@ const currentDocumentSelector = (state: PreviewState) => state.documents[state.c
 const currentDocumentIsLoadingSelector = (state: PreviewState) => state.isLoadingDocuments;
 
 const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
+  const [scriptFieldController] = useState(
+    () =>
+      new ScriptFieldController({
+        defaultValue: mapReturnTypeToPainlessContext(schema.type.defaultValue![0].value!),
+      })
+  );
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorValidationSubscription = useRef<Subscription>();
   const fieldCurrentValue = useRef<string>('');
@@ -66,6 +73,10 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   const { error, isLoadingPreview, isPreviewAvailable, controller } = useFieldPreviewContext();
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
   const isFetchingDoc = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
+  const painlessContext = useStateSelector(
+    scriptFieldController.state$,
+    (painlessCxt) => painlessCxt
+  );
   const [validationData$, nextValidationData$] = useBehaviorSubject<
     | {
         isFetchingDoc: boolean;
@@ -74,10 +85,6 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
       }
     | undefined
   >(undefined);
-
-  const [painlessContext, setPainlessContext] = useState<PainlessContext>(
-    mapReturnTypeToPainlessContext(schema.type.defaultValue![0].value!)
-  );
 
   const currentDocId = currentDocument?._id;
 
@@ -92,7 +99,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   const onFormDataChange = useCallback(
     ({ type }: FieldFormInternal) => {
       if (type !== undefined) {
-        setPainlessContext(mapReturnTypeToPainlessContext(type[0]!.value!));
+        scriptFieldController.setPainlessContext(mapReturnTypeToPainlessContext(type[0]!.value!));
       }
 
       if (isPreviewAvailable) {
@@ -102,7 +109,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
         nextValidationData$(undefined);
       }
     },
-    [nextValidationData$, isPreviewAvailable]
+    [nextValidationData$, isPreviewAvailable, scriptFieldController]
   );
 
   useFormData<FieldFormInternal>({
