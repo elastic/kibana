@@ -20,11 +20,7 @@ import {
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
-import {
-  topPanelHeightSelector,
-  columnsSelector,
-  currentSuggestionSelector,
-} from './utils/state_selectors';
+import { topPanelHeightSelector, currentSuggestionSelector } from './utils/state_selectors';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -55,6 +51,7 @@ export type UnifiedHistogramContainerProps = {
   | 'filters'
   | 'timeRange'
   | 'relativeTimeRange'
+  | 'columns'
   | 'resizeRef'
   | 'appendHitsCounter'
   | 'children'
@@ -74,7 +71,6 @@ export type UnifiedHistogramApi = {
   | 'setChartHidden'
   | 'setTopPanelHeight'
   | 'setBreakdownField'
-  | 'setColumns'
   | 'setTimeInterval'
   | 'setTotalHits'
 >;
@@ -94,20 +90,13 @@ export const UnifiedHistogramContainer = forwardRef<
 
   // Call for creation options once the container is mounted
   useMount(async () => {
-    const options = await containerProps?.getCreationOptions?.();
+    const { getCreationOptions, services } = containerProps;
+    const options = await getCreationOptions?.();
+    const apiHelper = await services.lens.stateHelperApi();
 
     setLayoutProps(pick(options, 'disableAutoFetching', 'disableTriggers', 'disabledActions'));
-
-    // API helpers are loaded async from Lens
-    const apiHelper = await containerProps.services.lens.stateHelperApi();
+    setStateService(createStateService({ services, ...options }));
     setLensSuggestionsApi(() => apiHelper.suggestions);
-
-    setStateService(
-      createStateService({
-        services: containerProps.services,
-        ...options,
-      })
-    );
   });
 
   // Initialize the API once the state service is available
@@ -126,16 +115,14 @@ export const UnifiedHistogramContainer = forwardRef<
         'setChartHidden',
         'setTopPanelHeight',
         'setBreakdownField',
-        'setColumns',
         'setTimeInterval',
         'setTotalHits'
       ),
     });
   }, [input$, stateService]);
 
-  const columns = useStateSelector(stateService?.state$, columnsSelector);
-  const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const { dataView, query, searchSessionId, requestAdapter } = containerProps;
+  const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
     stateService,
@@ -146,7 +133,7 @@ export const UnifiedHistogramContainer = forwardRef<
   });
 
   // Don't render anything until the container is initialized
-  if (!layoutProps || !api || !lensSuggestionsApi) {
+  if (!layoutProps || !lensSuggestionsApi || !api) {
     return null;
   }
 
@@ -155,7 +142,6 @@ export const UnifiedHistogramContainer = forwardRef<
       {...containerProps}
       {...layoutProps}
       {...stateProps}
-      columns={columns}
       currentSuggestion={currentSuggestion}
       topPanelHeight={topPanelHeight}
       input$={input$}

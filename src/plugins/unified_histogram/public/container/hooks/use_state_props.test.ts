@@ -32,7 +32,6 @@ describe('useStateProps', () => {
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
-    columns: [],
     currentSuggestion: undefined,
   };
 

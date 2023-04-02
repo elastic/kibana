@@ -57,7 +57,6 @@ export const useDiscoverHistogram = ({
       hideChart: chartHidden,
       interval: timeInterval,
       breakdownField,
-      columns,
     } = stateContainer.appState.getState();
 
     const { fetchStatus: totalHitsStatus, result: totalHitsResult } =
@@ -69,7 +68,6 @@ export const useDiscoverHistogram = ({
       initialState: {
         chartHidden,
         timeInterval,
-        columns,
         breakdownField,
         totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
         totalHitsResult,
@@ -159,18 +157,15 @@ export const useDiscoverHistogram = ({
 
   // Update the columns only when documents are fetched so the Lens suggestions
   // don't constantly change when the user modifies the table columns
-  useEffect(() => {
-    const subscription = createDocumentsFetchedObservable(
-      stateContainer.dataState.data$.documents$
-    ).subscribe(({ textBasedQueryColumns }) => {
-      const columns = textBasedQueryColumns?.map(({ name }) => name) ?? [];
-      unifiedHistogram?.setColumns(columns);
-    });
+  const columnsObservable = useMemo(
+    () => createColumnsObservable(savedSearchData$.documents$),
+    [savedSearchData$.documents$]
+  );
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [stateContainer.appState, stateContainer.dataState.data$.documents$, unifiedHistogram]);
+  const columns = useObservable(
+    columnsObservable,
+    savedSearchData$.documents$.getValue().textBasedQueryColumns?.map(({ name }) => name) ?? []
+  );
 
   /**
    * Total hits
@@ -319,6 +314,7 @@ export const useDiscoverHistogram = ({
     filters,
     timeRange,
     relativeTimeRange,
+    columns,
   };
 };
 
@@ -339,10 +335,11 @@ const createStateSyncObservable = (state$?: Observable<UnifiedHistogramState>) =
   );
 };
 
-const createDocumentsFetchedObservable = (documents$: DataDocuments$) => {
+const createColumnsObservable = (documents$: DataDocuments$) => {
   return documents$.pipe(
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
-    filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE)
+    filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
+    map(({ textBasedQueryColumns }) => textBasedQueryColumns?.map(({ name }) => name) ?? [])
   );
 };
 

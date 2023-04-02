@@ -133,7 +133,6 @@ describe('useDiscoverHistogram', () => {
       expect(Object.keys(params?.initialState ?? {})).toEqual([
         'chartHidden',
         'timeInterval',
-        'columns',
         'breakdownField',
         'totalHitsStatus',
         'totalHitsResult',

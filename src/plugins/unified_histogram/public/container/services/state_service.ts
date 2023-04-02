@@ -29,10 +29,6 @@ export interface UnifiedHistogramState {
    */
   breakdownField: string | undefined;
   /**
-   * The current selected columns
-   */
-  columns: string[] | undefined;
-  /**
    * The current Lens suggestion
    */
   currentSuggestion: Suggestion | undefined;
@@ -97,10 +93,6 @@ export interface UnifiedHistogramStateService {
    */
   setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
   /**
-   * Sets columns
-   */
-  setColumns: (columns: string[] | undefined) => void;
-  /**
    * Sets the current top panel height
    */
   setTopPanelHeight: (topPanelHeight: number | undefined) => void;
@@ -143,7 +135,6 @@ export const createStateService = (
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
-    columns: [],
     currentSuggestion: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
@@ -189,10 +180,6 @@ export const createStateService = (
 
     setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
       updateState({ currentSuggestion: suggestion });
-    },
-
-    setColumns: (columns: string[] | undefined) => {
-      updateState({ columns });
     },
 
     setTimeInterval: (timeInterval: string) => {
