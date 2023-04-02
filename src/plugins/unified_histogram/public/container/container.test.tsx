@@ -70,7 +70,9 @@ describe('UnifiedHistogramContainer', () => {
     const input$ = component.find(UnifiedHistogramLayout).prop('input$');
     const inputSpy = jest.fn();
     input$?.subscribe(inputSpy);
-    api?.refetch();
+    act(() => {
+      api?.refetch();
+    });
     expect(inputSpy).toHaveBeenCalledTimes(1);
     expect(inputSpy).toHaveBeenCalledWith({ type: 'refetch' });
   });
