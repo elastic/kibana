@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-
-export const getGroupByTerms = (ruleParams: RuleTypeParams) => {
-  return (ruleParams.groupBy ? [ruleParams.groupBy] : [])
-    .flat()
-    .map((group) => {
-      return {
-        field: group as string,
-        missing: (group as string)
-          .replaceAll('.', '_')
-          .toUpperCase()
-          .concat('_NOT_DEFINED'),
-      };
-    });
+export const getGroupByTerms = (groupBy: string[] | string | undefined) => {
+  return (groupBy ? [groupBy] : []).flat().map((group) => {
+    return {
+      field: group,
+      missing: group.replaceAll('.', '_').toUpperCase().concat('_NOT_DEFINED'),
+    };
+  });
 };

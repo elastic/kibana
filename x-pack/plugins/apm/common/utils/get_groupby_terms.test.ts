@@ -10,7 +10,7 @@ import { getGroupByTerms } from './get_groupby_terms';
 describe('get terms fields based on group-by', () => {
   it('returns single terms field', () => {
     const ruleParams = { groupBy: 'service.version' };
-    const terms = getGroupByTerms(ruleParams);
+    const terms = getGroupByTerms(ruleParams.groupBy);
     expect(terms).toEqual([
       { field: 'service.version', missing: 'SERVICE_VERSION_NOT_DEFINED' },
     ]);
@@ -18,7 +18,7 @@ describe('get terms fields based on group-by', () => {
 
   it('returns multiple terms fields', () => {
     const ruleParams = { groupBy: ['service.version', 'container.id'] };
-    const terms = getGroupByTerms(ruleParams);
+    const terms = getGroupByTerms(ruleParams.groupBy);
     expect(terms).toEqual([
       { field: 'service.version', missing: 'SERVICE_VERSION_NOT_DEFINED' },
       { field: 'container.id', missing: 'CONTAINER_ID_NOT_DEFINED' },
@@ -27,7 +27,7 @@ describe('get terms fields based on group-by', () => {
 
   it('returns an empty array', () => {
     const ruleParams = { groupBy: undefined };
-    const terms = getGroupByTerms(ruleParams);
+    const terms = getGroupByTerms(ruleParams.groupBy);
     expect(terms).toEqual([]);
   });
 });
