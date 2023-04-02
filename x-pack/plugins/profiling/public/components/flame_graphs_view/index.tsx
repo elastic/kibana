@@ -49,8 +49,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   const baselineScale: number = get(query, 'baseline', 1);
   const comparisonScale: number = get(query, 'comparison', 1);
 
-  const totalSeconds =
-    (new Date(timeRange.end).getTime() - new Date(timeRange.start).getTime()) / 1000;
+  const totalSeconds = timeRange.inSeconds.end - timeRange.inSeconds.start;
   const totalComparisonSeconds =
     (new Date(comparisonTimeRange.end!).getTime() -
       new Date(comparisonTimeRange.start!).getTime()) /
@@ -75,15 +74,15 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       return Promise.all([
         fetchElasticFlamechart({
           http,
-          timeFrom: new Date(timeRange.start).getTime() / 1000,
-          timeTo: new Date(timeRange.end).getTime() / 1000,
+          timeFrom: timeRange.inSeconds.start,
+          timeTo: timeRange.inSeconds.end,
           kuery,
         }),
-        comparisonTimeRange.start && comparisonTimeRange.end
+        comparisonTimeRange.inSeconds.start && comparisonTimeRange.inSeconds.end
           ? fetchElasticFlamechart({
               http,
-              timeFrom: new Date(comparisonTimeRange.start).getTime() / 1000,
-              timeTo: new Date(comparisonTimeRange.end).getTime() / 1000,
+              timeFrom: comparisonTimeRange.inSeconds.start,
+              timeTo: comparisonTimeRange.inSeconds.end,
               kuery: comparisonKuery,
             })
           : Promise.resolve(undefined),
@@ -95,11 +94,11 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       });
     },
     [
-      timeRange.start,
-      timeRange.end,
+      timeRange.inSeconds.start,
+      timeRange.inSeconds.end,
       kuery,
-      comparisonTimeRange.start,
-      comparisonTimeRange.end,
+      comparisonTimeRange.inSeconds.start,
+      comparisonTimeRange.inSeconds.end,
       comparisonKuery,
       fetchElasticFlamechart,
     ]
