@@ -14,7 +14,7 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
-import { distinctUntilChanged, filter, map, Observable, skip } from 'rxjs';
+import { distinctUntilChanged, filter, map, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
@@ -28,6 +28,7 @@ import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_message
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { addLog } from '../../../../utils/add_log';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -222,6 +223,17 @@ export const useDiscoverHistogram = ({
   ]);
 
   /**
+   * Request params
+   */
+  const { query, filters } = useQuerySubscriber({ data: services.data });
+  const timefilter = services.data.query.timefilter.timefilter;
+  const timeRange = timefilter.getAbsoluteTime();
+  const relativeTimeRange = useObservable(
+    timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
+    timefilter.getTime()
+  );
+
+  /**
    * Data fetching
    */
 
@@ -281,29 +293,23 @@ export const useDiscoverHistogram = ({
   // When the data view or query changes, which will trigger a current suggestion change,
   // skip the next refetch since we want to wait for the columns to update first, which
   // doesn't happen until after the documents are fetched
+  const dataViewId = useInternalStateSelector((state) => state.dataView?.id);
+  const skipFetchParams = useRef({ dataViewId, query });
+
   useEffect(() => {
-    const subscription = createSkipFetchObservable(unifiedHistogram?.state$)?.subscribe(() => {
-      if (usingLensSuggestion.current) {
-        skipLensSuggestionRefetch.current = true;
-        skipDiscoverRefetch.current = true;
-      }
-    });
+    const newSkipFetchParams = { dataViewId, query };
 
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [unifiedHistogram?.state$, usingLensSuggestion]);
+    if (isEqual(skipFetchParams.current, newSkipFetchParams)) {
+      return;
+    }
 
-  /**
-   * Request params
-   */
-  const { query, filters } = useQuerySubscriber({ data: services.data });
-  const timefilter = services.data.query.timefilter.timefilter;
-  const timeRange = timefilter.getAbsoluteTime();
-  const relativeTimeRange = useObservable(
-    timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
-    timefilter.getTime()
-  );
+    skipFetchParams.current = newSkipFetchParams;
+
+    if (usingLensSuggestion.current) {
+      skipLensSuggestionRefetch.current = true;
+      skipDiscoverRefetch.current = true;
+    }
+  }, [dataViewId, query, usingLensSuggestion]);
 
   return {
     ref,
@@ -351,13 +357,5 @@ const createCurrentSuggestionObservable = (state$?: Observable<UnifiedHistogramS
   return state$?.pipe(
     map((state) => state.currentSuggestion),
     distinctUntilChanged(isEqual)
-  );
-};
-
-const createSkipFetchObservable = (state$?: Observable<UnifiedHistogramState>) => {
-  return state$?.pipe(
-    map((state) => [state.dataView.id, state.query]),
-    distinctUntilChanged(isEqual),
-    skip(1)
   );
 };
