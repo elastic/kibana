@@ -15,6 +15,7 @@ export interface TelemetryServiceSetupParams {
 export enum InfraTelemetryEventTypes {
   HOSTS_VIEW_QUERY_SUBMITTED = 'Hosts View Query Submitted',
   HOSTS_ENTRY_CLICKED = 'Host Entry Clicked',
+  HOSTS_VIEW_LOGS_QUERY_SUBMITTED = 'Hosts View Logs Query Submitted',
 }
 
 export interface HostsViewQuerySubmittedParams {
@@ -29,11 +30,20 @@ export interface HostEntryClickedParams {
   cloud_provider?: string | null;
 }
 
-export type InfraTelemetryEventParams = HostsViewQuerySubmittedParams | HostEntryClickedParams;
+export interface HostsViewLogsQuerySubmittedParams {
+  host_filters: string;
+  query: string;
+}
+
+export type InfraTelemetryEventParams =
+  | HostsViewQuerySubmittedParams
+  | HostEntryClickedParams
+  | HostsViewLogsQuerySubmittedParams;
 
 export interface ITelemetryClient {
   reportHostEntryClicked(params: HostEntryClickedParams): void;
   reportHostsViewQuerySubmitted(params: HostsViewQuerySubmittedParams): void;
+  reportHostsViewLogsQuerySubmitted(params: HostsViewLogsQuerySubmittedParams): void;
 }
 
 export type InfraTelemetryEvent =
@@ -44,4 +54,8 @@ export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.HOSTS_ENTRY_CLICKED;
       schema: RootSchema<HostEntryClickedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.HOSTS_VIEW_LOGS_QUERY_SUBMITTED;
+      schema: RootSchema<HostsViewLogsQuerySubmittedParams>;
     };

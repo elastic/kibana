@@ -10,4 +10,5 @@ import { ITelemetryClient } from './types';
 export const createTelemetryClientMock = (): jest.Mocked<ITelemetryClient> => ({
   reportHostEntryClicked: jest.fn(),
   reportHostsViewQuerySubmitted: jest.fn(),
+  reportHostsViewLogsQuerySubmitted: jest.fn(),
 });

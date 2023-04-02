@@ -9,6 +9,7 @@ import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import {
   HostEntryClickedParams,
   HostsViewQuerySubmittedParams,
+  HostsViewLogsQuerySubmittedParams,
   InfraTelemetryEventTypes,
   ITelemetryClient,
 } from './types';
@@ -32,5 +33,9 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportHostsViewQuerySubmitted = (params: HostsViewQuerySubmittedParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED, params);
+  };
+
+  public reportHostsViewLogsQuerySubmitted = (params: HostsViewLogsQuerySubmittedParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.HOSTS_VIEW_LOGS_QUERY_SUBMITTED, params);
   };
 }

@@ -50,6 +50,7 @@ describe('TelemetryService', () => {
 
       expect(telemetry).toHaveProperty('reportHostEntryClicked');
       expect(telemetry).toHaveProperty('reportHostsViewQuerySubmitted');
+      expect(telemetry).toHaveProperty('reportHostsViewLogsQuerySubmitted');
     });
   });
 
@@ -115,6 +116,28 @@ describe('TelemetryService', () => {
           filters: [],
           interval: 'interval(now-1h)',
           query: '',
+        }
+      );
+    });
+  });
+
+  describe('#reportHostsLogsViewQuerySubmitted', () => {
+    it('should report hosts query and filtering submission with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportHostsViewLogsQuerySubmitted({
+        host_filters: 'host.name:(gke-edge-lite-oblt-edge-lite-oblt-poo-f65a47f2-3wgt)',
+        query: 'message:info',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.HOSTS_VIEW_LOGS_QUERY_SUBMITTED,
+        {
+          host_filters: 'host.name:(gke-edge-lite-oblt-edge-lite-oblt-poo-f65a47f2-3wgt)',
+          query: 'message:info',
         }
       );
     });
