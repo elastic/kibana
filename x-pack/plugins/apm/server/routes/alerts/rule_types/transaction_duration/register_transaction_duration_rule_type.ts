@@ -167,7 +167,7 @@ export function registerTransactionDurationRuleType({
                     missing: ENVIRONMENT_NOT_DEFINED.value,
                   },
                   { field: TRANSACTION_TYPE },
-                  ...getGroupByTerms(ruleParams),
+                  ...getGroupByTerms(ruleParams.groupBy),
                 ],
                 size: 1000,
                 ...getMultiTermsSortOrder(ruleParams.aggregationType),
@@ -198,9 +198,27 @@ export function registerTransactionDurationRuleType({
       // Converts threshold to microseconds because this is the unit used on transactionDuration
       const thresholdMicroseconds = ruleParams.threshold * 1000;
 
-      const triggeredBuckets = [];
+      const triggeredBuckets: Array<Record<string, any>> = [];
+
+      // console.log("response: ", JSON.stringify(response, null, 4));
+      const predefinedGroupby: string[] = [
+        SERVICE_NAME,
+        SERVICE_ENVIRONMENT,
+        TRANSACTION_TYPE,
+      ];
+      const allGroupbyFields: string[] = [
+        ...predefinedGroupby,
+        ...[ruleParams.groupBy ?? []].flat(),
+      ];
 
       for (const bucket of response.aggregations.series.buckets) {
+        const bucketKeyValues: Record<string, string> = {};
+        bucket.key.forEach((key, keyIndex) => {
+          if (!predefinedGroupby.includes(allGroupbyFields[keyIndex])) {
+            bucketKeyValues[allGroupbyFields[keyIndex]] = key;
+          }
+        });
+
         const [serviceName, environment, transactionType] = bucket.key;
 
         const transactionDuration =
@@ -218,6 +236,7 @@ export function registerTransactionDurationRuleType({
             sourceFields: getServiceGroupFields(bucket),
             transactionType,
             transactionDuration,
+            groupbyFields: bucketKeyValues,
           });
         }
       }
@@ -228,6 +247,7 @@ export function registerTransactionDurationRuleType({
         transactionType,
         transactionDuration,
         sourceFields,
+        groupbyFields,
       } of triggeredBuckets) {
         const environmentLabel = getEnvironmentLabel(environment);
 
@@ -292,6 +312,7 @@ export function registerTransactionDurationRuleType({
             transactionType,
             triggerValue: transactionDurationFormatted,
             viewInAppUrl,
+            ...groupbyFields,
           });
       }
 
