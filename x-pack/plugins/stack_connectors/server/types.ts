@@ -21,6 +21,7 @@ export type {
   PagerDutyActionParams,
   ServerLogConnectorTypeId,
   ServerLogActionParams,
+  SlackConnectorTypeId,
   SlackActionParams,
   WebhookConnectorTypeId,
   WebhookActionParams,

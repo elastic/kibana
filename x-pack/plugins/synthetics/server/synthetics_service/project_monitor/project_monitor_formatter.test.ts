@@ -122,7 +122,7 @@ describe('ProjectMonitorFormatter', () => {
         getSpaceId: jest.fn().mockReturnValue('test-space'),
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
