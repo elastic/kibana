@@ -45,10 +45,7 @@ export const selectDocumentsCount = (indices: EngineOverviewValues['indices']) =
 
 export const selectFieldsCount = (
   engineFieldCapabilitiesData: EngineOverviewValues['engineFieldCapabilitiesData']
-) =>
-  Object.values(engineFieldCapabilitiesData?.field_capabilities?.fields ?? {}).filter(
-    (value) => !Object.values(value).some((field) => !!field.metadata_field)
-  ).length;
+) => engineFieldCapabilitiesData?.fields?.length || 0;
 
 export const EngineOverviewLogic = kea<MakeLogicType<EngineOverviewValues, EngineOverviewActions>>({
   actions: {},
