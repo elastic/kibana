@@ -72,7 +72,7 @@ describe('EsEventStreamClient', () => {
       await esClient.indices.createDataStream({
         name: names.dataStream,
       });
-      throw 'Not expected';
+      throw new Error('Not expected');
     } catch (error) {
       expect(error.body.error.type).toBe('resource_already_exists_exception');
     }
