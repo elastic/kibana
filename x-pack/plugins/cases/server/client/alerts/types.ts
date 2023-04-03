@@ -42,3 +42,8 @@ export interface UpdateAlertCasesRequest {
   alerts: AlertInfo[];
   caseIds: string[];
 }
+
+export interface RemoveAlertsFromCaseRequest {
+  alerts: AlertInfo[];
+  caseId: string;
+}
