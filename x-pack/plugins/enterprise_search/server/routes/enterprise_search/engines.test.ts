@@ -333,9 +333,7 @@ describe('engines routes', () => {
     let mockRouter: MockRouter;
     const mockClient = {
       asCurrentUser: {
-        transport: {
-          request: jest.fn(),
-        },
+        search: jest.fn(),
       },
     };
     beforeEach(() => {
@@ -356,7 +354,7 @@ describe('engines routes', () => {
       });
     });
     it('POST - Search preview API creates a request', async () => {
-      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+      mockClient.asCurrentUser.search.mockImplementation(() => ({
         acknowledged: true,
       }));
 
@@ -365,10 +363,8 @@ describe('engines routes', () => {
           engine_name: 'engine-name',
         },
       });
-      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-        body: {},
-        method: 'POST',
-        path: '/engine-name/_search',
+      expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+        index: 'engine-name',
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
