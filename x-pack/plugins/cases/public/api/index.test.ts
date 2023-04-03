@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { getCases, getCasesMetrics } from '.';
+import { bulkGetCases, getCases, getCasesMetrics } from '.';
 import { allCases, allCasesSnake } from '../containers/mock';
 
 describe('api', () => {
@@ -44,6 +44,25 @@ describe('api', () => {
       await getCasesMetrics({ http, query: { features: ['mttr'], to: 'now-1d' } });
       expect(http.get).toHaveBeenCalledWith('/api/cases/metrics', {
         query: { features: ['mttr'], to: 'now-1d' },
+      });
+    });
+  });
+
+  describe('bulkGetCases', () => {
+    const http = httpServiceMock.createStartContract({ basePath: '' });
+    http.post.mockResolvedValue({ cases: allCasesSnake, errors: [] });
+
+    it('should return the correct response', async () => {
+      expect(await bulkGetCases({ http, params: { ids: ['test'], fields: ['title'] } })).toEqual({
+        cases: allCasesSnake,
+        errors: [],
+      });
+    });
+
+    it('should have been called with the correct path', async () => {
+      await bulkGetCases({ http, params: { ids: ['test'], fields: ['title'] } });
+      expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
+        body: '{"ids":["test"],"fields":["title"]}',
       });
     });
   });

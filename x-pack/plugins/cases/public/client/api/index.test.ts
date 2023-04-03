@@ -80,5 +80,25 @@ describe('createClientAPI', () => {
         });
       });
     });
+
+    describe('bulkGet', () => {
+      const http = httpServiceMock.createStartContract({ basePath: '' });
+      const api = createClientAPI({ http });
+      http.post.mockResolvedValue({ cases: [], errors: [] });
+
+      it('should return the correct response', async () => {
+        expect(await api.cases.bulkGet({ ids: ['test'], fields: ['title'] })).toEqual({
+          cases: [],
+          errors: [],
+        });
+      });
+
+      it('should have been called with the correct path', async () => {
+        await api.cases.bulkGet({ ids: ['test'], fields: ['title'] });
+        expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
+          body: '{"ids":["test"],"fields":["title"]}',
+        });
+      });
+    });
   });
 });
