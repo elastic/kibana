@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -17,6 +18,13 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
+import { formatLegacyActionsForSiemRules } from '../lib';
+
+jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
+  return {
+    formatLegacyActionsForSiemRules: jest.fn(),
+  };
+});
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -579,6 +587,84 @@ describe('resolve()', () => {
           },
         })
       );
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    const rule = {
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    };
+
+    test('should call formatLegacyActionsForSiemRules if consumer is SIEM', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+      unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+        saved_object: {
+          ...rule,
+          attributes: {
+            ...rule.attributes,
+            consumer: AlertConsumers.SIEM,
+          },
+        },
+        outcome: 'aliasMatch',
+        alias_target_id: '2',
+      });
+      (formatLegacyActionsForSiemRules as jest.Mock).mockResolvedValue([
+        {
+          id: 'migrated_rule_mock',
+        },
+      ]);
+
+      const result = await rulesClient.resolve({ id: '1' });
+
+      expect(formatLegacyActionsForSiemRules).toHaveBeenCalledWith(
+        [expect.objectContaining({ id: '1' })],
+        expect.any(Object)
+      );
+
+      expect(result).toEqual({
+        id: 'migrated_rule_mock',
+        outcome: 'aliasMatch',
+        alias_target_id: '2',
+      });
+    });
+
+    test('should not call formatLegacyActionsForSiemRules if consumer is not SIEM', async () => {
+      unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+        saved_object: rule,
+        outcome: 'aliasMatch',
+        alias_target_id: '2',
+      });
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.resolve({ id: '1' });
+
+      expect(formatLegacyActionsForSiemRules).not.toHaveBeenCalled();
     });
   });
 });
