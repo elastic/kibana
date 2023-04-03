@@ -12,7 +12,7 @@ import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
   CaseAggregationResult,
-  FileAttachmentAggregationResult,
+  FileAttachmentAggregationResults,
 } from '../types';
 import { getCasesTelemetryData } from './cases';
 
@@ -187,7 +187,7 @@ describe('getCasesTelemetryData', () => {
         ...attachmentFramework,
       };
 
-      const filesRes: FileAttachmentAggregationResult = {
+      const filesRes: FileAttachmentAggregationResults = {
         securitySolution: {
           averageSize: 500,
         },

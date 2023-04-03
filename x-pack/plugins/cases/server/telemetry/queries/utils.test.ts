@@ -10,7 +10,7 @@ import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
   CaseAggregationResult,
-  FileAttachmentAggregationResult,
+  FileAttachmentAggregationResults,
 } from '../types';
 import {
   findValueInBuckets,
@@ -168,7 +168,7 @@ describe('utils', () => {
       ...attachmentFramework,
     };
 
-    const filesRes: FileAttachmentAggregationResult = {
+    const filesRes: FileAttachmentAggregationResults = {
       securitySolution: {
         averageSize: 500,
       },

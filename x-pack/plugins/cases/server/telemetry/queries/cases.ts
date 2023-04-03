@@ -23,7 +23,7 @@ import type {
   LatestDates,
   CaseAggregationResult,
   AttachmentAggregationResult,
-  FileAttachmentAggregationResult,
+  FileAttachmentAggregationResults,
 } from '../types';
 import {
   findValueInBuckets,
@@ -284,11 +284,20 @@ const getCommentsSavedObjectTelemetry = async (
 
 const getFilesTelemetry = async (
   savedObjectsClient: ISavedObjectsRepository
-): Promise<SavedObjectsFindResponse<unknown, FileAttachmentAggregationResult>> => {
+): Promise<SavedObjectsFindResponse<unknown, FileAttachmentAggregationResults>> => {
   const averageSize = () => ({
     averageSize: {
       avg: {
         field: `${FILE_SO_TYPE}.attributes.size`,
+      },
+    },
+  });
+
+  const top20MimeTypes = () => ({
+    topMimeTypes: {
+      terms: {
+        field: `${FILE_SO_TYPE}.attributes.mime_type`,
+        size: 20,
       },
     },
   });
@@ -304,6 +313,7 @@ const getFilesTelemetry = async (
         },
         aggs: {
           ...averageSize(),
+          ...top20MimeTypes(),
         },
       },
     }),
@@ -312,12 +322,12 @@ const getFilesTelemetry = async (
 
   const filterCaseIdExists = fromKueryExpression(`${FILE_SO_TYPE}.attributes.Meta.caseId: *`);
 
-  return savedObjectsClient.find<unknown, FileAttachmentAggregationResult>({
+  return savedObjectsClient.find<unknown, FileAttachmentAggregationResults>({
     page: 0,
     perPage: 0,
     type: FILE_SO_TYPE,
     filter: filterCaseIdExists,
-    aggs: { ...filesByOwnerAggregationQuery, ...averageSize() },
+    aggs: { ...filesByOwnerAggregationQuery, ...averageSize(), ...top20MimeTypes() },
   });
 };
 
