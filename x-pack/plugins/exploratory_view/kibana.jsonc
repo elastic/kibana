@@ -17,22 +17,14 @@
       "files",
       "guidedOnboarding",
       "inspector",
-      "inspector",
+      "lens",
       "observability",
       "security",
       "share",
       "triggersActionsUi",
       "unifiedSearch"
     ],
-    "optionalPlugins": [
-      "discover",
-      "embeddable",
-      "home",
-      "lens",
-      "licensing",
-      "spaces",
-      "usageCollection"
-    ],
+    "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection"],
     "requiredBundles": [
       "data",
       "dataViews",
