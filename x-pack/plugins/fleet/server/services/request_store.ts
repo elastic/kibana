@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
-console.log('Disabled.');
+import { AsyncLocalStorage } from 'async_hooks';
+
+import type { KibanaRequest } from '@kbn/core-http-server';
+
+export function getRequestStore() {
+  const requestStore = new AsyncLocalStorage<KibanaRequest>();
+
+  return requestStore;
+}
