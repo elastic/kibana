@@ -49,7 +49,9 @@
     "@kbn/alerts-ui-shared",
     "@kbn/safer-lodash-set",
     "@kbn/cases-components",
-    "@kbn/field-types"
+    "@kbn/field-types",
+    "@kbn/ecs",
+    "@kbn/alerts-as-data-utils"
   ],
   "exclude": [
     "target/**/*"
