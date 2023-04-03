@@ -27,6 +27,7 @@ import {
 } from '../types/pipelines';
 
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
+export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
 
 export interface MlInferencePipelineParams {
   description?: string;

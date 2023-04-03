@@ -367,6 +367,103 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.values.mlInferencePipeline).toEqual(existingPipeline);
       });
     });
+    describe('supportedMLModels', () => {
+      it('filters unsupported ML models', () => {
+        MLModelsApiLogic.actions.apiSuccess([
+          {
+            inference_config: {
+              ner: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'ner-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+          {
+            inference_config: {
+              some_unsupported_task_type: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'unsupported-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+        ]);
+
+        expect(MLInferenceLogic.values.supportedMLModels).toEqual([
+          expect.objectContaining({
+            inference_config: {
+              ner: {},
+            },
+          }),
+        ]);
+      });
+
+      it('promotes text_expansion ML models and sorts others by ID', () => {
+        MLModelsApiLogic.actions.apiSuccess([
+          {
+            inference_config: {
+              ner: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'ner-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+          {
+            inference_config: {
+              text_expansion: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'text-expansion-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+          {
+            inference_config: {
+              text_embedding: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'text-embedding-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+        ]);
+
+        expect(MLInferenceLogic.values.supportedMLModels).toEqual([
+          expect.objectContaining({
+            inference_config: {
+              text_expansion: {},
+            },
+          }),
+          expect.objectContaining({
+            inference_config: {
+              ner: {},
+            },
+          }),
+          expect.objectContaining({
+            inference_config: {
+              text_embedding: {},
+            },
+          }),
+        ]);
+      });
+    });
   });
 
   describe('listeners', () => {
