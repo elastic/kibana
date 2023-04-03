@@ -54,8 +54,8 @@ import { Filtering } from './filtering';
 import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
-import type { LayerType } from '../../../../common';
-import { DOCUMENT_FIELD_NAME } from '../../../../common';
+import type { LayerType } from '../../../../common/types';
+import { DOCUMENT_FIELD_NAME } from '../../../../common/constants';
 import {
   quickFunctionsName,
   staticValueOperationName,
