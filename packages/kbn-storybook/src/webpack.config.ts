@@ -9,7 +9,7 @@
 import { externals } from '@kbn/ui-shared-deps-src';
 import { stringifyRequest } from 'loader-utils';
 import { resolve } from 'path';
-import webpack, { Configuration, Stats } from 'webpack';
+import webpack, { Configuration, RuleSetRule, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
@@ -30,6 +30,10 @@ function isProgressPlugin(plugin: any) {
 
 function isHtmlPlugin(plugin: any): plugin is { options: { template: string } } {
   return !!(typeof plugin.options?.template === 'string');
+}
+
+function isMDXRule(rule: RuleSetRule) {
+  return rule.test?.toString() === '/\\.mdx$/';
 }
 
 interface BabelLoaderRule extends webpack.RuleSetRule {
@@ -69,10 +73,7 @@ function isDesiredPreset(preset: Preset) {
 // Extend the Storybook Webpack config with some customizations
 /* eslint-disable import/no-default-export */
 export default ({ config: storybookConfig }: { config: Configuration }) => {
-  const config = {
-    devServer: {
-      stats,
-    },
+  const config: webpack.Configuration = {
     externals,
     module: {
       // no parse rules for a few known large packages which have no require() statements
@@ -138,11 +139,26 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     stats,
   };
 
-  const updatedModuleRules = [];
+  const updatedModuleRules: RuleSetRule[] = [
+    {
+      test: /\.mdx$/,
+      exclude: /\.stories\.mdx/,
+      issuer: /\.stories\.(mdx|tsx)/,
+      use: [
+        {
+          loader: require.resolve('./lib/loader'),
+        },
+      ],
+    },
+  ];
   // clone and modify the module.rules config provided by storybook so that the default babel plugins run after the typescript preset
   for (const originalRule of storybookConfig.module?.rules ?? []) {
     const rule = { ...originalRule };
     updatedModuleRules.push(rule);
+
+    if (isMDXRule(rule) && !rule.issuer) {
+      rule.issuer = /(?:(?!:\.stories\.mdx).)*$/;
+    }
 
     if (isBabelLoaderRule(rule)) {
       rule.use = [...rule.use];

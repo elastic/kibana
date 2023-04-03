@@ -19,5 +19,6 @@
   ],
   "exclude": [
     "target/**/*",
+    "src/lib/loader.js"
   ]
 }
