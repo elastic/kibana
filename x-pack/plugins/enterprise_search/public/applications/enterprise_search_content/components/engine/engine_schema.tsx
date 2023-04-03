@@ -154,7 +154,7 @@ export const EngineSchema: React.FC = () => {
   const toggleOnlyShowConflicts = useCallback(() => {
     setOnlyShowConflicts(!onlyShowConflicts);
     setItemIdToExpandedRowMap({});
-  }, [setItemIdToExpandedRowMap, onlyShowConflicts]);
+  }, [onlyShowConflicts]);
 
   const filteredSchemaFields = useMemo(() => {
     if (!onlyShowConflicts) return schemaFields;
