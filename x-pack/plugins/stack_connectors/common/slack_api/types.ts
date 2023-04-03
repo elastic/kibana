@@ -42,7 +42,7 @@ export type SlackExecutorOptions = ConnectorTypeExecutorOptions<
   SlackApiParams
 >;
 
-export type SlackActionParams = TypeOf<typeof SlackApiParamsSchema>;
+export type SlackApiActionParams = TypeOf<typeof SlackApiParamsSchema>;
 
 export interface GetChannelsResponse {
   ok: true;

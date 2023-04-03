@@ -17,24 +17,23 @@ import {
   SELECT_MESSAGE,
 } from './translations';
 import type {
-  SlackActionParams,
+  SlackApiActionParams,
   SlackApiSecrets,
   PostMessageParams,
 } from '../../../common/slack_api/types';
-
-const SLACK_API_CONNECTOR_ID = '.slack_api';
+import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 
 export const getConnectorType = (): ConnectorTypeModel<
   unknown,
   SlackApiSecrets,
   PostMessageParams
 > => ({
-  id: SLACK_API_CONNECTOR_ID, // need a common constant?
+  id: SLACK_API_CONNECTOR_ID,
   iconClass: 'logoSlack',
   selectMessage: SELECT_MESSAGE,
   actionTypeTitle: ACTION_TYPE_TITLE,
   validateParams: async (
-    actionParams: SlackActionParams
+    actionParams: SlackApiActionParams
   ): Promise<GenericValidationResult<unknown>> => {
     // can we use something instead of unknown?
     const errors = {

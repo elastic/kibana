@@ -27,7 +27,7 @@ import {
   errorResult,
   successResult,
 } from '../../../common/slack_api/lib';
-import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
+import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 const buildSlackExecutorErrorResponse = ({
@@ -45,22 +45,22 @@ const buildSlackExecutorErrorResponse = ({
   logger: Logger;
 }) => {
   if (!slackApiError.response) {
-    return serviceErrorResult(SLACK_CONNECTOR_ID, slackApiError.message);
+    return serviceErrorResult(SLACK_API_CONNECTOR_ID, slackApiError.message);
   }
 
   const { status, statusText, headers } = slackApiError.response;
 
   // special handling for 5xx
   if (status >= 500) {
-    return retryResult(SLACK_CONNECTOR_ID, slackApiError.message);
+    return retryResult(SLACK_API_CONNECTOR_ID, slackApiError.message);
   }
 
   // special handling for rate limiting
   if (status === 429) {
     return pipe(
       getRetryAfterIntervalFromHeaders(headers),
-      map((retry) => retryResultSeconds(SLACK_CONNECTOR_ID, slackApiError.message, retry)),
-      getOrElse(() => retryResult(SLACK_CONNECTOR_ID, slackApiError.message))
+      map((retry) => retryResultSeconds(SLACK_API_CONNECTOR_ID, slackApiError.message, retry)),
+      getOrElse(() => retryResult(SLACK_API_CONNECTOR_ID, slackApiError.message))
     );
   }
 
@@ -74,9 +74,9 @@ const buildSlackExecutorErrorResponse = ({
       },
     }
   );
-  logger.error(`error on ${SLACK_CONNECTOR_ID} slack action: ${errorMessage}`);
+  logger.error(`error on ${SLACK_API_CONNECTOR_ID} slack action: ${errorMessage}`);
 
-  return errorResult(SLACK_CONNECTOR_ID, errorMessage);
+  return errorResult(SLACK_API_CONNECTOR_ID, errorMessage);
 };
 
 const buildSlackExecutorSuccessResponse = ({
@@ -91,14 +91,14 @@ const buildSlackExecutorSuccessResponse = ({
         defaultMessage: 'unexpected null response from slack',
       }
     );
-    return errorResult(SLACK_CONNECTOR_ID, errMessage);
+    return errorResult(SLACK_API_CONNECTOR_ID, errMessage);
   }
 
   if (!slackApiResponseData.ok) {
-    return serviceErrorResult(SLACK_CONNECTOR_ID, slackApiResponseData.error);
+    return serviceErrorResult(SLACK_API_CONNECTOR_ID, slackApiResponseData.error);
   }
 
-  return successResult(SLACK_CONNECTOR_ID, slackApiResponseData);
+  return successResult(SLACK_API_CONNECTOR_ID, slackApiResponseData);
 };
 
 export const createExternalService = (

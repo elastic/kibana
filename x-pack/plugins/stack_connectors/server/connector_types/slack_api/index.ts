@@ -31,7 +31,7 @@ const supportedSubActions = ['getChannels', 'postMessage'];
 
 export const getConnectorType = (): SlackApiConnectorType => {
   return {
-    id: SLACK_API_CONNECTOR_ID, // need a common constant?
+    id: SLACK_API_CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
     name: SLACK_CONNECTOR_NAME,
     supportedFeatureIds: [
@@ -51,8 +51,7 @@ export const getConnectorType = (): SlackApiConnectorType => {
       },
     },
     renderParameterTemplates,
-    executor: async (execOptions: SlackApiExecutorOptions) =>
-      await slackWebApiExecutor(execOptions),
+    executor: async (execOptions: SlackApiExecutorOptions) => await slackApiExecutor(execOptions),
   };
 };
 
@@ -68,7 +67,7 @@ const renderParameterTemplates = (params: SlackApiParams, variables: Record<stri
   return params;
 };
 
-const slackWebApiExecutor = async (
+const slackApiExecutor = async (
   execOptions: SlackApiExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> => {
   const { actionId, params, secrets, configurationUtilities, logger } = execOptions;

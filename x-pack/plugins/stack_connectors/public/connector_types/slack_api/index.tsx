@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorType as getSlackConnectorType } from './slack_api';
+export { getConnectorType as getSlackApiConnectorType } from './slack_api';
