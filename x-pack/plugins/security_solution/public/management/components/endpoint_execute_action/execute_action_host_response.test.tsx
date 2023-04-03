@@ -43,15 +43,29 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     };
   });
 
+  const outputSuffix = 'output';
+
+  it('should show shell info and shell code', async () => {
+    render();
+    expect(renderResult.getByTestId(`test-executeResponseOutput-shell`)).toBeTruthy();
+  });
+
+  it('should show current working directory', async () => {
+    render();
+    expect(renderResult.getByTestId(`test-executeResponseOutput-cwd`)).toBeTruthy();
+  });
+
   it('should show execute output and execute errors', async () => {
     render();
-    expect(renderResult.getByTestId('test-executeResponseOutput')).toBeTruthy();
+    expect(renderResult.getByTestId(`test-executeResponseOutput-${outputSuffix}`)).toBeTruthy();
   });
 
   it('should show execute output accordion as `open`', async () => {
     render();
     const accordionOutputButton = Array.from(
-      renderResult.getByTestId('test-executeResponseOutput').querySelectorAll('.euiAccordion')
+      renderResult
+        .getByTestId(`test-executeResponseOutput-${outputSuffix}`)
+        .querySelectorAll('.euiAccordion')
     )[0];
     expect(accordionOutputButton.className).toContain('isOpen');
   });
@@ -68,7 +82,9 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     };
     render();
     const accordionOutputButton = Array.from(
-      renderResult.getByTestId('test-executeResponseOutput').querySelectorAll('.euiAccordion')
+      renderResult
+        .getByTestId(`test-executeResponseOutput-${outputSuffix}`)
+        .querySelectorAll('.euiAccordion')
     )[0];
     expect(accordionOutputButton.textContent).toContain(
       `Execution output (truncated)${getEmptyValue()}`
@@ -87,7 +103,9 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     };
     render();
     const accordionErrorButton = Array.from(
-      renderResult.getByTestId('test-executeResponseOutput').querySelectorAll('.euiAccordion')
+      renderResult
+        .getByTestId(`test-executeResponseOutput-${outputSuffix}`)
+        .querySelectorAll('.euiAccordion')
     )[1];
     expect(accordionErrorButton.textContent).toContain(
       `Execution error (truncated)${getEmptyValue()}`
@@ -97,6 +115,8 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
   it('should not show execute output accordions when no output in action details', () => {
     (renderProps.action as ActionDetails).outputs = undefined;
     render();
-    expect(renderResult.queryByTestId('test-executeResponseOutput')).toBeNull();
+    expect(renderResult.queryByTestId(`test-executeResponseOutput-shell`)).toBeNull();
+    expect(renderResult.queryByTestId(`test-executeResponseOutput-cwd`)).toBeNull();
+    expect(renderResult.queryByTestId(`test-executeResponseOutput-${outputSuffix}`)).toBeNull();
   });
 });

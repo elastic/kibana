@@ -327,7 +327,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           stderr_truncated: true,
           shell_code: 0,
           shell: 'bash',
-          cwd: '/some/path',
+          cwd: this.randomChoice(['/some/path', '/a-very/long/path'.repeat(30)]),
           output_file_id: 'some-output-file-id',
           output_file_stdout_truncated: this.randomChoice([true, false]),
           output_file_stderr_truncated: this.randomChoice([true, false]),
