@@ -42,4 +42,11 @@ export type SecurityCellActionName =
   | 'copyToClipboard'
   | 'toggleColumn';
 
-export type SecurityCellActions = Record<SecurityCellActionName, CellActionFactory>;
+export interface SecurityCellActions {
+  filterIn?: CellActionFactory;
+  filterOut?: CellActionFactory;
+  addToTimeline?: CellActionFactory;
+  showTopN?: CellActionFactory;
+  copyToClipboard?: CellActionFactory;
+  toggleColumn?: CellActionFactory;
+}

@@ -88,6 +88,13 @@ export const createDataProviders = ({
     if (!isValidDataProviderField(field, fieldType)) {
       return dataProviders;
     }
+    if (sourceParamType === 'severity' && values === '*') {
+      id = `severity-data-provider-${contextId}-${field}`;
+      dataProviders.push(
+        getDataProvider({ field, id, value: '', excluded: false, operator: EXISTS_OPERATOR })
+      );
+      return dataProviders;
+    }
 
     if (isCountField(fieldType, sourceParamType)) {
       id = `value-count-data-provider-${contextId}-${field}`;

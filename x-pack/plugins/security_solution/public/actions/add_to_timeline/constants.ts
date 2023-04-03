@@ -16,6 +16,12 @@ export const ADD_TO_TIMELINE = i18n.translate(
   }
 );
 
+export const SEVERITY_ALERTS = (value: string, severity: string) =>
+  i18n.translate('xpack.securitySolution.actions.addToTimeline.addedFieldMessage', {
+    values: { severity, value },
+    defaultMessage: severity !== '*' ? `{value} {severity} alerts` : `{value} alerts`,
+  });
+
 export const ADD_TO_TIMELINE_SUCCESS_TITLE = (value: string) =>
   i18n.translate('xpack.securitySolution.actions.addToTimeline.addedFieldMessage', {
     values: { fieldOrValue: value },

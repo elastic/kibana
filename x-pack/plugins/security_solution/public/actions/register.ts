@@ -65,6 +65,13 @@ const registerCellActions = (
     'copyToClipboard',
   ]);
 
+  registerCellActionsTrigger(
+    uiActions,
+    SecurityCellActionsTrigger.ALERTS_COUNT,
+    { addToTimeline: cellActions.addToTimeline },
+    ['addToTimeline']
+  );
+
   registerCellActionsTrigger(uiActions, SecurityCellActionsTrigger.DETAILS_FLYOUT, cellActions, [
     'filterIn',
     'filterOut',
@@ -85,9 +92,11 @@ const registerCellActionsTrigger = (
 
   actionsOrder.forEach((actionName, order) => {
     const actionFactory = cellActions[actionName];
-    uiActions.addTriggerAction(
-      triggerId,
-      actionFactory({ id: `${triggerId}-${actionName}`, order })
-    );
+    if (actionFactory) {
+      uiActions.addTriggerAction(
+        triggerId,
+        actionFactory({ id: `${triggerId}-${actionName}`, order })
+      );
+    }
   });
 };
