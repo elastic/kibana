@@ -1,0 +1,57 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { lazy } from 'react';
+import type {
+  ActionTypeModel as ConnectorTypeModel,
+  GenericValidationResult,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  ACTION_TYPE_TITLE,
+  CHANNEL_REQUIRED,
+  MESSAGE_REQUIRED,
+  SELECT_MESSAGE,
+} from './translations';
+import type {
+  SlackActionParams,
+  SlackApiSecrets,
+  PostMessageParams,
+} from '../../../common/slack_api/types';
+
+const SLACK_API_CONNECTOR_ID = '.slack_api';
+
+export const getConnectorType = (): ConnectorTypeModel<
+  unknown,
+  SlackApiSecrets,
+  PostMessageParams
+> => ({
+  id: SLACK_API_CONNECTOR_ID, // need a common constant?
+  iconClass: 'logoSlack',
+  selectMessage: SELECT_MESSAGE,
+  actionTypeTitle: ACTION_TYPE_TITLE,
+  validateParams: async (
+    actionParams: SlackActionParams
+  ): Promise<GenericValidationResult<unknown>> => {
+    // can we use something instead of unknown?
+    const errors = {
+      text: new Array<string>(),
+      channels: new Array<string>(),
+    };
+    const validationResult = { errors };
+    if (actionParams.subAction === 'postMessage') {
+      if (!actionParams.subActionParams.text) {
+        errors.text.push(MESSAGE_REQUIRED);
+      }
+      if (!actionParams.subActionParams.channels?.length) {
+        errors.channels.push(CHANNEL_REQUIRED);
+      }
+    }
+    return validationResult;
+  },
+  actionConnectorFields: lazy(() => import('./slack_connectors')),
+  actionParamsFields: lazy(() => import('./slack_params')),
+});
