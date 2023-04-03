@@ -16,7 +16,7 @@ export const SCHEMA_QUERY_V8_8_0 = schema.object({
     language: schema.string(),
     query: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
   }),
-  filters: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { defaultValue: [] }),
+  filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   timefilter: schema.maybe(
     schema.object({
       from: schema.string(),
