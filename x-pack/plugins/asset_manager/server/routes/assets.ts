@@ -8,16 +8,20 @@
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
 import { debug } from '../../common/debug_log';
-import { AssetFilters, AssetType, assetType } from '../../common/types_api';
+import { AssetType, assetType } from '../../common/types_api';
 import { ASSET_MANAGER_API_BASE } from '../constants';
 import { getAssets } from '../lib/get_assets';
 import { getAllRelatedAssets } from '../lib/get_all_related_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
 
-export type GetAssetsQueryOptions = AssetFilters & {
-  size?: number;
-};
+const getAssetsQueryOptions = schema.object({
+  from: schema.maybe(schema.string()),
+  to: schema.maybe(schema.string()),
+  type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
+  ean: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
+  size: schema.maybe(schema.number()),
+});
 
 const getAssetsAncestorsQueryOptions = schema.object({
   from: schema.string(), // ISO timestamp or ES datemath
@@ -30,16 +34,23 @@ const getAssetsAncestorsQueryOptions = schema.object({
 type GetAssetsAncestorsQueryOptions = typeof getAssetsAncestorsQueryOptions.type;
 
 export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupRouteOptions<T>) {
-  // GET assets
-  router.get<unknown, GetAssetsQueryOptions | undefined, unknown>(
+  // GET /assets
+  router.get<unknown, typeof getAssetsQueryOptions.type, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets`,
       validate: {
-        query: schema.any({}),
+        query: getAssetsQueryOptions,
       },
     },
     async (context, req, res) => {
       const { size, ...filters } = req.query || {};
+
+      if (filters.type && filters.ean) {
+        return res.badRequest({
+          body: 'Filters "type" and "ean" are mutually exclusive but found both.',
+        });
+      }
+
       const esClient = await getEsClientFromContext(context);
 
       try {

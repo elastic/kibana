@@ -673,7 +673,7 @@
             "section": "def-common.Case",
             "text": "Case"
           },
-          ") => Promise<void>) | undefined; attachments?: ",
+          ") => void) | undefined; attachments?: ",
           {
             "pluginId": "cases",
             "scope": "public",
@@ -968,7 +968,7 @@
           "label": "hooks",
           "description": [],
           "signature": [
-            "{ getUseCasesAddToNewCaseFlyout: (props?: AddToNewCaseFlyoutProps) => { open: ({ attachments, headerContent, }?: { attachments?: ",
+            "{ useCasesAddToNewCaseFlyout: (props?: AddToNewCaseFlyoutProps) => { open: ({ attachments, headerContent, }?: { attachments?: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -976,7 +976,7 @@
               "section": "def-public.CaseAttachmentsWithoutOwner",
               "text": "CaseAttachmentsWithoutOwner"
             },
-            " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props?: AddToExistingFlyoutProps) => { open: ({ attachments }?: { attachments?: ",
+            " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; useCasesAddToExistingCaseModal: (props?: AddToExistingFlyoutProps) => { open: ({ attachments }?: { attachments?: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -1016,14 +1016,8 @@
               "section": "def-common.CasesPermissions",
               "text": "CasesPermissions"
             },
-            "; getRuleIdFromEvent: (event: Event) => { id: string; name: string; }; groupAlertsByRule: (items: Event[]) => ",
-            {
-              "pluginId": "cases",
-              "scope": "public",
-              "docId": "kibCasesPluginApi",
-              "section": "def-public.CaseAttachmentsWithoutOwner",
-              "text": "CaseAttachmentsWithoutOwner"
-            },
+            "; getRuleIdFromEvent: (event: Event) => { id: string; name: string; }; groupAlertsByRule: ",
+            "GroupAlertsByRule",
             "; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",

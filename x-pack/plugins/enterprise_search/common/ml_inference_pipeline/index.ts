@@ -14,26 +14,19 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import {
+  SUPPORTED_PYTORCH_TASKS,
+  TRAINED_MODEL_TYPE,
+  BUILT_IN_MODEL_TAG,
+} from '@kbn/ml-trained-models-utils';
+
+import {
   MlInferencePipeline,
   CreateMlInferencePipelineParameters,
   TrainedModelState,
   InferencePipelineInferenceConfig,
 } from '../types/pipelines';
 
-// Getting an error importing this from @kbn/ml-plugin/common/constants/data_frame_analytics'
-// So defining it locally for now with a test to make sure it matches.
-export const BUILT_IN_MODEL_TAG = 'prepackaged';
-
-// Getting an error importing this from @kbn/ml-plugin/common/constants/trained_models'
-// So defining it locally for now with a test to make sure it matches.
-export const SUPPORTED_PYTORCH_TASKS = {
-  FILL_MASK: 'fill_mask',
-  NER: 'ner',
-  QUESTION_ANSWERING: 'question_answering',
-  TEXT_CLASSIFICATION: 'text_classification',
-  TEXT_EMBEDDING: 'text_embedding',
-  ZERO_SHOT_CLASSIFICATION: 'zero_shot_classification',
-} as const;
+export const ELSER_TASK_TYPE = 'text_expansion';
 
 export interface MlInferencePipelineParams {
   description?: string;
@@ -206,8 +199,16 @@ export const parseMlInferenceParametersFromPipeline = (
   };
 };
 
-export const parseModelStateFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) => {
-  switch (trainedModelStats?.deployment_stats?.state) {
+export const parseModelStateFromStats = (
+  model?: Partial<MlTrainedModelStats> & Partial<MlTrainedModelConfig>,
+  modelTypes?: string[]
+) => {
+  if (
+    model?.model_type === TRAINED_MODEL_TYPE.LANG_IDENT ||
+    modelTypes?.includes(TRAINED_MODEL_TYPE.LANG_IDENT)
+  )
+    return TrainedModelState.Started;
+  switch (model?.deployment_stats?.state) {
     case 'started':
       return TrainedModelState.Started;
     case 'starting':
