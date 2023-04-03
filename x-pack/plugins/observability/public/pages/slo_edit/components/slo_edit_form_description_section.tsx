@@ -13,9 +13,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiPanel,
-  EuiSpacer,
   EuiTextArea,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -32,17 +30,13 @@ export function SloEditFormDescriptionSection() {
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-      <EuiTitle>
-        <h2>
-          {i18n.translate('xpack.observability.slo.sloEdit.description.title', {
-            defaultMessage: 'Describe SLO',
-          })}
-        </h2>
-      </EuiTitle>
-
-      <EuiSpacer size="xl" />
-
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      style={{ maxWidth }}
+      data-test-subj="sloEditFormDescriptionSection"
+    >
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem>
           <EuiFormLabel>
@@ -159,8 +153,6 @@ export function SloEditFormDescriptionSection() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="xl" />
     </EuiPanel>
   );
 }

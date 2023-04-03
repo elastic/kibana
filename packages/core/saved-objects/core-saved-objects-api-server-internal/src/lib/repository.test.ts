@@ -5228,4 +5228,24 @@ describe('SavedObjectsRepository', () => {
       await expect(repository.updateObjectsSpaces([], [], [])).rejects.toEqual(expectedResult);
     });
   });
+
+  describe('#getCurrentNamespace', () => {
+    it('returns `undefined` for `undefined` namespace argument', async () => {
+      expect(repository.getCurrentNamespace()).toBeUndefined();
+    });
+
+    it('throws if `*` namespace argument is provided', async () => {
+      expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
+        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+      );
+    });
+
+    it('properly handles `default` namespace', async () => {
+      expect(repository.getCurrentNamespace('default')).toBeUndefined();
+    });
+
+    it('properly handles non-`default` namespace', async () => {
+      expect(repository.getCurrentNamespace('space-a')).toBe('space-a');
+    });
+  });
 });

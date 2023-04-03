@@ -7,19 +7,14 @@
 
 import Boom from '@hapi/boom';
 
-import pMap from 'p-map';
-import { partition } from 'lodash';
-import type { File, FileJSON } from '@kbn/files-plugin/common';
-import type { FileServiceStart } from '@kbn/files-plugin/server';
+import type { CommentAttributes } from '../../../common/api';
 import { Actions, ActionTypes } from '../../../common/api';
-import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
-import type { DeleteAllArgs, DeleteArgs, DeleteFileArgs } from './types';
-import type { CaseFileMetadata } from '../../../common/files';
-import { CaseFileMetadataRt } from '../../../common/files';
-import { createFileEntities, deleteFiles } from '../files';
+import type { DeleteAllArgs, DeleteArgs } from './types';
 
 /**
  * Delete all comments for a case.
@@ -75,107 +70,6 @@ export async function deleteAll(
   }
 }
 
-export const deleteFileAttachments = async (
-  { caseId, fileIds }: DeleteFileArgs,
-  clientArgs: CasesClientArgs
-) => {
-  const {
-    user,
-    services: { attachmentService, userActionService },
-    logger,
-    authorization,
-    fileService,
-  } = clientArgs;
-
-  try {
-    const fileEntities = await getFileEntities(caseId, fileIds, fileService);
-
-    // It's possible for this to return an empty array if there was an error creating file attachments in which case the
-    // file would be present but the case attachment would not
-    const fileAttachments = await attachmentService.getter.getFileAttachments({ caseId, fileIds });
-
-    await authorization.ensureAuthorized({
-      entities: [
-        ...fileAttachments.map((attachment) => ({
-          id: attachment.id,
-          owner: attachment.attributes.owner,
-        })),
-        ...fileEntities,
-      ],
-      operation: Operations.deleteComment,
-    });
-
-    await Promise.all([
-      deleteFiles(fileIds, fileService),
-      attachmentService.bulkDelete({
-        attachmentIds: fileAttachments.map((so) => so.id),
-        refresh: false,
-      }),
-    ]);
-
-    await userActionService.creator.bulkCreateAttachmentDeletion({
-      caseId,
-      attachments: fileAttachments.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-        attachment: attachment.attributes,
-      })),
-      user,
-    });
-  } catch (error) {
-    throw createCaseError({
-      message: `Failed to delete file attachments for case: ${caseId} file ids: ${fileIds}: ${error}`,
-      error,
-      logger,
-    });
-  }
-};
-
-const getFileEntities = async (
-  caseId: DeleteFileArgs['caseId'],
-  fileIds: DeleteFileArgs['fileIds'],
-  fileService: FileServiceStart
-) => {
-  const files = await getFiles(caseId, fileIds, fileService);
-
-  const fileEntities = createFileEntities(files.map((fileInfo) => fileInfo.data));
-
-  return fileEntities;
-};
-
-type FileWithRequiredCaseMetadata = Omit<File<CaseFileMetadata>, 'data'> & {
-  data: Omit<FileJSON<CaseFileMetadata>, 'meta'> & { meta: CaseFileMetadata };
-};
-
-const getFiles = async (
-  caseId: DeleteFileArgs['caseId'],
-  fileIds: DeleteFileArgs['fileIds'],
-  fileService: FileServiceStart
-) => {
-  // it's possible that we're trying to delete a file when an attachment wasn't created (for example if the create
-  // attachment request failed)
-  const files = await pMap(fileIds, async (fileId: string) => fileService.getById({ id: fileId }), {
-    concurrency: MAX_CONCURRENT_SEARCHES,
-  });
-
-  const [validFiles, invalidFiles] = partition(files, (file) => {
-    return CaseFileMetadataRt.is(file.data.meta) && file.data.meta.caseId === caseId;
-  }) as [FileWithRequiredCaseMetadata[], File[]];
-
-  if (invalidFiles.length > 0) {
-    const invalidIds = invalidFiles.map((fileInfo) => fileInfo.id);
-
-    // I'm intentionally being vague here because it's possible an unauthorized user could attempt to delete files
-    throw Boom.badRequest(`Failed to delete files because filed ids were invalid: ${invalidIds}`);
-  }
-
-  if (validFiles.length <= 0) {
-    throw Boom.badRequest('Failed to find files to delete');
-  }
-
-  return validFiles;
-};
-
 /**
  * Deletes an attachment
  */
@@ -185,29 +79,29 @@ export async function deleteComment(
 ) {
   const {
     user,
-    services: { attachmentService, userActionService },
+    services: { attachmentService, userActionService, alertsService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const myComment = await attachmentService.getter.get({
+    const attachment = await attachmentService.getter.get({
       attachmentId: attachmentID,
     });
 
-    if (myComment == null) {
+    if (attachment == null) {
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
+      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
       operation: Operations.deleteComment,
     });
 
     const type = CASE_SAVED_OBJECT;
     const id = caseID;
 
-    const caseRef = myComment.references.find((c) => c.type === type);
+    const caseRef = attachment.references.find((c) => c.type === type);
     if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
       throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
     }
@@ -222,10 +116,12 @@ export async function deleteComment(
       action: Actions.delete,
       caseId: id,
       attachmentId: attachmentID,
-      payload: { attachment: { ...myComment.attributes } },
+      payload: { attachment: { ...attachment.attributes } },
       user,
-      owner: myComment.attributes.owner,
+      owner: attachment.attributes.owner,
     });
+
+    await handleAlerts({ alertsService, attachment: attachment.attributes, caseId: id });
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,
@@ -234,3 +130,19 @@ export async function deleteComment(
     });
   }
 }
+
+interface HandleAlertsArgs {
+  alertsService: CasesClientArgs['services']['alertsService'];
+  attachment: CommentAttributes;
+  caseId: string;
+}
+
+const handleAlerts = async ({ alertsService, attachment, caseId }: HandleAlertsArgs) => {
+  if (!isCommentRequestTypeAlert(attachment)) {
+    return;
+  }
+
+  const alerts = getAlertInfoFromComments([attachment]);
+  await alertsService.ensureAlertsAuthorized({ alerts });
+  await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
+};

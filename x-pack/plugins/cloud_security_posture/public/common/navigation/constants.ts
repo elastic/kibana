@@ -23,7 +23,7 @@ const NAV_ITEMS_NAMES = {
     defaultMessage: 'Findings',
   }),
   BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
-    defaultMessage: 'CSP Benchmarks',
+    defaultMessage: 'Cloud Posture Benchmarks',
   }),
   RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
     defaultMessage: 'Rules',

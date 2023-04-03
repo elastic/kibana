@@ -262,7 +262,7 @@ export const updateComment = async ({
   return res;
 };
 
-export const deleteFileAttachments = async ({
+export const bulkDeleteFileAttachments = async ({
   supertest,
   caseId,
   fileIds,
@@ -276,9 +276,9 @@ export const deleteFileAttachments = async ({
   auth?: { user: User; space: string | null };
 }): Promise<void> => {
   await supertest
-    .delete(`${getSpaceUrlPrefix(auth.space)}${getCasesDeleteFileAttachmentsUrl(caseId)}`)
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCasesDeleteFileAttachmentsUrl(caseId)}`)
     .set('kbn-xsrf', 'true')
-    .query({ ids: JSON.stringify(fileIds) })
+    .send({ ids: fileIds })
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 };

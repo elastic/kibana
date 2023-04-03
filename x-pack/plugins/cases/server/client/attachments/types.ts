@@ -44,7 +44,7 @@ export interface DeleteAllArgs {
 /**
  * Parameters for deleting a file attachment.
  */
-export interface DeleteFileArgs {
+export interface BulkDeleteFileArgs {
   /**
    * The id of the case
    */

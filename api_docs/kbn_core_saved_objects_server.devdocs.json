@@ -5788,6 +5788,46 @@
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "home",
+                "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
@@ -6086,6 +6126,14 @@
           {
             "plugin": "actions",
             "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
           },
           {
             "plugin": "alerting",
@@ -9488,7 +9536,7 @@
               "\nThe {@link SavedObjectsNamespaceType | namespace type} for the type."
             ],
             "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
