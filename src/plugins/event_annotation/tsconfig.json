@@ -21,7 +21,10 @@
     "@kbn/ui-theme",
     "@kbn/saved-objects-plugin",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/saved-objects-management-plugin"
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/saved-objects-tagging-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/content-management-table-list",
   ],
   "exclude": [
     "target/**/*",
