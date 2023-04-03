@@ -48,8 +48,8 @@ export const EMPTY_PROMPT_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CREATE_MAINTENANCE_WINDOW_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.create.title',
+export const CREATE_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.alerting.maintenanceWindows.create.maintenanceWindow',
   {
     defaultMessage: 'Create maintenance window',
   }
@@ -362,10 +362,3 @@ export const CREATE_FORM_YEARLY_BY_MONTH_SUMMARY = (date: string) =>
 export const CANCEL = i18n.translate('xpack.alerting.maintenanceWindows.createForm.cancel', {
   defaultMessage: 'Cancel',
 });
-
-export const CREATE_MAINTENANCE_WINDOW = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createMaintenanceWindow',
-  {
-    defaultMessage: 'Create maintenance window',
-  }
-);

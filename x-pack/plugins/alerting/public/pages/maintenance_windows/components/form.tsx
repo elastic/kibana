@@ -75,6 +75,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       watch: ['recurring'],
     });
     const isRecurring = recurring || false;
+    const defaultDateValue = moment().toISOString();
 
     return (
       <Form form={form}>
@@ -101,7 +102,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                           path: 'startDate',
                           config: {
                             label: i18n.CREATE_FORM_SCHEDULE,
-                            defaultValue: moment().toISOString(),
+                            defaultValue: defaultDateValue,
                             validations: [],
                           },
                         },
@@ -109,7 +110,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                           path: 'endDate',
                           config: {
                             label: '',
-                            defaultValue: moment().toISOString(),
+                            defaultValue: defaultDateValue,
                             validations: [],
                           },
                         },
