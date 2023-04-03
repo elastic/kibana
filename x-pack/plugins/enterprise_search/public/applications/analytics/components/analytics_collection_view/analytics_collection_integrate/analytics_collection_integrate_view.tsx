@@ -7,31 +7,37 @@
 
 import React from 'react';
 
-import { EuiPanel, EuiSpacer, EuiSteps, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiSteps, EuiTab, EuiTabs } from '@elastic/eui';
 
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+
 import { i18n } from '@kbn/i18n';
 
 import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
+
+import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
 
 import { javascriptClientEmbedSteps } from './analytics_collection_integrate_javascript_client_embed';
 import { javascriptEmbedSteps } from './analytics_collection_integrate_javascript_embed';
 import { searchUIEmbedSteps } from './analytics_collection_integrate_searchui';
 
 interface AnalyticsCollectionIntegrateProps {
-  collection: AnalyticsCollection;
+  analyticsCollection: AnalyticsCollection;
 }
 
 export type TabKey = 'javascriptEmbed' | 'searchuiEmbed' | 'javascriptClientEmbed';
 
-export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrateProps> = ({
-  collection,
+export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionIntegrateProps> = ({
+  analyticsCollection,
 }) => {
-  const analyticsDNSUrl = getEnterpriseSearchUrl(`/api/analytics/collections/${collection.name}`);
-  const webClientSrc = getEnterpriseSearchUrl('/analytics.js');
-
   const [selectedTab, setSelectedTab] = React.useState<TabKey>('javascriptEmbed');
+
+  const analyticsDNSUrl = getEnterpriseSearchUrl(
+    `/api/analytics/collections/${analyticsCollection?.name}`
+  );
+  const webClientSrc = getEnterpriseSearchUrl('/analytics.js');
 
   const tabs: Array<{
     key: TabKey;
@@ -73,35 +79,48 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
   };
 
   return (
-    <EuiPanel hasBorder paddingSize="l">
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.title',
-            {
-              defaultMessage: 'Start tracking events',
-            }
-          )}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiTabs>
-        {tabs.map((tab) => (
-          <EuiTab
-            key={tab.key}
-            onClick={() => {
-              setSelectedTab(tab.key);
-            }}
-            isSelected={selectedTab === tab.key}
-            data-test-subj={tab.key}
-            data-telemetry-id={`entSearch-analytics-integrate-${tab.key}-tab`}
-          >
-            {tab.title}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-      <EuiSpacer size="xxl" />
-      <EuiSteps steps={steps[selectedTab]} />
-    </EuiPanel>
+    <EnterpriseSearchAnalyticsPageTemplate
+      restrictWidth
+      pageChrome={[analyticsCollection?.name]}
+      analyticsName={analyticsCollection?.name}
+      pageViewTelemetry={`View Analytics Collection - integrate`}
+      pageHeader={{
+        bottomBorder: false,
+        pageTitle: i18n.translate(
+          'xpack.enterpriseSearch.analytics.collectionsView.integration.title',
+          {
+            defaultMessage: 'Tracker Integration',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.enterpriseSearch.analytics.collectionsView.integration.description',
+          {
+            defaultMessage:
+              'Easily install our tracker on your search application to receive in depth analytics data. No search applications required.',
+          }
+        ),
+        rightSideItems: [],
+      }}
+    >
+      <>
+        <EuiTabs>
+          {tabs.map((tab) => (
+            <EuiTab
+              key={tab.key}
+              onClick={() => {
+                setSelectedTab(tab.key);
+              }}
+              isSelected={selectedTab === tab.key}
+              data-test-subj={tab.key}
+              data-telemetry-id={`entSearch-analytics-integrate-${tab.key}-tab`}
+            >
+              {tab.title}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        <EuiSpacer size="xxl" />
+        <EuiSteps steps={steps[selectedTab]} />
+      </>
+    </EnterpriseSearchAnalyticsPageTemplate>
   );
 };

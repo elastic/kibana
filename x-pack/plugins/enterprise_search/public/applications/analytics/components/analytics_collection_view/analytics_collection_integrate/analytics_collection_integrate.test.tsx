@@ -9,12 +9,13 @@ import '../../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
-import { EuiCodeBlock } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { shallow } from 'enzyme';
+
+import { EuiCodeBlock, EuiSteps } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
-import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate';
+import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate_view';
 
 describe('AnalyticsCollectionIntegrate', () => {
   const analyticsCollections: AnalyticsCollection = {
@@ -27,23 +28,25 @@ describe('AnalyticsCollectionIntegrate', () => {
   });
 
   it('renders', () => {
-    const wrapper = mountWithIntl(
-      <AnalyticsCollectionIntegrate collection={analyticsCollections} />
+    const wrapper = shallow(
+      <AnalyticsCollectionIntegrateView analyticsCollection={analyticsCollections} />
     );
-    expect(wrapper.find(EuiCodeBlock)).toHaveLength(3);
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock)).toHaveLength(3);
     wrapper.find('[data-test-subj="searchuiEmbed"]').at(0).simulate('click');
-    expect(wrapper.find(EuiCodeBlock)).toHaveLength(3);
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock)).toHaveLength(3);
     wrapper.find('[data-test-subj="javascriptClientEmbed"]').at(0).simulate('click');
-    expect(wrapper.find(EuiCodeBlock)).toHaveLength(5);
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock)).toHaveLength(5);
   });
 
   it('check value of analyticsDNSUrl & webClientSrc', () => {
-    const wrapper = mountWithIntl(
-      <AnalyticsCollectionIntegrate collection={analyticsCollections} />
+    const wrapper = shallow(
+      <AnalyticsCollectionIntegrateView analyticsCollection={analyticsCollections} />
     );
-    expect(wrapper.find(EuiCodeBlock).at(0).text()).toContain(
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(0).dive().text()).toContain(
       'data-dsn="/api/analytics/collections/example"'
     );
-    expect(wrapper.find(EuiCodeBlock).at(0).text()).toContain('src="/analytics.js"');
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(0).dive().text()).toContain(
+      'src="/analytics.js"'
+    );
   });
 });
