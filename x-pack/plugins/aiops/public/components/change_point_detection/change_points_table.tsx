@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { type EuiBasicTableColumn, EuiInMemoryTable, EuiBadge } from '@elastic/eui';
+import { type EuiBasicTableColumn, EuiInMemoryTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
 import React, { type FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { FilterStateStore } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDataSource } from '../../hooks/use_data_source';
 import { fnOperationTypeMapping } from './constants';
 import {
@@ -24,9 +25,14 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 export interface ChangePointsTableProps {
   annotations: ChangePointAnnotation[];
   fieldConfig: FieldConfig;
+  isLoading: boolean;
 }
 
-export const ChangePointsTable: FC<ChangePointsTableProps> = ({ annotations, fieldConfig }) => {
+export const ChangePointsTable: FC<ChangePointsTableProps> = ({
+  isLoading,
+  annotations,
+  fieldConfig,
+}) => {
   const { fieldFormats } = useAiopsAppContext();
 
   const dateFormatter = useMemo(() => fieldFormats.deserialize({ id: 'date' }), [fieldFormats]);
@@ -107,10 +113,32 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({ annotations, fie
 
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
+      loading={isLoading}
       items={annotations}
       columns={columns}
       pagination={{ pageSizeOptions: [5, 10, 15] }}
       sorting={sorting}
+      message={
+        <EuiEmptyPrompt
+          iconType="search"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
+                defaultMessage="No change points found"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
+                defaultMessage="Detect statistically significant change points such as dips, spikes, and distribution changes in a metric. Select a metric and set a time range to start detecting change points in your data."
+              />
+            </p>
+          }
+        />
+      }
     />
   );
 };

@@ -120,7 +120,10 @@ export function useChangePointResults(
   const refresh = useRefresh();
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
-  const [progress, setProgress] = useState<number>(0);
+  /**
+   * null also means the fetching has been complete
+   */
+  const [progress, setProgress] = useState<number | null>(null);
 
   const isSingleMetric = !isDefined(fieldConfig.splitField);
 
@@ -130,11 +133,11 @@ export function useChangePointResults(
     );
   }, [splitFieldCardinality]);
 
-  const { runRequest, cancelRequest, isLoading } = useCancellableSearch();
+  const { runRequest, cancelRequest } = useCancellableSearch();
 
   const reset = useCallback(() => {
     cancelRequest();
-    setProgress(0);
+    setProgress(null);
     setResults([]);
   }, [cancelRequest]);
 
@@ -142,7 +145,7 @@ export function useChangePointResults(
     async (pageNumber: number = 1, afterKey?: string) => {
       try {
         if (!isSingleMetric && !totalAggPages) {
-          setProgress(100);
+          setProgress(null);
           return;
         }
 
@@ -164,7 +167,7 @@ export function useChangePointResults(
         >(requestPayload);
 
         if (result === null) {
-          setProgress(100);
+          setProgress(null);
           return;
         }
 
@@ -220,7 +223,7 @@ export function useChangePointResults(
             result.rawResponse.aggregations.groupings.after_key.splitFieldTerm
           );
         } else {
-          setProgress(100);
+          setProgress(null);
         }
       } catch (e) {
         toasts.addError(e, {
@@ -254,7 +257,7 @@ export function useChangePointResults(
     ]
   );
 
-  return { results, isLoading, reset, progress };
+  return { results, isLoading: progress !== null, reset, progress };
 }
 
 /**
