@@ -13,7 +13,7 @@
     z-index: $euiZLevel9; // the highest possible z-level
   }
 
-  &:hover, &:focus-within {
+  &:hover, &:focus {
     .presentationUtil__floatingActions {
       opacity: 1;
       visibility: visible;
