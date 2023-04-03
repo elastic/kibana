@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v4 } from 'uuid';
 import { isEmpty } from 'lodash/fp';
 import type { SavedObjectReference } from '@kbn/core/server';
 
 import type { RulesClientContext } from '..';
 
 import { RuleActionParams, RawRuleAction } from '../../types';
-
 import { find } from '../methods/find';
 import { deleteRule } from '../methods/delete';
 
@@ -154,7 +154,7 @@ export const transformFromLegacyActions = (
       {
         group,
         params,
-        uuid: actionReference[actionRef].id, // TODO: generate id?
+        uuid: v4(),
         actionRef,
         actionTypeId,
         frequency: {
