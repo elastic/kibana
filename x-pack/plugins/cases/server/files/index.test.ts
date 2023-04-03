@@ -128,11 +128,6 @@ describe('server files', () => {
                       "access:casesFilesCasesCreate",
                     ],
                   },
-                  "delete": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesDelete",
-                    ],
-                  },
                   "download": Object {
                     "tags": Array [
                       "access:casesFilesCasesRead",
@@ -171,11 +166,6 @@ describe('server files', () => {
                       "access:observabilityFilesCasesCreate",
                     ],
                   },
-                  "delete": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesDelete",
-                    ],
-                  },
                   "download": Object {
                     "tags": Array [
                       "access:observabilityFilesCasesRead",
@@ -212,11 +202,6 @@ describe('server files', () => {
                   "create": Object {
                     "tags": Array [
                       "access:securitySolutionFilesCasesCreate",
-                    ],
-                  },
-                  "delete": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesDelete",
                     ],
                   },
                   "download": Object {
@@ -259,11 +244,6 @@ describe('server files', () => {
                       "access:casesFilesCasesCreate",
                     ],
                   },
-                  "delete": Object {
-                    "tags": Array [
-                      "access:casesFilesCasesDelete",
-                    ],
-                  },
                   "download": Object {
                     "tags": Array [
                       "access:casesFilesCasesRead",
@@ -300,11 +280,6 @@ describe('server files', () => {
                       "access:observabilityFilesCasesCreate",
                     ],
                   },
-                  "delete": Object {
-                    "tags": Array [
-                      "access:observabilityFilesCasesDelete",
-                    ],
-                  },
                   "download": Object {
                     "tags": Array [
                       "access:observabilityFilesCasesRead",
@@ -339,11 +314,6 @@ describe('server files', () => {
                   "create": Object {
                     "tags": Array [
                       "access:securitySolutionFilesCasesCreate",
-                    ],
-                  },
-                  "delete": Object {
-                    "tags": Array [
-                      "access:securitySolutionFilesCasesDelete",
                     ],
                   },
                   "download": Object {
@@ -475,11 +445,6 @@ describe('server files', () => {
                     "access:casesFilesCasesCreate",
                   ],
                 },
-                "delete": Object {
-                  "tags": Array [
-                    "access:casesFilesCasesDelete",
-                  ],
-                },
                 "download": Object {
                   "tags": Array [
                     "access:casesFilesCasesRead",
@@ -604,11 +569,6 @@ describe('server files', () => {
                     "access:observabilityFilesCasesCreate",
                   ],
                 },
-                "delete": Object {
-                  "tags": Array [
-                    "access:observabilityFilesCasesDelete",
-                  ],
-                },
                 "download": Object {
                   "tags": Array [
                     "access:observabilityFilesCasesRead",
@@ -731,11 +691,6 @@ describe('server files', () => {
                 "create": Object {
                   "tags": Array [
                     "access:securitySolutionFilesCasesCreate",
-                  ],
-                },
-                "delete": Object {
-                  "tags": Array [
-                    "access:securitySolutionFilesCasesDelete",
                   ],
                 },
                 "download": Object {
