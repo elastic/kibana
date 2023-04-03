@@ -55,7 +55,7 @@ export const generateMlInferencePipelineBody = ({
 
   // For now this only works for a single field mapping
   const sourceField = Object.keys(fieldMappings)[0];
-  const destinationField = Object.values(fieldMappings)[0];
+  const destinationField = fieldMappings[sourceField];
   const inferenceType = Object.keys(model.inference_config)[0];
   const remove = getRemoveProcessorForInferenceType(destinationField, inferenceType);
   const set = getSetProcessorForInferenceType(destinationField, inferenceType);
