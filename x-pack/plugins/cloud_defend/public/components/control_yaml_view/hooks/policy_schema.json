@@ -115,7 +115,7 @@
             "type": "string"
           }
         },
-        "fullContainerImageName": {
+        "containerImageFullName": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -194,7 +194,7 @@
             "required": ["ignoreVolumeFiles"]
           }
         },
-        "fullContainerImageName": {
+        "containerImageFullName": {
           "not": {
             "required": ["containerImageName"]
           }
@@ -213,7 +213,7 @@
           "required": ["containerImageName"]
         },
         {
-          "required": ["fullContainerImageName"]
+          "required": ["containerImageFullName"]
         },
         {
           "required": ["containerImageTag"]
@@ -268,7 +268,7 @@
             "type": "string"
           }
         },
-        "fullContainerImageName": {
+        "containerImageFullName": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -347,13 +347,12 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string",
-            "maxLength": 8
+            "type": "string"
           }
         }
       },
       "dependencies": {
-        "fullContainerImageName": {
+        "containerImageFullName": {
           "not": {
             "required": ["containerImageName"]
           }

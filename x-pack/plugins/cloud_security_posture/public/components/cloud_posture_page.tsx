@@ -28,6 +28,7 @@ import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_
 
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
+import { getCpmStatus } from '../common/utils/get_cpm_status';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
@@ -250,9 +251,10 @@ export const CloudPosturePage = <TData, TError>({
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
-  const getSetupStatus = useCspSetupStatusApi();
+  const { data: getSetupStatus, isLoading, isError, error } = useCspSetupStatusApi();
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+  const { isEmptyData, hasFindings } = getCpmStatus(getSetupStatus);
 
   const render = () => {
     if (subscriptionStatus.isError) {
@@ -267,21 +269,21 @@ export const CloudPosturePage = <TData, TError>({
       return subscriptionNotAllowedRenderer();
     }
 
-    if (getSetupStatus.isError) {
-      return defaultErrorRenderer(getSetupStatus.error);
+    if (isError) {
+      return defaultErrorRenderer(error);
     }
 
-    if (getSetupStatus.isLoading) {
+    if (isLoading) {
       return defaultLoadingRenderer();
     }
 
     /* Checks if its a completely new user which means no integration has been installed and no latest findings default index has been found */
-    if (
-      getSetupStatus.data?.kspm?.status === 'not-installed' &&
-      getSetupStatus.data?.cspm?.status === 'not-installed' &&
-      getSetupStatus.data?.indicesDetails[0].status === 'empty'
-    ) {
+    if (isEmptyData) {
       return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
+    }
+
+    if (!hasFindings) {
+      return children;
     }
 
     if (!query) {
