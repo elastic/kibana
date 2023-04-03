@@ -73,26 +73,29 @@ const FileDownloadLinkContainer = styled.div`
 `;
 
 interface TruncatedTextInfoProps {
-  size: 's' | 'm';
+  textSize: Required<ResponseActionFileDownloadLinkProps['textSize']>;
   'data-test-subj'?: string;
 }
 
 const TruncatedTextInfo = memo<TruncatedTextInfoProps>(
-  ({ size, 'data-test-subj': dataTestSubj }) => (
-    <>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon size={size} type="warning" color="warning" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size={size} data-test-subj={dataTestSubj}>
-            {FILE_TRUNCATED_MESSAGE}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  )
+  ({ textSize, 'data-test-subj': dataTestSubj }) => {
+    const alertIconSize = useMemo(() => (textSize === 'xs' ? 's' : 'm'), [textSize]);
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon size={alertIconSize} type="warning" color="warning" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size={textSize} data-test-subj={dataTestSubj}>
+              {FILE_TRUNCATED_MESSAGE}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
 );
 
 TruncatedTextInfo.displayName = 'TruncatedTextInfo';
@@ -125,8 +128,6 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
   }) => {
     const action = _action as ActionDetails; // cast to remove `Immutable`
     const getTestId = useTestIdGenerator(dataTestSubj);
-
-    const alertIconSize = useMemo(() => (textSize === 'xs' ? 's' : 'm'), [textSize]);
 
     const shouldFetchFileInfo: boolean = useMemo(() => {
       return action.isCompleted && action.wasSuccessful;
@@ -191,7 +192,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
         </EuiText>
         {isTruncatedFile && (
           <TruncatedTextInfo
-            size={alertIconSize}
+            textSize={textSize}
             data-test-subj={getTestId('fileTruncatedMessage')}
           />
         )}
