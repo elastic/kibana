@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
+import { createLogsAppServiceStartMock } from './services/logs_app/logs_app_service.mock';
 import { createLogViewsServiceStartMock } from './services/log_views/log_views_service.mock';
 import { createTelemetryServiceMock } from './services/telemetry/telemetry_service.mock';
 import { InfraClientStartExports } from './types';
 
 export const createInfraPluginStartMock = () => ({
+  logsApp: createLogsAppServiceStartMock(),
   logViews: createLogViewsServiceStartMock(),
   telemetry: createTelemetryServiceMock(),
   ContainerMetricsTable: () => <div />,

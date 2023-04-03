@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-plugin/public';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -24,15 +23,22 @@ import { StreamPage } from './stream';
 import { isDevMode } from '../../utils/dev_mode';
 import { StateMachinePlayground } from '../../observability_logs/xstate_helpers';
 import { NotFoundPage } from '../404';
+import { useLogViewContext } from '../../hooks/use_log_view';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const enableDeveloperRoutes = isDevMode();
-  const uiCapabilities = useKibana().services.application?.capabilities;
+  const { application, logsApp } = useKibanaContextForPlugin().services;
+
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
-  const kibana = useKibana();
+  const { logView } = useLogViewContext();
 
-  useReadOnlyBadge(!uiCapabilities?.logs?.save);
+  useReadOnlyBadge(!application?.capabilities?.logs?.save);
+
+  if (logsApp.isDiscoverApp() && logView) {
+    logsApp.client.redirectToDiscover({ logView });
+  }
 
   // !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts
   const streamTab = {
@@ -76,7 +82,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
             </EuiHeaderLink>
             <LazyAlertDropdownWrapper />
             <EuiHeaderLink
-              href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
+              href={application?.getUrlForApp('/integrations/browse')}
               color="primary"
               iconType="indexOpen"
             >

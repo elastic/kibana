@@ -41,11 +41,13 @@ import type {
 } from './components/infrastructure_node_metrics_tables/shared';
 import { LogViewsServiceStart } from './services/log_views';
 import { ITelemetryClient } from './services/telemetry';
+import { LogsAppServiceStart } from './services/logs_app';
 
 // Our own setup and start contract values
 export type InfraClientSetupExports = void;
 
 export interface InfraClientStartExports {
+  logsApp: LogsAppServiceStart;
   logViews: LogViewsServiceStart;
   telemetry: ITelemetryClient;
   ContainerMetricsTable: (

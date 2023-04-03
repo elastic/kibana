@@ -60,6 +60,8 @@ export const logViewFieldColumnConfigurationRT = rt.strict({
   ]),
 });
 
+export type LogViewFieldColumnConfiguration = rt.TypeOf<typeof logViewFieldColumnConfigurationRT>;
+
 export const logViewColumnConfigurationRT = rt.union([
   logViewTimestampColumnConfigurationRT,
   logViewMessageColumnConfigurationRT,
