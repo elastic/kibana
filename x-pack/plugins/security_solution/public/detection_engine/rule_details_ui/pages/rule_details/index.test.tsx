@@ -110,9 +110,6 @@ jest.mock('../../../../common/lib/kibana', () => {
           },
         },
         data: {
-          dataViews: {
-            getIdsWithTitle: () => [],
-          },
           search: {
             search: () => ({
               subscribe: () => ({

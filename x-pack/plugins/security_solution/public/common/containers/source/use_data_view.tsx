@@ -13,6 +13,7 @@ import { pick } from 'lodash/fp';
 import type { BrowserField } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import { getCategory } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/helpers';
 
 import { useKibana } from '../../lib/kibana';
 import { sourcererActions } from '../../store/sourcerer';
@@ -52,7 +53,7 @@ export const getDataViewStateFromIndexFields = memoizeOne(
     return fields.reduce<DataViewInfo>(
       (acc, field) => {
         // mutate browserFields
-        const category = field.name.split('.')[0];
+        const category = getCategory(field.name);
         if (acc.browserFields[category] == null) {
           (acc.browserFields as DangerCastForMutation)[category] = {};
         }
@@ -109,7 +110,7 @@ export const useDataView = (): {
         };
         setLoading({ id: dataViewId, loading: true });
 
-        const dataView = await getSourcererDataView(dataViewId, data.dataViews);
+        const dataView = await getSourcererDataView(dataViewId, data.dataViews, cleanCache);
 
         if (needToBeInit) {
           dispatch(sourcererActions.setDataView({ ...dataView, loading: false }));

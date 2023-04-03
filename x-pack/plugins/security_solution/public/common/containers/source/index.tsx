@@ -9,9 +9,10 @@ import { isEmpty, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
 import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import { getCategory } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/helpers';
+
 import { useKibana } from '../../lib/kibana';
 import { getDataViewStateFromIndexFields } from './use_data_view';
 
@@ -27,6 +28,11 @@ export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial
   return result;
 }
 
+/**
+ * @deprecated use EcsFlat from `@kbn/ecs`
+ * @param browserFields
+ * @returns
+ */
 export const getAllFieldsByName = (
   browserFields: BrowserFields
 ): { [fieldName: string]: Partial<BrowserField> } =>
@@ -78,13 +84,14 @@ export const getBrowserFields = memoizeOne(
 
     // We mutate this instead of using lodash/set to keep this as fast as possible
     return fields.reduce<DangerCastForBrowserFieldsMutation>((accumulator, field) => {
-      if (accumulator[field.category] == null) {
-        (accumulator as DangerCastForMutation)[field.category] = {};
+      const category = getCategory(field.name);
+      if (accumulator[category] == null) {
+        (accumulator as DangerCastForMutation)[category] = {};
       }
-      if (accumulator[field.category].fields == null) {
-        accumulator[field.category].fields = {};
+      if (accumulator[category].fields == null) {
+        accumulator[category].fields = {};
       }
-      accumulator[field.category].fields[field.name] = field as unknown as BrowserField;
+      accumulator[category].fields[field.name] = field as unknown as BrowserField;
       return accumulator;
     }, {});
   },
