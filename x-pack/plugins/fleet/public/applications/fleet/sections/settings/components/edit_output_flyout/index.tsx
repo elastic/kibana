@@ -166,7 +166,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                       'xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout',
                       {
                         defaultMessage:
-                          'This output type currently does not support connectivity to a remote Elasticsearch cluster',
+                          'This output type currently does not support connectivity to a remote Elasticsearch cluster.',
                       }
                     )}
                     iconType="alert"

@@ -15380,7 +15380,7 @@
     "xpack.fleet.settings.editOutputFlyout.editTitle": "编辑输出",
     "xpack.fleet.settings.editOutputFlyout.esHostsInputLabel": "主机",
     "xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder": "指定主机 URL",
-    "xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout": "该输出类型目前不支持与远程Elasticsearch集群的连接",
+    "xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout": "该输出类型目前不支持与远程Elasticsearch集群的连接。",
     "xpack.fleet.settings.editOutputFlyout.loadBalancingDescription": "启用后，代理将在为此输出定义的所有主机之间执行负载均衡。这会增加被代理打开的连接的数量。",
     "xpack.fleet.settings.editOutputFlyout.loadBalancingSwitchLabel": "负载均衡",
     "xpack.fleet.settings.editOutputFlyout.logstashHostsInputLabel": "Logstash 主机",
