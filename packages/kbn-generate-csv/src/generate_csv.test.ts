@@ -20,17 +20,17 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import {
+  CancellationToken,
+  UI_SETTINGS_CSV_QUOTE_VALUES,
+  UI_SETTINGS_CSV_SEPARATOR,
+  UI_SETTINGS_DATEFORMAT_TZ,
+} from '@kbn/reporting-common';
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
+import { CsvConfig, JobParams } from '../types';
 import { CsvGenerator } from './generate_csv';
-import { CancellationToken, UI_SETTINGS_DATEFORMAT_TZ } from '@kbn/reporting-common';
-import {
-  CsvConfig,
-  JobParams,
-  UI_SETTINGS_CSV_QUOTE_VALUES,
-  UI_SETTINGS_CSV_SEPARATOR,
-} from '../types';
 
 const createMockJob = (baseObj: any = {}): JobParams => ({
   ...baseObj,

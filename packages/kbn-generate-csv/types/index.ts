@@ -10,12 +10,6 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { TaskRunMetrics } from '@kbn/reporting-common';
 
-export const CONTENT_TYPE_CSV = 'text/csv';
-export const CSV_BOM_CHARS = '\ufeff';
-export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
-export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
-export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
-
 export interface JobParams {
   searchSource: SerializedSearchSourceFields;
   columns?: string[];

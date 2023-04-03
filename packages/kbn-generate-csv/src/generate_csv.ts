@@ -17,18 +17,18 @@ import type {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
+import {
+  byteSizeValueToNumber,
+  CancellationToken,
+  CONTENT_TYPE_CSV,
+  errors as reportingErrors,
+} from '@kbn/reporting-common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import {
-  CancellationToken,
-  AuthenticationExpiredError,
-  ReportingError,
-  byteSizeValueToNumber,
-} from '@kbn/reporting-common';
-import { MaxSizeStringBuilder } from './max_size_string_builder';
-import { i18nTexts } from './i18n_texts';
+import { CsvConfig, JobParams, TaskRunResult } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
-import { CONTENT_TYPE_CSV, CsvConfig, JobParams, TaskRunResult } from '../types';
+import { i18nTexts } from './i18n_texts';
+import { MaxSizeStringBuilder } from './max_size_string_builder';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -311,7 +311,7 @@ export class CsvGenerator {
       ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
-    let reportingError: undefined | ReportingError;
+    let reportingError: undefined | reportingErrors.ReportingError;
 
     const index = searchSource.getField('index');
 
@@ -448,7 +448,7 @@ export class CsvGenerator {
       this.logger.error(err);
       if (err instanceof esErrors.ResponseError) {
         if ([401, 403].includes(err.statusCode ?? 0)) {
-          reportingError = new AuthenticationExpiredError();
+          reportingError = new reportingErrors.AuthenticationExpiredError();
           warnings.push(i18nTexts.authenticationError.partialResultsMessage);
         } else {
           warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
