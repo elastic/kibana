@@ -29,6 +29,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/canvas/server/templates/assets/*.{png,jpg,svg}',
   'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
+  'x-pack/plugins/fleet/cypress/packages/*.zip',
   '**/.*',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
