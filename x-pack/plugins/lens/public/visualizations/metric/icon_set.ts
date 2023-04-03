@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
+import { AvailableMetricIcon } from '@kbn/expression-metric-vis-plugin/common';
 import { IconSet } from '../../shared_components/icon_select/icon_select';
 
-export const iconsSet: IconSet<AvailableReferenceLineIcon> = [
+export const iconsSet: IconSet<AvailableMetricIcon> = [
   {
     value: 'empty',
     label: i18n.translate('xpack.lens.metric.iconSelect.noIconLabel', {
@@ -17,77 +17,95 @@ export const iconsSet: IconSet<AvailableReferenceLineIcon> = [
     }),
   },
   {
+    value: 'sortUp',
+    label: i18n.translate('xpack.lens.metric.iconSelect.sortUpLabel', {
+      defaultMessage: 'Sort up',
+    }),
+  },
+  {
+    value: 'sortDown',
+    label: i18n.translate('xpack.lens.metric.iconSelect.sortDownLabel', {
+      defaultMessage: 'Sort down',
+    }),
+  },
+  {
+    value: 'compute',
+    label: i18n.translate('xpack.lens.metric.iconSelect.computeLabel', {
+      defaultMessage: 'Compute',
+    }),
+  },
+  {
     value: 'asterisk',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.asteriskIconLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.asteriskIconLabel', {
       defaultMessage: 'Asterisk',
     }),
   },
   {
     value: 'alert',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.alertIconLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.alertIconLabel', {
       defaultMessage: 'Alert',
     }),
   },
   {
     value: 'bell',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.bellIconLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.bellIconLabel', {
       defaultMessage: 'Bell',
     }),
   },
   {
     value: 'bolt',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.boltIconLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.boltIconLabel', {
       defaultMessage: 'Bolt',
     }),
   },
   {
     value: 'bug',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.bugIconLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.bugIconLabel', {
       defaultMessage: 'Bug',
     }),
   },
 
   {
     value: 'editorComment',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.commentIconLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.commentIconLabel', {
       defaultMessage: 'Comment',
     }),
   },
   {
     value: 'flag',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.flagIconLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.flagIconLabel', {
       defaultMessage: 'Flag',
     }),
   },
   {
     value: 'heart',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.heartLabel', { defaultMessage: 'Heart' }),
+    label: i18n.translate('xpack.lens.metric.iconSelect.heartLabel', { defaultMessage: 'Heart' }),
   },
   {
     value: 'mapMarker',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.mapMarkerLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.mapMarkerLabel', {
       defaultMessage: 'Map Marker',
     }),
   },
   {
     value: 'pinFilled',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.mapPinLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.mapPinLabel', {
       defaultMessage: 'Map Pin',
     }),
   },
   {
     value: 'starEmpty',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.starLabel', { defaultMessage: 'Star' }),
+    label: i18n.translate('xpack.lens.metric.iconSelect.starLabel', { defaultMessage: 'Star' }),
   },
   {
     value: 'starFilled',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.starFilledLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.starFilledLabel', {
       defaultMessage: 'Star filled',
     }),
   },
   {
     value: 'tag',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.tagIconLabel', {
+    label: i18n.translate('xpack.lens.metric.iconSelect.tagIconLabel', {
       defaultMessage: 'Tag',
     }),
   },

@@ -15,3 +15,23 @@ export const LabelPosition = {
   BOTTOM: 'bottom',
   TOP: 'top',
 } as const;
+
+export const AvailableMetricIcons = {
+  EMPTY: 'empty',
+  SORTUP: 'sortUp',
+  SORTDOWN: 'sortDown',
+  COMPUTE: 'compute',
+  ASTERISK: 'asterisk',
+  ALERT: 'alert',
+  BELL: 'bell',
+  BOLT: 'bolt',
+  BUG: 'bug',
+  EDITOR_COMMENT: 'editorComment',
+  FLAG: 'flag',
+  HEART: 'heart',
+  MAP_MARKER: 'mapMarker',
+  PIN_FILLED: 'pinFilled',
+  STAR_EMPTY: 'starEmpty',
+  STAR_FILLED: 'starFilled',
+  TAG: 'tag',
+} as const;
