@@ -30,7 +30,6 @@ describe('TaskPoller', () => {
         pollIntervalDelay$: of(0),
         getCapacity: () => 1,
         work,
-        workTimeout: pollInterval * 5,
       }).start();
 
       expect(work).toHaveBeenCalledTimes(1);
@@ -66,7 +65,6 @@ describe('TaskPoller', () => {
         pollIntervalDelay$: of(0),
         getCapacity: () => 1,
         work,
-        workTimeout: pollInterval * 5,
       }).start();
 
       expect(work).toHaveBeenCalledTimes(1);
@@ -108,7 +106,6 @@ describe('TaskPoller', () => {
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
         work,
-        workTimeout: pollInterval * 5,
         getCapacity: () => (hasCapacity ? 1 : 0),
       }).start();
 
@@ -169,7 +166,6 @@ describe('TaskPoller', () => {
           return args;
         },
         getCapacity: () => 5,
-        workTimeout: pollInterval * 5,
       });
       poller.events$.subscribe(handler);
       poller.start();
@@ -210,7 +206,6 @@ describe('TaskPoller', () => {
         work: async (...args) => {
           throw new Error('failed to work');
         },
-        workTimeout: pollInterval * 5,
         getCapacity: () => 5,
       });
       poller.events$.subscribe(handler);
@@ -249,7 +244,6 @@ describe('TaskPoller', () => {
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
         work,
-        workTimeout: pollInterval * 5,
         getCapacity: () => 5,
       });
       poller.events$.subscribe(handler);
