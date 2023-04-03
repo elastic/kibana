@@ -108,7 +108,11 @@ export class AddLayerPanel extends Component<Props, State> {
         id: ADD_LAYER_STEP_ID,
         label: ADD_LAYER_STEP_LABEL,
         nextButtonLabel: ADD_LAYER_STEP_NEXT_BUTTON_LABEL,
-        renderSecondaryActionButton: ({ isDisabled, isLoading, addLayersAndClose }: RenderSecondaryActionButtonProps) => {
+        renderSecondaryActionButton: ({
+          isDisabled,
+          isLoading,
+          addLayersAndClose,
+        }: RenderSecondaryActionButtonProps) => {
           return (
             <EuiButton
               disabled={isDisabled || isLoading}
