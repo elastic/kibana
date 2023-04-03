@@ -59,7 +59,7 @@ export const FormContext: React.FC<Props> = ({
     useGetSupportedActionConnectors();
   const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
-  const { postCase } = usePostCase();
+  const { mutateAsync: postCase } = usePostCase();
   const { createAttachments } = useCreateAttachments();
   const { pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
@@ -84,11 +84,13 @@ export const FormContext: React.FC<Props> = ({
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
-        const updatedCase = await postCase({
-          ...userFormData,
-          connector: connectorToUpdate,
-          settings: { syncAlerts },
-          owner: selectedOwner ?? owner[0],
+        const theCase = await postCase({
+          request: {
+            ...userFormData,
+            connector: connectorToUpdate,
+            settings: { syncAlerts },
+            owner: selectedOwner ?? owner[0],
+          },
         });
 
         // add attachments to the case

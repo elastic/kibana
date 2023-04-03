@@ -33,6 +33,7 @@ describe('usePostCase', () => {
     },
     owner: SECURITY_SOLUTION_OWNER,
   };
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -45,30 +46,30 @@ describe('usePostCase', () => {
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
-        postCase: result.current.postCase,
+        mutateAsync: result.current.mutateAsync,
       });
     });
   });
 
-  it('calls postCase with correct arguments', async () => {
+  it('calls mutateAsync with correct arguments', async () => {
     const spyOnPostCase = jest.spyOn(api, 'postCase');
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
       await waitForNextUpdate();
 
-      result.current.postCase(samplePost);
+      result.current.mutateAsync({ request: samplePost });
       await waitForNextUpdate();
       expect(spyOnPostCase).toBeCalledWith(samplePost, abortCtrl.signal);
     });
   });
 
-  it('calls postCase with correct result', async () => {
+  it('calls mutateAsync with correct result', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
       await waitForNextUpdate();
 
-      const postData = await result.current.postCase(samplePost);
+      const postData = await result.current.mutateAsync({ request: samplePost });
       expect(postData).toEqual(basicCasePost);
     });
   });
@@ -77,12 +78,12 @@ describe('usePostCase', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
       await waitForNextUpdate();
-      result.current.postCase(samplePost);
+      result.current.mutateAsync({ request: samplePost });
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
-        postCase: result.current.postCase,
+        mutateAsync: result.current.mutateAsync,
       });
     });
   });
@@ -91,7 +92,7 @@ describe('usePostCase', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
       await waitForNextUpdate();
-      result.current.postCase(samplePost);
+      result.current.mutateAsync({ request: samplePost });
 
       expect(result.current.isLoading).toBe(true);
     });
@@ -106,12 +107,12 @@ describe('usePostCase', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
       await waitForNextUpdate();
-      result.current.postCase(samplePost);
+      result.current.mutateAsync({ request: samplePost });
 
       expect(result.current).toEqual({
         isLoading: false,
         isError: true,
-        postCase: result.current.postCase,
+        mutateAsync: result.current.mutateAsync,
       });
     });
   });
