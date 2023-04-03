@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
 import Semver from 'semver';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
@@ -108,9 +107,8 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
     const latestVersion = this.typeTransforms.latestVersion.migrate;
 
     if (currentVersion && Semver.gt(currentVersion, latestVersion)) {
-      throw Boom.badData(
-        `Document "${id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`,
-        this.document
+      throw new Error(
+        `Document "${id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
       );
     }
 
