@@ -197,65 +197,6 @@ describe('TaskPoller', () => {
   );
 
   test(
-    'work times out when it exceeds a predefined amount of time',
-    fakeSchedulers(async (advance) => {
-      const pollInterval = 100;
-      const workTimeout = pollInterval * 2;
-
-      const handler = jest.fn();
-
-      type ResolvableTupple = [string, PromiseLike<void> & Resolvable];
-      const poller = createTaskPoller<[string, Resolvable], string[]>({
-        initialPollInterval: pollInterval,
-        logger: loggingSystemMock.create().get(),
-        pollInterval$: of(pollInterval),
-        pollIntervalDelay$: of(0),
-        work: async () => {
-          return [];
-        },
-        getCapacity: () => 5,
-        workTimeout,
-      });
-      poller.events$.subscribe(handler);
-      poller.start();
-
-      const one: ResolvableTupple = ['one', resolvable()];
-
-      // split these into two payloads
-      advance(pollInterval);
-
-      const two: ResolvableTupple = ['two', resolvable()];
-      const three: ResolvableTupple = ['three', resolvable()];
-
-      advance(workTimeout);
-      await sleep(workTimeout);
-
-      // one resolves too late!
-      one[1].resolve();
-
-      expect(handler).toHaveBeenCalledWith(
-        asErr(
-          new PollingError<string>(
-            'Failed to poll for work: Error: work has timed out',
-            PollingErrorType.WorkError,
-            none
-          )
-        )
-      );
-      expect(handler.mock.calls[0][0].error.type).toEqual(PollingErrorType.WorkError);
-
-      // two and three in time
-      two[1].resolve();
-      three[1].resolve();
-
-      advance(pollInterval);
-      await sleep(pollInterval);
-
-      expect(handler).toHaveBeenCalledTimes(2);
-    })
-  );
-
-  test(
     'returns an error when polling for work fails',
     fakeSchedulers(async (advance) => {
       const pollInterval = 100;

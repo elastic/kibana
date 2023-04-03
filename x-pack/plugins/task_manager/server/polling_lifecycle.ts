@@ -146,8 +146,7 @@ export class TaskPollingLifecycle {
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
 
-    const { max_poll_inactivity_cycles: maxPollInactivityCycles, poll_interval: pollInterval } =
-      config;
+    const { poll_interval: pollInterval } = config;
 
     const pollIntervalDelay$ = delayOnClaimConflicts(
       maxWorkersConfiguration$,
@@ -172,11 +171,6 @@ export class TaskPollingLifecycle {
         return capacity;
       },
       work: this.pollForWork,
-      // Time out the `work` phase if it takes longer than a certain number of polling cycles
-      // The `work` phase includes the prework needed *before* executing a task
-      // (such as polling for new work, marking tasks as running etc.) but does not
-      // include the time of actually running the task
-      workTimeout: pollInterval * maxPollInactivityCycles,
     });
     this.subscribeToPoller(poller.events$);
 

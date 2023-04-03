@@ -14,7 +14,6 @@ import { Observable, Subject } from 'rxjs';
 import { Option, none } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
 import { Result, asOk, asErr } from '../lib/result_type';
-import { timeoutPromiseAfter } from './timeout_promise_after';
 
 type WorkFn<H> = () => Promise<H>;
 
@@ -25,7 +24,6 @@ interface Opts<H> {
   pollIntervalDelay$: Observable<number>;
   getCapacity: () => number;
   work: WorkFn<H>;
-  workTimeout: number;
 }
 
 /**
@@ -46,7 +44,6 @@ export function createTaskPoller<T, H>({
   pollIntervalDelay$,
   getCapacity,
   work,
-  workTimeout,
 }: Opts<H>): {
   start: () => void;
   stop: () => void;
@@ -65,11 +62,7 @@ export function createTaskPoller<T, H>({
     const start = Date.now();
     if (hasCapacity()) {
       try {
-        const result = await timeoutPromiseAfter<H, Error>(
-          work(),
-          workTimeout,
-          () => new Error(`work has timed out`)
-        );
+        const result = await work();
         subject.next(asOk(result));
       } catch (e) {
         subject.next(asPollingError<T>(e, PollingErrorType.WorkError));

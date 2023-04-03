@@ -73,6 +73,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 
@@ -238,6 +239,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 
@@ -307,6 +309,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 
@@ -405,6 +408,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 
@@ -508,6 +512,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 
@@ -549,6 +554,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 
@@ -583,6 +589,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 
@@ -617,6 +624,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 
@@ -674,6 +682,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 
@@ -766,6 +775,7 @@ describe('TaskStore', () => {
             definitions: taskDefinitions,
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
+            updateByQueryTimeout: 30000,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -786,6 +796,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -804,6 +815,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -822,6 +834,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        updateByQueryTimeout: 30000,
       });
     });
 

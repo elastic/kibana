@@ -45,6 +45,7 @@ export interface StoreOpts {
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: ISavedObjectsSerializer;
   adHocTaskCounter: AdHocTaskCounter;
+  updateByQueryTimeout: number;
 }
 
 export interface SearchOpts {
@@ -123,8 +124,9 @@ export class TaskStore {
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
     this.esClientForUpdateByQuery = opts.esClient.child({
-      requestTimeout: 30 * 1000,
+      requestTimeout: opts.updateByQueryTimeout,
       // Somehow timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
+      // We don't need retry logic in our poller because it will try again at the next cycle by design
       maxRetries: 0,
     });
   }
