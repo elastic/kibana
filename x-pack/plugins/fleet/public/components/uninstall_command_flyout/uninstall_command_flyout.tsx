@@ -21,7 +21,8 @@ import { REDUCED_PLATFORM_OPTIONS } from '../../hooks';
 import type { Commands } from './commands_for_platforms';
 import { CommandsForPlatforms } from './commands_for_platforms';
 
-type UninstallCommandTarget = 'agent' | 'endpoint';
+export const UNINSTALL_COMMAND_TARGETS = ['agent', 'endpoint'] as const;
+type UninstallCommandTarget = typeof UNINSTALL_COMMAND_TARGETS[number];
 
 const DESCRIPTION_PER_TARGET: { [key in UninstallCommandTarget]: React.ReactElement } = {
   agent: (
@@ -77,13 +78,13 @@ const useCommands = (policyId: string | undefined, target: UninstallCommandTarge
   return commands;
 };
 
-interface Props {
+export interface UninstallCommandFlyoutProps {
   target: UninstallCommandTarget;
   policyId?: string;
   onClose: () => void;
 }
 
-export const UninstallCommandFlyout: React.FunctionComponent<Props> = ({
+export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFlyoutProps> = ({
   policyId,
   onClose,
   target,
