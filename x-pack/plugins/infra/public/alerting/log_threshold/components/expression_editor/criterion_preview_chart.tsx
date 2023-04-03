@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { ReactElement, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   ScaleType,
@@ -59,6 +59,7 @@ interface Props {
   logViewReference: PersistedLogViewReference;
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
@@ -67,6 +68,7 @@ export const CriterionPreview: React.FC<Props> = ({
   logViewReference,
   showThreshold,
   executionTimeRange,
+  annotations,
 }) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
@@ -111,6 +113,7 @@ export const CriterionPreview: React.FC<Props> = ({
       chartAlertParams={chartAlertParams}
       showThreshold={showThreshold}
       executionTimeRange={executionTimeRange}
+      annotations={annotations}
     />
   );
 };
@@ -122,6 +125,7 @@ interface ChartProps {
   chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
@@ -131,6 +135,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   chartAlertParams,
   showThreshold,
   executionTimeRange,
+  annotations,
 }) => {
   const { uiSettings } = useKibana().services;
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
@@ -287,6 +292,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               ]}
             />
           ) : null}
+          {annotations}
           {showThreshold && threshold && isAbove ? (
             <RectAnnotation
               id="above-threshold"

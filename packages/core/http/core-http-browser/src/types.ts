@@ -9,6 +9,7 @@
 import type { Observable } from 'rxjs';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { ApiVersion } from '@kbn/core-http-common';
 
 /** @public */
 export interface HttpSetup {
@@ -280,6 +281,9 @@ export interface HttpFetchOptions extends HttpRequestInit {
   asResponse?: boolean;
 
   context?: KibanaExecutionContext;
+
+  /** @experimental */
+  version?: ApiVersion;
 }
 
 /**

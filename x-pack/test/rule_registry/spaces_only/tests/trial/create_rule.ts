@@ -9,16 +9,20 @@ import expect from '@kbn/expect';
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
   EVENT_KIND,
   VERSION,
 } from '@kbn/rule-data-utils';
 import { omit } from 'lodash';
 import { Rule } from '@kbn/alerting-plugin/common';
+import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import type { RuleTaskState } from '@kbn/alerting-state-types';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   getAlertsTargetIndices,
@@ -32,6 +36,7 @@ import {
 import { AlertDef, AlertParams } from '../../../common/types';
 import { APM_METRIC_INDEX_NAME } from '../../../common/constants';
 import { obsOnly } from '../../../common/lib/authentication/users';
+import { getEventLog } from '../../../../alerting_api_integration/common/lib/get_event_log';
 
 const SPACE_ID = 'space1';
 
@@ -39,8 +44,7 @@ const SPACE_ID = 'space1';
 export default function registryRulesApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('Rule Registry API', () => {
+  describe('Rule Registry API', async () => {
     describe('with write permissions', () => {
       it('does not bootstrap indices on plugin startup', async () => {
         const { body: targetIndices } = await getAlertsTargetIndices(getService, obsOnly, SPACE_ID);
@@ -119,7 +123,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
                 },
               },
             });
-            expect(res).to.be.empty();
+            expect(res.hits.hits).to.be.empty();
           } catch (exc) {
             expect(exc.message).contain('index_not_found_exception');
           }
@@ -151,7 +155,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
                 },
               },
             });
-            expect(res).to.be.empty();
+            expect(res.hits.hits).to.be.empty();
           } catch (exc) {
             expect(exc.message).contain('index_not_found_exception');
           }
@@ -195,8 +199,24 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
             ALERT_UUID,
             ALERT_RULE_EXECUTION_UUID,
             ALERT_RULE_UUID,
+            ALERT_TIME_RANGE,
             VERSION,
           ];
+
+          const alertInstanceId = alertEvent[ALERT_INSTANCE_ID]?.[0];
+          const alertUuid = alertEvent[ALERT_UUID]?.[0];
+          const executionUuid = alertEvent[ALERT_RULE_EXECUTION_UUID]?.[0];
+          expect(typeof alertUuid).to.be('string');
+          expect(typeof executionUuid).to.be('string');
+
+          await checkEventLogAlertUuids(
+            getService,
+            SPACE_ID,
+            createResponse.alert.id,
+            alertInstanceId,
+            alertUuid,
+            executionUuid
+          );
 
           const toCompare = omit(alertEvent, exclude);
 
@@ -258,4 +278,55 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
       });
     });
   });
+}
+
+async function checkEventLogAlertUuids(
+  getService: FtrProviderContext['getService'],
+  spaceId: string,
+  ruleId: string,
+  alertInstanceId: string,
+  alertUuid: string,
+  executionUuid: string
+) {
+  const es = getService('es');
+  const retry = getService('retry');
+
+  const docs: Awaited<ReturnType<typeof getEventLog>> = [];
+  await retry.waitFor('getting event log docs', async () => {
+    docs.push(...(await getEventLogDocs()));
+    return docs.length > 0;
+  });
+
+  expect(docs.length).to.be.greaterThan(0);
+  for (const doc of docs) {
+    expect(doc?.kibana?.alert?.uuid).to.be(alertUuid);
+  }
+
+  // check that the task doc has the same UUID
+  const taskDoc = await es.get<{ task: SerializedConcreteTaskInstance }>({
+    index: '.kibana_task_manager',
+    id: `task:${ruleId}`,
+  });
+
+  const ruleStateString = taskDoc._source?.task.state || 'task-state-is-missing';
+  const ruleState: RuleTaskState = JSON.parse(ruleStateString);
+  if (ruleState.alertInstances?.[alertInstanceId]) {
+    expect(ruleState.alertInstances[alertInstanceId].meta?.uuid).to.be(alertUuid);
+  } else if (ruleState.alertRecoveredInstances?.[alertInstanceId]) {
+    expect(ruleState.alertRecoveredInstances[alertInstanceId].meta?.uuid).to.be(alertUuid);
+  } else {
+    expect(false).to.be('alert instance not found in task doc');
+  }
+
+  function getEventLogDocs() {
+    return getEventLog({
+      getService,
+      spaceId,
+      type: 'alert',
+      id: ruleId,
+      provider: 'alerting',
+      actions: new Map([['active-instance', { equal: 1 }]]),
+      filter: `kibana.alert.rule.execution.uuid: ${executionUuid}`,
+    });
+  }
 }
