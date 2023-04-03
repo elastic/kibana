@@ -58,7 +58,9 @@
     "@kbn/cases-plugin",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/shared-ux-router",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/actions-plugin",
+    "@kbn/ui-theme"
   ],
   "exclude": ["target/**/*"]
 }

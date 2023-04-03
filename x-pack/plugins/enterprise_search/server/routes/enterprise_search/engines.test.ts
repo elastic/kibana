@@ -10,9 +10,12 @@ import { mockDependencies, MockRouter } from '../../__mocks__';
 jest.mock('../../lib/engines/field_capabilities', () => ({
   fetchEngineFieldCapabilities: jest.fn(),
 }));
-
+jest.mock('../../lib/engines/fetch_indices_stats', () => ({
+  fetchIndicesStats: jest.fn(),
+}));
 import { RequestHandlerContext } from '@kbn/core/server';
 
+import { fetchIndicesStats } from '../../lib/engines/fetch_indices_stats';
 import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
 
 import { registerEnginesRoutes } from './engines';
@@ -115,6 +118,22 @@ describe('engines routes', () => {
         method: 'GET',
         path: '/_application/search_application/engine-name',
       });
+      const mock = jest.fn();
+
+      const fetchIndicesStatsResponse = [
+        { count: 5, health: 'green', name: 'test-index-name-1' },
+        { count: 10, health: 'yellow', name: 'test-index-name-2' },
+        { count: 0, health: 'red', name: 'test-index-name-3' },
+      ];
+      const engineResult = {
+        indices: mock(['test-index-name-1', 'test-index-name-2', 'test-index-name-3']),
+        name: 'test-engine-1',
+        updated_at_millis: 1679847286355,
+      };
+
+      (fetchIndicesStats as jest.Mock).mockResolvedValueOnce(fetchIndicesStatsResponse);
+      expect(fetchIndicesStats).toHaveBeenCalledWith(mockClient, engineResult.indices);
+
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {},
       });
@@ -314,9 +333,7 @@ describe('engines routes', () => {
     let mockRouter: MockRouter;
     const mockClient = {
       asCurrentUser: {
-        transport: {
-          request: jest.fn(),
-        },
+        search: jest.fn(),
       },
     };
     beforeEach(() => {
@@ -337,7 +354,7 @@ describe('engines routes', () => {
       });
     });
     it('POST - Search preview API creates a request', async () => {
-      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+      mockClient.asCurrentUser.search.mockImplementation(() => ({
         acknowledged: true,
       }));
 
@@ -346,10 +363,8 @@ describe('engines routes', () => {
           engine_name: 'engine-name',
         },
       });
-      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-        body: {},
-        method: 'POST',
-        path: '/engine-name/_search',
+      expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+        index: 'engine-name',
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
