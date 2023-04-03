@@ -26,7 +26,7 @@ import type {
   ILensInterpreterRenderHandlers,
   LensCellValueAction,
 } from '../../types';
-import type { FormatFactory } from '../../../common';
+import type { FormatFactory } from '../../../common/types';
 import type { DatatableProps } from '../../../common/expressions';
 
 async function getColumnsFilterable(table: Datatable, handlers: IInterpreterRenderHandlers) {

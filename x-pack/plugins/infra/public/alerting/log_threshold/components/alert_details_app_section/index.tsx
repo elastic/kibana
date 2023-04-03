@@ -10,7 +10,10 @@ import moment from 'moment';
 import React from 'react';
 import { type PartialCriterion } from '../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
+import { AlertAnnotation } from './components/alert_annotation';
 import { AlertDetailsAppSectionProps } from './types';
+
+const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
   const ruleWindowSizeMS = moment
@@ -34,22 +37,31 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
 
   return (
     // Create a chart per-criteria
-    <EuiFlexGroup>
-      {rule.params.criteria.map((criteria) => {
+    <EuiFlexGroup direction="column">
+      {rule.params.criteria.map((criteria, idx) => {
         const chartCriterion = criteria as PartialCriterion;
         return (
-          <EuiFlexItem>
+          <EuiFlexItem key={`${chartCriterion.field}${idx}`}>
             <CriterionPreview
-              key={chartCriterion.field}
               ruleParams={rule.params}
-              sourceId={rule.params.logView.logViewId}
+              logViewReference={{
+                type: 'log-view-reference',
+                logViewId: rule.params.logView.logViewId,
+              }}
               chartCriterion={chartCriterion}
               showThreshold={true}
               executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
+              annotations={[<AlertAnnotation alertStarted={alert.start} />]}
             />
           </EuiFlexItem>
         );
       })}
+      {/* For now we show the history chart only if we have one criteria */}
+      {rule.params.criteria.length === 1 && (
+        <EuiFlexItem>
+          <LogsHistoryChart alert={alert} rule={rule} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
