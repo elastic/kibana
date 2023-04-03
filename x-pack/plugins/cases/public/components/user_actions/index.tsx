@@ -166,8 +166,10 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     <EuiSkeletonText
       lines={8}
       data-test-subj="user-actions-loading"
-      isLoading={ isLoadingLastPageUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)
-          || isLoadingInfiniteUserActions
+      isLoading={
+        isLoadingLastPageUserActions ||
+        loadingCommentIds.includes(NEW_COMMENT_ID) ||
+        isLoadingInfiniteUserActions
       }
     >
       <EuiFlexItem
