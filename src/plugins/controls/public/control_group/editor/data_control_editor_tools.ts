@@ -8,10 +8,10 @@
 
 import { memoize } from 'lodash';
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 import { pluginServices } from '../../services';
-import { DataControlField, DataControlFieldRegistry, IEditableControlFactory } from '../../types';
+import { DataControlFieldRegistry, IEditableControlFactory } from '../../types';
 
 export const getDataControlFieldRegistry = memoize(
   async (dataView: DataView) => {
@@ -31,29 +31,18 @@ const loadFieldRegistryFromDataView = async (
     (controlType) => getControlFactory(controlType) as IEditableControlFactory
   );
   const fieldRegistry: DataControlFieldRegistry = {};
-  await Promise.all(
-    dataView.fields.getAll().map(async (field): Promise<void> => {
-      const test = await getDataControlField(controlFactories, field);
-      if (test.compatibleControlTypes.length > 0) {
-        fieldRegistry[field.name] = test;
+  return new Promise<DataControlFieldRegistry>((resolve) => {
+    dataView.fields.getAll().forEach((field) => {
+      const compatibleControlTypes = [];
+      for (const factory of controlFactories) {
+        if (factory.isFieldCompatible && factory.isFieldCompatible(field)) {
+          compatibleControlTypes.push(factory.type);
+        }
       }
-    })
-  );
-
-  return fieldRegistry;
-};
-
-const getDataControlField = (
-  controlFactories: IEditableControlFactory[],
-  field: DataViewField
-): Promise<DataControlField> => {
-  return new Promise((resolve) => {
-    const compatibleControlTypes = [];
-    for (const factory of controlFactories) {
-      if (factory.isFieldCompatible && factory.isFieldCompatible(field)) {
-        compatibleControlTypes.push(factory.type);
+      if (compatibleControlTypes.length > 0) {
+        fieldRegistry[field.name] = { field, compatibleControlTypes };
       }
-    }
-    resolve({ field, compatibleControlTypes });
+    });
+    resolve(fieldRegistry);
   });
 };
