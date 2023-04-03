@@ -14,7 +14,7 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 
-import type { FilesSetup } from '@kbn/files-plugin/server';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
@@ -75,6 +75,7 @@ export interface PluginsSetup {
 export interface PluginsStart {
   actions: ActionsPluginStart;
   features: FeaturesPluginStart;
+  files: FilesStart;
   licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   security: SecurityPluginStart;
@@ -215,6 +216,7 @@ export class CasePlugin {
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
+      filesPluginStart: plugins.files,
     });
 
     const client = core.elasticsearch.client;

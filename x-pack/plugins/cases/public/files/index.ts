@@ -7,8 +7,9 @@
 
 import type { FilesSetup } from '@kbn/files-plugin/public';
 import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
-import { constructFileKindIdByOwner, MAX_FILE_SIZE, OWNERS } from '../../common/constants';
+import { MAX_FILE_SIZE, OWNERS } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
+import { constructFileKindIdByOwner } from '../../common/files';
 import type { CaseFileKinds, FilesConfig } from './types';
 
 const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
