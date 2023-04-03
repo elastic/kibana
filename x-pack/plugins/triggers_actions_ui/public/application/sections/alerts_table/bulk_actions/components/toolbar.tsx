@@ -9,7 +9,7 @@ import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem } f
 import numeral from '@elastic/numeral';
 import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { Alerts, BulkActionsConfig, BulkActionsVerbs, RowSelection } from '../../../../../types';
 import * as i18n from '../translations';
 import { BulkActionsContext } from '../context';
@@ -52,6 +52,7 @@ const selectedIdsToTimelineItemMapper = (
       data: [
         { field: ALERT_RULE_NAME, value: alert[ALERT_RULE_NAME] },
         { field: ALERT_RULE_UUID, value: alert[ALERT_RULE_UUID] },
+        { field: ALERT_CASE_IDS, value: alert[ALERT_CASE_IDS] ?? [] },
       ],
       ecs: {
         _id: alert._id,

@@ -33,7 +33,11 @@ export interface SystemCellComponentMap {
 export type SystemCellId = keyof SystemCellComponentMap;
 
 type CaseHooks = (props?: Record<string, unknown>) => {
-  open: ({ attachments }: { attachments: any[] }) => void;
+  open: ({
+    getAttachments,
+  }: {
+    getAttachments: ({ theCase }: { theCase: { id: string } }) => any[];
+  }) => void;
   close: () => void;
 };
 

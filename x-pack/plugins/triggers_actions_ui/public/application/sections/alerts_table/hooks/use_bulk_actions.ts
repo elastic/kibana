@@ -7,6 +7,7 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import {
   Alerts,
   AlertsTableConfigurationRegistry,
@@ -22,6 +23,7 @@ import {
 } from '../bulk_actions/get_leading_control_column';
 import { CasesService } from '../types';
 import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
+import { TimelineItem } from '../bulk_actions/components/toolbar';
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -42,6 +44,27 @@ export interface UseBulkActions {
 
 type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
   Pick<UseBulkActions, 'clearSelection'>;
+
+const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: string) =>
+  alerts.filter(
+    (alert) =>
+      !alert.data.some(
+        (field) => field.field === ALERT_CASE_IDS && field.value?.some((id) => id === caseId)
+      )
+  );
+
+const getCaseAttachments = ({
+  alerts,
+  caseId,
+  groupAlertsByRule,
+}: {
+  caseId: string;
+  groupAlertsByRule?: CasesService['helpers']['groupAlertsByRule'];
+  alerts?: TimelineItem[];
+}) => {
+  const filteredAlerts = filterAlertsAlreadyAttachedToCase(alerts ?? [], caseId);
+  return groupAlertsByRule?.(filteredAlerts) ?? [];
+};
 
 export const useBulkAddToCaseActions = ({
   casesConfig,
@@ -75,13 +98,15 @@ export const useBulkAddToCaseActions = ({
             'data-test-subj': 'attach-new-case',
             disableOnQuery: true,
             disabledLabel: ADD_TO_CASE_DISABLED,
-            onClick: (items?: any[]) => {
-              const caseAttachments = items
-                ? casesService?.helpers.groupAlertsByRule(items) ?? []
-                : [];
-
+            onClick: (alerts?: TimelineItem[]) => {
               createCaseFlyout.open({
-                attachments: caseAttachments,
+                getAttachments: ({ theCase }) => {
+                  return getCaseAttachments({
+                    alerts,
+                    caseId: theCase.id,
+                    groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
+                  });
+                },
               });
             },
           },
@@ -91,13 +116,15 @@ export const useBulkAddToCaseActions = ({
             disableOnQuery: true,
             disabledLabel: ADD_TO_CASE_DISABLED,
             'data-test-subj': 'attach-existing-case',
-            onClick: (items?: any[]) => {
-              const caseAttachments = items
-                ? casesService?.helpers.groupAlertsByRule(items) ?? []
-                : [];
-
+            onClick: (alerts?: TimelineItem[]) => {
               selectCaseModal.open({
-                attachments: caseAttachments,
+                getAttachments: ({ theCase }) => {
+                  return getCaseAttachments({
+                    alerts,
+                    caseId: theCase.id,
+                    groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
+                  });
+                },
               });
             },
           },
