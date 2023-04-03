@@ -29,6 +29,7 @@ export const SUPPORTED_PYTORCH_TASKS = {
   TEXT_CLASSIFICATION: 'text_classification',
   TEXT_EMBEDDING: 'text_embedding',
   FILL_MASK: 'fill_mask',
+  TEXT_EXPANSION: 'text_expansion',
 } as const;
 export type SupportedPytorchTasksType =
   typeof SUPPORTED_PYTORCH_TASKS[keyof typeof SUPPORTED_PYTORCH_TASKS];
@@ -37,3 +38,5 @@ export const BUILT_IN_MODEL_TYPE = i18n.translate(
   'xpack.ml.trainedModels.modelsList.builtInModelLabel',
   { defaultMessage: 'built-in' }
 );
+
+export const BUILT_IN_MODEL_TAG = 'prepackaged';

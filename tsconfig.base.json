@@ -918,6 +918,8 @@
       "@kbn/ml-route-utils/*": ["x-pack/packages/ml/route_utils/*"],
       "@kbn/ml-string-hash": ["x-pack/packages/ml/string_hash"],
       "@kbn/ml-string-hash/*": ["x-pack/packages/ml/string_hash/*"],
+      "@kbn/ml-trained-models-utils": ["x-pack/packages/ml/trained_models_utils"],
+      "@kbn/ml-trained-models-utils/*": ["x-pack/packages/ml/trained_models_utils/*"],
       "@kbn/ml-url-state": ["x-pack/packages/ml/url_state"],
       "@kbn/ml-url-state/*": ["x-pack/packages/ml/url_state/*"],
       "@kbn/monaco": ["packages/kbn-monaco"],
