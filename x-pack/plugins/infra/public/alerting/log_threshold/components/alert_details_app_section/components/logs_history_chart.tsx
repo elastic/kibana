@@ -152,7 +152,7 @@ const LogsHistoryChart = ({
           />,
         ]}
         ruleParams={rule.params}
-        sourceId={rule.params.logView.logViewId}
+        logViewReference={rule.params.logView}
         chartCriterion={criteria as PartialCriterion}
         showThreshold={true}
         executionTimeRange={executionTimeRange}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import {
@@ -16,7 +17,6 @@ import {
   ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface Props {
