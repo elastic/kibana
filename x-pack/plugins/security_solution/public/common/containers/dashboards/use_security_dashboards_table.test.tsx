@@ -18,8 +18,12 @@ import {
   useSecurityDashboardsTableItems,
 } from './use_security_dashboards_table';
 import * as telemetry from '../../lib/telemetry';
+import { SecurityPageName } from '../../../../common/constants';
+import * as linkTo from '../../components/link_to';
 
 jest.mock('../../lib/kibana');
+
+const spyUseGetSecuritySolutionUrl = jest.spyOn(linkTo, 'useGetSecuritySolutionUrl');
 const spyTrack = jest.spyOn(telemetry, 'track');
 
 const TAG_ID = 'securityTagId';
@@ -201,5 +205,21 @@ describe('Security Dashboards Table hooks', () => {
       telemetry.METRIC_TYPE.CLICK,
       telemetry.TELEMETRY_EVENT.DASHBOARD
     );
+  });
+
+  it('should land on SecuritySolution dashboard view page when dashboard title clicked', async () => {
+    const mockGetSecuritySolutionUrl = jest.fn();
+    spyUseGetSecuritySolutionUrl.mockImplementation(() => mockGetSecuritySolutionUrl);
+    const { result: itemsResult } = await renderUseSecurityDashboardsTableItems();
+    const { result: columnsResult } = renderUseDashboardsTableColumns();
+
+    render(<EuiBasicTable items={itemsResult.current.items} columns={columnsResult.current} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(mockGetSecuritySolutionUrl).toHaveBeenCalledWith({
+      deepLinkId: SecurityPageName.dashboards,
+      path: 'dashboardId1',
+    });
   });
 });

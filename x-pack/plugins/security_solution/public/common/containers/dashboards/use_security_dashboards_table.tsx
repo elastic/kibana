@@ -16,6 +16,8 @@ import { useKibana, useNavigateTo } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useFetch, REQUEST_NAMES } from '../../hooks/use_fetch';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
+import { SecurityPageName } from '../../../../common/constants';
+import { useGetSecuritySolutionUrl } from '../../components/link_to';
 
 export interface DashboardTableItem extends SavedObject<SavedObjectAttributes> {
   title?: string;
@@ -57,8 +59,9 @@ export const useSecurityDashboardsTableItems = () => {
 export const useSecurityDashboardsTableColumns = (): Array<
   EuiBasicTableColumn<DashboardTableItem>
 > => {
-  const { savedObjectsTagging, dashboard } = useKibana().services;
+  const { savedObjectsTagging } = useKibana().services;
   const { navigateTo } = useNavigateTo();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
   const getNavigationHandler = useCallback(
     (href: string): MouseEventHandler =>
@@ -77,7 +80,10 @@ export const useSecurityDashboardsTableColumns = (): Array<
         name: i18n.DASHBOARD_TITLE,
         sortable: true,
         render: (title: string, { id }) => {
-          const href = dashboard?.locator?.getRedirectUrl({ dashboardId: id });
+          const href = `${getSecuritySolutionUrl({
+            deepLinkId: SecurityPageName.dashboards,
+            path: id,
+          })}`;
           return href ? (
             <LinkAnchor href={href} onClick={getNavigationHandler(href)}>
               {title}
@@ -98,7 +104,7 @@ export const useSecurityDashboardsTableColumns = (): Array<
       // adds the tags table column based on the saved object items
       ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
     ],
-    [getNavigationHandler, dashboard, savedObjectsTagging]
+    [savedObjectsTagging, getSecuritySolutionUrl, getNavigationHandler]
   );
 
   return columns;
