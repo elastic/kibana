@@ -16,13 +16,13 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { get } from 'lodash';
 
-interface DateAndTimeFieldProps {
+interface DatePickerFieldProps {
   field: FieldHook;
   showTimeSelect?: boolean;
   'data-test-subj'?: string;
 }
 
-export const DateAndTimeField: React.FC<DateAndTimeFieldProps> = React.memo(
+export const DatePickerField: React.FC<DatePickerFieldProps> = React.memo(
   ({ field, showTimeSelect = true, ...rest }) => {
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [field.path] });
@@ -49,9 +49,10 @@ export const DateAndTimeField: React.FC<DateAndTimeFieldProps> = React.memo(
           selected={selected}
           onChange={onChange}
           minDate={selected}
+          fullWidth
         />
       </EuiFormRow>
     );
   }
 );
-DateAndTimeField.displayName = 'DateAndTimeField';
+DatePickerField.displayName = 'DatePickerField';

@@ -11,6 +11,7 @@ import {
   getUseField,
   useForm,
   useFormData,
+  UseMultiFields,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
@@ -18,11 +19,11 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@e
 import { FormProps, schema } from './schema';
 import * as i18n from '../translations';
 import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
-import { DateAndTimeField } from './fields/date_and_time_field';
 import { SubmitButton } from './submit_button';
 import { convertToRRule } from '../helpers/convert_to_rrule';
 import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
 import { useUiSetting } from '../../../utils/kibana_react';
+import { DatePickerRangeField } from './fields/date_picker_range_field';
 
 const UseField = getUseField({ component: Field });
 
@@ -47,11 +48,13 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       async ({ fields, ...data }, isValid) => {
         if (isValid) {
           const { ...formData } = data;
+          const startDate = moment(formData.startDate);
+          const endDate = moment(formData.endDate);
           await createMaintenanceWindow(
             {
               title: formData.title,
-              duration: formData.duration,
-              rRule: convertToRRule(moment(formData.date), timezone, formData.recurringSchedule),
+              duration: endDate.diff(startDate),
+              rRule: convertToRRule(startDate, timezone, formData.recurringSchedule),
             },
             { onSuccess }
           );
@@ -83,7 +86,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 'data-test-subj': 'title-field',
                 euiFieldProps: {
                   autoFocus: true,
-                  fullWidth: true,
                 },
               }}
             />
@@ -92,30 +94,31 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 <EuiFlexGroup>
-                  <EuiFlexItem grow={4}>
-                    <UseField
-                      path="date"
-                      component={DateAndTimeField}
-                      componentProps={{
-                        'data-test-subj': 'date-field',
-                      }}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={2}>
-                    <UseField
-                      path="duration"
-                      componentProps={{
-                        'data-test-subj': 'duration-field',
-                        euiFieldProps: {
-                          autoFocus: false,
-                          fullWidth: false,
-                          type: 'number',
-                          min: 1,
-                          max: 24,
-                          append: i18n.CREATE_FORM_DURATION_HOURS,
+                  <EuiFlexItem>
+                    <UseMultiFields
+                      fields={{
+                        startDate: {
+                          path: 'startDate',
+                          config: {
+                            label: i18n.CREATE_FORM_DATE_AND_TIME,
+                            defaultValue: moment().toISOString(),
+                            validations: [],
+                          },
+                        },
+                        endDate: {
+                          path: 'endDate',
+                          config: {
+                            label: '',
+                            defaultValue: moment().toISOString(),
+                            validations: [],
+                          },
                         },
                       }}
-                    />
+                    >
+                      {(fields) => (
+                        <DatePickerRangeField fields={fields} data-test-subj="date-field" />
+                      )}
+                    </UseMultiFields>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

@@ -17,8 +17,8 @@ const { emptyField } = fieldValidators;
 
 export interface FormProps {
   title: string;
-  date: string;
-  duration: number;
+  startDate: string;
+  endDate: string;
   recurring: boolean;
   recurringSchedule?: RecurringScheduleFormProps;
 }
@@ -44,20 +44,8 @@ export const schema: FormSchema<FormProps> = {
       },
     ],
   },
-  date: {
-    label: i18n.CREATE_FORM_DATE_AND_TIME,
-    defaultValue: moment().toISOString(),
-    validations: [],
-  },
-  duration: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.CREATE_FORM_DURATION,
-    validations: [
-      {
-        validator: emptyField(i18n.CREATE_FORM_DURATION_REQUIRED),
-      },
-    ],
-  },
+  startDate: {},
+  endDate: {},
   recurring: {
     type: FIELD_TYPES.TOGGLE,
     label: i18n.CREATE_FORM_RECURRING,

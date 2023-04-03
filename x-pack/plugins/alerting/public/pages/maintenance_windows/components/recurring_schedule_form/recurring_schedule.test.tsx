@@ -15,8 +15,8 @@ import { EndsOptions, Frequency } from '../../constants';
 
 const initialValue: FormProps = {
   title: 'test',
-  date: '2023-03-24',
-  duration: 1,
+  startDate: '2023-03-24',
+  endDate: '2023-03-26',
   recurring: true,
 };
 

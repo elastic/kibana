@@ -19,9 +19,9 @@ import './recurring_schedule.scss';
 const UseField = getUseField({ component: Field });
 
 export const CustomRecurringSchedule: React.FC = React.memo(() => {
-  const [{ date, recurringSchedule }] = useFormData({
+  const [{ startDate, recurringSchedule }] = useFormData({
     watch: [
-      'date',
+      'startDate',
       'recurringSchedule.frequency',
       'recurringSchedule.interval',
       'recurringSchedule.customFrequency',
@@ -34,22 +34,22 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
   );
 
   const bymonthOptions = useMemo(() => {
-    if (!date) return [];
-    const startDate = moment(date);
-    const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(startDate, 'ddd');
+    if (!startDate) return [];
+    const date = moment(startDate);
+    const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(date, 'ddd');
     return [
       {
         id: 'day',
-        label: i18n.CREATE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY(startDate),
+        label: i18n.CREATE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY(date),
       },
       {
         id: 'weekday',
         label: i18n.CREATE_FORM_WEEKDAY_SHORT(dayOfWeek!)[isLastOfMonth ? 0 : nthWeekdayOfMonth!],
       },
     ];
-  }, [date]);
+  }, [startDate]);
 
-  const defaultByWeekday = useMemo(() => getInitialByWeekday([], moment(date)), [date]);
+  const defaultByWeekday = useMemo(() => getInitialByWeekday([], moment(startDate)), [startDate]);
 
   return (
     <>

@@ -19,7 +19,7 @@ import {
 } from '../../constants';
 import * as i18n from '../../translations';
 import { ButtonGroupField } from '../fields/button_group_field';
-import { DateAndTimeField } from '../fields/date_and_time_field';
+import { DatePickerField } from '../fields/date_picker_field';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { recurringSummary } from '../../helpers/recurring_summary';
 import { getPresets } from '../../helpers/get_presets';
@@ -27,9 +27,9 @@ import { getPresets } from '../../helpers/get_presets';
 const UseField = getUseField({ component: Field });
 
 export const RecurringSchedule: React.FC = React.memo(() => {
-  const [{ date, recurringSchedule }] = useFormData({
+  const [{ startDate, recurringSchedule }] = useFormData({
     watch: [
-      'date',
+      'startDate',
       'recurringSchedule.frequency',
       'recurringSchedule.interval',
       'recurringSchedule.ends',
@@ -42,11 +42,11 @@ export const RecurringSchedule: React.FC = React.memo(() => {
   });
 
   const { options, presets } = useMemo(() => {
-    if (!date) {
+    if (!startDate) {
       return { options: DEFAULT_FREQUENCY_OPTIONS, presets: DEFAULT_PRESETS };
     }
-    const startDate = moment(date);
-    const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(startDate);
+    const date = moment(startDate);
+    const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(date);
     return {
       options: [
         {
@@ -64,7 +64,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
           value: Frequency.MONTHLY,
         },
         {
-          text: i18n.CREATE_FORM_FREQUENCY_YEARLY_ON(startDate),
+          text: i18n.CREATE_FORM_FREQUENCY_YEARLY_ON(date),
           value: Frequency.YEARLY,
         },
         {
@@ -72,9 +72,9 @@ export const RecurringSchedule: React.FC = React.memo(() => {
           value: 'CUSTOM',
         },
       ],
-      presets: getPresets(startDate),
+      presets: getPresets(date),
     };
-  }, [date]);
+  }, [startDate]);
 
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
@@ -85,8 +85,6 @@ export const RecurringSchedule: React.FC = React.memo(() => {
             'data-test-subj': 'frequency-field',
             euiFieldProps: {
               options,
-              compressed: true,
-              fullWidth: true,
             },
           }}
         />
@@ -106,7 +104,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
         {recurringSchedule?.ends === EndsOptions.ON_DATE ? (
           <UseField
             path="recurringSchedule.until"
-            component={DateAndTimeField}
+            component={DatePickerField}
             componentProps={{
               'data-test-subj': 'until-field',
               showTimeSelect: false,
@@ -119,12 +117,10 @@ export const RecurringSchedule: React.FC = React.memo(() => {
             componentProps={{
               'data-test-subj': 'count-field',
               euiFieldProps: {
-                fullWidth: false,
                 type: 'number',
                 min: 1,
                 prepend: i18n.CREATE_FORM_COUNT_AFTER,
                 append: i18n.CREATE_FORM_COUNT_OCCURRENCE,
-                compressed: true,
               },
             }}
           />
@@ -133,7 +129,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
       <EuiHorizontalRule margin="none" />
       <EuiSplitPanel.Inner>
         {i18n.CREATE_FORM_RECURRING_SUMMARY_PREFIX(
-          recurringSummary(moment(date), recurringSchedule, presets)
+          recurringSummary(moment(startDate), recurringSchedule, presets)
         )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

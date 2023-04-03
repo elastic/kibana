@@ -98,27 +98,6 @@ export const CREATE_FORM_DATE_AND_TIME_REQUIRED = i18n.translate(
   }
 );
 
-export const CREATE_FORM_DURATION = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.duration',
-  {
-    defaultMessage: 'Duration',
-  }
-);
-
-export const CREATE_FORM_DURATION_HOURS = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.durationHours',
-  {
-    defaultMessage: 'hours',
-  }
-);
-
-export const CREATE_FORM_DURATION_REQUIRED = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.durationFieldRequiredError',
-  {
-    defaultMessage: 'Duration is required.',
-  }
-);
-
 export const CREATE_FORM_RECURRING = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.recurring',
   {

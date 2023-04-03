@@ -28,7 +28,6 @@ describe('CreateMaintenanceWindowForm', () => {
 
     expect(result.getByTestId('title-field')).toBeInTheDocument();
     expect(result.getByTestId('date-field')).toBeInTheDocument();
-    expect(result.getByTestId('duration-field')).toBeInTheDocument();
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
   });
@@ -37,17 +36,16 @@ describe('CreateMaintenanceWindowForm', () => {
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     const titleInput = within(result.getByTestId('title-field')).getByTestId('input');
-    const dateInput = within(result.getByTestId('date-field')).getByLabelText(
+    const dateInputs = within(result.getByTestId('date-field')).getAllByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'
     );
-    const durationInput = within(result.getByTestId('duration-field')).getByTestId('input');
     const recurringInput = within(result.getByTestId('recurring-field')).getByTestId('input');
 
     expect(titleInput).toHaveValue('');
     // except for the date field
-    expect(dateInput).not.toHaveValue('');
-    expect(durationInput).toHaveValue(null);
+    expect(dateInputs[0]).not.toHaveValue('');
+    expect(dateInputs[1]).not.toHaveValue('');
     expect(recurringInput).not.toBeChecked();
   });
 
@@ -55,21 +53,25 @@ describe('CreateMaintenanceWindowForm', () => {
     const result = appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
-        initialValue={{ title: 'test', date: '2023-03-24', duration: 1, recurring: true }}
+        initialValue={{
+          title: 'test',
+          startDate: '2023-03-24',
+          endDate: '2023-03-26',
+          recurring: true,
+        }}
       />
     );
 
     const titleInput = within(result.getByTestId('title-field')).getByTestId('input');
-    const dateInput = within(result.getByTestId('date-field')).getByLabelText(
+    const dateInputs = within(result.getByTestId('date-field')).getAllByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'
     );
-    const durationInput = within(result.getByTestId('duration-field')).getByTestId('input');
     const recurringInput = within(result.getByTestId('recurring-field')).getByTestId('input');
 
     expect(titleInput).toHaveValue('test');
-    expect(dateInput).toHaveValue('03/24/2023 12:00 AM');
-    expect(durationInput).toHaveValue(1);
+    expect(dateInputs[0]).toHaveValue('03/24/2023 12:00 AM');
+    expect(dateInputs[1]).toHaveValue('03/26/2023 12:00 AM');
     expect(recurringInput).toBeChecked();
   });
 });
