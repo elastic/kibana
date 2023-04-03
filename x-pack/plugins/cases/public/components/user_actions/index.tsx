@@ -26,10 +26,7 @@ import { useLastPageUserActions } from './use_user_actions_last_page';
 import { ShowMoreButton } from './show_more_button';
 import { useLastPage } from './use_last_page';
 
-const getIconsCss = (
-  hasNextPage: boolean | undefined,
-  euiTheme: EuiThemeComputed<{}>
-): string => {
+const getIconsCss = (hasNextPage: boolean | undefined, euiTheme: EuiThemeComputed<{}>): string => {
   const customSize = hasNextPage
     ? {
         showMoreSectionSize: euiTheme.size.xxxl,
@@ -194,7 +191,15 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           <ShowMoreButton onShowMoreClick={handleShowMore} isLoading={isFetchingNextPage} />
         )}
         {lastPageUserActions?.length ? (
-          <EuiFlexItem {...(!hasNextPage ? {css: css`margin-top: 24px`} : {})}>
+          <EuiFlexItem
+            {...(!hasNextPage
+              ? {
+                  css: css`
+                    margin-top: 24px;
+                  `,
+                }
+              : {})}
+          >
             <UserActionsList
               {...props}
               caseUserActions={lastPageUserActions}
