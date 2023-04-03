@@ -32,7 +32,7 @@ const loadFieldRegistryFromDataView = async (
   );
   const fieldRegistry: DataControlFieldRegistry = {};
   return new Promise<DataControlFieldRegistry>((resolve) => {
-    dataView.fields.getAll().forEach((field) => {
+    for (const field of dataView.fields.getAll()) {
       const compatibleControlTypes = [];
       for (const factory of controlFactories) {
         if (factory.isFieldCompatible && factory.isFieldCompatible(field)) {
@@ -42,7 +42,7 @@ const loadFieldRegistryFromDataView = async (
       if (compatibleControlTypes.length > 0) {
         fieldRegistry[field.name] = { field, compatibleControlTypes };
       }
-    });
+    }
     resolve(fieldRegistry);
   });
 };
