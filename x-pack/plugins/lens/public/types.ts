@@ -45,7 +45,7 @@ import type {
   DragContextState,
   DropType,
 } from '@kbn/dom-drag-drop';
-import type { DateRange, LayerType, SortingHint } from '../common';
+import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
   LensResizeActionData,
