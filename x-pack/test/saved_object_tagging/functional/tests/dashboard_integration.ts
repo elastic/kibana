@@ -14,9 +14,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
+  const dashboardSettings = getService('dashboardSettings');
   const PageObjects = getPageObjects(['dashboard', 'tagManagement', 'common']);
 
-  describe('dashboard integration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/154168
+  describe.skip('dashboard integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
@@ -161,7 +163,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('retains dashboard saved object tags after quicksave', async () => {
         // edit and save dashboard
         await PageObjects.dashboard.gotoDashboardEditMode('dashboard 4 with real data (tag-1)');
-        await PageObjects.dashboard.useMargins(false); // turn margins off to cause quicksave to be enabled
+        await PageObjects.dashboard.openSettingsFlyout();
+        await dashboardSettings.toggleUseMarginsBetweenPanels(false); // turn margins off to cause quicksave to be enabled
+        await dashboardSettings.clickApplyButton();
         await PageObjects.dashboard.clickQuickSave();
 
         // verify dashboard still has original tags

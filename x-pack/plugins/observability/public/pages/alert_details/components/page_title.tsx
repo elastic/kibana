@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -15,9 +14,16 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_DURATION, TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_FLAPPING,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { css } from '@emotion/react';
 import { asDuration } from '../../../../common/utils/formatters';
@@ -32,25 +38,16 @@ export function PageTitle({ alert }: PageTitleProps) {
 
   if (!alert) return <EuiLoadingSpinner />;
 
-  const label = Boolean(alert.active)
-    ? i18n.translate('xpack.observability.alertDetails.alertActiveState', {
-        defaultMessage: 'Active',
-      })
-    : i18n.translate('xpack.observability.alertDetails.alertRecoveredState', {
-        defaultMessage: 'Recovered',
-      });
-
   return (
     <div data-test-subj="page-title-container">
       {alert.reason}
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
-          {typeof Boolean(alert.active) === 'boolean' ? (
-            <EuiBadge color="#BD271E" data-test-subj="page-title-active-badge">
-              {label}
-            </EuiBadge>
-          ) : null}
+          <AlertLifecycleStatusBadge
+            alertStatus={alert.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+            flapping={alert.fields[ALERT_FLAPPING]}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">
