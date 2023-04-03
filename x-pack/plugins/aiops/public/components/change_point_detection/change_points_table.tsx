@@ -34,7 +34,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({ annotations, fie
   const sorting = {
     sort: {
       field: 'p_value',
-      direction: 'desc' as const,
+      direction: 'asc' as const,
     },
   };
 
@@ -80,6 +80,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({ annotations, fie
           defaultMessage: 'p-value',
         }
       ),
+      sortable: true,
       truncateText: false,
       render: (pValue: ChangePointAnnotation['p_value']) => pValue.toPrecision(3),
     },
@@ -98,6 +99,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({ annotations, fie
               defaultMessage: 'Field value',
             }),
             truncateText: false,
+            sortable: true,
           },
         ]
       : []),
