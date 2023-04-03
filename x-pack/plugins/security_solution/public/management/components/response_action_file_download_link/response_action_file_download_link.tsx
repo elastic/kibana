@@ -6,7 +6,15 @@
  */
 
 import React, { memo, useMemo, type CSSProperties } from 'react';
-import { EuiButtonEmpty, EuiSkeletonText, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiSkeletonText,
+  EuiText,
+  EuiSpacer,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
@@ -64,6 +72,30 @@ const FileDownloadLinkContainer = styled.div`
   }
 `;
 
+interface TruncatedTextInfoProps {
+  size: 's' | 'm';
+  'data-test-subj'?: string;
+}
+
+const TruncatedTextInfo = memo<TruncatedTextInfoProps>(
+  ({ size, 'data-test-subj': dataTestSubj }) => (
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon size={size} type="warning" color="warning" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size={size} data-test-subj={dataTestSubj}>
+            {FILE_TRUNCATED_MESSAGE}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  )
+);
+
+TruncatedTextInfo.displayName = 'TruncatedTextInfo';
 export interface ResponseActionFileDownloadLinkProps {
   action: MaybeImmutable<ActionDetails>;
   /** If left undefined, the first agent that the action was sent to will be used */
@@ -93,6 +125,8 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
   }) => {
     const action = _action as ActionDetails; // cast to remove `Immutable`
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const alertIconSize = useMemo(() => (textSize === 'xs' ? 's' : 'm'), [textSize]);
 
     const shouldFetchFileInfo: boolean = useMemo(() => {
       return action.isCompleted && action.wasSuccessful;
@@ -156,9 +190,10 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           {FILE_DELETED_MESSAGE}
         </EuiText>
         {isTruncatedFile && (
-          <EuiText size={textSize} data-test-subj={getTestId('fileTruncatedMessage')}>
-            {FILE_TRUNCATED_MESSAGE}
-          </EuiText>
+          <TruncatedTextInfo
+            size={alertIconSize}
+            data-test-subj={getTestId('fileTruncatedMessage')}
+          />
         )}
       </FileDownloadLinkContainer>
     );
