@@ -37,20 +37,20 @@ export type DataFilters = {
   executionContext: KibanaExecutionContext;
 };
 
-export type VectorSourceRequestMeta = DataFilters & {
+export type SourceRequestMeta = DataFilters & {
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
   applyForceRefresh: boolean;
-  fieldNames: string[];
-  geogridPrecision?: number;
-  timesliceMaskField?: string;
   sourceQuery?: Query;
-  sourceMeta: object | null;
   isForceRefresh: boolean;
-  isFeatureEditorOpenForLayer: boolean;
 };
 
-export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'>;
+export type VectorSourceRequestMeta = SourceRequestMeta & {
+  fieldNames: string[];
+  timesliceMaskField?: string;
+  sourceMeta: object | null;
+  isFeatureEditorOpenForLayer: boolean;
+};
 
 export type VectorStyleRequestMeta = DataFilters & {
   dynamicStyleFields: string[];
@@ -89,8 +89,8 @@ export type DataRequestMeta = {
   // request stop time in milliseconds since epoch
   requestStopTime?: number;
 } & Partial<
-  VectorSourceRequestMeta &
-    VectorJoinSourceRequestMeta &
+  SourceRequestMeta &
+    VectorSourceRequestMeta &
     VectorStyleRequestMeta &
     ESSearchSourceResponseMeta &
     ESGeoLineSourceResponseMeta &

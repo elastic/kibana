@@ -1269,6 +1269,30 @@
             "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
           },
           {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/index.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/index.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
+          },
+          {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
           },
@@ -1291,18 +1315,6 @@
           {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
             "plugin": "ml",
@@ -1366,15 +1378,15 @@
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_toolbar/analytics_collection_toolbar.tsx"
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_toolbar/analytics_collection_toolbar.tsx"
           },
           {
             "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_toolbar/analytics_collection_toolbar.tsx"
           },
           {
             "plugin": "indexLifecycleManagement",

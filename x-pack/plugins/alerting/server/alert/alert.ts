@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { v4 as uuidV4 } from 'uuid';
+import { get, isEmpty } from 'lodash';
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -34,7 +37,13 @@ export type PublicAlert<
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
   Alert<State, Context, ActionGroupIds>,
-  'getState' | 'replaceState' | 'scheduleActions' | 'setContext' | 'getContext' | 'hasContext'
+  | 'getContext'
+  | 'getState'
+  | 'getUuid'
+  | 'hasContext'
+  | 'replaceState'
+  | 'scheduleActions'
+  | 'setContext'
 >;
 
 export class Alert<
@@ -53,6 +62,7 @@ export class Alert<
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
+    this.meta.uuid = meta.uuid ?? uuidV4();
 
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
@@ -61,6 +71,10 @@ export class Alert<
 
   getId() {
     return this.id;
+  }
+
+  getUuid() {
+    return this.meta.uuid!;
   }
 
   hasScheduledActions() {
@@ -212,11 +226,12 @@ export class Alert<
   toRaw(recovered: boolean = false): RawAlertInstance {
     return recovered
       ? {
-          // for a recovered alert, we only care to track the flappingHistory
-          // and the flapping flag
+          // for a recovered alert, we only care to track the flappingHistory,
+          // the flapping flag, and the UUID
           meta: {
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
+            uuid: this.meta.uuid,
           },
         }
       : {
@@ -254,5 +269,15 @@ export class Alert<
 
   resetPendingRecoveredCount() {
     this.meta.pendingRecoveredCount = 0;
+  }
+
+  isFilteredOut(summarizedAlerts: CombinedSummarizedAlerts | null) {
+    if (summarizedAlerts === null) {
+      return false;
+    }
+
+    return !summarizedAlerts.all.data.some(
+      (alert) => get(alert, ALERT_INSTANCE_ID) === this.getId()
+    );
   }
 }
