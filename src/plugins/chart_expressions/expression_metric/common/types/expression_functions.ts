@@ -28,6 +28,7 @@ export interface MetricArguments {
   secondaryPrefix?: string;
   progressDirection: LayoutDirection;
   color?: string;
+  icon?: string;
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;
   minTiles?: number;

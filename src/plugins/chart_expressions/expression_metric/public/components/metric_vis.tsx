@@ -35,7 +35,7 @@ import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/commo
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useResizeObserver, useEuiScrollBar } from '@elastic/eui';
+import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import {
@@ -170,6 +170,11 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
   };
 };
 
+const getIcon =
+  (type: string) =>
+  ({ width, height, color }: { width: number; height: number; color: string }) =>
+    <EuiIcon type={type} width={width} height={height} fill={color} style={{ width, height }} />;
+
 export interface MetricVisComponentProps {
   data: Datatable;
   config: Pick<VisParams, 'metric' | 'dimensions'>;
@@ -224,6 +229,7 @@ export const MetricVis = ({
       valueFormatter: formatPrimaryMetric,
       title,
       subtitle,
+      icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
       extra: (
         <span>
           {secondaryPrefix}

@@ -6,11 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AvailableAnnotationIcon } from '@kbn/event-annotation-plugin/common';
-import { IconTriangle, IconCircle } from '@kbn/chart-icons';
-import { IconSet } from '../../../../shared_components/icon_select/icon_select';
+import { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
+import { IconSet } from '../../shared_components/icon_select/icon_select';
 
-export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
+export const iconsSet: IconSet<AvailableReferenceLineIcon> = [
+  {
+    value: 'empty',
+    label: i18n.translate('xpack.lens.metric.iconSelect.noIconLabel', {
+      defaultMessage: 'None',
+    }),
+  },
   {
     value: 'asterisk',
     label: i18n.translate('xpack.lens.xyChart.iconSelect.asteriskIconLabel', {
@@ -40,14 +45,6 @@ export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
     label: i18n.translate('xpack.lens.xyChart.iconSelect.bugIconLabel', {
       defaultMessage: 'Bug',
     }),
-  },
-  {
-    value: 'circle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.circleIconLabel', {
-      defaultMessage: 'Circle',
-    }),
-    icon: IconCircle,
-    canFill: true,
   },
 
   {
@@ -93,14 +90,5 @@ export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
     label: i18n.translate('xpack.lens.xyChart.iconSelect.tagIconLabel', {
       defaultMessage: 'Tag',
     }),
-  },
-  {
-    value: 'triangle',
-    label: i18n.translate('xpack.lens.xyChart.iconSelect.triangleIconLabel', {
-      defaultMessage: 'Triangle',
-    }),
-    icon: IconTriangle,
-    shouldRotate: true,
-    canFill: true,
   },
 ];
