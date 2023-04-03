@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { AppFeatureKeys, AppFeatureKey } from './types';
 export { AppFeatures } from './app_features';

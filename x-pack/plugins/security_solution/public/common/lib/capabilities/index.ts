@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { hasCapabilities } from './utils';
-export type { Features } from './types';
+export { hasCapabilities, type RequiredCapabilities } from './has_capabilities';

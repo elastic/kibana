@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppFeatureKeys } from './types';
+import type { AppFeatureKeys } from '../../../common';
 
 export const DEFAULT_APP_FEATURES: AppFeatureKeys = {
   cases_base: true,

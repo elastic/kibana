@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiToolTip, EuiLink } from '@elastic/eui';
+import { EuiToolTip, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { ServerlessSecuritySkus } from '../../../../common/config';
 
 export const PrebuiltRulesTooltipUpselling: React.FC = React.memo(({ children }) => {
   return (
@@ -25,3 +26,33 @@ export const PrebuiltRulesTooltipUpselling: React.FC = React.memo(({ children })
     </EuiToolTip>
   );
 });
+
+export const RulesResponseActionsUpselling: React.FC<{ projectSkus: ServerlessSecuritySkus }> =
+  React.memo(({ projectSkus }) => {
+    const upsellingSku = projectSkus.includes('cloudEssentials')
+      ? 'Cloud Complete'
+      : 'Endpoint Complete';
+
+    return (
+      <EuiEmptyPrompt
+        iconType="logoSecurity"
+        title={<>This is a testing component for a Serverless upselling prompt.</>}
+        body={
+          <>
+            Get <EuiLink href="#">{upsellingSku}</EuiLink> to attach Response Actions to rules
+            <br />
+            <br />
+            <iframe
+              title="money"
+              src="https://giphy.com/embed/px8O7NANzzaqk"
+              width="480"
+              height="283"
+              frameBorder="0"
+              className="giphy-embed"
+              allowFullScreen
+            />
+          </>
+        }
+      />
+    );
+  });

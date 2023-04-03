@@ -21,4 +21,3 @@ export interface AppFeatureKeys {
 }
 
 export type AppFeatureKey = keyof AppFeatureKeys;
-export type AppFeaturesMap = Map<AppFeatureKey, boolean>;

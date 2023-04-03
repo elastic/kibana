@@ -60,6 +60,7 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
         //   rulesClient,
         //   undefined
         // );
+
         const validated = { ok: 'true' };
         return response.ok({ body: validated ?? {} });
       } catch (err) {

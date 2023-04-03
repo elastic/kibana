@@ -209,7 +209,7 @@ export const getSubPluginRoutesByCapabilities = (
         ...value.routes.map((route: RouteProps) => ({
           path: route.path,
           component: () => {
-            const Upsell = services.upselling.getPageUpsellComponent(key as SecurityPageName);
+            const Upsell = services.upselling.getPageUpselling(key as SecurityPageName);
             if (Upsell) {
               return <Upsell />;
             }

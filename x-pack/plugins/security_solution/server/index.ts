@@ -60,4 +60,3 @@ export type { ConfigType, PluginSetup, PluginStart };
 export { Plugin };
 export { AppClient };
 export type { SecuritySolutionApiRequestHandlerContext } from './types';
-export type { AppFeatureKeys, AppFeatureKey } from './lib/app_features';

@@ -58,10 +58,10 @@ import { getLazyEndpointPolicyResponseExtension } from './management/pages/polic
 import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { UpsellingService } from './common/lib/upsellings';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 import type { SecurityAppStore } from './common/store/types';
-import { UpsellingService } from './upselling';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -270,7 +270,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     licenseService.start(plugins.licensing.license$);
     // console.log(core.application.capabilities);
-    this.upsellingService.start(core.application.capabilities);
 
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;

@@ -161,8 +161,7 @@ const processAppLinks = (appLinks: AppLinkItems, linksPermissions: LinksPermissi
       if (linksPermissions.upselling.isPageUpsellable(appLink.id)) {
         acc.push({ ...appLink, unauthorized: true });
       }
-      // not adding sub-links for non-authorized links, only the link itself if it's upsellable
-      return acc;
+      return acc; // not adding sub-links for links that are not authorized
     }
 
     if (appLink.links) {

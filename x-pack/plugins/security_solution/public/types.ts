@@ -67,7 +67,7 @@ import type { Explore } from './explore';
 import type { NavigationLink } from './common/links';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
-import type { UpsellingService } from './upselling';
+import type { UpsellingService } from './common/lib/upsellings';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;

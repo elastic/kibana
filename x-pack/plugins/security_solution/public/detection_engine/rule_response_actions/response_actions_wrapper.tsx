@@ -12,6 +12,7 @@ import type { ResponseActionType } from './get_supported_response_actions';
 import { ResponseActionAddButton } from './response_action_add_button';
 import type { ArrayItem } from '../../shared_imports';
 import { useFormContext } from '../../shared_imports';
+import { useUpsellingComponent } from '../../common/hooks/use_upselling';
 
 interface ResponseActionsWrapperProps {
   items: ArrayItem[];
@@ -26,7 +27,7 @@ export const ResponseActionsWrapper = React.memo<ResponseActionsWrapperProps>(
     const updateActionTypeId = useCallback((id) => {
       actionTypeIdRef.current = id;
     }, []);
-
+    const ResponseActionUpselling = useUpsellingComponent('rules_response_actions');
     const context = useFormContext();
 
     const renderButton = useMemo(() => {
@@ -50,8 +51,14 @@ export const ResponseActionsWrapper = React.memo<ResponseActionsWrapperProps>(
 
     return (
       <div data-test-subj="response-actions-wrapper">
-        <ResponseActionsList items={items} removeItem={removeItem} />
-        {renderButton}
+        {ResponseActionUpselling ? (
+          <ResponseActionUpselling />
+        ) : (
+          <>
+            <ResponseActionsList items={items} removeItem={removeItem} />
+            {renderButton}
+          </>
+        )}
       </div>
     );
   }

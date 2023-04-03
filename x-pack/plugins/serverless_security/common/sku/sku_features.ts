@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/server';
+import type { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
 import { ServerlessSecuritySku } from '../config';
 import { SKU_APP_FEATURES } from './sku_config';
 
 /**
- * Merges all enabled skus features into a single object, using the last enabled value for each feature.
+ * Returns the U (union) of all enabled skus features in a single object.
  */
 export const getProjectSkusFeatures = (projectSkus: ServerlessSecuritySku[]): AppFeatureKeys =>
   projectSkus.reduce<AppFeatureKeys>((skusFeatures, projectSku) => {

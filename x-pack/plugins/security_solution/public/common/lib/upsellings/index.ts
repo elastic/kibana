@@ -4,5 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export type Features = string | Array<string | string[]>;
+export { UpsellingService } from './upselling_service';
+export type { PageUpsellings, SectionUpsellings, UpsellingSectionId } from './types';

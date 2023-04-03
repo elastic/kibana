@@ -9,7 +9,7 @@ import type {
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import type { ExperimentalFeatures } from '../../../common';
-import type { AppFeaturesMap } from './types';
+import type { AppFeaturesMap } from './app_features';
 import {
   SECURITY_SOLUTION_FEATURE_ID,
   CASES_FEATURE_ID,
@@ -43,6 +43,7 @@ const filterSecurityFeature = (
     ...securityFeature.privileges,
   };
 
+  // TODO: decide if it's better to do it the other way around, and only add the privileges if the feature is enabled
   if (!appFeatures.get('rules_load_prepackaged')) {
     privileges.all = {
       ...privileges.all,
@@ -50,6 +51,9 @@ const filterSecurityFeature = (
       ui: privileges.all.ui?.filter((ui) => ui !== 'prebuilt-rules'),
     };
   }
+
+  // we'll be able to add/remove sub-features here based on allowed features
+
   // console.log('privileges all api', privileges.all.api);
   return { ...securityFeature, privileges };
 };

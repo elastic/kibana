@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import {
   ServerlessSecurityPluginSetup,
   ServerlessSecurityPluginStart,
   ServerlessSecurityPluginSetupDependencies,
   ServerlessSecurityPluginStartDependencies,
+  ServerlessSecurityPublicConfig,
 } from './types';
 import { SecuritySideNavigation } from './components/side_navigation';
 import { getKibanaServicesProvider } from './services';
@@ -26,11 +27,17 @@ export class ServerlessSecurityPlugin
       ServerlessSecurityPluginStartDependencies
     >
 {
+  private config: ServerlessSecurityPublicConfig;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<ServerlessSecurityPublicConfig>();
+  }
+
   public setup(
-    core: CoreSetup,
+    _core: CoreSetup,
     setupDeps: ServerlessSecurityPluginSetupDependencies
   ): ServerlessSecurityPluginSetup {
-    registerUpsellings(setupDeps.securitySolution.upselling);
+    registerUpsellings(setupDeps.securitySolution.upselling, this.config.projectSkus);
     return {};
   }
 

@@ -12,14 +12,15 @@
  */
 
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { ExperimentalFeatures } from '../../../common';
+import type { AppFeatureKey, AppFeatureKeys, ExperimentalFeatures } from '../../../common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginSetupDependencies,
 } from '../../plugin_contract';
 import { DEFAULT_APP_FEATURES } from './constants';
 import { registerKibanaFeatures } from './register_kibana_features';
-import type { AppFeaturesMap, AppFeatureKey, AppFeatureKeys } from './types';
+
+export type AppFeaturesMap = Map<AppFeatureKey, boolean>;
 
 export class AppFeatures {
   private experimentalFeatures: ExperimentalFeatures;
