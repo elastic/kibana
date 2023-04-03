@@ -161,9 +161,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
       });
 
-      // should reject if the times are not valid RangeDates (ISO or ES datemath)
-
-      // Not sure if this is needed, ES seems perfectly happy to handle negative time ranges?
       it('should reject requests where either time range is moving backwards in time', async () => {
         const now = new Date();
         const isoNow = now.toISOString();
@@ -206,10 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
       });
 
-      // should complain if the time ranges don't somewhat overlap?
-
       it('should return the difference in assets present between two time ranges', async () => {
-        // Should probably think of a better way to spread asset data over a time range to make this easier
         const onlyInA = sampleAssetDocs.slice(0, 2);
         const onlyInB = sampleAssetDocs.slice(sampleAssetDocs.length - 2);
         const inBoth = sampleAssetDocs.slice(2, sampleAssetDocs.length - 2);
@@ -228,10 +222,6 @@ export default function ({ getService }: FtrProviderContext) {
           excludeEans: inBoth.concat(onlyInA).map((asset) => asset['asset.ean']),
         });
 
-        // Two hours ago: Insert 2
-        // One hour ago: Insert many
-        // Now: Insert 2
-        // Wow this becomes hard to understand
         const twoHoursAndTenMinuesAgo = new Date(now.getTime() - 1000 * 60 * 130 * 1);
         const fiftyMinuesAgo = new Date(now.getTime() - 1000 * 60 * 50 * 1);
         const seventyMinuesAgo = new Date(now.getTime() - 1000 * 60 * 70 * 1);
@@ -251,7 +241,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body).to.have.property('onlyInB');
         expect(getResponse.body).to.have.property('inBoth');
 
-        // Need to find a better way to do this?
         getResponse.body.onlyInA.forEach((asset: any) => {
           delete asset['@timestamp'];
         });

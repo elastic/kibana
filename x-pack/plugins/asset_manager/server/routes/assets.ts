@@ -43,12 +43,18 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   );
 
   // GET /assets/diff
+  const assetType = schema.oneOf([
+    schema.literal('k8s.pod'),
+    schema.literal('k8s.cluster'),
+    schema.literal('k8s.node'),
+  ]);
+
   const getAssetsDiffQueryOptions = schema.object({
     aFrom: schema.string(),
     aTo: schema.string(),
     bFrom: schema.string(),
     bTo: schema.string(),
-    type: schema.maybe(schema.arrayOf(schema.string())),
+    type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
   });
   router.get<unknown, typeof getAssetsDiffQueryOptions.type, unknown>(
     {
@@ -58,9 +64,8 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       },
     },
     async (context, req, res) => {
-      const { aFrom, aTo, bFrom, bTo } = req.query;
+      const { aFrom, aTo, bFrom, bTo, type } = req.query;
 
-      // Assuming for now that these are valid ISO strings, they might not be or they might be ES datemath strings
       if (new Date(aFrom) > new Date(aTo)) {
         return res.badRequest({
           body: `Time range cannot move backwards in time. "aTo" (${aTo}) is before "aFrom" (${aFrom}).`,
@@ -76,12 +81,12 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       const esClient = await getEsClientFromContext(context);
 
       try {
-        // Worth doing this in parallel?
         const resultsForA = await getAssets({
           esClient,
           filters: {
             from: aFrom,
             to: aTo,
+            type,
           },
         });
 
@@ -90,6 +95,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
           filters: {
             from: bFrom,
             to: bTo,
+            type,
           },
         });
 
