@@ -184,7 +184,7 @@ export class ContentCrud<T = unknown> {
     id: string,
     data: object,
     options?: object
-  ): Promise<UpdateItemResponse<T>> {
+  ): Promise<UpdateItemResponse<T, any>> {
     this.eventBus.emit({
       type: 'updateItemStart',
       contentId: id,
