@@ -6,65 +6,133 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { AssetType, Relation } from '../../common/types_api';
+import { flatten } from 'lodash';
+import { Asset, AssetType, Relation, RelationField } from '../../common/types_api';
 import { getAssets } from './get_assets';
 import { getRelatedAssets } from './get_related_assets';
 
+interface GetAllRelatedAssetsOptions {
+  ean: string;
+  from: string;
+  to?: string;
+  relation: Relation;
+  type?: AssetType[];
+  maxDistance: number;
+  size: number;
+}
+
 export async function getAllRelatedAssets(
   esClient: ElasticsearchClient,
-  options: {
-    ean: string;
-    from: string;
-    to?: string;
-    relation: Relation;
-    type?: AssetType[];
-    maxDistance: number;
-    size: number;
-  }
+  options: GetAllRelatedAssetsOptions
 ) {
   const { ean, from, to, type, relation } = options;
 
+  const primary = await findPrimary(esClient, { ean, from, to });
+
+  // Distance 1
+  const relatedAssets = await findRelatedAssets(esClient, primary, { relation, from, to });
+
+  // Distance 2
+  // Do we run these in parallel or in sequence?
+  // Sequence might make more sense if we want to bail before size?
+  const moreRelatedAssets = flatten(
+    await Promise.all(
+      relatedAssets.map((asset) => findRelatedAssets(esClient, asset, { relation, from, to }))
+    )
+  );
+
+  // Distance 3
+  const evenMoreRelatedAssets = flatten(
+    await Promise.all(
+      moreRelatedAssets.map((asset) => findRelatedAssets(esClient, asset, { relation, from, to }))
+    )
+  );
+
+  // Bail if maxDistance is 1, else go for the next hop
+  // Start with size = maxAssets, for each jump, deduct previousHop from size
+  // If size = 0, don't do anything.
+
+  // Filter down related by type
+  return {
+    primary,
+    related: [
+      ...relatedAssets.map(withDistance(1)),
+      ...moreRelatedAssets.map(withDistance(2)),
+      ...evenMoreRelatedAssets.map(withDistance(3)),
+    ],
+  };
+}
+
+async function findPrimary(
+  esClient: ElasticsearchClient,
+  { ean, from, to }: Pick<GetAllRelatedAssetsOptions, 'ean' | 'from' | 'to'>
+): Promise<Asset> {
   const primaryResults = await getAssets({
     esClient,
     size: 1,
-    filters: { ean, type, from, to },
+    filters: { ean, from, to },
   });
 
   if (primaryResults.length === 0) {
     throw new Error(`Could not find asset with ean=${ean}`);
   }
 
-  const primary = primaryResults[0];
-  // Translate relation paths to be generic
-  const parentEans = primary['asset.parents']
-    ? Array.isArray(primary['asset.parents']) // Why isn't it always an array?
-      ? primary['asset.parents']
-      : [primary['asset.parents']]
-    : [];
+  return primaryResults[0];
+}
 
-  // What if maxDistance is below 1?
-  // Can be skipped if parents are empty
-  const parentResults = await getAssets({
-    esClient,
-    size: 1,
-    filters: { ean: parentEans, type, from, to },
-  });
+async function findRelatedAssets(
+  esClient: ElasticsearchClient,
+  primary: Asset,
+  { relation, from, to }: Pick<GetAllRelatedAssetsOptions, 'relation' | 'type' | 'from' | 'to'>
+): Promise<Asset[]> {
+  const relationField = relationToDirectField(relation);
+  // Why isn't it always an array?
+  const directlyRelatedEans = toArray(primary[relationField]);
 
-  const nonReferencedParents = await getRelatedAssets({
+  let directlyRelatedAssets: Asset[] = [];
+  if (directlyRelatedEans.length) {
+    directlyRelatedAssets = await getAssets({
+      esClient,
+      size: 1,
+      filters: { ean: directlyRelatedEans, from, to },
+    });
+  }
+
+  const indirectlyRelatedAssets = await getRelatedAssets({
     esClient,
-    filters: {
-      ean: parentEans,
-      from,
-      to,
-    },
+    ean: primary['asset.ean'],
     relation,
+    from,
+    to,
   });
 
-  // Bail if maxDistance is 1, else go for the next hop
-  // Start with size = maxAssets, for each jump, deduct previousHop from size
-  // If size = 0, don't do anything.
-  return {
-    primary,
-    ancestors: parentResults.map((parent) => ({ ...parent, distance: 1 })),
-  };
+  return [...directlyRelatedAssets, ...indirectlyRelatedAssets];
+}
+
+function relationToDirectField(relation: Relation): RelationField {
+  if (relation === 'ancestors') {
+    return 'asset.parents';
+  } else if (relation === 'descendants') {
+    return 'asset.children';
+  } else {
+    return 'asset.references';
+  }
+}
+
+function toArray(maybeArray: string | string[] | undefined): string[] {
+  if (!maybeArray) {
+    return [];
+  }
+
+  if (Array.isArray(maybeArray)) {
+    return maybeArray;
+  }
+
+  return [maybeArray];
+}
+
+function withDistance(
+  distance: number
+): (value: Asset, index: number, array: Asset[]) => Asset & { distance: number } {
+  return (asset: Asset) => ({ ...asset, distance });
 }

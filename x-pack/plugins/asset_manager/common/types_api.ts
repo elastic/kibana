@@ -60,6 +60,7 @@ export interface Asset extends ECSDocument {
   'asset.status'?: AssetStatus;
   'asset.parents'?: string | string[];
   'asset.children'?: string | string[];
+  'asset.references'?: string | string[];
   'asset.namespace'?: string;
 }
 
@@ -130,3 +131,7 @@ export interface AssetFilters {
 }
 
 export type Relation = 'ancestors' | 'descendants' | 'references';
+export type RelationField = keyof Pick<
+  Asset,
+  'asset.children' | 'asset.parents' | 'asset.references'
+>;

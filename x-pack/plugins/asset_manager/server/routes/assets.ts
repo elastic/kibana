@@ -55,6 +55,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   // GET assets/ancestors
   router.get<unknown, GetAssetsAncestorsQueryOptions, unknown>(
     {
+      // Maybe we can just make this one endpoint, /assets/related?
       path: `${ASSET_MANAGER_API_BASE}/assets/ancestors`,
       validate: {
         query: getAssetsAncestorsQueryOptions,
@@ -64,6 +65,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       const { from, to, ean } = req.query || {};
       const esClient = await getEsClientFromContext(context);
 
+      // What if maxDistance is below 1?
       const maxDistance = req.query.maxDistance ? Math.min(req.query.maxDistance, 5) : 1; // Validate maxDistance not larger than 5
       const size = req.query.size ? Math.min(req.query.size, 100) : 10; // Do we need pagination and sorting? Yes.
       const type = validateTypeParameter(req.query.type);
@@ -72,7 +74,15 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       try {
         return res.ok({
           body: {
-            results: getAllRelatedAssets(esClient, { ean, from, to, type, maxDistance, size }),
+            results: getAllRelatedAssets(esClient, {
+              ean,
+              from,
+              to,
+              type,
+              maxDistance,
+              size,
+              relation: 'ancestors',
+            }),
           },
         });
       } catch (error: unknown) {
