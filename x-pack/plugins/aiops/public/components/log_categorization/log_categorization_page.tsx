@@ -51,13 +51,15 @@ export const LogCategorizationPage: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [categories, setCategories] = useState<Category[] | null>(null);
   const [selectedSavedSearch, setSelectedDataView] = useState(savedSearch);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
-  const [sparkLines, setSparkLines] = useState<SparkLinesPerCategory>({});
+  const [data, setData] = useState<{
+    categories: Category[];
+    sparkLines: SparkLinesPerCategory;
+  } | null>(null);
 
   useEffect(() => {
     if (savedSearch) {
@@ -156,14 +158,14 @@ export const LogCategorizationPage: FC = () => {
           docCount,
         }))
       );
-      setCategories(null);
+      setData(null);
       setTotalCount(documentStats.totalCount);
     }
   }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
-    setCategories(null);
+    setData(null);
     const { title: index, timeFieldName: timeField } = dataView;
 
     if (selectedField === undefined || timeField === undefined) {
@@ -183,8 +185,9 @@ export const LogCategorizationPage: FC = () => {
         intervalMs
       );
 
-      setCategories(resp.categories);
-      setSparkLines(resp.sparkLinesPerCategory);
+      // setCategories(resp.categories);
+      // setSparkLines(resp.sparkLinesPerCategory);
+      setData({ categories: resp.categories, sparkLines: resp.sparkLinesPerCategory });
     } catch (error) {
       toasts.addError(error, {
         title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
@@ -207,7 +210,7 @@ export const LogCategorizationPage: FC = () => {
   ]);
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
-    setCategories(null);
+    setData(null);
     setSelectedField(value && value.length ? value[0].label : undefined);
   };
 
@@ -271,7 +274,7 @@ export const LogCategorizationPage: FC = () => {
             eventRate={eventRate}
             pinnedCategory={pinnedCategory}
             selectedCategory={selectedCategory}
-            sparkLines={sparkLines}
+            sparkLines={data?.sparkLines ?? {}}
             totalCount={totalCount}
             documentCountStats={documentStats.documentCountStats}
           />
@@ -283,18 +286,18 @@ export const LogCategorizationPage: FC = () => {
 
       <InformationText
         loading={loading}
-        categoriesLength={categories?.length ?? null}
+        categoriesLength={data?.categories?.length ?? null}
         eventRateLength={eventRate.length}
         fieldSelected={selectedField !== null}
       />
 
-      {selectedField !== undefined && categories !== null && categories.length > 0 ? (
+      {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
         <CategoryTable
-          categories={categories}
+          categories={data.categories}
           aiopsListState={aiopsListState}
           dataViewId={dataView.id!}
           eventRate={eventRate}
-          sparkLines={sparkLines}
+          sparkLines={data.sparkLines}
           selectedField={selectedField}
           pinnedCategory={pinnedCategory}
           setPinnedCategory={setPinnedCategory}

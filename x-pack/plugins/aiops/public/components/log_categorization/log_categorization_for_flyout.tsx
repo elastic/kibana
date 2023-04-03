@@ -8,7 +8,7 @@ import React, { FC, useState, useEffect, useCallback } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyoutBody, EuiSkeletonText } from '@elastic/eui';
+import { EuiTitle, EuiFlyoutHeader, EuiFlyoutBody, EuiSkeletonText, EuiButton } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { useData } from '../../hooks/use_data';
@@ -17,6 +17,7 @@ import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { InformationText } from './information_text';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -172,7 +173,19 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>
-        {loading === true ? <EuiSkeletonText lines={10} /> : null}
+        {loading === true ? (
+          <>
+            <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
+            <EuiSkeletonText lines={10} />
+          </>
+        ) : null}
+
+        <InformationText
+          loading={loading}
+          categoriesLength={data?.categories?.length ?? null}
+          eventRateLength={eventRate.length}
+          fieldSelected={selectedField !== null}
+        />
 
         {loading === false && data !== null && data.categories.length > 0 ? (
           <CategoryTable
