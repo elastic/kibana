@@ -26,8 +26,8 @@ import type {
   IRouterWithVersion,
 } from '@kbn/core-http-server';
 import { validBodyOutput } from '@kbn/core-http-server';
-import { CoreVersionedRouter } from '@kbn/core-http-versioned-router-server-internal';
-import { RouteValidator } from '@kbn/core-http-route-validator-internal';
+import { RouteValidator } from './validator';
+import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';

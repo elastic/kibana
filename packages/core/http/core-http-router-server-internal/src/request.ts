@@ -29,7 +29,7 @@ import {
   RawRequest,
   FakeRawRequest,
 } from '@kbn/core-http-server';
-import { RouteValidator } from '@kbn/core-http-route-validator-internal';
+import { RouteValidator } from './validator';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
 
