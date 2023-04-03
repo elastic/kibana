@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { mockRouter } from './src/router.mock';
-export { createVersionedRouterMock } from './src/versioned_router.mock';
-export type { RouterMock, RequestFixtureOptions } from './src/router.mock';
+export function isValidRouteVersion(version: string): boolean {
+  const float = parseFloat(version);
+  return isFinite(float) && !isNaN(float) && float > 0 && Math.round(float) === float;
+}

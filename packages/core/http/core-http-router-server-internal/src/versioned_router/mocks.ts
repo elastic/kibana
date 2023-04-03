@@ -6,6 +6,17 @@
  * Side Public License, v 1.
  */
 
-export { mockRouter } from './src/router.mock';
-export { createVersionedRouterMock } from './src/versioned_router.mock';
-export type { RouterMock, RequestFixtureOptions } from './src/router.mock';
+import { IRouter } from '@kbn/core-http-server';
+
+export function createRouter(): jest.Mocked<IRouter> {
+  return {
+    delete: jest.fn(),
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    getRoutes: jest.fn(),
+    handleLegacyErrors: jest.fn(),
+    patch: jest.fn(),
+    routerPath: '',
+  };
+}

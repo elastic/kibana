@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { CoreVersionedRouter } from './src';
+/**
+ * A Kibana HTTP API version
+ * @note assumption that version will be monotonically increasing number where: version > 0.
+ * @experimental
+ */
+export type ApiVersion = `${number}`;
+
+/** @internal */
+export const ELASTIC_HTTP_VERSION_HEADER = 'elastic-api-version' as const;

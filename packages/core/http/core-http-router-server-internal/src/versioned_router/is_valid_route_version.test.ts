@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/http/core-http-versioned-router-server-internal'],
-};
+import { isValidRouteVersion } from './is_valid_route_version';
+
+describe('isValidRouteVersion', () => {
+  test('valid numbers return "true"', () => {
+    expect(isValidRouteVersion('1')).toBe(true);
+  });
+
+  test.each([['1.1'], [''], ['abc']])('%p returns "false"', (value: string) => {
+    expect(isValidRouteVersion(value)).toBe(false);
+  });
+});
