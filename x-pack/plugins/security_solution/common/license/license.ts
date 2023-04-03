@@ -38,6 +38,12 @@ export class LicenseService {
     return this.observable;
   }
 
+  public getLicenseType() {
+    return this.licenseInformation && this.licenseInformation.type
+      ? this.licenseInformation.type
+      : '';
+  }
+
   public isAtLeast(level: LicenseType): boolean {
     return isAtLeast(this.licenseInformation, level);
   }
