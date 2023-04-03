@@ -386,7 +386,7 @@ function PrimaryMetricEditor(props: SubProps) {
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.lineMarker.icon', {
+        label={i18n.translate('xpack.lens.metric.icon', {
           defaultMessage: 'Icon decoration',
         })}
       >
