@@ -24,3 +24,4 @@ export interface GroupTableItem {
 }
 
 export type GroupTableItemAction = EuiTableActionsColumnType<GroupTableItem>['actions'][number];
+export type TableItemAction = EuiTableActionsColumnType<SignificantTerm>['actions'][number];

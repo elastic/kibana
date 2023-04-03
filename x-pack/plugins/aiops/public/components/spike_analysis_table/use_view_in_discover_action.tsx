@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
-import { getGroupTableItemAsKuery } from './get_group_table_item_as_kuery';
+import { getTableItemAsKuery } from './get_table_item_as_kuery';
 import type { GroupTableItem, GroupTableItemAction } from './types';
 
 const viewInDiscoverMessage = i18n.translate(
@@ -73,7 +73,7 @@ export const useViewInDiscoverAction = (dataViewId?: string): GroupTableItemActi
         filters: data.query.filterManager.getFilters(),
         query: {
           language: SEARCH_QUERY_LANGUAGE.KUERY,
-          query: getGroupTableItemAsKuery(groupTableItem),
+          query: getTableItemAsKuery(groupTableItem),
         },
       });
 

@@ -11,32 +11,30 @@ import { EuiCopy, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { getGroupTableItemAsKuery } from './get_group_table_item_as_kuery';
+import { getTableItemAsKuery } from './get_table_item_as_kuery';
 import type { GroupTableItem, GroupTableItemAction } from './types';
 
 const copyToClipboardGroupMessage = i18n.translate(
-  'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardGroupMessage',
+  'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardMessage',
   {
-    defaultMessage: 'Copy group items as KUERY filter to clipboard',
+    defaultMessage: 'Copy as KUERY filter to clipboard',
   }
 );
 
 export const useCopyToClipboardAction = (): GroupTableItemAction => {
   return {
-    render: (tableItem: GroupTableItem) => {
-      return (
-        <EuiCopy textToCopy={getGroupTableItemAsKuery(tableItem)}>
-          {(copy) => (
-            <EuiToolTip content={copyToClipboardGroupMessage}>
-              <EuiButtonIcon
-                iconType="copyClipboard"
-                onClick={copy}
-                aria-label={copyToClipboardGroupMessage}
-              />
-            </EuiToolTip>
-          )}
-        </EuiCopy>
-      );
-    },
+    render: (tableItem: GroupTableItem) => (
+      <EuiCopy textToCopy={getTableItemAsKuery(tableItem)}>
+        {(copy) => (
+          <EuiToolTip content={copyToClipboardGroupMessage}>
+            <EuiButtonIcon
+              iconType="copyClipboard"
+              onClick={copy}
+              aria-label={copyToClipboardGroupMessage}
+            />
+          </EuiToolTip>
+        )}
+      </EuiCopy>
+    ),
   };
 };
