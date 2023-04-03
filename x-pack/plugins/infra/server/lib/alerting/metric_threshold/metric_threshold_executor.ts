@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_ACTION_GROUP, ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUE, ALERT_REASON } from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
@@ -51,8 +51,8 @@ export type MetricThresholdRuleTypeState = RuleTypeState & {
   groupBy?: string | string[];
   filterQuery?: string;
 };
-export type MetricThresholdAlertState = AlertState; // no specific instace state used
-export type MetricThresholdAlertContext = AlertContext; // no specific instace state used
+export type MetricThresholdAlertState = AlertState; // no specific instance state used
+export type MetricThresholdAlertContext = AlertContext; // no specific instance state used
 
 export const FIRED_ACTIONS_ID = 'metrics.threshold.fired';
 export const WARNING_ACTIONS_ID = 'metrics.threshold.warning';
@@ -79,8 +79,7 @@ type MetricThresholdAlertFactory = (
   reason: string,
   actionGroup: MetricThresholdActionGroup,
   additionalContext?: AdditionalContext | null,
-  threshold?: number | undefined,
-  value?: number | undefined
+  evaluationValues?: Array<number | null>
 ) => MetricThresholdAlert;
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
@@ -117,13 +116,15 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       id,
       reason,
       actionGroup,
-      additionalContext
+      additionalContext,
+      evaluationValues
     ) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
+          [ALERT_EVALUATION_VALUE]: evaluationValues,
           ...flattenAdditionalContext(additionalContext),
         },
       });
@@ -295,7 +296,18 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
         );
 
-        const alert = alertFactory(`${group}`, reason, actionGroupId, additionalContext);
+        const evaluationValues = alertResults.reduce((acc: Array<number | null>, result) => {
+          acc.push(result[group].currentValue);
+          return acc;
+        }, []);
+
+        const alert = alertFactory(
+          `${group}`,
+          reason,
+          actionGroupId,
+          additionalContext,
+          evaluationValues
+        );
         const alertUuid = getAlertUuid(group);
         scheduledActionsCount++;
 
