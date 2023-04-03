@@ -19,7 +19,6 @@ describe('calculateCspStatusCode for cspm', () => {
       },
       1,
       1,
-      1,
       ['cspm']
     );
 
@@ -36,7 +35,6 @@ describe('calculateCspStatusCode for cspm', () => {
       },
       0,
       0,
-      0,
       []
     );
 
@@ -51,7 +49,6 @@ describe('calculateCspStatusCode for cspm', () => {
         findings: 'not-empty',
         score: 'not-empty',
       },
-      1,
       0,
       10,
       ['cspm']
@@ -69,7 +66,6 @@ describe('calculateCspStatusCode for cspm', () => {
         score: 'not-empty',
       },
       1,
-      1,
       10,
       ['cspm']
     );
@@ -85,7 +81,6 @@ describe('calculateCspStatusCode for cspm', () => {
         findings: 'empty',
         score: 'empty',
       },
-      1,
       0,
       10,
       ['cspm']
@@ -103,7 +98,6 @@ describe('calculateCspStatusCode for cspm', () => {
         score: 'empty',
       },
       1,
-      1,
       9,
       ['cspm']
     );
@@ -120,7 +114,6 @@ describe('calculateCspStatusCode for cspm', () => {
         score: 'empty',
       },
       1,
-      1,
       11,
       ['cspm']
     );
@@ -136,7 +129,6 @@ describe('calculateCspStatusCode for cspm', () => {
         findings: 'not-empty',
         score: 'not-empty',
       },
-      1,
       1,
       0,
       ['cspm']
@@ -157,7 +149,6 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
       },
       1,
       1,
-      1,
       ['cspm']
     );
 
@@ -174,7 +165,6 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
       },
       0,
       0,
-      0,
       []
     );
 
@@ -189,7 +179,6 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
         findings: 'not-empty',
         score: 'not-empty',
       },
-      1,
       0,
       10,
       [VULN_MGMT_POLICY_TEMPLATE]
@@ -207,7 +196,6 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
         score: 'not-empty',
       },
       1,
-      1,
       10,
       [VULN_MGMT_POLICY_TEMPLATE]
     );
@@ -223,7 +211,6 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
         findings: 'empty',
         score: 'empty',
       },
-      1,
       0,
       10,
       [VULN_MGMT_POLICY_TEMPLATE]
@@ -241,7 +228,6 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
         score: 'empty',
       },
       1,
-      1,
       9,
       [VULN_MGMT_POLICY_TEMPLATE]
     );
@@ -258,7 +244,6 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
         score: 'empty',
       },
       1,
-      1,
       11,
       [VULN_MGMT_POLICY_TEMPLATE]
     );
@@ -274,7 +259,6 @@ describe('calculateCspStatusCode for vul_mgmt', () => {
         findings: 'not-empty',
         score: 'not-empty',
       },
-      1,
       1,
       0,
       [VULN_MGMT_POLICY_TEMPLATE]
