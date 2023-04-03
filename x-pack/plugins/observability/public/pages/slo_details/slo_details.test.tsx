@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useParams } from 'react-router-dom';
@@ -56,6 +56,11 @@ const mockKibana = () => {
         basePath: {
           prepend: mockBasePathPrepend,
         },
+      },
+      triggersActionsUi: {
+        getAddRuleFlyout: jest.fn(() => (
+          <div data-test-subj="add-rule-flyout">mocked component</div>
+        )),
       },
       uiSettings: {
         get: (settings: string) => {
@@ -149,8 +154,32 @@ describe('SLO Details Page', () => {
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(0);
   });
 
+  it("renders a 'Edit' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverEdit')).toBeTruthy();
+  });
+
+  it("renders a 'Create alert rule' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverCreateRule')).toBeTruthy();
+  });
+
   describe('when an APM SLO is loaded', () => {
-    it("should render a 'Explore in APM' button", async () => {
+    it("renders a 'Explore in APM' button under actions menu", async () => {
       const slo = buildSlo({ indicator: buildApmAvailabilityIndicator() });
       useParamsMock.mockReturnValue(slo.id);
       useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
@@ -158,12 +187,13 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(screen.queryByTestId('sloDetailsExploreInApmButton')).toBeTruthy();
+      fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+      expect(screen.queryByTestId('sloDetailsHeaderControlPopoverExploreInApm')).toBeTruthy();
     });
   });
 
   describe('when an Custom KQL SLO is loaded', () => {
-    it("should not render a 'Explore in APM' button", async () => {
+    it("does not render a 'Explore in APM' button under actions menu", async () => {
       const slo = buildSlo();
       useParamsMock.mockReturnValue(slo.id);
       useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
@@ -171,7 +201,8 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(screen.queryByTestId('sloDetailsExploreInApmButton')).toBeFalsy();
+      fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+      expect(screen.queryByTestId('sloDetailsHeaderControlPopoverExploreInApm')).toBeFalsy();
     });
   });
 });
