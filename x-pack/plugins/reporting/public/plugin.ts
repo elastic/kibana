@@ -94,12 +94,12 @@ export interface ReportingPublicPluginStartDendencies {
  */
 export class ReportingPublicPlugin
   implements
-  Plugin<
-  ReportingSetup,
-  ReportingStart,
-  ReportingPublicPluginSetupDendencies,
-  ReportingPublicPluginStartDendencies
-  >
+    Plugin<
+      ReportingSetup,
+      ReportingStart,
+      ReportingPublicPluginSetupDendencies,
+      ReportingPublicPluginStartDendencies
+    >
 {
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;

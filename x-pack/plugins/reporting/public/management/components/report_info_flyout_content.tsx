@@ -90,9 +90,9 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.max_attempts
         ? i18n.translate('xpack.reporting.listing.infoPanel.attempts', {
-          defaultMessage: '{attempts} of {maxAttempts}',
-          values: { attempts: info.attempts, maxAttempts: info.max_attempts },
-        })
+            defaultMessage: '{attempts} of {maxAttempts}',
+            values: { attempts: info.attempts, maxAttempts: info.max_attempts },
+          })
         : info.attempts,
     },
     {
@@ -219,8 +219,8 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
      */
     info.error_code === reportingErrors.VisualReportingSoftDisabledError.code
       ? sharedI18nTexts.cloud.insufficientMemoryError(
-        docLinks.links.reporting.cloudMinimumRequirements
-      )
+          docLinks.links.reporting.cloudMinimumRequirements
+        )
       : info.getError();
 
   return (

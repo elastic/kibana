@@ -246,9 +246,9 @@ class ReportListingUi extends Component<Props, State> {
       if (fetchError.message === 'Failed to fetch') {
         this.props.toasts.addDanger(
           fetchError.message ||
-          i18n.translate('xpack.reporting.listing.table.requestFailedErrorMessage', {
-            defaultMessage: 'Request failed',
-          })
+            i18n.translate('xpack.reporting.listing.table.requestFailedErrorMessage', {
+              defaultMessage: 'Request failed',
+            })
         );
       }
       if (this.mounted) {
@@ -478,11 +478,11 @@ class ReportListingUi extends Component<Props, State> {
           noItemsMessage={
             this.state.isLoading
               ? i18n.translate('xpack.reporting.listing.table.loadingReportsDescription', {
-                defaultMessage: 'Loading reports',
-              })
+                  defaultMessage: 'Loading reports',
+                })
               : i18n.translate('xpack.reporting.listing.table.noCreatedReportsDescription', {
-                defaultMessage: 'No reports have been created',
-              })
+                  defaultMessage: 'No reports have been created',
+                })
           }
           pagination={pagination}
           selection={selection}
