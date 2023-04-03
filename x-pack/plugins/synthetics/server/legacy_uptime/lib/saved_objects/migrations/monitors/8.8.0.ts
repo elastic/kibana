@@ -20,7 +20,10 @@ import {
   SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
 } from '../../synthetics_monitor';
 import { validateMonitor } from '../../../../../routes/monitor_cruds/monitor_validation';
-import { normalizeSecrets, formatSecrets } from '../../../../../synthetics_service/utils/secrets';
+import {
+  normalizeMonitorSecretAttributes,
+  formatSecrets,
+} from '../../../../../synthetics_service/utils/secrets';
 
 export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => {
   return encryptedSavedObjects.createMigration<
@@ -54,10 +57,10 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
       };
       if (migrated.attributes.type === 'browser') {
         try {
-          const normalizedDoc = normalizeSecrets(migrated);
+          const normalizedMonitorAttributes = normalizeMonitorSecretAttributes(migrated.attributes);
           migrated = {
             ...migrated,
-            attributes: omitZipUrlFields(normalizedDoc.attributes as BrowserFields),
+            attributes: omitZipUrlFields(normalizedMonitorAttributes as BrowserFields),
           };
         } catch (e) {
           logger.log.warn(

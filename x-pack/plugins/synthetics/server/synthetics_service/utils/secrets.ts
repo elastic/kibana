@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit, pick } from 'lodash';
-import { SavedObject, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/server';
 import { secretKeys } from '../../../common/constants/monitor_management';
 import {
   ConfigKey,
@@ -25,19 +25,25 @@ export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWith
 }
 
 export function normalizeSecrets(
-  monitor:
-    | SavedObject<SyntheticsMonitorWithSecrets>
-    | SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>
-): SavedObject<SyntheticsMonitor> | SavedObjectUnsanitizedDoc<SyntheticsMonitor> {
-  const defaultFields = DEFAULT_FIELDS[monitor.attributes[ConfigKey.MONITOR_TYPE]];
+  monitor: SavedObject<SyntheticsMonitorWithSecrets>
+): SavedObject<SyntheticsMonitor> {
+  const attributes = normalizeMonitorSecretAttributes(monitor.attributes);
   const normalizedMonitor = {
     ...monitor,
-    attributes: {
-      ...defaultFields,
-      ...monitor.attributes,
-      ...JSON.parse(monitor.attributes.secrets || ''),
-    },
+    attributes,
   };
-  delete normalizedMonitor.attributes.secrets;
   return normalizedMonitor;
+}
+
+export function normalizeMonitorSecretAttributes(
+  monitor: SyntheticsMonitorWithSecrets
+): SyntheticsMonitor {
+  const defaultFields = DEFAULT_FIELDS[monitor[ConfigKey.MONITOR_TYPE]];
+  const normalizedMonitorAttributes = {
+    ...defaultFields,
+    ...monitor,
+    ...JSON.parse(monitor.secrets || ''),
+  };
+  delete normalizedMonitorAttributes.secrets;
+  return normalizedMonitorAttributes;
 }
