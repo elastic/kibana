@@ -37,15 +37,17 @@ export function getSavedSearchObjectType(
     mappings: {
       dynamic: false,
       properties: {
-        description: { type: 'text' },
         title: { type: 'text' },
+        description: { type: 'text' },
         version: { type: 'integer' },
       },
     },
     schemas: {
       '8.8.0': schema.object({
-        columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        title: schema.string(),
         description: schema.string({ defaultValue: '' }),
+        version: schema.maybe(schema.number()),
+        columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
         viewMode: schema.maybe(
           schema.oneOf([
             schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
@@ -67,7 +69,6 @@ export function getSavedSearchObjectType(
           ],
           { defaultValue: [] }
         ),
-        title: schema.string({ defaultValue: '' }),
         grid: schema.object(
           {
             columns: schema.maybe(
@@ -81,7 +82,6 @@ export function getSavedSearchObjectType(
           },
           { defaultValue: {} }
         ),
-        version: schema.maybe(schema.number()),
         rowHeight: schema.maybe(schema.number()),
         timeRestore: schema.maybe(schema.boolean()),
         timeRange: schema.maybe(
