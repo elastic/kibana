@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: SECURITY_SOLUTION_FILE_KIND,
               mimeType: 'text/plain',
               meta: {
-                caseId: postedCase.id,
+                caseIds: [postedCase.id],
                 owner: [postedCase.owner],
               },
             },
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: SECURITY_SOLUTION_FILE_KIND,
               mimeType: 'text/plain',
               meta: {
-                caseId: postedCase.id,
+                caseIds: [postedCase.id],
                 owner: [postedCase.owner],
               },
             },
@@ -219,7 +219,7 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: SECURITY_SOLUTION_FILE_KIND,
               mimeType: 'text/plain',
               meta: {
-                caseId: postedCase.id,
+                caseIds: [postedCase.id],
                 owner: [postedCase.owner],
               },
             },
@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext): void => {
               kind: SECURITY_SOLUTION_FILE_KIND,
               mimeType: 'text/plain',
               meta: {
-                caseId: postedCase2.id,
+                caseIds: [postedCase2.id],
                 owner: [postedCase2.owner],
               },
             },
@@ -325,7 +325,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 kind: SECURITY_SOLUTION_FILE_KIND,
                 mimeType: 'text/plain',
                 meta: {
-                  caseId: postedCase.id,
+                  caseIds: [postedCase.id],
                   owner: [postedCase.owner],
                 },
               },
@@ -339,7 +339,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 kind: SECURITY_SOLUTION_FILE_KIND,
                 mimeType: 'text/plain',
                 meta: {
-                  caseId: postedCase.id,
+                  caseIds: [postedCase.id],
                   owner: [postedCase.owner],
                 },
               },
