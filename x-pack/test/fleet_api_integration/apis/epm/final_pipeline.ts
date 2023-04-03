@@ -14,9 +14,9 @@ const TEST_INDEX = 'logs-log.log-test';
 
 const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
-const FINAL_PIPELINE_VERSION = 1;
+const LOG_INTEGRATION_VERSION = '1.1.2';
 
-let pkgVersion: string;
+const FINAL_PIPELINE_VERSION = 1;
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -33,7 +33,14 @@ export default function (providerContext: FtrProviderContext) {
       .expect(201);
   }
 
-  describe('fleet_final_pipeline', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/154220
+  // FLAKY: https://github.com/elastic/kibana/issues/154221
+  // FLAKY: https://github.com/elastic/kibana/issues/154222
+  // FLAKY: https://github.com/elastic/kibana/issues/154223
+  // FLAKY: https://github.com/elastic/kibana/issues/154224
+  // FLAKY: https://github.com/elastic/kibana/issues/154225
+  // FLAKY: https://github.com/elastic/kibana/issues/154226
+  describe.skip('fleet_final_pipeline', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -42,25 +49,15 @@ export default function (providerContext: FtrProviderContext) {
 
     // Use the custom log package to test the fleet final pipeline
     before(async () => {
-      const { body: getPackagesRes } = await supertest.get(
-        `/api/fleet/epm/packages?prerelease=true`
-      );
-      const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
-      if (!logPackage) {
-        throw new Error('No log package');
-      }
-
-      pkgVersion = logPackage.version;
-
       await supertest
-        .post(`/api/fleet/epm/packages/log/${pkgVersion}`)
+        .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
     after(async () => {
       await supertest
-        .delete(`/api/fleet/epm/packages/log/${pkgVersion}`)
+        .delete(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
