@@ -71,7 +71,7 @@ const renderVulnerabilitiesPage = () => {
   );
 };
 
-describe('<Findings />', () => {
+describe('<Vulnerabilities />', () => {
   it('No vulnerabilities  state: not-deployed - shows NotDeployed instead of vulnerabilities ', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({

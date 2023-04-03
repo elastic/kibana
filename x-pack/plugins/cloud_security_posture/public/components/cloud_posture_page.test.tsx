@@ -30,21 +30,14 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
-import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '../common/navigation/constants';
+import { MemoryRouter } from 'react-router-dom';
 
 const chance = new Chance();
 
 jest.mock('../common/api/use_setup_status_api');
 jest.mock('../common/hooks/use_subscription_status');
 jest.mock('../common/navigation/use_csp_integration_link');
-
-const mockLocation = {
-  pathname: findingsNavigation.vulnerabilities.path,
-  search: '',
-  hash: '',
-  state: null,
-};
 
 describe('<CloudPosturePage />', () => {
   beforeEach(() => {
@@ -65,9 +58,15 @@ describe('<CloudPosturePage />', () => {
   });
 
   const renderCloudPosturePage = (
-    props: ComponentProps<typeof CloudPosturePage> = { children: null }
+    props: ComponentProps<typeof CloudPosturePage> & { initialEntries?: string } = {
+      children: null,
+      initialEntries: findingsNavigation.findings_default.path,
+    }
   ) => {
     const mockCore = coreMock.createStart();
+    const initialEntriesProps = [
+      { pathname: props!.initialEntries ?? '/', search: '', hash: '', state: null },
+    ];
 
     render(
       <TestProvider
@@ -83,7 +82,9 @@ describe('<CloudPosturePage />', () => {
           },
         }}
       >
-        <CloudPosturePage {...props} />
+        <MemoryRouter initialEntries={initialEntriesProps}>
+          <CloudPosturePage {...props} />
+        </MemoryRouter>
       </TestProvider>
     );
   };
@@ -180,8 +181,7 @@ describe('<CloudPosturePage />', () => {
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
   });
 
-  // Todo: fix this test once we have a way to mock the useLocation hook
-  xit('renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed', () => {
+  it('renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -197,11 +197,10 @@ describe('<CloudPosturePage />', () => {
         },
       })
     );
-    (useLocation as jest.Mock).mockImplementation(() => mockLocation);
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     const children = chance.sentence();
-    renderCloudPosturePage({ children });
+    renderCloudPosturePage({ children, initialEntries: findingsNavigation.vulnerabilities.path });
 
     expect(
       screen.getByTestId(VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT)
