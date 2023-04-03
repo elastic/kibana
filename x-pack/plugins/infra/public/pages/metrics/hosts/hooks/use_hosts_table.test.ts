@@ -77,6 +77,7 @@ describe('useHostTable hook', () => {
       {
         name: 'host-0',
         os: '-',
+        ip: '',
         uuid: 'uuidv4',
         title: {
           cloudProvider: 'aws',
@@ -107,6 +108,7 @@ describe('useHostTable hook', () => {
       {
         name: 'host-1',
         os: 'macOS',
+        ip: '243.86.94.22',
         uuid: 'uuidv4',
         title: {
           cloudProvider: null,
