@@ -12,6 +12,7 @@ filegroup(
       "//packages/kbn-apm-utils:build",
       "//packages/kbn-babel-code-parser:build",
       "//packages/kbn-babel-preset:build",
+      "//packages/kbn-babel-register:build",
       "//packages/kbn-cli-dev-mode:build",
       "//packages/kbn-config:build",
       "//packages/kbn-config-schema:build",

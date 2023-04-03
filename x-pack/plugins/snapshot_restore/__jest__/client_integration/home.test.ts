@@ -58,7 +58,7 @@ describe('<SnapshotRestoreHome />', () => {
     /**
      * TODO: investigate why we need to skip this test.
      * My guess is a change in the useRequest() hook and maybe a setTimout() that hasn't been
-     * mocked with jest.useFakeTimers();
+     * mocked with jest.useFakeTimers('legacy');
      * I tested locally and the loading spinner is present in the UI so skipping this test for now.
      */
     test.skip('should display a loading while fetching the repositories', () => {

@@ -16,7 +16,7 @@ import React from 'react';
 import { CustomUrlEditor } from './editor';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { CustomUrlSettings } from './utils';
-import { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import { DataViewListItem } from '../../../../../../../../src/plugins/data_views/common';
 
 function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: UrlConfig) => void) {
   const savedCustomUrls = [
@@ -50,7 +50,7 @@ function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: Url
   const indexPatterns = [
     { id: 'pattern1', title: 'Index Pattern 1' },
     { id: 'pattern2', title: 'Index Pattern 2' },
-  ] as DataView[];
+  ] as DataViewListItem[];
 
   const queryEntityFieldNames = ['airline'];
 

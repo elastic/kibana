@@ -110,3 +110,6 @@ export DISABLE_BOOTSTRAP_VALIDATION=true
 
 # Prevent Browserlist from logging on CI about outdated database versions
 export BROWSERSLIST_IGNORE_OLD_DATA=true
+
+# tells the gh command what our default repo is
+export GH_REPO=github.com/elastic/kibana

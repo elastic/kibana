@@ -52,7 +52,7 @@ export const EventSchema = schema.maybe(
         code: ecsString(),
         created: ecsDate(),
         dataset: ecsString(),
-        duration: ecsNumber(),
+        duration: ecsStringOrNumber(),
         end: ecsDate(),
         hash: ecsString(),
         id: ecsString(),
@@ -66,8 +66,8 @@ export const EventSchema = schema.maybe(
         reference: ecsString(),
         risk_score: ecsNumber(),
         risk_score_norm: ecsNumber(),
-        sequence: ecsNumber(),
-        severity: ecsNumber(),
+        sequence: ecsStringOrNumber(),
+        severity: ecsStringOrNumber(),
         start: ecsDate(),
         timezone: ecsString(),
         type: ecsStringMulti(),
@@ -105,7 +105,7 @@ export const EventSchema = schema.maybe(
         task: schema.maybe(
           schema.object({
             scheduled: ecsDate(),
-            schedule_delay: ecsNumber(),
+            schedule_delay: ecsStringOrNumber(),
           })
         ),
         alerting: schema.maybe(
@@ -124,12 +124,12 @@ export const EventSchema = schema.maybe(
                   schema.object({
                     uuid: ecsString(),
                     status: ecsString(),
-                    status_order: ecsNumber(),
+                    status_order: ecsStringOrNumber(),
                     metrics: schema.maybe(
                       schema.object({
-                        total_indexing_duration_ms: ecsNumber(),
-                        total_search_duration_ms: ecsNumber(),
-                        execution_gap_duration_s: ecsNumber(),
+                        total_indexing_duration_ms: ecsStringOrNumber(),
+                        total_search_duration_ms: ecsStringOrNumber(),
+                        execution_gap_duration_s: ecsStringOrNumber(),
                       })
                     ),
                   })
@@ -166,6 +166,10 @@ function ecsString() {
 
 function ecsNumber() {
   return schema.maybe(schema.number());
+}
+
+function ecsStringOrNumber() {
+  return schema.maybe(schema.oneOf([schema.string(), schema.number()]));
 }
 
 function ecsDate() {

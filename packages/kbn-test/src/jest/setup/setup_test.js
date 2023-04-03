@@ -13,3 +13,9 @@
 
 import 'jest-styled-components';
 import '@testing-library/jest-dom';
+
+/**
+ * Removed in Jest 27/jsdom, used in some transitive dependencies
+ */
+global.setImmediate = require('core-js/stable/set-immediate');
+global.clearImmediate = require('core-js/stable/clear-immediate');

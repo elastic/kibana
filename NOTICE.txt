@@ -1,5 +1,5 @@
 Kibana source code with Kibana X-Pack source code
-Copyright 2012-2022 Elasticsearch B.V.
+Copyright 2012-2023 Elasticsearch B.V.
 
 ---
 Pretty handling of logarithmic axes.

@@ -48,13 +48,17 @@ const DEFAULT_SETUP_RESULT = {
 
 export function getScreenshots$(
   captureConfig: CaptureConfig,
-  browserDriverFactory: HeadlessChromiumDriverFactory,
+  browserDriverFactory: HeadlessChromiumDriverFactory | null,
   options: ScreenshotObservableOpts
 ): Rx.Observable<ScreenshotResults[]> {
   const apmTrans = apm.startTransaction('screenshot-pipeline', REPORTING_TRANSACTION_TYPE);
   const { layout } = options;
   const apmCreatePage = apmTrans?.startSpan('create-page', 'wait');
   const { browserTimezone, logger } = options;
+
+  if (!browserDriverFactory) {
+    throw new Error(`Browser driver factory is not initialized!`);
+  }
 
   return browserDriverFactory
     .createPage(

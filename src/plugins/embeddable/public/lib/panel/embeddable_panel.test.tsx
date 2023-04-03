@@ -51,7 +51,7 @@ setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
 
 const start = doStart();
 const getEmbeddableFactory = start.getEmbeddableFactory;
-test('HelloWorldContainer initializes embeddables', async (done) => {
+test('HelloWorldContainer initializes embeddables', (done) => {
   const container = new HelloWorldContainer(
     {
       id: '123',

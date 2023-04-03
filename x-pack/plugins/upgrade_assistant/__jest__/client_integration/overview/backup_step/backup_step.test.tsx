@@ -153,7 +153,7 @@ describe('Overview - Backup Step', () => {
 
     describe('poll for new status', () => {
       beforeEach(async () => {
-        jest.useFakeTimers();
+        jest.useFakeTimers('legacy');
 
         // First request will succeed.
         httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({

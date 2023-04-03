@@ -7,7 +7,8 @@
 
 import { produce } from 'immer';
 import { satisfies } from 'semver';
-import { filter, reduce, mapKeys, each, set, unset, uniq, map, has } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { filter, reduce, mapKeys, each, unset, uniq, map, has } from 'lodash';
 import { packSavedObjectType } from '../../../common/types';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,

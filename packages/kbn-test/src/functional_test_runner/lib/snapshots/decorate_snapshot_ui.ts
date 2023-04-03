@@ -13,8 +13,6 @@ import {
   addSerializer,
 } from 'jest-snapshot';
 import path from 'path';
-import prettier from 'prettier';
-import babelTraverse from '@babel/traverse';
 import { once } from 'lodash';
 import { Lifecycle } from '../lifecycle';
 import { Suite, Test } from '../../fake_mocha_types';
@@ -161,8 +159,8 @@ function getSnapshotState(file: string, updateSnapshot: SnapshotUpdateState) {
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
     {
       updateSnapshot,
-      getPrettier: () => prettier,
-      getBabelTraverse: () => babelTraverse,
+      prettierPath: require.resolve('prettier'),
+      snapshotFormat: { escapeString: true, printBasicPrototype: true },
     }
   );
 
