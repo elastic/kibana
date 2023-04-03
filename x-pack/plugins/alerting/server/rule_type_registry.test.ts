@@ -62,6 +62,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       expect(registry.has('foo')).toEqual(true);
     });
@@ -83,6 +86,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -116,6 +122,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -140,6 +149,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -167,6 +179,9 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         defaultScheduleInterval: 'foobar',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -193,6 +208,9 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         defaultScheduleInterval: '10s',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
@@ -219,6 +237,9 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         defaultScheduleInterval: '10s',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry({
         ...ruleTypeRegistryParams,
@@ -255,6 +276,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -284,6 +308,9 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         minimumLicenseRequired: 'basic',
         isExportable: true,
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
@@ -317,6 +344,9 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         minimumLicenseRequired: 'basic',
         isExportable: true,
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
@@ -354,6 +384,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
@@ -380,6 +413,9 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         ruleTaskTimeout: '20m',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
@@ -412,6 +448,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
@@ -435,6 +474,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       expect(() =>
         registry.register({
@@ -451,6 +493,9 @@ describe('Create Lifecycle', () => {
           isExportable: true,
           executor: jest.fn(),
           producer: 'alerts',
+          validate: {
+            params: { validate: (params) => params },
+          },
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Rule type \\"test\\" is already registered."`);
     });
@@ -474,6 +519,9 @@ describe('Create Lifecycle', () => {
         alerts: {
           context: 'test',
           mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+        },
+        validate: {
+          params: { validate: (params) => params },
         },
       });
 
@@ -499,6 +547,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
 
       expect(alertsService.register).not.toHaveBeenCalled();
@@ -522,6 +573,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       const ruleType = registry.get('test');
       expect(ruleType).toMatchInlineSnapshot(`
@@ -551,6 +605,11 @@ describe('Create Lifecycle', () => {
                 "recoveryActionGroup": Object {
                   "id": "recovered",
                   "name": "Recovered",
+                },
+                "validate": Object {
+                  "params": Object {
+                    "validate": [Function],
+                  },
                 },
               }
           `);
@@ -589,6 +648,9 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       const result = registry.list();
       expect(result).toMatchInlineSnapshot(`
@@ -689,6 +751,9 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       const result = registry.getAllTypes();
       expect(result).toEqual(['test']);
@@ -715,6 +780,9 @@ describe('Create Lifecycle', () => {
         isExportable: true,
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
     });
 
@@ -750,6 +818,9 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
       return { state: {} };
     },
     producer: 'alerts',
+    validate: {
+      params: { validate: (params) => params },
+    },
   };
 
   if (!context && !state) return baseAlert;

@@ -195,6 +195,9 @@ function getCumulativeFiringAlertType() {
         },
       };
     },
+    validate: {
+      params: { validate: () => ({}) },
+    },
   };
   return result;
 }
@@ -531,6 +534,9 @@ function getPatternFiringAlertType() {
         },
       };
     },
+    validate: {
+      params: { validate: (params) => params },
+    },
   };
   return result;
 }
@@ -571,6 +577,9 @@ function getPatternSuccessOrFailureAlertType() {
           patternIndex: patternIndex + 1,
         },
       };
+    },
+    validate: {
+      params: { validate: (params) => params },
     },
   };
   return result;
@@ -646,6 +655,9 @@ function getPatternFiringAutoRecoverFalseAlertType() {
         },
       };
     },
+    validate: {
+      params: { validate: (params) => params },
+    },
   };
   return result;
 }
@@ -691,6 +703,9 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
       return { state: {} };
+    },
+    validate: {
+      params: { validate: () => ({ pattern: [true] }) },
     },
   };
   return result;
@@ -751,6 +766,9 @@ function getCancellableRuleType() {
       }
 
       return { state: {} };
+    },
+    validate: {
+      params: { validate: (params) => params },
     },
   };
   return result;
@@ -851,6 +869,9 @@ export function defineAlertTypes(
     async executor() {
       return { state: {} };
     },
+    validate: {
+      params: { validate: () => ({}) },
+    },
   };
   const goldNoopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
@@ -862,6 +883,9 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {
       return { state: {} };
+    },
+    validate: {
+      params: { validate: (params) => params },
     },
   };
   const onlyContextVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -878,6 +902,9 @@ export function defineAlertTypes(
     async executor() {
       return { state: {} };
     },
+    validate: {
+      params: { validate: () => ({}) },
+    },
   };
   const onlyStateVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyStateVariables',
@@ -892,6 +919,9 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {
       return { state: {} };
+    },
+    validate: {
+      params: { validate: () => ({}) },
     },
   };
   const throwAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -909,6 +939,9 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {
       throw new Error('this alert is intended to fail');
+    },
+    validate: {
+      params: { validate: () => ({}) },
     },
   };
   function getLongRunningRuleType() {
@@ -935,6 +968,9 @@ export function defineAlertTypes(
         await new Promise((resolve) => setTimeout(resolve, params.delay ?? 5000));
         return { state: {} };
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     };
     return result;
   }
@@ -953,7 +989,11 @@ export function defineAlertTypes(
       return { state: {} };
     },
     producer: 'alertsFixture',
+    validate: {
+      params: { validate: () => ({}) },
+    },
   };
+
   const multipleSearchesRuleType: RuleType<
     { numSearches: number; delay: string },
     {},
@@ -1005,6 +1045,9 @@ export function defineAlertTypes(
       }
 
       return { state: {} };
+    },
+    validate: {
+      params: { validate: (params) => params },
     },
   };
 

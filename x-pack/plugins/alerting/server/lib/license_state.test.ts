@@ -72,6 +72,9 @@ describe('getLicenseCheckForRuleType', () => {
     minimumLicenseRequired: 'gold',
     isExportable: true,
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    validate: {
+      params: { validate: (params) => params },
+    },
   };
 
   beforeEach(() => {
@@ -207,6 +210,9 @@ describe('ensureLicenseForRuleType()', () => {
     minimumLicenseRequired: 'gold',
     isExportable: true,
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    validate: {
+      params: { validate: (params) => params },
+    },
   };
 
   beforeEach(() => {

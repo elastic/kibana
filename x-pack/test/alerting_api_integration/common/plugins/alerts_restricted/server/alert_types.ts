@@ -25,6 +25,9 @@ export function defineAlertTypes(
     async executor() {
       return { state: {} };
     },
+    validate: {
+      params: { validate: (params) => params },
+    },
   };
   const noopUnrestrictedAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.unrestricted-noop',
@@ -36,6 +39,9 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {
       return { state: {} };
+    },
+    validate: {
+      params: { validate: (params) => params },
     },
   };
   alerting.registerType(noopRestrictedAlertType);

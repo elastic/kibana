@@ -84,4 +84,7 @@ export const alertType: RuleType<
   getViewInAppRelativeUrl({ rule }) {
     return `/app/${ALERTING_EXAMPLE_APP_ID}/astros/${rule.id}`;
   },
+  validate: {
+    params: { validate: (params) => params },
+  },
 };

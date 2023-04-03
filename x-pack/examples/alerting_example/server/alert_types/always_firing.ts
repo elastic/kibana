@@ -78,4 +78,7 @@ export const alertType: RuleType<
     };
   },
   producer: ALERTING_EXAMPLE_APP_ID,
+  validate: {
+    params: { validate: (params) => params },
+  },
 };

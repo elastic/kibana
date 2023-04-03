@@ -26,6 +26,9 @@ export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     return { state: {} };
   },
   producer: 'alerts',
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 
 export const alwaysFiringAlertType: RuleType<
@@ -66,6 +69,9 @@ export const alwaysFiringAlertType: RuleType<
       },
     };
   },
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 
 export const failingAlertType: RuleType<never, never, never, never, never, 'default' | 'other'> = {
@@ -83,6 +89,9 @@ export const failingAlertType: RuleType<never, never, never, never, never, 'defa
   isExportable: true,
   async executor() {
     throw new Error('Failed to execute alert type');
+  },
+  validate: {
+    params: { validate: (params) => params },
   },
 };
 

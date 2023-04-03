@@ -71,6 +71,9 @@ const sampleRuleType: RuleType<never, never, {}, never, never, 'default'> = {
   async executor() {
     return { state: {} };
   },
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 
 describe('Alerting Plugin', () => {

@@ -103,6 +103,9 @@ export class BaseRule {
       actionVariables: {
         context: actionVariables,
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     };
   }
 
