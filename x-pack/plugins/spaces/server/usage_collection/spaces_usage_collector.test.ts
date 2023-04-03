@@ -32,11 +32,15 @@ const MOCK_USAGE_STATS: UsageStats = {
   'apiCalls.copySavedObjects.createNewCopiesEnabled.no': 3,
   'apiCalls.copySavedObjects.overwriteEnabled.yes': 1,
   'apiCalls.copySavedObjects.overwriteEnabled.no': 4,
+  'apiCalls.copySavedObjects.compatibilityModeEnabled.yes': 2,
+  'apiCalls.copySavedObjects.compatibilityModeEnabled.no': 4,
   'apiCalls.resolveCopySavedObjectsErrors.total': 13,
   'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes': 13,
   'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no': 0,
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes': 6,
   'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no': 7,
+  'apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.yes': 0,
+  'apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.no': 5,
   'apiCalls.disableLegacyUrlAliases.total': 17,
 };
 

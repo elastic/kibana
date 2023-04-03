@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
-console.log('Disabled.');
+export { createExecutionContext } from './src/create_execution_context';

@@ -107,7 +107,7 @@ export const setupValueSuggestionProvider = (
     } else if (
       !shouldSuggestValues ||
       !field.aggregatable ||
-      field.type !== 'string' ||
+      (field.type !== 'string' && field.type !== 'ip') ||
       isVersionFieldType // suggestions don't work for version fields
     ) {
       return [];
