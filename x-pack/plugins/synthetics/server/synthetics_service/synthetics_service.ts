@@ -401,7 +401,7 @@ export class SyntheticsService {
 
     const finder = soClient.createPointInTimeFinder({
       type: syntheticsMonitorType,
-      perPage: 500,
+      perPage: 100,
       namespaces: ['*'],
     });
 
