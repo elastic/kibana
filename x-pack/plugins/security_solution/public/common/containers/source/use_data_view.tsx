@@ -13,7 +13,7 @@ import { pick } from 'lodash/fp';
 import type { BrowserField } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
-import { getCategory } from '@kbn/triggers-actions-ui-plugin/public/application/sections/field_browser/helpers';
+import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
 import { sourcererActions } from '../../store/sourcerer';

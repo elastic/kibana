@@ -69,6 +69,8 @@ export {
 
 export type { ConnectorFormSchema } from './application/sections/action_connector_form';
 
+export { getCategory } from './application/sections/field_browser';
+
 export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
 
 export {
