@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
@@ -22,14 +22,9 @@ export const HostsTable = () => {
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
-  const { columns, items, isFlyoutOpen, closeFlyout, clickedItemId } = useHostsTable(hostNodes, {
+  const { columns, items, isFlyoutOpen, closeFlyout, clickedItem } = useHostsTable(hostNodes, {
     time: searchCriteria.dateRange,
   });
-
-  const clickedItem = useMemo(
-    () => items.find(({ id }) => id === clickedItemId),
-    [clickedItemId, items]
-  );
 
   const noData = items.length === 0;
 

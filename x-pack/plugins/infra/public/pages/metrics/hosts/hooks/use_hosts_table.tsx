@@ -138,6 +138,10 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   );
 
   const items = useMemo(() => buildItemsList(nodes), [nodes]);
+  const clickedItem = useMemo(
+    () => items.find(({ id }) => id === hostFlyoutOpen.clickedItemId),
+    [hostFlyoutOpen.clickedItemId, items]
+  );
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
@@ -244,7 +248,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   return {
     columns,
     items,
-    clickedItemId: hostFlyoutOpen.clickedItemId,
+    clickedItem,
     isFlyoutOpen: !!hostFlyoutOpen.clickedItemId,
     closeFlyout,
   };
