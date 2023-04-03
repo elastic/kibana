@@ -2797,6 +2797,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-state-types@link:x-pack/packages/kbn-alerting-state-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts-as-data-utils@link:packages/kbn-alerts-as-data-utils":
   version "0.0.0"
   uid ""
@@ -4566,6 +4570,10 @@
   uid ""
 
 "@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-trained-models-utils@link:x-pack/packages/ml/trained_models_utils":
   version "0.0.0"
   uid ""
 
