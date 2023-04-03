@@ -56,7 +56,7 @@ export interface Props {
 
 interface State {
   currentStepIndex: number;
-  currentStep: { id: string; label: string } | null;
+  currentStep: LayerWizardStep | null;
   layerSteps: LayerWizardStep[] | null;
   layerWizard: LayerWizard | null;
   isNextStepBtnEnabled: boolean;
