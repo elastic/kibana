@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { Version } from '@kbn/object-versioning';
 import { versionSchema } from './constants';
 
-import type { ProcedureSchemas } from './types';
+import type { ItemResult, ProcedureSchemas } from './types';
 
 export const createSchemas: ProcedureSchemas = {
   in: schema.object(
@@ -28,10 +28,12 @@ export const createSchemas: ProcedureSchemas = {
 export interface CreateIn<
   T extends string = string,
   Data extends object = object,
-  Options extends object = object
+  Options extends void | object = object
 > {
   contentTypeId: T;
   data: Data;
   version?: Version;
   options?: Options;
 }
+
+export type CreateResult<T = unknown, M = void> = ItemResult<T, M>;

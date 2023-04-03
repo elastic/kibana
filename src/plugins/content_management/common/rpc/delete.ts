@@ -24,9 +24,13 @@ export const deleteSchemas: ProcedureSchemas = {
   out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 };
 
-export interface DeleteIn<T extends string = string, Options extends object = object> {
+export interface DeleteIn<T extends string = string, Options extends void | object = object> {
   contentTypeId: T;
   id: string;
   version?: Version;
   options?: Options;
+}
+
+export interface DeleteResult {
+  success: boolean;
 }
