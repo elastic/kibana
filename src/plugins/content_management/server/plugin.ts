@@ -75,6 +75,10 @@ export class ContentManagementPlugin
   }
 
   public async stop(): Promise<void> {
-    await this.#eventStream.stop();
+    try {
+      await this.#eventStream.stop();
+    } catch (e) {
+      this.logger.error(`Error during event stream stop: ${e}`);
+    }
   }
 }
