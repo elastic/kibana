@@ -125,10 +125,8 @@ export const getPrivilegesAndCapabilities = (
 
   capabilities.canUseTransformAlerts = capabilities.canGetTransform;
 
-  capabilities.canScheduleNowTransform = hasPrivilege([
-    'cluster',
-    'cluster:admin/transform/schedule_now',
-  ]);
+  capabilities.canScheduleNowTransform = capabilities.canStartStopTransform;
+
   return { privileges: privilegesResult, capabilities };
 };
 // create the text for button's tooltips if the user
