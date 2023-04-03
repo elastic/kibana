@@ -267,22 +267,29 @@ describe('unmuteInstance()', () => {
   });
 
   describe('legacy actions migration for SIEM', () => {
+    const rule = {
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: ['2'],
+      },
+      version: '123',
+      references: [],
+    };
+
     test('should call migrateLegacyActions if consumer is SIEM', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'alert',
+        ...rule,
         attributes: {
+          ...rule.attributes,
           consumer: AlertConsumers.SIEM,
-          actions: [],
-          schedule: { interval: '10s' },
-          alertTypeId: '2',
-          enabled: true,
-          scheduledTaskId: 'task-123',
-          mutedInstanceIds: ['2'],
         },
-        version: '123',
-        references: [],
       });
       (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
 
@@ -295,20 +302,7 @@ describe('unmuteInstance()', () => {
 
     test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: 'alert',
-        attributes: {
-          actions: [],
-          schedule: { interval: '10s' },
-          alertTypeId: '2',
-          enabled: true,
-          scheduledTaskId: 'task-123',
-          mutedInstanceIds: ['2'],
-        },
-        version: '123',
-        references: [],
-      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(rule);
 
       await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
 

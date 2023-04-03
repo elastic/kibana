@@ -19,7 +19,13 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { loggerMock } from '@kbn/logging-mocks';
-import { enabledRule1, enabledRule2, returnedRule1, returnedRule2, siemRule } from './test_helpers';
+import {
+  enabledRule1,
+  enabledRule2,
+  returnedRule1,
+  returnedRule2,
+  siemRule1,
+} from './test_helpers';
 import { migrateLegacyActions } from '../lib';
 
 jest.mock('../lib/migrate_legacy_actions', () => {
@@ -408,7 +414,7 @@ describe('bulkDelete', () => {
         .mockResolvedValueOnce({
           close: jest.fn(),
           find: function* asyncGenerator() {
-            yield { saved_objects: [enabledRule1, enabledRule2, siemRule] };
+            yield { saved_objects: [enabledRule1, enabledRule2, siemRule1] };
           },
         });
 
@@ -416,7 +422,7 @@ describe('bulkDelete', () => {
         statuses: [
           { id: enabledRule1.id, type: 'alert', success: true },
           { id: enabledRule2.id, type: 'alert', success: true },
-          { id: siemRule.id, type: 'alert', success: true },
+          { id: siemRule1.id, type: 'alert', success: true },
         ],
       });
 
@@ -424,7 +430,7 @@ describe('bulkDelete', () => {
 
       expect(migrateLegacyActions).toHaveBeenCalledTimes(1);
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: siemRule.id,
+        ruleId: siemRule1.id,
       });
     });
   });

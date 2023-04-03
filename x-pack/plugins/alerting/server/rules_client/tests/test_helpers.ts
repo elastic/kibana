@@ -42,18 +42,18 @@ export const defaultRule = {
   version: '1',
 };
 
-export const siemRule = {
-  id: 'siem-id1',
-  type: 'alert',
+export const siemRule1 = {
+  ...defaultRule,
   attributes: {
-    name: 'fakeName',
+    ...defaultRule.attributes,
     consumer: AlertConsumers.SIEM,
-    alertTypeId: 'fakeType',
-    schedule: { interval: '5m' },
-    actions: [] as unknown,
   },
-  references: [],
-  version: '1',
+  id: 'siem-id1',
+};
+
+export const siemRule2 = {
+  ...siemRule1,
+  id: 'siem-id2',
 };
 
 export const enabledRule1 = {

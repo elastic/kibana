@@ -21,6 +21,15 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { NormalizedAlertAction } from '../types';
+import { enabledRule1, enabledRule2, siemRule1, siemRule2 } from './test_helpers';
+import { migrateLegacyActions } from '../lib';
+import { migrateLegacyActionsMock } from '../lib/migrate_legacy_actions.mock';
+
+jest.mock('../lib/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -190,6 +199,8 @@ describe('bulkEdit()', () => {
       },
       producer: 'alerts',
     });
+
+    (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
   });
 
   describe('tags operations', () => {
@@ -2345,6 +2356,37 @@ describe('bulkEdit()', () => {
       });
 
       expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions for SIEM consumers rules only', async () => {
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRule1, enabledRule2, siemRule1, siemRule2] };
+          },
+        });
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'tags',
+            operation: 'set',
+            value: ['test-tag'],
+          },
+        ],
+      });
+
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(2);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: siemRule1.id,
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: siemRule2.id,
+      });
     });
   });
 });

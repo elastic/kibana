@@ -29,8 +29,17 @@ import {
   savedObjectWith500Error,
   returnedRule1,
   returnedRule2,
+  siemRule1,
+  siemRule2,
 } from './test_helpers';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { migrateLegacyActions } from '../lib';
+
+jest.mock('../lib/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -775,6 +784,33 @@ describe('bulkEnableRules', () => {
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions for SIEM consumers rules only', async () => {
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [disabledRule1, siemRule1, siemRule2] };
+          },
+        });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [disabledRule1, siemRule1, siemRule2],
+      });
+
+      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(2);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: siemRule1.id,
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: siemRule2.id,
+      });
     });
   });
 });

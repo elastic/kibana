@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -16,6 +17,14 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { migrateLegacyActions } from '../lib';
+import { migrateLegacyActionsMock } from '../lib/migrate_legacy_actions.mock';
+
+jest.mock('../lib/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -233,6 +242,55 @@ describe('muteAll()', () => {
           },
         })
       );
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    const rule = {
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        muteAll: false,
+      },
+      references: [],
+      version: '123',
+    };
+    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...rule,
+        attributes: {
+          ...rule.attributes,
+          consumer: AlertConsumers.SIEM,
+        },
+      });
+      (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
+
+      await rulesClient.muteAll({ id: '1' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: '1',
+      });
+    });
+
+    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(rule);
+
+      await rulesClient.muteAll({ id: '1' });
+
+      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 });
