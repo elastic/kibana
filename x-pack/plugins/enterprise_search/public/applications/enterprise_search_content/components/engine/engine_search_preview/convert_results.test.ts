@@ -5,34 +5,38 @@
  * 2.0.
  */
 
-import { convertResults, flattenObject } from './convert_results';
+import { convertResults, flattenObjectPreservingValues } from './convert_results';
 
-describe('flattenObject', () => {
+describe('flattenObjectPreservingValues', () => {
   it('flattens an object', () => {
     const obj = {
       a: {
-        b: {
-          c: 'd',
+        raw: {
+          b: {
+            c: 'd',
+          },
         },
       },
     };
 
-    expect(flattenObject(obj)).toEqual({
-      'a.b.c': 'd',
+    expect(flattenObjectPreservingValues(obj)).toEqual({
+      'a.b.c': { raw: 'd' },
     });
   });
 
   it('handles null values', () => {
     const obj = {
       a: {
-        b: null,
-        c: 'd',
+        raw: {
+          b: null,
+          c: 'd',
+        },
       },
     };
 
-    expect(flattenObject(obj)).toEqual({
-      'a.b': null,
-      'a.c': 'd',
+    expect(flattenObjectPreservingValues(obj)).toEqual({
+      'a.b': { raw: null },
+      'a.c': { raw: 'd' },
     });
   });
 });
@@ -52,15 +56,15 @@ describe('convertResults', () => {
     expect(convertResults(result)).toEqual([
       {
         field: 'a._meta.id',
-        value: '1337',
+        value: { raw: 1337 },
       },
       {
         field: 'a.b.c',
-        value: '"d"',
+        value: { raw: 'd' },
       },
       {
         field: 'e',
-        value: 'false',
+        value: { raw: false },
       },
     ]);
   });

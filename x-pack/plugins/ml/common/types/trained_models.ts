@@ -5,10 +5,10 @@
  * 2.0.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
 import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
 import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
 import type { XOR } from './common';
-import type { DeploymentState, TrainedModelType } from '../constants/trained_models';
 import type { MlSavedObjectType } from './saved_objects';
 
 export interface IngestStats {
