@@ -6,11 +6,25 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 import { MetadataTab } from './metadata/metadata';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import { navigateToUptime } from './links/navigate_to_uptime';
 
 interface Props {
   node: HostNodeRow;
@@ -18,9 +32,11 @@ interface Props {
 }
 
 const flyoutTabs = [MetadataTab];
+const NODE_TYPE = 'host' as InventoryItemType;
 
 export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const { share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>().services;
 
   const tabs = useMemo(() => {
     const currentTimeRange = {
@@ -42,9 +58,26 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
   return (
     <EuiFlyout onClose={closeFlyout} ownFocus={false}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="xs">
-          <h2>{node.name}</h2>
-        </EuiTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            {' '}
+            <EuiTitle size="xs">
+              <h2>{node.name}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLink
+              data-test-subj="infraFlyoutLink"
+              onClick={() => navigateToUptime(share.url.locators, NODE_TYPE, node)}
+            >
+              <EuiIcon type="popout" />{' '}
+              <FormattedMessage
+                id="xpack.infra.infra.nodeDetails.updtimeTabLabel"
+                defaultMessage="Uptime"
+              />
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiTabs style={{ marginBottom: '-25px' }} size="s">
           {tabs.map((tab, i) => (

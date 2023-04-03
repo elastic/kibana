@@ -31,6 +31,7 @@ type HostMetrics = Record<HostMetric, SnapshotNodeMetric>;
 
 export interface HostNodeRow extends HostMetrics {
   os?: string | null;
+  ip?: string | null;
   servicesOnHost?: number | null;
   title: { name: string; cloudProvider?: CloudProvider | null };
   name: string;
@@ -53,6 +54,7 @@ const buildItemsList = (nodes: SnapshotNode[]) => {
     uuid: uuidv4(),
     name,
     os: path.at(-1)?.os ?? '-',
+    ip: path.at(-1)?.ip ?? '',
     title: {
       name,
       cloudProvider: path.at(-1)?.cloudProvider ?? null,
