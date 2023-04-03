@@ -34,7 +34,7 @@ export function fetchProvider(kibanaIndex: string) {
     }
     const { successCount, errorCount, totalDuration } =
       esResponse.hits.hits[0]._source!['search-telemetry'];
-    const averageDuration = totalDuration / successCount;
+    const averageDuration = successCount === 0 ? null : totalDuration / successCount;
     return { successCount, errorCount, averageDuration };
   };
 }
