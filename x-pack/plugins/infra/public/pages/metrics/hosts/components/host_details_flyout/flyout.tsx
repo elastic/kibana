@@ -20,8 +20,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import type { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 import { MetadataTab } from './metadata/metadata';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -67,16 +67,7 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="infraFlyoutLink"
-              onClick={() => navigateToUptime(share.url.locators, NODE_TYPE, node)}
-            >
-              <EuiIcon type="popout" />{' '}
-              <FormattedMessage
-                id="xpack.infra.infra.nodeDetails.updtimeTabLabel"
-                defaultMessage="Uptime"
-              />
-            </EuiLink>
+            <LinkToApmTraces hostName={node.name} apmField={'host.hostname'} />
           </EuiFlexItem>
           <EuiFlexItem
             grow={false}
@@ -84,7 +75,16 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
               padding-right: 20px;
             `}
           >
-            <LinkToApmTraces hostName={node.name} apmField={'host.hostname'} />
+            <EuiLink
+              data-test-subj="infraHostsViewFlyoutUptimeLink"
+              onClick={() => navigateToUptime(share.url.locators, NODE_TYPE, node)}
+            >
+              <EuiIcon type="popout" />{' '}
+              <FormattedMessage
+                id="xpack.infra.hostsViewPage.flyout.uptimeLinkLabel"
+                defaultMessage="Uptime"
+              />
+            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />

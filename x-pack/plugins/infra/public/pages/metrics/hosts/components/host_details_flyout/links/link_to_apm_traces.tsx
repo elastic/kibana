@@ -34,10 +34,10 @@ export const LinkToApmTraces = ({ hostName, apmField }: LinkToApmTracesProps) =>
 
   return (
     <RedirectAppLinks coreStart={services}>
-      <EuiLink href={linkToApmTraces} data-test-subj="hostsView-flyout-link-to-apm-button">
+      <EuiLink href={linkToApmTraces} data-test-subj="infraHostsViewFlyoutApmTracesLink">
         <EuiIcon type="popout" />{' '}
         <FormattedMessage
-          id="xpack.infra.hostsViewPage.flyout.linkToApmTraces"
+          id="xpack.infra.hostsViewPage.flyout.apmTracesLinkLabel"
           defaultMessage="APM Traces"
         />
       </EuiLink>
