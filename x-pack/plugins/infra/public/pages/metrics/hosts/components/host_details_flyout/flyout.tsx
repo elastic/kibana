@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -14,48 +14,63 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiTab,
+  EuiSpacer,
+  EuiTabs,
 } from '@elastic/eui';
-import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import type { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
-import { MetadataTab } from './metadata/metadata';
-import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { navigateToUptime } from './links/navigate_to_uptime';
 import { LinkToApmTraces } from './links/link_to_apm_traces';
+import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
+import { metadataTab } from './metadata';
+import type { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import type { HostNodeRow } from '../../hooks/use_hosts_table';
+import { processesTab } from './processes';
+import { Metadata } from './metadata/metadata';
+import { Processes } from './processes/processes';
+import { FlyoutTabIds, useHostFlyoutOpen } from '../../hooks/use_host_flyout_open_url_state';
 
 interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
 }
 
-const flyoutTabs = [MetadataTab];
+const flyoutTabs = [metadataTab, processesTab];
 const NODE_TYPE = 'host' as InventoryItemType;
 
 export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const { share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>().services;
 
-  const tabs = useMemo(() => {
-    const currentTimeRange = {
-      ...getDateRangeAsTimestamp(),
-      interval: '1m',
-    };
+  const currentTimeRange = {
+    ...getDateRangeAsTimestamp(),
+    interval: '1m',
+  };
 
-    return flyoutTabs.map((m) => {
-      const TabContent = m.content;
-      return {
-        ...m,
-        content: <TabContent node={node} currentTimeRange={currentTimeRange} />,
-      };
-    });
-  }, [getDateRangeAsTimestamp, node]);
+  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
 
-  const [selectedTab, setSelectedTab] = useState(0);
+  // This map allow to keep track of which tabs content have been rendered the first time.
+  // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
+  const renderedTabsSet = useLazyRef(() => new Set([hostFlyoutOpen.selectedTabId]));
+
+  const tabEntries = flyoutTabs.map((tab) => (
+    <EuiTab
+      {...tab}
+      key={tab.id}
+      onClick={() => {
+        renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
+        setHostFlyoutOpen({ selectedTabId: tab.id });
+      }}
+      isSelected={tab.id === hostFlyoutOpen.selectedTabId}
+    >
+      {tab.name}
+    </EuiTab>
+  ));
 
   return (
     <EuiFlyout onClose={closeFlyout} ownFocus={false}>
@@ -89,14 +104,21 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiTabs style={{ marginBottom: '-25px' }} size="s">
-          {tabs.map((tab, i) => (
-            <EuiTab key={tab.id} isSelected={i === selectedTab} onClick={() => setSelectedTab(i)}>
-              {tab.name}
-            </EuiTab>
-          ))}
+          {tabEntries}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{tabs[selectedTab].content}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        {renderedTabsSet.current.has(FlyoutTabIds.METADATA) && (
+          <div hidden={hostFlyoutOpen.selectedTabId !== FlyoutTabIds.METADATA}>
+            <Metadata currentTimeRange={currentTimeRange} node={node} nodeType={NODE_TYPE} />
+          </div>
+        )}
+        {renderedTabsSet.current.has(FlyoutTabIds.PROCESSES) && (
+          <div hidden={hostFlyoutOpen.selectedTabId !== FlyoutTabIds.PROCESSES}>
+            <Processes node={node} nodeType={NODE_TYPE} currentTime={currentTimeRange.to} />
+          </div>
+        )}
+      </EuiFlyoutBody>
     </EuiFlyout>
   );
 };

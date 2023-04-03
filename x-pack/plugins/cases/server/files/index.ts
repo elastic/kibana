@@ -9,8 +9,6 @@ import type { FileJSON, FileKind } from '@kbn/files-plugin/common';
 import type { FilesSetup } from '@kbn/files-plugin/server';
 import {
   APP_ID,
-  constructFileKindIdByOwner,
-  constructFilesHttpOperationTag,
   MAX_FILE_SIZE,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
@@ -18,6 +16,7 @@ import {
 import type { Owner } from '../../common/constants/types';
 import { HttpApiTagOperation } from '../../common/constants/types';
 import { ALLOWED_MIME_TYPES, IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
+import { constructFileKindIdByOwner, constructFilesHttpOperationTag } from '../../common/files';
 
 const buildFileKind = (owner: Owner): FileKind => {
   return {
@@ -31,7 +30,6 @@ const buildFileKind = (owner: Owner): FileKind => {
 const fileKindHttpTags = (owner: Owner): FileKind['http'] => {
   return {
     create: buildTag(owner, HttpApiTagOperation.Create),
-    delete: buildTag(owner, HttpApiTagOperation.Delete),
     download: buildTag(owner, HttpApiTagOperation.Read),
     getById: buildTag(owner, HttpApiTagOperation.Read),
     list: buildTag(owner, HttpApiTagOperation.Read),
@@ -70,5 +68,3 @@ export const registerCaseFileKinds = (filesSetupPlugin: FilesSetup) => {
     filesSetupPlugin.registerFileKind(fileKind);
   }
 };
-
-export const MAX_FILES_PER_CASE = 100;
