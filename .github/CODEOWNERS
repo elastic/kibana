@@ -462,6 +462,7 @@ x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
+x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-monaco @elastic/appex-sharedux
 x-pack/plugins/monitoring_collection @elastic/infra-monitoring-ui
