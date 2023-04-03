@@ -198,6 +198,7 @@ export function useChangePointResults(
             timestamp: timeAsString,
             label: changePointType,
             reason: v.change_point_request.type[changePointType].reason,
+            id: `${fieldConfig.splitField}_${v.key.splitFieldTerm}`,
           } as ChangePointAnnotation;
         });
 

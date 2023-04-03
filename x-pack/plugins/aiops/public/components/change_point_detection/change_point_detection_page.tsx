@@ -4,11 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useCallback } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { FC, useCallback, useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
+import { ChartsGrid } from './charts_grid';
 import { FieldsConfig } from './fields_config';
 import { useDataSource } from '../../hooks/use_data_source';
 import { ChangePointTypeFilter } from './change_point_type_filter';
@@ -16,6 +28,8 @@ import { SearchBarWrapper } from './search_bar';
 import { ChangePointType, useChangePointDetectionContext } from './change_point_detection_context';
 
 export const ChangePointDetectionPage: FC = () => {
+  const [isFlyoutVisible, setFlyoutVisible] = useState<boolean>(false);
+
   const {
     requestParams,
     updateRequestParams,
@@ -23,6 +37,7 @@ export const ChangePointDetectionPage: FC = () => {
     updateFilters,
     resultQuery,
     metricFieldOptions,
+    selectedChangePoints,
   } = useChangePointDetectionContext();
 
   const { dataView } = useDataSource();
@@ -74,13 +89,27 @@ export const ChangePointDetectionPage: FC = () => {
 
       <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
         <EuiFlexItem grow={false}>
-          <EuiText size={'s'}>
-            <FormattedMessage
-              id="xpack.aiops.changePointDetection.aggregationIntervalTitle"
-              defaultMessage="Aggregation interval: "
-            />
-            {requestParams.interval}
-          </EuiText>
+          <EuiFlexGroup alignItems={'center'}>
+            <EuiFlexItem grow={false}>
+              <EuiText size={'s'}>
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.aggregationIntervalTitle"
+                  defaultMessage="Aggregation interval: "
+                />
+                {requestParams.interval}
+              </EuiText>
+            </EuiFlexItem>
+            {Object.keys(selectedChangePoints).length > 0 ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => setFlyoutVisible(!isFlyoutVisible)} size={'s'}>
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage="View selected"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ minWidth: '400px' }}>
           <ChangePointTypeFilter
@@ -93,6 +122,29 @@ export const ChangePointDetectionPage: FC = () => {
       <EuiSpacer size="s" />
 
       <FieldsConfig />
+
+      {isFlyoutVisible ? (
+        <EuiFlyout
+          ownFocus
+          onClose={setFlyoutVisible.bind(null, false)}
+          aria-labelledby={'change_point_charts'}
+          size={'l'}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id={'change_point_charts'}>
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.selectedChangePointsHeader"
+                  defaultMessage="Selected change points"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <ChartsGrid changePoints={selectedChangePoints} />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      ) : null}
     </div>
   );
 };

@@ -62,6 +62,8 @@ export const ChangePointDetectionContext = createContext<{
   updateFilters: (update: Filter[]) => void;
   resultQuery: Query;
   combinedQuery: QueryDslQueryContainer;
+  selectedChangePoints: Record<number, SelectedChangePoint[]>;
+  setSelectedChangePoints: (update: Record<number, SelectedChangePoint[]>) => void;
 }>({
   splitFieldsOptions: [],
   metricFieldOptions: [],
@@ -73,6 +75,8 @@ export const ChangePointDetectionContext = createContext<{
   updateFilters: () => {},
   resultQuery: { query: '', language: 'kuery' },
   combinedQuery: {},
+  selectedChangePoints: {},
+  setSelectedChangePoints: () => {},
 });
 
 export type ChangePointType =
@@ -86,6 +90,7 @@ export type ChangePointType =
   | 'indeterminable';
 
 export interface ChangePointAnnotation {
+  id: string;
   label: string;
   reason: string;
   timestamp: string;
@@ -96,6 +101,8 @@ export interface ChangePointAnnotation {
   type: ChangePointType;
   p_value: number;
 }
+
+export type SelectedChangePoint = FieldConfig & ChangePointAnnotation;
 
 export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView, savedSearch } = useDataSource();
@@ -117,8 +124,11 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   const timefilter = useTimefilter();
   const timeBuckets = useTimeBuckets();
-  const [resultFilters, setResultFilter] = useState<Filter[]>([]);
 
+  const [resultFilters, setResultFilter] = useState<Filter[]>([]);
+  const [selectedChangePoints, setSelectedChangePoints] = useState<
+    Record<number, SelectedChangePoint[]>
+  >({});
   const [bucketInterval, setBucketInterval] = useState<TimeBucketsInterval>();
 
   const timeRange = useTimeRangeUpdates();
@@ -249,6 +259,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     updateFilters,
     resultQuery,
     combinedQuery,
+    selectedChangePoints,
+    setSelectedChangePoints,
   };
 
   return (

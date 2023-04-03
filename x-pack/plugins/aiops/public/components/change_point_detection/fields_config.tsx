@@ -27,6 +27,7 @@ import { SplitFieldSelector } from './split_field_selector';
 import {
   type ChangePointAnnotation,
   type FieldConfig,
+  SelectedChangePoint,
   useChangePointDetectionContext,
 } from './change_point_detection_context';
 import { useChangePointResults } from './use_change_point_agg_request';
@@ -38,6 +39,8 @@ export const FieldsConfig: FC = () => {
   const {
     requestParams: { fieldConfigs },
     updateRequestParams,
+    selectedChangePoints,
+    setSelectedChangePoints,
   } = useChangePointDetectionContext();
 
   const onChange = useCallback(
@@ -58,8 +61,23 @@ export const FieldsConfig: FC = () => {
     (index: number) => {
       fieldConfigs.splice(index, 1);
       updateRequestParams({ fieldConfigs });
+
+      delete selectedChangePoints[index];
+      setSelectedChangePoints({
+        ...selectedChangePoints,
+      });
     },
-    [updateRequestParams, fieldConfigs]
+    [updateRequestParams, fieldConfigs, setSelectedChangePoints, selectedChangePoints]
+  );
+
+  const onSelectionChange = useCallback(
+    (update: SelectedChangePoint[], index: number) => {
+      setSelectedChangePoints({
+        ...selectedChangePoints,
+        [index]: update,
+      });
+    },
+    [setSelectedChangePoints, selectedChangePoints]
   );
 
   return (
@@ -72,6 +90,9 @@ export const FieldsConfig: FC = () => {
               onChange={(value) => onChange(value, index)}
               onRemove={onRemove.bind(null, index)}
               removeDisabled={fieldConfigs.length === 1}
+              onSelectionChange={(update) => {
+                onSelectionChange(update, index);
+              }}
             />
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -92,6 +113,7 @@ export interface FieldPanelProps {
   removeDisabled: boolean;
   onChange: (update: FieldConfig) => void;
   onRemove: () => void;
+  onSelectionChange: (update: SelectedChangePoint[]) => void;
 }
 
 /**
@@ -102,7 +124,13 @@ export interface FieldPanelProps {
  * @param removeDisabled
  * @constructor
  */
-const FieldPanel: FC<FieldPanelProps> = ({ fieldConfig, onChange, onRemove, removeDisabled }) => {
+const FieldPanel: FC<FieldPanelProps> = ({
+  fieldConfig,
+  onChange,
+  onRemove,
+  removeDisabled,
+  onSelectionChange,
+}) => {
   const { combinedQuery, requestParams } = useChangePointDetectionContext();
 
   const splitFieldCardinality = useSplitFieldCardinality(fieldConfig.splitField, combinedQuery);
@@ -117,6 +145,7 @@ const FieldPanel: FC<FieldPanelProps> = ({ fieldConfig, onChange, onRemove, remo
     <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
       <EuiAccordion
         id={'temp_id'}
+        initialIsOpen={true}
         buttonElement={'div'}
         buttonContent={
           <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
@@ -158,6 +187,7 @@ const FieldPanel: FC<FieldPanelProps> = ({ fieldConfig, onChange, onRemove, remo
           isLoading={annotationsLoading}
           annotations={annotations}
           splitFieldCardinality={splitFieldCardinality}
+          onSelectionChange={onSelectionChange}
         />
       </EuiAccordion>
     </EuiPanel>
@@ -216,6 +246,7 @@ interface ChangePointResultsProps {
   splitFieldCardinality: number | null;
   isLoading: boolean;
   annotations: ChangePointAnnotation[];
+  onSelectionChange: (update: SelectedChangePoint[]) => void;
 }
 
 /**
@@ -226,6 +257,7 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
   splitFieldCardinality,
   isLoading,
   annotations,
+  onSelectionChange,
 }) => {
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
@@ -263,6 +295,7 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
         annotations={annotations}
         fieldConfig={fieldConfig}
         isLoading={isLoading}
+        onSelectionChange={onSelectionChange}
       />
     </>
   );

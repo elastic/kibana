@@ -12,11 +12,13 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { FilterStateStore } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { useDataSource } from '../../hooks/use_data_source';
 import { fnOperationTypeMapping } from './constants';
 import {
   type ChangePointAnnotation,
   FieldConfig,
+  SelectedChangePoint,
   useChangePointDetectionContext,
 } from './change_point_detection_context';
 import { type ChartComponentProps } from './chart_component';
@@ -26,12 +28,14 @@ export interface ChangePointsTableProps {
   annotations: ChangePointAnnotation[];
   fieldConfig: FieldConfig;
   isLoading: boolean;
+  onSelectionChange: (update: SelectedChangePoint[]) => void;
 }
 
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   isLoading,
   annotations,
   fieldConfig,
+  onSelectionChange,
 }) => {
   const { fieldFormats } = useAiopsAppContext();
 
@@ -111,8 +115,26 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       : []),
   ];
 
+  const selectionValue = useMemo<EuiTableSelectionType<ChangePointAnnotation>>(() => {
+    return {
+      selectable: (item) => true,
+      onSelectionChange: (selection) => {
+        onSelectionChange(
+          selection.map((s) => {
+            return {
+              ...s,
+              ...fieldConfig,
+            };
+          })
+        );
+      },
+    };
+  }, [fieldConfig, onSelectionChange]);
+
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
+      itemId={'id'}
+      selection={selectionValue}
       loading={isLoading}
       items={annotations}
       columns={columns}
