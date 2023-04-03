@@ -21,7 +21,7 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import { createVersionedRouterMock } from '@kbn/core-http-versioned-router-server-mocks';
+import { createVersionedRouterMock } from './versioned_router.mock';
 
 export type RouterMock = jest.Mocked<IRouterWithVersion<any>>;
 
