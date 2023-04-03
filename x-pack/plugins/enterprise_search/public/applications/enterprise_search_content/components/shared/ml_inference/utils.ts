@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
 import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+
 import { TrainedModel } from '../../../api/ml_models/ml_trained_models_logic';
 
 export const NLP_CONFIG_KEYS: string[] = Object.values(SUPPORTED_PYTORCH_TASKS);
