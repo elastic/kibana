@@ -48,7 +48,7 @@ export const schema: FormSchema<FormProps> = {
   endDate: {},
   recurring: {
     type: FIELD_TYPES.TOGGLE,
-    label: i18n.CREATE_FORM_RECURRING,
+    label: i18n.CREATE_FORM_REPEAT,
     defaultValue: false,
   },
   recurringSchedule: {

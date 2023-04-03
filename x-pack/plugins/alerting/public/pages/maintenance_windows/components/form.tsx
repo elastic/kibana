@@ -100,7 +100,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                         startDate: {
                           path: 'startDate',
                           config: {
-                            label: i18n.CREATE_FORM_DATE_AND_TIME,
+                            label: i18n.CREATE_FORM_SCHEDULE,
                             defaultValue: moment().toISOString(),
                             validations: [],
                           },
