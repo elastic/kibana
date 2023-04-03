@@ -180,7 +180,7 @@ export const CategoryTable: FC<Props> = ({
           description: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
             defaultMessage: 'Show these in Discover',
           }),
-          icon: 'discoverApp',
+          icon: 'plusInCircle',
           type: 'icon',
           onClick: (category) => openInDiscover(QUERY_MODE.INCLUDE, category),
         },
@@ -191,7 +191,7 @@ export const CategoryTable: FC<Props> = ({
           description: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
             defaultMessage: 'Filter out in Discover',
           }),
-          icon: 'filter',
+          icon: 'minusInCircle',
           type: 'icon',
           onClick: (category) => openInDiscover(QUERY_MODE.EXCLUDE, category),
         },

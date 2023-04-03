@@ -48,7 +48,7 @@ interface CatResponse {
   };
 }
 
-export function isCatSampleResponse(resp: any): resp is CatSampleResponse {
+export function isSampleCatResponse(resp: any): resp is CatSampleResponse {
   return resp.rawResponse.aggregations.sample !== undefined;
 }
 
@@ -206,7 +206,7 @@ function processCategoryResults(result: CatResponse | CatSampleResponse, field: 
     throw new Error('processCategoryResults failed, did not return aggregations.');
   }
 
-  const buckets = isCatSampleResponse(result)
+  const buckets = isSampleCatResponse(result)
     ? result.rawResponse.aggregations.sample.categories.buckets
     : result.rawResponse.aggregations.categories.buckets;
 
