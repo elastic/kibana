@@ -142,7 +142,9 @@ describe('RPC -> get()', () => {
     test('should return the storage get() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = 'GetResult';
+      const expected = {
+        item: 'GetResult',
+      };
       storage.get.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });

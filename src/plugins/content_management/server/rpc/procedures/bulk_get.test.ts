@@ -173,7 +173,16 @@ describe('RPC -> bulkGet()', () => {
     test('should return the storage bulkGet() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = ['Item1', 'Item2'];
+      const expected = {
+        hits: [
+          {
+            item: 'Item1',
+          },
+          {
+            item: 'Item2',
+          },
+        ],
+      };
       storage.bulkGet.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, {

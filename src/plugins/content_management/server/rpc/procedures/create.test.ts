@@ -146,7 +146,9 @@ describe('RPC -> create()', () => {
     test('should return the storage create() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = 'CreateResult';
+      const expected = {
+        item: 'CreateResult',
+      };
       storage.create.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, {

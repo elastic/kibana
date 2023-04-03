@@ -153,7 +153,9 @@ describe('RPC -> update()', () => {
     test('should return the storage update() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = 'UpdateResult';
+      const expected = {
+        item: 'UpdateResult',
+      };
       storage.update.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, {

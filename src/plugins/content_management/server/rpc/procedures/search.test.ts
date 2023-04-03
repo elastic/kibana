@@ -34,7 +34,7 @@ const FOO_CONTENT_ID = 'foo';
 
 describe('RPC -> search()', () => {
   describe('Input/Output validation', () => {
-    const query = { title: 'hello' };
+    const query = { text: 'hello' };
     const validInput = { contentTypeId: 'foo', version: 1, query };
 
     test('should validate that a contentTypeId and "query" object is passed', () => {
@@ -57,11 +57,11 @@ describe('RPC -> search()', () => {
         },
         {
           input: omit(validInput, 'query'),
-          expectedError: '[query]: expected value of type [object] but got [undefined]',
+          expectedError: '[query]: expected at least one defined value but got [undefined]',
         },
         {
           input: { ...validInput, query: 123 }, // query is not an object
-          expectedError: '[query]: expected value of type [object] but got [number]',
+          expectedError: '[query]: expected a plain object value, but found [number] instead.',
         },
         {
           input: { ...validInput, unknown: 'foo' },
@@ -69,7 +69,6 @@ describe('RPC -> search()', () => {
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);
-
         if (!expectedError) {
           try {
             expect(error).toBe(null);
@@ -86,7 +85,7 @@ describe('RPC -> search()', () => {
       let error = validate(
         {
           contentTypeId: 'foo',
-          query: { title: 'hello' },
+          query: { text: 'hello' },
           version: 1,
           options: { any: 'object' },
         },
@@ -99,7 +98,7 @@ describe('RPC -> search()', () => {
         {
           contentTypeId: 'foo',
           version: 1,
-          query: { title: 'hello' },
+          query: { text: 'hello' },
           options: 123, // Not an object
         },
         inputSchema
@@ -110,22 +109,18 @@ describe('RPC -> search()', () => {
       );
     });
 
-    test('should validate that the response is an object or an array of object', () => {
+    test('should validate the response format with "hits" and "pagination"', () => {
       let error = validate(
         {
-          any: 'object',
-        },
-        outputSchema
-      );
-
-      expect(error).toBe(null);
-
-      error = validate(
-        [
-          {
-            any: 'object',
+          contentTypeId: 'foo',
+          result: {
+            hits: [],
+            pagination: {
+              total: 0,
+              cursor: '',
+            },
           },
-        ],
+        },
         outputSchema
       );
 
@@ -136,7 +131,6 @@ describe('RPC -> search()', () => {
       expect(error?.message).toContain(
         'expected a plain object value, but found [number] instead.'
       );
-      expect(error?.message).toContain('expected value of type [array] but got [number]');
     });
   });
 
@@ -165,13 +159,19 @@ describe('RPC -> search()', () => {
     test('should return the storage search() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = 'SearchResult';
+      const expected = {
+        hits: ['SearchResult'],
+        pagination: {
+          total: 1,
+          cursor: '',
+        },
+      };
       storage.search.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, {
         contentTypeId: FOO_CONTENT_ID,
         version: 1, // version in request
-        query: { title: 'Hello' },
+        query: { text: 'Hello' },
       });
 
       expect(result).toEqual({
@@ -190,7 +190,7 @@ describe('RPC -> search()', () => {
             getTransforms: expect.any(Function),
           },
         },
-        { title: 'Hello' },
+        { text: 'Hello' },
         undefined
       );
     });
@@ -199,7 +199,7 @@ describe('RPC -> search()', () => {
       test('should validate that content type definition exist', () => {
         const { ctx } = setup();
         expect(() =>
-          fn(ctx, { contentTypeId: 'unknown', query: { title: 'Hello' } })
+          fn(ctx, { contentTypeId: 'unknown', query: { text: 'Hello' } })
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
@@ -208,7 +208,7 @@ describe('RPC -> search()', () => {
         expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
-            query: { title: 'Hello' },
+            query: { text: 'Hello' },
             version: 7,
           })
         ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
@@ -218,7 +218,7 @@ describe('RPC -> search()', () => {
     describe('object versioning', () => {
       test('should expose a  utility to transform and validate services objects', () => {
         const { ctx, storage } = setup();
-        fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: { title: 'Hello' }, version: 1 });
+        fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: { text: 'Hello' }, version: 1 });
         const [[storageContext]] = storage.search.mock.calls;
 
         // getTransforms() utils should be available from context
