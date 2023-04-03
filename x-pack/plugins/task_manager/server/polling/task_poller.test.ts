@@ -9,7 +9,7 @@ import { of, BehaviorSubject } from 'rxjs';
 import { none } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { sleep, resolvable, Resolvable } from '../test_utils';
+import { sleep, resolvable } from '../test_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 
