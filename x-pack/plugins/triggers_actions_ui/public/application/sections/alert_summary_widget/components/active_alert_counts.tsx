@@ -22,7 +22,7 @@ export const ActiveAlertCounts = ({ activeAlertCount }: Props) => {
       <EuiText
         color={!!activeAlertCount ? euiTheme.colors.dangerText : euiTheme.colors.successText}
       >
-        <h3 data-test-subj="activeAlertsCount">
+        <h3 data-test-subj="activeAlertCount">
           {numeral(activeAlertCount).format(ALERT_COUNT_FORMAT)}
           {!!activeAlertCount && (
             <>

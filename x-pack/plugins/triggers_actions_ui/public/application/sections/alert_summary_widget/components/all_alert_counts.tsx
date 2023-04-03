@@ -18,7 +18,7 @@ export const AllAlertCounts = ({ count }: Props) => {
   return (
     <>
       <EuiText color={ALL_ALERT_COLOR}>
-        <h3 data-test-subj="totalAlertsCount">{numeral(count).format(ALERT_COUNT_FORMAT)}</h3>
+        <h3 data-test-subj="totalAlertCount">{numeral(count).format(ALERT_COUNT_FORMAT)}</h3>
       </EuiText>
       <EuiText size="s" color="subdued">
         {ALERTS_LABEL}
