@@ -70,7 +70,6 @@ export class TodosClient implements CrudClient {
     return {
       hits,
       pagination: {
-        cursor: '1',
         total: hits.length,
       },
     };

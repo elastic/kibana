@@ -129,7 +129,6 @@ class TodosStorage implements ContentStorage<Todo> {
     return {
       hits,
       pagination: {
-        cursor: '1',
         total: hits.length,
       },
     };

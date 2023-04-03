@@ -47,14 +47,14 @@ export interface SearchResponse<T = unknown> {
   result: SearchResult<T>;
 }
 
-export class ContentCrud {
-  private storage: ContentStorage;
+export class ContentCrud<T = unknown> {
+  private storage: ContentStorage<T>;
   private eventBus: EventBus;
   public contentTypeId: string;
 
   constructor(
     contentTypeId: string,
-    contentStorage: ContentStorage,
+    contentStorage: ContentStorage<T>,
     {
       eventBus,
     }: {
@@ -66,7 +66,11 @@ export class ContentCrud {
     this.eventBus = eventBus;
   }
 
-  public async get(ctx: StorageContext, contentId: string, options?: object): Promise<GetResponse> {
+  public async get(
+    ctx: StorageContext,
+    contentId: string,
+    options?: object
+  ): Promise<GetResponse<T>> {
     this.eventBus.emit({
       type: 'getItemStart',
       contentId,
@@ -103,7 +107,7 @@ export class ContentCrud {
     ctx: StorageContext,
     ids: string[],
     options?: object
-  ): Promise<BulkGetResponse> {
+  ): Promise<BulkGetResponse<T>> {
     this.eventBus.emit({
       type: 'bulkGetItemStart',
       contentTypeId: this.contentTypeId,
@@ -143,7 +147,7 @@ export class ContentCrud {
     ctx: StorageContext,
     data: object,
     options?: object
-  ): Promise<CreateItemResponse> {
+  ): Promise<CreateItemResponse<T, any>> {
     this.eventBus.emit({
       type: 'createItemStart',
       contentTypeId: this.contentTypeId,
@@ -180,7 +184,7 @@ export class ContentCrud {
     id: string,
     data: object,
     options?: object
-  ): Promise<UpdateItemResponse> {
+  ): Promise<UpdateItemResponse<T>> {
     this.eventBus.emit({
       type: 'updateItemStart',
       contentId: id,
@@ -255,7 +259,7 @@ export class ContentCrud {
     ctx: StorageContext,
     query: SearchQuery,
     options?: object
-  ): Promise<SearchResponse> {
+  ): Promise<SearchResponse<T>> {
     this.eventBus.emit({
       type: 'searchItemStart',
       contentTypeId: this.contentTypeId,

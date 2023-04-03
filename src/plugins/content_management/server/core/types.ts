@@ -33,16 +33,21 @@ export interface StorageContext {
 
 export interface ContentStorage<T = unknown, U = T> {
   /** Get a single item */
-  get<M>(ctx: StorageContext, id: string, options?: object): Promise<GetResult<T>>;
+  get(ctx: StorageContext, id: string, options?: object): Promise<GetResult<T, any>>;
 
   /** Get multiple items */
-  bulkGet(ctx: StorageContext, ids: string[], options?: object): Promise<BulkGetResult<T>>;
+  bulkGet(ctx: StorageContext, ids: string[], options?: object): Promise<BulkGetResult<T, any>>;
 
   /** Create an item */
-  create(ctx: StorageContext, data: object, options?: object): Promise<CreateResult<T>>;
+  create(ctx: StorageContext, data: object, options?: object): Promise<CreateResult<T, any>>;
 
   /** Update an item */
-  update(ctx: StorageContext, id: string, data: object, options?: object): Promise<UpdateResult<U>>;
+  update(
+    ctx: StorageContext,
+    id: string,
+    data: object,
+    options?: object
+  ): Promise<UpdateResult<U, any>>;
 
   /** Delete an item */
   delete(ctx: StorageContext, id: string, options?: object): Promise<DeleteResult>;

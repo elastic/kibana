@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import { ObjectMigrationDefinition, Version } from './types';
+import { ObjectMigrationDefinition, Version, VersionableObject } from './types';
 import type {
   ServiceDefinitionVersioned,
   ServicesDefinition,
@@ -196,5 +197,3 @@ export const getTransforms = (
 };
 
 export type GetTransformsFn = typeof getTransforms;
-
-import { VersionableObject } from './types';
