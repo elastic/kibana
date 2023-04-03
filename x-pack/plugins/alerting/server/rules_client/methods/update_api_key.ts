@@ -6,13 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SavedObjectReference } from '@kbn/core/server';
+
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
-import { updateMeta } from '../lib';
+import { updateMeta, migrateLegacyActions } from '../lib';
 import { RulesClientContext } from '../types';
 
 export async function updateApiKey(
@@ -30,6 +33,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
   let apiKeyToInvalidate: string | null = null;
   let attributes: RawRule;
   let version: string | undefined;
+  let references: SavedObjectReference[];
 
   try {
     const decryptedAlert =
@@ -39,6 +43,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
+    references = decryptedAlert.references;
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
     context.logger.error(
@@ -48,6 +53,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     attributes = alert.attributes;
     version = alert.version;
+    references = alert.references;
   }
 
   try {
@@ -84,11 +90,25 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     );
   }
 
+  let legacyActions: RawRule['actions'] = [];
+  let legacyActionsReferences: SavedObjectReference[] = [];
+
+  // migrate legacy actions only for SIEM rules
+  if (attributes.consumer === AlertConsumers.SIEM) {
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: id,
+    });
+
+    legacyActions = migratedActions.legacyActions;
+    legacyActionsReferences = migratedActions.legacyActionsReferences;
+  }
+
   const updateAttributes = updateMeta(context, {
     ...attributes,
     ...apiKeyAsAlertAttributes(createdAPIKey, username),
     updatedAt: new Date().toISOString(),
     updatedBy: username,
+    actions: [...attributes.actions, ...legacyActions],
   });
 
   context.auditLogger?.log(
@@ -102,7 +122,12 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   try {
-    await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
+    await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
+      version,
+      ...(legacyActionsReferences.length
+        ? { references: [...references, ...legacyActionsReferences] }
+        : {}),
+    });
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
