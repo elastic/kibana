@@ -26,7 +26,7 @@ import { MetadataTab } from './metadata/metadata';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { navigateToUptime } from './links/navigate_to_uptime';
-import { LinkToApmTraces } from './links/link-to-apm-traces';
+import { LinkToApmTraces } from './links/link_to_apm_traces';
 
 interface Props {
   node: HostNodeRow;
