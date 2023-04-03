@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './mock_globals';
-export * from './rtl_helpers';
+import { MockResizeObserver } from './__mocks__/resize_observer.mock';
+
+export function mockGlobals() {
+  global.ResizeObserver = MockResizeObserver;
+}
