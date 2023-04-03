@@ -49,7 +49,7 @@ export interface SearchQuery {
   /** The text to search for */
   text?: string;
   /** List of tags id to include and exclude */
-  tags?: [included: string[], excluded?: string[]];
+  tags?: [included?: string[], excluded?: string[]];
   /** The number of result to return */
   limit?: number;
   /** The cursor for this query. Can be a page number or a cursor */
