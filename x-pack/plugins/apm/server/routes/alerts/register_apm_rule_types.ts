@@ -21,6 +21,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { registerTransactionDurationRuleType } from './rule_types/transaction_duration/register_transaction_duration_rule_type';
@@ -42,6 +43,10 @@ export const apmRuleTypeAlertFieldMap = {
     required: false,
   },
   [TRANSACTION_TYPE]: {
+    type: 'keyword',
+    required: false,
+  },
+  [TRANSACTION_NAME]: {
     type: 'keyword',
     required: false,
   },

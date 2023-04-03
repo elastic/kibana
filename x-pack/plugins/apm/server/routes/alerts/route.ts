@@ -29,6 +29,7 @@ const alertParamsRt = t.intersection([
     ]),
     serviceName: t.string,
     transactionType: t.string,
+    transactionName: t.string,
   }),
   environmentRt,
   rangeRt,

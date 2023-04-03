@@ -66,6 +66,13 @@ export const apmActionVariables = {
     ),
     name: 'transactionType' as const,
   },
+  transactionName: {
+    description: i18n.translate(
+      'xpack.apm.alerts.action_variables.transactionName',
+      { defaultMessage: 'The transaction name the alert is created for' }
+    ),
+    name: 'transactionName' as const,
+  },
   triggerValue: {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.triggerValue',
