@@ -8,11 +8,11 @@ import { v4 } from 'uuid';
 import { isEmpty } from 'lodash/fp';
 import type { SavedObjectReference } from '@kbn/core/server';
 
-import type { RulesClientContext } from '..';
+import type { RulesClientContext } from '../..';
 
-import { RuleActionParams, RawRuleAction } from '../../types';
-import { find } from '../methods/find';
-import { deleteRule } from '../methods/delete';
+import { RuleActionParams, RawRuleAction } from '../../../types';
+import { find } from '../../methods/find';
+import { deleteRule } from '../../methods/delete';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

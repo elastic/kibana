@@ -28,7 +28,7 @@ import {
 } from './test_helpers';
 import { migrateLegacyActions } from '../lib';
 
-jest.mock('../lib/migrate_legacy_actions', () => {
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
     migrateLegacyActions: jest.fn(),
   };

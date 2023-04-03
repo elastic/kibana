@@ -18,9 +18,9 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { migrateLegacyActions } from '../lib';
-import { migrateLegacyActionsMock } from '../lib/migrate_legacy_actions.mock';
+import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/migrate_legacy_actions.mock';
 
-jest.mock('../lib/migrate_legacy_actions', () => {
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
     migrateLegacyActions: jest.fn(),
   };

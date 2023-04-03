@@ -21,7 +21,7 @@ import { getBeforeSetup } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { migrateLegacyActions } from '../lib';
 
-jest.mock('../lib/migrate_legacy_actions', () => {
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
     migrateLegacyActions: jest.fn(),
   };

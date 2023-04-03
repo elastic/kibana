@@ -10,9 +10,9 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
-import { RuleAction, Rule } from '../../types';
-import type { RuleExecutorServices } from '../..';
-import { injectReferencesIntoActions } from '../common';
+import { RuleAction, Rule } from '../../../types';
+import type { RuleExecutorServices } from '../../..';
+import { injectReferencesIntoActions } from '../../common';
 
 import {
   transformFromLegacyActions,
