@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { bulkGetCases, getCases, getCasesMetrics } from '.';
-import { allCases, allCasesSnake } from '../containers/mock';
+import { allCases, allCasesSnake, casesSnake } from '../containers/mock';
 
 describe('api', () => {
   beforeEach(() => {
@@ -50,11 +50,19 @@ describe('api', () => {
 
   describe('bulkGetCases', () => {
     const http = httpServiceMock.createStartContract({ basePath: '' });
-    http.post.mockResolvedValue({ cases: allCasesSnake, errors: [] });
+    http.post.mockResolvedValue({ cases: [{ title: 'test' }], errors: [] });
 
-    it('should return the correct response', async () => {
+    it('should return the correct cases with a subset of fields', async () => {
       expect(await bulkGetCases({ http, params: { ids: ['test'], fields: ['title'] } })).toEqual({
-        cases: allCasesSnake,
+        cases: [{ title: 'test' }],
+        errors: [],
+      });
+    });
+
+    it('should return the correct cases with all fields', async () => {
+      http.post.mockResolvedValueOnce({ cases: casesSnake, errors: [] });
+      expect(await bulkGetCases({ http, params: { ids: ['test'] } })).toEqual({
+        cases: casesSnake,
         errors: [],
       });
     });

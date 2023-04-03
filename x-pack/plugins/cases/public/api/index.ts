@@ -26,6 +26,7 @@ import type {
 } from '../../common/api';
 import { convertAllCasesToCamel, convertToCamelCase } from './utils';
 import {
+  decodeCasesBulkGetResponse,
   decodeCasesFindResponse,
   decodeCasesMetricsResponse,
   decodeCasesStatusResponse,
@@ -82,5 +83,5 @@ export const bulkGetCases = async <Field extends keyof CaseResponse = keyof Case
     }
   );
 
-  return res;
+  return decodeCasesBulkGetResponse(res, params.fields);
 };
