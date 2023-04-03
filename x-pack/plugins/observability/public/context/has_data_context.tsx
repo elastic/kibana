@@ -15,7 +15,6 @@ import {
   APM_APP,
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
-  SLOS_APP,
   UPTIME_APP,
   UX_APP,
 } from './constants';
@@ -26,7 +25,6 @@ import { getObservabilityAlerts } from '../services/get_observability_alerts';
 import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { ApmIndicesConfig } from '../../common/typings';
 import { ObservabilityAppServices } from '../application/types';
-import { useFetchSloList } from '../hooks/slo/use_fetch_slo_list';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
@@ -57,7 +55,6 @@ const apps: DataContextApps[] = [
   INFRA_METRICS_APP,
   UX_APP,
   ALERT_APP,
-  SLOS_APP,
 ];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
@@ -66,8 +63,6 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
-
-  const { sloList } = useFetchSloList();
 
   const isExploratoryView = useRouteMatch('/exploratory-view');
 
@@ -130,16 +125,6 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
                 });
                 break;
             }
-
-            if (sloList?.total && sloList.total > 0) {
-              setHasDataMap((prevState) => ({
-                ...prevState,
-                [SLOS_APP]: {
-                  hasData: sloList.total > 0,
-                  status: FETCH_STATUS.SUCCESS,
-                },
-              }));
-            }
           } catch (e) {
             setHasDataMap((prevState) => ({
               ...prevState,
@@ -152,7 +137,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
         });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isExploratoryView, sloList?.total]
+    [isExploratoryView]
   );
 
   useEffect(() => {
