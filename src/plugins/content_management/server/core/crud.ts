@@ -70,7 +70,7 @@ export class ContentCrud<T = unknown> {
     ctx: StorageContext,
     contentId: string,
     options?: object
-  ): Promise<GetResponse<T>> {
+  ): Promise<GetResponse<T, any>> {
     this.eventBus.emit({
       type: 'getItemStart',
       contentId,
@@ -107,7 +107,7 @@ export class ContentCrud<T = unknown> {
     ctx: StorageContext,
     ids: string[],
     options?: object
-  ): Promise<BulkGetResponse<T>> {
+  ): Promise<BulkGetResponse<T, any>> {
     this.eventBus.emit({
       type: 'bulkGetItemStart',
       contentTypeId: this.contentTypeId,
