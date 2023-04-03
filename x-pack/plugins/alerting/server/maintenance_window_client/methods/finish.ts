@@ -7,7 +7,10 @@
 
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import { generateMaintenanceWindowEvents } from '../generate_maintenance_window_events';
+import {
+  generateMaintenanceWindowEvents,
+  mergeEvents,
+} from '../generate_maintenance_window_events';
 import { getMaintenanceWindowDateAndStatus } from '../get_maintenance_window_date_and_status';
 import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
 import {
@@ -59,10 +62,16 @@ async function finishWithOCC(
     );
 
     // Generate new events with new expiration date
-    const events = generateMaintenanceWindowEvents({
+    const newEvents = generateMaintenanceWindowEvents({
       rRule: attributes.rRule,
       duration: attributes.duration,
       expirationDate: expirationDate.toISOString(),
+    });
+
+    // Merge it with the old events
+    const events = mergeEvents({
+      newEvents,
+      oldEvents: attributes.events,
     });
 
     // Find the current event and status of the maintenance window
@@ -86,15 +95,15 @@ async function finishWithOCC(
       lte: now.toISOString(),
     };
 
-    // Update the events with the new event
-    const eventsCopy = [...events];
-    eventsCopy[index] = eventToFinish;
+    // Update the events with the new finished event
+    const eventsWithFinishedEvent = [...events];
+    eventsWithFinishedEvent[index] = eventToFinish;
 
     const result = await savedObjectsClient.update<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       fetchedId,
       {
-        events: eventsCopy,
+        events: eventsWithFinishedEvent,
         expirationDate: expirationDate.toISOString(),
         ...modificationMetadata,
       },

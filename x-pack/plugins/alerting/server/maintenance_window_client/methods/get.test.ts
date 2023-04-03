@@ -33,7 +33,6 @@ describe('MaintenanceWindowClient - get', () => {
 
   it('should get maintenance window by id', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
-
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: new Date().toISOString(),
     });
@@ -49,7 +48,6 @@ describe('MaintenanceWindowClient - get', () => {
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       'test-id'
     );
-
     expect(result.id).toEqual('test-id');
   });
 });

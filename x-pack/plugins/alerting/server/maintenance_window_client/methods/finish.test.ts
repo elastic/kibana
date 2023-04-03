@@ -49,7 +49,7 @@ describe('MaintenanceWindowClient - finish', () => {
   it('should finish the currently running maintenance window event', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
-      duration: 60 * 60 * 1000, //
+      duration: 60 * 60 * 1000,
       expirationDate: moment.utc().add(1, 'year').toISOString(),
       rRule: {
         tzid: 'UTC',
@@ -70,14 +70,8 @@ describe('MaintenanceWindowClient - finish', () => {
         ...mockMaintenanceWindow,
         ...updatedMetadata,
         events: [
-          {
-            gte: '2023-02-26T00:00:00.000Z',
-            lte: '2023-02-26T00:30:00.000Z',
-          },
-          {
-            gte: '2023-03-05T00:00:00.000Z',
-            lte: '2023-03-05T01:00:00.000Z',
-          },
+          { gte: '2023-02-26T00:00:00.000Z', lte: '2023-02-26T00:30:00.000Z' },
+          { gte: '2023-03-05T00:00:00.000Z', lte: '2023-03-05T01:00:00.000Z' },
         ],
       },
       id: 'test-id',
@@ -87,30 +81,73 @@ describe('MaintenanceWindowClient - finish', () => {
     jest.useFakeTimers().setSystemTime(moment.utc(firstTimestamp).add(30, 'minute').toDate());
 
     const result = await finish(mockContext, { id: 'test-id' });
+
     expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       'test-id',
       expect.objectContaining({
         expirationDate: moment.utc().add(1, 'year').toISOString(),
         events: [
-          {
-            gte: '2023-02-26T00:00:00.000Z',
-            lte: '2023-02-26T00:30:00.000Z', // Second event ends 30 mins earlier, just like expected
-          },
-          {
-            gte: '2023-03-05T00:00:00.000Z',
-            lte: '2023-03-05T01:00:00.000Z',
-          },
+          // Event ends 30 mins earlier, just like expected}
+          { gte: '2023-02-26T00:00:00.000Z', lte: '2023-02-26T00:30:00.000Z' },
+          { gte: '2023-03-05T00:00:00.000Z', lte: '2023-03-05T01:00:00.000Z' },
         ],
       }),
-      {
-        version: '123',
-      }
+      { version: '123' }
     );
-
     expect(result.status).toEqual('upcoming');
     expect(result.startDate).toEqual('2023-03-05T00:00:00.000Z');
     expect(result.endDate).toEqual('2023-03-05T01:00:00.000Z');
+  });
+
+  it('should keep events that were finished in the past', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const modifiedEvents = [
+      { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' },
+      { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-01T23:43:21.000Z' },
+    ];
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      rRule: {
+        tzid: 'CET',
+        dtstart: '2023-03-26T00:00:00.000Z',
+        freq: RRule.WEEKLY,
+        count: 5,
+      },
+      events: modifiedEvents,
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValue({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    savedObjectsClient.update.mockResolvedValue({
+      attributes: {
+        ...mockMaintenanceWindow,
+        ...updatedMetadata,
+      },
+      id: 'test-id',
+    } as unknown as SavedObjectsUpdateResponse);
+
+    jest.useFakeTimers().setSystemTime(new Date('2023-04-15T23:30:00.000Z'));
+
+    await finish(mockContext, { id: 'test-id' });
+
+    expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      'test-id',
+      expect.objectContaining({
+        events: [
+          ...modifiedEvents,
+          { gte: '2023-04-08T23:00:00.000Z', lte: '2023-04-09T00:00:00.000Z' },
+          { gte: '2023-04-15T23:00:00.000Z', lte: '2023-04-15T23:30:00.000Z' },
+          { gte: '2023-04-22T23:00:00.000Z', lte: '2023-04-23T00:00:00.000Z' },
+        ],
+      }),
+      { version: '123' }
+    );
   });
 
   it('should throw if trying to finish a maintenance window that is not running', async () => {

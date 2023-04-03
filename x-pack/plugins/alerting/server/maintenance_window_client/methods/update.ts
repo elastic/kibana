@@ -8,7 +8,11 @@
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
-import { generateMaintenanceWindowEvents } from '../generate_maintenance_window_events';
+import {
+  generateMaintenanceWindowEvents,
+  shouldRegenerateEvents,
+  mergeEvents,
+} from '../generate_maintenance_window_events';
 import {
   MaintenanceWindow,
   MaintenanceWindowSOAttributes,
@@ -45,8 +49,6 @@ async function updateWithOCC(
 ): Promise<MaintenanceWindow> {
   const { savedObjectsClient, getModificationMetadata, logger } = context;
   const { id, title, enabled, duration, rRule } = params;
-  const modificationMetadata = await getModificationMetadata();
-  const expirationDate = moment.utc().add(1, 'year').toISOString();
 
   try {
     const {
@@ -62,11 +64,18 @@ async function updateWithOCC(
       throw Boom.badRequest('Cannot edit archived maintenance windows');
     }
 
-    const events = generateMaintenanceWindowEvents({
+    const expirationDate = moment.utc().add(1, 'year').toISOString();
+    const modificationMetadata = await getModificationMetadata();
+
+    let events = generateMaintenanceWindowEvents({
       rRule: rRule || attributes.rRule,
-      expirationDate: expirationDate || attributes.expirationDate,
-      duration: duration || attributes.duration,
+      duration: typeof duration === 'number' ? duration : attributes.duration,
+      expirationDate,
     });
+
+    if (!shouldRegenerateEvents({ maintenanceWindow: attributes, rRule, duration })) {
+      events = mergeEvents({ oldEvents: attributes.events, newEvents: events });
+    }
 
     const result = await savedObjectsClient.update<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,

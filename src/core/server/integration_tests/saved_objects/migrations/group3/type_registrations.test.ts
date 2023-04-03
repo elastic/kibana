@@ -79,6 +79,7 @@ const previouslyRegisteredTypes = [
   'legacy-url-alias',
   'lens',
   'lens-ui-telemetry',
+  'maintenance-window',
   'map',
   'maps-telemetry',
   'metrics-explorer-view',

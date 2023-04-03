@@ -92,28 +92,20 @@ describe('MaintenanceWindowClient - update', () => {
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       'test-id'
     );
-
     expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       'test-id',
       {
         ...updatedAttributes,
         events: [
-          {
-            gte: '2023-03-26T00:00:00.000Z',
-            lte: '2023-03-26T02:00:00.000Z',
-          },
-          {
-            gte: '2023-04-01T23:00:00.000Z',
-            lte: '2023-04-02T01:00:00.000Z',
-          },
+          { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T02:00:00.000Z' },
+          { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T01:00:00.000Z' }, // Daylight savings
         ],
         expirationDate: moment(new Date(secondTimestamp)).tz('UTC').add(1, 'year').toISOString(),
         ...updatedMetadata,
       },
       { version: '123' }
     );
-
     // Only these 3 properties are worth asserting since the rest come from mocks
     expect(result).toEqual(
       expect.objectContaining({
@@ -125,9 +117,77 @@ describe('MaintenanceWindowClient - update', () => {
     );
   });
 
-  it('should throw if updating a maintenance window that has expired', async () => {
+  it('should not regenerate all events if rrule and duration did not change', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
+    const modifiedEvents = [
+      { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' },
+      { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-01T23:43:21.000Z' },
+    ];
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      rRule: {
+        tzid: 'CET',
+        dtstart: '2023-03-26T00:00:00.000Z',
+        freq: RRule.WEEKLY,
+        count: 5,
+      },
+      events: modifiedEvents,
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValue({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    savedObjectsClient.update.mockResolvedValue({
+      attributes: {
+        ...mockMaintenanceWindow,
+        ...updatedAttributes,
+        ...updatedMetadata,
+      },
+      id: 'test-id',
+    } as unknown as SavedObjectsUpdateResponse);
+
+    // Update without changing duration or rrule
+    await update(mockContext, { id: 'test-id' });
+    // Events keep the previous modified events, but adds on the new events
+    expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      'test-id',
+      expect.objectContaining({
+        events: [...modifiedEvents, expect.any(Object), expect.any(Object), expect.any(Object)],
+      }),
+      { version: '123' }
+    );
+
+    // Update with changing rrule
+    await update(mockContext, {
+      id: 'test-id',
+      rRule: {
+        tzid: 'CET',
+        dtstart: '2023-03-26T00:00:00.000Z',
+        freq: RRule.WEEKLY,
+        count: 2,
+      },
+    });
+    // All events are regenerated
+    expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      'test-id',
+      expect.objectContaining({
+        events: [
+          { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T01:00:00.000Z' },
+          { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T00:00:00.000Z' },
+        ],
+      }),
+      { version: '123' }
+    );
+  });
+
+  it('should throw if updating a maintenance window that has expired', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
     });
@@ -139,10 +199,7 @@ describe('MaintenanceWindowClient - update', () => {
     } as unknown as SavedObject);
 
     await expect(async () => {
-      await update(mockContext, {
-        id: 'test-id',
-        ...updatedAttributes,
-      });
+      await update(mockContext, { id: 'test-id', ...updatedAttributes });
     }).rejects.toThrowError();
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(

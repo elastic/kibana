@@ -7,7 +7,10 @@
 
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import { generateMaintenanceWindowEvents } from '../generate_maintenance_window_events';
+import {
+  generateMaintenanceWindowEvents,
+  mergeEvents,
+} from '../generate_maintenance_window_events';
 import { getMaintenanceWindowFromRaw } from '../get_maintenance_window_from_raw';
 import {
   MaintenanceWindowSOAttributes,
@@ -48,6 +51,7 @@ async function archiveWithOCC(
 ): Promise<MaintenanceWindow> {
   const { savedObjectsClient, getModificationMetadata, logger } = context;
   const { id, archive: shouldArchive } = params;
+
   const modificationMetadata = await getModificationMetadata();
   const expirationDate = getArchivedExpirationDate(shouldArchive);
 
@@ -56,11 +60,16 @@ async function archiveWithOCC(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       id
     );
-    const events = generateMaintenanceWindowEvents({
-      rRule: attributes.rRule,
-      duration: attributes.duration,
-      expirationDate,
+
+    const events = mergeEvents({
+      newEvents: generateMaintenanceWindowEvents({
+        rRule: attributes.rRule,
+        duration: attributes.duration,
+        expirationDate,
+      }),
+      oldEvents: attributes.events,
     });
+
     const result = await savedObjectsClient.update<MaintenanceWindowSOAttributes>(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       id,

@@ -102,6 +102,12 @@ export default function ({ getService }: FtrProviderContext) {
         'allFlappingSettings',
         'readFlappingSettings',
       ],
+      maintenanceWindow: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+      ]
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };
