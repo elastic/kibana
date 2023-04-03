@@ -21,10 +21,12 @@ export const SCHEMA_QUERY_V8_8_0 = schema.object({
     schema.object({
       from: schema.string(),
       to: schema.string(),
-      refreshInterval: schema.object({
-        value: schema.number(),
-        pause: schema.boolean(),
-      }),
+      refreshInterval: schema.maybe(
+        schema.object({
+          value: schema.number(),
+          pause: schema.boolean(),
+        })
+      ),
     })
   ),
 });
