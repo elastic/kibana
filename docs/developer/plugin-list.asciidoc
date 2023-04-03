@@ -328,6 +328,10 @@ In general this plugin provides:
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
 
+|{kib-repo}blob/{branch}/src/plugins/unified_doc_viewer/README.md[unifiedDocViewer]
+|Helpful description to come....
+
+
 |{kib-repo}blob/{branch}/src/plugins/unified_field_list/README.md[unifiedFieldList]
 |This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
