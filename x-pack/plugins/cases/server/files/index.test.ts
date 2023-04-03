@@ -246,7 +246,7 @@ describe('server files', () => {
       describe('no mime types', () => {
         const schema = ConfigSchema.validate({ files: { allowedMimeTypes: [] } });
 
-        it('sets the cases file kind allowed mime types to only image png', () => {
+        it('sets the cases file kind allowed mime types to an empty array', () => {
           registerCaseFileKinds(schema.files, mockFilesSetup);
 
           expect(mockFilesSetup.registerFileKind.mock.calls[0]).toMatchInlineSnapshot(`
@@ -287,7 +287,7 @@ describe('server files', () => {
           `);
         });
 
-        it('sets the observability file kind allowed mime types to only image png', () => {
+        it('sets the observability file kind allowed mime types to an empty array', () => {
           registerCaseFileKinds(schema.files, mockFilesSetup);
 
           expect(mockFilesSetup.registerFileKind.mock.calls[1]).toMatchInlineSnapshot(`
@@ -328,7 +328,7 @@ describe('server files', () => {
           `);
         });
 
-        it('sets the security solution file kind allowed mime types to only image png', () => {
+        it('sets the security solution file kind allowed mime types to an empty array', () => {
           registerCaseFileKinds(schema.files, mockFilesSetup);
 
           expect(mockFilesSetup.registerFileKind.mock.calls[2]).toMatchInlineSnapshot(`
