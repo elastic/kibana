@@ -27,7 +27,6 @@ import { ShowMoreButton } from './show_more_button';
 import { useLastPage } from './use_last_page';
 
 const getIconsCss = (
-  showBottomList: boolean,
   hasNextPage: boolean | undefined,
   euiTheme: EuiThemeComputed<{}>
 ): string => {
@@ -176,7 +175,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         {...(showBottomList
           ? {
               css: css`
-                ${getIconsCss(showBottomList, hasNextPage, euiTheme)}
+                ${getIconsCss(hasNextPage, euiTheme)}
               `,
             }
           : {})}
@@ -198,7 +197,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           />
         )}
         {lastPageUserActions?.length ? (
-          <EuiFlexItem>
+          <EuiFlexItem {...(!hasNextPage ? {css: css`margin-top: 24px`} : {})}>
             <UserActionsList
               {...props}
               caseUserActions={lastPageUserActions}
