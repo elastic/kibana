@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidV4 } from 'uuid';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -48,5 +49,8 @@ export const alertInstanceFactoryStub = <
   },
   hasContext() {
     return false;
+  },
+  getUuid() {
+    return uuidV4();
   },
 });
