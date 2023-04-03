@@ -157,8 +157,8 @@ export const EngineSchema: React.FC = () => {
   }, [onlyShowConflicts]);
 
   const filteredSchemaFields = useMemo(() => {
-    if (!onlyShowConflicts) return schemaFields;
-    return schemaFields.filter((field) => field.type === 'conflict');
+    if (onlyShowConflicts) return schemaFields.filter((field) => field.type === 'conflict');
+    return schemaFields;
   }, [onlyShowConflicts, schemaFields]);
 
   useEffect(() => {
