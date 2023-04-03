@@ -105,13 +105,6 @@ import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list
 const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
-interface RulesPageContainerState {
-  lastResponse: string[];
-  search: string;
-  status: RuleStatus[];
-  type: string[];
-}
-
 export interface RulesListProps {
   filteredRuleTypes?: string[];
   showActionFilter?: boolean;
@@ -119,15 +112,15 @@ export interface RulesListProps {
   showCreateRuleButtonInPrompt?: boolean;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   statusFilter?: RuleStatus[];
-  onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
+  onStatusFilterChange?: (status: RuleStatus[]) => void;
   lastResponseFilter?: string[];
-  onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
+  onLastResponseFilterChange?: (lastResponse: string[]) => void;
   lastRunOutcomeFilter?: string[];
-  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
+  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => void;
   typeFilter?: string[];
-  onTypeFilterChange?: (type: string[]) => RulesPageContainerState;
+  onTypeFilterChange?: (type: string[]) => void;
   searchFilter?: string;
-  onSearchFilterChange?: (search: string) => RulesPageContainerState;
+  onSearchFilterChange?: (search: string) => void;
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: string[];

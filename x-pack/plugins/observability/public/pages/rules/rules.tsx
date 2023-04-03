@@ -81,46 +81,22 @@ export function RulesPage() {
   const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
     setStatus(newStatus);
     urlStateStorage.set('_a', { lastResponse, search, status: newStatus, type });
-    return {
-      lastResponse: stateLastResponse || [],
-      search: search || '',
-      status: newStatus,
-      type: stateType,
-    };
   };
 
   const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
     setRefresh(new Date());
     setLastResponse(newLastResponse);
     urlStateStorage.set('_a', { lastResponse: newLastResponse, search, status, type });
-    return {
-      lastResponse: newLastResponse,
-      search: search || '',
-      status: stateStatus || [],
-      type: stateType || [],
-    };
   };
 
   const handleTypeFilterChange = (newType: string[]) => {
     setType(newType);
     urlStateStorage.set('_a', { lastResponse, search, status, type: newType });
-    return {
-      lastResponse: stateLastResponse,
-      search: search || '',
-      status: stateStatus || [],
-      type: newType || [],
-    };
   };
 
   const handleSearchFilterChange = (newSearch: string) => {
     setSearch(newSearch);
     urlStateStorage.set('_a', { lastResponse, search: newSearch, status, type });
-    return {
-      lastResponse: lastResponse || [],
-      search: newSearch,
-      status: stateStatus || [],
-      type: stateType || [],
-    };
   };
 
   return (
