@@ -22,6 +22,7 @@ import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers';
 import {
   type LayerWizardStep,
+  type RenderSecondaryActionButtonProps,
   getWizardById,
 } from '../../classes/layers/wizards/layer_wizard_registry';
 
@@ -107,6 +108,17 @@ export class AddLayerPanel extends Component<Props, State> {
         id: ADD_LAYER_STEP_ID,
         label: ADD_LAYER_STEP_LABEL,
         nextButtonLabel: ADD_LAYER_STEP_NEXT_BUTTON_LABEL,
+        renderSecondaryActionButton: ({ isDisabled, isLoading, addLayersAndClose }: RenderSecondaryActionButtonProps) => {
+          return (
+            <EuiButton
+              disabled={isDisabled || isLoading}
+              isLoading={isLoading}
+              onClick={addLayersAndClose}
+            >
+              {ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL}
+            </EuiButton>
+          );
+        },
       },
     ];
     this.setState({
@@ -190,17 +202,15 @@ export class AddLayerPanel extends Component<Props, State> {
       </EuiFlexItem>
     );
 
-    return this.state.currentStep.id === ADD_LAYER_STEP_ID ? (
+    return this.state.currentStep.renderSecondaryActionButton ? (
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              disabled={isDisabled || isLoading}
-              isLoading={isLoading}
-              onClick={this.props.addLayersAndClose}
-            >
-              {ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL}
-            </EuiButton>
+            {this.state.currentStep.renderSecondaryActionButton({
+              isDisabled,
+              isLoading,
+              addLayersAndClose: this.props.addLayersAndClose,
+            })}
           </EuiFlexItem>
           {nextButton}
         </EuiFlexGroup>

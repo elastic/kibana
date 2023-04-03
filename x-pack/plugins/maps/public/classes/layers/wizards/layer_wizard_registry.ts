@@ -7,14 +7,21 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { ReactElement, FunctionComponent } from 'react';
+import { ReactElement, ReactNode, FunctionComponent } from 'react';
 import type { LayerDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+
+export type RenderSecondaryActionButtonProps = { 
+  isDisabled: boolean; 
+  isLoading: boolean; 
+  addLayersAndClose: () => void;
+}
 
 export type LayerWizardStep = {
   id: string;
   label: string;
   nextButtonLabel?: string;
+  renderSecondaryActionButton?: (props: RenderSecondaryActionButtonProps) => ReactNode;
 };
 
 export type LayerWizard = {
