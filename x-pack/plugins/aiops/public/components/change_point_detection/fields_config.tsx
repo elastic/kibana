@@ -77,7 +77,12 @@ export const FieldsConfig: FC = () => {
           </React.Fragment>
         );
       })}
-      <EuiButton onClick={onAdd}>Add</EuiButton>
+      <EuiButton onClick={onAdd}>
+        <FormattedMessage
+          id="xpack.aiops.changePointDetection.addButtonLabel"
+          defaultMessage="Add"
+        />
+      </EuiButton>
     </>
   );
 };

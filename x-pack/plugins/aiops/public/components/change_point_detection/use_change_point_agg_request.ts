@@ -233,7 +233,19 @@ export function useChangePointResults(
         });
       }
     },
-    [runRequest, requestParams, fieldConfig, query, dataView, totalAggPages, toasts, isSingleMetric]
+    [
+      runRequest,
+      requestParams.interval,
+      requestParams.changePointType,
+      fieldConfig.fn,
+      fieldConfig.metricField,
+      fieldConfig.splitField,
+      query,
+      dataView,
+      totalAggPages,
+      toasts,
+      isSingleMetric,
+    ]
   );
 
   useEffect(
@@ -246,8 +258,11 @@ export function useChangePointResults(
       };
     },
     [
-      requestParams,
-      fieldConfig,
+      requestParams.interval,
+      requestParams.changePointType,
+      fieldConfig.fn,
+      fieldConfig.metricField,
+      fieldConfig.splitField,
       query,
       splitFieldCardinality,
       fetchResults,
