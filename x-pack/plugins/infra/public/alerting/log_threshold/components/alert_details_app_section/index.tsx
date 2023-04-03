@@ -6,8 +6,10 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
+import compact from 'lodash/compact';
 import moment from 'moment';
 import React from 'react';
+import { getChartGroupNames } from '../../../../../common/utils/get_chart_group_names';
 import { type PartialCriterion } from '../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
 import { AlertAnnotation } from './components/alert_annotation';
@@ -21,6 +23,22 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
     .asMilliseconds();
   const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
   const TWENTY_TIMES_RULE_WINDOW_MS = 20 * ruleWindowSizeMS;
+
+  // The `CriterionPreview` chart shows all the series/data when there is a GroupBy in the rule parameters.
+  // e.g., `host. name`, the chart will show stacks of data by hostname.
+  // We only need the chart to show the series that is related to the selected alert.
+  // The chart series are built based on the GroupBy in the rule params
+  // Each series have an id which is the just a joining of fields value of the GroupBy `getChartGroupNames`
+  // We filter down the series using this groupName (id)
+
+  const alertFieldsByGroupBy = compact(
+    Object.keys(alert.fields).map((key) => {
+      const field = rule.params.groupBy?.find((groupByFiled) => groupByFiled === key);
+      if (field) return alert.fields[field];
+    })
+  );
+  const selectedSeries = getChartGroupNames(alertFieldsByGroupBy);
+
   /**
    * This is part or the requirements (RFC).
    * If the alert is less than 20 units of `FOR THE LAST <x> <units>` then we should draw a time range of 20 units.
@@ -52,6 +70,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               showThreshold={true}
               executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
               annotations={[<AlertAnnotation alertStarted={alert.start} />]}
+              filterSeriesByGroupName={[selectedSeries]}
             />
           </EuiFlexItem>
         );

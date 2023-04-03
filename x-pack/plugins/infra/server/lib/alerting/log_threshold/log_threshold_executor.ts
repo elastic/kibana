@@ -27,6 +27,7 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import {
   RuleParams,
   ruleParamsRT,
@@ -484,7 +485,7 @@ const getReducedGroupByResults = (
 ): ReducedGroupByResults => {
   const getGroupName = (
     key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
-  ) => Object.values(key).join(', ');
+  ) => getChartGroupNames(Object.values(key));
 
   const reducedGroupByResults: ReducedGroupByResults = [];
   if (isOptimizedGroupedSearchQueryResponse(results)) {
