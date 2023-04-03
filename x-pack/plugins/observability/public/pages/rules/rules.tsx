@@ -48,13 +48,16 @@ export function RulesPage() {
     useHashQuery: false,
   });
 
-  const { status, lastResponse } = urlStateStorage.get<{
+  const { status, lastResponse, params } = urlStateStorage.get<{
     status: RuleStatus[];
     lastResponse: string[];
-  }>('_a') || { status: [], lastResponse: [] };
+    params: Record<string, string | number>;
+  }>('_a') || { status: [], lastResponse: [], params: {} };
 
   const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
   const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
+  const [stateParams, setParams] = useState<Record<string, string | number>>(params);
+
   const [stateRefresh, setRefresh] = useState(new Date());
 
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
@@ -84,6 +87,11 @@ export function RulesPage() {
     setLastResponse(newLastResponse);
     urlStateStorage.set('_a', { status, lastResponse: newLastResponse });
     return { lastResponse: newLastResponse, status: stateStatus || [] };
+  };
+
+  const handleRuleParamFilterChange = (newParams: Record<string, string | number>) => {
+    setParams(newParams);
+    urlStateStorage.set('_a', { lastResponse, params: newParams, status });
   };
 
   return (
@@ -127,10 +135,12 @@ export function RulesPage() {
           <RuleList
             filteredRuleTypes={filteredRuleTypes}
             lastRunOutcomeFilter={stateLastResponse}
+            ruleParamFilter={stateParams}
             refresh={stateRefresh}
             ruleDetailsRoute="alerts/rules/:ruleId"
             rulesListKey="observability_rulesListColumns"
             showActionFilter={false}
+            showRuleParamFilter
             statusFilter={stateStatus}
             visibleColumns={[
               'ruleName',
@@ -141,6 +151,7 @@ export function RulesPage() {
             ]}
             onLastRunOutcomeFilterChange={handleLastRunOutcomeFilterChange}
             onStatusFilterChange={handleStatusFilterChange}
+            onRuleParamFilterChange={handleRuleParamFilterChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

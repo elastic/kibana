@@ -198,6 +198,10 @@ export const hasFilterKeyError = (
     if (keySplit.length <= 1 || !types.includes(keySplit[0])) {
       return `This type ${keySplit[0]} is not allowed`;
     }
+    // Allow searching through 'alert.params'
+    if (keySplit[1] === 'params') {
+      return null;
+    }
     if (
       (keySplit.length === 2 && fieldDefined(indexMapping, key)) ||
       (keySplit.length > 2 && keySplit[1] !== 'attributes')

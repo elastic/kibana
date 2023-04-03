@@ -91,6 +91,8 @@ export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
 export type { LinkDescriptor } from './hooks/use_link_props';
 
+export { useFetchSloDetails } from './hooks/slo/use_fetch_slo_details';
+
 export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warning_prompt';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';

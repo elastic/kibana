@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { ActionType, RulesListFilters, UpdateFiltersProps } from '../../../../types';
+import { ActionType, RulesListFilters, RuleTableItem, UpdateFiltersProps } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RulesListStatuses } from './rules_list_statuses';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
@@ -28,6 +28,7 @@ import { TypeFilter, TypeFilterProps } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
+import { RuleParamsFilter } from './rule_params_filter';
 
 const ENTER_KEY = 13;
 
@@ -35,6 +36,7 @@ interface RulesListFiltersBarProps {
   inputText: string;
   filters: RulesListFilters;
   showActionFilter: boolean;
+  showRuleParamFilter: boolean;
   rulesStatusesTotal: Record<string, number>;
   rulesLastRunOutcomesTotal: Record<string, number>;
   tags: string[];
@@ -42,6 +44,7 @@ interface RulesListFiltersBarProps {
   actionTypes: ActionType[];
   lastUpdate: string;
   showErrors: boolean;
+  items: RuleTableItem[];
   updateFilters: (updateFiltersProps: UpdateFiltersProps) => void;
   setInputText: (text: string) => void;
   onClearSelection: () => void;
@@ -54,6 +57,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     filters,
     inputText,
     showActionFilter = true,
+    showRuleParamFilter = true,
     rulesStatusesTotal,
     rulesLastRunOutcomesTotal,
     tags,
@@ -63,6 +67,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     showErrors,
     updateFilters,
     setInputText,
+    items,
     onClearSelection,
     onRefreshRules,
     onToggleRuleErrors,
@@ -134,6 +139,14 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     ),
     ...getRuleOutcomeOrStatusFilter(),
     ...getRuleTagFilter(),
+    showRuleParamFilter && (
+      <RuleParamsFilter
+        key="param-filter"
+        filters={filters.ruleParams}
+        ruleItems={items}
+        onChange={(value) => updateFilters({ filter: 'ruleParams', value })}
+      />
+    ),
   ];
 
   return (

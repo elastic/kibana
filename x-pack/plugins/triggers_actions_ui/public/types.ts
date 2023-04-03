@@ -373,6 +373,8 @@ export interface RuleTypeParamsExpressionProps<
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
+export type RuleParamsForRules = Record<string, Array<{ label: string; value: string | number }>>;
+
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
@@ -693,6 +695,7 @@ export interface RulesListFilters {
   ruleLastRunOutcomes: string[];
   ruleStatuses: RuleStatus[];
   tags: string[];
+  ruleParams: Record<string, string | number>;
 }
 
 export type UpdateFiltersProps =
@@ -707,6 +710,10 @@ export type UpdateFiltersProps =
   | {
       filter: 'types' | 'actionTypes' | 'ruleExecutionStatuses' | 'ruleLastRunOutcomes' | 'tags';
       value: string[];
+    }
+  | {
+      filter: 'ruleParams';
+      value: Record<string, string | number>;
     };
 
 export interface RulesPageContainerState {

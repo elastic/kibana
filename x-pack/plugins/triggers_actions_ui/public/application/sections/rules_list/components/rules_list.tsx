@@ -113,6 +113,7 @@ interface RulesPageContainerState {
 export interface RulesListProps {
   filteredRuleTypes?: string[];
   showActionFilter?: boolean;
+  showRuleParamFilter?: boolean;
   ruleDetailsRoute?: string;
   showCreateRuleButtonInPrompt?: boolean;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
@@ -122,6 +123,8 @@ export interface RulesListProps {
   onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
   lastRunOutcomeFilter?: string[];
   onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
+  ruleParamFilter?: Record<string, string | number>;
+  onRuleParamFilterChange?: (ruleParams: Record<string, string | number>) => void;
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: string[];
@@ -144,6 +147,7 @@ const EMPTY_ARRAY: string[] = [];
 export const RulesList = ({
   filteredRuleTypes = EMPTY_ARRAY,
   showActionFilter = true,
+  showRuleParamFilter = true,
   ruleDetailsRoute,
   showCreateRuleButtonInPrompt = false,
   statusFilter,
@@ -152,6 +156,8 @@ export const RulesList = ({
   onLastResponseFilterChange,
   lastRunOutcomeFilter,
   onLastRunOutcomeFilterChange,
+  ruleParamFilter,
+  onRuleParamFilterChange,
   setHeaderActions,
   refresh,
   rulesListKey,
@@ -178,6 +184,7 @@ export const RulesList = ({
     ruleExecutionStatuses: lastResponseFilter || [],
     ruleLastRunOutcomes: lastRunOutcomeFilter || [],
     ruleStatuses: statusFilter || [],
+    ruleParams: ruleParamFilter || {},
     tags: [],
   }));
 
@@ -354,6 +361,9 @@ export const RulesList = ({
         case 'ruleLastRunOutcomes':
           onLastRunOutcomeFilterChange?.(value as string[]);
           break;
+        case 'ruleParams':
+          onRuleParamFilterChange?.(value as Record<string, string | number>);
+          break;
         default:
           break;
       }
@@ -395,6 +405,12 @@ export const RulesList = ({
       updateFilters({ filter: 'ruleLastRunOutcomes', value: lastRunOutcomeFilter });
     }
   }, [lastRunOutcomeFilter]);
+
+  useEffect(() => {
+    if (ruleParamFilter) {
+      updateFilters({ filter: 'ruleParams', value: ruleParamFilter });
+    }
+  }, [ruleParamFilter]);
 
   useEffect(() => {
     if (cloneRuleId.current) {
@@ -772,6 +788,8 @@ export const RulesList = ({
               actionTypes={actionTypes}
               lastUpdate={lastUpdate}
               showErrors={showErrors}
+              items={tableItems}
+              showRuleParamFilter={showRuleParamFilter}
               updateFilters={updateFilters}
               setInputText={setInputText}
               onClearSelection={onClearSelection}
