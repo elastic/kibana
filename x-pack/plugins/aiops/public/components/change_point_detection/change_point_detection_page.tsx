@@ -76,6 +76,8 @@ export const ChangePointDetectionPage: FC = () => {
     );
   }
 
+  const hasSelectedChangePoints = Object.values(selectedChangePoints).some((v) => v.length > 0);
+
   return (
     <div data-test-subj="aiopsChangePointDetectionPage">
       <SearchBarWrapper
@@ -99,7 +101,7 @@ export const ChangePointDetectionPage: FC = () => {
                 {requestParams.interval}
               </EuiText>
             </EuiFlexItem>
-            {Object.keys(selectedChangePoints).length > 0 ? (
+            {hasSelectedChangePoints ? (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={() => setFlyoutVisible(!isFlyoutVisible)} size={'s'}>
                   <FormattedMessage
