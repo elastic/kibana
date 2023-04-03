@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseResponse } from '@kbn/cases-plugin/common';
+import type SuperTest from 'supertest';
 import { MAX_DOCS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -46,7 +46,11 @@ import {
 } from '../../../../../api_integration/apis/cases/common/users';
 import { roles as api_int_roles } from '../../../../../api_integration/apis/cases/common/roles';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
-import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
+import {
+  OBSERVABILITY_FILE_KIND,
+  SECURITY_SOLUTION_FILE_KIND,
+} from '../../../../common/lib/constants';
+import { User } from '../../../../common/lib/authentication/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -121,16 +125,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('files', () => {
-      let postedCase: CaseResponse;
-
-      beforeEach(async () => {
-        postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolution' }),
-          200
-        );
-      });
-
       afterEach(async () => {
         await deleteAllFiles({
           supertest,
@@ -138,48 +132,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete all files associated with a case', async () => {
-        const files = await Promise.all([
-          createAndUploadFile({
-            supertest: supertestWithoutAuth,
-            createFileParams: {
-              name: 'testfile',
-              kind: SECURITY_SOLUTION_FILE_KIND,
-              mimeType: 'text/plain',
-              meta: {
-                caseIds: [postedCase.id],
-                owner: [postedCase.owner],
-              },
-            },
-            data: 'abc',
-          }),
-          createAndUploadFile({
-            supertest: supertestWithoutAuth,
-            createFileParams: {
-              name: 'testfile',
-              kind: SECURITY_SOLUTION_FILE_KIND,
-              mimeType: 'text/plain',
-              meta: {
-                caseIds: [postedCase.id],
-                owner: [postedCase.owner],
-              },
-            },
-            data: 'abc',
-          }),
-        ]);
-
-        await bulkCreateAttachments({
+        const { caseInfo: postedCase } = await createCaseWithFiles({
           supertest: supertestWithoutAuth,
-          caseId: postedCase.id,
-          params: [
-            getFilesAttachmentReq({
-              externalReferenceId: files[0].create.file.id,
-              owner: 'securitySolution',
-            }),
-            getFilesAttachmentReq({
-              externalReferenceId: files[1].create.file.id,
-              owner: 'securitySolution',
-            }),
-          ],
+          fileKind: SECURITY_SOLUTION_FILE_KIND,
+          owner: 'securitySolution',
         });
 
         await deleteCases({ supertest: supertestWithoutAuth, caseIDs: [postedCase.id] });
@@ -205,67 +161,22 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete all files associated with multiple cases', async () => {
-        const postedCase2 = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolution' }),
-          200
-        );
-
-        const files = await Promise.all([
-          createAndUploadFile({
+        const [{ caseInfo: postedCase1 }, { caseInfo: postedCase2 }] = await Promise.all([
+          createCaseWithFiles({
             supertest: supertestWithoutAuth,
-            createFileParams: {
-              name: 'testfile',
-              kind: SECURITY_SOLUTION_FILE_KIND,
-              mimeType: 'text/plain',
-              meta: {
-                caseIds: [postedCase.id],
-                owner: [postedCase.owner],
-              },
-            },
-            data: 'abc',
+            fileKind: SECURITY_SOLUTION_FILE_KIND,
+            owner: 'securitySolution',
           }),
-          createAndUploadFile({
+          createCaseWithFiles({
             supertest: supertestWithoutAuth,
-            createFileParams: {
-              name: 'testfile',
-              kind: SECURITY_SOLUTION_FILE_KIND,
-              mimeType: 'text/plain',
-              meta: {
-                caseIds: [postedCase2.id],
-                owner: [postedCase2.owner],
-              },
-            },
-            data: 'abc',
-          }),
-        ]);
-
-        await Promise.all([
-          bulkCreateAttachments({
-            supertest: supertestWithoutAuth,
-            caseId: postedCase.id,
-            params: [
-              getFilesAttachmentReq({
-                externalReferenceId: files[0].create.file.id,
-                owner: 'securitySolution',
-              }),
-            ],
-          }),
-          bulkCreateAttachments({
-            supertest: supertestWithoutAuth,
-            caseId: postedCase2.id,
-            params: [
-              getFilesAttachmentReq({
-                externalReferenceId: files[1].create.file.id,
-                owner: 'securitySolution',
-              }),
-            ],
+            fileKind: SECURITY_SOLUTION_FILE_KIND,
+            owner: 'securitySolution',
           }),
         ]);
 
         await deleteCases({
           supertest: supertestWithoutAuth,
-          caseIDs: [postedCase.id, postedCase2.id],
+          caseIDs: [postedCase1.id, postedCase2.id],
         });
 
         const [filesAfterDelete, attachmentsAfterDelete, attachmentsAfterDelete2] =
@@ -278,7 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
             findAttachments({
               supertest: supertestWithoutAuth,
-              caseId: postedCase.id,
+              caseId: postedCase1.id,
               query: {
                 perPage: MAX_DOCS_PER_PAGE,
               },
@@ -311,56 +222,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should delete a case when the user has access to delete the case and files', async () => {
-          const postedCase = await createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolution' }),
-            200,
-            { user: secAllUser, space: 'space1' }
-          );
-          const files = await Promise.all([
-            createAndUploadFile({
-              supertest: supertestWithoutAuth,
-              createFileParams: {
-                name: 'testfile',
-                kind: SECURITY_SOLUTION_FILE_KIND,
-                mimeType: 'text/plain',
-                meta: {
-                  caseIds: [postedCase.id],
-                  owner: [postedCase.owner],
-                },
-              },
-              data: 'abc',
-              auth: { user: secAllUser, space: 'space1' },
-            }),
-            createAndUploadFile({
-              supertest: supertestWithoutAuth,
-              createFileParams: {
-                name: 'testfile',
-                kind: SECURITY_SOLUTION_FILE_KIND,
-                mimeType: 'text/plain',
-                meta: {
-                  caseIds: [postedCase.id],
-                  owner: [postedCase.owner],
-                },
-              },
-              data: 'abc',
-              auth: { user: secAllUser, space: 'space1' },
-            }),
-          ]);
-
-          await bulkCreateAttachments({
+          const { caseInfo: postedCase } = await createCaseWithFiles({
             supertest: supertestWithoutAuth,
-            caseId: postedCase.id,
-            params: [
-              getFilesAttachmentReq({
-                externalReferenceId: files[0].create.file.id,
-                owner: 'securitySolution',
-              }),
-              getFilesAttachmentReq({
-                externalReferenceId: files[1].create.file.id,
-                owner: 'securitySolution',
-              }),
-            ],
+            fileKind: SECURITY_SOLUTION_FILE_KIND,
+            owner: 'securitySolution',
             auth: { user: secAllUser, space: 'space1' },
           });
 
@@ -390,6 +255,70 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(filesAfterDelete.total).to.be(0);
           expect(attachmentsAfterDelete.comments.length).to.be(0);
+        });
+
+        it('should not delete a case when the user does not have access to the file kind of the files', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolution' }),
+            200,
+            { user: secAllUser, space: 'space1' }
+          );
+          const { create: createdFile } = await createAndUploadFile({
+            supertest: supertestWithoutAuth,
+            createFileParams: {
+              name: 'testfile',
+              // use observability for the file kind which the security user should not have access to
+              kind: OBSERVABILITY_FILE_KIND,
+              mimeType: 'text/plain',
+              meta: {
+                caseIds: [postedCase.id],
+                owner: [postedCase.owner],
+              },
+            },
+            data: 'abc',
+            auth: { user: superUser, space: 'space1' },
+          });
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: [
+              getFilesAttachmentReq({
+                externalReferenceId: createdFile.file.id,
+                owner: 'securitySolution',
+              }),
+            ],
+            auth: { user: secAllUser, space: 'space1' },
+          });
+
+          await deleteCases({
+            supertest: supertestWithoutAuth,
+            caseIDs: [postedCase.id],
+            auth: { user: secAllUser, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+
+          const [filesAfterDelete, attachmentsAfterDelete] = await Promise.all([
+            listFiles({
+              supertest: supertestWithoutAuth,
+              params: {
+                kind: OBSERVABILITY_FILE_KIND,
+              },
+              auth: { user: superUser, space: 'space1' },
+            }),
+            findAttachments({
+              supertest: supertestWithoutAuth,
+              caseId: postedCase.id,
+              query: {
+                perPage: MAX_DOCS_PER_PAGE,
+              },
+              auth: { user: secAllUser, space: 'space1' },
+            }),
+          ]);
+
+          expect(filesAfterDelete.total).to.be(1);
+          expect(attachmentsAfterDelete.comments.length).to.be(1);
         });
       });
 
@@ -540,4 +469,70 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
   });
+};
+
+const createCaseWithFiles = async ({
+  supertest,
+  fileKind,
+  owner,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  fileKind: string;
+  owner: string;
+  auth?: { user: User; space: string | null };
+}) => {
+  const postedCase = await createCase(supertest, getPostCaseRequest({ owner }), 200, auth);
+
+  const files = await Promise.all([
+    createAndUploadFile({
+      supertest,
+      createFileParams: {
+        name: 'testfile',
+        kind: fileKind,
+        mimeType: 'text/plain',
+        meta: {
+          caseIds: [postedCase.id],
+          owner: [postedCase.owner],
+        },
+      },
+      data: 'abc',
+      auth,
+    }),
+    createAndUploadFile({
+      supertest,
+      createFileParams: {
+        name: 'testfile',
+        kind: fileKind,
+        mimeType: 'text/plain',
+        meta: {
+          caseIds: [postedCase.id],
+          owner: [postedCase.owner],
+        },
+      },
+      data: 'abc',
+      auth,
+    }),
+  ]);
+
+  const caseWithAttachments = await bulkCreateAttachments({
+    supertest,
+    caseId: postedCase.id,
+    params: [
+      getFilesAttachmentReq({
+        externalReferenceId: files[0].create.file.id,
+        owner,
+      }),
+      getFilesAttachmentReq({
+        externalReferenceId: files[1].create.file.id,
+        owner,
+      }),
+    ],
+    auth,
+  });
+
+  return {
+    caseInfo: caseWithAttachments,
+    attachments: files,
+  };
 };
