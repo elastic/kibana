@@ -19,6 +19,7 @@ export interface CopyOptions {
   overwrite: boolean;
   includeReferences: boolean;
   createNewCopies: boolean;
+  compatibilityMode?: boolean;
 }
 
 export interface ResolveConflictsOptions {
@@ -28,6 +29,7 @@ export interface ResolveConflictsOptions {
     [spaceId: string]: Array<Omit<SavedObjectsImportRetry, 'replaceReferences'>>;
   };
   createNewCopies: boolean;
+  compatibilityMode?: boolean;
 }
 
 export interface CopyResponse {
