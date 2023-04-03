@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getPrivilegesAndCapabilities } from '../../../common/privilege/has_privilege_factory';
 import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/constants';
-import { Privileges } from '../../../common/types/privileges';
+import type { Privileges } from '../../../common/types/privileges';
 
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { addBasePath } from '..';
 
 export function registerPrivilegesRoute({ router, license }: RouteDependencies) {
@@ -29,18 +31,24 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
         return res.ok({ body: privilegesResult });
       }
 
-      const esClient = (await ctx.core).elasticsearch.client;
-      // Get cluster privileges
-      const { has_all_requested: hasAllPrivileges, cluster } =
-        await esClient.asCurrentUser.security.hasPrivileges({
+      const esClient: IScopedClusterClient = (await ctx.core).elasticsearch.client;
+
+      const esClusterPrivilegesReq: Promise<SecurityHasPrivilegesResponse> =
+        esClient.asCurrentUser.security.hasPrivileges({
           body: {
             // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
             cluster: APP_CLUSTER_PRIVILEGES,
           },
         });
+      const [esClusterPrivileges, userPrivileges] = await Promise.all([
+        // Get cluster privileges
+        esClusterPrivilegesReq,
+        // // Get all index privileges the user has
+        esClient.asCurrentUser.security.getUserPrivileges(),
+      ]);
 
-      // Get all index privileges the user has
-      const { indices } = await esClient.asCurrentUser.security.getUserPrivileges();
+      const { has_all_requested: hasAllPrivileges, cluster } = esClusterPrivileges;
+      const { indices } = userPrivileges;
 
       // Check if they have all the required index privileges for at least one index
       const hasOneIndexWithAllPrivileges =

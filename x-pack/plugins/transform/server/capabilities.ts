@@ -27,16 +27,16 @@ export const setupCapabilities = (
 
   core.capabilities.registerSwitcher(async (request, capabilities, useDefaultCapabilities) => {
     if (!isSecurityPluginEnabled || useDefaultCapabilities) {
-      return capabilities;
+      return {};
     }
-    const startServices = await core.getStartServices();
 
+    const startServices = await core.getStartServices();
     const [, { security }] = startServices;
     if (!security) {
-      return capabilities;
+      return {};
     }
 
-    const checkPrivileges = security?.authz.checkPrivilegesDynamicallyWithRequest(request);
+    const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
 
     const { hasAllRequested, privileges } = await checkPrivileges({
       elasticsearch: {
@@ -48,10 +48,10 @@ export const setupCapabilities = (
     const clusterPrivileges: Record<string, boolean> = Array.isArray(
       privileges?.elasticsearch?.cluster
     )
-      ? privileges.elasticsearch.cluster.reduce((acc, p) => {
+      ? privileges.elasticsearch.cluster.reduce<Record<string, boolean>>((acc, p) => {
           acc[p.privilege] = p.authorized;
           return acc;
-        }, {} as Record<string, boolean>)
+        }, {})
       : {};
 
     const hasOneIndexWithAllPrivileges = false;
@@ -62,6 +62,6 @@ export const setupCapabilities = (
       hasAllRequested
     ).capabilities;
 
-    return { ...capabilities, transform: transformCapabilities };
+    return { transform: transformCapabilities };
   });
 };

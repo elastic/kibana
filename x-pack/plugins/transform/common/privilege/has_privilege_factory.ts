@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import { cloneDeep } from 'lodash';
 import { APP_INDEX_PRIVILEGES } from '../constants';
 import { Privileges } from '../types/privileges';
 
@@ -72,7 +73,9 @@ export const hasPrivilegeFactory =
     );
   };
 
-const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
+export const extractMissingPrivileges = (
+  privilegesObject: { [key: string]: boolean } = {}
+): string[] =>
   Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
     if (!privilegesObject[privilegeName]) {
       privileges.push(privilegeName);
@@ -103,7 +106,7 @@ export const getPrivilegesAndCapabilities = (
 
   const hasPrivilege = hasPrivilegeFactory(privilegesResult);
 
-  const capabilities = INITIAL_CAPABILITIES;
+  const capabilities = cloneDeep(INITIAL_CAPABILITIES);
   capabilities.canGetTransform =
     hasPrivilege(['cluster', 'cluster:monitor/transform/get']) &&
     hasPrivilege(['cluster', 'cluster:monitor/transform/stats/get']);
