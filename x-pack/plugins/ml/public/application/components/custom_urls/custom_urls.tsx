@@ -95,6 +95,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     return {
       job: props.job,
       customUrls: props.jobCustomUrls,
+      // For DFA uses the destination index Data View to get the query entities and falls back to source index Data View.
       queryEntityFieldNames: getDropDownOptions(props.job, props.dataView),
     };
   }
@@ -153,7 +154,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       editorSettings: customUrl,
     });
   };
-  // TODO: update to handle DFA jobs
+
   addNewCustomUrl = () => {
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
       .then((customUrl) => {
@@ -234,6 +235,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     const editMode = this.props.editMode ?? 'inline';
     const editor = (
       <CustomUrlEditor
+        showTimeRangeSelector={isAnomalyDetectionJob(this.props.job)}
         customUrl={editorSettings}
         setEditCustomUrl={this.setEditCustomUrl}
         savedCustomUrls={customUrls}
@@ -347,7 +349,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         <CustomUrlList
           job={this.props.job}
           customUrls={customUrls}
-          setCustomUrls={this.props.setCustomUrls}
+          onChange={this.props.setCustomUrls}
         />
       </>
     );

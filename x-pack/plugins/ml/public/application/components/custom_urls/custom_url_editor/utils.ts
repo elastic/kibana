@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import rison from '@kbn/rison';
 import url from 'url';
@@ -14,13 +13,12 @@ import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-// import type { DataFrameAnalyticsConfig } from '../../../../shared';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
 } from '../../../../../common/types/data_frame_analytics';
-// import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
+import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { JobType } from '../../../../../common/types/saved_objects';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
@@ -106,7 +104,7 @@ export function getNewCustomUrlDefaults(
     query = job.datafeed_config?.query ?? {};
     jobId = job.job_id;
   } else if (isDataFrameAnalyticsConfigs(job) && dataViews !== undefined && dataViews.length > 0) {
-    indicesName = typeof job.dest.index;
+    indicesName = job.dest.index;
     query = job.source?.query ?? {};
     jobId = job.id;
   }
@@ -134,20 +132,12 @@ export function getNewCustomUrlDefaults(
   };
 }
 
-const noKeywordCategoryFieldTypes = [
-  ES_FIELD_TYPES.TEXT,
-  ES_FIELD_TYPES.IP,
-  ES_FIELD_TYPES.VERSION,
-];
-
 export function getSupportedFieldNames(dataView: DataView): string[] {
   // Returns the list of supported field names that can be used
   // to add to the query used when linking to a Kibana dashboard or Discover.
   const sortedFields = dataView.fields.getAll().sort((a, b) => a.name.localeCompare(b.name)) ?? [];
-  // TODO: can we keep just TEXT type when a type is both keyword and text? using 'noKeywordCategoryFieldTypes' instead of 'categoryFieldTypes'
-  // Right now we don't need to access .keyword fields because we pull the field value from the source
   const categoryFields = sortedFields.filter((f) =>
-    noKeywordCategoryFieldTypes.some((type) => {
+    categoryFieldTypes.some((type) => {
       return f.esTypes?.includes(type);
     })
   );

@@ -61,6 +61,7 @@ interface CustomUrlEditorProps {
   dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
   queryEntityFieldNames: string[];
+  showTimeRangeSelector?: boolean;
 }
 
 /*
@@ -73,6 +74,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   dashboards,
   dataViewListItems,
   queryEntityFieldNames,
+  showTimeRangeSelector = true,
 }) => {
   if (customUrl === undefined) {
     return null;
@@ -283,79 +285,80 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
         )}
 
         {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
-          entityOptions.length > 0 && (
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
-                  defaultMessage="Query entities"
-                />
-              }
-            >
-              <EuiComboBox
-                placeholder={i18n.translate('xpack.ml.customUrlsEditor.selectEntitiesPlaceholder', {
-                  defaultMessage: 'Select entities',
-                })}
-                options={entityOptions}
-                selectedOptions={selectedEntityOptions}
-                onChange={onQueryEntitiesChange}
-                isClearable={true}
-                data-test-subj="mlJobCustomUrlQueryEntitiesInput"
+        entityOptions.length > 0 ? (
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+                defaultMessage="Query entities"
               />
-            </EuiFormRow>
-          )}
+            }
+          >
+            <EuiComboBox
+              placeholder={i18n.translate('xpack.ml.customUrlsEditor.selectEntitiesPlaceholder', {
+                defaultMessage: 'Select entities',
+              })}
+              options={entityOptions}
+              selectedOptions={selectedEntityOptions}
+              onChange={onQueryEntitiesChange}
+              isClearable={true}
+              data-test-subj="mlJobCustomUrlQueryEntitiesInput"
+            />
+          </EuiFormRow>
+        ) : null}
 
-        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={
-                    <FormattedMessage
-                      id="xpack.ml.customUrlsEditor.timeRangeLabel"
-                      defaultMessage="Time range"
-                    />
-                  }
-                  className="url-time-range"
-                  display="rowCompressed"
-                >
-                  <EuiSelect
-                    options={timeRangeOptions}
-                    value={timeRange.type}
-                    onChange={onTimeRangeTypeChange}
-                    data-test-subj="mlJobCustomUrlTimeRangeInput"
-                    compressed
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              {timeRange.type === TIME_RANGE_TYPE.INTERVAL && (
-                <EuiFlexItem>
+        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
+          showTimeRangeSelector && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
                   <EuiFormRow
                     label={
                       <FormattedMessage
-                        id="xpack.ml.customUrlsEditor.intervalLabel"
-                        defaultMessage="Interval"
+                        id="xpack.ml.customUrlsEditor.timeRangeLabel"
+                        defaultMessage="Time range"
                       />
                     }
                     className="url-time-range"
-                    error={invalidIntervalError}
-                    isInvalid={isInvalidTimeRange}
                     display="rowCompressed"
                   >
-                    <EuiFieldText
-                      value={timeRange.interval}
-                      onChange={onTimeRangeIntervalChange}
-                      isInvalid={isInvalidTimeRange}
-                      data-test-subj="mlJobCustomUrlTimeRangeIntervalInput"
+                    <EuiSelect
+                      options={timeRangeOptions}
+                      value={timeRange.type}
+                      onChange={onTimeRangeTypeChange}
+                      data-test-subj="mlJobCustomUrlTimeRangeInput"
                       compressed
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </>
-        )}
+                {timeRange.type === TIME_RANGE_TYPE.INTERVAL && (
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.ml.customUrlsEditor.intervalLabel"
+                          defaultMessage="Interval"
+                        />
+                      }
+                      className="url-time-range"
+                      error={invalidIntervalError}
+                      isInvalid={isInvalidTimeRange}
+                      display="rowCompressed"
+                    >
+                      <EuiFieldText
+                        value={timeRange.interval}
+                        onChange={onTimeRangeIntervalChange}
+                        isInvalid={isInvalidTimeRange}
+                        data-test-subj="mlJobCustomUrlTimeRangeIntervalInput"
+                        compressed
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </>
+          )}
 
         {type === URL_TYPE.OTHER && (
           <EuiFormRow

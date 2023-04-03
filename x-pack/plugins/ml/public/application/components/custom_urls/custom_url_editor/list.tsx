@@ -25,13 +25,10 @@ import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_util
 import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import {
-  // isDataFrameAnalyticsConfigs,
-  type DataFrameAnalyticsConfig,
-} from '../../../../../common/types/data_frame_analytics';
+import { type DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
 import { TIME_RANGE_TYPE } from './constants';
 import { UrlConfig, KibanaUrlConfig } from '../../../../../common/types/custom_urls';
-import { Job } from '../../../../../common/types/anomaly_detection_jobs';
+import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -46,14 +43,18 @@ function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
 export interface CustomUrlListProps {
   job: Job | DataFrameAnalyticsConfig;
   customUrls: UrlConfig[];
-  setCustomUrls: (customUrls: UrlConfig[]) => void;
+  onChange: (customUrls: UrlConfig[]) => void;
 }
 
 /*
  * React component for listing the custom URLs added to a job,
  * with buttons for testing and deleting each custom URL.
  */
-export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCustomUrls }) => {
+export const CustomUrlList: FC<CustomUrlListProps> = ({
+  job,
+  customUrls,
+  onChange: setCustomUrls,
+}) => {
   const {
     services: { http, notifications },
   } = useMlKibana();
@@ -65,7 +66,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
         ...customUrls[index],
         url_name: e.target.value,
       };
-      setCustomUrls(customUrls);
+      setCustomUrls([...customUrls]);
     }
   };
 
@@ -78,7 +79,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
         ...customUrls[index],
         url_value: e.target.value,
       };
-      setCustomUrls(customUrls);
+      setCustomUrls([...customUrls]);
     }
   };
 
@@ -94,14 +95,14 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
       } else {
         delete (customUrls[index] as KibanaUrlConfig).time_range;
       }
-      setCustomUrls(customUrls);
+      setCustomUrls([...customUrls]);
     }
   };
 
   const onDeleteButtonClick = (index: number) => {
     if (index < customUrls.length) {
       customUrls.splice(index, 1);
-      setCustomUrls(customUrls);
+      setCustomUrls([...customUrls]);
     }
   };
 
@@ -209,25 +210,27 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
               )}
             </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.ml.customUrlEditorList.timeRangeLabel"
-                  defaultMessage="Time range"
-                />
-              }
-              error={invalidIntervalError}
-              isInvalid={isInvalidTimeRange}
-            >
-              <EuiFieldText
-                value={(customUrl as KibanaUrlConfig).time_range || ''}
+          {isAnomalyDetectionJob(job) ? (
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.customUrlEditorList.timeRangeLabel"
+                    defaultMessage="Time range"
+                  />
+                }
+                error={invalidIntervalError}
                 isInvalid={isInvalidTimeRange}
-                placeholder={TIME_RANGE_TYPE.AUTO}
-                onChange={(e) => onTimeRangeChange(e, index)}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
+              >
+                <EuiFieldText
+                  value={(customUrl as KibanaUrlConfig).time_range || ''}
+                  isInvalid={isInvalidTimeRange}
+                  placeholder={TIME_RANGE_TYPE.AUTO}
+                  onChange={(e) => onTimeRangeChange(e, index)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
               <EuiToolTip

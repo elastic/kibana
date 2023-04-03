@@ -158,8 +158,10 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       await updateDataFrameAnalytics(updateConfig);
     } else if (activeTabId === 'custom-urls') {
       const meta = analyticsJob._meta ?? {};
+      delete meta.custom_urls;
+      // Only update custom urls and leave anything else in _meta untouched
       const updateConfig: UpdateDataFrameAnalyticsConfig = {
-        _meta: { ...meta, custom_urls: [...(meta.custom_urls ?? []), ...customUrls] },
+        _meta: { ...meta, custom_urls: customUrls },
       };
       await updateDataFrameAnalytics(updateConfig);
     }
