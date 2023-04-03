@@ -12,18 +12,19 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { waitFor } from '@testing-library/react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
+import { pluginServices } from '../services/plugin_services';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
-import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_session_storage/dashboard_session_storage_service';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
-  redirectTo: jest.fn(),
+  goToDashboard: jest.fn(),
   unsavedDashboardIds: ['dashboardUnsavedOne', 'dashboardUnsavedTwo', 'dashboardUnsavedThree'],
   refreshUnsavedDashboards: jest.fn(),
 });
 
-function mountWith({ props: incomingProps }: { props?: DashboardUnsavedListingProps }) {
-  const props = incomingProps ?? makeDefaultProps();
+function mountWith({ props: incomingProps }: { props?: Partial<DashboardUnsavedListingProps> }) {
+  const props = { ...makeDefaultProps(), incomingProps };
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
   }> = ({ children }) => {
@@ -62,11 +63,7 @@ describe('Unsaved listing', () => {
       expect(getEditButton().length).toEqual(1);
     });
     getEditButton().simulate('click');
-    expect(props.redirectTo).toHaveBeenCalledWith({
-      destination: 'dashboard',
-      id: 'dashboardUnsavedOne',
-      editMode: true,
-    });
+    expect(props.goToDashboard).toHaveBeenCalledWith('dashboardUnsavedOne', ViewMode.EDIT);
   });
 
   it('Redirects to new dashboard when continue editing clicked', async () => {
@@ -79,11 +76,7 @@ describe('Unsaved listing', () => {
       expect(getEditButton().length).toBe(1);
     });
     getEditButton().simulate('click');
-    expect(props.redirectTo).toHaveBeenCalledWith({
-      destination: 'dashboard',
-      id: undefined,
-      editMode: true,
-    });
+    expect(props.goToDashboard).toHaveBeenCalledWith(undefined, ViewMode.EDIT);
   });
 
   it('Shows a warning then clears changes when delete unsaved changes is pressed', async () => {

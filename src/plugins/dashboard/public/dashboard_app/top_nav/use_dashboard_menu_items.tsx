@@ -19,8 +19,8 @@ import { ShowShareModal } from './share/show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { SaveDashboardReturn } from '../../services/dashboard_saved_object/types';
+import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
-import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 
 export const useDashboardMenuItems = ({
   redirectTo,

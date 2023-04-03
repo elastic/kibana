@@ -23,6 +23,8 @@ export {
 } from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
+export { DashboardListingTable } from './dashboard_listing';
+
 export {
   type DashboardAppLocator,
   type DashboardAppLocatorParams,

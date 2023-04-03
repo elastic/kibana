@@ -37,6 +37,7 @@ export const dashboardSavedObjectServiceFactory: DashboardSavedObjectServiceFact
               description: `dashboard${i} desc`,
               title: `dashboard${i} - ${search} - title`,
             },
+            references: [] as FindDashboardSavedObjectsResponse['hits'][0]['references'],
           } as FindDashboardSavedObjectsResponse['hits'][0]);
         }
         return Promise.resolve({
