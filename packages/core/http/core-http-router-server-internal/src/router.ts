@@ -155,10 +155,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
               handler: this.enhanceWithContext(handler),
             });
 
-            const eventLoopUtilization = performance.eventLoopUtilization(
-              performance.eventLoopUtilization(),
-              startUtilization
-            );
+            const eventLoopUtilization = performance.eventLoopUtilization(startUtilization);
 
             apm.currentTransaction?.addLabels({
               event_loop_utilization: eventLoopUtilization.utilization,
