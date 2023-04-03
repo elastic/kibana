@@ -52,14 +52,19 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
   }, [dispatch]);
 
   const handleOnRowClick = useCallback(
-    async (theCase: Case | undefined, attachments: CaseAttachmentsWithoutOwner) => {
+    async (
+      theCase: Case | undefined,
+      getAttachments?: ({ theCase }: { theCase?: Case }) => CaseAttachmentsWithoutOwner
+    ) => {
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
         closeModal();
-        createNewCaseFlyout.open({ attachments });
+        createNewCaseFlyout.open({ getAttachments });
         return;
       }
+
+      const attachments = getAttachments?.({ theCase }) ?? [];
 
       try {
         // add attachments to the case
@@ -101,15 +106,18 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
   );
 
   const openModal = useCallback(
-    ({ attachments }: { attachments?: CaseAttachmentsWithoutOwner } = {}) => {
+    ({
+      getAttachments,
+    }: {
+      getAttachments?: ({ theCase }: { theCase?: Case }) => CaseAttachmentsWithoutOwner;
+    } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
           ...props,
           hiddenStatuses: [CaseStatuses.closed, StatusAll],
           onRowClick: (theCase?: Case) => {
-            const caseAttachments = attachments ?? [];
-            handleOnRowClick(theCase, caseAttachments);
+            handleOnRowClick(theCase, getAttachments);
           },
           onClose: () => {
             closeModal();

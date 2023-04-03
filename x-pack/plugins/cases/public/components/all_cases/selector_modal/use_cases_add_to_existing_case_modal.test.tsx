@@ -33,6 +33,7 @@ jest.mock('./all_cases_selector_modal', () => {
 });
 
 const onSuccess = jest.fn();
+const getAttachments = jest.fn().mockReturnValue([alertComment]);
 const useCasesToastMock = useCasesToast as jest.Mock;
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
@@ -41,7 +42,7 @@ const TestComponent: React.FC = () => {
   const hook = useCasesAddToExistingCaseModal({ onSuccess });
 
   const onClick = () => {
-    hook.open({ attachments: [alertComment] });
+    hook.open({ getAttachments });
   };
 
   return <button type="button" data-test-subj="open-modal" onClick={onClick} />;

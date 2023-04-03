@@ -31,14 +31,17 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
 
   const openFlyout = useCallback(
     ({
-      attachments,
+      getAttachments,
       headerContent,
-    }: { attachments?: CaseAttachmentsWithoutOwner; headerContent?: React.ReactNode } = {}) => {
+    }: {
+      getAttachments?: ({ theCase }: { theCase?: Case }) => CaseAttachmentsWithoutOwner;
+      headerContent?: React.ReactNode;
+    } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {
           ...props,
-          attachments,
+          getAttachments,
           headerContent,
           onClose: () => {
             closeFlyout();
@@ -50,7 +53,7 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
             if (theCase) {
               casesToasts.showSuccessAttach({
                 theCase,
-                attachments: attachments ?? [],
+                attachments: getAttachments?.({ theCase }) ?? [],
                 title: props.toastTitle,
                 content: props.toastContent,
               });

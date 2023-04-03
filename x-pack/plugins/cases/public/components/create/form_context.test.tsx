@@ -40,7 +40,6 @@ import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
-import type { CaseAttachments } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { waitForComponentToUpdate } from '../../common/test_utils';
@@ -572,6 +571,7 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
+
     const attachments = [
       {
         alertId: '1234',
@@ -595,8 +595,10 @@ describe('Create case', () => {
       },
     ];
 
+    const getAttachments = jest.fn().mockReturnValue(attachments);
+
     mockedContext.render(
-      <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
+      <FormContext onSuccess={onFormSubmitSuccess} getAttachments={getAttachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
@@ -623,10 +625,10 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
-    const attachments: CaseAttachments = [];
+    const getAttachments = jest.fn().mockReturnValue([]);
 
     mockedContext.render(
-      <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
+      <FormContext onSuccess={onFormSubmitSuccess} getAttachments={getAttachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
@@ -660,11 +662,13 @@ describe('Create case', () => {
       },
     ];
 
+    const getAttachments = jest.fn().mockReturnValue(attachments);
+
     mockedContext.render(
       <FormContext
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
-        attachments={attachments}
+        getAttachments={getAttachments}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />

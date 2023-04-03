@@ -44,7 +44,7 @@ interface Props {
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => void;
-  attachments?: CaseAttachmentsWithoutOwner;
+  getAttachments?: ({ theCase }: { theCase: Case }) => CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
@@ -52,7 +52,7 @@ export const FormContext: React.FC<Props> = ({
   afterCaseCreated,
   children,
   onSuccess,
-  attachments,
+  getAttachments,
   initialValue,
 }) => {
   const { data: connectors = [], isLoading: isLoadingConnectors } =
@@ -78,7 +78,8 @@ export const FormContext: React.FC<Props> = ({
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
 
-        startTransaction({ appId, attachments });
+        // TODO: Fix it
+        startTransaction({ appId, attachments: [] });
 
         const connectorToUpdate = caseConnector
           ? normalizeActionConnector(caseConnector, fields)
@@ -93,41 +94,43 @@ export const FormContext: React.FC<Props> = ({
           },
         });
 
+        const attachments = getAttachments?.({ theCase }) ?? [];
+
         // add attachments to the case
-        if (updatedCase && Array.isArray(attachments) && attachments.length > 0) {
+        if (theCase && Array.isArray(attachments) && attachments.length > 0) {
           await createAttachments({
-            caseId: updatedCase.id,
-            caseOwner: updatedCase.owner,
+            caseId: theCase.id,
+            caseOwner: theCase.owner,
             data: attachments,
           });
         }
 
-        if (afterCaseCreated && updatedCase) {
-          await afterCaseCreated(updatedCase, createAttachments);
+        if (afterCaseCreated && theCase) {
+          await afterCaseCreated(theCase, createAttachments);
         }
 
-        if (updatedCase?.id && connectorToUpdate.id !== 'none') {
+        if (theCase?.id && connectorToUpdate.id !== 'none') {
           await pushCaseToExternalService({
-            caseId: updatedCase.id,
+            caseId: theCase.id,
             connector: connectorToUpdate,
           });
         }
 
-        if (onSuccess && updatedCase) {
-          onSuccess(updatedCase);
+        if (onSuccess && theCase) {
+          onSuccess(theCase);
         }
       }
     },
     [
-      appId,
-      startTransaction,
       isSyncAlertsEnabled,
       connectors,
+      startTransaction,
+      appId,
       postCase,
       owner,
+      getAttachments,
       afterCaseCreated,
       onSuccess,
-      attachments,
       createAttachments,
       pushCaseToExternalService,
     ]
