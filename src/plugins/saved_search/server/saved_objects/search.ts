@@ -88,9 +88,6 @@ export function getSavedSearchObjectType(
           schema.object({
             from: schema.string(),
             to: schema.string(),
-            mode: schema.maybe(
-              schema.oneOf([schema.literal('absolute'), schema.literal('relative')])
-            ),
           })
         ),
         refreshInterval: schema.maybe(
