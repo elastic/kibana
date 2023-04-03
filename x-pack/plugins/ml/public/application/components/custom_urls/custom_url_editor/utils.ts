@@ -429,7 +429,6 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Pr
   }
 }
 
-// https://localhost:5601/cuv/app/discover#/?_g=(time:(from:'2023-03-20T05:00:00.000Z',mode:absolute,to:'2023-03-20T08:00:00.000Z'))&_a=(index:'ff959d40-b880-11e8-a6d9-e546fe2bba5f',query:(language:kuery,query:'"customer_full_name.keyword":"Wagdi Shaw"'),sort:!('@timestamp',desc))
 async function getDataFrameAnalyticsTestUrl(
   job: DataFrameAnalyticsConfig,
   customUrl: UrlConfig,
@@ -448,34 +447,29 @@ async function getDataFrameAnalyticsTestUrl(
         size: 1,
       },
     });
+
+    if (resp && resp.hits.total.value > 0) {
+      record = resp.hits.hits[0]._source;
+      testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
+      return testUrl;
+    } else {
+      // No results for this job yet so use source index for example doc.
+      resp = await ml.esSearch({
+        index: Array.isArray(job.source.index) ? job.source.index.join(',') : job.source.index,
+        body: {
+          size: 1,
+        },
+      });
+
+      record = resp?.hits?.hits[0]._source;
+      testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
+    }
   } catch (error) {
     // search may fail if the job doesn't already exist
     // ignore this error as the outer function call will raise a toast
   }
 
-  if (resp && resp.hits.total.value > 0) {
-    record = resp.hits.hits[0]._source;
-    testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
-    return testUrl;
-  } else {
-    // TODO: No results for this job yet so use source index for example doc.
-
-    // try {
-    //   resp = await ml.esSearch({
-    //     index: (Array.isArray(job.source.index)
-    //      ? job.source.index.join(',')
-    //      : job.source.index),
-    //     body: {
-    //       size: 1,
-    //     },
-    //   });
-    // } catch (error) {
-    //   // jobs may not exist as this might be called from the AD job wizards
-    //   // ignore this error as the outer function call will raise a toast
-    // }
-
-    return testUrl;
-  }
+  return testUrl;
 }
 
 export function getTestUrl(

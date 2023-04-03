@@ -233,8 +233,6 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     // eslint-disable-next-line no-console
     console.log('Data Frame Analytics Results Table - open customUrl for record:', item);
     // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
-
-    // TODO: update item type here - getUrlForRecord should not just accept anomlay records - needs generic record type
     const urlPath = replaceTokensInDFAUrlValue(
       customUrl,
       item as any,

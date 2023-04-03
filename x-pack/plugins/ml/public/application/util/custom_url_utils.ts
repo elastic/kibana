@@ -19,6 +19,7 @@ import {
   CustomUrlAnomalyRecordDoc,
 } from '../../../common/types/custom_urls';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
+import type { DataGridItem } from '../components/data_grid';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.
@@ -28,7 +29,7 @@ const TIME_RANGE_AUTO = 'auto';
 // with values from the supplied document.
 export function replaceTokensInDFAUrlValue(
   customUrlConfig: UrlConfig | KibanaUrlConfig,
-  doc: AnomalyRecordDoc,
+  doc: DataGridItem,
   timeRange?: TimeRange
 ) {
   // If urlValue contains $earliest$ and $latest$ tokens, add in times to the test doc.
