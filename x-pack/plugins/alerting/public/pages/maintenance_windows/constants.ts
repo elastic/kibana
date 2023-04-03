@@ -88,7 +88,7 @@ export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
 
 export const WEEKDAY_OPTIONS = ISO_WEEKDAYS.map((n) => ({
   id: String(n),
-  label: moment().isoWeekday(n).format('dd'),
+  label: moment().isoWeekday(n).format('ddd'),
 }));
 
 export const ISO_WEEKDAYS_TO_RRULE: Record<number, string> = {
