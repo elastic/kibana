@@ -33,6 +33,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { type TypedLensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -74,6 +75,7 @@ export interface InfraClientStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
   ml: MlPluginStart;
