@@ -38,9 +38,14 @@ interface ProcessesProps {
   currentTime: number;
 }
 
+const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
+  value,
+  view,
+}));
+
 export const Processes = ({ currentTime, node, nodeType }: ProcessesProps) => {
   const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
-  const [searchBarState, setSearchBarState] = useState<Query>(
+  const [searchBarState, setSearchBarState] = useState<Query>(() =>
     hostFlyoutOpen.searchFilter ? Query.parse(hostFlyoutOpen.searchFilter) : Query.MATCH_ALL
   );
 
@@ -132,10 +137,7 @@ export const Processes = ({ currentTime, node, nodeType }: ProcessesProps) => {
               name: 'State',
               operator: 'exact',
               multiSelect: false,
-              options: Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
-                value,
-                view,
-              })),
+              options,
             },
           ]}
         />
