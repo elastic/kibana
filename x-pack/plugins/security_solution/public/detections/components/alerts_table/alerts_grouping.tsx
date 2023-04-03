@@ -156,7 +156,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       }
       return (
         <GroupedSubLevel
-          // all GroupedAlertsTableComponent are passed to GroupedSubLevel, renderChildComponent is overwritten below
           {...props}
           getGrouping={getGrouping}
           groupingLevel={level}

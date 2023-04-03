@@ -35,6 +35,8 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
             ...defaultGroup,
             ...groupsById[id],
             activeGroups,
+            // When any group is added or removed from the active groups
+            // reset the pagination on all active groups
             pagingSettings: Object.keys(groupsById[id].pagingSettings).reduce(
               (acc, group) => ({
                 ...acc,

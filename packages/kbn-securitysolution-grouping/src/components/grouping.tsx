@@ -149,7 +149,9 @@ const GroupingComponent = <T,>({
         );
       }),
     [
+      childGroups,
       data?.groupByFields?.buckets,
+      dispatch,
       groupPanelRenderer,
       groupStatsRenderer,
       groupingId,
