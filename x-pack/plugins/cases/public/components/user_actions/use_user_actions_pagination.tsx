@@ -27,6 +27,7 @@ export const useUserActionsPagination = ({
     isLoading: isLoadingInfiniteUserActions,
     hasNextPage,
     fetchNextPage,
+    isFetchingNextPage,
   } = useInfiniteFindCaseUserActions(caseId, userActivityQueryParams, true);
 
   const showBottomList = lastPage > 1;
@@ -50,5 +51,6 @@ export const useUserActionsPagination = ({
     infiniteCaseUserActions,
     hasNextPage,
     fetchNextPage,
+    isFetchingNextPage,
   };
 };

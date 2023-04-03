@@ -90,6 +90,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     hasNextPage,
     fetchNextPage,
     showBottomList,
+    isFetchingNextPage,
   } = useUserActionsPagination({
     userActivityQueryParams,
     caseId: caseData.id,
@@ -191,7 +192,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         {hasNextPage && (
           <ShowMoreButton
             onShowMoreClick={handleShowMore}
-            isLoading={isLoadingInfiniteUserActions}
+            isLoading={isFetchingNextPage}
           />
         )}
         {lastPageUserActions?.length ? (
