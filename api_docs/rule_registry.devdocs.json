@@ -307,6 +307,40 @@
           },
           {
             "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.removeCaseIdFromAlerts",
+            "type": "Function",
+            "tags": [],
+            "label": "removeCaseIdFromAlerts",
+            "description": [],
+            "signature": [
+              "({ caseId, alerts }: ",
+              "RemoveAlertsFromCaseOptions",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.removeCaseIdFromAlerts.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ caseId, alerts }",
+                "description": [],
+                "signature": [
+                  "RemoveAlertsFromCaseOptions"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
             "id": "def-server.AlertsClient.find",
             "type": "Function",
             "tags": [],
@@ -1544,7 +1578,7 @@
         "label": "createGetSummarizedAlertsFn",
         "description": [],
         "signature": [
-          "(opts: CreateGetSummarizedAlertsFnOpts) => () => ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, }: ",
+          "(opts: CreateGetSummarizedAlertsFnOpts) => () => ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -1889,7 +1923,7 @@
             "section": "def-common.WithoutReservedActionGroups",
             "text": "WithoutReservedActionGroups"
           },
-          "<TActionGroupIds, never>>) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, }: ",
+          "<TActionGroupIds, never>>) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
           {
             "pluginId": "alerting",
             "scope": "server",
