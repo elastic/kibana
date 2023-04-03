@@ -197,7 +197,7 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
-  private alertsService?: AlertsService;
+  private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -205,6 +205,7 @@ export class AlertingPlugin {
     this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
+    this.alertsService = null;
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
@@ -399,9 +400,12 @@ export class AlertingPlugin {
       },
       frameworkAlerts: {
         enabled: () => this.config.enableFrameworkAlerts,
-        getContextInitializationPromise: (context: string): Promise<InitializationPromise> => {
+        getContextInitializationPromise: (
+          context: string,
+          namespace: string
+        ): Promise<InitializationPromise> => {
           if (this.alertsService) {
-            return this.alertsService.getContextInitializationPromise(context);
+            return this.alertsService.getContextInitializationPromise(context, namespace);
           }
 
           return Promise.resolve(errorResult(`Framework alerts service not available`));
@@ -514,6 +518,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
+      alertsService: this.alertsService,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,

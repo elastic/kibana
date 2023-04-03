@@ -3670,6 +3670,27 @@
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.alertsFilter",
+            "type": "Object",
+            "tags": [],
+            "label": "alertsFilter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.AlertsFilter",
+                "text": "AlertsFilter"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5588,7 +5609,7 @@
         "signature": [
           "{ alertsTableConfiguration: ",
           "AlertsTableConfigurationRegistry",
-          "; casesData: { cases: Map<string, ",
+          "; cases: { data: Map<string, ",
           "Case",
           ">; isLoading: boolean; }; columns: ",
           "EuiDataGridColumn",

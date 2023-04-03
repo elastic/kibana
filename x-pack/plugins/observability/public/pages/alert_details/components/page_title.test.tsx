@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { PageTitle, PageTitleProps } from './page_title';
 import { alert } from '../mock/alert';
 
@@ -16,7 +17,11 @@ describe('Page Title', () => {
   };
 
   const renderComp = (props: PageTitleProps) => {
-    return render(<PageTitle {...props} />);
+    return render(
+      <IntlProvider locale="en">
+        <PageTitle {...props} />
+      </IntlProvider>
+    );
   };
 
   it('should display a title when it is passed', () => {

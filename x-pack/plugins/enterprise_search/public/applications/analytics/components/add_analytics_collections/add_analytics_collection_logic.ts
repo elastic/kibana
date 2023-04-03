@@ -104,7 +104,6 @@ export const AddAnalyticsCollectionLogic = kea<
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(COLLECTION_VIEW_PATH, {
           name,
-          section: 'events',
         })
       );
     },
