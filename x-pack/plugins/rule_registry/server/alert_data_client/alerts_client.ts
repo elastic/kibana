@@ -105,6 +105,11 @@ export interface BulkUpdateCasesOptions {
   caseIds: string[];
 }
 
+export interface RemoveAlertsFromCaseOptions {
+  alerts: MgetAndAuditAlert[];
+  caseId: string;
+}
+
 interface GetAlertParams {
   id: string;
   index?: string;
@@ -844,6 +849,51 @@ export class AlertsClient {
       fieldToUpdate: (source) => this.getAlertCaseIdsFieldUpdate(source, caseIds),
       validate: (source) => this.validateTotalCasesPerAlert(source, caseIds),
     });
+  }
+
+  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveAlertsFromCaseOptions) {
+    try {
+      if (alerts.length === 0) {
+        return;
+      }
+
+      const mgetRes = await this.ensureAllAlertsAuthorized({
+        alerts,
+        operation: ReadOperations.Get,
+      });
+
+      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null) {
+        for (int i=0; i < ctx._source['${ALERT_CASE_IDS}'].length; i++) {
+            if (ctx._source['${ALERT_CASE_IDS}'][i].equals('${caseId}')) {
+                ctx._source['${ALERT_CASE_IDS}'].remove(i);
+            }
+        }
+      }`;
+
+      const bulkUpdateRequest = [];
+
+      for (const doc of mgetRes.docs) {
+        bulkUpdateRequest.push(
+          {
+            update: {
+              _index: doc._index,
+              _id: doc._id,
+            },
+          },
+          {
+            script: { source: painlessScript, lang: 'painless' },
+          }
+        );
+      }
+
+      await this.esClient.bulk({
+        refresh: 'wait_for',
+        body: bulkUpdateRequest,
+      });
+    } catch (error) {
+      this.logger.error(`Error to remove case ${caseId} from alerts: ${error}`);
+      throw error;
+    }
   }
 
   public async find<Params extends RuleTypeParams = never>({
