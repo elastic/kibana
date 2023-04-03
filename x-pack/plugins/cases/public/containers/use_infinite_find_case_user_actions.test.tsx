@@ -167,4 +167,15 @@ describe('UseInfiniteFindCaseUserActions', () => {
     });
     await waitFor(() => result.current.data?.pages.length === 2);
   });
+
+  it('returns hasNextPage correctly', async () => {
+    jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+
+    const { result } = renderHook(
+      () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    expect(result.current.hasNextPage).toBe(undefined);
+  });
 });

@@ -25,7 +25,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { Actions } from '../../../common/api';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
-import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import {
@@ -34,11 +34,9 @@ import {
 } from '../case_view/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
+import { getMockBuilderArgs } from './mock';
 
-const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
-const updateCase = jest.fn();
-const onShowAlertDetails = jest.fn();
 
 const userActionsStats = {
   total: 25,
@@ -53,29 +51,22 @@ const userActivityQueryParams: UserActivityParams = {
   perPage: 10,
 };
 
+const builderArgs = getMockBuilderArgs();
+
 const defaultProps = {
+  caseUserActions,
+  ...builderArgs,
   caseConnectors: getCaseConnectorsMockResponse(),
-  userProfiles: new Map(),
-  currentUserProfile: undefined,
-  connectors: connectorsMock,
-  actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
-  getRuleDetailsHref: jest.fn(),
-  onRuleDetailsClick: jest.fn(),
   data: basicCase,
-  fetchUserActions,
-  isLoadingUserActions: false,
+  manualAlertsData: { 'some-id': { _id: 'some-id' } },
   onUpdateField,
-  selectedAlertPatterns: ['some-test-pattern'],
+  userActivityQueryParams,
+  userActionsStats,
   statusActionButton: null,
-  updateCase,
   useFetchAlertData: (): [boolean, Record<string, unknown>] => [
     false,
     { 'some-id': { _id: 'some-id' } },
   ],
-  alerts: {},
-  onShowAlertDetails,
-  userActivityQueryParams,
-  userActionsStats,
 };
 
 jest.mock('../../containers/use_infinite_find_case_user_actions');
@@ -370,9 +361,11 @@ describe(`UserActions`, () => {
 
       appMockRender.render(<UserActions {...props} />);
 
-      expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-      expect(screen.getByText('DR')).toBeInTheDocument();
-      expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+      expect(
+        screen.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
+      ).toBeInTheDocument();
+      expect(screen.getAllByText('DR')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Damaged Raccoon')[0]).toBeInTheDocument();
     });
   });
 
