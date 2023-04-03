@@ -41,10 +41,6 @@ export const useEnterpriseSearchNav = () => {
       name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
         defaultMessage: 'Overview',
       }),
-      ...generateNavLink({
-        shouldNotCreateHref: true,
-        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-      }),
       items: [
         {
           id: 'elasticsearch',
@@ -52,6 +48,16 @@ export const useEnterpriseSearchNav = () => {
           ...generateNavLink({
             shouldNotCreateHref: true,
             to: ELASTICSEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'searchExperiences',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+            defaultMessage: 'Search Experiences',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: SEARCH_EXPERIENCES_PLUGIN.URL,
           }),
         },
       ],
@@ -139,16 +145,6 @@ export const useEnterpriseSearchNav = () => {
               },
             ]
           : []),
-        {
-          id: 'searchExperiences',
-          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-            defaultMessage: 'Search Experiences',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: SEARCH_EXPERIENCES_PLUGIN.URL,
-          }),
-        },
       ],
       name: ENTERPRISE_SEARCH_PRODUCT_NAME,
     },
@@ -163,7 +159,7 @@ export const useEnterpriseSearchNav = () => {
         items: [
           {
             id: 'search_applications',
-            name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
+            name: i18n.translate('xpack.enterpriseSearch.nav.searchApplicationsTitle', {
               defaultMessage: 'Search Applications',
             }),
             ...generateNavLink({
@@ -190,6 +186,16 @@ export const useEnterpriseSearchNav = () => {
       {
         id: 'enterpriseSearch',
         items: [
+          {
+            id: 'entsearch_getting_started',
+            name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchGettingStartedTitle', {
+              defaultMessage: 'Getting Started',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+            }),
+          },
           ...(productAccess.hasAppSearchAccess
             ? [
                 {
@@ -218,16 +224,6 @@ export const useEnterpriseSearchNav = () => {
                 },
               ]
             : []),
-          {
-            id: 'searchExperiences',
-            name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-              defaultMessage: 'Search Experiences',
-            }),
-            ...generateNavLink({
-              shouldNotCreateHref: true,
-              to: SEARCH_EXPERIENCES_PLUGIN.URL,
-            }),
-          },
         ],
         name: ENTERPRISE_SEARCH_PRODUCT_NAME,
       },

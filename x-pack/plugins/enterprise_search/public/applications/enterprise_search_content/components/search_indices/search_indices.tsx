@@ -76,7 +76,7 @@ export const SearchIndices: React.FC = () => {
     ? ''
     : hasNoIndices
     ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle', {
-        defaultMessage: 'Welcome to Enterprise Search',
+        defaultMessage: 'Welcome to Elasticsearch',
       })
     : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
         defaultMessage: 'Elasticsearch indices',
@@ -224,7 +224,7 @@ export const SearchIndices: React.FC = () => {
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle',
                     {
-                      defaultMessage: 'Build beautiful search experiences with Enterprise Search',
+                      defaultMessage: 'Build beautiful search experiences with Elasticsearch',
                     }
                   )}
                 </h2>

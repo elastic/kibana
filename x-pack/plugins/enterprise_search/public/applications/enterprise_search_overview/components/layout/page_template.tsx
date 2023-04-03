@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
+import { ENTERPRISE_SEARCH_OVERVIEW_PLUGIN } from '../../../../../common/constants';
 import { SetSearchOverviewChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -23,10 +23,10 @@ export const EnterpriseSearchOverviewPageTemplate: React.FC<PageTemplateProps> =
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
+        name: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
         items: useEnterpriseSearchNav(),
       }}
-      solutionNavIcon={ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO}
+      solutionNavIcon={ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO}
       setPageChrome={pageChrome && <SetSearchOverviewChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (

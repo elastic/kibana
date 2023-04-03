@@ -94,6 +94,7 @@ const overviewIDs = [
   'securitySolutionUI:get_started',
   'management',
   'enterpriseSearch',
+  'elasticsearch',
 ];
 
 export function CollapsibleNav({

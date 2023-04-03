@@ -72,29 +72,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     const { config } = this;
 
     core.application.register({
-      id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.elasticsearch,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { EnterpriseSearchOverview } = await import(
-          './applications/enterprise_search_overview'
-        );
-
-        return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
-      },
-    });
-
-    core.application.register({
       id: ELASTICSEARCH_PLUGIN.ID,
       title: ELASTICSEARCH_PLUGIN.NAV_TITLE,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
@@ -112,6 +89,27 @@ export class EnterpriseSearchPlugin implements Plugin {
         const { Elasticsearch } = await import('./applications/elasticsearch');
 
         return renderApp(Elasticsearch, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
+      id: SEARCH_EXPERIENCES_PLUGIN.ID,
+      title: SEARCH_EXPERIENCES_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      appRoute: SEARCH_EXPERIENCES_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.elasticsearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(SEARCH_EXPERIENCES_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { SearchExperiences } = await import('./applications/search_experiences');
+
+        return renderApp(SearchExperiences, kibanaDeps, pluginData);
       },
     });
 
@@ -163,6 +161,29 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     if (config.canDeployEntSearch) {
       core.application.register({
+        id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+        title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+        euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+        appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        mount: async (params: AppMountParameters) => {
+          const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+          const { chrome, http } = kibanaDeps.core;
+          chrome.docTitle.change(ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME);
+
+          await this.getInitialData(http);
+          const pluginData = this.getPluginData();
+
+          const { renderApp } = await import('./applications');
+          const { EnterpriseSearchOverview } = await import(
+            './applications/enterprise_search_overview'
+          );
+
+          return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
+        },
+      });
+
+      core.application.register({
         id: APP_SEARCH_PLUGIN.ID,
         title: APP_SEARCH_PLUGIN.NAME,
         euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
@@ -208,34 +229,13 @@ export class EnterpriseSearchPlugin implements Plugin {
       });
     }
 
-    core.application.register({
-      id: SEARCH_EXPERIENCES_PLUGIN.ID,
-      title: SEARCH_EXPERIENCES_PLUGIN.NAME,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      appRoute: SEARCH_EXPERIENCES_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(SEARCH_EXPERIENCES_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { SearchExperiences } = await import('./applications/search_experiences');
-
-        return renderApp(SearchExperiences, kibanaDeps, pluginData);
-      },
-    });
-
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-        title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
+        title: ELASTICSEARCH_PLUGIN.NAME,
         icon: 'logoElastic',
         description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
-        path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+        path: ELASTICSEARCH_PLUGIN.URL,
         order: 100,
       });
 

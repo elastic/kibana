@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
 
-const ELASTICSEARCH_PRODUCT_NAME = i18n.translate(
+export const ELASTICSEARCH_PRODUCT_NAME = i18n.translate(
   'xpack.enterpriseSearch.elasticsearch.productName',
   {
     defaultMessage: 'Elasticsearch',
@@ -26,15 +26,15 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate(
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
-  NAME: ELASTICSEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
-    defaultMessage: 'Overview',
+  NAME: ENTERPRISE_SEARCH_PRODUCT_NAME,
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.gettingStarted.navTitle', {
+    defaultMessage: 'Getting Started',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.overview.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
   URL: '/app/enterprise_search/overview',
-  LOGO: 'logoElastic',
+  LOGO: 'logoEnterpriseSearch',
 };
 
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
@@ -49,6 +49,24 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
     defaultMessage: 'Content',
   }),
   URL: '/app/enterprise_search/content',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
+export const APPLICATIONS_PLUGIN = {
+  ID: 'searchApplications',
+  NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
+    defaultMessage: 'Applications',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.applications.productDescription', {
+    defaultMessage:
+      'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
+  }),
+  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.applications.productCardDescription', {
+    defaultMessage:
+      'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
+  }),
+  LOGO: 'logoElastic',
+  URL: '/app/enterprise_search/applications',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
@@ -78,7 +96,7 @@ export const ELASTICSEARCH_PLUGIN = {
   }),
   LOGO: 'logoElastic',
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.elasticsearch.navTitle', {
-    defaultMessage: 'Getting started',
+    defaultMessage: 'Getting Started',
   }),
   URL: '/app/enterprise_search/elasticsearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',

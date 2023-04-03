@@ -363,7 +363,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       restrictWidth
       pageHeader={{
         pageTitle: i18n.translate('xpack.enterpriseSearch.overview.pageTitle', {
-          defaultMessage: 'Welcome to Elasticsearch',
+          defaultMessage: 'Welcome to Enterprise Search',
         }),
       }}
     >
