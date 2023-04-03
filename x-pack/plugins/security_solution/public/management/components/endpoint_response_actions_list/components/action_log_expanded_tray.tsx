@@ -152,7 +152,7 @@ export const ActionsLogExpandedTray = memo<{
     () =>
       parameters
         ? Object.entries(parameters).map(([key, value]) => {
-            return `${key}:${value}`;
+            return `${key}: ${value}`;
           })
         : undefined,
     [parameters]
