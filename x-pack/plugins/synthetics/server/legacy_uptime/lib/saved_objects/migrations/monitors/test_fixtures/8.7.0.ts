@@ -245,7 +245,7 @@ export const browserUptimeUI = {
     form_monitor_type: 'multistep',
     enabled: true,
     alert: { status: { enabled: true } },
-    schedule: { number: '600', unit: 'm' },
+    schedule: { number: '240', unit: 'm' },
     'service.name': '',
     config_id: '9bf12063-271f-47b1-9121-db1d14a71bb3',
     tags: [],

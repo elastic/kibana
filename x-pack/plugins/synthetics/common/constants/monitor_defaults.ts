@@ -30,7 +30,18 @@ import { ConfigKey } from './monitor_management';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 
-export const ALLOWED_SCHEDULES_IN_MINUTES = [1, 3, 5, 10, 15, 20, 30, 60, 120, 240];
+export const ALLOWED_SCHEDULES_IN_MINUTES = [
+  '1',
+  '3',
+  '5',
+  '10',
+  '15',
+  '20',
+  '30',
+  '60',
+  '120',
+  '240',
+];
 
 export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,

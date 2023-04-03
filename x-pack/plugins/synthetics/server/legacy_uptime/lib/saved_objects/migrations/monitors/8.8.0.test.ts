@@ -183,21 +183,19 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         };
         expect(
           ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+            testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number
           )
         ).toBe(false);
         const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
         expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(migrated);
         expect(
-          ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-          )
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
         ).toBe(true);
         expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
       }
     );
 
-    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES)(
       'handles migrating schedule with valid schedules - browser',
       (validSchedule) => {
         const testMonitorWithSchedule = {
@@ -212,21 +210,19 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         };
         expect(
           ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+            testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number
           )
         ).toBe(true);
         const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
         expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
         expect(
-          ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-          )
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
         ).toBe(true);
         expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
       }
     );
 
-    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES)(
       'handles migrating schedule with valid schedules - http',
       (validSchedule) => {
         const testMonitorWithSchedule = {
@@ -241,21 +237,19 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         };
         expect(
           ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+            testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number
           )
         ).toBe(true);
         const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
         expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
         expect(
-          ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-          )
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
         ).toBe(true);
         expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
       }
     );
 
-    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES)(
       'handles migrating schedule with valid schedules - tcp',
       (validSchedule) => {
         const testMonitorWithSchedule = {
@@ -270,21 +264,19 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         };
         expect(
           ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+            testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number
           )
         ).toBe(true);
         const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
         expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
         expect(
-          ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-          )
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
         ).toBe(true);
         expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
       }
     );
 
-    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES)(
       'handles migrating schedule with valid schedules - icmp',
       (validSchedule) => {
         const testMonitorWithSchedule = {
@@ -299,21 +291,19 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         };
         expect(
           ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+            testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number
           )
         ).toBe(true);
         const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
         expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
         expect(
-          ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-          )
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
         ).toBe(true);
         expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
       }
     );
 
-    it.each(ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`))(
+    it.each(ALLOWED_SCHEDULES_IN_MINUTES)(
       'handles migrating schedule with valid schedules - project',
       (validSchedule) => {
         const testMonitorWithSchedule = {
@@ -328,15 +318,13 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         };
         expect(
           ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number, 10)
+            testMonitorWithSchedule.attributes[ConfigKey.SCHEDULE].number
           )
         ).toBe(true);
         const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
         expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(validSchedule);
         expect(
-          ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-          )
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
         ).toBe(true);
         expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
       }
@@ -360,9 +348,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
         const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
         expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual('1');
         expect(
-          ALLOWED_SCHEDULES_IN_MINUTES.includes(
-            parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-          )
+          ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
         ).toBe(true);
         expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
       }
@@ -388,9 +374,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
       const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
       expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(migrated);
       expect(
-        ALLOWED_SCHEDULES_IN_MINUTES.includes(
-          parseInt(actual.attributes[ConfigKey.SCHEDULE].number, 10)
-        )
+        ALLOWED_SCHEDULES_IN_MINUTES.includes(actual.attributes[ConfigKey.SCHEDULE].number)
       ).toBe(true);
       expect(actual.attributes[ConfigKey.SCHEDULE].unit).toEqual(ScheduleUnit.MINUTES);
     });

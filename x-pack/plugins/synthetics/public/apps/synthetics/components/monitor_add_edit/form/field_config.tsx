@@ -95,7 +95,7 @@ const getScheduleContent = (value: number) => {
 };
 
 const SCHEDULES = ALLOWED_SCHEDULES_IN_MINUTES.map((value) => ({
-  value: `${value}`,
+  value,
   text: getScheduleContent(value),
 }));
 

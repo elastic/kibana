@@ -77,10 +77,8 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
 };
 
 const getNearestSupportedSchedule = (currentSchedule: string): string => {
-  const schedules = ALLOWED_SCHEDULES_IN_MINUTES.map((schedule) => `${schedule}`);
-
   try {
-    const closest = schedules.reduce(function (prev, curr) {
+    const closest = ALLOWED_SCHEDULES_IN_MINUTES.reduce(function (prev, curr) {
       const supportedSchedule = parseFloat(curr);
       const currSchedule = parseFloat(currentSchedule);
       const prevSupportedSchedule = parseFloat(prev);
@@ -92,7 +90,7 @@ const getNearestSupportedSchedule = (currentSchedule: string): string => {
 
     return closest;
   } catch {
-    return `${ALLOWED_SCHEDULES_IN_MINUTES[0]}`;
+    return ALLOWED_SCHEDULES_IN_MINUTES[0];
   }
 };
 

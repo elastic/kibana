@@ -191,7 +191,13 @@ describe('validateMonitor', () => {
 
   describe('should invalidate', () => {
     it(`when 'type' is null or undefined`, () => {
-      const testMonitor = { type: undefined } as unknown as MonitorFields;
+      const testMonitor = {
+        type: undefined,
+        schedule: {
+          unit: 'm',
+          number: '3',
+        },
+      } as unknown as MonitorFields;
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: false,
@@ -201,12 +207,35 @@ describe('validateMonitor', () => {
     });
 
     it(`when 'type' is not an acceptable monitor type (DataStream)`, () => {
-      const monitor = { type: 'non-HTTP' } as unknown as MonitorFields;
+      const monitor = {
+        type: 'non-HTTP',
+        schedule: {
+          unit: 'm',
+          number: '3',
+        },
+      } as unknown as MonitorFields;
       const result = validateMonitor(monitor);
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
         details: expect.stringMatching(/(?=.*invalid)(?=.*non-HTTP)(?=.*DataStream)/i),
+      });
+    });
+
+    it(`when schedule is not valid`, () => {
+      const testMonitor = testICMPFields as MonitorFields;
+      const result = validateMonitor({
+        ...testICMPFields,
+        schedule: {
+          number: '4',
+          unit: 'm',
+        },
+      });
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor schedule is invalid',
+        details:
+          'Invalid schedule 4 minutes supplied to monitor configuration. Please use a supported monitor schedule.',
       });
     });
   });

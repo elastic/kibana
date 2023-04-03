@@ -23,6 +23,8 @@ import {
   SyntheticsMonitor,
 } from '../../../common/runtime_types';
 
+import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../common/constants/monitor_defaults';
+
 type MonitorCodecType =
   | typeof ICMPSimpleFieldsCodec
   | typeof TCPFieldsCodec
@@ -52,6 +54,17 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
 
   const decodedType = DataStreamCodec.decode(monitorType);
+  if (!ALLOWED_SCHEDULES_IN_MINUTES.includes(monitorFields[ConfigKey.SCHEDULE].number)) {
+    return {
+      valid: false,
+      reason: `Monitor schedule is invalid`,
+      details: `Invalid schedule ${
+        monitorFields[ConfigKey.SCHEDULE].number
+      } minutes supplied to monitor configuration. Please use a supported monitor schedule.`,
+      payload: monitorFields,
+    };
+  }
+
   if (isLeft(decodedType)) {
     return {
       valid: false,
@@ -107,7 +120,7 @@ export function validateProjectMonitor(monitorFields: ProjectMonitor): Validatio
   if (isLeft(decodedMonitor)) {
     return {
       valid: false,
-      reason: `Failed to save or update monitor. Configuration is not valid`,
+      reason: `Failed to save or update monitor.Configuration is not valid`,
       details: [...formatErrors(decodedMonitor.left), locationsError]
         .filter((error) => error !== '')
         .join(' | '),
@@ -118,7 +131,7 @@ export function validateProjectMonitor(monitorFields: ProjectMonitor): Validatio
   if (locationsError) {
     return {
       valid: false,
-      reason: `Failed to save or update monitor. Configuration is not valid`,
+      reason: `Failed to save or update monitor.Configuration is not valid`,
       details: locationsError,
       payload: monitorFields,
     };
