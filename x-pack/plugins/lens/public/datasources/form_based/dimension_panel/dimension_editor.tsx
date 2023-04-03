@@ -460,9 +460,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
               <EuiFlexItem grow={false}>
                 <EuiIconTip
                   content={i18n.translate('xpack.lens.indexPattern.settingsSamplingUnsupported', {
-                    defaultMessage: `Selecting this function will change this layer's sampling to 100% in order to function properly`,
+                    defaultMessage: `Selecting this function will change this layer's sampling to 100% in order to function properly.`,
                   })}
-                  position="left"
                   size="s"
                   type="dot"
                   color="warning"

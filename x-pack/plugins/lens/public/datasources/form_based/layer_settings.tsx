@@ -163,7 +163,6 @@ export function LayerSettingsPanel({
               content={i18n.translate('xpack.lens.indexPattern.randomSampling.experimentalLabel', {
                 defaultMessage: 'Technical preview',
               })}
-              delay="long"
             >
               <EuiBetaBadge
                 css={css`
