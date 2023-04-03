@@ -26,7 +26,7 @@ import {
   InferencePipelineInferenceConfig,
 } from '../types/pipelines';
 
-export const ELSER_TASK_TYPE = 'text_expansion';
+export const ELSER_TASK_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 
 export interface MlInferencePipelineParams {
   description?: string;
