@@ -21,30 +21,74 @@ import { REDUCED_PLATFORM_OPTIONS } from '../../hooks';
 import type { Commands } from './commands_for_platforms';
 import { CommandsForPlatforms } from './commands_for_platforms';
 
-interface Props {
-  policyId?: string;
-  onClose: () => void;
-}
+type UninstallCommandTarget = 'agent' | 'endpoint';
+
+const DESCRIPTION_PER_TARGET: { [key in UninstallCommandTarget]: React.ReactElement } = {
+  agent: (
+    <>
+      <h3>
+        <FormattedMessage
+          id="xpack.fleet.agentUninstallCommand.subtitle"
+          defaultMessage="Uninstall Elastic Agent on your host"
+        />
+      </h3>
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.agentUninstallCommand.description"
+          defaultMessage="Use the below uninstall command to uninstall Agent... [TODO]"
+        />
+      </p>
+    </>
+  ),
+  endpoint: (
+    <>
+      <h3>
+        <FormattedMessage
+          id="xpack.fleet.endpointUninstallCommand.subtitle"
+          defaultMessage="Uninstall Elastic Defend integration on your host"
+        />
+      </h3>
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.endpointUninstallCommand.description"
+          defaultMessage="Use the below uninstall command to uninstall Endpoint integration... [TODO]"
+        />
+      </p>
+    </>
+  ),
+};
 
 // todo: update with real API and extract if needed
-const useCommands = (policyId: string | undefined): Commands => {
+const useCommands = (policyId: string | undefined, target: UninstallCommandTarget): Commands => {
   const commands = useMemo(
     () =>
       REDUCED_PLATFORM_OPTIONS.map(({ id }) => id).reduce<Commands>(
         (_commands, platform) => ({
           ..._commands,
-          [platform]: policyId ? `${platform} command for ${policyId}` : `${platform} command`,
+          [platform]: policyId
+            ? `${platform}/${target} command for ${policyId}`
+            : `${platform}/${target} command`,
         }),
         {}
       ),
-    [policyId]
+    [policyId, target]
   );
 
   return commands;
 };
 
-export const UninstallCommandFlyout: React.FunctionComponent<Props> = ({ policyId, onClose }) => {
-  const commands = useCommands(policyId);
+interface Props {
+  target: UninstallCommandTarget;
+  policyId?: string;
+  onClose: () => void;
+}
+
+export const UninstallCommandFlyout: React.FunctionComponent<Props> = ({
+  policyId,
+  onClose,
+  target,
+}) => {
+  const commands = useCommands(policyId, target);
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -60,20 +104,7 @@ export const UninstallCommandFlyout: React.FunctionComponent<Props> = ({ policyI
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiText>
-          <h3>
-            <FormattedMessage
-              id="xpack.fleet.agentUninstallCommand.subtitle"
-              defaultMessage="Uninstall Elastic Agent on your host"
-            />
-          </h3>
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.agentUninstallCommand.description"
-              defaultMessage="Use the below uninstall command to... [TODO]"
-            />
-          </p>
-        </EuiText>
+        <EuiText>{DESCRIPTION_PER_TARGET[target]}</EuiText>
 
         <EuiSpacer size="l" />
 

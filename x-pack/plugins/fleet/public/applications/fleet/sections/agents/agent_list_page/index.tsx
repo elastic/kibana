@@ -460,7 +460,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {agentToGetUninstallCommand && (
         <EuiPortal>
           <UninstallCommandFlyout
-            policyId={agentToGetUninstallCommand?.policy_id}
+            target="agent"
+            policyId={agentToGetUninstallCommand.policy_id}
             onClose={() => {
               setAgentToGetUninstallCommand(undefined);
               refreshAgents({ refreshTags: true });

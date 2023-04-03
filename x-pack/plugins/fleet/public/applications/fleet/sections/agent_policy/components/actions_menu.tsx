@@ -166,6 +166,7 @@ export const AgentPolicyActionMenu = memo<{
               )}
               {isUninstallCommandFlyoutOpen && (
                 <UninstallCommandFlyout
+                  target="agent"
                   policyId={agentPolicy.id}
                   onClose={() => setIsUninstallCommandFlyoutOpen(false)}
                 />
