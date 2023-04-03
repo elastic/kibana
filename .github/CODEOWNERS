@@ -18,6 +18,7 @@ x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
+x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
@@ -459,6 +460,7 @@ x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
+x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui

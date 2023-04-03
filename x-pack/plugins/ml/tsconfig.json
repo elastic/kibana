@@ -68,7 +68,6 @@
     "@kbn/field-types",
     "@kbn/es-ui-shared-plugin",
     "@kbn/ace",
-    "@kbn/saved-objects-plugin",
     "@kbn/actions-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/config-schema",
@@ -89,5 +88,6 @@
     "@kbn/monaco",
     "@kbn/repo-info",
     "@kbn/ml-trained-models-utils",
+    "@kbn/ml-route-utils",
   ],
 }
