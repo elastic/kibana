@@ -53,13 +53,17 @@ export const GettingStarted = () => {
   const query = parse(search);
 
   const isTypeOfGuideFilterValue = (useCase: string | string[] | null) => {
-    const filterValues = ['search', 'observability', 'security', 'all'];
+    const filterValues: string[] = ['search', 'observability', 'security', 'all']; // list of GuideFilterValues types
 
     if (!useCase) {
       return false;
     }
 
-    return filterValues.includes(useCase as string);
+    if (useCase instanceof Array) {
+      return filterValues.includes(useCase[0]);
+    }
+
+    return filterValues.includes(useCase);
   };
 
   const [filter, setFilter] = useState<GuideFilterValues>(
