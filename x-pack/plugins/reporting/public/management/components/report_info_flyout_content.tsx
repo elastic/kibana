@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListProps,
-  EuiTitle,
-  EuiCallOut,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { errors as reportingErrors } from '@kbn/reporting-common';
 import moment from 'moment';
-
+import React, { FunctionComponent } from 'react';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
-import { VisualReportingSoftDisabledError } from '../../../common/errors';
-
 import type { Job } from '../../lib/job';
-import { useKibana } from '../../shared_imports';
-
 import { sharedI18nTexts } from '../../shared_i18n_texts';
+import { useKibana } from '../../shared_imports';
 
 // TODO: Move all of these i18n texts to ./i18n_texts.tsx
 const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
@@ -93,9 +90,9 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.max_attempts
         ? i18n.translate('xpack.reporting.listing.infoPanel.attempts', {
-            defaultMessage: '{attempts} of {maxAttempts}',
-            values: { attempts: info.attempts, maxAttempts: info.max_attempts },
-          })
+          defaultMessage: '{attempts} of {maxAttempts}',
+          values: { attempts: info.attempts, maxAttempts: info.max_attempts },
+        })
         : info.attempts,
     },
     {
@@ -220,10 +217,10 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
      * We link the user to documentation if they hit this error case. Note: this
      * should only occur on cloud.
      */
-    info.error_code === VisualReportingSoftDisabledError.code
+    info.error_code === reportingErrors.VisualReportingSoftDisabledError.code
       ? sharedI18nTexts.cloud.insufficientMemoryError(
-          docLinks.links.reporting.cloudMinimumRequirements
-        )
+        docLinks.links.reporting.cloudMinimumRequirements
+      )
       : info.getError();
 
   return (

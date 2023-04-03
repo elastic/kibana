@@ -6,12 +6,12 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { DocLinksStart, ThemeServiceStart, ToastInput } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { errors } from '@kbn/reporting-common';
+import React from 'react';
 import type { JobSummary, ManagementLinkFn } from '../../common/types';
-import * as errors from '../../common/errors';
 import { sharedI18nTexts } from '../shared_i18n_texts';
 
 export const getFailureToast = (

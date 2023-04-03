@@ -7,29 +7,24 @@
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/core/server';
+import {
+  CancellationToken,
+  durationToNumber,
+  errors as reportingErrors,
+  mapToReportingError,
+  numberToDuration,
+} from '@kbn/reporting-common';
+import type {
+  RunContext,
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
-import type {
-  RunContext,
-  TaskManagerStartContract,
-  TaskRunCreatorFunction,
-} from '@kbn/task-manager-plugin/server';
-import { CancellationToken } from '@kbn/reporting-common';
-import { getContentStream } from '..';
-import type { ReportingCore } from '../..';
-import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
-import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
-import type { ReportOutput } from '../../../common/types';
-import type { ReportingConfigType } from '../../config';
-import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
-import type { ReportDocument, ReportingStore } from '../store';
-import { Report, SavedReport } from '../store';
-import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import {
   ReportingTask,
   ReportingTaskStatus,
@@ -37,9 +32,18 @@ import {
   ReportTaskParams,
   TaskRunResult,
 } from '.';
+import { getContentStream } from '..';
+import type { ReportingCore } from '../..';
+import type { ReportOutput } from '../../../common/types';
+import type { ReportingConfigType } from '../../config';
+import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
+import type { ReportDocument, ReportingStore } from '../store';
+import { Report, SavedReport } from '../store';
+import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
+const { QueueTimeoutError, KibanaShuttingDownError } = reportingErrors;
 
 interface ReportingExecuteTaskInstance {
   state: object;
@@ -211,7 +215,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   private async _failJob(
     report: SavedReport,
-    error?: ReportingError
+    error?: reportingErrors.ReportingError
   ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Failing ${report.jobtype} job ${report._id}`;
 
@@ -235,7 +239,9 @@ export class ExecuteReportTask implements ReportingTask {
     return await store.setReportFailed(report, doc);
   }
 
-  private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
+  private _formatOutput(
+    output: CompletedReportOutput | reportingErrors.ReportingError
+  ): ReportOutput {
     const docOutput = {} as ReportOutput;
     const unknownMime = null;
 

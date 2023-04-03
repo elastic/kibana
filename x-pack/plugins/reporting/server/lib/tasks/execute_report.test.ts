@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../..';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { KibanaShuttingDownError } from '../../../common/errors';
+import { errors } from '@kbn/reporting-common';
 import type { SavedReport } from '../store';
 import { ReportingConfigType } from '../../config';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
@@ -118,7 +118,7 @@ describe('Execute Report Task', () => {
     expect(store.setReportFailed).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        output: expect.objectContaining({ error_code: new KibanaShuttingDownError().code }),
+        output: expect.objectContaining({ error_code: new errors.KibanaShuttingDownError().code }),
       })
     );
   });

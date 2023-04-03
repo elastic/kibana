@@ -6,15 +6,15 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import moment from 'moment';
+import { numberToDuration } from '@kbn/reporting-common';
 import { TaskManagerStartContract, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import moment from 'moment';
+import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from '.';
 import { ReportingStore } from '..';
 import { ReportingCore } from '../..';
-import { numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
 import { statuses } from '../statuses';
 import { SavedReport } from '../store';
-import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from '.';
 
 /*
  * Task for finding the ReportingRecords left in the ReportingStore (.reporting index) and stuck in

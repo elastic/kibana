@@ -18,6 +18,7 @@ export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
+
 export * as errors from './errors';
-export * as reportTypes from './report_types';
-export * as jobTypes from './job_types';
+export * from './errors/map_to_reporting_error';
+export * from './schema_utils';

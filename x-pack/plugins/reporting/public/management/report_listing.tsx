@@ -7,40 +7,40 @@
 
 import {
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
-  EuiBasicTableColumn,
-  EuiIconTip,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ILicense } from '@kbn/licensing-plugin/public';
+import { durationToNumber } from '@kbn/reporting-common/schema_utils';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import { ListingProps as Props } from '.';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
-import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus } from '../lib/ilm_policy_status_context';
 import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
 import { useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
-import { ListingProps as Props } from '.';
 import {
   IlmPolicyLink,
   MigrateIlmPolicyCallOut,
   ReportDeleteButton,
   ReportDiagnostic,
-  ReportStatusIndicator,
   ReportInfoFlyout,
+  ReportStatusIndicator,
 } from './components';
-import { guessAppIconTypeFromObjectType } from './utils';
 import './report_listing.scss';
+import { guessAppIconTypeFromObjectType } from './utils';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -246,9 +246,9 @@ class ReportListingUi extends Component<Props, State> {
       if (fetchError.message === 'Failed to fetch') {
         this.props.toasts.addDanger(
           fetchError.message ||
-            i18n.translate('xpack.reporting.listing.table.requestFailedErrorMessage', {
-              defaultMessage: 'Request failed',
-            })
+          i18n.translate('xpack.reporting.listing.table.requestFailedErrorMessage', {
+            defaultMessage: 'Request failed',
+          })
         );
       }
       if (this.mounted) {
@@ -478,11 +478,11 @@ class ReportListingUi extends Component<Props, State> {
           noItemsMessage={
             this.state.isLoading
               ? i18n.translate('xpack.reporting.listing.table.loadingReportsDescription', {
-                  defaultMessage: 'Loading reports',
-                })
+                defaultMessage: 'Loading reports',
+              })
               : i18n.translate('xpack.reporting.listing.table.noCreatedReportsDescription', {
-                  defaultMessage: 'No reports have been created',
-                })
+                defaultMessage: 'No reports have been created',
+              })
           }
           pagination={pagination}
           selection={selection}
