@@ -9,3 +9,4 @@ export const ROOT_PATH = '/';
 export const COLLECTIONS_PATH = '/collections';
 export const COLLECTION_VIEW_PATH = `${COLLECTIONS_PATH}/:name/overview`;
 export const COLLECTION_INTEGRATE_PATH = `${COLLECTIONS_PATH}/:name/integrate`;
+export const COLLECTION_EXPLORER_PATH = `${COLLECTIONS_PATH}/:name/explorer`;

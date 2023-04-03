@@ -33,6 +33,7 @@ export interface AlertSummary {
 }
 
 export interface AlertStatus {
+  uuid?: string;
   status: AlertStatusValues;
   muted: boolean;
   actionGroupId?: string;

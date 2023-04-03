@@ -235,7 +235,12 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
       );
 
-      const actualAlerts = response.body.alerts;
+      const actualAlerts = checkAndCleanActualAlerts(response.body.alerts, [
+        'alertA',
+        'alertB',
+        'alertC',
+      ]);
+
       const expectedAlerts = {
         alertA: {
           status: 'Active',
@@ -294,7 +299,11 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdRule.id}/_instance_summary`
         );
 
-        const actualAlerts = response.body.instances;
+        const actualAlerts = checkAndCleanActualAlerts(response.body.instances, [
+          'alertA',
+          'alertB',
+          'alertC',
+        ]);
         const expectedAlerts = {
           alertA: {
             status: 'Active',
@@ -338,4 +347,26 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
       });
     });
   }
+}
+
+function checkAndCleanActualAlerts(actualAlerts: any, idsWithUuids: string[]) {
+  const uuids = new Set<string>();
+  const idsWithUuidsSet = new Set(idsWithUuids);
+
+  for (const alertId of Object.keys(actualAlerts)) {
+    const alert = actualAlerts[alertId];
+
+    if (idsWithUuidsSet.has(alertId)) {
+      const uuid = alert?.uuid;
+      expect(typeof uuid).to.be('string');
+
+      if (uuid) {
+        expect(uuids.has(uuid)).to.be(false);
+        uuids.add(uuid);
+        delete actualAlerts[alertId].uuid;
+      }
+    }
+  }
+
+  return actualAlerts;
 }
