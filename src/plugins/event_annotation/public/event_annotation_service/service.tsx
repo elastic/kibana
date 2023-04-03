@@ -11,7 +11,7 @@ import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { CoreStart, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/public';
-import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import {

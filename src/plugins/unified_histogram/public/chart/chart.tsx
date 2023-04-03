@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -36,6 +37,7 @@ import type {
   UnifiedHistogramInputMessage,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { SuggestionSelector } from './suggestion_selector';
 import { useTotalHits } from './hooks/use_total_hits';
 import { useRequestParams } from './hooks/use_request_params';
 import { useChartStyles } from './hooks/use_chart_styles';
@@ -50,6 +52,9 @@ export interface ChartProps {
   dataView: DataView;
   query?: Query | AggregateQuery;
   filters?: Filter[];
+  isPlainRecord?: boolean;
+  currentSuggestion?: Suggestion;
+  allSuggestions?: Suggestion[];
   timeRange?: TimeRange;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
@@ -66,6 +71,7 @@ export interface ChartProps {
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
@@ -85,6 +91,9 @@ export function Chart({
   hits,
   chart,
   breakdown,
+  currentSuggestion,
+  allSuggestions,
+  isPlainRecord,
   appendHitsCounter,
   appendHistogram,
   disableAutoFetching,
@@ -95,6 +104,7 @@ export function Chart({
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
+  onSuggestionChange,
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
@@ -118,6 +128,7 @@ export function Chart({
     onTimeIntervalChange,
     closePopover: closeChartOptions,
     onResetChartHeight,
+    isPlainRecord,
   });
 
   const chartVisible = !!(
@@ -150,6 +161,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
+    currentSuggestion,
     disableAutoFetching,
     input$,
     beforeRefetch: updateTimeRange,
@@ -166,6 +178,7 @@ export function Chart({
     getTimeRange,
     refetch$,
     onTotalHitsChange,
+    isPlainRecord,
   });
 
   const {
@@ -188,8 +201,17 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
+        suggestion: currentSuggestion,
       }),
-    [breakdown?.field, chart?.timeInterval, chart?.title, dataView, filters, query]
+    [
+      breakdown?.field,
+      chart?.timeInterval,
+      chart?.title,
+      currentSuggestion,
+      dataView,
+      filters,
+      query,
+    ]
   );
 
   const getRelativeTimeRange = useMemo(
@@ -241,6 +263,15 @@ export function Chart({
                       dataView={dataView}
                       breakdown={breakdown}
                       onBreakdownFieldChange={onBreakdownFieldChange}
+                    />
+                  </EuiFlexItem>
+                )}
+                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
+                  <EuiFlexItem css={breakdownFieldSelectorItemCss}>
+                    <SuggestionSelector
+                      suggestions={allSuggestions}
+                      activeSuggestion={currentSuggestion}
+                      onSuggestionChange={onSuggestionChange}
                     />
                   </EuiFlexItem>
                 )}
@@ -315,6 +346,7 @@ export function Chart({
               getTimeRange={getTimeRange}
               refetch$={refetch$}
               lensAttributes={lensAttributes}
+              isPlainRecord={isPlainRecord}
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}

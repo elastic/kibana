@@ -71,6 +71,7 @@ describe('getDataFilters', () => {
     minLon: -0.25,
   };
   const isReadOnly = false;
+  const executionContext = {};
 
   test('should set buffer as searchSessionMapBuffer when using searchSessionId', () => {
     const dataFilters = getDataFilters.resultFunc(
@@ -84,7 +85,8 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       searchSessionMapBuffer,
-      isReadOnly
+      isReadOnly,
+      executionContext
     );
     expect(dataFilters.buffer).toEqual(searchSessionMapBuffer);
   });
@@ -101,7 +103,8 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       undefined,
-      isReadOnly
+      isReadOnly,
+      executionContext
     );
     expect(dataFilters.buffer).toEqual(mapBuffer);
   });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+export { CASES } from '../translations';
 
 export const ALERTS_TABLE_CONF_ERROR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.configuration.errorTitle',

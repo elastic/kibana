@@ -7,7 +7,7 @@
  */
 
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common/ast';
-import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 
 export interface EventAnnotationServiceType {

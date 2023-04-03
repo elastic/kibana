@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
-import type { SavedObjectMetaData, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 
 import {
