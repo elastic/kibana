@@ -62,7 +62,7 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
         type: 'json',
         content: {
           ...(renderProps.action as ActionDetails).outputs?.[action.agents[0]].content,
-          stdout: '   ',
+          stdout: '',
         },
       },
     };
@@ -81,7 +81,7 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
         type: 'json',
         content: {
           ...(renderProps.action as ActionDetails).outputs?.[action.agents[0]].content,
-          stderr: '   ',
+          stderr: '',
         },
       },
     };

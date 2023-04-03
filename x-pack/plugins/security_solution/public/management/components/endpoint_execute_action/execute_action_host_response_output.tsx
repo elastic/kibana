@@ -91,7 +91,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
     <EuiFlexItem data-test-subj={dataTestSubj}>
       <EuiSpacer size="m" />
       <ExecutionActionOutputAccordion
-        content={outputContent.stdout.trim().length ? outputContent.stdout.trim() : undefined}
+        content={outputContent.stdout.length ? outputContent.stdout : undefined}
         isTruncated={outputContent.stdout_truncated}
         initialIsOpen
         textSize={textSize}
@@ -99,7 +99,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
       />
       <EuiSpacer size="m" />
       <ExecutionActionOutputAccordion
-        content={outputContent.stderr.trim().length ? outputContent.stderr.trim() : undefined}
+        content={outputContent.stderr.length ? outputContent.stderr : undefined}
         isTruncated={outputContent.stderr_truncated}
         textSize={textSize}
         type="error"
