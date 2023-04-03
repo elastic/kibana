@@ -31,7 +31,7 @@ type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 export const passThroughValidation = {
   body: schema.nullable(schema.any()),
   params: schema.nullable(schema.any()),
-  query: schema.nullable(schema.any({ defaultValue: undefined })),
+  query: schema.nullable(schema.any()),
 };
 
 export class CoreVersionedRoute implements VersionedRoute {
