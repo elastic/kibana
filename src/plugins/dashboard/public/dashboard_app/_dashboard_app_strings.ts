@@ -49,7 +49,7 @@ export const unsavedChangesBadgeStrings = {
   getUnsavedChangedBadgeToolTipContent: () =>
     i18n.translate('dashboard.unsavedChangesBadgeToolTipContent', {
       defaultMessage:
-        'This dashboard has changed since the last time it was saved. To clear this message save the dashboard.',
+        ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
     }),
 };
 

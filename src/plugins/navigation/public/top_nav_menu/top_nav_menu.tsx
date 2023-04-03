@@ -25,16 +25,16 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
+type Badge = EuiBadgeProps & {
+  badgeText: string;
+  toolTipProps?: Partial<EuiToolTipProps>;
+};
+
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> =
   StatefulSearchBarProps<QT> &
     Omit<SearchBarProps<QT>, 'kibana' | 'intl' | 'timeHistory'> & {
       config?: TopNavMenuData[];
-      badges?: Array<
-        EuiBadgeProps & {
-          badgeText: string;
-          toolTipProps: EuiToolTipProps;
-        }
-      >;
+      badges?: Badge[];
       showSearchBar?: boolean;
       showQueryInput?: boolean;
       showDatePicker?: boolean;
@@ -81,28 +81,20 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
     return null;
   }
 
+  function createBadge({ badgeText, toolTipProps, ...badgeProps }: Badge, i: number): ReactElement {
+    const badge = (
+      <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
+        {badgeText}
+      </EuiBadge>
+    );
+    return toolTipProps ? <EuiToolTip {...toolTipProps}>{badge}</EuiToolTip> : badge;
+  }
+
   function renderBadges(): ReactElement | null {
     if (!badges || badges.length === 0) return null;
     return (
       <EuiBadgeGroup className={'kbnTopNavMenu__badgeGroup'}>
-        {badges.map(
-          (
-            badge: EuiBadgeProps & {
-              badgeText: string;
-              toolTipProps: EuiToolTipProps;
-            },
-            i: number
-          ) => {
-            const { badgeText, toolTipProps, ...badgeProps } = badge;
-            return (
-              <EuiToolTip {...toolTipProps}>
-                <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
-                  {badgeText}
-                </EuiBadge>
-              </EuiToolTip>
-            );
-          }
-        )}
+        {badges.map(createBadge)}
       </EuiBadgeGroup>
     );
   }
