@@ -10,9 +10,11 @@ import type { Logger } from '@kbn/core/server';
 import {
   CancellationToken,
   durationToNumber,
-  errors as reportingErrors,
+  KibanaShuttingDownError,
   mapToReportingError,
   numberToDuration,
+  QueueTimeoutError,
+  ReportingError,
 } from '@kbn/reporting-common';
 import type {
   RunContext,
@@ -43,7 +45,6 @@ import type { ReportFailedFields, ReportProcessingFields } from '../store/store'
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
-const { QueueTimeoutError, KibanaShuttingDownError } = reportingErrors;
 
 interface ReportingExecuteTaskInstance {
   state: object;
@@ -215,7 +216,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   private async _failJob(
     report: SavedReport,
-    error?: reportingErrors.ReportingError
+    error?: ReportingError
   ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Failing ${report.jobtype} job ${report._id}`;
 
@@ -239,9 +240,7 @@ export class ExecuteReportTask implements ReportingTask {
     return await store.setReportFailed(report, doc);
   }
 
-  private _formatOutput(
-    output: CompletedReportOutput | reportingErrors.ReportingError
-  ): ReportOutput {
+  private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
     const docOutput = {} as ReportOutput;
     const unknownMime = null;
 

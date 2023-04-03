@@ -13,7 +13,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { errors as reportingErrors } from '@kbn/reporting-common';
+import { VisualReportingSoftDisabledError } from '@kbn/reporting-common';
 import moment from 'moment';
 import React, { FunctionComponent } from 'react';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
@@ -217,7 +217,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
      * We link the user to documentation if they hit this error case. Note: this
      * should only occur on cloud.
      */
-    info.error_code === reportingErrors.VisualReportingSoftDisabledError.code
+    info.error_code === VisualReportingSoftDisabledError.code
       ? sharedI18nTexts.cloud.insufficientMemoryError(
           docLinks.links.reporting.cloudMinimumRequirements
         )

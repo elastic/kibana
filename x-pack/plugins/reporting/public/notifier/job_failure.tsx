@@ -9,7 +9,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { DocLinksStart, ThemeServiceStart, ToastInput } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { errors } from '@kbn/reporting-common';
+import { VisualReportingSoftDisabledError } from '@kbn/reporting-common';
 import React from 'react';
 import type { JobSummary, ManagementLinkFn } from '../../common/types';
 import { sharedI18nTexts } from '../shared_i18n_texts';
@@ -33,7 +33,7 @@ export const getFailureToast = (
     text: toMountPoint(
       <>
         <EuiCallOut size="m" color="danger" data-test-errorText={errorText}>
-          {job.errorCode === errors.VisualReportingSoftDisabledError.code
+          {job.errorCode === VisualReportingSoftDisabledError.code
             ? sharedI18nTexts.cloud.insufficientMemoryError(
                 docLinks.links.reporting.cloudMinimumRequirements
               )

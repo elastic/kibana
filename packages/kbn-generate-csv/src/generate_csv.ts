@@ -18,13 +18,14 @@ import type {
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
 import {
+  AuthenticationExpiredError,
   byteSizeValueToNumber,
   CancellationToken,
-  CONTENT_TYPE_CSV,
-  errors as reportingErrors,
+  ReportingError,
 } from '@kbn/reporting-common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
+import { CONTENT_TYPE_CSV } from '../constants';
 import { CsvConfig, JobParams, TaskRunResult } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { i18nTexts } from './i18n_texts';
@@ -311,7 +312,7 @@ export class CsvGenerator {
       ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
-    let reportingError: undefined | reportingErrors.ReportingError;
+    let reportingError: undefined | ReportingError;
 
     const index = searchSource.getField('index');
 
@@ -448,7 +449,7 @@ export class CsvGenerator {
       this.logger.error(err);
       if (err instanceof esErrors.ResponseError) {
         if ([401, 403].includes(err.statusCode ?? 0)) {
-          reportingError = new reportingErrors.AuthenticationExpiredError();
+          reportingError = new AuthenticationExpiredError();
           warnings.push(i18nTexts.authenticationError.partialResultsMessage);
         } else {
           warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));

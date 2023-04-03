@@ -13,11 +13,10 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import {
-  UI_SETTINGS_CSV_QUOTE_VALUES,
-  UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '@kbn/reporting-common';
+import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from '../constants';
 import { CsvConfig } from '../types';
 import { getExportSettings } from './get_export_settings';
 

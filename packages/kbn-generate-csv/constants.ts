@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { CsvGenerator } from './src/generate_csv';
-export * from './constants';
+export const CONTENT_TYPE_CSV = 'text/csv';
+export const CSV_BOM_CHARS = '\ufeff';
+export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
+export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
