@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 
 import { Actions, ActionTypes } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
@@ -77,29 +78,29 @@ export async function deleteComment(
 ) {
   const {
     user,
-    services: { attachmentService, userActionService },
+    services: { attachmentService, userActionService, alertsService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const myComment = await attachmentService.getter.get({
+    const attachment = await attachmentService.getter.get({
       attachmentId: attachmentID,
     });
 
-    if (myComment == null) {
+    if (attachment == null) {
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
+      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
       operation: Operations.deleteComment,
     });
 
     const type = CASE_SAVED_OBJECT;
     const id = caseID;
 
-    const caseRef = myComment.references.find((c) => c.type === type);
+    const caseRef = attachment.references.find((c) => c.type === type);
     if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
       throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
     }
@@ -114,10 +115,12 @@ export async function deleteComment(
       action: Actions.delete,
       caseId: id,
       attachmentId: attachmentID,
-      payload: { attachment: { ...myComment.attributes } },
+      payload: { attachment: { ...attachment.attributes } },
       user,
-      owner: myComment.attributes.owner,
+      owner: attachment.attributes.owner,
     });
+
+    await handleAlerts({ alertsService, attachment: attachment.attributes, caseId: id });
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,
@@ -126,3 +129,19 @@ export async function deleteComment(
     });
   }
 }
+
+interface HandleAlertsArgs {
+  alertsService: CasesClientArgs['services']['alertsService'];
+  attachment: CommentAttributes;
+  caseId: string;
+}
+
+const handleAlerts = async ({ alertsService, attachment, caseId }: HandleAlertsArgs) => {
+  if (!isCommentRequestTypeAlert(attachment)) {
+    return;
+  }
+
+  const alerts = getAlertInfoFromComments([attachment]);
+  await alertsService.ensureAlertsAuthorized({ alerts });
+  await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
+};
