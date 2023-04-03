@@ -49,7 +49,7 @@ const LeftoverIntegrationFound: React.FC = () => {
         <FormattedMessage
           id="xpack.synthetics.leftOver.errors.title"
           defaultMessage="Please click on the button below to delete the integration. Normally this should not happen.
-        Since the monitor has been deleted, the integration is deleted as well automatically. If
+        Since the monitor has been deleted, the integration was supposed to be deleted automatically. If
         this happens often, report it by "
         />
         <EuiLink
