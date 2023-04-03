@@ -36,7 +36,7 @@ export const VULNERABILITIES_INDEX_DEFAULT_NS =
 export const LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME =
   'logs-cloud_security_posture.vulnerabilities_latest';
 export const LATEST_VULNERABILITIES_INDEX_PATTERN =
-  'logs-cloud_security_posture.vulnerabilities_latest-*';
+  'logs-cloud_security_posture.vulnerabilities_latest*';
 export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
 
