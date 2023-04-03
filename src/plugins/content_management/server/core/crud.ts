@@ -5,40 +5,49 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type {
+  GetResult,
+  BulkGetResult,
+  CreateResult,
+  UpdateResult,
+  DeleteResult,
+  SearchResult,
+  SearchQuery,
+} from '../../common';
 import type { EventBus } from './event_bus';
 import type { ContentStorage, StorageContext } from './types';
 
-export interface GetResponse<T = any> {
+export interface GetResponse<T = unknown, M = void> {
   contentTypeId: string;
-  item: T;
+  item: GetResult<T, M>;
 }
 
-export interface BulkGetResponse<T = any> {
+export interface BulkGetResponse<T = unknown, M = void> {
   contentTypeId: string;
-  items: T;
+  items: BulkGetResult<T, M>;
 }
 
-export interface CreateItemResponse<T = any> {
+export interface CreateItemResponse<T = unknown, M = void> {
   contentTypeId: string;
-  result: T;
+  result: CreateResult<T, M>;
 }
 
-export interface UpdateItemResponse<T = any> {
+export interface UpdateItemResponse<T = unknown, M = void> {
   contentTypeId: string;
-  result: T;
+  result: UpdateResult<T, M>;
 }
 
-export interface DeleteItemResponse<T = any> {
+export interface DeleteItemResponse {
   contentTypeId: string;
-  result: T;
+  result: DeleteResult;
 }
 
-export interface SearchResponse<T = any> {
+export interface SearchResponse<T = unknown> {
   contentTypeId: string;
-  result: T;
+  result: SearchResult<T>;
 }
 
-export class ContentCrud implements ContentStorage {
+export class ContentCrud {
   private storage: ContentStorage;
   private eventBus: EventBus;
   public contentTypeId: string;
@@ -57,11 +66,7 @@ export class ContentCrud implements ContentStorage {
     this.eventBus = eventBus;
   }
 
-  public async get<Options extends object = object, O = any>(
-    ctx: StorageContext,
-    contentId: string,
-    options?: Options
-  ): Promise<GetResponse<O>> {
+  public async get(ctx: StorageContext, contentId: string, options?: object): Promise<GetResponse> {
     this.eventBus.emit({
       type: 'getItemStart',
       contentId,
@@ -94,11 +99,11 @@ export class ContentCrud implements ContentStorage {
     }
   }
 
-  public async bulkGet<Options extends object = object, O = any>(
+  public async bulkGet(
     ctx: StorageContext,
     ids: string[],
-    options?: Options
-  ): Promise<BulkGetResponse<O>> {
+    options?: object
+  ): Promise<BulkGetResponse> {
     this.eventBus.emit({
       type: 'bulkGetItemStart',
       contentTypeId: this.contentTypeId,
@@ -134,11 +139,11 @@ export class ContentCrud implements ContentStorage {
     }
   }
 
-  public async create<Data extends object, Options extends object = object, O = any>(
+  public async create(
     ctx: StorageContext,
-    data: Data,
-    options?: Options
-  ): Promise<CreateItemResponse<O>> {
+    data: object,
+    options?: object
+  ): Promise<CreateItemResponse> {
     this.eventBus.emit({
       type: 'createItemStart',
       contentTypeId: this.contentTypeId,
@@ -170,12 +175,12 @@ export class ContentCrud implements ContentStorage {
     }
   }
 
-  public async update<Data extends object, Options extends object = object, O = any>(
+  public async update(
     ctx: StorageContext,
     id: string,
-    data: Data,
-    options?: Options
-  ): Promise<UpdateItemResponse<O>> {
+    data: object,
+    options?: object
+  ): Promise<UpdateItemResponse> {
     this.eventBus.emit({
       type: 'updateItemStart',
       contentId: id,
@@ -210,11 +215,11 @@ export class ContentCrud implements ContentStorage {
     }
   }
 
-  public async delete<Options extends object = object, O = any>(
+  public async delete(
     ctx: StorageContext,
     id: string,
-    options?: Options
-  ): Promise<DeleteItemResponse<O>> {
+    options?: object
+  ): Promise<DeleteItemResponse> {
     this.eventBus.emit({
       type: 'deleteItemStart',
       contentId: id,
@@ -246,11 +251,11 @@ export class ContentCrud implements ContentStorage {
     }
   }
 
-  public async search<Query extends object, Options extends object = object, O = any>(
+  public async search(
     ctx: StorageContext,
-    query: Query,
-    options?: Options
-  ): Promise<SearchResponse<O>> {
+    query: SearchQuery,
+    options?: object
+  ): Promise<SearchResponse> {
     this.eventBus.emit({
       type: 'searchItemStart',
       contentTypeId: this.contentTypeId,
