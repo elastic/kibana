@@ -8,6 +8,7 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 import { savedQueryMigrations } from './migrations/query';
+import { SCHEMA_QUERY_V8_8_0 } from './schemas/query';
 
 export const querySavedObjectType: SavedObjectsType = {
   name: 'query',
@@ -46,4 +47,7 @@ export const querySavedObjectType: SavedObjectsType = {
     },
   },
   migrations: savedQueryMigrations,
+  schemas: {
+    '8.8.0': SCHEMA_QUERY_V8_8_0,
+  },
 };
