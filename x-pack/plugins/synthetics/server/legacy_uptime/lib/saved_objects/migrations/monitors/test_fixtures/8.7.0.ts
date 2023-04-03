@@ -642,7 +642,7 @@ export const tcpProject = {
   typeMigrationVersion: '8.6.0',
 } as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
 
-const testMonitors = [
+export const testMonitors = [
   browserUI,
   browserSinglePageUI,
   httpUI,
