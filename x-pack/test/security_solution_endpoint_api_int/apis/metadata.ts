@@ -38,10 +38,6 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
 
   describe('test metadata apis', () => {
-    before(async () => {
-      await endpointTestResources.setMetadataTransformFrequency('1s');
-    });
-
     describe('list endpoints GET route', () => {
       const numberOfHostsInFixture = 2;
 
