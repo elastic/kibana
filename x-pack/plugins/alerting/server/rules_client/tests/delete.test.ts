@@ -212,7 +212,7 @@ describe('delete()', () => {
     test('should call migrateLegacyActions if consumer is SIEM', async () => {
       const existingDecryptedSiemAlert = {
         ...existingDecryptedAlert,
-        attributes: { ...existingDecryptedAlert, consumer: AlertConsumers.SIEM },
+        attributes: { ...existingDecryptedAlert.attributes, consumer: AlertConsumers.SIEM },
       };
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(

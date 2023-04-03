@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -21,6 +22,14 @@ import { getBeforeSetup, mockedDateString } from './lib';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RuleSnooze } from '../../types';
+import { migrateLegacyActions } from '../lib';
+import { migrateLegacyActionsMock } from '../lib/migrate_legacy_actions.mock';
+
+jest.mock('../lib/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -60,6 +69,33 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   eventLogger,
+};
+
+const ruleMock = {
+  id: '1',
+  type: 'alert',
+  attributes: {
+    name: 'name',
+    consumer: 'myApp',
+    schedule: { interval: '10s' },
+    alertTypeId: 'myType',
+    enabled: true,
+    apiKey: 'MTIzOmFiYw==',
+    apiKeyOwner: 'elastic',
+    actions: [
+      {
+        group: 'default',
+        id: '1',
+        actionTypeId: '1',
+        actionRef: '1',
+        params: {
+          foo: true,
+        },
+      },
+    ],
+  },
+  version: '123',
+  references: [],
 };
 
 describe('clearExpiredSnoozes()', () => {
@@ -192,39 +228,60 @@ describe('clearExpiredSnoozes()', () => {
     await rulesClient.clearExpiredSnoozes({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
-});
 
-function setupTestWithSnoozeSchedule(snoozeSchedule: RuleSnooze) {
-  const rule = {
-    id: '1',
-    type: 'alert',
-    attributes: {
-      name: 'name',
-      consumer: 'myApp',
-      schedule: { interval: '10s' },
-      alertTypeId: 'myType',
-      enabled: true,
-      apiKey: 'MTIzOmFiYw==',
-      apiKeyOwner: 'elastic',
-      actions: [
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+      const siemRule = {
+        ...ruleMock,
+        attributes: { ...ruleMock.attributes, consumer: AlertConsumers.SIEM },
+      };
+      (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
+      setupTestWithSnoozeSchedule(
+        [
+          {
+            duration: 1000,
+            rRule: {
+              tzid: 'UTC',
+              dtstart: moment().subtract(1, 'd').toISOString(),
+              count: 1,
+            },
+          },
+        ],
+        siemRule
+      );
+
+      await rulesClient.clearExpiredSnoozes({ id: '1' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: '1',
+      });
+    });
+
+    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
+      setupTestWithSnoozeSchedule([
         {
-          group: 'default',
-          id: '1',
-          actionTypeId: '1',
-          actionRef: '1',
-          params: {
-            foo: true,
+          duration: 1000,
+          rRule: {
+            tzid: 'UTC',
+            dtstart: moment().subtract(1, 'd').toISOString(),
+            count: 1,
           },
         },
-      ],
-      snoozeSchedule,
-    },
-    version: '123',
-    references: [],
-  };
+      ]);
+      await rulesClient.clearExpiredSnoozes({ id: '1' });
 
-  encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(rule);
-  unsecuredSavedObjectsClient.get.mockResolvedValue(rule);
+      expect(migrateLegacyActions).not.toHaveBeenCalled();
+    });
+  });
+});
+
+function setupTestWithSnoozeSchedule(snoozeSchedule: RuleSnooze, rule = ruleMock) {
+  const ruleWithSnooze = {
+    ...rule,
+    attributes: { ...rule.attributes, snoozeSchedule },
+  };
+  encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(ruleWithSnooze);
+  unsecuredSavedObjectsClient.get.mockResolvedValue(ruleWithSnooze);
   taskManager.schedule.mockResolvedValue({
     id: '1',
     scheduledAt: new Date(),

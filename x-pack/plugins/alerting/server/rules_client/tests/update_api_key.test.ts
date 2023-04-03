@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -17,6 +18,14 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { migrateLegacyActions } from '../lib';
+import { migrateLegacyActionsMock } from '../lib/migrate_legacy_actions.mock';
+
+jest.mock('../lib/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -311,6 +320,36 @@ describe('updateApiKey()', () => {
           },
         })
       );
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions if consumer is SIEM', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        ...existingEncryptedAlert,
+        attributes: { ...existingEncryptedAlert.attributes, consumer: AlertConsumers.SIEM },
+      });
+      (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
+
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      await rulesClient.updateApiKey({ id: '1' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: '1',
+      });
+    });
+
+    test('should not call migrateLegacyActions if consumer is not SIEM', async () => {
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      await rulesClient.updateApiKey({ id: '1' });
+
+      expect(migrateLegacyActions).not.toHaveBeenCalled();
     });
   });
 });

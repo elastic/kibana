@@ -63,6 +63,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
       operation: WriteOperations.UpdateApiKey,
       entity: AlertingAuthorizationEntity.Rule,
     });
+
     if (attributes.actions.length) {
       await context.actionsAuthorization.ensureAuthorized('execute');
     }
