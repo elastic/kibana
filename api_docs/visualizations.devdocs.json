@@ -6731,9 +6731,9 @@
           "DisabledLabEmbeddable",
           ">; readonly savedObjectMetaData: ",
           {
-            "pluginId": "savedObjects",
+            "pluginId": "savedObjectsFinder",
             "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
+            "docId": "kibSavedObjectsFinderPluginApi",
             "section": "def-public.SavedObjectMetaData",
             "text": "SavedObjectMetaData"
           },
@@ -7473,7 +7473,23 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined) => { id?: string | undefined; params?: Record<string, any> | undefined; } | undefined"
+          "> | undefined) => ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined"
         ],
         "path": "src/plugins/visualizations/common/utils/accessors.ts",
         "deprecated": false,

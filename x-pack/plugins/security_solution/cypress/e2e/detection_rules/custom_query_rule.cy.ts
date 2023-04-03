@@ -234,9 +234,9 @@ describe('Custom query rules', () => {
     context('Deletion', () => {
       beforeEach(() => {
         deleteAlertsAndRules();
-        createRule({ ...getNewRule(), rule_id: 'rule1', enabled: true, max_signals: 500 });
-        createRule({ ...getNewOverrideRule(), rule_id: 'rule2', enabled: true, max_signals: 500 });
-        createRule({ ...getExistingRule(), rule_id: 'rule3', enabled: true });
+        createRule(getNewRule({ rule_id: 'rule1', enabled: true, max_signals: 500 }));
+        createRule(getNewOverrideRule({ rule_id: 'rule2', enabled: true, max_signals: 500 }));
+        createRule(getExistingRule({ rule_id: 'rule3', enabled: true }));
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
@@ -346,7 +346,7 @@ describe('Custom query rules', () => {
       before(() => {
         deleteAlertsAndRules();
         deleteConnectors();
-        createRule({ ...getExistingRule(), rule_id: 'rule1', enabled: true });
+        createRule(getExistingRule({ rule_id: 'rule1', enabled: true }));
       });
       beforeEach(() => {
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
