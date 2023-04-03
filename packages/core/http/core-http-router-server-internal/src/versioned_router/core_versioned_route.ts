@@ -77,7 +77,10 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   private getAvailableVersionsMessage(): string {
-    return `Available versions are: "${[...this.handlers.keys()].join(',') || 'none'}"`;
+    const versions = [...this.handlers.keys()];
+    return `Available versions are: ${
+      versions.length ? '[' + [...versions].join(', ') + ']' : '<none>'
+    }`;
   }
 
   /** This is where we must implement the versioned spec once it is available */

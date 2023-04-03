@@ -193,7 +193,7 @@ describe('Versioned route', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         payload:
-          'No version "999" available for [post] [/test/{id}]. Available versions are: "none"',
+          'No version "999" available for [post] [/test/{id}]. Available versions are: <none>',
         status: 406,
       })
     );
@@ -212,7 +212,7 @@ describe('Versioned route', () => {
       handler!({} as any, createRequest({ version: undefined }), responseFactory)
     ).resolves.toEqual({
       options: {},
-      payload: `Version expected at [post] [/test/{id}]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. Available versions are: "1"`,
+      payload: `Version expected at [post] [/test/{id}]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. Available versions are: [1]`,
       status: 406,
     });
   });

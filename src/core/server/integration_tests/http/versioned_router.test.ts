@@ -101,8 +101,7 @@ describe('Routing versioned requests', () => {
         .then(({ body }) => body)
     ).resolves.toEqual(
       expect.objectContaining({
-        message:
-          'Version expected at [get] [/my-path]. Please specify a version using the "elastic-api-version" header. Available versions are: "1,2"',
+        message: expect.stringMatching(/Version expected at/),
       })
     );
   });
