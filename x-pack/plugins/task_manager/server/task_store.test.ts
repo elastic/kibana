@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
 import { first } from 'rxjs/operators';
@@ -73,7 +74,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 
@@ -228,9 +228,14 @@ describe('TaskStore', () => {
   describe('fetch', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         index: 'tasky',
         taskManagerId: '',
@@ -239,22 +244,21 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 
     async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
-      esClient.search.mockResponse({
+      childEsClient.search.mockResponse({
         hits: { hits, total: hits.length },
       } as estypes.SearchResponse);
 
       const result = await store.fetch(opts);
 
-      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(childEsClient.search).toHaveBeenCalledTimes(1);
 
       return {
         result,
-        args: esClient.search.mock.calls[0][0],
+        args: childEsClient.search.mock.calls[0][0],
       };
     }
 
@@ -289,7 +293,7 @@ describe('TaskStore', () => {
 
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      esClient.search.mockRejectedValue(new Error('Failure'));
+      childEsClient.search.mockRejectedValue(new Error('Failure'));
       await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
@@ -309,7 +313,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 
@@ -408,7 +411,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 
@@ -512,7 +514,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 
@@ -554,7 +555,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 
@@ -589,7 +589,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 
@@ -624,7 +623,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 
@@ -682,7 +680,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 
@@ -775,7 +772,6 @@ describe('TaskStore', () => {
             definitions: taskDefinitions,
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
-            updateByQueryTimeout: 30000,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -796,7 +792,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -815,7 +810,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -834,7 +828,6 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        updateByQueryTimeout: 30000,
       });
     });
 

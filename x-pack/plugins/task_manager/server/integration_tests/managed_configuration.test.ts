@@ -43,7 +43,6 @@ describe('managed configuration', () => {
       max_attempts: 9,
       poll_interval: 3000,
       version_conflict_threshold: 80,
-      max_poll_inactivity_cycles: 10,
       monitored_aggregated_stats_refresh_rate: 60000,
       monitored_stats_health_verbose_log: {
         enabled: false,

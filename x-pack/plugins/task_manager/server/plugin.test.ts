@@ -42,7 +42,6 @@ const pluginInitializerContextParams = {
   max_attempts: 9,
   poll_interval: 3000,
   version_conflict_threshold: 80,
-  max_poll_inactivity_cycles: 10,
   request_capacity: 1000,
   monitored_aggregated_stats_refresh_rate: 5000,
   monitored_stats_health_verbose_log: {
