@@ -46,6 +46,11 @@ function setup({
           getQuery: () => {},
           clearQuery: () => {},
         },
+        timefilter: {
+          timefilter: {
+            setTime: () => {},
+          },
+        },
       },
     },
   } as Partial<CoreStart>);
