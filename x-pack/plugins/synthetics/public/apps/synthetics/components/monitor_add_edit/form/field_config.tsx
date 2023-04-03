@@ -96,7 +96,7 @@ const getScheduleContent = (value: number) => {
 
 const SCHEDULES = ALLOWED_SCHEDULES_IN_MINUTES.map((value) => ({
   value,
-  text: getScheduleContent(value),
+  text: getScheduleContent(parseInt(value, 10)),
 }));
 
 export const MONITOR_TYPE_CONFIG = {

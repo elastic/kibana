@@ -194,7 +194,7 @@ describe('validateMonitor', () => {
       const testMonitor = {
         type: undefined,
         schedule: {
-          unit: 'm',
+          unit: ScheduleUnit.MINUTES,
           number: '3',
         },
       } as unknown as MonitorFields;
@@ -210,7 +210,7 @@ describe('validateMonitor', () => {
       const monitor = {
         type: 'non-HTTP',
         schedule: {
-          unit: 'm',
+          unit: ScheduleUnit.MINUTES,
           number: '3',
         },
       } as unknown as MonitorFields;
@@ -223,14 +223,13 @@ describe('validateMonitor', () => {
     });
 
     it(`when schedule is not valid`, () => {
-      const testMonitor = testICMPFields as MonitorFields;
       const result = validateMonitor({
         ...testICMPFields,
         schedule: {
           number: '4',
-          unit: 'm',
+          unit: ScheduleUnit.MINUTES,
         },
-      });
+      } as unknown as MonitorFields);
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor schedule is invalid',
