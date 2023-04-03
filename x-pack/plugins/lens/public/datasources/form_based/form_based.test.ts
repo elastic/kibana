@@ -19,7 +19,6 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-// eslint-disable-next-line @kbn/imports/uniform_imports
 import { TinymathAST } from '@kbn/tinymath';
 import { getFormBasedDatasource, GenericIndexPatternColumn } from './form_based';
 import {
