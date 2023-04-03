@@ -9,10 +9,15 @@
 import { schema } from '@kbn/config-schema';
 import {
   CreateIn,
+  CreateResult,
   DeleteIn,
+  DeleteResult,
   GetIn,
+  GetResult,
   SearchIn,
+  SearchResult,
   UpdateIn,
+  UpdateResult,
 } from '@kbn/content-management-plugin/common';
 
 export const TODO_CONTENT_ID = 'todos';
@@ -28,12 +33,12 @@ const todoSchema = schema.object({
 });
 
 export type TodoCreateIn = CreateIn<'todos', { title: string }>;
-export type TodoCreateOut = Todo; // TODO: Is this correct?
+export type TodoCreateOut = CreateResult<Todo>;
 export const createInSchema = schema.object({ title: schema.string() });
 export const createOutSchema = todoSchema;
 
 export type TodoUpdateIn = UpdateIn<'todos', Partial<Omit<Todo, 'id'>>>;
-export type TodoUpdateOut = Todo;
+export type TodoUpdateOut = UpdateResult<Todo>;
 export const updateInSchema = schema.object({
   title: schema.maybe(schema.string()),
   completed: schema.maybe(schema.boolean()),
@@ -41,16 +46,15 @@ export const updateInSchema = schema.object({
 export const updateOutSchema = todoSchema;
 
 export type TodoDeleteIn = DeleteIn<'todos', { id: string }>;
-export type TodoDeleteOut = void;
+export type TodoDeleteOut = DeleteResult;
 
 export type TodoGetIn = GetIn<'todos'>;
-export type TodoGetOut = Todo;
+export type TodoGetOut = GetResult<Todo>;
 export const getOutSchema = todoSchema;
 
 export type TodoSearchIn = SearchIn<'todos', { filter?: 'todo' | 'completed' }>;
-export interface TodoSearchOut {
-  hits: Todo[];
-}
+export type TodoSearchOut = SearchResult<Todo>;
+
 export const searchInSchema = schema.object({
   filter: schema.maybe(
     schema.oneOf([schema.literal('todo'), schema.literal('completed')], {
