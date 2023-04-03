@@ -121,7 +121,14 @@ describe('RPC -> bulkGet()', () => {
     test('should validate that the response is an object or an array of object', () => {
       let error = validate(
         {
-          any: 'object',
+          hits: [
+            {
+              contentTypeId: '123',
+              result: {
+                any: 'object',
+              },
+            },
+          ],
         },
         outputSchema
       );
@@ -129,22 +136,20 @@ describe('RPC -> bulkGet()', () => {
       expect(error).toBe(null);
 
       error = validate(
-        [
-          {
-            any: 'object',
-          },
-        ],
+        {
+          hits: [
+            {
+              contentTypeId: '123',
+              result: 123,
+            },
+          ],
+        },
         outputSchema
       );
 
-      expect(error).toBe(null);
-
-      error = validate(123, outputSchema);
-
       expect(error?.message).toContain(
-        'expected a plain object value, but found [number] instead.'
+        '[hits.0.result]: expected a plain object value, but found [number] instead.'
       );
-      expect(error?.message).toContain('expected value of type [array] but got [number]');
     });
   });
 

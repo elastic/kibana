@@ -21,7 +21,7 @@ export const deleteSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  out: schema.object({ success: schema.boolean() }, { unknowns: 'allow' }),
 };
 
 export interface DeleteIn<T extends string = string, Options extends void | object = object> {

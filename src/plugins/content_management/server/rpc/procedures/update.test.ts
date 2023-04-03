@@ -115,16 +115,27 @@ describe('RPC -> update()', () => {
     test('should validate that the response is an object', () => {
       let error = validate(
         {
-          any: 'object',
+          contentTypeId: '123',
+          result: {
+            any: 'object',
+          },
         },
         outputSchema
       );
 
       expect(error).toBe(null);
 
-      error = validate(123, outputSchema);
+      error = validate(
+        {
+          contentTypeId: '123',
+          result: 123,
+        },
+        outputSchema
+      );
 
-      expect(error?.message).toBe('expected a plain object value, but found [number] instead.');
+      expect(error?.message).toBe(
+        '[result]: expected a plain object value, but found [number] instead.'
+      );
     });
   });
 

@@ -23,7 +23,14 @@ export const updateSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  out: schema.object(
+    {
+      contentTypeId: schema.string(),
+      // --> "result" will be (optionally) specified by each storage layer
+      result: schema.object({}, { unknowns: 'allow' }),
+    },
+    { unknowns: 'allow' }
+  ),
 };
 
 export interface UpdateIn<

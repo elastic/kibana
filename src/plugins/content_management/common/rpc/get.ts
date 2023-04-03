@@ -11,6 +11,15 @@ import { versionSchema } from './constants';
 
 import type { ItemResult, ProcedureSchemas } from './types';
 
+export const getResultSchema = schema.object(
+  {
+    contentTypeId: schema.string(),
+    // --> "result" will be (optionally) specified by each storage layer
+    result: schema.object({}, { unknowns: 'allow' }),
+  },
+  { unknowns: 'allow' }
+);
+
 export const getSchemas: ProcedureSchemas = {
   in: schema.object(
     {
@@ -21,8 +30,7 @@ export const getSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-  // --> "out" will be (optionally) specified by each storage layer
-  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  out: getResultSchema,
 };
 
 export interface GetIn<T extends string = string, Options extends void | object = object> {
