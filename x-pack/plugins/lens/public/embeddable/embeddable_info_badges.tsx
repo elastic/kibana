@@ -43,11 +43,13 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
         <EuiToolTip content={iconTitle}>
           <EuiButtonEmpty
             data-test-subj="lns-feature-badges-trigger"
+            className="lnsEmbeddablePanelFeatureList_button"
             color={'text'}
             onClick={onButtonClick}
             title={iconTitle}
             size="s"
             css={css`
+              color: ${euiTheme.colors.emptyShade};
               font-size: ${xsFontSize};
               height: ${euiTheme.size.l} !important;
               .euiButtonEmpty__content {
