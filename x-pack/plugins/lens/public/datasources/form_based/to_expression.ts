@@ -8,6 +8,7 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
+import { parse } from '@kbn/tinymath';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
@@ -406,11 +407,19 @@ function getExpressionForLayer(
         if (col.operationType === 'formula') {
           // we need to check if formula is doing counter_rate(max(counter field))
           const formula = (col as FormulaIndexPatternColumn).params.formula || '';
-          if (formula.startsWith('counter_rate(max(') || formula.startsWith('counter_rate(min(')) {
-            const regexp = /counter_rate\(([a-z]+)\((.*?)\)\)/;
-            const match = formula.match(regexp);
-            if (match && match.length === 3) {
-              const fieldName = match[2].replace("'", '');
+          const ast = parse(formula);
+          if (typeof ast !== 'number' && ast.type === 'function') {
+            const { name, args } = ast;
+            if (
+              name === 'counter_rate' &&
+              typeof args[0] !== 'number' &&
+              args[0].type === 'function' &&
+              args[0].name === 'max' &&
+              args[0].args.length === 1 &&
+              typeof args[0].args[0] !== 'number' &&
+              args[0].args[0].type === 'namedArgument'
+            ) {
+              const fieldName = args[0].args[0].value;
               if (indexPattern.getFieldByName(fieldName)?.timeSeriesMetric === 'counter') {
                 return [formatCall];
               }
