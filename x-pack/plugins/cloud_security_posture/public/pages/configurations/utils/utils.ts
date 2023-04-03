@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { buildEsQuery, type Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import type { EuiBasicTableProps, EuiThemeComputed, Pagination } from '@elastic/eui';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
@@ -39,23 +39,6 @@ export const getPaginationTableParams = (
   pageSizeOptions,
   showPerPageOptions,
 });
-
-export const usePersistedQuery = <T>(getter: ({ filters, query }: FindingsBaseURLQuery) => T) => {
-  const {
-    data: {
-      query: { filterManager, queryString },
-    },
-  } = useKibana().services;
-
-  return useCallback(
-    () =>
-      getter({
-        filters: filterManager.getAppFilters(),
-        query: queryString.getQuery() as Query,
-      }),
-    [getter, filterManager, queryString]
-  );
-};
 
 export const getPaginationQuery = ({
   pageIndex,

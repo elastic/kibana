@@ -13,158 +13,58 @@ import {
   EuiDataGrid,
   EuiDataGridColumn,
   EuiDataGridProps,
+  EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { usePageSize } from '../../common/hooks/use_page_size';
+import { useUrlQuery } from '../../common/hooks/use_url_query';
+import { useLimitProperties } from '../configurations/utils/get_limit_properties';
+import {
+  getPaginationTableParams,
+  useBaseEsQuery,
+  usePersistedQuery,
+} from '../configurations/utils/utils';
+import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
+import { VulnerabilityRecord } from './types';
+import { getVulnerabilitiesColumns } from './utils';
 
-interface VulnerabilityRecord {
-  actions: any;
-  severity: string;
-  vulnerabilities: string;
-  resource: string;
-  cvss: string;
-  exploitability: string;
-  'package-version': string;
-  'fix-version': string;
-}
+const VULN_MGMT_FINDINGS_SORT_KEY = 'csp:vuln-mgmt:findings-sort';
+const VULN_MGMT_FINDINGS_PAGINATION_KEY = 'csp:vuln-mgmt:findings-pagination';
 
-const data: VulnerabilityRecord[] = [
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.6',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-  {
-    actions: <EuiButtonIcon color="primary" iconType="expand" />,
-    severity: 'high',
-    vulnerabilities: 'CVE-2019-5736',
-    resource: 'alpine:3.10',
-    cvss: '7.5',
-    exploitability: 'High',
-    'package-version': '1.30-r1',
-    'fix-version': '1.30-r2',
-  },
-];
+export const getDefaultQuery = ({ query, filters }: any): any => ({
+  query,
+  filters,
+  sort: { field: '@timestamp', direction: 'desc' },
+  pageIndex: 0,
+});
+
+const defaultSorting = {
+  id: 'cvss',
+  direction: 'desc',
+};
 
 export const Vulnerabilities = () => {
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  // const { pageSize, setPageSize } = usePageSize('vulnerabilities-pagination');
+
+  /**
+   * Page ES query result
+   */
+  const { data, isLoading } = useLatestVulnerabilities({
+    query: urlQuery.query,
+    sort: urlQuery.sort,
+    enabled: true,
+  });
   // Pagination
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
       setPagination((paginationState) => ({
@@ -180,7 +80,7 @@ export const Vulnerabilities = () => {
   );
 
   // Sorting
-  const [sortingColumns, setSortingColumns] = useState([]);
+  const [sortingColumns, setSortingColumns] = useState([defaultSorting]);
   const onSort = useCallback(
     (sort) => {
       setSortingColumns(sort);
@@ -188,100 +88,69 @@ export const Vulnerabilities = () => {
     [setSortingColumns]
   );
 
-  const columns: EuiDataGridColumn[] = [
-    {
-      id: 'actions',
-      initialWidth: 40,
-      display: <></>,
-      isSortable: false,
-      isExpandable: false,
-      actions: false,
-      isResizable: false,
-    },
-    {
-      id: 'severity',
-      displayAsText: 'Severity',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
-    },
-    {
-      id: 'vulnerabilities',
-      displayAsText: 'Vulnerabilities',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
-    },
-    {
-      id: 'resource',
-      displayAsText: 'Resource',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
-    },
-    {
-      id: 'cvss',
-      displayAsText: 'CVSS',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
-    },
-    {
-      id: 'exploitability',
-      displayAsText: 'Exploitability',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
-    },
-    {
-      id: 'package-version',
-      displayAsText: 'Package and Version',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
-    },
-    {
-      id: 'fix-version',
-      displayAsText: 'Fix Version',
-      isExpandable: false,
-      isResizable: false,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-      },
-    },
-  ];
-
   const renderCellValue = useMemo(() => {
-    return ({ rowIndex, columnId }) => {
-      return data.hasOwnProperty(rowIndex) ? data[rowIndex][columnId] : null;
+    return ({
+      rowIndex,
+      columnId,
+    }: {
+      rowIndex: number;
+      columnId: typeof columns[number]['id'];
+    }) => {
+      const vulnerabilityIndex =
+        Math.floor(pagination?.pageIndex * pagination?.pageSize) + rowIndex;
+
+      const vulnerability = data?.page[vulnerabilityIndex] as VulnerabilityRecord;
+
+      if (!vulnerability) return null;
+
+      if (columnId === 'actions') {
+        return (
+          <EuiButtonIcon
+            iconType="expand"
+            color="primary"
+            aria-label="View"
+            onClick={() => {
+              alert(`Flyout id ${vulnerability.finding?.vulnerability?.id}`);
+            }}
+          />
+        );
+      }
+      if (columnId === 'vulnerability') {
+        return vulnerability.finding?.vulnerability?.id || null;
+      }
+      if (columnId === 'cvss') {
+        return (
+          <>
+            {vulnerability.finding?.vulnerability.score.base}|
+            {vulnerability.finding?.vulnerability.score.version}
+          </>
+        );
+      }
+      if (columnId === 'resource') {
+        return vulnerability.resource?.name || null;
+      }
+      if (columnId === 'severity') {
+        return <>{vulnerability.finding?.vulnerability.severity || null}</>;
+      }
+      if (columnId === 'package-version') {
+        return (
+          <>
+            {vulnerability.finding?.vulnerability.package.name}{' '}
+            {vulnerability.finding?.vulnerability.package.version}
+          </>
+        );
+      }
+      if (columnId === 'fix-version') {
+        return vulnerability.finding?.vulnerability.package.fixed_version || null;
+      }
     };
-  }, []);
+  }, [data, pagination?.pageIndex, pagination?.pageSize]);
+
+  if (isLoading || !data) {
+    return <EuiLoadingSpinner />;
+  }
+
+  const columns = getVulnerabilitiesColumns();
 
   return (
     <>
@@ -291,6 +160,9 @@ export const Vulnerabilities = () => {
           & .euiDataGridHeaderCell__icon {
             display: none;
           }
+          & .euiDataGrid__controls {
+            border-bottom: none;
+          }
         `}
         aria-label="Data grid styling demo"
         columns={columns}
@@ -299,7 +171,7 @@ export const Vulnerabilities = () => {
           setVisibleColumns: () => {},
         }}
         // sorting={{ columns: sortingColumns, onSort }}
-        rowCount={data.length}
+        rowCount={data?.total}
         toolbarVisibility={{
           showColumnSelector: false,
           showDisplaySelector: false,
@@ -308,22 +180,18 @@ export const Vulnerabilities = () => {
             left: {
               prepend: (
                 <EuiButtonEmpty size="xs" color="text">
-                  {data.length} Vulnerabilities
+                  {data?.total} Vulnerabilities
                 </EuiButtonEmpty>
               ),
             },
           },
         }}
         gridStyle={{
-          border: 'none',
-          //   // fontSize: fontSize,
-          //   // cellPadding: cellPadding,
+          border: 'horizontal',
+          cellPadding: 'l',
           stripes: false,
           rowHover: 'none',
           header: 'underline',
-          //   // rowHover: rowHover,
-          //   // header: header,
-          //   // footer: footer,
         }}
         renderCellValue={renderCellValue}
         inMemory={{ level: 'sorting' }}
