@@ -40,7 +40,7 @@ export const GuideFilters = ({ activeFilter, setActiveFilter, application }: Gui
     color: ${euiTheme.colors.lightestShade};
   `;
   const setQuerystringParams = ({ useCase }: { useCase: string }) => {
-    application.navigateToUrl(`./home#/getting_started?useCase=${useCase}`);
+    application.navigateToApp('home', { path: `#/getting_started?useCase=${useCase}` });
   };
   const onSelectFilter = (e: React.BaseSyntheticEvent) => {
     const {
