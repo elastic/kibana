@@ -61,6 +61,6 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['containers', 'kubernetes'],
+    integrationBrowserCategories: ['containers', 'kubernetes', 'observability'],
   };
 }
