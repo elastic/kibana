@@ -19,7 +19,14 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { loggerMock } from '@kbn/logging-mocks';
-import { enabledRule1, enabledRule2, returnedRule1, returnedRule2 } from './test_helpers';
+import { enabledRule1, enabledRule2, returnedRule1, returnedRule2, siemRule } from './test_helpers';
+import { migrateLegacyActions } from '../lib';
+
+jest.mock('../lib/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -391,6 +398,34 @@ describe('bulkDelete', () => {
         'Successfully deleted schedules for underlying tasks: id1, id2'
       );
       expect(logger.error).toBeCalledTimes(0);
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions for SIEM consumers rules only', async () => {
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRule1, enabledRule2, siemRule] };
+          },
+        });
+
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: enabledRule1.id, type: 'alert', success: true },
+          { id: enabledRule2.id, type: 'alert', success: true },
+          { id: siemRule.id, type: 'alert', success: true },
+        ],
+      });
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(1);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: siemRule.id,
+      });
     });
   });
 

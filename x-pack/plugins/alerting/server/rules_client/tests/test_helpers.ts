@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 
@@ -33,6 +34,20 @@ export const defaultRule = {
   attributes: {
     name: 'fakeName',
     consumer: 'fakeConsumer',
+    alertTypeId: 'fakeType',
+    schedule: { interval: '5m' },
+    actions: [] as unknown,
+  },
+  references: [],
+  version: '1',
+};
+
+export const siemRule = {
+  id: 'siem-id1',
+  type: 'alert',
+  attributes: {
+    name: 'fakeName',
+    consumer: AlertConsumers.SIEM,
     alertTypeId: 'fakeType',
     schedule: { interval: '5m' },
     actions: [] as unknown,
