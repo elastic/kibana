@@ -63,7 +63,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
     const errors = isInvalid ? varErrors : null;
     const fieldLabel = title || name;
-
+    const fieldTestSelector = fieldLabel.replace(/\s/g, '-').toLowerCase();
     const field = useMemo(() => {
       if (multi) {
         return (
@@ -72,6 +72,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             onChange={onChange}
             onBlur={() => setIsDirty(true)}
             isDisabled={frozen}
+            data-test-subj={`multiTextInput-${fieldTestSelector}`}
           />
         );
       }
@@ -96,6 +97,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               onBlur={() => setIsDirty(true)}
               disabled={frozen}
               resize="vertical"
+              data-test-subj={`textAreaInput-${fieldTestSelector}`}
             />
           );
         case 'yaml':
@@ -142,6 +144,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               onChange={(e) => onChange(e.target.checked)}
               onBlur={() => setIsDirty(true)}
               disabled={frozen}
+              data-test-subj={`switch-${fieldTestSelector}`}
             />
           );
         case 'password':
@@ -153,6 +156,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               onChange={(e) => onChange(e.target.value)}
               onBlur={() => setIsDirty(true)}
               disabled={frozen}
+              data-test-subj={`passwordInput-${fieldTestSelector}`}
             />
           );
         case 'select':
@@ -177,6 +181,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
                 return onChange(newValue);
               }}
               onBlur={() => setIsDirty(true)}
+              data-test-subj={`select-${fieldTestSelector}`}
             />
           );
         default:
@@ -187,6 +192,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               onChange={(e) => onChange(e.target.value)}
               onBlur={() => setIsDirty(true)}
               disabled={frozen}
+              data-test-subj={`textInput-${fieldTestSelector}`}
             />
           );
       }
@@ -204,6 +210,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
       isInvalid,
       fieldLabel,
       options,
+      fieldTestSelector,
     ]);
 
     // Boolean cannot be optional by default set to false
