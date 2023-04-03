@@ -3421,10 +3421,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-versioned-router-server-mocks@link:packages/core/http/core-http-versioned-router-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-i18n-browser-internal@link:packages/core/i18n/core-i18n-browser-internal":
   version "0.0.0"
   uid ""
