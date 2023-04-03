@@ -6,12 +6,36 @@
  * Side Public License, v 1.
  */
 
+import { hapiMocks } from '@kbn/hapi-mocks';
 import { schema } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { IRouter, KibanaResponseFactory, RequestHandler } from '@kbn/core-http-server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
+import { passThroughValidation } from './core_versioned_route';
+import { CoreKibanaRequest } from '../request';
+
+const createRequest = (
+  {
+    version,
+    body,
+    params,
+    query,
+  }: { version: undefined | ApiVersion; body?: object; params?: object; query?: object } = {
+    version: '1',
+  }
+) =>
+  CoreKibanaRequest.from(
+    hapiMocks.createRequest({
+      payload: body,
+      params,
+      query,
+      headers: { [ELASTIC_HTTP_VERSION_HEADER]: version },
+      app: { requestId: 'fakeId' },
+    }),
+    passThroughValidation
+  );
 
 describe('Versioned route', () => {
   let router: IRouter;
@@ -142,12 +166,12 @@ describe('Versioned route', () => {
 
     const kibanaResponse = await handler!(
       {} as any,
-      {
-        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+      createRequest({
+        version: '1',
         body: { foo: 1 },
         params: { foo: 1 },
         query: { foo: 1 },
-      } as any,
+      }),
       responseFactory
     );
 
@@ -165,13 +189,7 @@ describe('Versioned route', () => {
     versionedRouter.post({ access: 'internal', path: '/test/{id}' });
 
     await expect(
-      handler!(
-        {} as any,
-        {
-          headers: { [ELASTIC_HTTP_VERSION_HEADER]: '999' },
-        } as any,
-        responseFactory
-      )
+      handler!({} as any, createRequest({ version: '999' }), responseFactory)
     ).resolves.toEqual(
       expect.objectContaining({
         payload:
@@ -191,13 +209,7 @@ describe('Versioned route', () => {
       .addVersion({ validate: false, version: '1' }, handlerFn);
 
     await expect(
-      handler!(
-        {} as any,
-        {
-          headers: {},
-        } as any,
-        responseFactory
-      )
+      handler!({} as any, createRequest({ version: undefined }), responseFactory)
     ).resolves.toEqual({
       options: {},
       payload: `Version expected at [post] [/test/{id}]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. Available versions are: "1"`,
@@ -219,10 +231,10 @@ describe('Versioned route', () => {
     await expect(
       handler!(
         {} as any,
-        {
-          headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+        createRequest({
+          version: '1',
           body: {},
-        } as any,
+        }),
         responseFactory
       )
     ).resolves.toEqual({

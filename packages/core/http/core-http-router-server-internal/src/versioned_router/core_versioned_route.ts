@@ -28,7 +28,7 @@ import { isValidRouteVersion } from './is_valid_route_version';
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 
 // This validation is a pass-through so that we can apply our version-specific validation later
-const passThroughValidation = {
+export const passThroughValidation = {
   body: schema.nullable(schema.any()),
   params: schema.nullable(schema.any()),
   query: schema.nullable(schema.any({ defaultValue: undefined })),

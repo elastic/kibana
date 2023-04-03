@@ -14,8 +14,7 @@
     "@kbn/hapi-mocks",
     "@kbn/config-schema",
     "@kbn/core-http-server",
-    "@kbn/core-http-router-server-internal",
-    "@kbn/core-http-versioned-router-server-mocks"
+    "@kbn/core-http-router-server-internal"
   ],
   "exclude": [
     "target/**/*",
