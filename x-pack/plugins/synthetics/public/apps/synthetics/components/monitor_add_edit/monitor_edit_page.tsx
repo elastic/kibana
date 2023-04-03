@@ -12,6 +12,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { EditMonitorNotFound } from './edit_monitor_not_found';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
 import { getServiceLocations, selectServiceLocationsState } from '../../state';
@@ -43,10 +44,13 @@ export const MonitorEditPage: React.FC = () => {
     return getMonitorAPI({ id: monitorId });
   }, []);
 
-  const notFoundContent = useMonitorNotFound(error as IHttpFetchError<ResponseErrorBody>, data?.id);
+  const monitorNotFoundError = useMonitorNotFound(
+    error as IHttpFetchError<ResponseErrorBody>,
+    data?.id
+  );
 
-  if (notFoundContent) {
-    return notFoundContent;
+  if (monitorNotFoundError) {
+    return <EditMonitorNotFound />;
   }
 
   const isReadOnly = data?.attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
