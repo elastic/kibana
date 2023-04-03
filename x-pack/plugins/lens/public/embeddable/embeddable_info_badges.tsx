@@ -46,20 +46,18 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
             color={'text'}
             onClick={onButtonClick}
             title={iconTitle}
+            size="s"
             css={css`
-              block-size: ${euiTheme.size.l};
-              border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
               font-size: ${xsFontSize};
-              padding: 0 ${euiTheme.size.xxs};
+              height: ${euiTheme.size.l} !important;
+              .euiButtonEmpty__content {
+                padding: 0 ${euiTheme.size.xs};
+              }
+              .euiButtonEmpty__text {
+                margin-inline-start: ${euiTheme.size.xs};
+              }
             `}
             iconType="wrench"
-            textProps={{
-              css: css`
-                & > * + * {
-                  margin-inline-start: ${euiTheme.size.xs};
-                }
-              `,
-            }}
           >
             {messages.length}
           </EuiButtonEmpty>
@@ -70,17 +68,17 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
     >
       <div>
         {messages.map(({ shortMessage, longMessage }, index) => (
-          <React.Fragment key={`${shortMessage}-${index}`}>
+          <aside key={`${shortMessage}-${index}`}>
             {index ? <EuiHorizontalRule margin="none" /> : null}
             <EuiTitle
-              size="xs"
+              size="xxs"
               css={css`color=${euiTheme.colors.title}`}
               className="lnsEmbeddablePanelFeatureList_header"
             >
               <h3>{shortMessage}</h3>
             </EuiTitle>
             <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>
-          </React.Fragment>
+          </aside>
         ))}
       </div>
     </EuiPopover>

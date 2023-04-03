@@ -61,12 +61,30 @@ import { getOriginalId } from '../../../common/expressions/datatable/transpose_h
 import { isQueryValid } from '../../shared_components';
 import { ReducedSamplingSectionEntries } from './info_badges';
 
+function isMinOrMaxColumn(
+  column?: GenericIndexPatternColumn
+): column is MaxIndexPatternColumn | MinIndexPatternColumn {
+  if (!column) {
+    return false;
+  }
+  return (
+    isColumnOfType<MaxIndexPatternColumn>('max', column) ||
+    isColumnOfType<MinIndexPatternColumn>('min', column)
+  );
+}
+
+function isReferenceColumn(
+  column: GenericIndexPatternColumn
+): column is ReferenceBasedIndexPatternColumn {
+  return 'references' in column;
+}
+
 export function isSamplingValueEnabled(layer: FormBasedLayer) {
   // Do not use columnOrder here as it needs to check also inside formulas columns
   return !Object.values(layer.columns).some(
     (column) =>
-      isColumnOfType<MaxIndexPatternColumn>('max', column) ||
-      isColumnOfType<MinIndexPatternColumn>('min', column)
+      isMinOrMaxColumn(column) ||
+      (isReferenceColumn(column) && isMinOrMaxColumn(layer.columns[column.references[0]]))
   );
 }
 

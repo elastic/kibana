@@ -44,7 +44,7 @@ import {
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { getReferencedField, hasField } from '../pure_utils';
-import { fieldIsInvalid, isSamplingValueEnabled } from '../utils';
+import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { FormBasedLayer } from '../types';
 import { FormatSelector } from './format_selector';
@@ -128,7 +128,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   // If a layer has sampling disabled, assume the toast has already fired in the past
   const [hasRandomSamplingToastFired, setSamplingToastAsFired] = useState(
-    isSamplingValueEnabled(state.layers[layerId])
+    !isSamplingValueEnabled(state.layers[layerId])
   );
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
@@ -145,27 +145,24 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const fireOrResetRandomSamplingToast = useCallback(
     (newLayer: FormBasedLayer) => {
-      if (!isSamplingValueEnabled(newLayer) && !hasRandomSamplingToastFired) {
+      // if prev and current sampling state is different, show a toast to the user
+      if (isSamplingValueEnabled(state.layers[layerId]) && !isSamplingValueEnabled(newLayer)) {
         if (newLayer.sampling != null && newLayer.sampling < 1) {
-          const message = i18n.translate('xpack.lens.uiInfo.samplingDisabledMessage', {
-            defaultMessage:
-              'The use of a maximum or minimum function on a layer requires all documents to be sampled in order to function properly.',
-          });
-          props.notifications.toasts.addInfo({
+          props.notifications.toasts.add({
             title: i18n.translate('xpack.lens.uiInfo.samplingDisabledTitle', {
               defaultMessage: 'Layer sampling changed to 100%',
             }),
-            text: message,
+            text: i18n.translate('xpack.lens.uiInfo.samplingDisabledMessage', {
+              defaultMessage:
+                'The use of a maximum or minimum function on a layer requires all documents to be sampled in order to function properly.',
+            }),
           });
-          setSamplingToastAsFired(true);
         }
       }
       // reset the flag if the user switches to another supported operation
-      if (isSamplingValueEnabled(newLayer) && hasRandomSamplingToastFired) {
-        setSamplingToastAsFired(false);
-      }
+      setSamplingToastAsFired(!hasRandomSamplingToastFired);
     },
-    [hasRandomSamplingToastFired, props.notifications.toasts]
+    [hasRandomSamplingToastFired, layerId, props.notifications.toasts, state.layers]
   );
 
   const setStateWrapper = useCallback(
@@ -370,6 +367,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
           state.layers[layerId],
           layerType
         ),
+      compatibleWithSampling:
+        getSamplingValue(state.layers[layerId]) === 1 ||
+        (definition.getUnsupportedSettings?.()?.sampling ?? true),
     };
   });
 
@@ -383,7 +383,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (selectedColumn?.operationType != null && isQuickFunction(selectedColumn?.operationType));
 
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
-    ({ operationType, compatibleWithCurrentField, disabledStatus }) => {
+    ({ operationType, compatibleWithCurrentField, disabledStatus, compatibleWithSampling }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
@@ -440,6 +440,27 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   content={i18n.translate('xpack.lens.indexPattern.helpIncompatibleFieldDotLabel', {
                     defaultMessage:
                       'This function is not compatible with the current selected field',
+                  })}
+                  position="left"
+                  size="s"
+                  type="dot"
+                  color="warning"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      } else if (!compatibleWithSampling) {
+        label = (
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
+              {label}
+            </EuiFlexItem>
+            {shouldDisplayDots && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate('xpack.lens.indexPattern.settingsSamplingUnsupported', {
+                    defaultMessage: `Selecting this function will change this layer's sampling to 100% in order to function properly`,
                   })}
                   position="left"
                   size="s"
@@ -774,16 +795,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   );
                 }}
                 onChooseFunction={(operationType: string, field?: IndexPatternField) => {
-                  updateLayer(
-                    insertOrReplaceColumn({
-                      layer,
-                      columnId: referenceId,
-                      op: operationType,
-                      indexPattern: currentIndexPattern,
-                      field,
-                      visualizationGroups: dimensionGroups,
-                    })
-                  );
+                  const newLayer = insertOrReplaceColumn({
+                    layer,
+                    columnId: referenceId,
+                    op: operationType,
+                    indexPattern: currentIndexPattern,
+                    field,
+                    visualizationGroups: dimensionGroups,
+                  });
+                  fireOrResetRandomSamplingToast(newLayer);
+                  updateLayer(newLayer);
                 }}
                 onChooseField={(choice: FieldChoiceWithOperationType) => {
                   updateLayer(
@@ -817,6 +838,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   } else {
                     newLayer = setter;
                   }
+                  fireOrResetRandomSamplingToast(newLayer);
                   return updateLayer(adjustColumnReferencesForChangedColumn(newLayer, referenceId));
                 }}
                 validation={validation}

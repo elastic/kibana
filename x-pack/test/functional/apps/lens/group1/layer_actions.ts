@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -198,15 +198,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // click on the badge and check the popover
       await testSubjects.click('lns-feature-badges-trigger');
-      expect((await testSubjects.getVisibleText('lns-feature-badges-0-0')).split('\n')).to.contain(
-        '1%'
-      );
-      expect((await testSubjects.getVisibleText('lns-feature-badges-0-1')).split('\n')).to.contain(
-        '0.1%'
-      );
-      expect((await testSubjects.getVisibleText('lns-feature-badges-1-0')).split('\n')).to.contain(
-        'Annotations'
-      );
+      expect(
+        (await testSubjects.getVisibleText('lns-feature-badges-reducedSampling-0')).split('\n')
+      ).to.contain('1%');
+      expect(
+        (await testSubjects.getVisibleText('lns-feature-badges-reducedSampling-1')).split('\n')
+      ).to.contain('0.1%');
+      expect(
+        (await testSubjects.getVisibleText('lns-feature-badges-ignoreGlobalFilters-0')).split('\n')
+      ).to.contain('Annotations');
     });
   });
 }

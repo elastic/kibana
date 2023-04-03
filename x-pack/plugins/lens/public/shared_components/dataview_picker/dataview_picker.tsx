@@ -51,10 +51,27 @@ function TriggerButton({
     : {};
   const content =
     samplingValue != null && samplingValue !== 1 ? (
-      <EuiFlexGroup justifyContent={'spaceBetween'}>
-        <EuiFlexItem grow={1}>{label}</EuiFlexItem>
-
-        <EuiFlexItem grow={false} data-test-subj="lnsChangeIndexPatternSamplingInfo">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem
+          className="eui-textTruncate"
+          css={css`
+            display: block;
+            min-width: 0;
+          `}
+        >
+          {label}
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          data-test-subj="lnsChangeIndexPatternSamplingInfo"
+          css={css`
+            display: block;
+            *:hover &,
+            *:focus & {
+              text-decoration: none !important;
+            }
+          `}
+        >
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
               defaultMessage: '{value}% sampling',
@@ -62,28 +79,18 @@ function TriggerButton({
                 value: samplingValue * 100,
               },
             })}
-            display="block"
             position="top"
           >
-            <>
-              <RandomSamplingIcon
-                color={euiTheme.colors.mediumShade}
-                fill="currentColor"
-                css={css`
-                  margin-top: -1px;
-                  vertical-align: middle;
-                  display: inline-block;
-                `}
-              />
-              <EuiTextColor
-                color={euiTheme.colors.mediumShade}
-                css={css`
-                  padding-left: 8px;
-                `}
-              >
-                {samplingValue * 100}%
-              </EuiTextColor>
-            </>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <RandomSamplingIcon color={euiTheme.colors.disabledText} fill="currentColor" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTextColor color={euiTheme.colors.disabledText}>
+                  {samplingValue * 100}%
+                </EuiTextColor>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

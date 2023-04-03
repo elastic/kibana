@@ -56,6 +56,11 @@ export const counterRateOperation: OperationDefinition<
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
+  // return false for quick function as the built-in reference will use max
+  // in formula this check won't be used and the check is performed on the formula AST tree traversal independently
+  getUnsupportedSettings: () => ({
+    sampling: false,
+  }),
   getPossibleOperation: (indexPattern) => {
     if (hasDateField(indexPattern)) {
       return {

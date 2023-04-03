@@ -681,7 +681,7 @@ export function LayerPanel(
           }}
         >
           <div id={layerId}>
-            <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
+            <div className="lnsIndexPatternDimensionEditor--padded">
               {layerDatasource?.renderLayerSettings && (
                 <>
                   <NativeRenderer

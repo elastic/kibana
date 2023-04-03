@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -41,14 +41,16 @@ export function ReducedSamplingSectionEntries({
             data-test-subj={`lns-feature-badges-reducedSampling-${layerIndex}`}
           >
             <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>{layerTitle}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{layerTitle}</EuiText>
+              </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
                 css={css`
                   padding-right: 0;
                 `}
               >
-                {`${Number(getSamplingValue(layer)) * 100}%`}
+                <EuiText size="s">{`${Number(getSamplingValue(layer)) * 100}%`}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </li>
