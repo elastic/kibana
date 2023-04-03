@@ -32,6 +32,9 @@ import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
 
+const THRESHOLD_ELU = 0.15;
+const THRESHOLD_ELA = 250;
+
 export type ContextEnhancer<
   P,
   Q,
@@ -147,6 +150,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         this.routes.push({
           handler: async (req, responseToolkit) => {
             const startUtilization = performance.eventLoopUtilization();
+            const start = performance.now();
 
             const response = await this.handle({
               routeSchemas,
@@ -155,12 +159,33 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
               handler: this.enhanceWithContext(handler),
             });
 
-            const eventLoopUtilization = performance.eventLoopUtilization(startUtilization);
+            const { active, utilization } = performance.eventLoopUtilization(startUtilization);
 
             apm.currentTransaction?.addLabels({
-              event_loop_utilization: eventLoopUtilization.utilization,
-              event_loop_active: eventLoopUtilization.active,
+              event_loop_utilization: utilization,
+              event_loop_active: active,
             });
+
+            const duration = performance.now() - start;
+
+            const path = req.path;
+
+            if (active > THRESHOLD_ELA && utilization > THRESHOLD_ELU) {
+              log.warn(
+                `Event loop utilization for ${path} exceeded threshold of ${THRESHOLD_ELA}ms and ${
+                  THRESHOLD_ELU * 100
+                }%: ${Math.round(active)}ms out of ${Math.round(duration)}ms (${Math.round(
+                  utilization * 100
+                )}%)`,
+                {
+                  labels: {
+                    request_path: path,
+                    event_loop_active: active,
+                    event_loop_utilization: utilization,
+                  },
+                }
+              );
+            }
 
             return response;
           },
