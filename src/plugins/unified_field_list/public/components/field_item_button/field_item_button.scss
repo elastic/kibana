@@ -51,10 +51,10 @@
   }
 
   .kbnFieldButton__button:focus {
-    @include passDownFocusRing('.kbnFieldButton__name > span');
+    @include passDownFocusRing('.kbnFieldButton__nameInner');
   }
 
-  &:hover button .kbnFieldButton__name > span {
+  & button .kbnFieldButton__nameInner:hover {
     text-decoration: underline;
   }
 

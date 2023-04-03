@@ -11,7 +11,9 @@ exports[`fieldAction is rendered 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      <span>
+      <span
+        className="kbnFieldButton__nameInner"
+      >
         name
       </span>
     </span>
@@ -44,7 +46,9 @@ exports[`fieldIcon is rendered 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      <span>
+      <span
+        className="kbnFieldButton__nameInner"
+      >
         name
       </span>
     </span>
@@ -63,7 +67,9 @@ exports[`isActive defaults to false 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      <span>
+      <span
+        className="kbnFieldButton__nameInner"
+      >
         name
       </span>
     </span>
@@ -82,7 +88,9 @@ exports[`isActive renders true 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      <span>
+      <span
+        className="kbnFieldButton__nameInner"
+      >
         name
       </span>
     </span>
@@ -101,7 +109,9 @@ exports[`sizes s is applied 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      <span>
+      <span
+        className="kbnFieldButton__nameInner"
+      >
         name
       </span>
     </span>
@@ -120,7 +130,9 @@ exports[`sizes xs is applied 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      <span>
+      <span
+        className="kbnFieldButton__nameInner"
+      >
         name
       </span>
     </span>
@@ -146,7 +158,9 @@ exports[`with drag handle is rendered 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      <span>
+      <span
+        className="kbnFieldButton__nameInner"
+      >
         name
       </span>
     </span>

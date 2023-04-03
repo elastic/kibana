@@ -104,7 +104,7 @@ export function FieldButton({
       {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
       {fieldName && (
         <span className="kbnFieldButton__name">
-          <span>{fieldName}</span>
+          <span className="kbnFieldButton__nameInner">{fieldName}</span>
         </span>
       )}
       {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
