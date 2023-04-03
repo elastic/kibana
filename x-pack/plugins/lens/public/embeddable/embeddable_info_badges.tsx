@@ -10,9 +10,6 @@ import {
   EuiToolTip,
   EuiHorizontalRule,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
   useEuiTheme,
   EuiButtonEmpty,
   useEuiFontSize,
@@ -21,22 +18,22 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useState } from 'react';
-import type { FeatureBadge } from '../types';
+import type { UserMessage } from '../types';
 import './embeddable_info_badges.scss';
 
-export const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) => {
+export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
-  if (!badges.length) {
+  if (!messages.length) {
     return null;
   }
   const iconTitle = i18n.translate('xpack.lens.embeddable.featureBadge.iconDescription', {
     defaultMessage: `{count} visualization {count, plural, one {modifier} other {modifiers}}`,
     values: {
-      count: badges.length,
+      count: messages.length,
     },
   });
   return (
@@ -64,7 +61,7 @@ export const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) =
               `,
             }}
           >
-            {badges.length}
+            {messages.length}
           </EuiButtonEmpty>
         </EuiToolTip>
       }
@@ -72,51 +69,17 @@ export const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) =
       closePopover={closePopover}
     >
       <div>
-        {badges.map(({ icon, title, meta, content }, index) => (
-          <React.Fragment key={`${title}-${index}`}>
+        {messages.map(({ shortMessage, longMessage }, index) => (
+          <React.Fragment key={`${shortMessage}-${index}`}>
             {index ? <EuiHorizontalRule margin="none" /> : null}
             <EuiTitle
               size="xs"
               css={css`color=${euiTheme.colors.title}`}
               className="lnsEmbeddablePanelFeatureList_header"
             >
-              <h3>
-                {icon} {title}
-              </h3>
+              <h3>{shortMessage}</h3>
             </EuiTitle>
-            {content}
-            {meta ? (
-              <ul className="lnsEmbeddablePanelFeatureList">
-                {meta.map(({ layerTitle, dataView, value }, layerIndex) => {
-                  return (
-                    <li
-                      key={`${layerTitle}-${dataView}-${layerIndex}`}
-                      className="lnsEmbeddablePanelFeatureList__item"
-                      data-test-subj={`lns-feature-badges-${index}-${layerIndex}`}
-                    >
-                      <EuiFlexGroup justifyContent="spaceBetween">
-                        <EuiFlexItem grow={false}>{layerTitle}</EuiFlexItem>
-                        {value ? (
-                          <EuiFlexItem
-                            grow={false}
-                            className="lnsEmbeddablePanelFeatureList__value"
-                          >
-                            {value}
-                          </EuiFlexItem>
-                        ) : null}
-                      </EuiFlexGroup>
-                      <EuiFlexGroup>
-                        <EuiFlexItem grow={false}>
-                          <EuiText color="subdued" size="xs">
-                            {dataView}
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
+            <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>
           </React.Fragment>
         ))}
       </div>

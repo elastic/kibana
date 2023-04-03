@@ -26,7 +26,13 @@ import {
 
 import { estypes } from '@elastic/elasticsearch';
 import type { DateRange } from '../../../common/types';
-import type { FramePublicAPI, IndexPattern, StateSetter, UserMessage } from '../../types';
+import type {
+  FramePublicAPI,
+  IndexPattern,
+  StateSetter,
+  UserMessage,
+  VisualizationInfo,
+} from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -53,6 +59,7 @@ import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
 import { isQueryValid } from '../../shared_components';
+import { ReducedSamplingSectionEntries } from './info_badges';
 
 export function isSamplingValueEnabled(layer: FormBasedLayer) {
   // Do not use columnOrder here as it needs to check also inside formulas columns
@@ -467,6 +474,40 @@ export function getVisualDefaultsForLayer(layer: FormBasedLayer) {
     },
     {}
   );
+}
+
+export function getNotifiableFeatures(
+  state: FormBasedPrivateState,
+  frame: FramePublicAPI,
+  visualizationInfo?: VisualizationInfo
+): UserMessage[] {
+  if (!visualizationInfo) {
+    return [];
+  }
+  const layersWithCustomSamplingValues = Object.entries(state.layers).filter(
+    ([, layer]) => getSamplingValue(layer) !== 1
+  );
+  if (!layersWithCustomSamplingValues.length) {
+    return [];
+  }
+  return [
+    {
+      uniqueId: 'random_sampling_info',
+      severity: 'info',
+      fixableInEditor: false,
+      shortMessage: i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
+        defaultMessage: 'Layers with reduced sampling',
+      }),
+      longMessage: (
+        <ReducedSamplingSectionEntries
+          layers={layersWithCustomSamplingValues}
+          dataViews={frame.dataViews}
+          visualizationInfo={visualizationInfo}
+        />
+      ),
+      displayLocations: [{ id: 'embeddableBadge' }],
+    },
+  ];
 }
 
 /**

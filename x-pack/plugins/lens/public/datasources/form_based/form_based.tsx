@@ -25,7 +25,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { css } from '@emotion/react';
 import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import type {
   DatasourceDimensionEditorProps,
@@ -70,7 +69,7 @@ import {
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
-  getSamplingValue,
+  getNotifiableFeatures,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -103,7 +102,6 @@ import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
-import { RandomSamplingIcon } from '../../shared_components/dataview_picker/sampling_icon';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -822,7 +820,7 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getUserMessages(state, { frame: frameDatasourceAPI, setState }) {
+    getUserMessages(state, { frame: frameDatasourceAPI, setState, visualizationInfo }) {
       if (!state) {
         return [];
       }
@@ -876,47 +874,9 @@ export function getFormBasedDatasource({
         ),
       ];
 
-      return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
-    },
+      const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
 
-    getNotifiableFeatures: (state, { frame: frameDatasourceAPI, visualizationInfo }) => {
-      if (!state) {
-        return [];
-      }
-      const layersWithCustomSamplingValues = Object.entries(state.layers).filter(
-        ([, layer]) => getSamplingValue(layer) !== 1
-      );
-      if (!layersWithCustomSamplingValues.length) {
-        return [];
-      }
-      return [
-        {
-          icon: (
-            <RandomSamplingIcon
-              css={css`
-                color: inherit;
-              `}
-            />
-          ),
-          title: i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
-            defaultMessage: 'Layers with reduced sampling',
-          }),
-          meta: layersWithCustomSamplingValues.map(([id, layer]) => {
-            const dataView = frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId];
-            const layerTitle =
-              visualizationInfo?.layers.find(({ layerId, label }) => layerId === id)?.label ||
-              i18n.translate('xpack.lens.indexPattern.samplingPerLayer.fallbackLayerName', {
-                defaultMessage: 'Data layer',
-              });
-            return {
-              dataView: dataView.name ?? dataView.title,
-              layerTitle,
-              value: `${Number(getSamplingValue(layer)) * 100}%`,
-            };
-          }),
-          content: null,
-        },
-      ];
+      return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {

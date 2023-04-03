@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy } from 'lodash';
+import { partition, uniqBy } from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -99,7 +99,6 @@ import {
   isMessageRemovable,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
-  FeatureBadge,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -120,7 +119,6 @@ import {
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
-import { getApplicationFeatureBadges } from '../app_plugin/get_app_feature_badges';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
@@ -424,7 +422,6 @@ export class Embeddable
     this.initializeSavedVis(initialInput)
       .then(() => {
         this.loadUserMessages();
-        this.loadFeatureBadges();
         this.reload();
       })
       .catch((e) => this.onFatalError(e));
@@ -561,29 +558,7 @@ export class Embeddable
     );
   };
 
-  public getFeatureBadges = (): FeatureBadge[] => this._featureBadges;
-
   private _userMessages: UserMessage[] = [];
-  private _featureBadges: FeatureBadge[] = [];
-
-  private loadFeatureBadges() {
-    this._featureBadges = getApplicationFeatureBadges({
-      visualizationType: this.savedVis?.visualizationType,
-      visualization: {
-        state: this.activeVisualizationState,
-        activeId: this.activeVisualizationId,
-      },
-      visualizationMap: this.deps.visualizationMap,
-      activeDatasource: this.activeDatasource,
-      activeDatasourceState: { state: this.activeDatasourceState },
-      framePublicAPI: {
-        dataViews: {
-          indexPatterns: this.indexPatterns,
-          indexPatternRefs: this.indexPatternRefs,
-        },
-      },
-    });
-  }
 
   // loads all available user messages
   private loadUserMessages() {
@@ -631,6 +606,9 @@ export class Embeddable
       ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
         frame: frameDatasourceAPI,
+        visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
+          this.activeVisualizationState
+        ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
         frame: frameDatasourceAPI,
@@ -981,12 +959,16 @@ export class Embeddable
    */
   private renderBadgeMessages = () => {
     const messages = this.getUserMessages('embeddableBadge');
+    const [warningOrErrorMessages, infoMessages] = partition(
+      messages,
+      ({ severity }) => severity !== 'info'
+    );
 
     if (this.badgeDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <EmbeddableMessagesPopover messages={messages} />
-          <EmbeddableFeatureBadge badges={this.getFeatureBadges()} />
+          <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
+          <EmbeddableFeatureBadge messages={infoMessages} />
         </KibanaThemeProvider>,
         this.badgeDomNode
       );

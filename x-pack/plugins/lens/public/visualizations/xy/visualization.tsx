@@ -21,7 +21,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EuiIcon } from '@elastic/eui';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -109,6 +108,7 @@ import {
   IGNORE_GLOBAL_FILTERS_ACTION_ID,
   KEEP_GLOBAL_FILTERS_ACTION_ID,
 } from './annotations/actions';
+import { IgnoredGlobalFiltersEntries } from './info_badges';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -877,40 +877,9 @@ export const getXyVisualization = ({
       );
     }
 
-    return [...errors, ...warnings];
-  },
+    const info = getNotifiableFeatures(state, frame.dataViews);
 
-  getNotifiableFeatures(state, { frame: frameDatasourceAPI }) {
-    const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
-      (layer) => layer.ignoreGlobalFilters
-    );
-    if (!annotationsWithIgnoreFlag.length) {
-      return [];
-    }
-    const visualizationInfo = getVisualizationInfo(state);
-
-    return [
-      {
-        icon: <EuiIcon type="filterIgnore" />,
-        title: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {
-          defaultMessage: 'Layers ignoring global filters',
-        }),
-        meta: annotationsWithIgnoreFlag.map((layer) => {
-          const dataView = frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId];
-          const layerTitle =
-            visualizationInfo.layers.find(({ layerId, label }) => layerId === layer.layerId)
-              ?.label ||
-            i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
-              defaultMessage: 'Annotations',
-            });
-          return {
-            dataView: dataView.name ?? dataView.title,
-            layerTitle,
-          };
-        }),
-        content: null,
-      },
-    ];
+    return errors.concat(warnings, info);
   },
 
   getUniqueLabels(state) {
@@ -1075,4 +1044,36 @@ function getVisualizationInfo(state: XYState) {
   return {
     layers: visualizationLayersInfo,
   };
+}
+
+function getNotifiableFeatures(
+  state: XYState,
+  dataViews: FramePublicAPI['dataViews']
+): UserMessage[] {
+  const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
+    (layer) => layer.ignoreGlobalFilters
+  );
+  if (!annotationsWithIgnoreFlag.length) {
+    return [];
+  }
+  const visualizationInfo = getVisualizationInfo(state);
+
+  return [
+    {
+      uniqueId: 'ignoring-global-filters-layers',
+      severity: 'info',
+      fixableInEditor: false,
+      shortMessage: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {
+        defaultMessage: 'Layers ignoring global filters',
+      }),
+      longMessage: (
+        <IgnoredGlobalFiltersEntries
+          layers={annotationsWithIgnoreFlag}
+          visualizationInfo={visualizationInfo}
+          dataViews={dataViews}
+        />
+      ),
+      displayLocations: [{ id: 'embeddableBadge' }],
+    },
+  ];
 }
