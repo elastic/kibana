@@ -59,6 +59,6 @@ export function haproxyLogsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['network', 'web'],
+    integrationBrowserCategories: ['observability', 'load_balancer'],
   };
 }

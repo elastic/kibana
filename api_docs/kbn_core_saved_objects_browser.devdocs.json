@@ -98,6 +98,14 @@
             "path": "x-pack/plugins/observability/public/application/types.ts"
           },
           {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
+          },
+          {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/services/platform.ts"
           },

@@ -7,9 +7,9 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { DescriptionSection } from '../components/description_section';
 import { HighlightedFields } from '../components/highlighted_fields';
-import { MitreAttack } from '../components/mitre_attack';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
@@ -17,7 +17,8 @@ import { MitreAttack } from '../components/mitre_attack';
 export const OverviewTab: FC = memo(() => {
   return (
     <>
-      <MitreAttack />
+      <DescriptionSection />
+      <EuiHorizontalRule margin="l" />
       <EuiPanel hasBorder hasShadow={false}>
         <HighlightedFields />
       </EuiPanel>
