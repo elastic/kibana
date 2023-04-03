@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { flow } from 'lodash';
+import { default as get } from 'lodash/fp/get';
 import { TransformFn } from '../types';
 import { transformMigrationVersion } from './transform_migration_version';
+import { transformSetManagedDefault } from './transform_set_managed_default';
 
 export const migrations = {
-  '8.8.0': transformMigrationVersion,
+  '8.8.0': flow(transformMigrationVersion, get('transformedDoc'), transformSetManagedDefault),
 } as Record<string, TransformFn>;

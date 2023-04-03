@@ -8,6 +8,7 @@ Object {
       "bbb": "18c78c995965207ed3f6e7fc5c6e55fe",
       "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
       "created_at": "00da57df13e94e9d98437d13ace4bfe0",
+      "managed": "88cf246b441a6362458cb6a56ca3f7d7",
       "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
       "namespace": "2f4316de49999235636386fe51dc06c1",
       "namespaces": "2f4316de49999235636386fe51dc06c1",
@@ -31,6 +32,9 @@ Object {
     },
     "created_at": Object {
       "type": "date",
+    },
+    "managed": Object {
+      "type": "boolean",
     },
     "migrationVersion": Object {
       "dynamic": "true",
@@ -79,6 +83,7 @@ Object {
       "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
       "created_at": "00da57df13e94e9d98437d13ace4bfe0",
       "firstType": "635418ab953d81d93f1190b70a8d3f57",
+      "managed": "88cf246b441a6362458cb6a56ca3f7d7",
       "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
       "namespace": "2f4316de49999235636386fe51dc06c1",
       "namespaces": "2f4316de49999235636386fe51dc06c1",
@@ -106,6 +111,9 @@ Object {
           "type": "keyword",
         },
       },
+    },
+    "managed": Object {
+      "type": "boolean",
     },
     "migrationVersion": Object {
       "dynamic": "true",

@@ -49,6 +49,8 @@ export interface SimpleSavedObject<T = unknown> {
    * `namespaceType: 'agnostic'`.
    */
   namespaces: SavedObjectType<T>['namespaces'];
+  /** If the document is managed */
+  managed: SavedObjectType<T>['managed'];
 
   /**
    * Gets an attribute of this object

@@ -631,6 +631,7 @@ export const expectCreateResult = (obj: {
   ...obj,
   coreMigrationVersion: expect.any(String),
   typeMigrationVersion: '1.1.1',
+  managed: false,
   version: mockVersion,
   namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
   ...mockTimestampFieldsWithCreated,

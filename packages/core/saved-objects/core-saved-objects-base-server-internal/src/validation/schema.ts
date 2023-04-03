@@ -47,4 +47,5 @@ export const createSavedObjectSanitizedDocSchema = (attributesSchema: SavedObjec
     created_at: schema.maybe(schema.string()),
     version: schema.maybe(schema.string()),
     originId: schema.maybe(schema.string()),
+    managed: schema.maybe(schema.boolean()),
   });

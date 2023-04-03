@@ -150,6 +150,7 @@ export function getSavedObjectFromSource<T>(
     migrationVersion: doc._source.migrationVersion,
     coreMigrationVersion: doc._source.coreMigrationVersion,
     typeMigrationVersion: doc._source.typeMigrationVersion,
+    managed: doc._source.managed,
   };
 }
 

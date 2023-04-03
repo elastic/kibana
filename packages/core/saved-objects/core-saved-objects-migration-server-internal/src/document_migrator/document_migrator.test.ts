@@ -817,6 +817,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '1.0.0',
+              managed: false,
             },
           ]);
         });
@@ -832,6 +833,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '1.0.0',
+              managed: false,
               namespace: 'foo-namespace',
             },
           ]);
@@ -865,6 +867,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: '8.8.0',
+              managed: false,
             },
           ]);
         });
@@ -881,6 +884,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
               coreMigrationVersion: '8.8.0',
               namespace: 'foo-namespace',
+              managed: false,
             },
           ]);
         });
@@ -978,6 +982,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '1.0.0',
+              managed: false,
               namespaces: ['default'],
             },
           ]);
@@ -1008,6 +1013,7 @@ describe('DocumentMigrator', () => {
               typeMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'cute',
+              managed: false,
             },
             {
               id: 'foo-namespace:dog:cute',
@@ -1063,6 +1069,7 @@ describe('DocumentMigrator', () => {
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '2.0.0',
+              managed: false,
             },
           ]);
         });
@@ -1080,6 +1087,7 @@ describe('DocumentMigrator', () => {
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '2.0.0',
               namespace: 'foo-namespace',
+              managed: false,
             },
           ]);
         });
@@ -1190,6 +1198,7 @@ describe('DocumentMigrator', () => {
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: '2.0.0',
               namespaces: ['default'],
+              managed: false,
             },
           ]);
         });
@@ -1219,6 +1228,7 @@ describe('DocumentMigrator', () => {
               typeMigrationVersion: '2.0.0',
               namespaces: ['foo-namespace'],
               originId: 'pretty',
+              managed: false,
             },
             {
               id: 'foo-namespace:dog:pretty',

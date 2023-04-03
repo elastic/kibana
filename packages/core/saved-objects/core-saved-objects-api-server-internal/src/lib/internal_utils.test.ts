@@ -98,6 +98,7 @@ describe('#getSavedObjectFromSource', () => {
   const originId = 'originId';
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const updated_at = 'updatedAt';
+  const managed = false;
 
   function createRawDoc(
     type: string,
@@ -114,6 +115,7 @@ describe('#getSavedObjectFromSource', () => {
         migrationVersion,
         coreMigrationVersion,
         typeMigrationVersion,
+        managed,
         originId,
         updated_at,
         ...namespaceAttrs,
@@ -130,6 +132,7 @@ describe('#getSavedObjectFromSource', () => {
       attributes,
       coreMigrationVersion,
       typeMigrationVersion,
+      managed,
       id,
       migrationVersion,
       namespaces: expect.anything(), // see specific test cases below
