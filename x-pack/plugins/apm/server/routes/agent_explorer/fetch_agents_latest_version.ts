@@ -8,9 +8,6 @@ import { Logger } from '@kbn/core/server';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { fetchWithTimeout } from '../../lib/helpers/fetch_with_timeout';
 
-const bucketUrl =
-  'https://8f83orp5pc.execute-api.eu-west-1.amazonaws.com/test/0_0_1';
-
 export interface ElasticAgentLatestVersion {
   latest_version: string;
 }
@@ -31,10 +28,11 @@ type AgentLatestVersions = Record<
 >;
 
 export const fetchAgentsLatestVersion = async (
-  logger: Logger
+  logger: Logger,
+  latestAgentVersionsFileUrl: string
 ): Promise<AgentLatestVersionsResponse> => {
   try {
-    const data = await fetchWithTimeout(bucketUrl);
+    const data = await fetchWithTimeout(latestAgentVersionsFileUrl);
 
     return { data };
   } catch (error) {

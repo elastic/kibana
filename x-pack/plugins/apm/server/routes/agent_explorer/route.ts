@@ -42,6 +42,7 @@ const agentExplorerRoute = createApmServerRoute({
       request,
       plugins: { security },
       logger,
+      config,
     } = resources;
 
     const {
@@ -69,6 +70,7 @@ const agentExplorerRoute = createApmServerRoute({
       end,
       randomSampler,
       logger,
+      config,
     });
   },
 });

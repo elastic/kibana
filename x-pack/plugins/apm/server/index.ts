@@ -53,6 +53,9 @@ const configSchema = schema.object({
     onboarding: schema.string({ defaultValue: 'apm-*' }),
   }),
   forceSyntheticSource: schema.boolean({ defaultValue: false }),
+  latestAgentVersionsFileUrl: schema.string({
+    defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
+  }),
 });
 
 // plugin config

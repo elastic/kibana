@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { APMConfig } from '../..';
 import { isOpenTelemetryAgentName } from '../../../common/agent_name';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -15,8 +16,8 @@ import {
   fetchAgentsLatestVersion,
   OtelAgentLatestVersion,
 } from './fetch_agents_latest_version';
-import { getAgentsItems } from './get_agents_items';
 import { getAgentDocsPageUrl } from './get_agent_url_repository';
+import { getAgentsItems } from './get_agents_items';
 
 const getOtelAgentVersion = (item: {
   agentTelemetryAutoVersion: string[];
@@ -60,6 +61,7 @@ export async function getAgents({
   end,
   randomSampler,
   logger,
+  config,
 }: {
   environment: string;
   serviceName?: string;
@@ -70,6 +72,7 @@ export async function getAgents({
   end: number;
   randomSampler: RandomSampler;
   logger: Logger;
+  config: APMConfig;
 }): Promise<AgentExplorerAgentsResponse> {
   const [items, latestVersions] = await Promise.all([
     getAgentsItems({
@@ -82,7 +85,7 @@ export async function getAgents({
       end,
       randomSampler,
     }),
-    fetchAgentsLatestVersion(logger),
+    fetchAgentsLatestVersion(logger, config.latestAgentVersionsFileUrl),
   ]);
 
   const { data: latestVersionsData, error } = latestVersions;
