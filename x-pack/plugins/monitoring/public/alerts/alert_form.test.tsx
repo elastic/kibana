@@ -241,13 +241,13 @@ describe('alert_form', () => {
                   initialAlert.actions[index].id = id;
                 }}
                 setActions={(_updatedActions: AlertAction[]) => {}}
-                setActionParamsProperty={(key: string, value: any, index: number) =>
+                setActionParamsProperty={(key: string, value: unknown, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }
-                setActionFrequencyProperty={(key: string, value: any, index: number) =>
+                setActionFrequencyProperty={(key: string, value: unknown, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }
-                setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
+                setActionAlertsFilterProperty={(key: string, value: unknown, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }
                 actionTypeRegistry={actionTypeRegistry}
