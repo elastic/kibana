@@ -65,6 +65,8 @@ export class EsEventStreamClient implements EventStreamClient {
   }
 
   public async writeEvents(events: EventStreamEvent[]): Promise<void> {
+    if (events.length === 0) return;
+
     const esClient = await this.deps.esClient;
     const operations: Array<estypes.BulkOperationContainer | EsEventStreamEventDto> = [];
 
