@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 
+import type { CommentAttributes } from '../../../common/api';
 import { Actions, ActionTypes } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
