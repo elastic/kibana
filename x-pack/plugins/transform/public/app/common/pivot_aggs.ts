@@ -10,7 +10,7 @@ import { FC } from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
@@ -20,16 +20,6 @@ import { PIVOT_SUPPORTED_AGGS, PivotAgg } from '../../../common/types/pivot_aggs
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import type { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
 import type { PivotAggsConfigTopMetrics } from '../sections/create_transform/components/step_define/common/top_metrics_agg/types';
-
-enum TIME_SERIES_METRIC_TYPES {
-  HISTOGRAM = 'histogram',
-  COUNTER = 'counter',
-  GAUGE = 'gauge',
-  SUMMARY = 'summary',
-}
-export function isCounterTimeSeriesMetric(field: DataViewField) {
-  return field.timeSeriesMetric === TIME_SERIES_METRIC_TYPES.COUNTER;
-}
 
 export function isPivotSupportedAggs(arg: unknown): arg is PivotSupportedAggs {
   return (

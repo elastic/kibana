@@ -19,6 +19,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 
+import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';
 import {
@@ -119,10 +120,6 @@ export function getCombinedRuntimeMappings(
 
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
-}
-
-export function isCounterTimeSeriesMetric(field: DataViewField) {
-  return field.timeSeriesMetric === 'counter';
 }
 
 export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, resultsField: string) => {
@@ -245,7 +242,7 @@ export const getDataGridSchemaFromKibanaFieldType = (
 
   if (
     (schema === undefined && field.aggregatable === false) ||
-    field.timeSeriesMetric === 'counter' ||
+    isCounterTimeSeriesMetric(field) ||
     (schema === 'numeric' &&
       field?.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE))
   ) {

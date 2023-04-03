@@ -9,7 +9,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 
-import { isCounterTimeSeriesMetric } from '../../../../../common/pivot_aggs';
+import { isCounterTimeSeriesMetric, TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import { removeKeywordPostfix } from '../../../../../../../common/utils/field_utils';
 
 import { isRuntimeMappings } from '../../../../../../../common/shared_imports';
@@ -85,7 +85,9 @@ export function getPivotDropdownOptions(
     .map(
       (field): Field => ({
         name: field.name,
-        type: isCounterTimeSeriesMetric(field) ? 'counter' : (field.type as KBN_FIELD_TYPES),
+        type: isCounterTimeSeriesMetric(field)
+          ? TIME_SERIES_METRIC_TYPES.COUNTER
+          : (field.type as KBN_FIELD_TYPES),
       })
     );
 
