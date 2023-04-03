@@ -8,8 +8,8 @@
 import { journey, step, before, after } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import moment from 'moment';
+import { recordVideo } from '../../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../../../page_objects/synthetics/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 

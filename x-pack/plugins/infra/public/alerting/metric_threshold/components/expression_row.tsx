@@ -28,6 +28,7 @@ import {
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
+import useToggle from 'react-use/lib/useToggle';
 import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
@@ -74,8 +75,8 @@ const StyledHealth = euiStyled(EuiHealth)`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const [isExpanded, setRowState] = useState(true);
-  const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
+  const [isExpanded, toggle] = useToggle(true);
+
   const {
     dataView,
     children,
@@ -224,7 +225,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggleRowState}
+            onClick={toggle}
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}

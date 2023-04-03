@@ -9,7 +9,7 @@ import React, { useRef } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { FlyoutContainer } from '../../shared_components/flyout_container';
 import type { ExtraAppendLayerArg } from './visualization';
 

@@ -9,7 +9,12 @@ import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { AppLeaveAction, AppMountParameters, ScopedHistory } from '@kbn/core/public';
+import {
+  AppLeaveAction,
+  AppMountParameters,
+  KibanaExecutionContext,
+  ScopedHistory,
+} from '@kbn/core/public';
 import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
@@ -29,7 +34,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import {
   getData,
-  getExecutionContext,
+  getExecutionContextService,
   getCoreChrome,
   getIndexPatternService,
   getMapsCapabilities,
@@ -84,6 +89,7 @@ export interface Props {
   query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: ScopedHistory;
+  setExecutionContext: (executionContext: KibanaExecutionContext) => void;
 }
 
 export interface State {
@@ -123,11 +129,15 @@ export class MapApp extends React.Component<Props, State> {
   componentDidMount() {
     this._isMounted = true;
 
-    getExecutionContext().set({
+    const executionContext = {
       type: 'application',
-      page: 'editor',
+      name: APP_ID,
+      url: window.location.pathname,
       id: this.props.savedMap.getSavedObjectId() || 'new',
-    });
+      page: 'editor',
+    };
+    getExecutionContextService().set(executionContext); // set execution context in core ExecutionContextStartService
+    this.props.setExecutionContext(executionContext); // set execution context in redux store
 
     this._autoRefreshSubscription = getTimeFilter()
       .getAutoRefreshFetch$()
@@ -244,9 +254,17 @@ export class MapApp extends React.Component<Props, State> {
     } else {
       indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
     }
-    if (this._isMounted) {
-      this.setState({ indexPatterns });
+
+    if (!this._isMounted) {
+      return;
     }
+
+    // ignore results for outdated requests
+    if (!_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
+      return;
+    }
+
+    this.setState({ indexPatterns });
   }
 
   _onQueryChange = ({

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '../../common';

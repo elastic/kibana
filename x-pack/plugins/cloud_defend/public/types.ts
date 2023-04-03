@@ -15,6 +15,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CloudDefendRouterProps } from './application/router';
 import type { CloudDefendPageId } from './common/navigation/types';
+import * as i18n from './components/control_general_view/translations';
 
 /**
  * cloud_defend plugin types
@@ -63,31 +64,28 @@ export type SelectorType = 'file' | 'process';
 export type SelectorConditionType = 'stringArray' | 'flag' | 'boolean';
 
 export type SelectorCondition =
+  | 'containerImageFullName'
   | 'containerImageName'
   | 'containerImageTag'
-  | 'fullContainerImageName'
-  | 'orchestratorClusterId'
-  | 'orchestratorClusterName'
-  | 'orchestratorNamespace'
-  | 'orchestratorResourceLabel'
-  | 'orchestratorResourceName'
-  | 'orchestratorResourceType'
-  | 'orchestratorResourceLabel'
-  | 'orchestratorType'
+  | 'kubernetesClusterId'
+  | 'kubernetesClusterName'
+  | 'kubernetesNamespace'
+  | 'kubernetesResourceLabel'
+  | 'kubernetesResourceName'
   | 'targetFilePath'
   | 'ignoreVolumeFiles'
   | 'ignoreVolumeMounts'
   | 'operation'
   | 'processExecutable'
   | 'processName'
-  | 'processUserName'
   | 'processUserId'
   | 'sessionLeaderInteractive'
-  | 'sessionLeaderExecutable'
-  | 'operation';
+  | 'sessionLeaderName';
 
 export interface SelectorConditionOptions {
   type: SelectorConditionType;
+  pattern?: string;
+  patternError?: string;
   selectorType?: SelectorType;
   not?: SelectorCondition[];
   values?:
@@ -104,19 +102,28 @@ export type SelectorConditionsMapProps = {
 
 // used to determine UX control and allowed values for each condition
 export const SelectorConditionsMap: SelectorConditionsMapProps = {
-  containerImageName: { type: 'stringArray', not: ['fullContainerImageName'] },
-  containerImageTag: { type: 'stringArray' },
-  fullContainerImageName: {
+  containerImageFullName: {
     type: 'stringArray',
+    pattern:
+      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$',
+    patternError: i18n.errorInvalidFullContainerImageName,
     not: ['containerImageName'],
   },
-  orchestratorClusterId: { type: 'stringArray' },
-  orchestratorClusterName: { type: 'stringArray' },
-  orchestratorNamespace: { type: 'stringArray' },
-  orchestratorResourceLabel: { type: 'stringArray' },
-  orchestratorResourceName: { type: 'stringArray' },
-  orchestratorResourceType: { type: 'stringArray' },
-  orchestratorType: { type: 'stringArray', values: ['kubernetes'] },
+  containerImageName: {
+    type: 'stringArray',
+    pattern: '^[a-z0-9]+$',
+    not: ['containerImageFullName'],
+  },
+  containerImageTag: { type: 'stringArray' },
+  kubernetesClusterId: { type: 'stringArray' },
+  kubernetesClusterName: { type: 'stringArray' },
+  kubernetesNamespace: { type: 'stringArray' },
+  kubernetesResourceName: { type: 'stringArray' },
+  kubernetesResourceLabel: {
+    type: 'stringArray',
+    pattern: '^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$',
+    patternError: i18n.errorInvalidResourceLabel,
+  },
   operation: {
     type: 'stringArray',
     values: {
@@ -129,10 +136,9 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
   ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
   processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
   processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
-  processUserName: { selectorType: 'process', type: 'stringArray' },
   processUserId: { selectorType: 'process', type: 'stringArray' },
   sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
-  sessionLeaderExecutable: { selectorType: 'process', type: 'stringArray' },
+  sessionLeaderName: { selectorType: 'process', type: 'stringArray' },
 };
 
 export type ResponseAction = 'log' | 'alert' | 'block';
@@ -142,13 +148,11 @@ export interface Selector {
   operation?: string[];
   containerImageName?: string[];
   containerImageTag?: string[];
-  orchestratorClusterId?: string[];
-  orchestratorClusterName?: string[];
-  orchestratorNamespace?: string[];
-  orchestratorResourceLabel?: string[];
-  orchestratorResourceName?: string[];
-  orchestratorResourceType?: string[];
-  orchestratorType?: string[];
+  kubernetesClusterId?: string[];
+  kubernetesClusterName?: string[];
+  kubernetesNamespace?: string[];
+  kubernetesResourceLabel?: string[];
+  kubernetesResourceName?: string[];
 
   // selector properties
   targetFilePath?: string[];
@@ -158,9 +162,9 @@ export interface Selector {
   // process selector properties
   processExecutable?: string[];
   processName?: string[];
-  processUserName?: string[];
   processUserId?: string[];
   sessionLeaderInteractive?: string[];
+  sessionLeaderName?: string[];
 
   // non yaml fields
   type: SelectorType;

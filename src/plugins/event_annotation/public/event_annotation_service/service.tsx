@@ -18,7 +18,7 @@ import {
   SavedObjectsFindOptionsReference,
   SimpleSavedObject,
 } from '@kbn/core/public';
-import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { EventAnnotationGroupContent } from '../../common/types';
