@@ -59,6 +59,7 @@ const contextWithName = { ...contextWithScheduleDelay, ruleName: 'my-super-cool-
 const alert = {
   action: EVENT_LOG_ACTIONS.activeInstance,
   id: 'aaabbb',
+  uuid: 'u-u-i-d',
   message: `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`,
   group: 'aGroup',
   state: {
@@ -1089,6 +1090,7 @@ describe('createAlertRecord', () => {
     expect(record.event?.provider).toBeUndefined();
     expect(record.event?.outcome).toBeUndefined();
     expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+    expect(record.kibana?.alert?.uuid).toBe(alert.uuid);
     expect(record.kibana?.server_uuid).toBeUndefined();
     expect(record.kibana?.task).toBeUndefined();
     expect(record.kibana?.version).toBeUndefined();
