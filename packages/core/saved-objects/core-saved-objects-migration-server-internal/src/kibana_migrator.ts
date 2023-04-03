@@ -33,7 +33,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { getIndicesInvoledInRelocation } from './kibana_migrator_utils';
 import { buildActiveMappings, buildTypesMappings } from './core';
-import { DocumentMigrator, type VersionedTransformer } from './document_migrator';
+import { DocumentMigrator } from './document_migrator';
 import { createIndexMap } from './core/build_index_map';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
@@ -63,7 +63,7 @@ export interface KibanaMigratorOptions {
  */
 export class KibanaMigrator implements IKibanaMigrator {
   private readonly client: ElasticsearchClient;
-  private readonly documentMigrator: VersionedTransformer;
+  private readonly documentMigrator: DocumentMigrator;
   private readonly kibanaIndex: string;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;

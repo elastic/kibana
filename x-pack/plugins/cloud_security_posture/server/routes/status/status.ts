@@ -94,7 +94,6 @@ export const calculateCspStatusCode = (
     findings: IndexStatus;
     score?: IndexStatus;
   },
-  installedCspPackagePolicies: number,
   healthyAgents: number,
   timeSinceInstallationInMinutes: number,
   installedPolicyTemplates: string[]
@@ -269,7 +268,6 @@ export const getCspStatus = async ({
       findings: findingsIndexStatusCspm,
       score: scoreIndexStatusCspm,
     },
-    installedPackagePoliciesTotalCspm,
     healthyAgentsCspm,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates
@@ -282,7 +280,6 @@ export const getCspStatus = async ({
       findings: findingsIndexStatusKspm,
       score: scoreIndexStatusKspm,
     },
-    installedPackagePoliciesTotalKspm,
     healthyAgentsKspm,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates
@@ -294,7 +291,6 @@ export const getCspStatus = async ({
       findingsLatest: vulnerabilitiesLatestIndexStatus,
       findings: vulnerabilitiesIndexStatus,
     },
-    installedPackagePoliciesTotalVulnMgmt,
     healthyAgentsVulMgmt,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates
