@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
-import { ObjectMigrationDefinition, Version, VersionableObject } from './types';
+import { ObjectMigrationDefinition, Version } from './types';
 import type {
   ServiceDefinitionVersioned,
   ServicesDefinition,
@@ -32,7 +31,6 @@ const serviceObjectPaths = [
   'update.out.result',
   'delete.in.options',
   'delete.out.result',
-  'search.in.query',
   'search.in.options',
   'search.out.result',
 ];
@@ -171,7 +169,6 @@ const getDefaultServiceTransforms = (): ServiceTransforms => ({
   search: {
     in: {
       options: getDefaultTransforms(),
-      query: getDefaultTransforms(),
     },
     out: {
       result: getDefaultTransforms(),
@@ -199,3 +196,5 @@ export const getTransforms = (
 };
 
 export type GetTransformsFn = typeof getTransforms;
+
+import { VersionableObject } from './types';
