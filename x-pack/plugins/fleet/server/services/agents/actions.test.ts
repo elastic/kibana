@@ -7,15 +7,26 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
+import type { NewAgentAction } from '../../../common/types';
+
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
+import { auditLoggingService } from '../audit_logging';
 
-import { cancelAgentAction, getAgentsByActionsIds } from './actions';
+import {
+  bulkCreateAgentActionResults,
+  bulkCreateAgentActions,
+  cancelAgentAction,
+  createAgentAction,
+  getAgentsByActionsIds,
+} from './actions';
 import { bulkUpdateAgents } from './crud';
 
 jest.mock('./crud');
+jest.mock('../audit_logging');
 
-const mockedBulkUpdateAgents = bulkUpdateAgents as jest.Mock;
+const mockedBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bulkUpdateAgents>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 describe('Agent actions', () => {
   beforeEach(async () => {
@@ -24,7 +35,115 @@ describe('Agent actions', () => {
 
   afterEach(() => {
     appContextService.stop();
+    mockedAuditLoggingService.writeCustomAuditLog.mockReset();
   });
+
+  describe('getAgentActions', () => {
+    it('should call audit logger', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                action_id: 'action1',
+                agents: ['agent1'],
+                expiration: new Date().toISOString(),
+                type: 'UPGRADE',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      await getAgentsByActionsIds(esClientMock, ['action1']);
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `User retrieved Fleet action [id=action1]`,
+      });
+    });
+  });
+
+  describe('createAgentAction', () => {
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                type: 'UPGRADE',
+                action_id: 'action1',
+                agents: ['agent1', 'agent2'],
+                expiration: new Date().toISOString(),
+              },
+            },
+          ],
+        },
+      } as any);
+
+      await createAgentAction(esClient, {
+        id: 'action1',
+        type: 'UPGRADE',
+        agents: ['agent1'],
+      });
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: expect.stringMatching(/User created Fleet action/),
+      });
+    });
+  });
+
+  describe('bulkCreateAgentAction', () => {
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+
+      const newActions: NewAgentAction[] = [
+        {
+          id: 'action1',
+          type: 'UPGRADE',
+          agents: ['agent1'],
+        },
+        {
+          id: 'action2',
+          type: 'UPGRADE',
+          agents: ['agent2'],
+        },
+        {
+          id: 'action3',
+          type: 'UPGRADE',
+          agents: ['agent3'],
+        },
+      ];
+
+      await bulkCreateAgentActions(esClient, newActions);
+
+      for (const action of newActions) {
+        expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+          message: `User created Fleet action [id=${action.id}]`,
+        });
+      }
+    });
+  });
+
+  describe('bulkCreateAgentActionResults', () => {
+    it('should call audit logger', async () => {
+      const mockEsClient = elasticsearchServiceMock.createInternalClient();
+
+      await bulkCreateAgentActionResults(mockEsClient, [
+        {
+          actionId: 'action1',
+          agentId: 'agent1',
+        },
+      ]);
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `User created Fleet action result [id=action1]`,
+      });
+    });
+  });
+
   describe('cancelAgentAction', () => {
     it('throw if the target action is not found', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
@@ -114,6 +233,7 @@ describe('Agent actions', () => {
       );
     });
   });
+
   describe('getAgentsByActionsIds', () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
 

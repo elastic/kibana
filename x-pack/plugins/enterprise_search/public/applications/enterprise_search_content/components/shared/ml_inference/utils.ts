@@ -8,10 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
-import {
-  LANG_IDENT_MODEL_TYPE,
-  SUPPORTED_PYTORCH_TASKS,
-} from '../../../../../../common/ml_inference_pipeline';
+import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
 export const NLP_CONFIG_KEYS: string[] = Object.values(SUPPORTED_PYTORCH_TASKS);
 export const RECOMMENDED_FIELDS = ['body', 'body_content', 'title'];
@@ -52,7 +49,7 @@ export const NLP_DISPLAY_TITLES: Record<string, string | undefined> = {
 export const isSupportedMLModel = (model: TrainedModelConfigResponse): boolean => {
   return (
     Object.keys(model.inference_config).some((key) => NLP_CONFIG_KEYS.includes(key)) ||
-    model.model_type === LANG_IDENT_MODEL_TYPE
+    model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT
   );
 };
 
@@ -75,7 +72,7 @@ export const getMLType = (modelTypes: string[]): string => {
       return type;
     }
   }
-  if (modelTypes?.includes(LANG_IDENT_MODEL_TYPE)) return LANG_IDENT_MODEL_TYPE;
+  if (modelTypes?.includes(TRAINED_MODEL_TYPE.LANG_IDENT)) return TRAINED_MODEL_TYPE.LANG_IDENT;
   return modelTypes?.[0] ?? '';
 };
 
