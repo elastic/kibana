@@ -64,6 +64,7 @@ Returns a list of assets present within a given time range. Can be limited by as
 | to      | RangeDate     | No        | "now"   | End point for date range to search for assets                                      |
 | type    | AssetType[]   | No        | all     | Specify one or more types to restrict the query                                    |
 | ean     | AssetEan[]    | No        | all     | Specify one or more EANs (specific assets) to restrict the query                   |
+| size     | number    | No        | all     | Limit the amount of assets returned                  |
 
 
 _Notes:_
