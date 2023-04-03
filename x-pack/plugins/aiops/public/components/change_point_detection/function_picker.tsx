@@ -33,6 +33,7 @@ export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onCh
       onChange={(id) => onChange(id)}
       isFullWidth
       buttonSize="compressed"
+      onClick={(e) => e.stopPropagation()}
     />
   );
 });

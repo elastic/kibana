@@ -134,6 +134,7 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
         isClearable
         data-test-subj="aiopsChangePointTypeFilter"
         renderOption={renderOption}
+        compressed
       />
     </EuiFormRow>
   );

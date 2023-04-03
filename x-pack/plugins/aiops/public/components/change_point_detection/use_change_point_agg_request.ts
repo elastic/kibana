@@ -105,8 +105,6 @@ function getChangePointDetectionRequestBody(
   };
 }
 
-const CHARTS_PER_PAGE = 6;
-
 export function useChangePointResults(
   fieldConfig: FieldConfig,
   requestParams: ChangePointDetectionRequestParams,
@@ -122,7 +120,6 @@ export function useChangePointResults(
   const refresh = useRefresh();
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
-  const [activePage, setActivePage] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
 
   const isSingleMetric = !isDefined(fieldConfig.splitField);
@@ -138,7 +135,6 @@ export function useChangePointResults(
   const reset = useCallback(() => {
     cancelRequest();
     setProgress(0);
-    setActivePage(0);
     setResults([]);
   }, [cancelRequest]);
 
@@ -258,20 +254,7 @@ export function useChangePointResults(
     ]
   );
 
-  const pagination = useMemo(() => {
-    return {
-      activePage,
-      pageCount: Math.round((results.length ?? 0) / CHARTS_PER_PAGE),
-      updatePagination: setActivePage,
-    };
-  }, [activePage, results.length]);
-
-  const resultPerPage = useMemo(() => {
-    const start = activePage * CHARTS_PER_PAGE;
-    return results.slice(start, start + CHARTS_PER_PAGE);
-  }, [results, activePage]);
-
-  return { results: resultPerPage, isLoading, reset, progress, pagination };
+  return { results, isLoading, reset, progress };
 }
 
 /**

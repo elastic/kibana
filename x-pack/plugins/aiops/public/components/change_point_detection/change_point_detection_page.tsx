@@ -90,9 +90,9 @@ export const ChangePointDetectionPage: FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <FieldsConfig />
+      <EuiSpacer size="s" />
 
-      <EuiSpacer size="m" />
+      <FieldsConfig />
     </div>
   );
 };

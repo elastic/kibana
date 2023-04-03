@@ -105,10 +105,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({ annotations, fie
 
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
-      tableCaption="Demo of EuiInMemoryTable"
       items={annotations}
       columns={columns}
-      pagination={true}
+      pagination={{ pageSizeOptions: [5, 10, 15] }}
       sorting={sorting}
     />
   );

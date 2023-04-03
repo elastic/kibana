@@ -48,6 +48,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
           onChange={onChangeCallback}
           isClearable={false}
           data-test-subj="aiopsChangePointMetricField"
+          onClick={(e) => e.stopPropagation()}
         />
       </EuiFormRow>
     );

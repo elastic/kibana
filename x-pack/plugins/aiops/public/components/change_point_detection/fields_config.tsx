@@ -7,30 +7,20 @@
 
 import React, { type FC, useCallback } from 'react';
 import {
-  EuiFlexItem,
-  EuiFlexGroup,
+  EuiAccordion,
   EuiButton,
-  EuiSpacer,
   EuiButtonIcon,
-  EuiPanel,
-  EuiProgress,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiFlexGrid,
-  EuiDescriptionList,
-  EuiToolTip,
-  EuiIcon,
-  EuiText,
-  EuiHorizontalRule,
-  EuiBadge,
-  EuiAccordion,
-  EuiCode,
-  EuiPagination,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiProgress,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ChangePointsTable } from './change_points_table';
-import { ChartComponent } from './chart_component';
 import { SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
 import { FunctionPicker } from './function_picker';
 import { MetricFieldSelector } from './metric_field_selector';
@@ -79,20 +69,10 @@ export const FieldsConfig: FC = () => {
                 id={'temp_id'}
                 buttonElement={'div'}
                 buttonContent={
-                  <EuiCode>
-                    {fieldConfig.fn}({fieldConfig.metricField})
-                    {fieldConfig.splitField ? (
-                      <FormattedMessage
-                        id="xpack.aiops.changePointDetection.fieldConfigShortMessage"
-                        defaultMessage=", split by = {splitBy}"
-                        values={{
-                          splitBy: fieldConfig.splitField,
-                        }}
-                      />
-                    ) : (
-                      ''
-                    )}
-                  </EuiCode>
+                  <FieldsControls
+                    fieldConfig={fieldConfig}
+                    onChange={(value) => onChange(value, index)}
+                  />
                 }
                 extraAction={
                   <EuiButtonIcon
@@ -105,16 +85,7 @@ export const FieldsConfig: FC = () => {
                 }
                 paddingSize="s"
               >
-                <EuiFlexGroup alignItems={'center'}>
-                  <EuiFlexItem grow={false}>
-                    <FieldCon
-                      fieldConfig={fieldConfig}
-                      onChange={(value) => onChange(value, index)}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} />
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
+                <ChangePointResults fieldConfig={fieldConfig} />
               </EuiAccordion>
             </EuiPanel>
             <EuiSpacer size="s" />
@@ -126,16 +97,19 @@ export const FieldsConfig: FC = () => {
   );
 };
 
-interface FieldConProps {
+interface FieldsControlsProps {
   fieldConfig: FieldConfig;
   onChange: (update: FieldConfig) => void;
 }
 
 /**
- * Renders controls for the change point request params and the results
+ * Renders controls for fields selection and emits updates on change.
+ * @param fieldConfig
+ * @param onChange
+ * @constructor
  */
-export const FieldCon: FC<FieldConProps> = ({ fieldConfig, onChange }) => {
-  const { splitFieldsOptions, combinedQuery, requestParams } = useChangePointDetectionContext();
+export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange }) => {
+  const { splitFieldsOptions } = useChangePointDetectionContext();
 
   const onChangeFn = useCallback(
     (field: keyof FieldConfig, value: string) => {
@@ -145,13 +119,41 @@ export const FieldCon: FC<FieldConProps> = ({ fieldConfig, onChange }) => {
     [onChange, fieldConfig]
   );
 
+  return (
+    <EuiFlexGroup alignItems={'center'}>
+      <EuiFlexItem grow={false} css={{ width: '200px' }}>
+        <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={selectControlCss}>
+        <MetricFieldSelector
+          value={fieldConfig.metricField!}
+          onChange={(v) => onChangeFn('metricField', v)}
+        />
+      </EuiFlexItem>
+      {splitFieldsOptions.length > 0 ? (
+        <EuiFlexItem grow={false} css={selectControlCss}>
+          <SplitFieldSelector
+            value={fieldConfig.splitField}
+            onChange={(v) => onChangeFn('splitField', v!)}
+          />
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  );
+};
+
+/**
+ * Handles request and rendering results of the change point  with provided config.
+ */
+export const ChangePointResults: FC<{ fieldConfig: FieldConfig }> = ({ fieldConfig }) => {
+  const { combinedQuery, requestParams } = useChangePointDetectionContext();
+
   const splitFieldCardinality = useSplitFieldCardinality(fieldConfig.splitField, combinedQuery);
 
   const {
     results: annotations,
-    // isLoading: annotationsLoading,
+    isLoading: annotationsLoading,
     progress,
-    pagination,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
   const cardinalityExceeded =
@@ -160,24 +162,6 @@ export const FieldCon: FC<FieldConProps> = ({ fieldConfig, onChange }) => {
   return (
     <>
       <EuiFlexGroup alignItems={'center'}>
-        <EuiFlexItem grow={false} css={{ width: '200px' }}>
-          <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={selectControlCss}>
-          <MetricFieldSelector
-            value={fieldConfig.metricField!}
-            onChange={(v) => onChangeFn('metricField', v)}
-          />
-        </EuiFlexItem>
-        {splitFieldsOptions.length > 0 ? (
-          <EuiFlexItem grow={false} css={selectControlCss}>
-            <SplitFieldSelector
-              value={fieldConfig.splitField}
-              onChange={(v) => onChangeFn('splitField', v!)}
-            />
-          </EuiFlexItem>
-        ) : null}
-
         <EuiFlexItem css={{ visibility: progress === 100 ? 'hidden' : 'visible' }} grow={false}>
           <EuiProgress
             label={
@@ -222,7 +206,7 @@ export const FieldCon: FC<FieldConProps> = ({ fieldConfig, onChange }) => {
         </>
       ) : null}
 
-      {annotations.length === 0 && progress === 100 ? (
+      {!annotationsLoading && annotations.length === 0 && progress === 100 ? (
         <>
           <EuiEmptyPrompt
             iconType="search"
@@ -247,92 +231,6 @@ export const FieldCon: FC<FieldConProps> = ({ fieldConfig, onChange }) => {
       ) : null}
 
       <ChangePointsTable annotations={annotations} fieldConfig={fieldConfig} />
-
-      <EuiFlexGrid columns={annotations.length >= 2 ? 2 : 1} responsive gutterSize={'m'}>
-        {annotations.map((v) => {
-          return (
-            <EuiFlexItem key={v.group?.value ?? 'single_metric'}>
-              <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-                <EuiFlexGroup
-                  alignItems={'center'}
-                  justifyContent={'spaceBetween'}
-                  gutterSize={'s'}
-                >
-                  <EuiFlexItem grow={false}>
-                    {v.group ? (
-                      <EuiDescriptionList
-                        type="inline"
-                        listItems={[{ title: v.group.name, description: v.group.value }]}
-                      />
-                    ) : null}
-
-                    {v.reason ? (
-                      <EuiToolTip position="top" content={v.reason}>
-                        <EuiIcon
-                          tabIndex={0}
-                          color={'warning'}
-                          type="warning"
-                          title={i18n.translate(
-                            'xpack.aiops.changePointDetection.notResultsWarning',
-                            {
-                              defaultMessage: 'No change point agg results warning',
-                            }
-                          )}
-                        />
-                      </EuiToolTip>
-                    ) : null}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText color={'subdued'} size={'s'}>
-                      {fieldConfig.fn}({fieldConfig.metricField})
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiHorizontalRule margin="xs" />
-
-                <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
-                  {v.p_value !== undefined ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiDescriptionList
-                        type="inline"
-                        listItems={[
-                          {
-                            title: (
-                              <FormattedMessage
-                                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel"
-                                defaultMessage="p-value"
-                              />
-                            ),
-                            description: v.p_value.toPrecision(3),
-                          },
-                        ]}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{v.type}</EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <ChartComponent fieldConfig={fieldConfig} annotation={v} />
-              </EuiPanel>
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGrid>
-
-      {pagination.pageCount > 1 ? (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiPagination
-              pageCount={pagination.pageCount}
-              activePage={pagination.activePage}
-              onPageClick={pagination.updatePagination}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
     </>
   );
 };
