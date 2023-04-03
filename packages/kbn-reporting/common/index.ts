@@ -17,4 +17,3 @@ export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 
 export * from './errors';
 export * from './schema_utils';
-export { mapToReportingError } from './errors/map_to_reporting_error';

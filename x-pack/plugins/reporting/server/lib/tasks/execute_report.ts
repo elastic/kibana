@@ -11,7 +11,6 @@ import {
   CancellationToken,
   durationToNumber,
   KibanaShuttingDownError,
-  mapToReportingError,
   numberToDuration,
   QueueTimeoutError,
   ReportingError,
@@ -27,6 +26,7 @@ import { timeout } from 'rxjs/operators';
 import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
+import { mapToReportingError } from '../../../common/errors';
 import {
   ReportingTask,
   ReportingTaskStatus,
