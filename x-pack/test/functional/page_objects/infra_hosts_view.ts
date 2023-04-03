@@ -36,6 +36,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraProcessRowButton');
     },
 
+    async clickFlyoutUptimeLink() {
+      return testSubjects.click('infraHostsViewFlyoutUptimeLink');
+    },
+
+    async clickFlyoutApmTracesLink() {
+      return testSubjects.click('infraHostsViewFlyoutApmTracesLink');
+    },
+
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
       const containerText = await container.getVisibleText();
