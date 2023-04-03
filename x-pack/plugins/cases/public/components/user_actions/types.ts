@@ -69,7 +69,7 @@ export interface UserActionBuilderArgs {
   handleOutlineComment: (id: string) => void;
   handleManageMarkdownEditId: (id: string) => void;
   handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
-  handleDeleteComment: (id: string) => void;
+  handleDeleteComment: (id: string, successToasterTitle: string) => void;
   handleManageQuote: (quote: string) => void;
   onShowAlertDetails: (alertId: string, index: string) => void;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
