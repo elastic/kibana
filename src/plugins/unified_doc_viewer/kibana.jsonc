@@ -6,7 +6,7 @@
     "id": "unifiedDocViewer",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["data", "dataViews", "kibanaReact", "unifiedFieldList"],
+    "requiredPlugins": ["data", "dataViews", "kibanaReact", "unifiedFieldList", "kibanaUtils"],
     "requiredBundles": []
   }
 }

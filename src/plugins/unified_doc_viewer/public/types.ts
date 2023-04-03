@@ -131,3 +131,36 @@ export interface DocViewRenderProps {
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
+
+export type DocViewRenderFn = (
+  domNode: HTMLDivElement,
+  renderProps: DocViewRenderProps
+) => () => void;
+
+export type DocViewerComponent = React.FC<DocViewRenderProps>;
+
+export interface BaseDocViewInput {
+  order: number;
+  shouldShow?: (hit: DataTableRecord) => boolean;
+  title: string;
+}
+
+export interface RenderDocViewInput extends BaseDocViewInput {
+  render: DocViewRenderFn;
+  component?: undefined;
+  directive?: undefined;
+}
+
+interface ComponentDocViewInput extends BaseDocViewInput {
+  component: DocViewerComponent;
+  render?: undefined;
+  directive?: undefined;
+}
+
+export type DocViewInput = ComponentDocViewInput | RenderDocViewInput;
+
+export type DocView = DocViewInput & {
+  shouldShow: NonNullable<DocViewInput['shouldShow']>;
+};
+
+export type DocViewInputFn = () => DocViewInput;

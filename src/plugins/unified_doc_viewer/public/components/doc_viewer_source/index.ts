@@ -5,4 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { DocViewerSource } from './source';
+
+import { DocViewerSource } from './source';
+
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default DocViewerSource;

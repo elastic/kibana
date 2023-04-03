@@ -26,11 +26,10 @@ import {
   keys,
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';
+import type { DataTableRecord, DocViewFilterFn } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../types';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -103,6 +102,17 @@ export function DiscoverGridFlyout({
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
     { dataView, rowIndex: hit.raw._index, rowId: hit.raw._id, columns, filters, savedSearchId }
   );
+
+  const onFilterFn: DocViewFilterFn | undefined = onFilter
+    ? (mapping, value, mode) => {
+        onFilter(mapping, value, mode);
+        services.toastNotifications.addSuccess(
+          i18n.translate('discover.grid.flyout.toastFilterAdded', {
+            defaultMessage: `Filter was added`,
+          })
+        );
+      }
+    : undefined;
 
   return (
     <EuiPortal>
@@ -217,18 +227,7 @@ export function DiscoverGridFlyout({
             hit={actualHit}
             columns={columns}
             dataView={dataView}
-            filter={
-              onFilter
-                ? (mapping, value, mode) => {
-                    onFilter(mapping, value, mode);
-                    services.toastNotifications.addSuccess(
-                      i18n.translate('discover.grid.flyout.toastFilterAdded', {
-                        defaultMessage: `Filter was added`,
-                      })
-                    );
-                  }
-                : undefined
-            }
+            filter={onFilterFn}
             onRemoveColumn={(columnName: string) => {
               onRemoveColumn(columnName);
               services.toastNotifications.addSuccess(

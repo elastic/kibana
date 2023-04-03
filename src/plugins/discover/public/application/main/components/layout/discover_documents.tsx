@@ -16,11 +16,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { DataTableRecord } from '../../../../types';
+import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';
+import type { DataTableRecord, DocViewFilterFn } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
 import {
@@ -40,7 +40,6 @@ import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/docu
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
-import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);

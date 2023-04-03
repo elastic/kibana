@@ -5,4 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { DocViewer } from './doc_viewer';
+
+export * from './doc_views_registry';

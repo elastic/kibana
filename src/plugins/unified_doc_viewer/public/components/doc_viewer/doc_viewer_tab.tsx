@@ -8,8 +8,7 @@
 
 import { isEqual } from 'lodash';
 import React from 'react';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer-plugin/public/types';
-import { DocViewRenderFn } from '../../doc_views_types';
+import type { DocViewRenderFn, DocViewRenderProps } from '../../types';
 import { DocViewerError } from './doc_viewer_render_error';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 

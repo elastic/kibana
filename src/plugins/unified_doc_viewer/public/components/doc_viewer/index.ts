@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DocViewerTable } from '@kbn/unified-doc-viewer-plugin/public';
+import { DocViewer } from './doc_viewer';
 
-// TODO: Can we avoid this?
 // Required for usage in React.lazy
 // eslint-disable-next-line import/no-default-export
-export default DocViewerTable;
+export default DocViewer;

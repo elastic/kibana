@@ -21,6 +21,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
@@ -31,7 +32,6 @@ import { useContextAppFetch } from './hooks/use_context_app_fetch';
 import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 

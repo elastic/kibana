@@ -14,8 +14,7 @@ import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../utils/build_data_record';
-import { EsHitRecord } from '../../types';
-import { DocViewer } from '../../services/doc_views/components/doc_viewer';
+import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 
 describe('Doc table component', () => {
   const mountComponent = (customProps?: Partial<DocTableWrapperProps>) => {
@@ -33,7 +32,7 @@ describe('Doc table component', () => {
             },
           ],
           _source: { message: 'mock_message', bytes: 20 },
-        } as EsHitRecord,
+        },
       ].map((row) => buildDataTableRecord(row, dataViewMock)),
       sort: [['order_date', 'desc']],
       isLoading: false,

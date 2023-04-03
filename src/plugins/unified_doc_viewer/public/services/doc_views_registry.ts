@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DocView, DocViewInput, DocViewInputFn } from './doc_views_types';
-import { DataTableRecord } from '../../types';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
+import type { DataTableRecord, DocView, DocViewInput, DocViewInputFn } from '../types';
+
+export const [getDocViewsRegistry, setDocViewsRegistry] =
+  createGetterSetter<DocViewsRegistry>('DocViewsRegistry');
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];

@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './doc_viewer_source';
-export * from './doc_viewer_table';
-export * from './doc_viewer_table_legacy';
+import DocViewer from './doc_viewer';
+import DocViewerSource from './doc_viewer_source';
+import DocViewerTable from './doc_viewer_table';
+import DocViewerTableLegacy from './doc_viewer_table_legacy';
+
 export * from './json_code_editor';
+export * from './deferred_spinner';
+
+export { DocViewer, DocViewerSource, DocViewerTable, DocViewerTableLegacy };

@@ -11,10 +11,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerTableLegacy } from './table';
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { DocViewRenderProps } from '../../types';
+import type { DocViewRenderProps, UnifiedDocViewerServices } from '../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DiscoverServices } from '../../../../../build_services';
-import { buildDataTableRecord } from '../../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-plugin/public/utils/build_data_record';
 
 const services = {
   uiSettings: {
@@ -73,7 +72,10 @@ dataView.fields.getByName = (name: string) => {
   return dataView.fields.getAll().find((field) => field.name === name);
 };
 
-const mountComponent = (props: DocViewRenderProps, overrides?: Partial<DiscoverServices>) => {
+const mountComponent = (
+  props: DocViewRenderProps,
+  overrides?: Partial<UnifiedDocViewerServices>
+) => {
   return mountWithIntl(
     <KibanaContextProvider services={{ ...services, ...overrides }}>
       <DocViewerTableLegacy {...props} />{' '}

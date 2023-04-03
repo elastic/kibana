@@ -9,6 +9,7 @@
 import { UnifiedDocViewerPlugin } from './plugin';
 
 export {
+  DocViewer,
   DocViewerSource,
   DocViewerTable,
   DocViewerTableLegacy,

@@ -8,9 +8,8 @@
 
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer-plugin/public/types';
-import { getDocViewsRegistry } from '../../../../kibana_services';
-import { DocView } from '../../doc_views_types';
+import type { DocView, DocViewRenderProps } from '../../types';
+import { getDocViewsRegistry } from '../../services';
 import { DocViewerTab } from './doc_viewer_tab';
 
 /**
@@ -41,7 +40,7 @@ export function DocViewer(renderProps: DocViewRenderProps) {
     });
 
   if (!tabs.length) {
-    // There there's a minimum of 2 tabs active in Discover.
+    // There's a minimum of 2 tabs active in Discover.
     // This condition takes care of unit tests with 0 tabs.
     return null;
   }
