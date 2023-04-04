@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// please try to keep this list sorted by module name (e.g. './bar' before './foo')
+
 export { Append } from './append';
 export { Bytes } from './bytes';
 export { Circle } from './circle';
