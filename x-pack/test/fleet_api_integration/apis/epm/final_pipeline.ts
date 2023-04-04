@@ -14,6 +14,7 @@ const TEST_INDEX = 'logs-log.log-test';
 
 const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
+// TODO: Use test package or move to input package version github.com/elastic/kibana/issues/154243
 const LOG_INTEGRATION_VERSION = '1.1.2';
 
 const FINAL_PIPELINE_VERSION = 1;
