@@ -84,9 +84,8 @@ describe('use cases add to new case flyout hook', () => {
       { wrapper }
     );
 
-    const getAttachments = jest.fn().mockReturnValue([alertComment]);
+    result.current.open({ attachments: [alertComment] });
 
-    result.current.open({ getAttachments });
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,

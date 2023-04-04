@@ -99,14 +99,12 @@ export const useBulkAddToCaseActions = ({
             disableOnQuery: true,
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (alerts?: TimelineItem[]) => {
+              const caseAttachments = alerts
+                ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
+                : [];
+
               createCaseFlyout.open({
-                getAttachments: ({ theCase }) => {
-                  return getCaseAttachments({
-                    alerts,
-                    caseId: theCase.id,
-                    groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
-                  });
-                },
+                attachments: caseAttachments,
               });
             },
           },

@@ -29,7 +29,7 @@ export const getCreateCaseFlyoutLazy = ({
   afterCaseCreated,
   onClose,
   onSuccess,
-  getAttachments,
+  attachments,
 }: GetCreateCaseFlyoutPropsInternal) => (
   <CasesProvider
     value={{
@@ -45,7 +45,7 @@ export const getCreateCaseFlyoutLazy = ({
         afterCaseCreated={afterCaseCreated}
         onClose={onClose}
         onSuccess={onSuccess}
-        getAttachments={getAttachments}
+        attachments={attachments}
       />
     </Suspense>
   </CasesProvider>

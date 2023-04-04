@@ -40,6 +40,7 @@ import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
+import type { CaseAttachments } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { waitForComponentToUpdate } from '../../common/test_utils';
@@ -595,10 +596,8 @@ describe('Create case', () => {
       },
     ];
 
-    const getAttachments = jest.fn().mockReturnValue(attachments);
-
     mockedContext.render(
-      <FormContext onSuccess={onFormSubmitSuccess} getAttachments={getAttachments}>
+      <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
@@ -625,10 +624,11 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
-    const getAttachments = jest.fn().mockReturnValue([]);
+
+    const attachments: CaseAttachments = [];
 
     mockedContext.render(
-      <FormContext onSuccess={onFormSubmitSuccess} getAttachments={getAttachments}>
+      <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />
       </FormContext>
@@ -662,13 +662,11 @@ describe('Create case', () => {
       },
     ];
 
-    const getAttachments = jest.fn().mockReturnValue(attachments);
-
     mockedContext.render(
       <FormContext
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
-        getAttachments={getAttachments}
+        attachments={attachments}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} />
         <SubmitCaseButton />

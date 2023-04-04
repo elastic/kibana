@@ -75,7 +75,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
-  getAttachments?: ({ theCase }: { theCase: Case }) => CaseAttachmentsWithoutOwner;
+  attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
@@ -192,7 +192,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     onCancel,
     onSuccess,
     timelineIntegration,
-    getAttachments,
+    attachments,
     initialValue,
   }) => {
     const { owner, appId } = useCasesContext();
@@ -218,7 +218,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         <FormContext
           afterCaseCreated={afterCaseCreated}
           onSuccess={handleOnSuccess}
-          getAttachments={getAttachments}
+          attachments={attachments}
           initialValue={initialValue}
         >
           <CreateCaseFormFields

@@ -44,7 +44,7 @@ interface Props {
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => void;
-  getAttachments?: ({ theCase }: { theCase: Case }) => CaseAttachmentsWithoutOwner;
+  attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
@@ -52,7 +52,7 @@ export const FormContext: React.FC<Props> = ({
   afterCaseCreated,
   children,
   onSuccess,
-  getAttachments,
+  attachments,
   initialValue,
 }) => {
   const { data: connectors = [], isLoading: isLoadingConnectors } =
@@ -78,8 +78,7 @@ export const FormContext: React.FC<Props> = ({
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
 
-        // TODO: Fix it
-        startTransaction({ appId, attachments: [] });
+        startTransaction({ appId, attachments });
 
         const connectorToUpdate = caseConnector
           ? normalizeActionConnector(caseConnector, fields)
@@ -93,8 +92,6 @@ export const FormContext: React.FC<Props> = ({
             owner: selectedOwner ?? owner[0],
           },
         });
-
-        const attachments = getAttachments?.({ theCase }) ?? [];
 
         // add attachments to the case
         if (theCase && Array.isArray(attachments) && attachments.length > 0) {
@@ -126,9 +123,9 @@ export const FormContext: React.FC<Props> = ({
       connectors,
       startTransaction,
       appId,
+      attachments,
       postCase,
       owner,
-      getAttachments,
       afterCaseCreated,
       onSuccess,
       createAttachments,

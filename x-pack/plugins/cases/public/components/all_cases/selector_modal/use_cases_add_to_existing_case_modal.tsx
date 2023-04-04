@@ -56,15 +56,14 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps =
       theCase: Case | undefined,
       getAttachments?: ({ theCase }: { theCase?: Case }) => CaseAttachmentsWithoutOwner
     ) => {
+      const attachments = getAttachments?.({ theCase }) ?? [];
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
         closeModal();
-        createNewCaseFlyout.open({ getAttachments });
+        createNewCaseFlyout.open({ attachments });
         return;
       }
-
-      const attachments = getAttachments?.({ theCase }) ?? [];
 
       try {
         // add attachments to the case

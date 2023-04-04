@@ -35,7 +35,7 @@ describe('Cases context UI', () => {
         createCaseFlyout: {
           isFlyoutOpen: true,
           props: {
-            getAttachments: jest.fn(),
+            attachments: [],
           },
         },
       };
