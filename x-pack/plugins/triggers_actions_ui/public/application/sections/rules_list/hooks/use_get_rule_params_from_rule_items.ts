@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { isObject } from 'lodash';
 import { RuleParamsForRules, RuleTableItem } from '../../../../types';
 import { useFetchSloList } from './use_fetch_slo_list';
@@ -16,8 +16,6 @@ interface Props {
 
 export function useGetRuleParamsFromRuleItems({ ruleItems }: Props): RuleParamsForRules {
   const { sloList } = useFetchSloList();
-
-  useEffect(() => {});
 
   return useMemo(() => {
     return ruleItems.reduce((acc, rule) => {
@@ -35,7 +33,9 @@ export function useGetRuleParamsFromRuleItems({ ruleItems }: Props): RuleParamsF
         if (!acc[param]) {
           acc[param] = [{ label, value: rule.params[param] as string }];
         } else if (
-          !acc[param].map((val) => JSON.stringify(val)).includes(JSON.stringify(rule.params[param]))
+          !acc[param].find(
+            (val) => JSON.stringify(val.value) === JSON.stringify(rule.params[param])
+          )
         ) {
           acc[param] = acc[param].concat({
             label,

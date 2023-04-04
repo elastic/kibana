@@ -6,14 +6,12 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiFilterGroup,
-  EuiFieldSearch,
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
@@ -29,8 +27,7 @@ import { ActionTypeFilter } from './action_type_filter';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
 import { RuleParamsFilter } from './rule_params_filter';
-
-const ENTER_KEY = 13;
+import { RulesListSearchFilter } from './rules_list_search_filter';
 
 interface RulesListFiltersBarProps {
   inputText: string;
@@ -52,6 +49,7 @@ interface RulesListFiltersBarProps {
   onToggleRuleErrors: () => void;
 }
 
+const ENTER_KEY = 13;
 export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) => {
   const {
     filters,
@@ -149,6 +147,22 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     ),
   ];
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputText(e.target.value);
+    if (e.target.value === '') {
+      updateFilters({ filter: 'searchText', value: e.target.value });
+    }
+  };
+
+  const handleKeyup = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.keyCode === ENTER_KEY) {
+      updateFilters({ filter: 'searchText', value: inputText });
+    }
+  };
+
+  const handlePoop = (value: Record<string, string>) =>
+    updateFilters({ filter: 'ruleParams', value });
+
   return (
     <>
       <RulesListErrorBanner
@@ -162,26 +176,14 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            isClearable
-            data-test-subj="ruleSearchField"
-            value={inputText}
-            onChange={(e) => {
-              setInputText(e.target.value);
-              if (e.target.value === '') {
-                updateFilters({ filter: 'searchText', value: e.target.value });
-              }
-            }}
-            onKeyUp={(e) => {
-              if (e.keyCode === ENTER_KEY) {
-                updateFilters({ filter: 'searchText', value: inputText });
-              }
-            }}
-            placeholder={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.searchPlaceholderTitle',
-              { defaultMessage: 'Search' }
-            )}
+          <RulesListSearchFilter
+            inputText={inputText}
+            filters={filters}
+            items={items}
+            showRuleParamFilter={showRuleParamFilter}
+            onChange={handleChange}
+            onChangeRuleParams={handlePoop}
+            onKeyUp={handleKeyup}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{renderRuleStatusFilter()}</EuiFlexItem>
