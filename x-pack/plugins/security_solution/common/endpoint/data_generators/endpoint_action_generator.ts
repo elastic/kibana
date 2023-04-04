@@ -232,6 +232,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           [details.agents[0]]: this.generateExecuteActionResponseOutput({
             content: {
               output_file_id: getFileDownloadId(details, details.agents[0]),
+              ...overrides.outputs?.[details.agents[0]].content,
             },
           }),
         };
@@ -310,11 +311,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         content: {
           stdout: this.randomChoice([
             this.randomString(1280),
+            this.randomString(3580),
             `-rw-r--r--    1 elastic  staff      458 Jan 26 09:10 doc.txt\
           -rw-r--r--     1 elastic  staff  298 Feb  2 09:10 readme.md`,
           ]),
           stderr: this.randomChoice([
             this.randomString(1280),
+            this.randomString(3580),
             `error line 1\
           error line 2\
           error line 3 that is quite very long and will be truncated, and should not be visible in the UI\
@@ -326,6 +329,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           shell: 'bash',
           cwd: '/some/path',
           output_file_id: 'some-output-file-id',
+          output_file_stdout_truncated: this.randomChoice([true, false]),
+          output_file_stderr_truncated: this.randomChoice([true, false]),
         },
       },
       overrides
