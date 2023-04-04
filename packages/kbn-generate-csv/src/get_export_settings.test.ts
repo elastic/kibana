@@ -66,7 +66,7 @@ describe('getExportSettings', () => {
           "duration": "30s",
           "size": 500,
         },
-        "separator": "helo world",
+        "separator": ",",
         "timezone": "UTC",
       }
     `);
