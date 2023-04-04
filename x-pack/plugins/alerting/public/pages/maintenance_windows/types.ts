@@ -39,3 +39,26 @@ export interface MaintenanceWindow {
   duration: number;
   rRule: RRule;
 }
+
+export interface DateRange {
+  gte: string;
+  lte: string;
+}
+
+export interface MaintenanceWindowResponse {
+  id: string;
+  title: string;
+  enabled: boolean;
+  duration: number;
+  expirationDate: string;
+  events: DateRange[];
+  rRule: RRule;
+  status: 'running' | 'upcoming' | 'finished' | 'archived';
+  eventStartTime: string | null;
+  eventEndTime: string | null;
+  createdBy: string | null;
+  updatedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  total: number;
+}

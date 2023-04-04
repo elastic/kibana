@@ -70,12 +70,9 @@ export const MAINTENANCE_WINDOWS_RETURN_LINK = i18n.translate(
   }
 );
 
-export const CREATE_FORM_NAME = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.name',
-  {
-    defaultMessage: 'Name',
-  }
-);
+export const NAME = i18n.translate('xpack.alerting.maintenanceWindows.name', {
+  defaultMessage: 'Name',
+});
 
 export const CREATE_FORM_NAME_REQUIRED = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.nameFieldRequiredError',
@@ -361,4 +358,47 @@ export const CREATE_FORM_YEARLY_BY_MONTH_SUMMARY = (date: string) =>
 
 export const CANCEL = i18n.translate('xpack.alerting.maintenanceWindows.createForm.cancel', {
   defaultMessage: 'Cancel',
+});
+
+export const TABLE_STATUS = i18n.translate('xpack.alerting.maintenanceWindows.table.status', {
+  defaultMessage: 'Status',
+});
+
+export const TABLE_STATUS_RUNNING = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.statusRunning',
+  {
+    defaultMessage: 'Running',
+  }
+);
+
+export const TABLE_STATUS_UPCOMING = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.statusUpcoming',
+  {
+    defaultMessage: 'Upcoming',
+  }
+);
+
+export const TABLE_STATUS_FINISHED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.statusFinished',
+  {
+    defaultMessage: 'Finished',
+  }
+);
+
+export const TABLE_STATUS_ARCHIVED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.statusArchived',
+  {
+    defaultMessage: 'Archived',
+  }
+);
+
+export const TABLE_START_TIME = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.startTime',
+  {
+    defaultMessage: 'Start time',
+  }
+);
+
+export const TABLE_END_TIME = i18n.translate('xpack.alerting.maintenanceWindows.table.endTime', {
+  defaultMessage: 'End time',
 });

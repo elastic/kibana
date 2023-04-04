@@ -37,7 +37,7 @@ export interface RecurringScheduleFormProps {
 export const schema: FormSchema<FormProps> = {
   title: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.CREATE_FORM_NAME,
+    label: i18n.NAME,
     validations: [
       {
         validator: emptyField(i18n.CREATE_FORM_NAME_REQUIRED),
