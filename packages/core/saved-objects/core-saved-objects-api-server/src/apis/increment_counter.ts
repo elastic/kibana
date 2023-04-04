@@ -39,7 +39,7 @@ export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
    * Attributes to use when upserting the document if it doesn't exist.
    */
   upsertAttributes?: Attributes;
-  /** Optional flag to indicate a document is managed */
+  /** Optional flag to indicate a document is managed. */
   managed?: boolean;
 }
 

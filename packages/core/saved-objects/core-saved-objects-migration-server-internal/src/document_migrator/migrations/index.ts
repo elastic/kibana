@@ -13,5 +13,10 @@ import { transformMigrationVersion } from './transform_migration_version';
 import { transformSetManagedDefault } from './transform_set_managed_default';
 
 export const migrations = {
-  '8.8.0': flow(transformMigrationVersion, get('transformedDoc'), transformSetManagedDefault),
+  '8.8.0': flow(
+    transformMigrationVersion,
+    // extract transformedDoc from TransformResult as input to next transform
+    get('transformedDoc'),
+    transformSetManagedDefault
+  ),
 } as Record<string, TransformFn>;

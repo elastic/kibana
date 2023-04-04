@@ -9,7 +9,7 @@
 import { transformSetManagedDefault } from './transform_set_managed_default';
 
 describe('transformAddManaged', () => {
-  it('should add the managed property if not defined', () => {
+  it('should add managed if not defined', () => {
     expect(
       transformSetManagedDefault({
         id: 'a',
@@ -18,13 +18,21 @@ describe('transformAddManaged', () => {
       })
     ).toHaveProperty('transformedDoc.managed');
   });
-  it('should not change the managed property if defined', () => {
-    const docWithManaged = transformSetManagedDefault({
+  it('should not change managed if already defined', () => {
+    const docWithManagedFalse = transformSetManagedDefault({
       id: 'a',
       attributes: {},
       type: 'something',
       managed: false,
     });
-    expect(docWithManaged.transformedDoc.managed).toBeDefined();
+    const docWithManagedTrue = transformSetManagedDefault({
+      id: 'a',
+      attributes: {},
+      type: 'something',
+      managed: true,
+    });
+    [docWithManagedFalse, docWithManagedTrue].forEach((doc) => {
+      expect(doc.transformedDoc.managed).toBeDefined();
+    });
   });
 });

@@ -35,6 +35,6 @@ export interface SavedObjectsCreateOptions {
   typeMigrationVersion?: string;
   /** Array of referenced saved objects. */
   references?: SavedObjectReference[];
-  /** A flag to indicate a document is managed */
+  /** Boolean flag to indicate a document is managed, used during import to create/bulkCreate saved objects. */
   managed?: boolean;
 }

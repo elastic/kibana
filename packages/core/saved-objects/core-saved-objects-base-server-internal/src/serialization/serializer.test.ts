@@ -731,7 +731,7 @@ describe('#savedObjectToRaw', () => {
     expect(actual._source).not.toHaveProperty('coreMigrationVersion');
   });
 
-  test('if specified it copies the managed property to _source.managed', () => {
+  test('if specified, copies managed property to _source.managed', () => {
     const actual = singleNamespaceSerializer.savedObjectToRaw({
       type: '',
       attributes: {},
@@ -741,7 +741,7 @@ describe('#savedObjectToRaw', () => {
     expect(actual._source).toHaveProperty('managed', false);
   });
 
-  test(`if unspecified it doesn't add the managed property to _source`, () => {
+  test(`if unspecified it doesn't add managed property to _source`, () => {
     const actual = singleNamespaceSerializer.savedObjectToRaw({
       type: '',
       attributes: {},

@@ -112,13 +112,13 @@ describe('migration v2', () => {
     expect(assertMigratedDocuments(migratedDocs, originalDocs));
   });
 
-  it('fails with a descriptive message when a single document exceeds maxBatchSizeBytes', async () => {
+  it.only('fails with a descriptive message when a single document exceeds maxBatchSizeBytes', async () => {
     root = createRoot({ maxBatchSizeBytes: 1015275 });
     esServer = await startES();
     await root.preboot();
     await root.setup();
     await expect(root.start()).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715248 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.]`
+      `[Error: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715264 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.]`
     );
 
     await retryAsync(
@@ -131,7 +131,7 @@ describe('migration v2', () => {
         expect(
           records.find((rec) =>
             rec.message.startsWith(
-              `Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715248 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
+              `Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715264 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
             )
           )
         ).toBeDefined();

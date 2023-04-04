@@ -55,6 +55,6 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
-  /** Otional flag to indicate a document is managed */
+  /** Optional flag to indicate a document is managed. */
   managed?: boolean;
 }

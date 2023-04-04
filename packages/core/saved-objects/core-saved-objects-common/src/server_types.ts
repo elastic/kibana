@@ -101,6 +101,6 @@ export interface SavedObject<T = unknown> {
    * space.
    */
   originId?: string;
-  /** A flag to indicate an object is managed */
+  /** A boolean that indicates if an object is managed, defaults to false. */
   managed?: boolean;
 }
