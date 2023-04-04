@@ -18,11 +18,15 @@ import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
-import { CancellationToken } from '@kbn/reporting-common';
+import {
+  CancellationToken,
+  ReportingError,
+  QueueTimeoutError,
+  KibanaShuttingDownError,
+} from '@kbn/reporting-common';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
-import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';

@@ -7,12 +7,6 @@
  */
 
 export { CancellationToken } from './cancellation_token';
-export { AuthenticationExpiredError, ReportingError } from './errors';
-export { byteSizeValueToNumber } from './schema_utils';
 export type { TaskRunMetrics, CsvMetrics } from './metrics';
-
-export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
-export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
-export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
-export * as reportTypes from './report_types';
-export * as jobTypes from './job_types';
+export * from './errors';
+export * from './constants';
