@@ -21,7 +21,6 @@ const triggerLinkA11yText = (label: string) =>
   });
 
 export function DimensionButton({
-  dragHandle,
   group,
   children,
   onClick,
@@ -32,7 +31,6 @@ export function DimensionButton({
   ...otherProps // from Drag&Drop integration
 }: {
   className?: string;
-  dragHandle?: React.ReactElement; // from Drag&Drop integration
   group: VisualizationDimensionGroupConfig;
   children: React.ReactElement;
   onClick: (id: string) => void;
@@ -44,11 +42,6 @@ export function DimensionButton({
   return (
     <div {...otherProps}>
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
-        {dragHandle && (
-          <EuiFlexItem grow={false} className="lnsLayerPanel__dimensionDragHandle">
-            {dragHandle}
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={message?.shortMessage || message?.longMessage || undefined}
