@@ -12,11 +12,6 @@ export interface SourceDoc {
   [key: string]: string | SourceDoc;
 }
 
-export interface TermsAggFields {
-  topHitsOpts?: AggregationsTopHitsAggregation;
-  groupByOpts?: string[] | string | undefined;
-}
-
 export function getServiceGroupFieldsAgg(
   topHitsOpts: AggregationsTopHitsAggregation = {}
 ) {
