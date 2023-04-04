@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-
 import { chunk } from 'lodash';
 import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
