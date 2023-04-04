@@ -11,8 +11,11 @@ import { ProtectionModes } from '../types';
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const policyFactory = (): PolicyConfig => {
+export const policyFactory = (license = ''): PolicyConfig => {
   return {
+    meta: {
+      license,
+    },
     windows: {
       events: {
         credential_access: true,
