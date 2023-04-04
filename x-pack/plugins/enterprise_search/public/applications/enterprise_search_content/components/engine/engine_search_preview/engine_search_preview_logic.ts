@@ -19,6 +19,7 @@ interface EngineSearchPreviewActions {
 export interface EngineSearchPreviewValues {
   engineFieldCapabilitiesData: typeof FetchEngineFieldCapabilitiesApiLogic.values.data;
   engineName: typeof EngineNameLogic.values.engineName;
+  fieldTypesByIndex: Record<string, Record<string, string>>;
   resultFields: Record<string, FieldConfiguration>;
   searchableFields: Record<string, SearchFieldConfiguration>;
   sortableFields: string[];
@@ -50,6 +51,27 @@ export const EngineSearchPreviewLogic = kea<
   }),
   path: ['enterprise_search', 'content', 'engine_search_preview_logic'],
   selectors: ({ selectors }) => ({
+    fieldTypesByIndex: [
+      () => [selectors.engineFieldCapabilitiesData],
+      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
+        if (!data) return {};
+
+        return data.fields.reduce(
+          (out: Record<string, Record<string, string>>, field) =>
+            field.indices.reduce(
+              (acc: Record<string, Record<string, string>>, index) => ({
+                ...acc,
+                [index.name]: {
+                  ...(acc[index.name] || {}),
+                  [field.name]: index.type,
+                },
+              }),
+              out
+            ),
+          {}
+        );
+      },
+    ],
     resultFields: [
       () => [selectors.engineFieldCapabilitiesData],
       (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
@@ -61,7 +83,7 @@ export const EngineSearchPreviewLogic = kea<
               return Object.values(mappings).some(({ metadata_field: isMeta }) => !isMeta);
             })
             .map(([key]) => {
-              return [key, { raw: {}, snippet: {} }];
+              return [key, { raw: {}, snippet: { fallback: true } }];
             })
         );
 
