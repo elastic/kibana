@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useMemo } from 'react';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
@@ -34,12 +35,21 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
 });
 
 export const Vulnerabilities = () => {
-  const {
-    data: dataView,
-    isLoading: dataViewIsLoading,
-    error: dataViewError,
-  } = useDataViewForIndexPattern(LATEST_VULNERABILITIES_INDEX_PATTERN);
+  const { data, isLoading, error } = useDataViewForIndexPattern(
+    LATEST_VULNERABILITIES_INDEX_PATTERN
+  );
 
+  if (error) {
+    return <ErrorCallout error={error as Error} />;
+  }
+  if (isLoading || !data) {
+    return <EuiLoadingSpinner />;
+  }
+
+  return <VulnerabilitiesContent dataView={data} />;
+};
+
+const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   const {
     pageIndex,
     query,
@@ -60,7 +70,7 @@ export const Vulnerabilities = () => {
   const { data, isLoading } = useLatestVulnerabilities({
     query,
     sort,
-    enabled: !queryError && !dataViewError,
+    enabled: !queryError,
   });
 
   const renderCellValue = useMemo(() => {
@@ -122,12 +132,12 @@ export const Vulnerabilities = () => {
     };
   }, [data?.page]);
 
-  const error = queryError || dataViewError || null;
+  const error = queryError || null;
 
   if (error) {
     return <ErrorCallout error={error as Error} />;
   }
-  if (dataViewIsLoading || isLoading || !data || !dataView) {
+  if (isLoading || !data) {
     return <EuiLoadingSpinner />;
   }
 

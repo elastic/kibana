@@ -19,7 +19,7 @@ export const useCloudPostureTable = ({
   paginationLocalStorageKey,
 }: {
   defaultQuery?: (params: any) => any;
-  dataView?: DataView;
+  dataView: DataView;
   paginationLocalStorageKey: string;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(defaultQuery);
