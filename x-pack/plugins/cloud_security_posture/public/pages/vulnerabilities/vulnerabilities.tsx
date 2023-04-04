@@ -8,11 +8,13 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiDataGrid,
+  EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
@@ -141,60 +143,74 @@ export const Vulnerabilities = () => {
         loading={isLoading}
       />
       <EuiSpacer size="l" />
-      <EuiDataGrid
-        css={css`
-          & .euiDataGridHeaderCell__icon {
-            display: none;
+      {!isLoading && data.page.length === 0 ? (
+        <EuiEmptyPrompt
+          iconType="logoKibana"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.csp.findings.resourceFindings.noFindingsTitle"
+                defaultMessage="There are no Findings"
+              />
+            </h2>
           }
-          & .euiDataGrid__controls {
-            border-bottom: none;
-          }
-          & .euiButtonIcon {
-            color: ${euiTheme.colors.primary};
-          }
-          & .euiDataGridRowCell {
-            font-size: ${euiTheme.size.m};
-          }
-        `}
-        aria-label="Data grid styling demo"
-        columns={columns}
-        columnVisibility={{
-          visibleColumns: columns.map(({ id }) => id),
-          setVisibleColumns: () => {},
-        }}
-        rowCount={data?.total}
-        toolbarVisibility={{
-          showColumnSelector: false,
-          showDisplaySelector: false,
-          showKeyboardShortcuts: false,
-          additionalControls: {
-            left: {
-              prepend: (
-                <EuiButtonEmpty size="xs" color="text">
-                  {data?.total} Vulnerabilities
-                </EuiButtonEmpty>
-              ),
+        />
+      ) : (
+        <EuiDataGrid
+          css={css`
+            & .euiDataGridHeaderCell__icon {
+              display: none;
+            }
+            & .euiDataGrid__controls {
+              border-bottom: none;
+            }
+            & .euiButtonIcon {
+              color: ${euiTheme.colors.primary};
+            }
+            & .euiDataGridRowCell {
+              font-size: ${euiTheme.size.m};
+            }
+          `}
+          aria-label="Data grid styling demo"
+          columns={columns}
+          columnVisibility={{
+            visibleColumns: columns.map(({ id }) => id),
+            setVisibleColumns: () => {},
+          }}
+          rowCount={data?.total}
+          toolbarVisibility={{
+            showColumnSelector: false,
+            showDisplaySelector: false,
+            showKeyboardShortcuts: false,
+            additionalControls: {
+              left: {
+                prepend: (
+                  <EuiButtonEmpty size="xs" color="text">
+                    {data?.total} Vulnerabilities
+                  </EuiButtonEmpty>
+                ),
+              },
             },
-          },
-        }}
-        gridStyle={{
-          border: 'horizontal',
-          cellPadding: 'l',
-          stripes: false,
-          rowHover: 'none',
-          header: 'underline',
-        }}
-        renderCellValue={renderCellValue}
-        inMemory={{ level: 'sorting' }}
-        sorting={{ columns: sort, onSort }}
-        pagination={{
-          pageIndex,
-          pageSize,
-          pageSizeOptions: [10, 25, 100],
-          onChangeItemsPerPage,
-          onChangePage,
-        }}
-      />
+          }}
+          gridStyle={{
+            border: 'horizontal',
+            cellPadding: 'l',
+            stripes: false,
+            rowHover: 'none',
+            header: 'underline',
+          }}
+          renderCellValue={renderCellValue}
+          inMemory={{ level: 'sorting' }}
+          sorting={{ columns: sort, onSort }}
+          pagination={{
+            pageIndex,
+            pageSize,
+            pageSizeOptions: [10, 25, 100],
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
+        />
+      )}
     </>
   );
 };
