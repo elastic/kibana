@@ -104,16 +104,26 @@ describe('RPC -> get()', () => {
     test('should validate that the response is an object', () => {
       let error = validate(
         {
-          any: 'object',
+          contentTypeId: 'foo',
+          result: {
+            item: {
+              any: 'object',
+            },
+            meta: {
+              foo: 'bar',
+            },
+          },
         },
         outputSchema
       );
 
       expect(error).toBe(null);
 
-      error = validate(123, outputSchema);
+      error = validate({ contentTypeId: '123', result: 123 }, outputSchema);
 
-      expect(error?.message).toBe('expected a plain object value, but found [number] instead.');
+      expect(error?.message).toBe(
+        '[result]: expected a plain object value, but found [number] instead.'
+      );
     });
   });
 
@@ -142,7 +152,9 @@ describe('RPC -> get()', () => {
     test('should return the storage get() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = 'GetResult';
+      const expected = {
+        item: 'GetResult',
+      };
       storage.get.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });
