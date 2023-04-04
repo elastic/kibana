@@ -8,11 +8,11 @@
 import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { paths } from '../../../../config/paths';
-import { useKibana } from '../../../../utils/kibana_react';
+import { paths } from '../../../config/paths';
+import { useKibana } from '../../../utils/kibana_react';
 
-import { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
-import { toAlertsPageQueryFilter } from '../../helpers/alerts_page_query_filter';
+import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { toAlertsPageQueryFilter } from '../../../pages/slos/helpers/alerts_page_query_filter';
 
 export interface Props {
   activeAlerts?: ActiveAlerts;
