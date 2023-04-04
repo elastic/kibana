@@ -375,22 +375,27 @@ export const MetricVis = ({
             ]}
             baseTheme={baseTheme}
             onRenderChange={onRenderChange}
-            onElementClick={(events) => {
-              if (!filterable) {
-                return;
-              }
-              events.forEach((event) => {
-                if (isMetricElementEvent(event)) {
-                  const colIdx = breakdownByColumn
-                    ? data.columns.findIndex((col) => col === breakdownByColumn)
-                    : data.columns.findIndex((col) => col === primaryMetricColumn);
-                  const rowLength = grid[0].length;
-                  fireEvent(
-                    buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
-                  );
-                }
-              });
-            }}
+            onElementClick={
+              filterable
+                ? (events) => {
+                    events.forEach((event) => {
+                      if (isMetricElementEvent(event)) {
+                        const colIdx = breakdownByColumn
+                          ? data.columns.findIndex((col) => col === breakdownByColumn)
+                          : data.columns.findIndex((col) => col === primaryMetricColumn);
+                        const rowLength = grid[0].length;
+                        fireEvent(
+                          buildFilterEvent(
+                            event.rowIndex * rowLength + event.columnIndex,
+                            colIdx,
+                            data
+                          )
+                        );
+                      }
+                    });
+                  }
+                : undefined
+            }
             {...settingsOverrides}
           />
           <Metric id="metric" data={grid} />

@@ -1103,15 +1103,27 @@ describe('MetricVisComponent', function () {
     });
 
     it('should do nothing if primary metric is not filterable', () => {
-      const event: MetricElementEvent = {
-        type: 'metricElementEvent',
-        rowIndex: 1,
-        columnIndex: 0,
+      const props = {
+        ...defaultProps,
+        filterable: false,
       };
+      const metricComponent = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+          }}
+          data={table}
+          {...props}
+        />
+      );
 
-      fireFilter(event, false, true);
-
-      expect(fireEventSpy).not.toHaveBeenCalled();
+      expect(metricComponent.find(Settings).props().onElementClick).toBeUndefined();
     });
   });
 

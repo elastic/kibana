@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_VALUES_SELECTED } from '@kbn/observability-plugin/public';
+import { ALL_VALUES_SELECTED } from '@kbn/exploratory-view-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_ENVIRONMENT,
