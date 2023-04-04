@@ -118,7 +118,7 @@ export const reportingScreenshotShareProvider = ({
     });
 
     const jobProviderOptions: JobParamsProviderOptions = {
-      shareableUrl: shareableUrlForSavedObject ?? shareableUrl,
+      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
       objectType,
       sharingData,
     };

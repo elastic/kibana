@@ -57,7 +57,8 @@ export function getLocatorParams(
     visualization,
     adHocDataViews,
     currentDoc,
-  }: ShareableConfiguration
+  }: ShareableConfiguration,
+  isDirty: boolean
 ) {
   const references = extractReferencesFromState({
     activeDatasources: Object.keys(datasourceStates).reduce(
@@ -95,14 +96,15 @@ export function getLocatorParams(
   return {
     shareURL: snapshotParams,
     // for reporting use the shorten version when available
-    reporting: currentDoc?.savedObjectId
-      ? {
-          filters,
-          query,
-          resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-          savedObjectId: currentDoc?.savedObjectId,
-        }
-      : snapshotParams,
+    reporting:
+      currentDoc?.savedObjectId && !isDirty
+        ? {
+            filters,
+            query,
+            resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+            savedObjectId: currentDoc?.savedObjectId,
+          }
+        : snapshotParams,
   };
 }
 
@@ -110,11 +112,13 @@ export async function getShareURL(
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>,
   services: Pick<LensAppServices, 'application' | 'data'>,
   configuration: ShareableConfiguration,
-  shareUrlEnabled: boolean
+  shareUrlEnabled: boolean,
+  isDirty: boolean
 ) {
   const { shareURL: locatorParams, reporting: reportingLocatorParams } = getLocatorParams(
     services.data,
-    configuration
+    configuration,
+    isDirty
   );
   return {
     shareableUrl: await (shareUrlEnabled ? shortUrlService(locatorParams) : undefined),
