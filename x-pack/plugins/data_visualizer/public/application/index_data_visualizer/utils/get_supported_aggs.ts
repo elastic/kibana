@@ -6,13 +6,11 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { isCounterTimeSeriesMetric, isGaugeTimeSeriesMetric } from '@kbn/ml-agg-utils';
 
-export const isCounterTimeSeriesMetricField = (field: DataViewField) =>
-  field.timeSeriesMetric === 'counter';
-
-export const isGaugeTimeSeriesMetricField = (field: DataViewField) =>
-  field.timeSeriesMetric === 'gauge';
-
+/**
+ * Partial list of supported ES aggs that are used by Index data visualizer/Field stats
+ */
 const SUPPORTED_AGGS = {
   COUNTER: new Set([
     'count',
@@ -54,7 +52,15 @@ const SUPPORTED_AGGS = {
     'terms',
     'significant_terms',
   ]),
-  AGGREGATABLE: new Set(['count', 'avg', 'cardinality', 'percentiles', 'stats', 'terms']),
+  AGGREGATABLE: new Set([
+    'count',
+    'avg',
+    'cardinality',
+    'histogram',
+    'percentiles',
+    'stats',
+    'terms',
+  ]),
   DEFAULT: new Set<string>(),
 };
 
@@ -63,19 +69,8 @@ const SUPPORTED_AGGS = {
  * https://github.com/elastic/elasticsearch/pull/93884
  */
 export const getSupportedAggs = (field: DataViewField) => {
-  if (isCounterTimeSeriesMetricField(field)) {
-    return SUPPORTED_AGGS.COUNTER;
-  }
-  if (isGaugeTimeSeriesMetricField(field)) {
-    return SUPPORTED_AGGS.GAUGE;
-  }
-
-  if (isCounterTimeSeriesMetricField(field)) {
-    return SUPPORTED_AGGS.COUNTER;
-  }
-
-  if (field.aggregatable) {
-    return SUPPORTED_AGGS.AGGREGATABLE;
-  }
+  if (isCounterTimeSeriesMetric(field)) return SUPPORTED_AGGS.COUNTER;
+  if (isGaugeTimeSeriesMetric(field)) return SUPPORTED_AGGS.GAUGE;
+  if (field.aggregatable) return SUPPORTED_AGGS.AGGREGATABLE;
   return SUPPORTED_AGGS.DEFAULT;
 };
