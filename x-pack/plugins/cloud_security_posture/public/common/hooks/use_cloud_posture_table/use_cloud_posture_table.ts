@@ -10,6 +10,9 @@ import { useUrlQuery } from '../use_url_query';
 import { usePageSize } from '../use_page_size';
 import { getDefaultQuery, useBaseEsQuery, usePersistedQuery } from './utils';
 
+/*
+  Hook for managing common table state and methods for Cloud Posture
+*/
 export const useCloudPostureTable = ({
   defaultQuery = getDefaultQuery,
   dataView,
