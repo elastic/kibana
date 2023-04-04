@@ -7,11 +7,20 @@
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
+/**
+ * All available types for time series metric fields
+ */
 export enum TIME_SERIES_METRIC_TYPES {
   HISTOGRAM = 'histogram',
   COUNTER = 'counter',
   GAUGE = 'gauge',
   SUMMARY = 'summary',
 }
+
+/**
+ * Check if DataViewField is a 'counter' time series metric field
+ * @param field optional DataViewField
+ * @returns a boolean
+ */
 export const isCounterTimeSeriesMetric = (field?: DataViewField) =>
   field?.timeSeriesMetric === TIME_SERIES_METRIC_TYPES.COUNTER;
