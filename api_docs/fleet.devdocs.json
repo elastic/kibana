@@ -60,7 +60,7 @@
         "label": "PackagePolicyEditorDatastreamMappings",
         "description": [],
         "signature": [
-          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo, customDataset }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -79,7 +79,7 @@
             "id": "def-public.PackagePolicyEditorDatastreamMappings.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ packageInputStream, packageInfo }",
+            "label": "{ packageInputStream, packageInfo, customDataset }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -109,7 +109,7 @@
         "label": "PackagePolicyEditorDatastreamPipelines",
         "description": [],
         "signature": [
-          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo, customDataset }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -128,7 +128,7 @@
             "id": "def-public.PackagePolicyEditorDatastreamPipelines.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ packageInputStream, packageInfo }",
+            "label": "{ packageInputStream, packageInfo, customDataset }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1888,6 +1888,20 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamMappingsProps.customDataset",
+            "type": "string",
+            "tags": [],
+            "label": "customDataset",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1973,6 +1987,20 @@
             "description": [],
             "signature": [
               "{ id?: string | undefined; data_stream: { dataset: string; type: string; }; }"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackagePolicyEditorDatastreamPipelinesProps.customDataset",
+            "type": "string",
+            "tags": [],
+            "label": "customDataset",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
             "deprecated": false,
