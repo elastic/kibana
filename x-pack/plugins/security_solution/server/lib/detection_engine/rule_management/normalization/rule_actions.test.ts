@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
-
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../../common/constants';
 
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type { RuleAlertType } from '../../rule_schema';
 
 import {
-  transformActions,
   transformFromAlertThrottle,
   transformToAlertThrottle,
   transformToNotifyWhen,
@@ -155,137 +149,6 @@ describe('Rule actions normalization', () => {
           ],
         } as RuleAlertType)
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
-    });
-  });
-
-  describe('transformActions', () => {
-    test('It transforms two alert actions', () => {
-      const alertAction: RuleAction[] = [
-        {
-          id: 'id_1',
-          group: 'group',
-          actionTypeId: 'actionTypeId',
-          params: {},
-        },
-        {
-          id: 'id_2',
-          group: 'group',
-          actionTypeId: 'actionTypeId',
-          params: {},
-        },
-      ];
-
-      const transformed = transformActions(alertAction, null);
-      expect(transformed).toEqual<RuleResponse['actions']>([
-        {
-          id: 'id_1',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-        {
-          id: 'id_2',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-      ]);
-    });
-
-    test('It transforms two alert actions but not a legacyRuleActions if this is also passed in', () => {
-      const alertAction: RuleAction[] = [
-        {
-          id: 'id_1',
-          group: 'group',
-          actionTypeId: 'actionTypeId',
-          params: {},
-        },
-        {
-          id: 'id_2',
-          group: 'group',
-          actionTypeId: 'actionTypeId',
-          params: {},
-        },
-      ];
-      const legacyRuleActions: LegacyRuleActions = {
-        id: 'id_1',
-        ruleThrottle: '',
-        alertThrottle: '',
-        actions: [
-          {
-            id: 'id_2',
-            group: 'group',
-            action_type_id: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-      const transformed = transformActions(alertAction, legacyRuleActions);
-      expect(transformed).toEqual<RuleResponse['actions']>([
-        {
-          id: 'id_1',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-        {
-          id: 'id_2',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-      ]);
-    });
-
-    test('It will transform the legacyRuleActions if the alertAction is an empty array', () => {
-      const alertAction: RuleAction[] = [];
-      const legacyRuleActions: LegacyRuleActions = {
-        id: 'id_1',
-        ruleThrottle: '',
-        alertThrottle: '',
-        actions: [
-          {
-            id: 'id_2',
-            group: 'group',
-            action_type_id: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-      const transformed = transformActions(alertAction, legacyRuleActions);
-      expect(transformed).toEqual<RuleResponse['actions']>([
-        {
-          id: 'id_2',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-      ]);
-    });
-
-    test('It will transform the legacyRuleActions if the alertAction is undefined', () => {
-      const legacyRuleActions: LegacyRuleActions = {
-        id: 'id_1',
-        ruleThrottle: '',
-        alertThrottle: '',
-        actions: [
-          {
-            id: 'id_2',
-            group: 'group',
-            action_type_id: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-      const transformed = transformActions(undefined, legacyRuleActions);
-      expect(transformed).toEqual<RuleResponse['actions']>([
-        {
-          id: 'id_2',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-      ]);
     });
   });
 });

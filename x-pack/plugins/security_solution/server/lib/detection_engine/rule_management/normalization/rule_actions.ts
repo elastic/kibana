@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { RuleAction, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import type { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../../common/constants';
 
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
-import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type { RuleAlertType } from '../../rule_schema';
 
 /**
@@ -81,25 +77,3 @@ function transformFromFirstActionThrottle(rule: RuleAlertType) {
     return NOTIFICATION_THROTTLE_RULE;
   return frequency.throttle;
 }
-
-/**
- * Given a set of actions from an "alerting" Saved Object (SO) this will transform it into a "security_solution" alert action.
- * If this detects any legacy rule actions it will transform it. If both are sent in which is not typical but possible due to
- * the split nature of the API's this will prefer the usage of the non-legacy version. Eventually the "legacyRuleActions" should
- * be removed.
- * @param alertAction The alert action form a "alerting" Saved Object (SO).
- * @param legacyRuleActions Legacy "side car" rule actions that if it detects it being passed it in will transform using it.
- * @returns The actions of the RuleResponse
- */
-export const transformActions = (
-  alertAction: RuleAction[] | undefined,
-  legacyRuleActions: LegacyRuleActions | null | undefined
-): RuleResponse['actions'] => {
-  if (alertAction != null && alertAction.length !== 0) {
-    return alertAction.map((action) => transformAlertToRuleAction(action));
-  } else if (legacyRuleActions != null) {
-    return legacyRuleActions.actions;
-  } else {
-    return [];
-  }
-};

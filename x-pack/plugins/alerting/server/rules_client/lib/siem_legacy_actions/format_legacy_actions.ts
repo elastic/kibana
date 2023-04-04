@@ -14,11 +14,10 @@ import { RuleAction, Rule } from '../../../types';
 import type { RuleExecutorServices } from '../../..';
 import { injectReferencesIntoActions } from '../../common';
 
-import {
-  transformFromLegacyActions,
-  LegacyIRuleActionsAttributes,
-  legacyRuleActionsSavedObjectType,
-} from './migrate_legacy_actions';
+import { transformFromLegacyActions } from './migrate_legacy_actions';
+
+import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
+
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
@@ -28,16 +27,18 @@ interface LegacyGetBulkRuleActionsSavedObject {
   logger: Logger;
 }
 
-interface LegacyActionsObj {
+/**
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export interface LegacyActionsObj {
   ruleThrottle: string | null;
   legacyRuleActions: RuleAction[];
-  legacyActionsReferences: SavedObjectReference[];
 }
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-const legacyGetBulkRuleActionsSavedObject = async ({
+export const legacyGetBulkRuleActionsSavedObject = async ({
   alertIds,
   savedObjectsClient,
   logger,
@@ -47,7 +48,6 @@ const legacyGetBulkRuleActionsSavedObject = async ({
     type: 'alert',
   }));
   const errors: unknown[] = [];
-
   const results = await pMap(
     chunk(references, 1000),
     async (referencesChunk) => {
@@ -67,7 +67,6 @@ const legacyGetBulkRuleActionsSavedObject = async ({
     },
     { concurrency: 1 }
   );
-
   const actionSavedObjects = results.flat().flatMap((r) => r.saved_objects);
 
   if (errors.length) {
@@ -88,7 +87,6 @@ const legacyGetBulkRuleActionsSavedObject = async ({
       );
       acc[ruleAlertIdKey] = {
         ruleThrottle: savedObject.attributes.ruleThrottle,
-        legacyActionsReferences: savedObject.references,
         legacyRuleActions: injectReferencesIntoActions(
           ruleAlertIdKey,
           legacyRawActions,
