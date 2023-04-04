@@ -179,7 +179,7 @@ describe('ModelVersionObserver', () => {
     );
 
     const observer = createTestModelVersionObserver({ client, logger, pollInterval: 500 });
-    const sub = observer.modelVersionMap$.subscribe();
+    const sub = observer.modelVersionMap$.subscribe({ error: jest.fn() });
 
     await tickOnce(10_000);
     sub.unsubscribe(); // let's say we unsubbed.
@@ -246,5 +246,10 @@ describe('ModelVersionObserver', () => {
     await expect(observer.getCurrentModelVersionMap()).resolves.toEqual({});
     await tickOnce(1000); // Ensure that we are not polling
     expect(client.indices.get).toHaveBeenCalledTimes(2);
+
+    (client.indices.get as jest.Mock).mockRejectedValueOnce(
+      new errors.ResponseError({ statusCode: 400, meta: {} as any, warnings: [] })
+    );
+    await expect(observer.getCurrentModelVersionMap()).rejects.toThrowError(errors.ResponseError);
   });
 });

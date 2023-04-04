@@ -82,6 +82,7 @@ export class ModelVersionObserver {
     return ModelVersionObserver.instance;
   }
 
+  private readonly observable$: Rx.Observable<ModelVersionMap>;
   public readonly modelVersionMap$: Rx.Observable<ModelVersionMap>;
 
   protected constructor(
@@ -90,10 +91,12 @@ export class ModelVersionObserver {
     private readonly pollInterval: number = POLL_INTERVAL_MS
   ) {
     const observable = new Rx.Observable<ModelVersionMap>(this.producer.bind(this));
-    this.modelVersionMap$ = observable.pipe(
+    this.observable$ = observable.pipe(
       Rx.distinctUntilChanged(deepEqual),
       Rx.shareReplay({ bufferSize: 1, refCount: true })
     );
+    // Drop errors for the public observables
+    this.modelVersionMap$ = this.observable$.pipe(Rx.catchError(() => Rx.EMPTY));
   }
 
   /**
@@ -120,6 +123,7 @@ export class ModelVersionObserver {
           subscriber.next(modelVersionMap);
         } catch (e) {
           this.logger.error(`Failed to fetch model version map: ${e}`);
+          subscriber.error(e);
         }
         await new Promise((resolve) => setTimeout(resolve, this.pollInterval));
       }
@@ -131,6 +135,6 @@ export class ModelVersionObserver {
   };
 
   public async getCurrentModelVersionMap(): Promise<ModelVersionMap> {
-    return await Rx.firstValueFrom(this.modelVersionMap$);
+    return await Rx.firstValueFrom(this.observable$);
   }
 }
