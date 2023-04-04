@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { fetchWithTimeout } from '../../lib/helpers/fetch_with_timeout';
 
-export interface ElasticAgentLatestVersion {
+export interface ElasticApmAgentLatestVersion {
   latest_version: string;
 }
 
@@ -25,7 +25,7 @@ interface AgentLatestVersionsResponse {
 
 type AgentLatestVersions = Record<
   AgentName,
-  ElasticAgentLatestVersion | OtelAgentLatestVersion
+  ElasticApmAgentLatestVersion | OtelAgentLatestVersion
 >;
 
 export const fetchAgentsLatestVersion = async (
@@ -41,8 +41,8 @@ export const fetchAgentsLatestVersion = async (
 
     return { data };
   } catch (error) {
-    const timedOut = error.name === 'AbortError';
-    const message = timedOut
+    const didTimeout = error.name === 'AbortError';
+    const message = didTimeout
       ? 'Failed to retrieve latest APM Agent versions due to a timeout'
       : `Failed to retrieve latest APM Agent versions due to ${error}`;
     logger.warn(message);

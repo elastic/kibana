@@ -30,7 +30,7 @@ export function AgentLatestVersion({
         'xpack.apm.agentExplorer.agentLatestVersion.airGappedMessage',
         {
           defaultMessage:
-            'The latest {agentName} agent version could not be fetched from the repository. Please contact your administrator to check the server logs.',
+            'The latest version of {agentName} could not be fetched from the repository. Please contact your administrator to check the server logs.',
           values: { agentName },
         }
       )}

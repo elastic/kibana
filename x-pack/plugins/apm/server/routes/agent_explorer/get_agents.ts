@@ -12,7 +12,7 @@ import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import {
-  ElasticAgentLatestVersion,
+  ElasticApmAgentLatestVersion,
   fetchAgentsLatestVersion,
   OtelAgentLatestVersion,
 } from './fetch_agents_latest_version';
@@ -94,7 +94,7 @@ export async function getAgents({
     items: items.map((item) => {
       const { agentTelemetryAutoVersion, ...rest } = item;
 
-      const agentDocsPageUrl = getAgentDocsPageUrl(item.agentName as AgentName);
+      const agentDocsPageUrl = getAgentDocsPageUrl(item.agentName);
 
       if (isOpenTelemetryAgentName(item.agentName)) {
         return {
@@ -103,9 +103,7 @@ export async function getAgents({
           agentDocsPageUrl,
           latestVersion: getOtelLatestAgentVersion(
             agentTelemetryAutoVersion,
-            latestVersionsData[
-              item.agentName as AgentName
-            ] as OtelAgentLatestVersion
+            latestVersionsData[item.agentName] as OtelAgentLatestVersion
           ),
         };
       }
@@ -114,9 +112,7 @@ export async function getAgents({
         ...rest,
         agentDocsPageUrl,
         latestVersion: (
-          latestVersionsData[
-            item.agentName as AgentName
-          ] as ElasticAgentLatestVersion
+          latestVersionsData[item.agentName] as ElasticApmAgentLatestVersion
         )?.latest_version,
       };
     }),
