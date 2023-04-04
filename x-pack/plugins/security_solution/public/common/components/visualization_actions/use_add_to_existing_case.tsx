@@ -44,7 +44,7 @@ export const useAddToExistingCase = ({
     if (onAddToCaseClicked) {
       onAddToCaseClicked();
     }
-    selectCaseModal.open({ attachments });
+    selectCaseModal.open({ getAttachments: () => attachments });
   }, [attachments, onAddToCaseClicked, selectCaseModal]);
 
   return {
