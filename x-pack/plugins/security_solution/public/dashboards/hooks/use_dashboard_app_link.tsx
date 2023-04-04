@@ -10,7 +10,7 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { useMemo } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
-import { useAppUrl } from '../../common/lib/kibana';
+import { useNavigation } from '../../common/lib/kibana';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
@@ -34,7 +34,7 @@ export const useDashboardAppLink = ({
   uiSettings,
   savedObjectId,
 }: UseDashboardAppLinkProps) => {
-  const { getAppUrl } = useAppUrl();
+  const { navigateTo, getAppUrl } = useNavigation();
   const useHash = uiSettings.get('state:storeInSessionStorage');
 
   let editDashboardUrl = useMemo(
@@ -56,5 +56,16 @@ export const useDashboardAppLink = ({
     { useHash, storeInHashQuery: true },
     editDashboardUrl
   );
-  return editDashboardUrl;
+
+  const editDashboardLinkProps = useMemo(
+    () => ({
+      onClick: (ev: React.MouseEvent<HTMLButtonElement>) => {
+        ev.preventDefault();
+        navigateTo({ url: editDashboardUrl });
+      },
+      href: editDashboardUrl,
+    }),
+    [editDashboardUrl, navigateTo]
+  );
+  return editDashboardLinkProps;
 };

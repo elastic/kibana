@@ -7,10 +7,10 @@
 
 import React from 'react';
 import type { Query, Filter } from '@kbn/es-query';
+import { EuiButton } from '@elastic/eui';
 import { useDashboardAppLink } from '../hooks/use_dashboard_app_link';
 import { EDIT_DASHBOARD_BUTTON_TITLE } from '../pages/details/translations';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
-import { LinkButton } from '../../common/components/links';
+import { useKibana } from '../../common/lib/kibana';
 
 export interface EditDashboardButtonComponentProps {
   dashboardExists: boolean;
@@ -38,7 +38,7 @@ const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> 
     services: { uiSettings },
   } = useKibana();
 
-  const editDashboardUrl = useDashboardAppLink({
+  const { onClick } = useDashboardAppLink({
     query,
     filters,
     timeRange,
@@ -47,15 +47,15 @@ const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> 
   });
 
   return showWriteControls && dashboardExists ? (
-    <LinkButton
+    <EuiButton
       color="primary"
       fill
       iconType="pencil"
-      href={editDashboardUrl}
+      onClick={onClick}
       data-test-subj="dashboardEditButton"
     >
       {EDIT_DASHBOARD_BUTTON_TITLE}
-    </LinkButton>
+    </EuiButton>
   ) : null;
 };
 
