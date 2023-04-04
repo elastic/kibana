@@ -76,6 +76,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await renderService.waitForRender(2);
       // There should be 0 error embeddables on the dashboard
       await PageObjects.dashboard.verifyNoRenderErrors();
+
+      // logstash_dashboardwithfilters
+      await PageObjects.dashboard.loadSavedDashboard('logstash_dashboardwithfilters');
+      await PageObjects.dashboard.expectOnDashboard('logstash_dashboardwithfilters');
+
+      // count of panels rendered completely
+      await renderService.waitForRender(20);
+      // There should be 0 error embeddables on the dashboard
+      await PageObjects.dashboard.verifyNoRenderErrors();
     });
 
     it('should be able to import alerts and actions saved objects from 7.14 into 8.0.0', async function () {
