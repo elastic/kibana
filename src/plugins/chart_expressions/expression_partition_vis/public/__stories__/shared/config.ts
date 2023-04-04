@@ -9,12 +9,12 @@ import { Position } from '@elastic/charts';
 import {
   LabelPositions,
   LegendDisplay,
-  RenderValue,
+  PartitionChartProps,
   PartitionVisParams,
   ValueFormats,
 } from '../../../common/types';
 
-export const config: RenderValue['visConfig'] = {
+export const config: PartitionChartProps['visConfig'] = {
   addTooltip: true,
   legendDisplay: LegendDisplay.HIDE,
   metricsToLabels: { percent_uptime: 'percent_uptime' },
