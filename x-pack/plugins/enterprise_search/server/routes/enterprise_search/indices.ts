@@ -402,6 +402,7 @@ export function registerIndexRoutes({
             schema.object({
               description: schema.maybe(schema.string()),
               processors: schema.arrayOf(schema.any()),
+              version: schema.number(),
             })
           ),
           pipeline_name: schema.string(),
