@@ -14,7 +14,7 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 
-import type { FilesSetup } from '@kbn/files-plugin/server';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
@@ -59,6 +59,7 @@ import { UserProfileService } from './services';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
+import type { ConfigType } from './config';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -74,6 +75,7 @@ export interface PluginsSetup {
 export interface PluginsStart {
   actions: ActionsPluginStart;
   features: FeaturesPluginStart;
+  files: FilesStart;
   licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   security: SecurityPluginStart;
@@ -83,6 +85,7 @@ export interface PluginsStart {
 }
 
 export class CasePlugin {
+  private readonly caseConfig: ConfigType;
   private readonly logger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private clientFactory: CasesClientFactory;
@@ -93,6 +96,7 @@ export class CasePlugin {
   private userProfileService: UserProfileService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.caseConfig = initializerContext.config.get<ConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.logger = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.logger);
@@ -109,7 +113,7 @@ export class CasePlugin {
     );
 
     registerInternalAttachments(this.externalReferenceAttachmentTypeRegistry);
-    registerCaseFileKinds(plugins.files);
+    registerCaseFileKinds(this.caseConfig.files, plugins.files);
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -212,6 +216,7 @@ export class CasePlugin {
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
+      filesPluginStart: plugins.files,
     });
 
     const client = core.elasticsearch.client;

@@ -17,7 +17,7 @@ import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { CollapseFunction } from '../../../common/expressions';
-import type { LayerType } from '../../../common';
+import type { LayerType } from '../../../common/types';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
@@ -61,6 +61,7 @@ export interface MetricVisualizationState {
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   color?: string;
+  icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
 
