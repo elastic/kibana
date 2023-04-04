@@ -113,6 +113,7 @@ const RulesPageComponent: React.FC = () => {
       <RulesTableContextProvider>
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
+            {/* */}
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
                 <LoadPrePackagedRules>
@@ -153,6 +154,7 @@ const RulesPageComponent: React.FC = () => {
                 </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
+          {/*  */}
           </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
             prePackagedTimelineStatus === 'timelineNeedUpdate') && (

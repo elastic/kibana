@@ -43,7 +43,7 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Rule Management',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate(
@@ -595,19 +595,7 @@ export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
   }
 );
 
-export const RULES_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules',
-  {
-    defaultMessage: 'Rules',
-  }
-);
 
-export const MONITORING_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
-  {
-    defaultMessage: 'Rule Monitoring',
-  }
-);
 
 export const ENABLED_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',

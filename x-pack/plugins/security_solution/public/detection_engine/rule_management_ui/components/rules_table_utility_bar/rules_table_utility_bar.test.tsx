@@ -11,8 +11,8 @@ import { waitFor } from '@testing-library/react';
 
 import { getShowingRulesParams, RulesTableUtilityBar } from './rules_table_utility_bar';
 import { TestProviders } from '../../../../common/mock';
-import { useRulesTableContextMock } from './rules_table/__mocks__/rules_table_context';
-import { useRulesTableContext } from './rules_table/rules_table_context';
+import { useRulesTableContextMock } from '../rules_table/rules_table/__mocks__/rules_table_context';
+import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
 
 jest.mock('./rules_table/rules_table_context');
 

@@ -8,13 +8,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { toggleSelectedGroup } from '../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
-import { caseInsensitiveSort } from '../helpers';
+import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { toggleSelectedGroup } from '../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
+import { caseInsensitiveSort } from '../rules_table/helpers';
 
 const TAGS_POPOVER_WIDTH = 274;
 
-interface TagsFilterPopoverProps {
+export interface TagsFilterPopoverProps {
   selectedTags: string[];
   tags: string[];
   onSelectedTagsChanged: (newTags: string[]) => void;

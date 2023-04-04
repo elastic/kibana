@@ -30,7 +30,7 @@ import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { AllRulesTabs } from './rules_table_toolbar';
-import { RulesTableUtilityBar } from './rules_table_utility_bar';
+import { RulesTableUtilityBar } from '../rules_table_utility_bar/rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
@@ -221,13 +221,39 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
-  const tableProps =
-    selectedTab === AllRulesTabs.management
-      ? {
-          'data-test-subj': 'rules-management-table',
-          columns: rulesColumns,
-        }
-      : { 'data-test-subj': 'rules-monitoring-table', columns: monitoringColumns };
+  let tableProps;
+  switch (selectedTab) {
+    case AllRulesTabs.installed:
+      tableProps = {
+        'data-test-subj': 'rules-management-table',
+        columns: rulesColumns,
+      }
+      break;
+    case AllRulesTabs.monitoring:
+      tableProps = {
+        'data-test-subj': 'rules-monitoring-table',
+        columns: monitoringColumns
+      }
+      break;
+    case AllRulesTabs.updates:
+      tableProps = {
+        'data-test-subj': 'rules-updates-table',
+        columns: rulesColumns,
+      }
+      break;
+    case AllRulesTabs.addRules:
+      tableProps = {
+        'data-test-subj': 'rules-new-table',
+        columns: rulesColumns,
+      }
+      break;
+    default:
+    tableProps = {
+        'data-test-subj': 'rules-management-table',
+        columns: rulesColumns,
+      }
+      break;
+  }
 
   const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;

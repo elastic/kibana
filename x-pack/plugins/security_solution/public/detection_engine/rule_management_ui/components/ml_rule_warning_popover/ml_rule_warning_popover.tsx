@@ -17,7 +17,7 @@ import {
 
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
-import * as i18n from './translations';
+import * as i18n from '../rules_table/translations';
 
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -31,7 +31,7 @@ import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 
 const POPOVER_WIDTH = '340px';
 
-interface MlRuleWarningPopoverComponentProps {
+export interface MlRuleWarningPopoverComponentProps {
   rule: Rule;
   loadingJobs: boolean;
   jobs: SecurityJob[];

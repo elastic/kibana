@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { TagsFilterPopover } from './tags_filter_popover';
+import { TagsFilterPopover } from './tags_filter';
 
 describe('TagsFilterPopover', () => {
   it('renders correctly', () => {

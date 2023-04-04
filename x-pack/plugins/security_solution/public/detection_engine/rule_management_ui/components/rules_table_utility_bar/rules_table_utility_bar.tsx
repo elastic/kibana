@@ -25,7 +25,7 @@ import {
 } from '../../../../common/components/utility_bar';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useRulesTableContext } from './rules_table/rules_table_context';
+import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
 import type { PaginationOptions } from '../../../rule_management/logic/types';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -37,7 +37,7 @@ export const getShowingRulesParams = ({ page, perPage, total: totalRules }: Pagi
   return [firstInPage, lastInPage, totalRules] as const;
 };
 
-interface RulesTableUtilityBarProps {
+export interface RulesTableUtilityBarProps {
   canBulkEdit: boolean;
   onGetBulkItemsPopoverContent?: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
   onToggleSelectAll: () => void;
