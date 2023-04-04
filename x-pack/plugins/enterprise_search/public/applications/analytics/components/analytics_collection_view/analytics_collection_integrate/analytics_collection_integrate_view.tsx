@@ -29,15 +29,23 @@ interface AnalyticsCollectionIntegrateProps {
 
 export type TabKey = 'javascriptEmbed' | 'searchuiEmbed' | 'javascriptClientEmbed';
 
+export interface AnalyticsConfig {
+  apiKey: string;
+  collectionName: string;
+  endpoint: string;
+}
+
 export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionIntegrateProps> = ({
   analyticsCollection,
 }) => {
   const [selectedTab, setSelectedTab] = React.useState<TabKey>('javascriptEmbed');
 
-  const analyticsDNSUrl = getEnterpriseSearchUrl(
-    `/api/analytics/collections/${analyticsCollection?.name}`
-  );
-  const webClientSrc = getEnterpriseSearchUrl('/analytics.js');
+  const analyticsConfig: AnalyticsConfig = {
+    apiKey: '########',
+    collectionName: analyticsCollection?.name,
+    endpoint: getEnterpriseSearchUrl(),
+  };
+  const webClientSrc = `https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2/dist/umd/index.global.js`;
 
   const tabs: Array<{
     key: TabKey;
@@ -73,8 +81,8 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
   ];
 
   const steps: Record<TabKey, EuiContainedStepProps[]> = {
-    javascriptClientEmbed: javascriptClientEmbedSteps(analyticsDNSUrl),
-    javascriptEmbed: javascriptEmbedSteps(webClientSrc, analyticsDNSUrl),
+    javascriptClientEmbed: javascriptClientEmbedSteps(analyticsConfig),
+    javascriptEmbed: javascriptEmbedSteps(webClientSrc, analyticsConfig),
     searchuiEmbed: searchUIEmbedSteps(setSelectedTab),
   };
 

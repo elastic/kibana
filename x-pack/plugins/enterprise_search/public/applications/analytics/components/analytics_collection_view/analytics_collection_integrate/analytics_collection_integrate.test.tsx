@@ -17,6 +17,10 @@ import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
 import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate_view';
 
+jest.mock('../../../../shared/enterprise_search_url', () => ({
+  getEnterpriseSearchUrl: () => 'http://localhost:3002',
+}));
+
 describe('AnalyticsCollectionIntegrate', () => {
   const analyticsCollections: AnalyticsCollection = {
     events_datastream: 'analytics-events-example',
@@ -38,15 +42,21 @@ describe('AnalyticsCollectionIntegrate', () => {
     expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock)).toHaveLength(5);
   });
 
-  it('check value of analyticsDNSUrl & webClientSrc', () => {
+  it('check value of config & webClientSrc', () => {
     const wrapper = shallow(
       <AnalyticsCollectionIntegrateView analyticsCollection={analyticsCollections} />
     );
     expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(0).dive().text()).toContain(
-      'data-dsn="/api/analytics/collections/example"'
+      'https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2/dist/umd/index.global.js'
     );
-    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(0).dive().text()).toContain(
-      'src="/analytics.js"'
-    );
+
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(1).dive().text())
+      .toMatchInlineSnapshot(`
+      "<script type=\\"text/javascript\\">window.elasticAnalytics.createTracker({
+        endpoint: \\"http://localhost:3002\\",
+        collectionName: \\"example\\",
+        apiKey: \\"########\\"
+      });</script>"
+    `);
   });
 });

@@ -11403,7 +11403,6 @@
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchui.stepTwo.importDescription": "然后将行为分析插件导入到您的应用。",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchui.stepTwo.setupDescription": "最后，将插件添加到搜索 UI 配置。根据您嵌入行为分析的方式，您可能需要传入客户端。以下示例说明如何在使用 Javascript 客户端时传入客户端。",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchuiEmbed.stepOne.title": "嵌入行为分析",
-    "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchuiEmbed.stepThree.title": "跟踪单个事件",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchuiEmbed.stepTwo.title": "安装搜索 UI 行为分析插件",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchuiEmbed.title": "搜索 UI",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.settingsTab.delete.buttonTitle": "删除此集合",

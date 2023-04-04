@@ -13,8 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../shared/doc_links';
+import { AnalyticsConfig } from './analytics_collection_integrate_view';
 
-export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: string) => [
+export const javascriptEmbedSteps = (webClientSrc: string, analyticsConfig: AnalyticsConfig) => [
   {
     title: i18n.translate(
       'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptEmbed.stepOne.title',
@@ -35,7 +36,7 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
             )}
           </p>
           <EuiCodeBlock language="html" isCopyable>
-            {`<script src="${webClientSrc}" data-dsn="${analyticsDNSUrl}"></script>`}
+            {`<script src="${webClientSrc}"></script>`}
           </EuiCodeBlock>
         </EuiText>
       </>
@@ -61,7 +62,11 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
             )}
           </p>
           <EuiCodeBlock language="html" isCopyable>
-            {'<script type="text/javascript">window.elasticAnalytics.createTracker();</script>'}
+            {`<script type="text/javascript">window.elasticAnalytics.createTracker({
+  endpoint: "${analyticsConfig.endpoint}",
+  collectionName: "${analyticsConfig.collectionName}",
+  apiKey: "${analyticsConfig.apiKey}"
+});</script>`}
           </EuiCodeBlock>
         </EuiText>
       </>
@@ -69,9 +74,9 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
   },
   {
     title: i18n.translate(
-      'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchuiEmbed.stepThree.title',
+      'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptEmbed.stepThree.title',
       {
-        defaultMessage: 'Track individual events',
+        defaultMessage: 'Track search events',
       }
     ),
     children: (
@@ -80,7 +85,7 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptEmbed.stepThree.description"
-              defaultMessage="Track individual events, like clicks, by calling the trackEvent method. {link}"
+              defaultMessage="Track individual search events, like result clicks and searches, by using the trackSearch or trackSearchClick methods. {link}"
               values={{
                 link: (
                   <EuiLink
@@ -102,11 +107,36 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
             />
           </p>
           <EuiCodeBlock language="javascript" isCopyable>
-            {`window.elasticAnalytics.trackEvent("click", {
-  category: "product",
-  action: "add_to_cart",
-  label: "product_id",
-  value: "123"
+            {`window.elasticAnalytics.trackSearch({
+  search: {
+    query: "laptop",
+    filters: [
+      { field: "brand", value: ["apple"] },
+      { field: "price", value: ["1000-2000"] },
+    ],
+    page: {
+      current: 1,
+      size: 10,
+    },
+    results: {
+      items: [
+        {
+          document: {
+            id: "123",
+            index: "products",
+          },
+          page: {
+            url: "http://my-website.com/products/123",
+          },
+        },
+      ],
+      total_results: 100,
+    },
+    sort: {
+      name: "relevance",
+    },
+    search_application: "website",
+  }
 });`}
           </EuiCodeBlock>
         </EuiText>
