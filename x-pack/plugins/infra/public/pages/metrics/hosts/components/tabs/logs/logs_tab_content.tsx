@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
 import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
@@ -24,8 +23,6 @@ export const LogsTabContent = () => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
   const { hostNodes, loading } = useHostsViewContext();
-  const { services } = useKibanaContextForPlugin();
-  const { telemetry } = services;
 
   const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
 
@@ -38,12 +35,6 @@ export const LogsTabContent = () => {
 
     return filterQuery.query || hostsFilterQueryParam;
   }, [filterQuery.query, hostNodes]);
-
-  useEffect(() => {
-    telemetry.reportHostsViewLogsQuerySubmitted({
-      query: filterQuery.query,
-    });
-  }, [filterQuery.query, hostNodes, telemetry]);
 
   if (loading) {
     return (
