@@ -23,12 +23,7 @@ export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
-  onAddFilter?: (
-    field: DataViewField | string,
-    value: unknown,
-    type: '+' | '-',
-    title?: string
-  ) => void;
+  onAddFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void;
   onClose: () => void;
 }
 

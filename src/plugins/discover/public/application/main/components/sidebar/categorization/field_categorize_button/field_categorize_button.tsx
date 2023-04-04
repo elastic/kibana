@@ -25,12 +25,7 @@ export interface FieldCategorizeButtonProps {
   buttonProps?: Partial<EuiButtonProps>;
   wrapInContainer?: (element: React.ReactElement) => React.ReactElement;
   closePopover?: () => void;
-  onAddDSLFilter?: (
-    field: DataViewField | string,
-    value: unknown,
-    type: '+' | '-',
-    title?: string
-  ) => void;
+  onAddDSLFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void;
 }
 
 export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React.memo(

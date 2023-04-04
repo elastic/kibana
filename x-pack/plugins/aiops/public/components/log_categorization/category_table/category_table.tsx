@@ -48,12 +48,7 @@ interface Props {
   setPinnedCategory: (category: Category | null) => void;
   selectedCategory: Category | null;
   setSelectedCategory: (category: Category | null) => void;
-  onAddFilter?: (
-    field: DataViewField | string,
-    value: unknown,
-    type: '+' | '-',
-    title?: string
-  ) => void;
+  onAddFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void;
   onClose?: () => void;
   enableRowActions?: boolean;
 }
@@ -90,7 +85,6 @@ export const CategoryTable: FC<Props> = ({
       onAddFilter(
         selectedField,
         createFilter('', selectedField.name, selectedCategories, mode, category),
-        '+',
         `Categories - ${selectedField.name}`
       );
       onClose();

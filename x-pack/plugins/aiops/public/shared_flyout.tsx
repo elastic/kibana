@@ -28,12 +28,7 @@ export async function showCategorizeFlyout(
   dataView: DataView,
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
-  onAddFilter?: (
-    field: DataViewField | string,
-    value: unknown,
-    type: '+' | '-',
-    title?: string
-  ) => void
+  onAddFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void
 ): Promise<void> {
   const { http, theme, overlays, application, notifications, uiSettings } = coreStart;
 

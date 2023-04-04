@@ -17,12 +17,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldPopoverHeaderProps {
   field: DataViewField;
-  dataView?: DataView;
   closePopover: EuiPopoverProps['closePopover'];
   buttonAddFieldToWorkspaceProps?: Partial<EuiButtonIconProps>;
   buttonAddFilterProps?: Partial<EuiButtonIconProps>;
@@ -30,10 +29,8 @@ export interface FieldPopoverHeaderProps {
   buttonDeleteFieldProps?: Partial<EuiButtonIconProps>;
   onAddFieldToWorkspace?: (field: DataViewField) => unknown;
   onAddFilter?: AddFieldFilterHandler;
-  onAddDSLFilter?: AddFieldFilterHandler;
   onEditField?: (fieldName: string) => unknown;
   onDeleteField?: (fieldName: string) => unknown;
-  onCategorizeField?: (fieldName: string) => unknown;
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({

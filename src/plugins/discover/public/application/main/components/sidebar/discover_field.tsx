@@ -231,7 +231,7 @@ export interface DiscoverFieldProps {
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
-  onAddDSLFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
+  onAddDSLFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void;
   /**
    * Callback to remove a field column from the table
    * @param fieldName
@@ -474,7 +474,6 @@ function DiscoverFieldComponent({
           closePopover={closePopover}
           onAddFieldToWorkspace={!selected ? toggleDisplay : undefined}
           onAddFilter={onAddFilter}
-          onAddDSLFilter={onAddDSLFilter}
           onEditField={onEditField}
           onDeleteField={onDeleteField}
           {...customPopoverHeaderProps}

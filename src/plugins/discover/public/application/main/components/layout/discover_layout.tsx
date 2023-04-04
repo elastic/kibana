@@ -157,7 +157,7 @@ export function DiscoverLayout({
   );
 
   const onAddDSLFilter = useCallback(
-    (field: DataViewField | string, values: unknown, operation: '+' | '-', alias?: string) => {
+    (field: DataViewField | string, values: unknown, alias?: string) => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(dataView, fieldName, dataViews, capabilities);
       const filter = buildEmptyFilter(false, dataView.id);

@@ -34,12 +34,7 @@ export function triggerCategorizeActions(
   contextualFields: string[] = [],
   originatingApp: string,
   dataView?: DataView,
-  onAddDSLFilter?: (
-    field: DataViewField | string,
-    value: unknown,
-    type: '+' | '-',
-    title?: string
-  ) => void
+  onAddDSLFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void
 ) {
   if (!dataView) return;
   const triggerOptions: CategorizeFieldContext = {
