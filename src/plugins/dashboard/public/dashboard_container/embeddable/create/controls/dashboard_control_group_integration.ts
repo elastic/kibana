@@ -145,8 +145,8 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
         )
       )
       .subscribe(({ timeslice }) => {
-        if (!_.isEqual(timeslice, this.getInputAsValueType().timeslice)) {
-          this.updateInput({ timeslice });
+        if (!isEqual(timeslice, this.getInput().timeslice)) {
+          this.dispatch.setTimeslice(timeslice);
         }
       })
   );
