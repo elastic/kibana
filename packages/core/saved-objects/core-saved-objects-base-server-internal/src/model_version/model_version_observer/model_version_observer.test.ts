@@ -59,6 +59,17 @@ describe('ModelVersionObserver', () => {
   });
 
   it('continues polling at interval and broadcasts to all subscribers', async () => {
+    (client.indices.get as jest.Mock)
+      .mockResolvedValueOnce({
+        a: { mappings: { _meta: { mappingVersions: { a: '1' } } } },
+      })
+      .mockResolvedValueOnce({
+        a: { mappings: { _meta: { mappingVersions: { a: '2' } } } },
+      })
+      .mockResolvedValueOnce({
+        a: { mappings: { _meta: { mappingVersions: { a: '3' } } } },
+      });
+
     const observer = createTestModelVersionObserver({ client, logger, pollInterval: 500 });
     // Does not eagerly call
     expect(client.indices.get).not.toHaveBeenCalled();
@@ -85,6 +96,30 @@ describe('ModelVersionObserver', () => {
 
     sub2.unsubscribe();
     await flushPromises();
+  });
+
+  it('only emits distinct model version maps', async () => {
+    (client.indices.get as jest.Mock).mockResolvedValue({
+      a: { mappings: { _meta: { mappingVersions: { a: '1' } } } },
+    });
+
+    const observer = createTestModelVersionObserver({ client, logger, pollInterval: 500 });
+    const next = jest.fn();
+    const sub = observer.modelVersionMap$.subscribe({ next });
+
+    await tickOnce();
+    expect(client.indices.get).toHaveBeenCalledTimes(1);
+    expect(next).toHaveBeenCalledTimes(1);
+
+    await tickOnce();
+    expect(client.indices.get).toHaveBeenCalledTimes(2);
+    expect(next).toHaveBeenCalledTimes(1);
+
+    await tickOnce();
+    expect(client.indices.get).toHaveBeenCalledTimes(3);
+    expect(next).toHaveBeenCalledTimes(1);
+
+    sub.unsubscribe();
   });
 
   it('stops polling when no-one is subscribed', async () => {
