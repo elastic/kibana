@@ -292,8 +292,3 @@ export const assertRuleScheduleValues = ({ interval, lookback }: RuleSchedule) =
     cy.get('dd').eq(1).should('contain.text', lookback);
   });
 };
-
-export const pickActionFrequency = (frequency: string) => {
-  // TODO: [Frequency Integration]
-  // cy.get(RULES_BULK_EDIT_ACTIONS_THROTTLE_INPUT).select(frequency);
-};

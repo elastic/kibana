@@ -245,6 +245,7 @@ export const ActionNotifyWhen = ({
         onClick={() => selectSummaryOption(true)}
         icon={frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-summary"
+        data-test-subj="actionNotifyWhen-option-summary"
       >
         {SUMMARY_OF_ALERTS}
       </SummaryContextMenuOption>,
@@ -254,6 +255,7 @@ export const ActionNotifyWhen = ({
         onClick={() => selectSummaryOption(false)}
         icon={!frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-for_each"
+        data-test-subj="actionNotifyWhen-option-for_each"
       >
         {FOR_EACH_ALERT}
       </SummaryContextMenuOption>,

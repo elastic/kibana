@@ -16,8 +16,3 @@ export const goBackToRuleDetails = () => {
   cy.get(BACK_TO_RULE_DETAILS).should('exist').click();
   cy.get(BACK_TO_RULE_DETAILS).should('not.exist');
 };
-
-export const assertSelectedActionFrequency = (frequency: string) => {
-  // TODO: [Frequency Integration]
-  // cy.get(ACTIONS_THROTTLE_INPUT).find('option:selected').should('have.text', frequency);
-};

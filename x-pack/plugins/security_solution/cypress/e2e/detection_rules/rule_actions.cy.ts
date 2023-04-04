@@ -43,7 +43,7 @@ describe('Rule actions during detection rule creation', () => {
   });
 
   const rule = getSimpleCustomQueryRule();
-  const actions = { throttle: 'rule', connectors: [indexConnector] };
+  const actions = { connectors: [indexConnector] };
   const index = actions.connectors[0].index;
   const initialNumberOfDocuments = 0;
   const expectedJson = JSON.parse(actions.connectors[0].document);

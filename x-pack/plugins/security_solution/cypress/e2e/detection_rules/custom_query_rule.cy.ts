@@ -20,6 +20,10 @@ import {
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
 import {
+  ACTIONS_NOTIFY_WHEN_BUTTON,
+  ACTIONS_SUMMARY_BUTTON,
+} from '../../screens/common/rule_actions';
+import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_BUTTON,
   CUSTOM_QUERY_INPUT,
@@ -401,6 +405,9 @@ describe('Custom query rules', () => {
         goToActionsStepTab();
 
         addEmailConnectorAndRuleAction('test@example.com', 'Subject');
+
+        cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'Summary of alerts');
+        cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Per rule run');
 
         goToAboutStepTab();
         cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
