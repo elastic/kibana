@@ -189,6 +189,7 @@ describe('migration v2', () => {
           namespaces: ['default'],
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '8.0.0',
+          managed: false,
         },
         {
           id: `foo:${newFooId}`,
@@ -199,6 +200,7 @@ describe('migration v2', () => {
           originId: '1',
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '8.0.0',
+          managed: false,
         },
         {
           // new object for spacex:foo:1
@@ -223,6 +225,7 @@ describe('migration v2', () => {
           namespaces: ['default'],
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '8.0.0',
+          managed: false,
         },
         {
           id: `bar:${newBarId}`,
@@ -233,6 +236,7 @@ describe('migration v2', () => {
           originId: '1',
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '8.0.0',
+          managed: false,
         },
         {
           // new object for spacex:bar:1
