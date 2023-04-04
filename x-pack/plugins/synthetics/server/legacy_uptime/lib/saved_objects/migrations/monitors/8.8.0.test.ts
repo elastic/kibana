@@ -354,7 +354,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
       }
     );
 
-    // handles
+    // handles invalid values stored in saved object
     it.each([
       [5, '5'],
       [4, '3'],
