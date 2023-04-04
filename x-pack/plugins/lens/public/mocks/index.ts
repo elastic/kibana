@@ -35,7 +35,9 @@ export const createMockFramePublicAPI = ({
   dateRange,
   dataViews,
   activeData,
-}: Partial<FramePublicAPI> = {}): FrameMock => ({
+}: Partial<Omit<FramePublicAPI, 'dataViews'>> & {
+  dataViews?: Partial<FramePublicAPI['dataViews']>;
+} = {}): FrameMock => ({
   datasourceLayers: datasourceLayers ?? {},
   dateRange: dateRange ?? {
     fromDate: '2022-03-17T08:25:00.000Z',

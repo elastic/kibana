@@ -7,45 +7,37 @@
 
 import expect from '@kbn/expect';
 
-import {
-  APP_ID as CASES_APP_ID,
-  constructFileKindIdByOwner,
-} from '@kbn/cases-plugin/common/constants';
-import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
-import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import { User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createFile,
-  deleteFiles,
   uploadFile,
   downloadFile,
   createAndUploadFile,
   listFiles,
   getFileById,
-  deleteAllFiles,
+  deleteAllFilesForKind,
+  deleteFileForFileKind,
 } from '../../../cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   casesAllUser,
-  casesNoDeleteUser,
   casesReadUser,
   obsCasesAllUser,
-  obsCasesNoDeleteUser,
   obsCasesReadUser,
-  secAllCasesNoDeleteUser,
   secAllUser,
   secReadCasesReadUser,
 } from './common/users';
+import {
+  CASES_FILE_KIND,
+  OBSERVABILITY_FILE_KIND,
+  SECURITY_SOLUTION_FILE_KIND,
+} from '../../../cases_api_integration/common/lib/constants';
 
 interface TestScenario {
   user: User;
   fileKind: string;
 }
-
-const SECURITY_SOLUTION_FILE_KIND = constructFileKindIdByOwner(SECURITY_SOLUTION_APP_ID);
-const OBSERVABILITY_FILE_KIND = constructFileKindIdByOwner(OBSERVABILITY_APP_ID);
-const CASES_FILE_KIND = constructFileKindIdByOwner(CASES_APP_ID);
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -67,11 +59,12 @@ export default ({ getService }: FtrProviderContext): void => {
       };
 
       const deleteFileFailure = async (scenario: TestScenario) => {
-        await deleteFiles({
+        await deleteFileForFileKind({
           supertest: supertestWithoutAuth,
           auth: { user: scenario.user, space: null },
-          files: [{ kind: scenario.fileKind, id: 'abc' }],
-          expectedHttpCode: 403,
+          fileKind: scenario.fileKind,
+          id: 'abc',
+          expectedHttpCode: 404,
         });
       };
 
@@ -120,11 +113,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       };
 
-      describe('user not authorized for a delete operation', () => {
+      describe('delete api does not exist', () => {
         const testScenarios: TestScenario[] = [
-          { user: secAllCasesNoDeleteUser, fileKind: SECURITY_SOLUTION_FILE_KIND },
-          { user: casesNoDeleteUser, fileKind: CASES_FILE_KIND },
-          { user: obsCasesNoDeleteUser, fileKind: OBSERVABILITY_FILE_KIND },
+          { user: secAllUser, fileKind: SECURITY_SOLUTION_FILE_KIND },
+          { user: casesAllUser, fileKind: CASES_FILE_KIND },
+          { user: obsCasesAllUser, fileKind: OBSERVABILITY_FILE_KIND },
         ];
 
         for (const scenario of testScenarios) {
@@ -225,7 +218,7 @@ export default ({ getService }: FtrProviderContext): void => {
             });
 
             afterEach(async () => {
-              await deleteAllFiles({
+              await deleteAllFilesForKind({
                 supertest,
                 kind: scenario.fileKind,
               });
@@ -265,27 +258,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         for (const scenario of testScenarios) {
           describe(`scenario user: ${scenario.user.username} fileKind: ${scenario.fileKind}`, () => {
-            it('should create and delete a file', async () => {
-              const createResult = await createFile({
-                supertest: supertestWithoutAuth,
-                auth: { user: scenario.user, space: null },
-                params: {
-                  kind: scenario.fileKind,
-                  name: 'testFile',
-                  mimeType: 'image/png',
-                },
-              });
-
-              await deleteFiles({
-                supertest: supertestWithoutAuth,
-                auth: { user: scenario.user, space: null },
-                files: [{ kind: scenario.fileKind, id: createResult.file.id }],
-              });
-            });
-
             describe('delete created file after test', () => {
               afterEach(async () => {
-                await deleteAllFiles({
+                await deleteAllFilesForKind({
                   supertest,
                   kind: scenario.fileKind,
                 });
