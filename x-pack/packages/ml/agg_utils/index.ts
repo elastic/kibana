@@ -32,3 +32,7 @@ export type {
   FieldValuePair,
 } from './src/types';
 export type { NumberValidationResult } from './src/validate_number';
+export {
+  TIME_SERIES_METRIC_TYPES,
+  isCounterTimeSeriesMetric,
+} from './src/time_series_metric_fields';
