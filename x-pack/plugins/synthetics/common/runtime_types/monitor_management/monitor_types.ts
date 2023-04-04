@@ -112,10 +112,15 @@ export const TCPSimpleFieldsCodec = t.intersection([
 export type TCPSimpleFields = t.TypeOf<typeof TCPSimpleFieldsCodec>;
 
 // TCPAdvancedFields
-export const TCPAdvancedFieldsCodec = t.interface({
-  [ConfigKey.PROXY_URL]: t.string,
-  [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: t.boolean,
-});
+export const TCPAdvancedFieldsCodec = t.intersection([
+  t.interface({
+    [ConfigKey.PROXY_URL]: t.string,
+    [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: t.boolean,
+  }),
+  t.partial({
+    [ConfigKey.MODE]: ModeCodec,
+  }),
+]);
 
 export const TCPSensitiveAdvancedFieldsCodec = t.interface({
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: t.string,
@@ -154,7 +159,16 @@ export const ICMPSimpleFieldsCodec = t.intersection([
 ]);
 
 export type ICMPSimpleFields = t.TypeOf<typeof ICMPSimpleFieldsCodec>;
-export type ICMPFields = t.TypeOf<typeof ICMPSimpleFieldsCodec>;
+
+// ICMPAdvancedFields
+export const ICMPAdvancedFieldsCodec = t.partial({
+  [ConfigKey.MODE]: ModeCodec,
+});
+
+// ICMPFields
+export const ICMPFieldsCodec = t.intersection([ICMPSimpleFieldsCodec, ICMPAdvancedFieldsCodec]);
+
+export type ICMPFields = t.TypeOf<typeof ICMPFieldsCodec>;
 
 // HTTPSimpleFields
 export const HTTPSimpleFieldsCodec = t.intersection([

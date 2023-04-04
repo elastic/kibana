@@ -161,6 +161,11 @@ export const DEFAULT_TCP_ADVANCED_FIELDS: TCPAdvancedFields = {
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: false,
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: '',
   [ConfigKey.REQUEST_SEND_CHECK]: '',
+  [ConfigKey.MODE]: Mode.ANY,
+};
+
+export const DEFAULT_ICMP_ADVANCED_FIELDS = {
+  [ConfigKey.MODE]: Mode.ANY,
 };
 
 export const DEFAULT_TLS_FIELDS: TLSFields = {
@@ -185,6 +190,7 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
   },
   [DataStream.ICMP]: {
     ...DEFAULT_ICMP_SIMPLE_FIELDS,
+    ...DEFAULT_ICMP_ADVANCED_FIELDS,
   },
   [DataStream.BROWSER]: {
     ...DEFAULT_BROWSER_SIMPLE_FIELDS,
