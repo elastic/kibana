@@ -472,6 +472,7 @@
         "name": "@timestamp",
         "type": "date",
         "aggregatable": true,
+        "counter": false,
         "aggIds": []
       },
       {
@@ -479,6 +480,7 @@
         "name": "airline",
         "type": "keyword",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "distinct_count",
           "high_distinct_count",
@@ -493,6 +495,7 @@
         "name": "responsetime",
         "type": "float",
         "aggregatable": true,
+        "counter": false,
         "aggIds": [
           "mean",
           "high_mean",
