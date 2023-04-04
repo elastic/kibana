@@ -104,7 +104,10 @@ describe('RPC -> delete()', () => {
     test('should validate that the response is an object', () => {
       let error = validate(
         {
-          success: true,
+          contentTypeId: 'foo',
+          result: {
+            success: true,
+          },
         },
         outputSchema
       );

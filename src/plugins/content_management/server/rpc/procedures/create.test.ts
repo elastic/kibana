@@ -108,7 +108,7 @@ describe('RPC -> create()', () => {
     test('should validate that the response is an object', () => {
       let error = validate(
         {
-          contentTypeId: '123',
+          contentTypeId: 'foo',
           result: {
             item: {
               any: 'object',
@@ -122,7 +122,7 @@ describe('RPC -> create()', () => {
 
       error = validate(
         {
-          contentTypeId: '123',
+          contentTypeId: 'foo',
           result: 123,
         },
         outputSchema

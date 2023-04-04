@@ -104,7 +104,7 @@ describe('RPC -> get()', () => {
     test('should validate that the response is an object', () => {
       let error = validate(
         {
-          contentTypeId: '123',
+          contentTypeId: 'foo',
           result: {
             item: {
               any: 'object',
