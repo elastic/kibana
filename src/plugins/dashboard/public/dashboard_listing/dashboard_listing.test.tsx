@@ -20,11 +20,15 @@ import { DashboardListing, DashboardListingProps } from './dashboard_listing';
  * in our tests because it is covered in its package.
  */
 import { TableListView } from '@kbn/content-management-table-list';
+// import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 jest.mock('@kbn/content-management-table-list', () => {
   const originalModule = jest.requireActual('@kbn/content-management-table-list');
   return {
     __esModule: true,
     ...originalModule,
+    TableListViewKibanaProvider: jest.fn().mockImplementation(({ children }) => {
+      return <>{children}</>;
+    }),
     TableListView: jest.fn().mockReturnValue(null),
   };
 });
