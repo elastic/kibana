@@ -10,9 +10,10 @@ import React from 'react';
 import { EuiCopy, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import { getTableItemAsKuery } from './get_table_item_as_kuery';
-import type { GroupTableItem, GroupTableItemAction } from './types';
+import type { GroupTableItem, TableItemAction } from './types';
 
 const copyToClipboardGroupMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardMessage',
@@ -21,20 +22,18 @@ const copyToClipboardGroupMessage = i18n.translate(
   }
 );
 
-export const useCopyToClipboardAction = (): GroupTableItemAction => {
-  return {
-    render: (tableItem: GroupTableItem) => (
+export const useCopyToClipboardAction = (): TableItemAction => ({
+  render: (tableItem: SignificantTerm | GroupTableItem) => (
+    <EuiToolTip content={copyToClipboardGroupMessage}>
       <EuiCopy textToCopy={getTableItemAsKuery(tableItem)}>
         {(copy) => (
-          <EuiToolTip content={copyToClipboardGroupMessage}>
-            <EuiButtonIcon
-              iconType="copyClipboard"
-              onClick={copy}
-              aria-label={copyToClipboardGroupMessage}
-            />
-          </EuiToolTip>
+          <EuiButtonIcon
+            iconType="copyClipboard"
+            onClick={copy}
+            aria-label={copyToClipboardGroupMessage}
+          />
         )}
       </EuiCopy>
-    ),
-  };
-};
+    </EuiToolTip>
+  ),
+});

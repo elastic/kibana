@@ -10,12 +10,13 @@ import React, { useMemo } from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { getTableItemAsKuery } from './get_table_item_as_kuery';
-import type { GroupTableItem, GroupTableItemAction } from './types';
+import type { GroupTableItem, TableItemAction } from './types';
 
 const viewInDiscoverMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.linksMenu.viewInDiscover',
@@ -24,7 +25,7 @@ const viewInDiscoverMessage = i18n.translate(
   }
 );
 
-export const useViewInDiscoverAction = (dataViewId?: string): GroupTableItemAction => {
+export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction => {
   const { application, share, data } = useAiopsAppContext();
 
   const discoverLocator = useMemo(
@@ -65,7 +66,7 @@ export const useViewInDiscoverAction = (dataViewId?: string): GroupTableItemActi
     }
   }, [application.capabilities.discover?.show, dataViewId, discoverLocator]);
 
-  const generateDiscoverUrl = async (groupTableItem: GroupTableItem) => {
+  const generateDiscoverUrl = async (groupTableItem: GroupTableItem | SignificantTerm) => {
     if (discoverLocator !== undefined) {
       const url = await discoverLocator.getRedirectUrl({
         indexPatternId: dataViewId,

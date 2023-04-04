@@ -21,12 +21,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { escapeKuery } from '@kbn/es-query';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
-import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { MiniHistogram } from '../mini_histogram';
 

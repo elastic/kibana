@@ -23,5 +23,6 @@ export interface GroupTableItem {
   histogram: SignificantTerm['histogram'];
 }
 
-export type GroupTableItemAction = EuiTableActionsColumnType<GroupTableItem>['actions'][number];
-export type TableItemAction = EuiTableActionsColumnType<SignificantTerm>['actions'][number];
+export type TableItemAction = EuiTableActionsColumnType<
+  SignificantTerm | GroupTableItem
+>['actions'][number];
