@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { Filter, Query } from '@kbn/es-query';
+import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
@@ -47,13 +47,16 @@ interface OwnProps {
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;
-  parentGroupingFilter?: Filter[];
+  parentGroupingFilter?: string;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   selectedGroup: string;
   signalIndexName: string | null;
   tableId: TableIdLiteral;
   to: string;
   runtimeMappings: MappingRuntimeFields;
+  additionalFilters?: Array<{
+    bool: BoolQuery;
+  }>;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -96,7 +99,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
             ...(defaultFilters ?? []),
             ...globalFilters,
             ...customFilters,
-            ...(parentGroupingFilter ?? []),
+            ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
             ...buildTimeRangeFilter(from, to),
           ],
           kqlQuery: globalQuery,
@@ -124,7 +127,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
           ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
           ...(defaultFilters ?? []),
-          ...(parentGroupingFilter ?? []),
+          ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
         ]),
       ];
     } catch (e) {

@@ -99,18 +99,25 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   }, [dispatch, groupSelector, groupSelectorInRedux, selectedGroups]);
 
   const getLevel = useCallback(
-    (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => {
+    (level: number, selectedGroup: string, parentGroupingFilter?: string) => {
       let rcc;
       if (level < selectedGroups.length - 1) {
         rcc = (groupingFilters: Filter[]) => {
-          return getLevel(level + 1, selectedGroups[level + 1], [
-            ...groupingFilters,
-            ...(parentGroupingFilter ?? []),
-          ]);
+          return getLevel(
+            level + 1,
+            selectedGroups[level + 1],
+            JSON.stringify([
+              ...groupingFilters,
+              ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
+            ])
+          );
         };
       } else {
         rcc = (groupingFilters: Filter[]) => {
-          return props.renderChildComponent([...groupingFilters, ...(parentGroupingFilter ?? [])]);
+          return props.renderChildComponent([
+            ...groupingFilters,
+            ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
+          ]);
         };
       }
       return (
