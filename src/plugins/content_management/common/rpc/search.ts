@@ -33,16 +33,19 @@ export const searchSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-  out: schema.object({
-    contentTypeId: schema.string(),
-    result: schema.object({
-      hits: schema.arrayOf(schema.any()),
-      pagination: schema.object({
-        total: schema.number(),
-        cursor: schema.maybe(schema.string()),
+  out: schema.object(
+    {
+      contentTypeId: schema.string(),
+      result: schema.object({
+        hits: schema.arrayOf(schema.any()),
+        pagination: schema.object({
+          total: schema.number(),
+          cursor: schema.maybe(schema.string()),
+        }),
       }),
-    }),
-  }),
+    },
+    { unknowns: 'forbid' }
+  ),
 };
 
 export interface SearchQuery {

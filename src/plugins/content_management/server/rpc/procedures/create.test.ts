@@ -110,7 +110,9 @@ describe('RPC -> create()', () => {
         {
           contentTypeId: '123',
           result: {
-            any: 'object',
+            item: {
+              any: 'object',
+            },
           },
         },
         outputSchema

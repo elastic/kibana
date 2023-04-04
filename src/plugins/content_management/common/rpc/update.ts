@@ -7,6 +7,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { Version } from '@kbn/object-versioning';
+import { itemResultSchema } from './common';
 import { versionSchema } from './constants';
 
 import type { ItemResult, ProcedureSchemas } from './types';
@@ -26,10 +27,9 @@ export const updateSchemas: ProcedureSchemas = {
   out: schema.object(
     {
       contentTypeId: schema.string(),
-      // --> "result" will be (optionally) specified by each storage layer
-      result: schema.object({}, { unknowns: 'allow' }),
+      result: itemResultSchema,
     },
-    { unknowns: 'allow' }
+    { unknowns: 'forbid' }
   ),
 };
 

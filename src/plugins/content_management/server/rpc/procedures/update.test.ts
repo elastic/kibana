@@ -117,7 +117,9 @@ describe('RPC -> update()', () => {
         {
           contentTypeId: '123',
           result: {
-            any: 'object',
+            item: {
+              any: 'object',
+            },
           },
         },
         outputSchema

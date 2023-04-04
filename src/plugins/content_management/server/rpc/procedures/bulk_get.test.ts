@@ -125,7 +125,9 @@ describe('RPC -> bulkGet()', () => {
             {
               contentTypeId: '123',
               result: {
-                any: 'object',
+                item: {
+                  any: 'object',
+                },
               },
             },
           ],

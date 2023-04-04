@@ -26,7 +26,7 @@ export const bulkGetSchemas: ProcedureSchemas = {
     {
       hits: schema.arrayOf(getResultSchema),
     },
-    { unknowns: 'allow' }
+    { unknowns: 'forbid' }
   ),
 };
 
