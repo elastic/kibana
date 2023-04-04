@@ -62,7 +62,6 @@ import {
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
-import { resolveServicesReady } from './services/plugin_services';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import type { FindDashboardsService } from './services/dashboard_saved_object/types';
@@ -114,6 +113,9 @@ export interface DashboardStart {
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
 }
+
+export let resolveServicesReady: () => void;
+export const servicesReady = new Promise<void>((resolve) => (resolveServicesReady = resolve));
 
 export class DashboardPlugin
   implements

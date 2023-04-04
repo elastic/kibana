@@ -86,9 +86,6 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
 
 export const pluginServices = new PluginServices<DashboardServices>();
 
-export let resolveServicesReady: () => void;
-export const servicesReady = new Promise<void>((resolve) => (resolveServicesReady = resolve));
-
 export const registry = new PluginServiceRegistry<DashboardServices, DashboardPluginServiceParams>(
   providers
 );

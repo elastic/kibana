@@ -8,7 +8,8 @@
 
 import React, { Suspense } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { servicesReady } from '../services/plugin_services';
+
+import { servicesReady } from '../plugin';
 import { DashboardListingProps } from './dashboard_listing';
 
 const ListingTableLoadingIndicator = () => {
