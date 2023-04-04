@@ -16,7 +16,7 @@ import {
 } from '../../common/mock';
 import { FileDownloadButtonIcon } from './file_download_button_icon';
 import { basicFileMock } from '../../containers/mock';
-import { constructFileKindIdByOwner } from '../../../common/constants';
+import { constructFileKindIdByOwner } from '../../../common/files';
 
 describe('FileDownloadButtonIcon', () => {
   let appMockRender: AppMockRenderer;

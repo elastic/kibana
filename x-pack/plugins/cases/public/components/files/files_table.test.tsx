@@ -11,7 +11,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { basicFileMock } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
 
-import { constructFileKindIdByOwner } from '../../../common/constants';
+import { constructFileKindIdByOwner } from '../../../common/files';
 import {
   createAppMockRenderer,
   mockedFilesClient,

@@ -13,7 +13,7 @@ import type { AppMockRenderer } from '../common/mock';
 import { mockedTestProvidersOwner, mockedFilesClient, createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 import { useGetCaseFiles } from './use_get_case_files';
-import { constructFileKindIdByOwner } from '../../common/constants/files';
+import { constructFileKindIdByOwner } from '../../common/files';
 
 jest.mock('../common/lib/kibana');
 

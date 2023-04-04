@@ -20,11 +20,11 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 
+import { constructFileKindIdByOwner } from '../../../common/files';
 import type { Owner } from '../../../common/constants/types';
 
 import { CommentType, ExternalReferenceStorageType } from '../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
-import { constructFileKindIdByOwner } from '../../../common/constants';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';

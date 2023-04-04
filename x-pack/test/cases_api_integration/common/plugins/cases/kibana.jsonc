@@ -8,8 +8,8 @@
     "browser": false,
     "requiredPlugins": [
       "features",
+      "cases",
       "files",
-      "cases"
     ],
     "optionalPlugins": [
       "security",

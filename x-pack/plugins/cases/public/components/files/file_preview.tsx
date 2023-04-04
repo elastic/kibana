@@ -14,7 +14,7 @@ import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import type { Owner } from '../../../common/constants/types';
 
-import { constructFileKindIdByOwner } from '../../../common/constants';
+import { constructFileKindIdByOwner } from '../../../common/files';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface FilePreviewProps {

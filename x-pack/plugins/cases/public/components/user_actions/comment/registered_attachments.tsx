@@ -20,13 +20,16 @@ import type {
   AttachmentType,
   AttachmentViewObject,
 } from '../../../client/attachment_framework/types';
+import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { CommentResponse } from '../../../../common/api';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
-
-import { UserActionTimestamp } from '../timestamp';
-import { ATTACHMENT_NOT_REGISTERED_ERROR, DEFAULT_EVENT_ATTACHMENT_TITLE } from './translations';
+import {
+  ATTACHMENT_NOT_REGISTERED_ERROR,
+  DEFAULT_EVENT_ATTACHMENT_TITLE,
+  DELETE_REGISTERED_ATTACHMENT,
+} from './translations';
 import { UserActionContentToolbar } from '../content_toolbar';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
@@ -133,7 +136,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
             {!attachmentViewObject.hideDefaultActions && (
               <RegisteredAttachmentsPropertyActions
                 isLoading={isLoading}
-                onDelete={() => handleDeleteComment(comment.id)}
+                onDelete={() => handleDeleteComment(comment.id, DELETE_REGISTERED_ATTACHMENT)}
               />
             )}
           </UserActionContentToolbar>

@@ -76,8 +76,8 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
   );
 
   const handleDeleteComment = useCallback(
-    (id: string) => {
-      deleteComment({ caseId, commentId: id });
+    (id: string, successToasterTitle: string) => {
+      deleteComment({ caseId, commentId: id, successToasterTitle });
     },
     [caseId, deleteComment]
   );

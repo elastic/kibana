@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import React, { createContext, useContext, useMemo } from 'react';
 import type { SearchHit } from '@kbn/es-types';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useTimelineEventsDetails } from '../../timelines/containers/details';
 import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
 import { useSpaceId } from '../../common/hooks/use_space_id';
@@ -34,6 +35,10 @@ export interface RightPanelContext {
    */
   browserFields: BrowserFields | null;
   /**
+   * An object with top level fields from the ECS object
+   */
+  dataAsNestedObject: Ecs | null;
+  /**
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
@@ -42,7 +47,7 @@ export interface RightPanelContext {
    */
   searchHit: SearchHit<object> | undefined;
   /**
-   *
+   * Retrieves searchHit values for the provided field
    */
   getFieldsData: (field: string) => unknown | unknown[];
 }
@@ -65,12 +70,13 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, dataFormattedForFieldBrowser, searchHit] = useTimelineEventsDetails({
-    indexName: eventIndex,
-    eventId: id ?? '',
-    runtimeMappings: sourcererDataView.runtimeMappings,
-    skip: !id,
-  });
+  const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject] =
+    useTimelineEventsDetails({
+      indexName: eventIndex,
+      eventId: id ?? '',
+      runtimeMappings: sourcererDataView.runtimeMappings,
+      skip: !id,
+    });
   const getFieldsData = useGetFieldsData(searchHit?.fields);
 
   const contextValue = useMemo(
@@ -80,6 +86,7 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
             eventId: id,
             indexName,
             browserFields: sourcererDataView.browserFields,
+            dataAsNestedObject: dataAsNestedObject as unknown as Ecs,
             dataFormattedForFieldBrowser,
             searchHit: searchHit as SearchHit<object>,
             getFieldsData,
@@ -89,6 +96,7 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
       id,
       indexName,
       sourcererDataView.browserFields,
+      dataAsNestedObject,
       dataFormattedForFieldBrowser,
       searchHit,
       getFieldsData,

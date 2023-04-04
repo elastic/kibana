@@ -26,7 +26,8 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attac
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
-import { constructFileKindIdByOwner, DEFAULT_FEATURES } from '../../../common/constants';
+import { DEFAULT_FEATURES } from '../../../common/constants';
+import { constructFileKindIdByOwner } from '../../../common/files';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
 import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';

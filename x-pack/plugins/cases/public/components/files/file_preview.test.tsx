@@ -10,7 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 
-import { constructFileKindIdByOwner } from '../../../common/constants';
+import { constructFileKindIdByOwner } from '../../../common/files';
 import {
   createAppMockRenderer,
   mockedTestProvidersOwner,

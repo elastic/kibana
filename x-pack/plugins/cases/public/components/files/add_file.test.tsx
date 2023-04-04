@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 
-import { constructFileKindIdByOwner } from '../../../common/constants';
+import { constructFileKindIdByOwner } from '../../../common/files';
 import {
   buildCasesPermissions,
   createAppMockRenderer,

@@ -55,7 +55,8 @@ export class CasesUiPlugin
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
 
     registerInternalAttachments(externalReferenceAttachmentTypeRegistry);
-    registerCaseFileKinds(plugins.files);
+    const config = this.initializerContext.config.get<CasesUiConfigType>();
+    registerCaseFileKinds(config.files, plugins.files);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -108,7 +109,13 @@ export class CasesUiPlugin
 
   public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
-    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
+
+    KibanaServices.init({
+      ...core,
+      ...plugins,
+      kibanaVersion: this.kibanaVersion,
+      config,
+    });
 
     /**
      * getCasesContextLazy returns a new component each time is being called. To avoid re-renders
@@ -138,7 +145,7 @@ export class CasesUiPlugin
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
-        // @deprecated Please use the hook getUseCasesAddToNewCaseFlyout
+        // @deprecated Please use the hook useCasesAddToNewCaseFlyout
         getCreateCaseFlyout: (props) =>
           getCreateCaseFlyoutLazy({
             ...props,
@@ -146,7 +153,7 @@ export class CasesUiPlugin
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
-        // @deprecated Please use the hook getUseCasesAddToExistingCaseModal
+        // @deprecated Please use the hook useCasesAddToExistingCaseModal
         getAllCasesSelectorModal: (props) =>
           getAllCasesSelectorModalLazy({
             ...props,
@@ -156,8 +163,8 @@ export class CasesUiPlugin
           }),
       },
       hooks: {
-        getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
-        getUseCasesAddToExistingCaseModal: useCasesAddToExistingCaseModal,
+        useCasesAddToNewCaseFlyout,
+        useCasesAddToExistingCaseModal,
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),

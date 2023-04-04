@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { Owner } from '../../common/constants/types';
 import type { ServerError } from '../types';
 
-import { constructFileKindIdByOwner } from '../../common/constants';
+import { constructFileKindIdByOwner } from '../../common/files';
 import { useCasesToast } from '../common/use_cases_toast';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
