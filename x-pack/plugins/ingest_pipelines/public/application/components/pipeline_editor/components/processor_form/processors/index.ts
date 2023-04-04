@@ -38,12 +38,12 @@ export { Rename } from './rename';
 export { Script } from './script';
 export { SetProcessor } from './set';
 export { SetSecurityUser } from './set_security_user';
-export { Split } from './split';
 export { Sort } from './sort';
+export { Split } from './split';
 export { Trim } from './trim';
 export { Uppercase } from './uppercase';
+export { UriParts } from './uri_parts';
 export { UrlDecode } from './url_decode';
 export { UserAgent } from './user_agent';
-export { UriParts } from './uri_parts';
 
 export type { FormFieldsComponent } from './shared';
