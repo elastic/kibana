@@ -31,7 +31,7 @@ export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
 
 export interface MlInferencePipelineParams {
   description?: string;
-  fieldMappings: Record<string, string>;
+  fieldMappings: Record<string, string | undefined>;
   inferenceConfig?: InferencePipelineInferenceConfig;
   model: MlTrainedModelConfig;
   pipelineName: string;
@@ -55,7 +55,7 @@ export const generateMlInferencePipelineBody = ({
 
   // For now this only works for a single field mapping
   const sourceField = Object.keys(fieldMappings)[0];
-  const destinationField = fieldMappings[sourceField];
+  const destinationField = fieldMappings[sourceField] ?? sourceField;
   const inferenceType = Object.keys(model.inference_config)[0];
   const remove = getRemoveProcessorForInferenceType(destinationField, inferenceType);
   const set = getSetProcessorForInferenceType(destinationField, inferenceType);
