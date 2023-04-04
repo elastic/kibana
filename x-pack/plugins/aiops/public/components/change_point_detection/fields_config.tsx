@@ -83,8 +83,9 @@ export const FieldsConfig: FC = () => {
   return (
     <>
       {fieldConfigs.map((fieldConfig, index) => {
+        const key = index;
         return (
-          <React.Fragment key={`${fieldConfig.fn}_${index}`}>
+          <React.Fragment key={key}>
             <FieldPanel
               fieldConfig={fieldConfig}
               onChange={(value) => onChange(value, index)}
