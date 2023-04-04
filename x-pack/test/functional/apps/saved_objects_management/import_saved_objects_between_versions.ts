@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('should be able to import 7.13 saved objects into 8.0.0 and verfiy the rendering of two dashboards', async function () {
+    it('should be able to import 7.13 saved objects into 8.0.0 and verfiy the rendering of three dashboards', async function () {
       const initialObjectCount = await PageObjects.savedObjects.getExportCount();
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', '_7.13_import_saved_objects.ndjson')
