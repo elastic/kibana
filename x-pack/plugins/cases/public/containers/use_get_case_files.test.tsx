@@ -29,7 +29,7 @@ const expectedCallParams = {
   page: hookParams.page + 1,
   name: `*${hookParams.searchTerm}*`,
   perPage: hookParams.perPage,
-  meta: { caseId: hookParams.caseId },
+  meta: { caseIds: [hookParams.caseId] },
 };
 
 describe('useGetCaseFiles', () => {

@@ -90,3 +90,7 @@ export const ADDED_UNKNOWN_FILE = i18n.translate('xpack.cases.caseView.files.add
 export const DOWNLOAD = i18n.translate('xpack.cases.caseView.files.download', {
   defaultMessage: 'download',
 });
+
+export const FILE_DELETE_SUCCESS = i18n.translate('xpack.cases.caseView.files.deleteSuccess', {
+  defaultMessage: 'File deleted successfully',
+});

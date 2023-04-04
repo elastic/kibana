@@ -14,12 +14,15 @@ import * as i18n from './translations';
 import { parseMimeType } from './utils';
 import { FileNameLink } from './file_name_link';
 import { FileDownloadButtonIcon } from './file_download_button_icon';
+import { FileDeleteButtonIcon } from './file_delete_button_icon';
 
 export interface FilesTableColumnsProps {
+  caseId: string;
   showPreview: (file: FileJSON) => void;
 }
 
 export const useFilesTableColumns = ({
+  caseId,
   showPreview,
 }: FilesTableColumnsProps): Array<EuiBasicTableColumn<FileJSON>> => {
   return [
@@ -58,11 +61,7 @@ export const useFilesTableColumns = ({
           name: 'Delete',
           isPrimary: true,
           description: i18n.DELETE_FILE,
-          color: 'danger',
-          icon: 'trash',
-          type: 'icon',
-          onClick: () => {},
-          'data-test-subj': 'cases-files-table-action-delete',
+          render: (file: FileJSON) => <FileDeleteButtonIcon caseId={caseId} fileId={file.id} />,
         },
       ],
     },

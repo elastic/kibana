@@ -20,6 +20,7 @@ import { FilePreview } from './file_preview';
 import * as i18n from './translations';
 import { isImage, isValidFileExternalReferenceMetadata } from './utils';
 import { useFilePreview } from './use_file_preview';
+import { FileDeleteButtonIcon } from './file_delete_button_icon';
 
 interface FileAttachmentEventProps {
   file: FileJSON;
@@ -39,6 +40,15 @@ const FileAttachmentEvent = ({ file }: FileAttachmentEventProps) => {
 
 FileAttachmentEvent.displayName = 'FileAttachmentEvent';
 
+const FileAttachmentActions = ({ caseId, fileId }: { caseId: string; fileId: string }) => (
+  <>
+    <FileDownloadButtonIcon fileId={fileId} />
+    <FileDeleteButtonIcon caseId={caseId} fileId={fileId} />
+  </>
+);
+
+FileAttachmentActions.displayName = 'FileAttachmentActions';
+
 const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps) => {
   if (!isValidFileExternalReferenceMetadata(props.externalReferenceMetadata)) {
     return {
@@ -50,6 +60,7 @@ const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps
   }
 
   const fileId = props.externalReferenceId;
+  const caseId = props.caseData.id;
 
   // @ts-ignore
   const partialFileJSON = props.externalReferenceMetadata?.files[0] as Partial<FileJSON>;
@@ -62,7 +73,7 @@ const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps
   return {
     event: <FileAttachmentEvent file={file} />,
     timelineAvatar: isImage(file) ? 'image' : 'document',
-    actions: <FileDownloadButtonIcon fileId={fileId} />,
+    actions: <FileAttachmentActions caseId={caseId} fileId={fileId} />,
     hideDefaultActions: true,
   };
 };

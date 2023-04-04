@@ -45,7 +45,7 @@ describe('FilesTable', () => {
     expect(await screen.findByTestId('cases-files-table-filetype')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-date-added')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-table-action-delete')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
   });
 
   it('renders loading state', async () => {

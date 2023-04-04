@@ -209,7 +209,10 @@ describe('AddFile', () => {
     userEvent.click(await screen.findByTestId('testMetadata'));
 
     await waitFor(() =>
-      expect(validateMetadata).toHaveBeenCalledWith({ caseId, owner: mockedTestProvidersOwner[0] })
+      expect(validateMetadata).toHaveBeenCalledWith({
+        caseIds: [caseId],
+        owner: mockedTestProvidersOwner[0],
+      })
     );
   });
 

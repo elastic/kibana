@@ -25,7 +25,7 @@ const expectedCallParams = {
   kind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
   page: 1,
   perPage: 1,
-  meta: hookParams,
+  meta: { caseIds: [hookParams.caseId] },
 };
 
 describe('useGetCaseFileStats', () => {

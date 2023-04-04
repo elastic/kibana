@@ -10,11 +10,13 @@ import { useFilesTableColumns } from './use_files_table_columns';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
+import { basicCase } from '../../containers/mock';
 
-describe('useCasesColumns ', () => {
+describe('useFilesTableColumns ', () => {
   let appMockRender: AppMockRenderer;
 
-  const useCasesColumnsProps: FilesTableColumnsProps = {
+  const useFilesTableColumnsProps: FilesTableColumnsProps = {
+    caseId: basicCase.id,
     showPreview: () => {},
   };
 
@@ -24,7 +26,7 @@ describe('useCasesColumns ', () => {
   });
 
   it('return all files table columns correctly', async () => {
-    const { result } = renderHook(() => useFilesTableColumns(useCasesColumnsProps), {
+    const { result } = renderHook(() => useFilesTableColumns(useFilesTableColumnsProps), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -56,14 +58,10 @@ describe('useCasesColumns ', () => {
               "render": [Function],
             },
             Object {
-              "color": "danger",
-              "data-test-subj": "cases-files-table-action-delete",
               "description": "Delete File",
-              "icon": "trash",
               "isPrimary": true,
               "name": "Delete",
-              "onClick": [Function],
-              "type": "icon",
+              "render": [Function],
             },
           ],
           "name": "Actions",
