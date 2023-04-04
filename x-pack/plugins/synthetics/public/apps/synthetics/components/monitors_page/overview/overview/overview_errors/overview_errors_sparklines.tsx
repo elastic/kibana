@@ -18,9 +18,9 @@ interface Props {
   locations?: string[];
 }
 export const OverviewErrorsSparklines = ({ from, to, monitorIds, locations }: Props) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
 
