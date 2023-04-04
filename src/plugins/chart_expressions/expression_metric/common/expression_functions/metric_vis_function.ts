@@ -84,6 +84,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Provides a static visualization color. Overridden by palette.',
       }),
     },
+    icon: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.icon.help', {
+        defaultMessage: 'Provides a static visualization icon.',
+      }),
+    },
     palette: {
       types: ['palette'],
       help: i18n.translate('expressionMetricVis.function.palette.help', {
@@ -181,6 +187,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             subtitle: args.subtitle,
             secondaryPrefix: args.secondaryPrefix,
             color: args.color,
+            icon: args.icon,
             palette: args.palette?.params,
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,
