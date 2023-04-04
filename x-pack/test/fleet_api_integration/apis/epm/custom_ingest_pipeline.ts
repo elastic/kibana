@@ -59,7 +59,8 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    describe('Without custom pipeline', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/154227
+    describe.skip('Without custom pipeline', () => {
       it('Should write doc correctly', async () => {
         const res = await es.index({
           index: 'logs-log.log-test',

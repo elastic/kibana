@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import numeral from '@elastic/numeral';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -14,9 +14,9 @@ import {
 } from '@kbn/rule-data-utils';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
-
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { IBasePath } from '@kbn/core/server';
+
 import { Duration, toDurationUnit } from '../../../domain/models';
 import { DefaultSLIClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';
 import { computeBurnRate } from '../../../domain/services';
@@ -171,9 +171,9 @@ function buildReason(
       'The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {burnRateThreshold} for both windows',
     values: {
       longWindowDuration: longWindowDuration.format(),
-      longWindowBurnRate,
+      longWindowBurnRate: numeral(longWindowBurnRate).format('0.[00]'),
       shortWindowDuration: shortWindowDuration.format(),
-      shortWindowBurnRate,
+      shortWindowBurnRate: numeral(shortWindowBurnRate).format('0.[00]'),
       burnRateThreshold: params.burnRateThreshold,
     },
   });
