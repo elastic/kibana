@@ -5,52 +5,32 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { ESSearchRequest } from '@kbn/es-types';
-import { catchError, map, Observable } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { GetHostsRequestParams } from '../../../../common/http_api/hosts';
-import {
-  FilteredHostsAggregationResponse,
-  FilteredHostsAggregationResponseRT,
-  GetHostsArgs,
-} from './types';
-import { BUCKET_KEY, MAX_FILTERED_HOST_SIZE } from './constants';
+import { HostsRandomSamplerAggregationResponseRT, GetHostsArgs } from './types';
+import { BUCKET_KEY } from './constants';
 import { parseFilters } from './utils';
+import { createFilters, createRandomSampler, runQuery } from './helpers/query';
 
-type QueryResponse = IKibanaSearchResponse<FilteredHostsAggregationResponse | undefined>;
+export const getFilteredHosts = async ({ searchClient, source, params, seed }: GetHostsArgs) => {
+  const queryRequest = createQuery(params, source, seed);
 
-const createFilters = (params: GetHostsRequestParams): estypes.QueryDslQueryContainer => {
-  const parsedFilters = parseFilters(params.query);
-
-  return {
-    bool: {
-      ...parsedFilters.bool,
-      filter: [
-        ...(Array.isArray(parsedFilters.bool.filter) ? parsedFilters.bool.filter ?? [] : []),
-        {
-          range: {
-            '@timestamp': {
-              gte: params.timeRange.from,
-              lte: params.timeRange.to,
-              format: 'epoch_millis',
-            },
-          },
-        },
-        {
-          exists: {
-            field: 'host.name',
-          },
-        },
-      ],
-    },
-  };
+  return lastValueFrom(
+    runQuery(searchClient, queryRequest, decodeOrThrow(HostsRandomSamplerAggregationResponseRT))
+  );
 };
 
-const createQuery = (params: GetHostsRequestParams, source: InfraSource): ESSearchRequest => {
+const createQuery = (
+  params: GetHostsRequestParams,
+  source: InfraSource,
+  seed: number
+): ESSearchRequest => {
+  const parsedFilters = parseFilters(params.query);
+
   return {
     allow_no_indices: true,
     ignore_unavailable: true,
@@ -58,22 +38,22 @@ const createQuery = (params: GetHostsRequestParams, source: InfraSource): ESSear
     body: {
       size: 0,
       query: {
-        ...createFilters(params),
+        bool: {
+          ...parsedFilters.bool,
+          filter: [
+            ...(Array.isArray(parsedFilters.bool?.filter) ? parsedFilters.bool?.filter ?? [] : []),
+            ...createFilters(params),
+          ],
+        },
       },
       aggs: {
-        sampling: {
-          random_sampler: {
-            probability: 0.1,
-            seed: 42,
-          },
+        group: {
+          random_sampler: createRandomSampler(seed),
           aggs: {
             hosts: {
               terms: {
-                size: MAX_FILTERED_HOST_SIZE,
+                size: params.limit,
                 field: BUCKET_KEY,
-                order: {
-                  _key: 'asc',
-                },
               },
             },
           },
@@ -81,41 +61,4 @@ const createQuery = (params: GetHostsRequestParams, source: InfraSource): ESSear
       },
     },
   };
-};
-
-export const getFilteredHosts = ({
-  searchClient,
-  source,
-  params,
-  options,
-  id,
-}: GetHostsArgs): Observable<QueryResponse> => {
-  const queryRequest = createQuery(params, source);
-  const { executionContext: ctx, ...restOptions } = options || {};
-
-  return searchClient
-    .search(
-      {
-        id,
-        params: queryRequest,
-      },
-      restOptions
-    )
-    .pipe(
-      map((res) => ({
-        ...res,
-        rawResponse: decodeOrThrow(FilteredHostsAggregationResponseRT)(
-          res.rawResponse.aggregations
-        ),
-      })),
-      catchError((err) => {
-        const error = {
-          message: err.message,
-          statusCode: err.statusCode,
-          attributes: err.errBody?.error,
-        };
-
-        throw error;
-      })
-    );
 };

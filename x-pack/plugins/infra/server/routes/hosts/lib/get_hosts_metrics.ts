@@ -6,127 +6,32 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import {
-  IKibanaSearchResponse,
-  ISearchClient,
-  ISearchOptionsSerializable,
-} from '@kbn/data-plugin/common';
-import { catchError, lastValueFrom, map, Observable, of } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { ESSearchRequest } from '@kbn/es-types';
 import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { GetHostsRequestParams } from '../../../../common/http_api/hosts';
 import { BUCKET_KEY, METADATA_AGGREGATION } from './constants';
-import {
-  GetHostsMetricsArgs,
-  HostsMetricsSearchAggregationResponse,
-  HostsMetricsSearchAggregationResponseRT,
-} from './types';
+import { GetHostsArgs, HostsMetricsSearchAggregationResponseRT } from './types';
 import { createQueryFormulas } from './metric_aggregation_formulas';
-import { getSortField } from './utils';
+import { createFilters, getOrder, runQuery } from './helpers/query';
 
-type AggregationFunc = (
-  params: GetHostsRequestParams,
-  aggregationFormulas: Record<string, estypes.AggregationsAggregationContainer>
-) => Record<string, estypes.AggregationsAggregationContainer>;
-
-type QueryResponse = IKibanaSearchResponse<HostsMetricsSearchAggregationResponse | undefined>;
-
-const createFilterOutNullAggregation = (
-  field: string
-): Record<string, estypes.AggregationsAggregationContainer> => ({
-  filter_out_null: {
-    bucket_selector: {
-      buckets_path: {
-        fieldValue: field,
-      },
-      script: 'params.fieldValue > 0',
-    },
-  },
-});
-
-const getOrder = (params: GetHostsRequestParams) => {
-  return {
-    [getSortField(params.sortField)]: params.sortDirection ?? 'asc',
-  };
-};
-
-const createSortedAggregations = (
-  params: GetHostsRequestParams,
-  metricAggregations: Record<string, estypes.AggregationsAggregationContainer>
-): Record<string, estypes.AggregationsAggregationContainer> => {
-  return {
-    groupings: {
-      terms: {
-        field: BUCKET_KEY,
-        order: getOrder(params),
-        size: params.limit,
-      },
-      aggs: {
-        ...metricAggregations,
-        ...METADATA_AGGREGATION,
-        ...createFilterOutNullAggregation(getSortField(params.sortField)),
-      },
-    },
-  };
-};
-
-const createAggregations = (
-  params: GetHostsRequestParams,
-  metricAggregations: Record<string, estypes.AggregationsAggregationContainer>
-): Record<string, estypes.AggregationsAggregationContainer> => {
-  return {
-    groupings: {
-      terms: {
-        field: BUCKET_KEY,
-        order: {
-          _key: 'asc',
-        },
-        size: params.limit,
-      },
-      aggs: {
-        ...metricAggregations,
-        ...METADATA_AGGREGATION,
-      },
-    },
-  };
-};
-
-const createFilters = (params: GetHostsRequestParams, filteredHostNames: string[] = []) => {
-  const filter: estypes.QueryDslQueryContainer[] = [
-    {
-      range: {
-        '@timestamp': {
-          gte: params.timeRange.from,
-          lte: params.timeRange.to,
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
-
-  if (filteredHostNames.length > 0) {
-    filter.push({
-      terms: {
-        'host.name': filteredHostNames,
-      },
-    });
-  } else {
-    filter.push({
-      exists: {
-        field: 'host.name',
-      },
-    });
-  }
-
-  return filter;
+export const getHostMetrics = async (
+  { searchClient, source, params }: GetHostsArgs,
+  filteredHostNames: string[] = [],
+  sortedHostNames: string[] = []
+) => {
+  const query = createQuery(params, source, filteredHostNames, sortedHostNames);
+  return lastValueFrom(
+    runQuery(searchClient, query, decodeOrThrow(HostsMetricsSearchAggregationResponseRT))
+  );
 };
 
 const createQuery = (
   params: GetHostsRequestParams,
   source: InfraSource,
-  aggregationFunc: AggregationFunc,
-  filteredHostNames: string[] = []
+  filteredHostNames: string[],
+  sortedHostNames: string[]
 ): ESSearchRequest => {
   const { runtimeFields, metricAggregations } = createQueryFormulas(
     params.metrics.map((metric) => metric.type)
@@ -145,102 +50,96 @@ const createQuery = (
       },
       runtime_mappings: runtimeFields,
       aggs: {
-        ...aggregationFunc(params, metricAggregations),
+        ...createAggregations(params, metricAggregations, filteredHostNames, sortedHostNames),
       },
     },
   };
 };
 
-export const runQuery = (
-  serchClient: ISearchClient,
-  queryRequest: ESSearchRequest,
-  options?: ISearchOptionsSerializable,
-  id?: string
-): Observable<QueryResponse> => {
-  const { executionContext: ctx, ...restOptions } = options || {};
-  return serchClient
-    .search(
-      {
-        id,
-        params: queryRequest,
+const createAggregations = (
+  params: GetHostsRequestParams,
+  metricAggregations: Record<string, estypes.AggregationsAggregationContainer>,
+  filteredHostNames: string[],
+  sortedHostNames: string[]
+) => {
+  return {
+    ...(sortedHostNames.length > 0
+      ? createBucketSortedBySubAggregation(params, metricAggregations, sortedHostNames)
+      : {}),
+    ...(sortedHostNames.length < params.limit
+      ? createDefautSortBucket(params, metricAggregations, filteredHostNames, sortedHostNames)
+      : {}),
+  };
+};
+
+const createAggregationFilter = (sortedHostNames: string[]): estypes.QueryDslQueryContainer => {
+  return sortedHostNames
+    ? {
+        terms: {
+          [BUCKET_KEY]: sortedHostNames,
+        },
+      }
+    : {};
+};
+
+const createBucketSortedBySubAggregation = (
+  params: GetHostsRequestParams,
+  metricAggregations: Record<string, estypes.AggregationsAggregationContainer>,
+  sortedHostNames: string[]
+): Record<string, estypes.AggregationsAggregationContainer> => {
+  return {
+    sortedByMetric: {
+      filter: {
+        ...createAggregationFilter(sortedHostNames),
       },
-      restOptions
-    )
-    .pipe(
-      map((res) => ({
-        ...res,
-        rawResponse: decodeOrThrow(HostsMetricsSearchAggregationResponseRT)(
-          res.rawResponse.aggregations
-        ),
-      })),
-      catchError((err) => {
-        const error = {
-          message: err.message,
-          statusCode: err.statusCode,
-          attributes: err.errBody?.error,
-        };
-
-        throw error;
-      })
-    );
-};
-const getHostsUnsortedMetrics = ({
-  searchClient,
-  source,
-  params,
-  options,
-  id,
-  filteredHostNames,
-}: GetHostsMetricsArgs) => {
-  const query = createQuery(params, source, createAggregations, filteredHostNames);
-  return runQuery(searchClient, query, options, id);
+      aggs: {
+        hosts: {
+          terms: {
+            field: BUCKET_KEY,
+            order: getOrder(params),
+            size: sortedHostNames.length,
+          },
+          aggs: {
+            ...metricAggregations,
+            ...METADATA_AGGREGATION,
+          },
+        },
+      },
+    },
+  };
 };
 
-const getHostsSortedMetrics = ({
-  searchClient,
-  source,
-  params,
-  options,
-  id,
-  filteredHostNames,
-}: GetHostsMetricsArgs) => {
-  const query = createQuery(params, source, createSortedAggregations, filteredHostNames);
-  return runQuery(searchClient, query, options, id);
-};
-
-export const getHostMetrics = async ({
-  searchClient,
-  source,
-  params,
-  options,
-  id,
-  filteredHostNames = [],
-}: GetHostsMetricsArgs) => {
-  const sortRequest =
-    params.sortField && params.sortField !== 'name'
-      ? getHostsSortedMetrics({
-          searchClient,
-          source,
-          params,
-          options,
-          id,
-          filteredHostNames,
-        })
-      : of(undefined);
-
-  const fetchHostsList = [
-    lastValueFrom(
-      getHostsUnsortedMetrics({
-        searchClient,
-        source,
-        params,
-        options,
-        id,
-        filteredHostNames,
-      })
-    ),
-    lastValueFrom(sortRequest),
-  ];
-
-  return Promise.all(fetchHostsList);
+const createDefautSortBucket = (
+  params: GetHostsRequestParams,
+  metricAggregations: Record<string, estypes.AggregationsAggregationContainer>,
+  filteredHostNames: string[],
+  sortedHostNames: string[]
+): Record<string, estypes.AggregationsAggregationContainer> => {
+  const size = Math.abs(filteredHostNames.length - sortedHostNames.length);
+  return {
+    sortedByTerm: {
+      filter: {
+        bool: {
+          must_not: {
+            ...createAggregationFilter(sortedHostNames),
+          },
+        },
+      },
+      aggs: {
+        hosts: {
+          terms: {
+            field: BUCKET_KEY,
+            order: {
+              _key: params.sortDirection,
+            },
+            size: size > 0 ? size : params.limit,
+          },
+          aggs: {
+            ...metricAggregations,
+            ...METADATA_AGGREGATION,
+          },
+        },
+      },
+    },
+  };
 };

@@ -13,8 +13,12 @@ import { memoryTotal } from './memory_total';
 import { memory } from './memory';
 import { rx } from './rx';
 import { tx } from './tx';
+import type { HostsMetricsAggregationQueryConfig } from '../types';
 
-const metricsAggregationFormulas = {
+export const metricsAggregationFormulas: Record<
+  HostMetricType,
+  HostsMetricsAggregationQueryConfig
+> = {
   cpu,
   diskLatency,
   memory,
@@ -25,17 +29,33 @@ const metricsAggregationFormulas = {
 
 export const createQueryFormulas = (metricTypes: HostMetricType[]) => {
   return metricTypes.reduce(
-    (acc, curr) => ({
-      ...acc,
-      runtimeFields: {
-        ...acc.runtimeFields,
-        ...(metricsAggregationFormulas[curr].runtimeField ?? {}),
-      },
-      metricAggregations: {
-        ...acc.metricAggregations,
-        ...metricsAggregationFormulas[curr].aggregation,
-      },
-    }),
+    (acc, curr) => {
+      const hasRuntimeField = !!metricsAggregationFormulas[curr].runtimeField;
+      const currentMetricAggregation = hasRuntimeField
+        ? {
+            filter: metricsAggregationFormulas[curr].filter,
+            aggs: {
+              result: {
+                ...metricsAggregationFormulas[curr].aggregation,
+              },
+            },
+          }
+        : {
+            ...metricsAggregationFormulas[curr].aggregation,
+          };
+
+      return {
+        ...acc,
+        runtimeFields: {
+          ...acc.runtimeFields,
+          ...(metricsAggregationFormulas[curr].runtimeField ?? {}),
+        },
+        metricAggregations: {
+          ...acc.metricAggregations,
+          [curr]: currentMetricAggregation,
+        },
+      };
+    },
     {} as {
       runtimeFields: estypes.MappingRuntimeFields;
       metricAggregations: Record<string, estypes.AggregationsAggregationContainer>;

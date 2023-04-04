@@ -5,80 +5,81 @@
  * 2.0.
  */
 
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import { lastValueFrom } from 'rxjs';
 import { GetHostsRequestParams, GetHostsResponsePayload } from '../../../../common/http_api/hosts';
-import { getHostMetrics } from './get_hosts_metrics';
 import { getFilteredHosts } from './get_filtered_hosts';
 import { mapToApiResponse } from './map_to_response';
-import { hasFilters } from './utils';
+import { hasFilters, hasSortByMetric } from './utils';
 
 import { GetHostsArgs } from './types';
+import { getTopHostsByMetric } from './get_top_hosts';
+import { getHostMetrics } from './get_hosts_metrics';
 
-const combine = (
-  result: {
-    unsortedResponse: IKibanaSearchResponse<GetHostsResponsePayload>;
-    sortedResponse?: IKibanaSearchResponse<GetHostsResponsePayload>;
-  },
-  params: GetHostsRequestParams
-): GetHostsResponsePayload['hosts'] => {
-  const {
-    unsortedResponse: { rawResponse: unsortedHosts },
-    sortedResponse: { rawResponse: sortedHosts } = {},
-  } = result;
-
-  const dedupResponse = !!sortedHosts
-    ? unsortedHosts.hosts
-        .filter((o) => !sortedHosts?.hosts.some((s) => s.name === o.name))
-        .slice(0, params.limit - sortedHosts?.hosts.length ?? 0)
-    : unsortedHosts.hosts;
-
-  return !params.sortDirection || params.sortDirection === 'asc'
-    ? [...dedupResponse, ...(sortedHosts?.hosts ?? [])]
-    : [...(sortedHosts?.hosts ?? []), ...dedupResponse];
-};
-
-export const getHostsList = async ({
-  searchClient: serchClient,
-  source,
-  params,
-  options,
-  id,
-}: GetHostsArgs): Promise<IKibanaSearchResponse<GetHostsResponsePayload>> => {
-  const runFilterQuery = hasFilters(params.query);
-
-  const filteredHosts = runFilterQuery
-    ? await lastValueFrom(
-        getFilteredHosts({ searchClient: serchClient, source, params, options, id })
-      )
-    : null;
-
-  const { sampling } = filteredHosts?.rawResponse ?? {};
-  const hostsFound = (sampling?.doc_count ?? 0) > 0;
-  if (runFilterQuery && !hostsFound) {
+export const getHostsList = async (args: GetHostsArgs): Promise<GetHostsResponsePayload> => {
+  const runFilterQuery = hasFilters(args.params.query);
+  const filteredHostNames = runFilterQuery ? await getFilteredHostNames(args) : [];
+  if (runFilterQuery && filteredHostNames.length === 0) {
     return {
-      ...filteredHosts,
-      rawResponse: { hosts: [] },
+      hosts: [],
     };
   }
 
-  const filteredHostNames = sampling?.hosts.buckets.map((p) => p.key);
-  const [unsortedResponse, sortedResponse] = await getHostMetrics({
-    searchClient: serchClient,
-    source,
-    params,
-    options,
-    id,
-    filteredHostNames,
-  }).then((responses) =>
-    responses.filter(Boolean).map((res) => ({
-      ...res,
-      rawResponse: mapToApiResponse(params, res?.rawResponse),
-    }))
-  );
+  // Unfortunately, terms aggregation sorts null buckets first when direction is desc
+  // That's why this query is executed to first retrieve all host sorted by metric,
+  // considering only those which contain the necessary metric fields in the docs, filtering out
+  // null aggregations
+  const topHostNamesByMetric = await getTopHostNamesByMetric(args);
+  const result = await getHostMetrics(args, filteredHostNames, topHostNamesByMetric);
 
   return {
-    ...unsortedResponse,
-    rawResponse: { hosts: combine({ unsortedResponse, sortedResponse }, params) },
+    hosts: combine(
+      {
+        sortedByMetric: mapToApiResponse(args.params, result?.sortedByMetric),
+        sortedByTerm: mapToApiResponse(args.params, result?.sortedByTerm),
+      },
+      args.params
+    ),
   };
+};
+
+const combine = (
+  result: {
+    sortedByTerm?: GetHostsResponsePayload;
+    sortedByMetric?: GetHostsResponsePayload;
+  },
+  params: GetHostsRequestParams
+): GetHostsResponsePayload['hosts'] => {
+  const { sortedByTerm, sortedByMetric } = result;
+
+  if (sortedByTerm && sortedByTerm?.hosts.length === params.limit) {
+    return sortedByTerm.hosts;
+  }
+
+  // Sometimes sortedByMetric won't reach the limit.
+  // Here we complete it with the hosts sorted by term.
+  // This also makes sure that aggregations with null will be wither at the top or at the bottom of the list
+  // Depending on the sorting direction
+  const combined =
+    !params.sortDirection || params.sortDirection === 'asc'
+      ? [...(sortedByTerm?.hosts ?? []), ...(sortedByMetric?.hosts ?? [])]
+      : [...(sortedByMetric?.hosts ?? []), ...(sortedByTerm?.hosts ?? [])];
+
+  return combined;
+};
+
+const getTopHostNamesByMetric = async (args: GetHostsArgs, filteredHostNames: string[] = []) => {
+  if (!hasSortByMetric(args.params)) {
+    return [];
+  }
+
+  const sortedHostsByMetric = await getTopHostsByMetric(args, filteredHostNames);
+
+  const { group } = sortedHostsByMetric ?? {};
+  return group?.hosts.buckets.map((p) => p.key as string) ?? [];
+};
+
+const getFilteredHostNames = async (args: GetHostsArgs) => {
+  const filteredHosts = await getFilteredHosts(args);
+
+  const { group } = filteredHosts ?? {};
+  return group?.hosts.buckets.map((p) => p.key) ?? [];
 };

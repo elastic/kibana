@@ -23,11 +23,10 @@ import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plu
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
-  bfetch: BfetchServerSetup;
   data: DataPluginSetup;
   home: HomeServerPluginSetup;
   features: FeaturesPluginSetup;
@@ -40,9 +39,9 @@ export interface InfraServerPluginSetupDeps {
 }
 
 export interface InfraServerPluginStartDeps {
-  bfetch: BfetchServerSetup;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
+  security: SecurityPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {

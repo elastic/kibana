@@ -8,11 +8,20 @@
 import { HostsMetricsAggregationQueryConfig } from '../types';
 
 export const memory: HostsMetricsAggregationQueryConfig = {
+  filter: {
+    bool: {
+      filter: [
+        {
+          exists: {
+            field: 'system.memory.actual.used.pct',
+          },
+        },
+      ],
+    },
+  },
   aggregation: {
-    memory: {
-      avg: {
-        field: 'system.memory.actual.used.pct',
-      },
+    avg: {
+      field: 'system.memory.actual.used.pct',
     },
   },
 };

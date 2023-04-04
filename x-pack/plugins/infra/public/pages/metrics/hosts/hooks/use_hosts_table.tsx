@@ -17,6 +17,7 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
 import { useTableProperties } from './use_table_properties_url_state';
+import { useHostsViewContext } from './use_hosts_view';
 
 const METADATA_ATTRIBUTE_NAME = {
   'cloud.provider': 'cloudProvider',
@@ -120,6 +121,7 @@ const toggleDialogActionLabel = i18n.translate(
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableParams) => {
+  const { fetch } = useHostsViewContext();
   const [properties, setProperties] = useTableProperties();
   const {
     services: { telemetry },
@@ -249,6 +251,10 @@ export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableP
       const isSorting = sortableFields.has(field ?? '');
 
       if (isSorting && !isEqual(properties.sorting, sort)) {
+        await fetch({
+          sortDirection: sort?.direction,
+          sortField: sort?.field as any,
+        });
         setProperties({
           sorting: sort,
         });
@@ -258,7 +264,7 @@ export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableP
         });
       }
     },
-    [properties.pagination, properties.sorting, setProperties, sortableFields]
+    [fetch, properties.pagination, properties.sorting, setProperties, sortableFields]
   );
 
   return {

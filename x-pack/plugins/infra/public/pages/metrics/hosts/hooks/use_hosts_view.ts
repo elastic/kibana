@@ -20,12 +20,10 @@ import {
   GetHostsRequestParams,
   GetHostsResponsePayload,
   HostMetricType,
-  HostSortField,
 } from '../../../../../common/http_api/hosts';
 import { InfraClientCoreStart } from '../../../../types';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from './use_unified_search';
-import { useTableProperties } from './use_table_properties_url_state';
 
 const HOST_TABLE_METRICS: Array<{ type: HostMetricType }> = [
   { type: 'rx' },
@@ -42,7 +40,6 @@ export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const { http } = useKibana<InfraClientCoreStart>().services;
   const { buildQuery, getDateRangeAsTimestamp, searchCriteria } = useUnifiedSearchContext();
-  const [{ sorting }] = useTableProperties();
 
   const hostRequest = useMemo<HostsRequest>(
     () => ({
@@ -50,11 +47,11 @@ export const useHostsView = () => {
       metrics: HOST_TABLE_METRICS,
       query: buildQuery(),
       timeRange: getDateRangeAsTimestamp(),
+      sortField: 'name',
+      sortDirection: 'asc',
       sourceId,
-      sortField: sorting.field as HostSortField,
-      sortDirection: sorting.direction,
     }),
-    [searchCriteria.limit, sorting, buildQuery, getDateRangeAsTimestamp, sourceId]
+    [searchCriteria.limit, buildQuery, getDateRangeAsTimestamp, sourceId]
   );
 
   const abortCtrlRef = useRef(new AbortController());

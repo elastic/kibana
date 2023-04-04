@@ -7,6 +7,17 @@
 import { HostsMetricsAggregationQueryConfig } from '../types';
 
 export const rx: HostsMetricsAggregationQueryConfig = {
+  filter: {
+    bool: {
+      filter: [
+        {
+          exists: {
+            field: 'host.network.ingress.bytes',
+          },
+        },
+      ],
+    },
+  },
   runtimeField: {
     rx_bytes_per_period: {
       type: 'double',
@@ -16,19 +27,8 @@ export const rx: HostsMetricsAggregationQueryConfig = {
     },
   },
   aggregation: {
-    rx: {
-      filter: {
-        exists: {
-          field: 'host.network.ingress.bytes',
-        },
-      },
-      aggs: {
-        result: {
-          avg: {
-            field: 'rx_bytes_per_period',
-          },
-        },
-      },
+    avg: {
+      field: 'rx_bytes_per_period',
     },
   },
 };

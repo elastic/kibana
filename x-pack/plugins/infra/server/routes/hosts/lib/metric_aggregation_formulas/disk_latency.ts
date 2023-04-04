@@ -8,6 +8,32 @@
 import { HostsMetricsAggregationQueryConfig } from '../types';
 
 export const diskLatency: HostsMetricsAggregationQueryConfig = {
+  filter: {
+    bool: {
+      must: [
+        {
+          exists: {
+            field: 'system.diskio.read.time',
+          },
+        },
+        {
+          exists: {
+            field: 'system.diskio.write.time',
+          },
+        },
+        {
+          exists: {
+            field: 'system.diskio.read.count',
+          },
+        },
+        {
+          exists: {
+            field: 'system.diskio.write.count',
+          },
+        },
+      ],
+    },
+  },
   runtimeField: {
     disk_latency: {
       type: 'double',
@@ -17,40 +43,8 @@ export const diskLatency: HostsMetricsAggregationQueryConfig = {
     },
   },
   aggregation: {
-    diskLatency: {
-      filter: {
-        bool: {
-          must: [
-            {
-              exists: {
-                field: 'system.diskio.read.time',
-              },
-            },
-            {
-              exists: {
-                field: 'system.diskio.write.time',
-              },
-            },
-            {
-              exists: {
-                field: 'system.diskio.read.count',
-              },
-            },
-            {
-              exists: {
-                field: 'system.diskio.write.count',
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        result: {
-          avg: {
-            field: 'disk_latency',
-          },
-        },
-      },
+    avg: {
+      field: 'disk_latency',
     },
   },
 };

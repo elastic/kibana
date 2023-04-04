@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { ISearchClient, ISearchOptionsSerializable } from '@kbn/data-plugin/common';
+import { ISearchClient } from '@kbn/data-plugin/common';
 import * as rt from 'io-ts';
 import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 
@@ -36,30 +36,33 @@ export const HostsMetricsSearchBucketRT = rt.record(
   rt.union([rt.string, rt.number, HostsMetricsSearchValueRT])
 );
 
-// rt.type({ hostname: rt.string })
 export const HostsSearchBucketRT = rt.type({
   key: rt.string,
   doc_count: rt.number,
 });
 
+export const HostsMetricsSearchAggregationContentResponseRT = rt.type({
+  doc_count: rt.number,
+  hosts: rt.intersection([
+    rt.partial({
+      sum_other_doc_count: rt.number,
+      doc_count_error_upper_bound: rt.number,
+    }),
+    rt.type({ buckets: rt.array(HostsMetricsSearchBucketRT) }),
+  ]),
+});
+
 export const HostsMetricsSearchAggregationResponseRT = rt.union([
-  rt.type({
-    groupings: rt.intersection([
-      rt.partial({
-        sum_other_doc_count: rt.number,
-        doc_count_error_upper_bound: rt.number,
-      }),
-      rt.type({
-        buckets: rt.array(HostsMetricsSearchBucketRT),
-      }),
-    ]),
+  rt.partial({
+    sortedByMetric: HostsMetricsSearchAggregationContentResponseRT,
+    sortedByTerm: HostsMetricsSearchAggregationContentResponseRT,
   }),
   rt.undefined,
 ]);
 
-export const FilteredHostsAggregationResponseRT = rt.union([
+export const HostsRandomSamplerAggregationResponseRT = rt.union([
   rt.type({
-    sampling: rt.type({
+    group: rt.type({
       seed: rt.number,
       probability: rt.number,
       doc_count: rt.number,
@@ -78,27 +81,28 @@ export const FilteredHostsAggregationResponseRT = rt.union([
 ]);
 
 export interface HostsMetricsAggregationQueryConfig {
-  runtimeField: estypes.MappingRuntimeFields;
-  aggregation: estypes.AggregationsAggregationContainer['aggs'];
+  filter: estypes.QueryDslQueryContainer;
+  runtimeField?: estypes.MappingRuntimeFields;
+  aggregation: estypes.AggregationsAggregationContainer;
 }
 
 export interface GetHostsArgs {
   searchClient: ISearchClient;
   source: InfraSource;
   params: GetHostsRequestParams;
-  options?: ISearchOptionsSerializable;
-  id?: string;
-}
-
-export interface GetHostsMetricsArgs extends GetHostsArgs {
-  filteredHostNames?: string[];
+  seed: number;
 }
 
 export type HostsMetricsSearchValue = rt.TypeOf<typeof HostsMetricsSearchValueRT>;
 export type HostsMetricsSearchBucket = rt.TypeOf<typeof HostsMetricsSearchBucketRT>;
+export type HostsMetricsSearchAggregationContentResponse = rt.TypeOf<
+  typeof HostsMetricsSearchAggregationContentResponseRT
+>;
 
 export type HostsMetricsSearchAggregationResponse = rt.TypeOf<
   typeof HostsMetricsSearchAggregationResponseRT
 >;
 
-export type FilteredHostsAggregationResponse = rt.TypeOf<typeof FilteredHostsAggregationResponseRT>;
+export type HostsRandomSamplerAggregationResponse = rt.TypeOf<
+  typeof HostsRandomSamplerAggregationResponseRT
+>;

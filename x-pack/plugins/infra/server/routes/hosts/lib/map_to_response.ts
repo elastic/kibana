@@ -15,12 +15,49 @@ import {
 
 import {
   FilteredMetricsTypeRT,
-  HostsMetricsSearchAggregationResponse,
+  HostsMetricsSearchAggregationContentResponse,
   HostsMetricsSearchBucket,
   HostsMetricsSearchValue,
   HostsMetricsSearchValueRT,
 } from './types';
 import { METADATA_FIELD } from './constants';
+
+export const mapToApiResponse = (
+  params: GetHostsRequestParams,
+  aggregations?: HostsMetricsSearchAggregationContentResponse | undefined
+): GetHostsResponsePayload => {
+  if (!aggregations) {
+    return {
+      hosts: [],
+    };
+  }
+
+  const hosts = aggregations.hosts.buckets.map((bucket) => {
+    const metrics = convertMetricBucket(params, bucket);
+    const metadata = convertMetadataBucket(bucket);
+
+    return { name: bucket.key as string, metrics, metadata };
+  });
+
+  return {
+    hosts,
+  };
+};
+
+const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): HostMetadata[] => {
+  const metadataAggregation = bucket[METADATA_FIELD];
+  return TopMetricsTypeRT.is(metadataAggregation)
+    ? metadataAggregation.top
+        .flatMap((top) => Object.entries(top.metrics))
+        .map(
+          ([key, value]) =>
+            ({
+              name: key,
+              value,
+            } as HostMetadata)
+        )
+    : [];
+};
 
 const getMetricValue = (valueObject: HostsMetricsSearchValue) => {
   if (FilteredMetricsTypeRT.is(valueObject)) {
@@ -49,47 +86,4 @@ const convertMetricBucket = (
           : null,
       } as HostMetrics;
     });
-};
-
-const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): HostMetadata[] => {
-  const metadataAggregation = bucket[METADATA_FIELD];
-  return TopMetricsTypeRT.is(metadataAggregation)
-    ? metadataAggregation.top
-        .flatMap((top) => Object.entries(top.metrics))
-        .map(
-          ([key, value]) =>
-            ({
-              name: key,
-              value,
-            } as HostMetadata)
-        )
-    : [];
-};
-
-export const convertBucketsToRows = (
-  params: GetHostsRequestParams,
-  buckets: HostsMetricsSearchBucket[]
-): GetHostsResponsePayload => {
-  const hosts = buckets.map((bucket) => {
-    const metrics = convertMetricBucket(params, bucket);
-    const metadata = convertMetadataBucket(bucket);
-
-    return { name: bucket.key as string, metrics, metadata };
-  });
-
-  return {
-    hosts,
-  };
-};
-
-export const mapToApiResponse = (
-  params: GetHostsRequestParams,
-  aggregations?: HostsMetricsSearchAggregationResponse | null
-): GetHostsResponsePayload => {
-  if (!aggregations?.groupings) {
-    return {
-      hosts: [],
-    };
-  }
-  return convertBucketsToRows(params, aggregations.groupings.buckets);
 };

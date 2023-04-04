@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
+import seedrandom from 'seedrandom';
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { throwErrors } from '@kbn/cases-plugin/common';
-
-import { IKibanaSearchResponse, ISearchOptionsSerializable } from '@kbn/data-plugin/common';
 import {
   GetHostsRequestParamsRT,
   GetHostsRequestParams,
@@ -22,14 +15,6 @@ import {
 } from '../../../common/http_api/hosts';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getHostsList } from './lib/get_hosts_list';
-
-interface HostsBatchRequest {
-  request: {
-    id?: string;
-    params: GetHostsRequestParams;
-  };
-  options: ISearchOptionsSerializable;
-}
 
 export const initHostsRoute = (libs: InfraBackendLibs) => {
   const validateParams = createRouteValidationFunction(GetHostsRequestParamsRT);
@@ -45,18 +30,21 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (context, request, response) => {
-      const [{ savedObjects }, { data }] = await libs.getStartServices();
+      const [{ savedObjects }, { data, security }] = await libs.getStartServices();
       const params: GetHostsRequestParams = request.body;
 
-      const serchClient = data.search.asScoped(request);
+      const searchClient = data.search.asScoped(request);
       const soClient = savedObjects.getScopedClient(request);
       const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
 
+      const username = security.authc.getCurrentUser(request)?.username;
+      const seed = username ? Math.abs(seedrandom(username).int32()) : 1;
+
       try {
-        const hosts = await getHostsList({ searchClient: serchClient, source, params });
+        const hosts = await getHostsList({ searchClient, source, params, seed });
 
         return response.ok({
-          body: GetHostsResponsePayloadRT.encode(hosts.rawResponse),
+          body: GetHostsResponsePayloadRT.encode(hosts),
         });
       } catch (err) {
         return response.customError({
@@ -66,33 +54,6 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
           },
         });
       }
-    }
-  );
-
-  framework.plugins.bfetch.addBatchProcessingRoute<HostsBatchRequest, IKibanaSearchResponse<any>>(
-    '/api/metrics/hosts/batch',
-    (request) => {
-      return {
-        onBatchItem: async ({ request: requestData, options }) => {
-          const params = pipe(
-            GetHostsRequestParamsRT.decode(requestData.params),
-            fold(throwErrors(Boom.badRequest), identity)
-          );
-
-          const [{ executionContext, savedObjects }, { data }] = await libs.getStartServices();
-          const { id } = requestData;
-
-          const searchClient = data.search.asScoped(request);
-          const soClient = savedObjects.getScopedClient(request);
-          const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
-
-          const { executionContext: ctx, ...restOptions } = options || {};
-
-          return executionContext.withContext(ctx, async () => {
-            return getHostsList({ searchClient, source, params, options: restOptions, id });
-          });
-        },
-      };
     }
   );
 };

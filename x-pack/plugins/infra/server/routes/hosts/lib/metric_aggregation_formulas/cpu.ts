@@ -7,9 +7,32 @@
 
 import { HostsMetricsAggregationQueryConfig } from '../types';
 
+const RUNTIME_FIELD_NAME = 'cpu_usage';
+
 export const cpu: HostsMetricsAggregationQueryConfig = {
+  filter: {
+    bool: {
+      must: [
+        {
+          exists: {
+            field: 'system.cpu.user.pct',
+          },
+        },
+        {
+          exists: {
+            field: 'system.cpu.system.pct',
+          },
+        },
+        {
+          exists: {
+            field: 'system.cpu.cores',
+          },
+        },
+      ],
+    },
+  },
   runtimeField: {
-    cpu_usage: {
+    [RUNTIME_FIELD_NAME]: {
       type: 'double',
       script: `
         emit((doc['system.cpu.user.pct'].value + doc['system.cpu.system.pct'].value) / (doc['system.cpu.cores'].value)); 
@@ -17,35 +40,8 @@ export const cpu: HostsMetricsAggregationQueryConfig = {
     },
   },
   aggregation: {
-    cpu: {
-      filter: {
-        bool: {
-          must: [
-            {
-              exists: {
-                field: 'system.cpu.user.pct',
-              },
-            },
-            {
-              exists: {
-                field: 'system.cpu.system.pct',
-              },
-            },
-            {
-              exists: {
-                field: 'system.cpu.cores',
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        result: {
-          avg: {
-            field: 'cpu_usage',
-          },
-        },
-      },
+    avg: {
+      field: RUNTIME_FIELD_NAME,
     },
   },
 };

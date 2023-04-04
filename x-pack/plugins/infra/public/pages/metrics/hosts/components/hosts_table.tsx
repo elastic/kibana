@@ -35,10 +35,9 @@ export const HostsTable = () => {
   return (
     <>
       <EuiInMemoryTable
-        allowNeutralSort={false}
         data-test-subj="hostsView-table"
-        pagination={{ ...pagination, pageSizeOptions: [2, 5, 10] }}
-        sorting={{ sort: sorting }}
+        pagination={{ ...pagination }}
+        sorting={{ sort: { ...sorting } }}
         rowProps={{
           'data-test-subj': 'hostsView-tableRow',
         }}
