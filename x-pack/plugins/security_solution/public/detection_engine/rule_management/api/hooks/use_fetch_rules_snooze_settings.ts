@@ -47,7 +47,7 @@ export const useFetchRulesSnoozeSettings = (
  *
  * @returns A rules cache invalidation callback
  */
-export const useInvalidateFetchRulesSnoozeSettings = () => {
+export const useInvalidateFetchRulesSnoozeSettingsQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {

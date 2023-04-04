@@ -47,7 +47,7 @@ import { RuleSwitch } from '../../../../detections/components/rules/rule_switch'
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
-import { useInvalidateFetchRulesSnoozeSettings } from '../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
+import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import type { Rule } from '../../../rule_management/logic';
 import { PopoverTooltip } from './popover_tooltip';
 import type { ExtendedRule } from './rules_table/rules_table_context';
@@ -123,7 +123,7 @@ const useRuleSnoozeColumn = ({
 }: {
   hasCRUDPermissions: boolean;
 }): TableColumn => {
-  const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettings();
+  const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
 
   return useMemo(
     () => ({
