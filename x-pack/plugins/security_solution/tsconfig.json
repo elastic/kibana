@@ -152,5 +152,6 @@
     "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
     "@kbn/core-lifecycle-browser",
+    "@kbn/security-solution-plugin",
   ]
 }
