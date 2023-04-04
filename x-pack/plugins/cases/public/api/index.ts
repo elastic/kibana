@@ -7,8 +7,16 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { Cases, CasesStatus, CasesMetrics } from '../../common/ui';
-import { CASE_FIND_URL, CASE_METRICS_URL, CASE_STATUS_URL } from '../../common/constants';
+import {
+  CASE_FIND_URL,
+  CASE_METRICS_URL,
+  CASE_STATUS_URL,
+  INTERNAL_BULK_GET_CASES_URL,
+} from '../../common/constants';
 import type {
+  CaseResponse,
+  CasesBulkGetRequestCertainFields,
+  CasesBulkGetResponseCertainFields,
   CasesFindRequest,
   CasesFindResponse,
   CasesMetricsRequest,
@@ -18,6 +26,7 @@ import type {
 } from '../../common/api';
 import { convertAllCasesToCamel, convertToCamelCase } from './utils';
 import {
+  decodeCasesBulkGetResponse,
   decodeCasesFindResponse,
   decodeCasesMetricsResponse,
   decodeCasesStatusResponse,
@@ -57,4 +66,22 @@ export const getCasesMetrics = async ({
 }: HTTPService & { query: CasesMetricsRequest }): Promise<CasesMetrics> => {
   const res = await http.get<CasesMetricsResponse>(CASE_METRICS_URL, { signal, query });
   return convertToCamelCase(decodeCasesMetricsResponse(res));
+};
+
+export const bulkGetCases = async <Field extends keyof CaseResponse = keyof CaseResponse>({
+  http,
+  signal,
+  params,
+}: HTTPService & { params: CasesBulkGetRequestCertainFields<Field> }): Promise<
+  CasesBulkGetResponseCertainFields<Field>
+> => {
+  const res = await http.post<CasesBulkGetResponseCertainFields<Field>>(
+    INTERNAL_BULK_GET_CASES_URL,
+    {
+      body: JSON.stringify({ ...params }),
+      signal,
+    }
+  );
+
+  return decodeCasesBulkGetResponse(res, params.fields);
 };

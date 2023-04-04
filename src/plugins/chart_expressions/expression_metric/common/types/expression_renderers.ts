@@ -24,6 +24,7 @@ export interface MetricVisParam {
   subtitle?: string;
   secondaryPrefix?: string;
   color?: string;
+  icon?: string;
   palette?: CustomPaletteState;
   progressDirection: LayoutDirection;
   maxCols: number;

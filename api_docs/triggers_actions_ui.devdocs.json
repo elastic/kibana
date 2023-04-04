@@ -2756,6 +2756,20 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertStatus.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.AlertStatus.status",
             "type": "CompoundType",
             "tags": [],
