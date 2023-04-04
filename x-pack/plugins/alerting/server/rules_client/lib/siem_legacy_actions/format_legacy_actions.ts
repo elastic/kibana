@@ -12,7 +12,7 @@ import { RuleAction, Rule } from '../../../types';
 import type { RuleExecutorServices } from '../../..';
 import { injectReferencesIntoActions } from '../../common';
 
-import { transformFromLegacyActions } from './migrate_legacy_actions';
+import { transformFromLegacyActions } from './transform_legacy_actions';
 
 import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
 

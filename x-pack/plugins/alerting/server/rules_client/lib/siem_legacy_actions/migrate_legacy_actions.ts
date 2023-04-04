@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 } from 'uuid';
-import { isEmpty } from 'lodash/fp';
+
 import type { SavedObjectReference } from '@kbn/core/server';
 
 import type { RulesClientContext } from '../..';
@@ -16,17 +15,27 @@ import { deleteRule } from '../../methods/delete';
 
 import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
 
+import { transformFromLegacyActions } from './transform_legacy_actions';
+
 type MigrateLegacyActions = (
   context: RulesClientContext,
   { ruleId }: { ruleId: string }
 ) => Promise<{ legacyActions: RawRuleAction[]; legacyActionsReferences: SavedObjectReference[] }>;
 
+/**
+ * @deprecated
+ * migrates legacy actions for SIEM rules
+ * @param context RulesClient context
+ * @param params.ruleId - id of rule to be migrated
+ * @returns
+ */
 export const migrateLegacyActions: MigrateLegacyActions = async (context, { ruleId }) => {
   const { unsecuredSavedObjectsClient } = context;
   try {
     if (ruleId == null) {
       return { legacyActions: [], legacyActionsReferences: [] };
     }
+
     /**
      * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
      * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actual value (1hr etc..)
@@ -101,43 +110,4 @@ export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule
   }
 
   return { legacyActions: [], legacyActionsReferences: [] };
-};
-
-export const transformFromLegacyActions = (
-  legacyActionsAttr: LegacyIRuleActionsAttributes,
-  references: SavedObjectReference[]
-): RawRuleAction[] => {
-  const actionReference = references.reduce<Record<string, SavedObjectReference>>(
-    (acc, reference) => {
-      acc[reference.name] = reference;
-      return acc;
-    },
-    {}
-  );
-
-  if (isEmpty(actionReference)) {
-    throw new Error(`Connector reference id not found.`);
-  }
-
-  return legacyActionsAttr.actions.reduce<RawRuleAction[]>((acc, action) => {
-    const { actionRef, action_type_id: actionTypeId, group, params } = action;
-    if (!actionReference[actionRef]) {
-      return acc;
-    }
-    return [
-      ...acc,
-      {
-        group,
-        params,
-        uuid: v4(),
-        actionRef,
-        actionTypeId,
-        frequency: {
-          summary: true,
-          notifyWhen: 'onThrottleInterval',
-          throttle: legacyActionsAttr.ruleThrottle,
-        },
-      },
-    ];
-  }, []);
 };
