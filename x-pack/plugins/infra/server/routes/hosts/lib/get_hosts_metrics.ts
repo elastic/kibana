@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { ESSearchRequest } from '@kbn/es-types';
 import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { decodeOrThrow } from '../../../../common/runtime_types';
-import { GetHostsRequestParams } from '../../../../common/http_api/hosts';
+import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
 import { BUCKET_KEY, METADATA_AGGREGATION } from './constants';
 import { GetHostsArgs, HostsMetricsSearchAggregationResponseRT } from './types';
 import { createQueryFormulas } from './metric_aggregation_formulas';
@@ -28,7 +28,7 @@ export const getHostMetrics = async (
 };
 
 const createQuery = (
-  params: GetHostsRequestParams,
+  params: GetHostsRequestBodyPayload,
   source: InfraSource,
   filteredHostNames: string[],
   sortedHostNames: string[]
@@ -45,7 +45,10 @@ const createQuery = (
       size: 0,
       query: {
         bool: {
-          filter: createFilters(params, filteredHostNames),
+          filter: createFilters({
+            params,
+            filteredHostNames: [...new Set([...filteredHostNames, ...sortedHostNames])],
+          }),
         },
       },
       runtime_mappings: runtimeFields,
@@ -57,16 +60,18 @@ const createQuery = (
 };
 
 const createAggregations = (
-  params: GetHostsRequestParams,
+  params: GetHostsRequestBodyPayload,
   metricAggregations: Record<string, estypes.AggregationsAggregationContainer>,
   filteredHostNames: string[],
   sortedHostNames: string[]
 ) => {
+  const hasSortedAggregation = sortedHostNames.length > 0;
+  const hasDefaultAggregation = sortedHostNames.length < params.limit;
   return {
-    ...(sortedHostNames.length > 0
+    ...(hasSortedAggregation
       ? createBucketSortedBySubAggregation(params, metricAggregations, sortedHostNames)
       : {}),
-    ...(sortedHostNames.length < params.limit
+    ...(hasDefaultAggregation
       ? createDefautSortBucket(params, metricAggregations, filteredHostNames, sortedHostNames)
       : {}),
   };
@@ -83,14 +88,16 @@ const createAggregationFilter = (sortedHostNames: string[]): estypes.QueryDslQue
 };
 
 const createBucketSortedBySubAggregation = (
-  params: GetHostsRequestParams,
+  params: GetHostsRequestBodyPayload,
   metricAggregations: Record<string, estypes.AggregationsAggregationContainer>,
   sortedHostNames: string[]
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   return {
     sortedByMetric: {
       filter: {
-        ...createAggregationFilter(sortedHostNames),
+        bool: {
+          filter: sortedHostNames.length > 0 ? [createAggregationFilter(sortedHostNames)] : [],
+        },
       },
       aggs: {
         hosts: {
@@ -110,19 +117,21 @@ const createBucketSortedBySubAggregation = (
 };
 
 const createDefautSortBucket = (
-  params: GetHostsRequestParams,
+  params: GetHostsRequestBodyPayload,
   metricAggregations: Record<string, estypes.AggregationsAggregationContainer>,
   filteredHostNames: string[],
   sortedHostNames: string[]
 ): Record<string, estypes.AggregationsAggregationContainer> => {
-  const size = Math.abs(filteredHostNames.length - sortedHostNames.length);
   return {
     sortedByTerm: {
       filter: {
         bool: {
-          must_not: {
-            ...createAggregationFilter(sortedHostNames),
-          },
+          must_not:
+            sortedHostNames.length > 0
+              ? {
+                  ...createAggregationFilter(sortedHostNames),
+                }
+              : [],
         },
       },
       aggs: {
@@ -130,9 +139,9 @@ const createDefautSortBucket = (
           terms: {
             field: BUCKET_KEY,
             order: {
-              _key: params.sortDirection,
+              _key: params.sortDirection ?? 'asc',
             },
-            size: size > 0 ? size : params.limit,
+            size: filteredHostNames.length > 0 ? filteredHostNames.length : params.limit,
           },
           aggs: {
             ...metricAggregations,

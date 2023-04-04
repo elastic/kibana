@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { GetHostsRequestParams, GetHostsResponsePayload } from '../../../../common/http_api/hosts';
+import {
+  GetHostsRequestBodyPayload,
+  GetHostsResponsePayload,
+} from '../../../../common/http_api/hosts';
 import { getFilteredHosts } from './get_filtered_hosts';
-import { mapToApiResponse } from './map_to_response';
+import { mapToApiResponse } from './mapper';
 import { hasFilters, hasSortByMetric } from './utils';
 
 import { GetHostsArgs } from './types';
@@ -27,7 +30,7 @@ export const getHostsList = async (args: GetHostsArgs): Promise<GetHostsResponse
   // That's why this query is executed to first retrieve all host sorted by metric,
   // considering only those which contain the necessary metric fields in the docs, filtering out
   // null aggregations
-  const topHostNamesByMetric = await getTopHostNamesByMetric(args);
+  const topHostNamesByMetric = await getTopHostNamesByMetric(args, filteredHostNames);
   const result = await getHostMetrics(args, filteredHostNames, topHostNamesByMetric);
 
   return {
@@ -46,7 +49,7 @@ const combine = (
     sortedByTerm?: GetHostsResponsePayload;
     sortedByMetric?: GetHostsResponsePayload;
   },
-  params: GetHostsRequestParams
+  params: GetHostsRequestBodyPayload
 ): GetHostsResponsePayload['hosts'] => {
   const { sortedByTerm, sortedByMetric } = result;
 
@@ -73,13 +76,13 @@ const getTopHostNamesByMetric = async (args: GetHostsArgs, filteredHostNames: st
 
   const sortedHostsByMetric = await getTopHostsByMetric(args, filteredHostNames);
 
-  const { group } = sortedHostsByMetric ?? {};
-  return group?.hosts.buckets.map((p) => p.key as string) ?? [];
+  const { hosts } = sortedHostsByMetric ?? {};
+  return hosts?.buckets.map((p) => p.key as string) ?? [];
 };
 
 const getFilteredHostNames = async (args: GetHostsArgs) => {
   const filteredHosts = await getFilteredHosts(args);
 
-  const { group } = filteredHosts ?? {};
-  return group?.hosts.buckets.map((p) => p.key) ?? [];
+  const { hosts } = filteredHosts ?? {};
+  return hosts?.buckets.map((p) => p.key) ?? [];
 };

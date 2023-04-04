@@ -10,7 +10,7 @@ import { ISearchClient } from '@kbn/data-plugin/common';
 import * as rt from 'io-ts';
 import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 
-import { GetHostsRequestParams, HostMetricTypeRT } from '../../../../common/http_api/hosts';
+import { GetHostsRequestBodyPayload, HostMetricTypeRT } from '../../../../common/http_api/hosts';
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
 
 export const FilteredMetricsTypeRT = rt.type({
@@ -62,20 +62,15 @@ export const HostsMetricsSearchAggregationResponseRT = rt.union([
 
 export const HostsRandomSamplerAggregationResponseRT = rt.union([
   rt.type({
-    group: rt.type({
-      seed: rt.number,
-      probability: rt.number,
-      doc_count: rt.number,
-      hosts: rt.intersection([
-        rt.partial({
-          sum_other_doc_count: rt.number,
-          doc_count_error_upper_bound: rt.number,
-        }),
-        rt.type({
-          buckets: rt.array(HostsSearchBucketRT),
-        }),
-      ]),
-    }),
+    hosts: rt.intersection([
+      rt.partial({
+        sum_other_doc_count: rt.number,
+        doc_count_error_upper_bound: rt.number,
+      }),
+      rt.type({
+        buckets: rt.array(HostsSearchBucketRT),
+      }),
+    ]),
   }),
   rt.undefined,
 ]);
@@ -89,8 +84,7 @@ export interface HostsMetricsAggregationQueryConfig {
 export interface GetHostsArgs {
   searchClient: ISearchClient;
   source: InfraSource;
-  params: GetHostsRequestParams;
-  seed: number;
+  params: GetHostsRequestBodyPayload;
 }
 
 export type HostsMetricsSearchValue = rt.TypeOf<typeof HostsMetricsSearchValueRT>;

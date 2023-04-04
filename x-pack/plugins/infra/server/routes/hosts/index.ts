@@ -6,18 +6,17 @@
  */
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import seedrandom from 'seedrandom';
 
 import {
-  GetHostsRequestParamsRT,
-  GetHostsRequestParams,
+  GetHostsRequestBodyPayloadRT,
+  GetHostsRequestBodyPayload,
   GetHostsResponsePayloadRT,
 } from '../../../common/http_api/hosts';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getHostsList } from './lib/get_hosts_list';
 
 export const initHostsRoute = (libs: InfraBackendLibs) => {
-  const validateParams = createRouteValidationFunction(GetHostsRequestParamsRT);
+  const validateBody = createRouteValidationFunction(GetHostsRequestBodyPayloadRT);
 
   const { framework } = libs;
 
@@ -26,22 +25,19 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
       method: 'post',
       path: '/api/metrics/hosts',
       validate: {
-        body: validateParams,
+        body: validateBody,
       },
     },
-    async (context, request, response) => {
-      const [{ savedObjects }, { data, security }] = await libs.getStartServices();
-      const params: GetHostsRequestParams = request.body;
+    async (_, request, response) => {
+      const [{ savedObjects }, { data }] = await libs.getStartServices();
+      const params: GetHostsRequestBodyPayload = request.body;
 
       const searchClient = data.search.asScoped(request);
       const soClient = savedObjects.getScopedClient(request);
       const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
 
-      const username = security.authc.getCurrentUser(request)?.username;
-      const seed = username ? Math.abs(seedrandom(username).int32()) : 1;
-
       try {
-        const hosts = await getHostsList({ searchClient, source, params, seed });
+        const hosts = await getHostsList({ searchClient, source, params });
 
         return response.ok({
           body: GetHostsResponsePayloadRT.encode(hosts),

@@ -7,25 +7,47 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { ISearchClient } from '@kbn/data-plugin/common';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESSearchRequest } from '@kbn/es-types';
 import { catchError, map, Observable } from 'rxjs';
-import { GetHostsRequestParams } from '../../../../../common/http_api/hosts';
-import { RANDOM_SAMPLER_PROBABILITY } from '../constants';
+import { GetHostsRequestBodyPayload } from '../../../../../common/http_api/hosts';
 import { getSortField } from '../utils';
 
-export const getOrder = (params: GetHostsRequestParams) => {
+export const getOrder = (params: GetHostsRequestBodyPayload) => {
   return {
     [getSortField(params.sortField)]: params.sortDirection ?? 'asc',
   };
 };
 
-export const createRandomSampler = (seed: number) => ({
-  probability: RANDOM_SAMPLER_PROBABILITY,
-  seed,
-});
+export const createFilters = ({
+  params,
+  extraFilter,
+  filteredHostNames = [],
+}: {
+  params: GetHostsRequestBodyPayload;
+  filteredHostNames?: string[];
+  extraFilter?: QueryDslQueryContainer;
+}) => {
+  const extrafilterClause = extraFilter?.bool?.filter;
+  const extraFilterArray = !!extrafilterClause
+    ? Array.isArray(extrafilterClause)
+      ? extrafilterClause
+      : [extrafilterClause]
+    : [];
 
-export const createFilters = (params: GetHostsRequestParams, filteredHostNames: string[] = []) => {
-  const filter: estypes.QueryDslQueryContainer[] = [
+  const hostNamesFilter =
+    filteredHostNames.length > 0
+      ? [
+          {
+            terms: {
+              'host.name': filteredHostNames,
+            },
+          },
+        ]
+      : [];
+
+  return [
+    ...hostNamesFilter,
     {
       range: {
         '@timestamp': {
@@ -40,17 +62,13 @@ export const createFilters = (params: GetHostsRequestParams, filteredHostNames: 
         field: 'host.name',
       },
     },
-  ];
-
-  if (filteredHostNames.length > 0) {
-    filter.push({
-      terms: {
-        'host.name': filteredHostNames,
+    {
+      term: {
+        'event.module': 'system',
       },
-    });
-  }
-
-  return filter;
+    },
+    ...extraFilterArray,
+  ];
 };
 
 export const runQuery = <T>(

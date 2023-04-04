@@ -7,7 +7,7 @@
 
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
 import {
-  GetHostsRequestParams,
+  GetHostsRequestBodyPayload,
   GetHostsResponsePayload,
   HostMetadata,
   HostMetrics,
@@ -23,7 +23,7 @@ import {
 import { METADATA_FIELD } from './constants';
 
 export const mapToApiResponse = (
-  params: GetHostsRequestParams,
+  params: GetHostsRequestBodyPayload,
   aggregations?: HostsMetricsSearchAggregationContentResponse | undefined
 ): GetHostsResponsePayload => {
   if (!aggregations) {
@@ -72,7 +72,7 @@ const getMetricValue = (valueObject: HostsMetricsSearchValue) => {
 };
 
 const convertMetricBucket = (
-  params: GetHostsRequestParams,
+  params: GetHostsRequestBodyPayload,
   bucket: HostsMetricsSearchBucket
 ): HostMetrics[] => {
   return params.metrics

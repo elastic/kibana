@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import { GetHostsRequestParams, HostSortField } from '../../../../common/http_api/hosts';
+import { GetHostsRequestBodyPayload, HostSortField } from '../../../../common/http_api/hosts';
 
 import { AGGREGATION_NAME_BY_METRIC } from './constants';
 
@@ -24,9 +24,9 @@ const isValidFilter = (query?: any | undefined): query is ParsedFilter => {
     return false;
   }
   return (
-    boolClause.filter !== undefined &&
-    boolClause.must !== undefined &&
-    boolClause.must_not !== undefined &&
+    boolClause.filter !== undefined ||
+    boolClause.must !== undefined ||
+    boolClause.must_not !== undefined ||
     boolClause.should !== undefined
   );
 };
@@ -50,7 +50,7 @@ export const hasFilters = (query: any) => {
     });
 };
 
-export const hasSortByMetric = (params: GetHostsRequestParams) => {
+export const hasSortByMetric = (params: GetHostsRequestBodyPayload) => {
   return params.sortField && params.sortField !== 'name';
 };
 

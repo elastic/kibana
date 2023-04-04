@@ -17,7 +17,7 @@ import createContainer from 'constate';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  GetHostsRequestParams,
+  GetHostsRequestBodyPayload,
   GetHostsResponsePayload,
   HostMetricType,
 } from '../../../../../common/http_api/hosts';
@@ -34,14 +34,12 @@ const HOST_TABLE_METRICS: Array<{ type: HostMetricType }> = [
   { type: 'memoryTotal' },
 ];
 
-type HostsRequest = Omit<GetHostsRequestParams, 'limit'> & { limit: number };
-
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const { http } = useKibana<InfraClientCoreStart>().services;
   const { buildQuery, getDateRangeAsTimestamp, searchCriteria } = useUnifiedSearchContext();
 
-  const hostRequest = useMemo<HostsRequest>(
+  const hostRequest = useMemo<GetHostsRequestBodyPayload>(
     () => ({
       limit: searchCriteria.limit,
       metrics: HOST_TABLE_METRICS,

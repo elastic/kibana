@@ -28,37 +28,39 @@ export const metricsAggregationFormulas: Record<
 };
 
 export const createQueryFormulas = (metricTypes: HostMetricType[]) => {
-  return metricTypes.reduce(
-    (acc, curr) => {
-      const hasRuntimeField = !!metricsAggregationFormulas[curr].runtimeField;
-      const currentMetricAggregation = hasRuntimeField
-        ? {
-            filter: metricsAggregationFormulas[curr].filter,
-            aggs: {
-              result: {
-                ...metricsAggregationFormulas[curr].aggregation,
+  return metricTypes
+    .filter((type) => !!metricsAggregationFormulas[type])
+    .reduce(
+      (acc, curr) => {
+        const hasRuntimeField = !!metricsAggregationFormulas[curr].runtimeField;
+        const currentMetricAggregation = hasRuntimeField
+          ? {
+              filter: metricsAggregationFormulas[curr].filter,
+              aggs: {
+                result: {
+                  ...metricsAggregationFormulas[curr].aggregation,
+                },
               },
-            },
-          }
-        : {
-            ...metricsAggregationFormulas[curr].aggregation,
-          };
+            }
+          : {
+              ...metricsAggregationFormulas[curr].aggregation,
+            };
 
-      return {
-        ...acc,
-        runtimeFields: {
-          ...acc.runtimeFields,
-          ...(metricsAggregationFormulas[curr].runtimeField ?? {}),
-        },
-        metricAggregations: {
-          ...acc.metricAggregations,
-          [curr]: currentMetricAggregation,
-        },
-      };
-    },
-    {} as {
-      runtimeFields: estypes.MappingRuntimeFields;
-      metricAggregations: Record<string, estypes.AggregationsAggregationContainer>;
-    }
-  );
+        return {
+          ...acc,
+          runtimeFields: {
+            ...acc.runtimeFields,
+            ...(metricsAggregationFormulas[curr].runtimeField ?? {}),
+          },
+          metricAggregations: {
+            ...acc.metricAggregations,
+            [curr]: currentMetricAggregation,
+          },
+        };
+      },
+      {} as {
+        runtimeFields: estypes.MappingRuntimeFields;
+        metricAggregations: Record<string, estypes.AggregationsAggregationContainer>;
+      }
+    );
 };

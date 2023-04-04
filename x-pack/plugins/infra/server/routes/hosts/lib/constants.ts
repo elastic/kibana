@@ -38,8 +38,3 @@ export const METADATA_AGGREGATION: Record<string, estypes.AggregationsAggregatio
     },
   },
 };
-
-// Arbitrary probability used in random sapmler agggregation.
-// Set to a low value to improve performance.
-// This could potentially return wrong results, and need adjustments.
-export const RANDOM_SAMPLER_PROBABILITY = 0.1;

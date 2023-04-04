@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export const HostMetricTypeRT = rt.keyof({
@@ -45,20 +46,20 @@ interface LimitRangeBrand {
 
 export type LimitRange = rt.Branded<number, LimitRangeBrand>;
 
-const LimitBrandRT = rt.brand(
+const LimitRangeRT = rt.brand(
   rt.number, // codec
-  (n: number): n is LimitRange => n > 0 && n <= 100,
+  (n): n is LimitRange => n > 0 && n <= 100,
   // refinement of the number type
   'LimitRange' // name of this codec
 );
 
-export const GetHostsRequestParamsRT = rt.intersection([
+export const GetHostsRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     sortField: HostSortFieldRT,
     sortDirection: rt.union([rt.literal('desc'), rt.literal('asc')]),
   }),
   rt.type({
-    limit: LimitBrandRT,
+    limit: rt.union([LimitRangeRT, createLiteralValueFromUndefinedRT(10)]),
     metrics: rt.array(rt.type({ type: HostMetricTypeRT })),
     query: rt.UnknownRecord,
     sourceId: rt.string,
@@ -81,6 +82,11 @@ export type HostMetadata = rt.TypeOf<typeof HostMetadataRT>;
 export type HostMetricType = rt.TypeOf<typeof HostMetricTypeRT>;
 export type HostSortField = rt.TypeOf<typeof HostSortFieldRT>;
 
-export type GetHostsRequestParams = rt.TypeOf<typeof GetHostsRequestParamsRT>;
+export type GetHostsRequestBodyPayload = Omit<
+  rt.TypeOf<typeof GetHostsRequestBodyPayloadRT>,
+  'limit'
+> & {
+  limit: number;
+};
 export type HostMetricsResponse = rt.TypeOf<typeof HostMetricsResponseRT>;
 export type GetHostsResponsePayload = rt.TypeOf<typeof GetHostsResponsePayloadRT>;
