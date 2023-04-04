@@ -19,7 +19,6 @@ import { startWith } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import moment from 'moment';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_AGG_FUNCTION } from './constants';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
@@ -238,8 +237,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     mergedQuery.bool!.filter.push({
       range: {
         [dataView.timeFieldName!]: {
-          from: moment(timeRange.from).valueOf(),
-          to: moment(timeRange.to).valueOf(),
+          from: timeRange.from,
+          to: timeRange.to,
         },
       },
     });
