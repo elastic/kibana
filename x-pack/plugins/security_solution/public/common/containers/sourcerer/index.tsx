@@ -34,7 +34,7 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { createSourcererDataView } from './create_sourcerer_data_view';
-import { useDataView } from '../source/use_data_view';
+import { getDataViewStateFromIndexFields, useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
@@ -434,9 +434,19 @@ export const useSourcererDataView = (
     [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
   );
 
+  const browserFields = useCallback(() => {
+    const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
+      sourcererDataView.patternList.join(','),
+      // @ts-expect-error
+      sourcererDataView.fields,
+      false
+    );
+    return dataViewBrowserFields;
+  }, [sourcererDataView.fields, sourcererDataView.patternList]);
+
   return useMemo(
     () => ({
-      browserFields: sourcererDataView.browserFields,
+      browserFields: browserFields(),
       dataViewId: sourcererDataView.id,
       indexPattern: {
         fields: sourcererDataView.indexFields,
@@ -454,7 +464,14 @@ export const useSourcererDataView = (
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
       sourcererDataView,
     }),
-    [sourcererDataView, selectedPatterns, indicesExist, loading, legacyPatterns.length]
+    [
+      browserFields,
+      sourcererDataView,
+      selectedPatterns,
+      indicesExist,
+      loading,
+      legacyPatterns.length,
+    ]
   );
 };
 

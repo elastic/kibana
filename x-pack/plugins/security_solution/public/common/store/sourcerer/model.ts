@@ -78,6 +78,9 @@ export interface SourcererDataView extends KibanaDataView {
  * selected data view state
  */
 export interface SelectedDataView {
+  /**
+   * @deprecated use EcsFlat or fields / indexFields from data view
+   */
   browserFields: SourcererDataView['browserFields'];
   dataViewId: string | null; // null if legacy pre-8.0 timeline
   /**

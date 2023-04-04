@@ -51,7 +51,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
         if (isSubscribed && signal != null) {
           setSignalIndex({
             signalIndexExists: true,
-            signalIndexName: `${signal.name}*`,
+            signalIndexName: signal.name,
             signalIndexMappingOutdated: signal.index_mapping_outdated,
             createDeSignalIndex: createIndex,
           });
