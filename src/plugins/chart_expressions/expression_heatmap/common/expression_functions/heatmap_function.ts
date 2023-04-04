@@ -14,7 +14,7 @@ import {
   Dimension,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import { HeatmapExpressionFunctionDefinition } from '../types';
+import type { HeatmapExpressionFunctionDefinition, HeatmapExpressionProps } from '../types';
 import {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_GRID_NAME,
@@ -230,9 +230,10 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
             (handlers.variables?.embeddableTitle as string) ??
             handlers.getExecutionContext?.()?.description,
         },
-        syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
-        syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
-        canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
+        syncTooltips: handlers.isSyncTooltipsEnabled?.() ?? false,
+        syncCursor: handlers.isSyncCursorEnabled?.() ?? true,
+        canNavigateToLens: Boolean(handlers.variables?.canNavigateToLens),
+        overrides: handlers.variables?.overrides as HeatmapExpressionProps['overrides'],
       },
     };
   },
