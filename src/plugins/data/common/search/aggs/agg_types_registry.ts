@@ -9,6 +9,7 @@
 import type { BucketAggType } from './buckets/bucket_agg_type';
 import type { MetricAggType } from './metrics/metric_agg_type';
 import type { AggTypesDependencies } from './agg_types';
+import { legacyAggs } from './legacy_aggs';
 
 export type AggTypesRegistrySetup = ReturnType<AggTypesRegistry['setup']>;
 export type AggTypesRegistryStart = ReturnType<AggTypesRegistry['start']>;
@@ -50,9 +51,12 @@ export class AggTypesRegistry {
   start = (aggTypesDependencies: AggTypesDependencies) => {
     const initializedAggTypes = new Map();
 
-    const getInitializedFromCache = <T = unknown>(key: string, agg: any): T => {
+    const getInitializedFromCache = <T = unknown>(key: string, agg: ((aggTypesDependencies: AggTypesDependencies) => T) | undefined): T | undefined => {
       if (initializedAggTypes.has(key)) {
         return initializedAggTypes.get(key);
+      }
+      if (!agg) {
+        return;
       }
       const initialized = agg(aggTypesDependencies);
       initializedAggTypes.set(key, initialized);
@@ -63,7 +67,7 @@ export class AggTypesRegistry {
       get: (name: string) =>
         getInitializedFromCache<BucketAggType<any> | MetricAggType<any>>(
           name,
-          this.bucketAggs.get(name) || this.metricAggs.get(name)
+          this.bucketAggs.get(name) || this.metricAggs.get(name) || legacyAggs.get(name)
         ),
       getAll: () => ({
         buckets: Array.from(this.bucketAggs.entries()).map(([key, value]) =>
