@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
 import { AnalyticsConfig } from './analytics_collection_integrate_view';
 
 export const javascriptClientEmbedSteps = (analyticsConfig: AnalyticsConfig) => [

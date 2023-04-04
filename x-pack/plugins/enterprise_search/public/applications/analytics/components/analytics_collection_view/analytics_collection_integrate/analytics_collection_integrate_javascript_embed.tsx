@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../shared/doc_links';
+
 import { AnalyticsConfig } from './analytics_collection_integrate_view';
 
 export const javascriptEmbedSteps = (webClientSrc: string, analyticsConfig: AnalyticsConfig) => [
