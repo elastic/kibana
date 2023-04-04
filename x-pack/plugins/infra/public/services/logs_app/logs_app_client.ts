@@ -32,6 +32,14 @@ export class LogsAppClient implements ILogsAppClient {
   }
 }
 
+/**
+ * Helpers
+ */
+const generateDataViewId = (indexPattern: string) => {
+  // generates a unique but the same uuid as long as the index pattern doesn't change
+  return `infra_logs_${uuidv5(indexPattern, uuidv5.DNS)}`;
+};
+
 const getDataViewId = (logIndices: LogView['attributes']['logIndices']) => {
   return logIndices.type === 'data_view' ? logIndices.dataViewId : logIndices.indexName;
 };
@@ -46,9 +54,4 @@ const getFieldColumnValue = (logColumns: LogView['attributes']['logColumns']) =>
     | undefined;
 
   return column?.fieldColumn.field;
-};
-
-const generateDataViewId = (indexPattern: string) => {
-  // generates a unique but the same uuid as long as the index pattern doesn't change
-  return `infra_logs_${uuidv5(indexPattern, uuidv5.DNS)}`;
 };
