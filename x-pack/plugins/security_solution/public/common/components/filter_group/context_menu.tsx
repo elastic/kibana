@@ -16,10 +16,6 @@ import {
   FILTER_GROUP_MENU,
 } from './translations';
 
-interface FilterGroupContextMenuProps {
-  additionalMenuItem?: EuiContextMenuPanel['props']['items'];
-}
-
 export const FilterGroupContextMenu = () => {
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
 
