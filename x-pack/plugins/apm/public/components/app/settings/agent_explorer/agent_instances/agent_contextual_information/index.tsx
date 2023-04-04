@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
+import { isEmpty } from 'lodash';
 import React from 'react';
 import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
@@ -72,9 +73,11 @@ export function AgentContextualInformation({
   query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
   latestVersionsFailed: boolean;
 }) {
-  const { core } = useApmPluginContext();
+  const { core, config } = useApmPluginContext();
+  const latestAgentVersionEnabled = !isEmpty(config.latestAgentVersionsFileUrl);
   const comparisonEnabled = getComparisonEnabled({ core });
   const { rangeFrom, rangeTo } = useDefaultTimeRange();
+  const width = latestAgentVersionEnabled ? '20%' : '25%';
 
   const stickyProperties = [
     {
@@ -100,7 +103,7 @@ export function AgentContextualInformation({
           }
         />
       ),
-      width: '20%',
+      width,
     },
     {
       label: agentNameLabel,
@@ -112,7 +115,7 @@ export function AgentContextualInformation({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      width: '20%',
+      width,
     },
     {
       label: instancesLabel,
@@ -124,20 +127,24 @@ export function AgentContextualInformation({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      width: '20%',
+      width,
     },
-    {
-      label: latestVersionLabel,
-      fieldName: latestVersionLabel,
-      val: (
-        <AgentLatestVersion
-          agentName={agentName as AgentName}
-          latestVersion={latestVersion}
-          failed={latestVersionsFailed}
-        />
-      ),
-      width: '20%',
-    },
+    ...(latestAgentVersionEnabled
+      ? [
+          {
+            label: latestVersionLabel,
+            fieldName: latestVersionLabel,
+            val: (
+              <AgentLatestVersion
+                agentName={agentName as AgentName}
+                latestVersion={latestVersion}
+                failed={latestVersionsFailed}
+              />
+            ),
+            width,
+          },
+        ]
+      : []),
     {
       label: agentDocsLabel,
       fieldName: agentDocsLabel,
@@ -153,7 +160,7 @@ export function AgentContextualInformation({
           }
         />
       ),
-      width: '20%',
+      width,
     },
   ];
 

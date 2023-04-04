@@ -113,6 +113,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
+    latestAgentVersionsFileUrl: true,
   },
   schema: configSchema,
 };

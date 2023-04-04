@@ -13,6 +13,7 @@ export interface ConfigSchema {
   ui: {
     enabled: boolean;
   };
+  latestAgentVersionsFileUrl: string;
 }
 
 export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (

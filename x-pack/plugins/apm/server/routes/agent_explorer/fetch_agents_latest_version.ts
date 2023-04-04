@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { fetchWithTimeout } from '../../lib/helpers/fetch_with_timeout';
 
@@ -31,6 +32,10 @@ export const fetchAgentsLatestVersion = async (
   logger: Logger,
   latestAgentVersionsFileUrl: string
 ): Promise<AgentLatestVersionsResponse> => {
+  if (isEmpty(latestAgentVersionsFileUrl)) {
+    return { data: {} as AgentLatestVersions };
+  }
+
   try {
     const data = await fetchWithTimeout(latestAgentVersionsFileUrl);
 

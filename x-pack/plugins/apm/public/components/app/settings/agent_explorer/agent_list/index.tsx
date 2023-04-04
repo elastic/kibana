@@ -13,10 +13,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { AgentIcon } from '../../../../shared/agent_icon';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
@@ -33,10 +35,12 @@ export type AgentExplorerItem = ValuesType<
 
 export function getAgentsColumns({
   selectedAgent,
+  latestAgentVersionEnabled,
   latestVersionsFailed,
   onAgentSelected,
 }: {
   selectedAgent?: AgentExplorerItem;
+  latestAgentVersionEnabled: boolean;
   latestVersionsFailed: boolean;
   onAgentSelected: (agent: AgentExplorerItem) => void;
 }): Array<ITableColumn<AgentExplorerItem>> {
@@ -157,43 +161,50 @@ export function getAgentsColumns({
         />
       ),
     },
-    {
-      field: AgentExplorerFieldName.AgentLastVersion,
-      name: (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.agentExplorerTable.agentLatestVersionColumnTooltip',
-            {
-              defaultMessage: 'The latest released version of the agent.',
-            }
-          )}
-        >
-          <>
-            {i18n.translate(
-              'xpack.apm.agentExplorerTable.agentLatestVersionColumnLabel',
-              { defaultMessage: 'Latest Agent Version' }
-            )}
-            &nbsp;
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignCenter"
-            />
-          </>
-        </EuiToolTip>
-      ),
-      width: '10%',
-      align: 'center',
-      truncateText: true,
-      render: (_, { agentName, latestVersion }) => (
-        <AgentLatestVersion
-          agentName={agentName as AgentName}
-          latestVersion={latestVersion}
-          failed={latestVersionsFailed}
-        />
-      ),
-    },
+    ...(latestAgentVersionEnabled
+      ? [
+          {
+            field: AgentExplorerFieldName.AgentLastVersion,
+            name: (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.agentExplorerTable.agentLatestVersionColumnTooltip',
+                  {
+                    defaultMessage: 'The latest released version of the agent.',
+                  }
+                )}
+              >
+                <>
+                  {i18n.translate(
+                    'xpack.apm.agentExplorerTable.agentLatestVersionColumnLabel',
+                    { defaultMessage: 'Latest Agent Version' }
+                  )}
+                  &nbsp;
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignCenter"
+                  />
+                </>
+              </EuiToolTip>
+            ),
+            width: '10%',
+            align: 'center',
+            truncateText: true,
+            render: (
+              _: any,
+              { agentName, latestVersion }: AgentExplorerItem
+            ) => (
+              <AgentLatestVersion
+                agentName={agentName as AgentName}
+                latestVersion={latestVersion}
+                failed={latestVersionsFailed}
+              />
+            ),
+          },
+        ]
+      : []),
     {
       field: AgentExplorerFieldName.AgentDocsPageUrl,
       name: i18n.translate(
@@ -227,6 +238,9 @@ export function AgentList({
   isLoading,
   latestVersionsFailed,
 }: Props) {
+  const { config } = useApmPluginContext();
+  const latestAgentVersionEnabled = !isEmpty(config.latestAgentVersionsFileUrl);
+
   const [selectedAgent, setSelectedAgent] = useState<AgentExplorerItem>();
 
   const onAgentSelected = (agent: AgentExplorerItem) => {
@@ -241,10 +255,11 @@ export function AgentList({
     () =>
       getAgentsColumns({
         selectedAgent,
+        latestAgentVersionEnabled,
         latestVersionsFailed,
         onAgentSelected,
       }),
-    [selectedAgent, latestVersionsFailed]
+    [selectedAgent, latestAgentVersionEnabled, latestVersionsFailed]
   );
 
   return (
