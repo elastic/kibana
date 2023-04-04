@@ -70,13 +70,15 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
     >
       <div>
         {messages.map(({ shortMessage, longMessage }, index) => (
-          <aside key={`${shortMessage}-${index}`}>
-            {index ? <EuiHorizontalRule margin="none" /> : null}
-            <EuiTitle
-              size="xxs"
-              css={css`color=${euiTheme.colors.title}`}
-              className="lnsEmbeddablePanelFeatureList_header"
-            >
+          <aside
+            key={`${shortMessage}-${index}`}
+            css={css`
+              padding: ${index > 0 ? 0 : euiTheme.size.base} ${euiTheme.size.base}
+                ${index > 0 ? euiTheme.size.s : 0};
+            `}
+          >
+            {index ? <EuiHorizontalRule margin="s" /> : null}
+            <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
               <h3>{shortMessage}</h3>
             </EuiTitle>
             <ul className="lnsEmbeddablePanelFeatureList">{longMessage}</ul>

@@ -34,10 +34,10 @@ export function IgnoredGlobalFiltersEntries({
         return (
           <li
             key={`${layerTitle}-${dataView}-${layerIndex}`}
-            css={css`
-              padding: ${euiTheme.size.base};
-            `}
             data-test-subj={`lns-feature-badges-ignoreGlobalFilters-${layerIndex}`}
+            css={css`
+              margin: ${euiTheme.size.base} 0 0;
+            `}
           >
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
