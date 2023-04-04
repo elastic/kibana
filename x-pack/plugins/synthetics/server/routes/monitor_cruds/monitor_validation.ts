@@ -54,16 +54,6 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
 
   const decodedType = DataStreamCodec.decode(monitorType);
-  if (!ALLOWED_SCHEDULES_IN_MINUTES.includes(monitorFields[ConfigKey.SCHEDULE].number)) {
-    return {
-      valid: false,
-      reason: `Monitor schedule is invalid`,
-      details: `Invalid schedule ${
-        monitorFields[ConfigKey.SCHEDULE].number
-      } minutes supplied to monitor configuration. Please use a supported monitor schedule.`,
-      payload: monitorFields,
-    };
-  }
 
   if (isLeft(decodedType)) {
     return {
@@ -82,6 +72,17 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
       valid: false,
       reason: `Payload is not a valid monitor object`,
       details: '',
+      payload: monitorFields,
+    };
+  }
+
+  if (!ALLOWED_SCHEDULES_IN_MINUTES.includes(monitorFields[ConfigKey.SCHEDULE].number)) {
+    return {
+      valid: false,
+      reason: `Monitor schedule is invalid`,
+      details: `Invalid schedule ${
+        monitorFields[ConfigKey.SCHEDULE].number
+      } minutes supplied to monitor configuration. Please use a supported monitor schedule.`,
       payload: monitorFields,
     };
   }
