@@ -37,15 +37,10 @@ export const useLensSuggestions = ({
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
     const allSuggestions = isPlainRecord
-      ? lensSuggestionsApi(context, dataView, ['lnsDatatable'])
-      : undefined;
-    const firstSuggestion = allSuggestions?.length ? allSuggestions[0] : undefined;
-    const firstSuggestionExists = allSuggestions?.find(
-      (sug) => sug.title === firstSuggestion?.title
-    );
-    if (firstSuggestion && !firstSuggestionExists) {
-      allSuggestions?.push(firstSuggestion);
-    }
+      ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
+      : [];
+    const [firstSuggestion] = allSuggestions;
+
     return { firstSuggestion, allSuggestions };
   }, [columns, dataView, isPlainRecord, lensSuggestionsApi, query]);
 
