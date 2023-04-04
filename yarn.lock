@@ -3425,10 +3425,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-versioned-router-server-internal@link:packages/core/http/core-http-versioned-router-server-internal":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-i18n-browser-internal@link:packages/core/i18n/core-i18n-browser-internal":
   version "0.0.0"
   uid ""
@@ -4570,6 +4566,10 @@
   uid ""
 
 "@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-trained-models-utils@link:x-pack/packages/ml/trained_models_utils":
   version "0.0.0"
   uid ""
 

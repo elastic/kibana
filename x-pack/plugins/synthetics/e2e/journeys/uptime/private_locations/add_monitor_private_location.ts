@@ -81,8 +81,12 @@ journey('AddPrivateLocationMonitor', async ({ page, params }) => {
   });
 
   step('Integration edit button leads to correct Synthetics edit page', async () => {
+    const url = page.url();
+    const policyId = url.split('edit-integration/').pop();
     const btn = await page.locator(byTestId('syntheticsEditMonitorButton'));
-    expect(await btn.getAttribute('href')).toBe(`/app/synthetics/edit-monitor/${monitorId}`);
+    expect(await btn.getAttribute('href')).toBe(
+      `/app/synthetics/edit-monitor/${monitorId}?packagePolicyId=${policyId}`
+    );
     await page.click('text="Edit in Synthetics"');
 
     await page.waitForSelector('h1:has-text("Edit Monitor")');
