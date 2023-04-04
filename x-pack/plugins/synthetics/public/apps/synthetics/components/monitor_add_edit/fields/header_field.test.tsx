@@ -95,7 +95,7 @@ describe('<HeaderField />', () => {
   });
 
   it('handles content mode', async () => {
-    const contentMode: Mode = CodeEditorMode.PLAINTEXT;
+    const contentMode: CodeEditorMode = CodeEditorMode.PLAINTEXT;
     render(
       <HeaderField defaultValue={defaultValue} onChange={onChange} contentMode={contentMode} />
     );

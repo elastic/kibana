@@ -15,5 +15,6 @@ export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 export const icmpFormatters: ICMPFormatMap = {
   [ConfigKey.HOSTS]: null,
   [ConfigKey.WAIT]: secondsToCronFormatter,
+  [ConfigKey.MODE]: null,
   ...commonFormatters,
 };

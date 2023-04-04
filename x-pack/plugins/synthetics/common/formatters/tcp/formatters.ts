@@ -23,6 +23,7 @@ export const tcpFormatters: TCPFormatMap = {
   [ConfigKey.PROXY_URL]: null,
   [ConfigKey.PORT]: null,
   [ConfigKey.URLS]: null,
+  [ConfigKey.MODE]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };

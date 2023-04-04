@@ -33,6 +33,8 @@ export const httpFormatters: HTTPFormatMap = {
     fields[ConfigKey.REQUEST_BODY_CHECK]?.value
       ? JSON.stringify(fields[ConfigKey.REQUEST_BODY_CHECK]?.value)
       : null,
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: null,
+  [ConfigKey.MODE]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };

@@ -14,7 +14,7 @@ import {
 import {
   ConfigKey,
   DataStream,
-  Mode,
+  CodeEditorMode,
   MonitorFields,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
@@ -43,7 +43,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   'check.response.headers': {},
   'response.include_headers': true,
   'check.response.status': [],
-  'check.request.body': { type: 'text' as Mode, value: '' },
+  'check.request.body': { type: 'text' as CodeEditorMode, value: '' },
   'check.request.headers': {},
   'check.request.method': 'GET',
   'ssl.verification_mode': VerificationMode.NONE,
