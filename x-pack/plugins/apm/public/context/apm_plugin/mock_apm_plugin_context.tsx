@@ -66,6 +66,7 @@ const mockConfig: ConfigSchema = {
   ui: {
     enabled: false,
   },
+  latestAgentVersionsFileUrl: '',
 };
 
 const urlService = new UrlService({

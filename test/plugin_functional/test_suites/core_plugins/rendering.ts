@@ -165,6 +165,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.serviceMapEnabled (boolean)',
         'xpack.apm.ui.enabled (boolean)',
         'xpack.apm.ui.maxTraceItems (number)',
+        'xpack.apm.latestAgentVersionsFileUrl (string)',
         'xpack.cases.markdownPlugins.lens (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
         'xpack.cloud.base_url (string)',
