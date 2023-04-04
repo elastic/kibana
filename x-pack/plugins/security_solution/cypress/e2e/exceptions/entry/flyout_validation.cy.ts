@@ -74,8 +74,9 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions
     esArchiverLoad('exceptions');
-    esArchiverLoad('conflicts_1');
-    esArchiverLoad('conflicts_2');
+    // Comment the Conflicts here as they are skipped
+    // esArchiverLoad('conflicts_1');
+    // esArchiverLoad('conflicts_2');
     login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createRule(
