@@ -13,16 +13,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { REDUCED_PLATFORM_OPTIONS } from '../../hooks';
-
-import type { Commands } from './commands_for_platforms';
 import { CommandsForPlatforms } from './commands_for_platforms';
-
-export const UNINSTALL_COMMAND_TARGETS = ['agent', 'endpoint'] as const;
-type UninstallCommandTarget = typeof UNINSTALL_COMMAND_TARGETS[number];
+import { useCommands } from './hooks';
+import type { UninstallCommandTarget } from './types';
 
 const DESCRIPTION_PER_TARGET: { [key in UninstallCommandTarget]: React.ReactElement } = {
   agent: (
@@ -57,25 +53,6 @@ const DESCRIPTION_PER_TARGET: { [key in UninstallCommandTarget]: React.ReactElem
       </p>
     </>
   ),
-};
-
-// todo: update with real API and extract if needed
-const useCommands = (policyId: string | undefined, target: UninstallCommandTarget): Commands => {
-  const commands = useMemo(
-    () =>
-      REDUCED_PLATFORM_OPTIONS.map(({ id }) => id).reduce<Commands>(
-        (_commands, platform) => ({
-          ..._commands,
-          [platform]: policyId
-            ? `${platform}/${target} command for ${policyId}`
-            : `${platform}/${target} command`,
-        }),
-        {}
-      ),
-    [policyId, target]
-  );
-
-  return commands;
 };
 
 export interface UninstallCommandFlyoutProps {

@@ -12,9 +12,7 @@ import React, { useMemo } from 'react';
 import type { PLATFORM_TYPE } from '../../hooks';
 import { PLATFORM_OPTIONS, usePlatform } from '../../hooks';
 
-export type Commands = {
-  [key in PLATFORM_TYPE]?: string;
-};
+import type { Commands } from './types';
 
 interface Props {
   commands: Commands;
