@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import frontmatter from 'front-matter';
-// @ts-expect-error
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { compile } from '@storybook/mdx2-csf';
 import fs from 'fs';
 
