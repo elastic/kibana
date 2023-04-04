@@ -7,13 +7,13 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
 
 describe('Versioned router', () => {
   let router: IRouter;
   beforeEach(() => {
-    router = httpServiceMock.createRouter();
+    router = createRouter();
   });
 
   it('can register multiple routes', () => {

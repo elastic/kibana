@@ -13,10 +13,19 @@ import { Method, VersionedRouterRoute } from './types';
 
 export class CoreVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<CoreVersionedRoute>();
-  public static from({ router }: { router: IRouter }) {
-    return new CoreVersionedRouter(router);
+  public static from({
+    router,
+    validateResponses,
+  }: {
+    router: IRouter;
+    validateResponses?: boolean;
+  }) {
+    return new CoreVersionedRouter(router, validateResponses);
   }
-  private constructor(private readonly router: IRouter) {}
+  private constructor(
+    private readonly router: IRouter,
+    private readonly validateResponses: boolean = false
+  ) {}
 
   private registerVersionedRoute =
     (routeMethod: Method) =>
@@ -26,6 +35,7 @@ export class CoreVersionedRouter implements VersionedRouter {
         method: routeMethod,
         path: options.path,
         options,
+        validateResponses: this.validateResponses,
       });
       this.routes.add(route);
       return route;
