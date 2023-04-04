@@ -25,7 +25,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
   const TWENTY_TIMES_RULE_WINDOW_MS = 20 * ruleWindowSizeMS;
 
   /**
-   * The `CriterionPreview` chart shows all the series/data when there is a GroupBy in the rule parameters.
+   * The `CriterionPreview` chart shows all the series/data stacked when there is a GroupBy in the rule parameters.
    * e.g., `host.name`, the chart will show stacks of data by hostname.
    * We only need the chart to show the series that is related to the selected alert.
    * The chart series are built based on the GroupBy in the rule params
