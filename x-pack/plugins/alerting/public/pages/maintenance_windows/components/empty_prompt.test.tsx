@@ -29,9 +29,7 @@ describe('EmptyPrompt', () => {
 
     expect(result.getByText('Create your first maintenance window')).toBeInTheDocument();
     expect(
-      result.getByText(
-        'Supress notifications while marking associated alerts as `Under Maintenance`'
-      )
+      result.getByText('Schedule a time period in which rule notifications cease.')
     ).toBeInTheDocument();
   });
 
