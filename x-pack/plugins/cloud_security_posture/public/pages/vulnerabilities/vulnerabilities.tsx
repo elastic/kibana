@@ -5,88 +5,61 @@
  * 2.0.
  */
 import {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiDataGrid,
-  EuiDataGridColumn,
-  EuiDataGridProps,
   EuiLoadingSpinner,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { usePageSize } from '../../common/hooks/use_page_size';
-import { useUrlQuery } from '../../common/hooks/use_url_query';
-import { useLimitProperties } from '../configurations/utils/get_limit_properties';
-import {
-  getPaginationTableParams,
-  useBaseEsQuery,
-  usePersistedQuery,
-} from '../configurations/utils/utils';
+import React, { useMemo } from 'react';
+import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
+import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
 import { VulnerabilityRecord } from './types';
 import { getVulnerabilitiesColumns } from './utils';
+import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
+import { ErrorCallout } from '../configurations/layout/error_callout';
+import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
+import { useDataViewForIndexPattern } from '../../common/api/use_data_view_for_Index_pattern';
 
-const VULN_MGMT_FINDINGS_SORT_KEY = 'csp:vuln-mgmt:findings-sort';
-const VULN_MGMT_FINDINGS_PAGINATION_KEY = 'csp:vuln-mgmt:findings-pagination';
-
-export const getDefaultQuery = ({ query, filters }: any): any => ({
+const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
   filters,
-  sort: { field: '@timestamp', direction: 'desc' },
+  sort: [{ id: 'cvss', direction: 'desc' }],
   pageIndex: 0,
 });
 
-const defaultSorting = {
-  id: 'cvss',
-  direction: 'desc',
-};
-
 export const Vulnerabilities = () => {
-  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
-  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  // const { pageSize, setPageSize } = usePageSize('vulnerabilities-pagination');
+  const {
+    data: dataView,
+    isLoading: dataViewIsLoading,
+    error: dataViewError,
+  } = useDataViewForIndexPattern(LATEST_VULNERABILITIES_INDEX_PATTERN);
 
-  /**
-   * Page ES query result
-   */
+  const {
+    pageIndex,
+    query,
+    sort,
+    queryError,
+    pageSize,
+    onChangeItemsPerPage,
+    onChangePage,
+    onSort,
+    setUrlQuery,
+  } = useCloudPostureTable({
+    dataView,
+    defaultQuery: getDefaultQuery,
+    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+  });
+  const { euiTheme } = useEuiTheme();
+
   const { data, isLoading } = useLatestVulnerabilities({
-    query: urlQuery.query,
-    sort: urlQuery.sort,
-    enabled: true,
+    query,
+    sort,
+    enabled: !queryError && !dataViewError,
   });
-  // Pagination
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
-  const onChangeItemsPerPage = useCallback(
-    (pageSize) =>
-      setPagination((paginationState) => ({
-        ...paginationState,
-        pageSize,
-        pageIndex: 0,
-      })),
-    [setPagination]
-  );
-  const onChangePage = useCallback(
-    (pageIndex) => setPagination((paginationState) => ({ ...paginationState, pageIndex })),
-    [setPagination]
-  );
-
-  // Sorting
-  const [sortingColumns, setSortingColumns] = useState([defaultSorting]);
-  const onSort = useCallback(
-    (sort) => {
-      setSortingColumns(sort);
-    },
-    [setSortingColumns]
-  );
 
   const renderCellValue = useMemo(() => {
     return ({
@@ -96,10 +69,7 @@ export const Vulnerabilities = () => {
       rowIndex: number;
       columnId: typeof columns[number]['id'];
     }) => {
-      const vulnerabilityIndex =
-        Math.floor(pagination?.pageIndex * pagination?.pageSize) + rowIndex;
-
-      const vulnerability = data?.page[vulnerabilityIndex] as VulnerabilityRecord;
+      const vulnerability = data?.page[rowIndex] as VulnerabilityRecord;
 
       if (!vulnerability) return null;
 
@@ -107,7 +77,6 @@ export const Vulnerabilities = () => {
         return (
           <EuiButtonIcon
             iconType="expand"
-            color="primary"
             aria-label="View"
             onClick={() => {
               alert(`Flyout id ${vulnerability.finding?.vulnerability?.id}`);
@@ -141,12 +110,22 @@ export const Vulnerabilities = () => {
         );
       }
       if (columnId === 'fix-version') {
-        return vulnerability.finding?.vulnerability.package.fixed_version || null;
+        return (
+          <>
+            {vulnerability.finding?.vulnerability.package.name}{' '}
+            {vulnerability.finding?.vulnerability.package.fixed_version}
+          </>
+        );
       }
     };
-  }, [data, pagination?.pageIndex, pagination?.pageSize]);
+  }, [data?.page]);
 
-  if (isLoading || !data) {
+  const error = queryError || dataViewError || null;
+
+  if (error) {
+    return <ErrorCallout error={error as Error} />;
+  }
+  if (dataViewIsLoading || isLoading || !data || !dataView) {
     return <EuiLoadingSpinner />;
   }
 
@@ -154,6 +133,13 @@ export const Vulnerabilities = () => {
 
   return (
     <>
+      <FindingsSearchBar
+        dataView={dataView}
+        setQuery={(newQuery) => {
+          setUrlQuery({ ...newQuery, pageIndex: 0 });
+        }}
+        loading={isLoading}
+      />
       <EuiSpacer size="l" />
       <EuiDataGrid
         css={css`
@@ -163,6 +149,12 @@ export const Vulnerabilities = () => {
           & .euiDataGrid__controls {
             border-bottom: none;
           }
+          & .euiButtonIcon {
+            color: ${euiTheme.colors.primary};
+          }
+          & .euiDataGridRowCell {
+            font-size: ${euiTheme.size.m};
+          }
         `}
         aria-label="Data grid styling demo"
         columns={columns}
@@ -170,7 +162,6 @@ export const Vulnerabilities = () => {
           visibleColumns: columns.map(({ id }) => id),
           setVisibleColumns: () => {},
         }}
-        // sorting={{ columns: sortingColumns, onSort }}
         rowCount={data?.total}
         toolbarVisibility={{
           showColumnSelector: false,
@@ -195,10 +186,11 @@ export const Vulnerabilities = () => {
         }}
         renderCellValue={renderCellValue}
         inMemory={{ level: 'sorting' }}
-        sorting={{ columns: sortingColumns, onSort }}
+        sorting={{ columns: sort, onSort }}
         pagination={{
-          ...pagination,
-          pageSizeOptions: [10, 50, 100],
+          pageIndex,
+          pageSize,
+          pageSizeOptions: [10, 25, 100],
           onChangeItemsPerPage,
           onChangePage,
         }}

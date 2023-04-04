@@ -28,6 +28,7 @@ export const getVulnerabilitiesColumns = (): EuiDataGridColumn[] => {
         showMoveLeft: false,
         showMoveRight: false,
       },
+      initialWidth: 140,
     },
     {
       id: 'cvss',
@@ -39,6 +40,7 @@ export const getVulnerabilitiesColumns = (): EuiDataGridColumn[] => {
         showMoveLeft: false,
         showMoveRight: false,
       },
+      initialWidth: 100,
     },
     {
       id: 'resource',

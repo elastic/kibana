@@ -21,13 +21,8 @@ interface FindingsAggs {
 
 export const getFindingsQuery = ({ query, sort }: any) => ({
   index: LATEST_VULNERABILITIES_INDEX_PATTERN,
-  query: {
-    match_all: {},
-  },
-  // sort: sort ?? [{ '@timestamp': { order: 'desc' } }],
+  query,
   size: 500,
-  // aggs: getFindingsCountAggQuery(),
-  // ignore_unavailable: false,
 });
 
 export const useLatestVulnerabilities = (options: any) => {
