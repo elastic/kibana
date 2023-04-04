@@ -239,7 +239,7 @@ export function AgentList({
   latestVersionsFailed,
 }: Props) {
   const { config } = useApmPluginContext();
-  const latestAgentVersionEnabled = !isEmpty(config.latestAgentVersionsFileUrl);
+  const latestAgentVersionEnabled = !isEmpty(config.latestAgentVersionsUrl);
 
   const [selectedAgent, setSelectedAgent] = useState<AgentExplorerItem>();
 

@@ -30,14 +30,14 @@ type AgentLatestVersions = Record<
 
 export const fetchAgentsLatestVersion = async (
   logger: Logger,
-  latestAgentVersionsFileUrl: string
+  latestAgentVersionsUrl: string
 ): Promise<AgentLatestVersionsResponse> => {
-  if (isEmpty(latestAgentVersionsFileUrl)) {
+  if (isEmpty(latestAgentVersionsUrl)) {
     return { data: {} as AgentLatestVersions };
   }
 
   try {
-    const data = await fetchWithTimeout(latestAgentVersionsFileUrl);
+    const data = await fetchWithTimeout(latestAgentVersionsUrl);
 
     return { data };
   } catch (error) {

@@ -85,7 +85,7 @@ export async function getAgents({
       end,
       randomSampler,
     }),
-    fetchAgentsLatestVersion(logger, config.latestAgentVersionsFileUrl),
+    fetchAgentsLatestVersion(logger, config.latestAgentVersionsUrl),
   ]);
 
   const { data: latestVersionsData, error } = latestVersions;

@@ -74,7 +74,7 @@ export function AgentContextualInformation({
   latestVersionsFailed: boolean;
 }) {
   const { core, config } = useApmPluginContext();
-  const latestAgentVersionEnabled = !isEmpty(config.latestAgentVersionsFileUrl);
+  const latestAgentVersionEnabled = !isEmpty(config.latestAgentVersionsUrl);
   const comparisonEnabled = getComparisonEnabled({ core });
   const { rangeFrom, rangeTo } = useDefaultTimeRange();
   const width = latestAgentVersionEnabled ? '20%' : '25%';
