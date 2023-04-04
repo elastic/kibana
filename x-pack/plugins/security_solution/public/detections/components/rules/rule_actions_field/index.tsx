@@ -21,9 +21,8 @@ import { useFormContext } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
-// TODO: [Frequency Integration] check whether we can reuse it from "trigger actions" plugin
 const DEFAULT_FREQUENCY = {
-  notifyWhen: RuleNotifyWhen.CHANGE,
+  notifyWhen: RuleNotifyWhen.ACTIVE,
   throttle: null,
   summary: true,
 };

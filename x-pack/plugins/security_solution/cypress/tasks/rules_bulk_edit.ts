@@ -39,7 +39,6 @@ import {
   UPDATE_SCHEDULE_LOOKBACK_INPUT,
   RULES_BULK_EDIT_SCHEDULES_WARNING,
   RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX,
-  // RULES_BULK_EDIT_ACTIONS_THROTTLE_INPUT,
 } from '../screens/rules_bulk_edit';
 import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
