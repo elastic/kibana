@@ -382,6 +382,20 @@ export function getSpacesUsageCollector(
             'The number of times the "Copy Saved Objects" API has been called with "overwrite" set to false.',
         },
       },
+      'apiCalls.copySavedObjects.compatibilityModeEnabled.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called with "compatibilityMode" set to true.',
+        },
+      },
+      'apiCalls.copySavedObjects.compatibilityModeEnabled.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Copy Saved Objects" API has been called with "compatibilityMode" set to false.',
+        },
+      },
       'apiCalls.resolveCopySavedObjectsErrors.total': {
         type: 'long',
         _meta: {
@@ -415,6 +429,20 @@ export function getSpacesUsageCollector(
         _meta: {
           description:
             'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "createNewCopies" set to false.',
+        },
+      },
+      'apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "compatibilityMode" set to true.',
+        },
+      },
+      'apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "compatibilityMode" set to false.',
         },
       },
       'apiCalls.disableLegacyUrlAliases.total': {
