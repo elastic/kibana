@@ -7,7 +7,7 @@
 import type { Criteria } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
-import { CspFinding } from '../../../common/schemas/csp_finding';
+import { CspFinding } from '../../common/schemas/csp_finding';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 
