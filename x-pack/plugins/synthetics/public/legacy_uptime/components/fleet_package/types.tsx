@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  CodeEditorMode,
   HTTPFields,
   TCPFields,
   ICMPFields,
@@ -12,7 +13,6 @@ import {
   ConfigKey,
   ContentType,
   DataStream,
-  Mode,
   ThrottlingConfigKey,
   ThrottlingSuffix,
   ThrottlingSuffixType,
@@ -28,10 +28,10 @@ export interface PolicyConfig {
 }
 
 export const contentTypesToMode = {
-  [ContentType.FORM]: Mode.FORM,
-  [ContentType.JSON]: Mode.JSON,
-  [ContentType.TEXT]: Mode.PLAINTEXT,
-  [ContentType.XML]: Mode.XML,
+  [ContentType.FORM]: CodeEditorMode.FORM,
+  [ContentType.JSON]: CodeEditorMode.JSON,
+  [ContentType.TEXT]: CodeEditorMode.PLAINTEXT,
+  [ContentType.XML]: CodeEditorMode.XML,
 };
 
 export const configKeyToThrottlingSuffix: Record<ThrottlingConfigKey, ThrottlingSuffixType> = {

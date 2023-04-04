@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  CodeEditorMode,
   BrowserAdvancedFields,
   BrowserSimpleFields,
   CommonFields,
@@ -127,11 +128,12 @@ export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
   [ConfigKey.RESPONSE_STATUS_CHECK]: [],
   [ConfigKey.REQUEST_BODY_CHECK]: {
     value: '',
-    type: Mode.PLAINTEXT,
+    type: CodeEditorMode.PLAINTEXT,
   },
   [ConfigKey.REQUEST_HEADERS_CHECK]: {},
   [ConfigKey.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
   [ConfigKey.USERNAME]: '',
+  [ConfigKey.MODE]: Mode.ANY,
 };
 
 export const DEFAULT_ICMP_SIMPLE_FIELDS: ICMPSimpleFields = {

@@ -35,7 +35,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 describe('<RequestBodyField />', () => {
-  const defaultMode = Mode.PLAINTEXT;
+  const defaultMode = CodeEditorMode.PLAINTEXT;
   const defaultValue = 'sample value';
   const WrappedComponent = () => {
     const [config, setConfig] = useState({

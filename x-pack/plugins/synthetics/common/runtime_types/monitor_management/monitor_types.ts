@@ -11,6 +11,7 @@ import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
+  CodeEditorModeCodec,
   DataStream,
   DataStreamCodec,
   FormMonitorTypeCodec,
@@ -169,20 +170,25 @@ export const HTTPSimpleFieldsCodec = t.intersection([
 export type HTTPSimpleFields = t.TypeOf<typeof HTTPSimpleFieldsCodec>;
 
 // HTTPAdvancedFields
-export const HTTPAdvancedFieldsCodec = t.interface({
-  [ConfigKey.PROXY_URL]: t.string,
-  [ConfigKey.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicyCodec,
-  [ConfigKey.RESPONSE_HEADERS_INDEX]: t.boolean,
-  [ConfigKey.RESPONSE_STATUS_CHECK]: t.array(t.string),
-  [ConfigKey.REQUEST_METHOD_CHECK]: t.string,
-});
+export const HTTPAdvancedFieldsCodec = t.intersection([
+  t.interface({
+    [ConfigKey.PROXY_URL]: t.string,
+    [ConfigKey.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicyCodec,
+    [ConfigKey.RESPONSE_HEADERS_INDEX]: t.boolean,
+    [ConfigKey.RESPONSE_STATUS_CHECK]: t.array(t.string),
+    [ConfigKey.REQUEST_METHOD_CHECK]: t.string,
+  }),
+  t.partial({
+    [ConfigKey.MODE]: ModeCodec,
+  }),
+]);
 
 export const HTTPSensitiveAdvancedFieldsCodec = t.interface({
   [ConfigKey.PASSWORD]: t.string,
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: t.array(t.string),
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: t.array(t.string),
   [ConfigKey.RESPONSE_HEADERS_CHECK]: t.record(t.string, t.string),
-  [ConfigKey.REQUEST_BODY_CHECK]: t.interface({ value: t.string, type: ModeCodec }),
+  [ConfigKey.REQUEST_BODY_CHECK]: t.interface({ value: t.string, type: CodeEditorModeCodec }),
   [ConfigKey.REQUEST_HEADERS_CHECK]: t.record(t.string, t.string),
   [ConfigKey.USERNAME]: t.string,
 });

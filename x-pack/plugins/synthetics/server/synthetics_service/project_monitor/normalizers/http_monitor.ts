@@ -98,10 +98,10 @@ export const getRequestBodyField = (
 
   if (typeof value === 'object') {
     parsedValue = JSON.stringify(value);
-    type = Mode.JSON;
+    type = CodeEditorMode.JSON;
   } else {
     parsedValue = value;
-    type = Mode.PLAINTEXT;
+    type = CodeEditorMode.PLAINTEXT;
   }
   return {
     type,

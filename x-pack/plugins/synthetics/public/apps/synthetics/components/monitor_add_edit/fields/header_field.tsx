@@ -7,12 +7,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ContentType, Mode } from '../types';
+import { ContentType, CodeEditorMode } from '../types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
 
 export interface HeaderFieldProps {
-  contentMode?: Mode;
+  contentMode?: CodeEditorMode;
   defaultValue: Record<string, string>;
   onChange: (value: Record<string, string>) => void;
   onBlur?: () => void;
@@ -72,9 +72,9 @@ export const HeaderField = ({
   );
 };
 
-export const contentTypes: Record<Mode, ContentType> = {
-  [Mode.JSON]: ContentType.JSON,
-  [Mode.PLAINTEXT]: ContentType.TEXT,
-  [Mode.XML]: ContentType.XML,
-  [Mode.FORM]: ContentType.FORM,
+export const contentTypes: Record<CodeEditorMode, ContentType> = {
+  [CodeEditorMode.JSON]: ContentType.JSON,
+  [CodeEditorMode.PLAINTEXT]: ContentType.TEXT,
+  [CodeEditorMode.XML]: ContentType.XML,
+  [CodeEditorMode.FORM]: ContentType.FORM,
 };

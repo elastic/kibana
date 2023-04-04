@@ -27,6 +27,7 @@ export enum ConfigKey {
   JOURNEY_ID = 'journey_id',
   MAX_REDIRECTS = 'max_redirects',
   METADATA = '__ui',
+  MODE = 'mode',
   MONITOR_TYPE = 'type',
   NAME = 'name',
   NAMESPACE = 'namespace',

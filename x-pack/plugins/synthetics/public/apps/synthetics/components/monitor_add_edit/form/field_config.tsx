@@ -62,6 +62,7 @@ import {
   FormMonitorType,
   HTTPMethod,
   ScreenshotOption,
+  Mode,
   MonitorFields,
   TLSVersion,
   VerificationMode,
@@ -1253,6 +1254,30 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         setValue(ConfigKey.SYNTHETICS_ARGS, [...(field?.value || []), newValue]);
       },
       isDisabled: readOnly,
+    }),
+  },
+  [ConfigKey.MODE]: {
+    fieldKey: ConfigKey.MODE,
+    component: Select,
+    label: i18n.translate('xpack.synthetics.monitorConfig.mode.label', {
+      defaultMessage: 'Mode',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.synthetics.monitorConfig.syntheticsArgs.mode.helpText"
+        defaultMessage="If mode is {any}, the monitor pings only one IP address for a hostname. If mode is {all}, the monitor pings all resolvable IPs for a hostname. The mode: {all} setting is useful if you are using a DNS-load balancer and want to ping every IP address for the specified hostname."
+        values={{
+          all: <EuiCode>all</EuiCode>,
+          any: <EuiCode>any</EuiCode>,
+        }}
+      />
+    ),
+    props: (): EuiSelectProps => ({
+      options: Object.values(Mode).map((value) => ({
+        value,
+        text: value,
+      })),
+      disabled: readOnly,
     }),
   },
 });

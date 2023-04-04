@@ -43,6 +43,7 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
       FIELD(readOnly)[ConfigKey.REQUEST_METHOD_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_HEADERS_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_BODY_CHECK],
+      FIELD(readOnly)[ConfigKey.MODE],
     ],
   },
   responseConfig: {

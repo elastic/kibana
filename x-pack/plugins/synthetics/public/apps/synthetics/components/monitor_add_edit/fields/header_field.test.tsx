@@ -95,14 +95,14 @@ describe('<HeaderField />', () => {
   });
 
   it('handles content mode', async () => {
-    const contentMode: Mode = Mode.PLAINTEXT;
+    const contentMode: Mode = CodeEditorMode.PLAINTEXT;
     render(
       <HeaderField defaultValue={defaultValue} onChange={onChange} contentMode={contentMode} />
     );
 
     await waitFor(() => {
       expect(onChange).toBeCalledWith({
-        'Content-Type': contentTypes[Mode.PLAINTEXT],
+        'Content-Type': contentTypes[CodeEditorMode.PLAINTEXT],
       });
     });
   });
