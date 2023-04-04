@@ -5,23 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { schema } from '@kbn/config-schema';
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
-
-export type {
-  ProcedureSchemas,
-  ProcedureName,
-  GetIn,
-  GetResult,
-  BulkGetIn,
-  BulkGetResult,
-  CreateIn,
-  CreateResult,
-  UpdateIn,
-  UpdateResult,
-  DeleteIn,
-  DeleteResult,
-  SearchIn,
-  SearchQuery,
-  SearchResult,
-} from './rpc';
+export const itemResultSchema = schema.object(
+  {
+    item: schema.object({}, { unknowns: 'allow' }),
+    meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  },
+  { unknowns: 'forbid' }
+);
