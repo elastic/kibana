@@ -11,10 +11,14 @@ import { useFilterGroupInternalContext } from './hooks/use_filters';
 import {
   CONTEXT_MENU_RESET,
   CONTEXT_MENU_RESET_TOOLTIP,
+  DISCARD_CHANGES,
   EDIT_CONTROLS,
   FILTER_GROUP_MENU,
-  SAVE_CONTROLS,
 } from './translations';
+
+interface FilterGroupContextMenuProps {
+  additionalMenuItem?: EuiContextMenuPanel['props']['items'];
+}
 
 export const FilterGroupContextMenu = () => {
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
@@ -28,6 +32,7 @@ export const FilterGroupContextMenu = () => {
     initialControls,
     dataViewId,
     setShowFiltersChangedBanner,
+    discardChangesHandler,
   } = useFilterGroupInternalContext();
 
   const toggleContextMenu = useCallback(() => {
@@ -97,18 +102,20 @@ export const FilterGroupContextMenu = () => {
   const editControlsButton = useMemo(
     () => (
       <EuiContextMenuItem
-        icon="pencil"
+        icon={isViewMode ? 'pencil' : 'minusInCircle'}
         onClick={
           isViewMode
             ? withContextMenuAction(switchToEditMode)
-            : withContextMenuAction(switchToViewMode)
+            : withContextMenuAction(discardChangesHandler)
         }
-        data-test-subj={isViewMode ? `filter_group__context--edit` : `filter_group__context--save`}
+        data-test-subj={
+          isViewMode ? `filter_group__context--edit` : `filter_group__context--discard`
+        }
       >
-        {isViewMode ? EDIT_CONTROLS : SAVE_CONTROLS}
+        {isViewMode ? EDIT_CONTROLS : DISCARD_CHANGES}
       </EuiContextMenuItem>
     ),
-    [withContextMenuAction, isViewMode, switchToEditMode, switchToViewMode]
+    [withContextMenuAction, isViewMode, switchToEditMode, discardChangesHandler]
   );
 
   const contextMenuItems = useMemo(

@@ -35,7 +35,7 @@ import { NUM_OF_CONTROLS } from './config';
 import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_sync_to_local_storage';
 import { useViewEditMode } from './hooks/use_view_edit_mode';
 import { FilterGroupContextMenu } from './context_menu';
-import { AddControl, DiscardChanges, SaveControls } from './buttons';
+import { AddControl, SaveControls } from './buttons';
 import { getFilterItemObjListFromControlInput } from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
@@ -392,6 +392,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         openPendingChangesPopover,
         closePendingChangesPopover,
         setShowFiltersChangedBanner,
+        saveChangesHandler,
+        discardChangesHandler,
       }}
     >
       <FilterWrapper className="filter-group__wrapper">
@@ -415,9 +417,6 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SaveControls onClick={saveChangesHandler} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DiscardChanges onClick={discardChangesHandler} />
               </EuiFlexItem>
             </>
           ) : null}
