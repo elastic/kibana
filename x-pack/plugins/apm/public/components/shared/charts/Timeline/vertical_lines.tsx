@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { VerticalGridLines, XYPlot } from 'react-vis';
 import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks';
-import { PlotValues } from './plotUtils';
+import { PlotValues } from './plot_utils';
+import {isFiniteNumber} from "../../../../../common/utils/is_finite_number";
 
 interface VerticalLinesProps {
   marks?: Mark[];
@@ -18,11 +18,11 @@ interface VerticalLinesProps {
 }
 
 export function Vertical_lines({
-  topTraceDuration,
-  plotValues,
-  marks = [],
-}: VerticalLinesProps) {
-  const { width, height, margins, xDomain, tickValues } = plotValues;
+                                 topTraceDuration,
+                                 plotValues,
+                                 marks = [],
+                               }: VerticalLinesProps) {
+  const { width, height, margins, tickValues, xScale } = plotValues;
 
   const markTimes = marks
     .filter((mark) => mark.verticalLine)
@@ -30,38 +30,61 @@ export function Vertical_lines({
 
   const theme = useTheme();
 
+  const tickPositions = tickValues.reduce<number[]>((positions, tick) => {
+    const position = xScale(tick);
+    return isFiniteNumber(position) ? [...positions, position] : positions;
+  }, []);
+
+  const markPositions = markTimes.reduce<number[]>((positions, mark) => {
+    const position = xScale(mark);
+    return isFiniteNumber(position) ? [...positions, position] : positions;
+  }, []);
+
+  const topTraceDurationPosition =
+    topTraceDuration > 0 ? xScale(topTraceDuration) : NaN;
+
   return (
-    <div
+    <svg
+      width={width}
+      height={height + margins.top}
       style={{
         position: 'absolute',
         top: 0,
         left: 0,
       }}
     >
-      <XYPlot
-        dontCheckIfEmpty
-        width={width}
-        height={height + margins.top}
-        margin={margins}
-        xDomain={xDomain}
-      >
-        <VerticalGridLines
-          tickValues={tickValues}
-          style={{ stroke: theme.eui.euiColorLightestShade }}
-        />
-
-        <VerticalGridLines
-          tickValues={markTimes}
-          style={{ stroke: theme.eui.euiColorMediumShade }}
-        />
-
-        {topTraceDuration > 0 && (
-          <VerticalGridLines
-            tickValues={[topTraceDuration]}
-            style={{ stroke: theme.eui.euiColorMediumShade }}
+      <g transform={`translate(0 ${margins.top})`}>
+        {tickPositions.map((position) => (
+          <line
+            key={`tick-${position}`}
+            x1={position}
+            x2={position}
+            y1={0}
+            y2={height}
+            stroke={theme.eui.euiColorLightestShade}
+          />
+        ))}
+        {markPositions.map((position) => (
+          <line
+            key={`mark-${position}`}
+            x1={position}
+            x2={position}
+            y1={0}
+            y2={height}
+            stroke={theme.eui.euiColorMediumShade}
+          />
+        ))}
+        {Number.isFinite(topTraceDurationPosition) && (
+          <line
+            key="topTrace"
+            x1={topTraceDurationPosition}
+            x2={topTraceDurationPosition}
+            y1={0}
+            y2={height}
+            stroke={theme.eui.euiColorMediumShade}
           />
         )}
-      </XYPlot>
-    </div>
+      </g>
+    </svg>
   );
 }
