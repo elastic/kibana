@@ -8,8 +8,7 @@
 import React, { useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { InfraClientStartDeps } from '../../../../../../types';
+import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
 import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
@@ -25,7 +24,7 @@ export const LogsTabContent = () => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
   const { hostNodes, loading } = useHostsViewContext();
-  const { services } = useKibana<InfraClientStartDeps>();
+  const { services } = useKibanaContextForPlugin();
   const { telemetry } = services;
 
   const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
@@ -42,7 +41,6 @@ export const LogsTabContent = () => {
 
   useEffect(() => {
     telemetry.reportHostsViewLogsQuerySubmitted({
-      host_filters: createHostsFilterQueryParam(hostNodes),
       query: filterQuery.query,
     });
   }, [filterQuery.query, hostNodes, telemetry]);
