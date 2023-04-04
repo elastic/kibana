@@ -282,7 +282,7 @@ export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
 export interface UserMessage {
   uniqueId?: string;
-  severity: 'error' | 'warning';
+  severity: 'error' | 'warning' | 'info';
   shortMessage: string;
   longMessage: React.ReactNode | string;
   fixableInEditor: boolean;
@@ -475,6 +475,7 @@ export interface Datasource<T = unknown, P = unknown> {
     deps: {
       frame: FrameDatasourceAPI;
       setState: StateSetter<T>;
+      visualizationInfo?: VisualizationInfo;
     }
   ) => UserMessage[];
 
