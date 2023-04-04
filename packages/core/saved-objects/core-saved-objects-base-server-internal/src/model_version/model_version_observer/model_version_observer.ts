@@ -7,6 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
+import deepEqual from 'fast-deep-equal';
 import { errors } from '@elastic/elasticsearch';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -89,7 +90,10 @@ export class ModelVersionObserver {
     private readonly pollInterval: number = POLL_INTERVAL_MS
   ) {
     const observable = new Rx.Observable<ModelVersionMap>(this.producer.bind(this));
-    this.modelVersionMap$ = observable.pipe(Rx.shareReplay({ bufferSize: 1, refCount: true }));
+    this.modelVersionMap$ = observable.pipe(
+      Rx.distinctUntilChanged(deepEqual),
+      Rx.shareReplay({ bufferSize: 1, refCount: true })
+    );
   }
 
   /**
