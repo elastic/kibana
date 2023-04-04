@@ -9,11 +9,11 @@
 export { schemas } from './rpc';
 export { procedureNames } from './constants';
 
-export type { GetIn } from './get';
-export type { BulkGetIn } from './bulk_get';
-export type { CreateIn } from './create';
-export type { UpdateIn } from './update';
-export type { DeleteIn } from './delete';
-export type { SearchIn } from './search';
+export type { GetIn, GetResult } from './get';
+export type { BulkGetIn, BulkGetResult } from './bulk_get';
+export type { CreateIn, CreateResult } from './create';
+export type { UpdateIn, UpdateResult } from './update';
+export type { DeleteIn, DeleteResult } from './delete';
+export type { SearchIn, SearchQuery, SearchResult } from './search';
 export type { ProcedureSchemas } from './types';
 export type { ProcedureName } from './constants';
