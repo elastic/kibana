@@ -498,7 +498,7 @@ describe('indicator match', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
-        createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true });
+        createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true }));
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
         goToRuleDetails();
         waitForAlertsToPopulate();
@@ -531,7 +531,7 @@ describe('indicator match', () => {
     describe('Duplicates the indicator rule', () => {
       beforeEach(() => {
         deleteAlertsAndRules();
-        createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true });
+        createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true }));
         visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
