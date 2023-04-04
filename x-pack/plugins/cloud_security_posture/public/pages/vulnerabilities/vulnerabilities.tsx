@@ -25,7 +25,7 @@ import { getVulnerabilitiesColumns } from './utils';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
-import { useDataViewForIndexPattern } from '../../common/api/use_data_view_for_Index_pattern';
+import { useDataViewForIndexPattern } from '../../common/api/use_data_view_for_index_pattern';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
