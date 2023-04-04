@@ -29,7 +29,7 @@ import { useLastPage } from './use_last_page';
 const getIconsCss = (hasNextPage: boolean | undefined, euiTheme: EuiThemeComputed<{}>): string => {
   const customSize = hasNextPage
     ? {
-        showMoreSectionSize: euiTheme.size.xxxxl,
+        showMoreSectionSize: euiTheme.size.xxxl,
         marginTopShowMoreSectionSize: euiTheme.size.xxxl,
         marginBottomShowMoreSectionSize: euiTheme.size.xxxl,
       }
