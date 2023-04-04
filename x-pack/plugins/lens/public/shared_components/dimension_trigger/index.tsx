@@ -8,6 +8,10 @@ import { EuiText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+export const emptyTitleText = i18n.translate('xpack.lens.configure.emptyTitle', {
+  defaultMessage: '[No title]',
+});
+
 export const defaultDimensionTriggerTooltip = (
   <p>
     {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
@@ -30,7 +34,9 @@ export const DimensionTrigger = ({ id, label }: { label: string; id: string }) =
     >
       <EuiFlexItem grow={true}>
         <span>
-          <span className="lnsLayerPanel__triggerTextLabel">{label}</span>
+          <span className="lnsLayerPanel__triggerTextLabel">
+            {label.trim().length > 0 ? label : emptyTitleText}
+          </span>
         </span>
       </EuiFlexItem>
     </EuiText>

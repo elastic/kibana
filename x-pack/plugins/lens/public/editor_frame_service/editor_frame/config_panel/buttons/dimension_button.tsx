@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { emptyTitleText } from '../../../../shared_components/dimension_trigger';
 import { DimensionButtonIcon } from '../dimension_button_icon';
 import { PaletteIndicator } from '../palette_indicator';
 import { VisualizationDimensionGroupConfig, AccessorConfig, UserMessage } from '../../../../types';
@@ -17,7 +18,9 @@ import { VisualizationDimensionGroupConfig, AccessorConfig, UserMessage } from '
 const triggerLinkA11yText = (label: string) =>
   i18n.translate('xpack.lens.configure.editConfig', {
     defaultMessage: 'Edit {label} configuration',
-    values: { label },
+    values: {
+      label: label.trim().length ? label : emptyTitleText,
+    },
   });
 
 export function DimensionButton({
