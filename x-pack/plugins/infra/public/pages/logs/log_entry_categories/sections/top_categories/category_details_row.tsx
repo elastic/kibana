@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { PersistedLogViewReference } from '../../../../../../common/log_views';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { TimeRange } from '../../../../../../common/time/time_range';
@@ -16,8 +17,8 @@ const exampleCount = 5;
 export const CategoryDetailsRow: React.FunctionComponent<{
   categoryId: number;
   timeRange: TimeRange;
-  sourceId: string;
-}> = ({ categoryId, timeRange, sourceId }) => {
+  logViewReference: PersistedLogViewReference;
+}> = ({ categoryId, timeRange, logViewReference }) => {
   const {
     getLogEntryCategoryExamples,
     hasFailedLoadingLogEntryCategoryExamples,
@@ -27,7 +28,7 @@ export const CategoryDetailsRow: React.FunctionComponent<{
     categoryId,
     endTime: timeRange.endTime,
     exampleCount,
-    sourceId,
+    logViewReference,
     startTime: timeRange.startTime,
   });
 

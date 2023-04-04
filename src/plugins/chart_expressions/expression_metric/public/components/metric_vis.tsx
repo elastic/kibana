@@ -20,6 +20,7 @@ import {
   Settings,
   MetricWTrend,
   MetricWNumber,
+  SettingsProps,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
@@ -36,6 +37,8 @@ import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar } from '@elastic/eui';
+import { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import {
@@ -177,6 +180,7 @@ export interface MetricVisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderMode: RenderMode;
   filterable: boolean;
+  overrides?: AllowedSettingsOverrides;
 }
 
 export const MetricVis = ({
@@ -186,6 +190,7 @@ export const MetricVis = ({
   fireEvent,
   renderMode,
   filterable,
+  overrides,
 }: MetricVisComponentProps) => {
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
@@ -331,6 +336,11 @@ export const MetricVis = ({
     );
   }, [grid.length, minHeight, scrollDimensions.height]);
 
+  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
+    overrides,
+    'settings'
+  ) as Partial<SettingsProps>;
+
   return (
     <div
       ref={scrollContainerRef}
@@ -357,27 +367,36 @@ export const MetricVis = ({
                   background: defaultColor,
                   barBackground: euiThemeVars.euiColorLightShade,
                 },
+                ...chartTheme,
               },
-              chartTheme,
+              ...(Array.isArray(settingsThemeOverrides)
+                ? settingsThemeOverrides
+                : [settingsThemeOverrides]),
             ]}
             baseTheme={baseTheme}
             onRenderChange={onRenderChange}
-            onElementClick={(events) => {
-              if (!filterable) {
-                return;
-              }
-              events.forEach((event) => {
-                if (isMetricElementEvent(event)) {
-                  const colIdx = breakdownByColumn
-                    ? data.columns.findIndex((col) => col === breakdownByColumn)
-                    : data.columns.findIndex((col) => col === primaryMetricColumn);
-                  const rowLength = grid[0].length;
-                  fireEvent(
-                    buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
-                  );
-                }
-              });
-            }}
+            onElementClick={
+              filterable
+                ? (events) => {
+                    events.forEach((event) => {
+                      if (isMetricElementEvent(event)) {
+                        const colIdx = breakdownByColumn
+                          ? data.columns.findIndex((col) => col === breakdownByColumn)
+                          : data.columns.findIndex((col) => col === primaryMetricColumn);
+                        const rowLength = grid[0].length;
+                        fireEvent(
+                          buildFilterEvent(
+                            event.rowIndex * rowLength + event.columnIndex,
+                            colIdx,
+                            data
+                          )
+                        );
+                      }
+                    });
+                  }
+                : undefined
+            }
+            {...settingsOverrides}
           />
           <Metric id="metric" data={grid} />
         </Chart>
