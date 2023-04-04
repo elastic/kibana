@@ -7,11 +7,11 @@
 import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
+  CodeEditorMode,
   ConfigKey,
   DataStream,
   FormMonitorType,
   HTTPFields,
-  Mode,
   TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
 import {
@@ -94,7 +94,7 @@ export const getRequestBodyField = (
   defaultValue: HTTPFields[ConfigKey.REQUEST_BODY_CHECK]
 ): HTTPFields[ConfigKey.REQUEST_BODY_CHECK] => {
   let parsedValue: string;
-  let type: Mode;
+  let type: CodeEditorMode;
 
   if (typeof value === 'object') {
     parsedValue = JSON.stringify(value);
