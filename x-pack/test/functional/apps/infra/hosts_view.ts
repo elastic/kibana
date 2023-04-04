@@ -5,23 +5,92 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import expect from '@kbn/expect';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import moment from 'moment';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, HOSTS_LINK_LOCAL_STORAGE_KEY, HOSTS_VIEW_PATH } from './constants';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
+const START_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataStartDate);
+const END_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataEndDate);
 const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
+const tableEntries = [
+  {
+    title: 'demo-stack-apache-01',
+    os: '-',
+    cpuUsage: '1.2%',
+    diskLatency: '1.6 ms',
+    rx: '0 bit/s',
+    tx: '0 bit/s',
+    memoryTotal: '3.9 GB',
+    memory: '18.4%',
+  },
+  {
+    title: 'demo-stack-client-01',
+    os: '-',
+    cpuUsage: '0.5%',
+    diskLatency: '8.7 ms',
+    rx: '0 bit/s',
+    tx: '0 bit/s',
+    memoryTotal: '3.9 GB',
+    memory: '13.8%',
+  },
+  {
+    title: 'demo-stack-haproxy-01',
+    os: '-',
+    cpuUsage: '0.8%',
+    diskLatency: '7 ms',
+    rx: '0 bit/s',
+    tx: '0 bit/s',
+    memoryTotal: '3.9 GB',
+    memory: '16.5%',
+  },
+  {
+    title: 'demo-stack-mysql-01',
+    os: '-',
+    cpuUsage: '0.9%',
+    diskLatency: '6.6 ms',
+    rx: '0 bit/s',
+    tx: '0 bit/s',
+    memoryTotal: '3.9 GB',
+    memory: '18.2%',
+  },
+  {
+    title: 'demo-stack-nginx-01',
+    os: '-',
+    cpuUsage: '0.8%',
+    diskLatency: '5.7 ms',
+    rx: '0 bit/s',
+    tx: '0 bit/s',
+    memoryTotal: '3.9 GB',
+    memory: '18%',
+  },
+  {
+    title: 'demo-stack-redis-01',
+    os: '-',
+    cpuUsage: '0.8%',
+    diskLatency: '6.3 ms',
+    rx: '0 bit/s',
+    tx: '0 bit/s',
+    memoryTotal: '3.9 GB',
+    memory: '15.9%',
+  },
+];
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
   const find = getService('find');
+  const kibanaServer = getService('kibanaServer');
+  const observability = getService('observability');
+  const retry = getService('retry');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
     'common',
     'infraHome',
@@ -88,13 +157,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
         kibanaServer.savedObjects.cleanStandardList(),
       ]);
+      await browser.setWindowSize(1600, 1200);
     });
 
     after(() => {
       esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts');
       esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
       browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
     });
 
@@ -150,6 +222,67 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('#Single host Flyout', () => {
+      before(async () => {
+        await setHostViewEnabled(true);
+        await loginWithReadOnlyUser();
+        await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+        await pageObjects.timePicker.setAbsoluteRange(
+          START_HOST_PROCESSES_DATE.format(timepickerFormat),
+          END_HOST_PROCESSES_DATE.format(timepickerFormat)
+        );
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+      });
+
+      after(async () => {
+        await pageObjects.infraHostsView.clickCloseFlyoutButton();
+        await logoutAndDeleteReadOnlyUser();
+      });
+
+      it('should render metadata tab', async () => {
+        const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
+        expect(metadataTab).to.contain('Metadata');
+      });
+
+      describe('should render processes tab', async () => {
+        const processTitles = [
+          'Total processes',
+          'Running',
+          'Sleeping',
+          'Dead',
+          'Stopped',
+          'Idle',
+          'Zombie',
+          'Unknown',
+        ];
+
+        processTitles.forEach((value, index) => {
+          it(`Render title: ${value}`, async () => {
+            await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+            const processesTitleValue =
+              await pageObjects.infraHostsView.getProcessesTabContentTitle(index);
+            const processValue = await processesTitleValue.getVisibleText();
+            expect(processValue).to.eql(value);
+          });
+        });
+
+        it('should render processes total value', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          const processesTotalValue =
+            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+          const processValue = await processesTotalValue.getVisibleText();
+          expect(processValue).to.eql('313');
+        });
+
+        it('should render processes table', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          await pageObjects.infraHostsView.getProcessesTable();
+          await pageObjects.infraHostsView.getProcessesTableBody();
+          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
+        });
+      });
+    });
+
     describe('#Page Content', () => {
       before(async () => {
         await setHostViewEnabled(true);
@@ -170,9 +303,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
       });
 
-      it('should render a table with 6 hosts', async () => {
-        const hosts = await pageObjects.infraHostsView.getHostsTableData();
-        expect(hosts.length).to.equal(6);
+      describe('Hosts table', async () => {
+        let hostRows: WebElementWrapper[] = [];
+
+        before(async () => {
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+        });
+
+        it('should render a table with 6 hosts', async () => {
+          expect(hostRows.length).to.equal(6);
+        });
+
+        it('should render the computed metrics for each host entry', async () => {
+          hostRows.forEach((row, position) => {
+            pageObjects.infraHostsView
+              .getHostsRowData(row)
+              .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[position]));
+          });
+        });
       });
 
       describe('KPI tiles', () => {
@@ -196,6 +344,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Metrics Tab', () => {
+        before(async () => {
+          browser.scrollTop();
+          await pageObjects.infraHostsView.visitMetricsTab();
+        });
+
         it('should load 8 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
           expect(metricCharts.length).to.equal(8);
@@ -206,17 +359,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Alerts Tab', () => {
-        const observability = getService('observability');
-        const testSubjects = getService('testSubjects');
-        const retry = getService('retry');
+      describe('Logs Tab', () => {
+        before(async () => {
+          browser.scrollTop();
+          await pageObjects.infraHostsView.visitLogsTab();
+        });
 
+        it('should load the Logs tab section when clicking on it', async () => {
+          testSubjects.existOrFail('hostsView-logs');
+        });
+      });
+
+      describe('Alerts Tab', () => {
         const ACTIVE_ALERTS = 6;
         const RECOVERED_ALERTS = 4;
         const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
         const COLUMNS = 5;
 
         before(async () => {
+          browser.scrollTop();
           await pageObjects.infraHostsView.visitAlertTab();
         });
 
@@ -225,13 +386,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should correctly render a badge with the active alerts count', async () => {
-          const alertsCountBadge = await pageObjects.infraHostsView.getAlertsTabCountBadge();
-          const alertsCount = await alertsCountBadge.getVisibleText();
+          const alertsCount = await pageObjects.infraHostsView.getAlertsCount();
 
           expect(alertsCount).to.be('6');
         });
 
         describe('#FilterButtonGroup', () => {
+          it('can be filtered to only show "all" alerts using the filter button', async () => {
+            await pageObjects.infraHostsView.setAlertStatusFilter();
+            await retry.try(async () => {
+              const tableRows = await observability.alerts.common.getTableCellsInRows();
+              expect(tableRows.length).to.be(ALL_ALERTS);
+            });
+          });
+
           it('can be filtered to only show "active" alerts using the filter button', async () => {
             await pageObjects.infraHostsView.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
             await retry.try(async () => {
@@ -247,14 +415,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(tableRows.length).to.be(RECOVERED_ALERTS);
             });
           });
-
-          it('can be filtered to only show "all" alerts using the filter button', async () => {
-            await pageObjects.infraHostsView.setAlertStatusFilter();
-            await retry.try(async () => {
-              const tableRows = await observability.alerts.common.getTableCellsInRows();
-              expect(tableRows.length).to.be(ALL_ALERTS);
-            });
-          });
         });
 
         describe('#AlertsTable', () => {
@@ -263,10 +423,73 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should renders the correct number of cells', async () => {
+            await pageObjects.infraHostsView.setAlertStatusFilter();
             await retry.try(async () => {
               const cells = await observability.alerts.common.getTableCells();
               expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
             });
+          });
+        });
+      });
+
+      describe('Search Query', () => {
+        const filtererEntries = tableEntries.slice(0, 3);
+
+        const query = filtererEntries.map((entry) => `host.name :"${entry.title}"`).join(' or ');
+
+        before(async () => {
+          await pageObjects.infraHostsView.submitQuery(query);
+        });
+
+        after(async () => {
+          await pageObjects.infraHostsView.submitQuery('');
+        });
+
+        it('should filter the table content on a search submit', async () => {
+          const hostRows = await pageObjects.infraHostsView.getHostsTableData();
+
+          expect(hostRows.length).to.equal(3);
+
+          hostRows.forEach((row, position) => {
+            pageObjects.infraHostsView
+              .getHostsRowData(row)
+              .then((hostRowData) => expect(hostRowData).to.eql(filtererEntries[position]));
+          });
+        });
+
+        it('should update the KPIs content on a search submit', async () => {
+          await Promise.all(
+            [
+              { metric: 'hosts', value: '3' },
+              { metric: 'cpu', value: '0.8%' },
+              { metric: 'memory', value: '16.2%' },
+              { metric: 'tx', value: '0 bit/s' },
+              { metric: 'rx', value: '0 bit/s' },
+            ].map(async ({ metric, value }) => {
+              const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
+              expect(tileValue).to.eql(value);
+            })
+          );
+        });
+
+        it('should update the alerts count on a search submit', async () => {
+          const alertsCount = await pageObjects.infraHostsView.getAlertsCount();
+
+          expect(alertsCount).to.be('2');
+        });
+
+        it('should update the alerts table content on a search submit', async () => {
+          const ACTIVE_ALERTS = 2;
+          const RECOVERED_ALERTS = 2;
+          const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
+          const COLUMNS = 5;
+
+          await pageObjects.infraHostsView.visitAlertTab();
+
+          await pageObjects.infraHostsView.setAlertStatusFilter();
+          await retry.try(async () => {
+            const cells = await observability.alerts.common.getTableCells();
+            expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
           });
         });
       });

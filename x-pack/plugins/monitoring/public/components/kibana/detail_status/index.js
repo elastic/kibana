@@ -125,7 +125,7 @@ function prepareStaleMessage(status, lastSeenTimestamp, staleStatusThresholdSeco
       {capitalize(status)}
       <span style={{ marginLeft: '8px' }}>
         <EuiToolTip position="top" content={staleMessage}>
-          <EuiBadge iconType="alert" color="warning">
+          <EuiBadge iconType="warning" color="warning">
             {i18n.translate('xpack.monitoring.kibana.detailStatus.staleStatusLabel', {
               defaultMessage: 'Stale',
             })}

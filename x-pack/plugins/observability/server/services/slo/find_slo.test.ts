@@ -54,6 +54,7 @@ describe('FindSLO', () => {
                 transactionName: 'irrelevant',
                 transactionType: 'irrelevant',
                 threshold: 500,
+                index: 'metrics-apm*',
               },
               type: 'sli.apm.transactionDuration',
             },
@@ -65,7 +66,6 @@ describe('FindSLO', () => {
               isRolling: true,
             },
             settings: {
-              timestampField: '@timestamp',
               syncDelay: '1m',
               frequency: '1m',
             },
@@ -79,6 +79,7 @@ describe('FindSLO', () => {
                 isEstimated: false,
               },
             },
+            tags: ['critical', 'k8s'],
             createdAt: slo.createdAt.toISOString(),
             updatedAt: slo.updatedAt.toISOString(),
             enabled: slo.enabled,

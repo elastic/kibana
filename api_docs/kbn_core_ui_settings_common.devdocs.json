@@ -441,7 +441,7 @@
           "\nDenotes the scope of the setting"
         ],
         "signature": [
-          "\"global\" | \"namespace\""
+          "\"namespace\" | \"global\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

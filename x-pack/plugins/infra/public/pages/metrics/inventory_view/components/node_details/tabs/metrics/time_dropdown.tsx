@@ -16,6 +16,7 @@ interface Props {
 
 export const TimeDropdown = (props: Props) => (
   <EuiSelect
+    data-test-subj="infraTimeDropdownSelect"
     fullWidth={true}
     options={[
       {

@@ -90,7 +90,7 @@ export function SavedViewUpdateModal<ViewState extends { id: string; name: strin
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={close}>
+        <EuiButtonEmpty data-test-subj="infraSavedViewUpdateModalCancelButton" onClick={close}>
           <FormattedMessage
             defaultMessage="Cancel"
             id="xpack.infra.waffle.savedViews.cancelButton"

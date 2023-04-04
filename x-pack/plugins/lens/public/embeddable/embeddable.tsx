@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy } from 'lodash';
+import { partition, uniqBy } from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -30,10 +30,10 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
-import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -75,8 +75,7 @@ import {
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -102,7 +101,13 @@ import {
   UserMessagesDisplayLocationId,
 } from '../types';
 
-import { getEditPath, DOC_TYPE } from '../../common';
+import type {
+  AllowedPartitionOverrides,
+  AllowedSettingsOverrides,
+  AllowedGaugeOverrides,
+  AllowedXYOverrides,
+} from '../../common/types';
+import { getEditPath, DOC_TYPE } from '../../common/constants';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
@@ -120,6 +125,7 @@ import {
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
+import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -150,6 +156,18 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
 
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
+  /**
+   * Overrides can tweak the style of the final embeddable and are executed at the end of the Lens rendering pipeline.
+   * Each visualization type offers various type of overrides, per component (i.e. 'setting', 'axisX', 'partition', etc...)
+   *
+   * While it is not possible to pass function/callback/handlers to the renderer, it is possible to overwrite
+   * the current behaviour by passing the "ignore" string to the override prop (i.e. onBrushEnd: "ignore" to stop brushing)
+   */
+  overrides?:
+    | AllowedSettingsOverrides
+    | AllowedXYOverrides
+    | AllowedPartitionOverrides
+    | AllowedGaugeOverrides;
 } & LensBaseEmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
@@ -204,7 +222,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         data-test-subj="embeddable-lens-failure"
         body={
@@ -329,13 +347,15 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
+  if (!messages.length) {
+    return null;
+  }
+
   return (
     <MessageList
       messages={messages}
-      useSmallIconsOnButton={true}
       customButtonStyles={css`
         block-size: ${euiTheme.size.l};
-        border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
         font-size: ${xsFontSize};
         padding: 0 ${euiTheme.size.xs};
         & > * {
@@ -461,34 +481,52 @@ export class Embeddable
         })
     );
 
+    // Use a trigger to distinguish between observables in the subscription
+    const withTrigger = (trigger: 'attributesOrSavedObjectId' | 'searchContext') =>
+      map((input: LensEmbeddableInput) => ({ trigger, input }));
+
     // Re-initialize the visualization if either the attributes or the saved object id changes
-    this.inputReloadSubscriptions.push(
-      input$
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
-            )
-          ),
-          skip(1)
+    const attributesOrSavedObjectId$ = input$.pipe(
+      distinctUntilChanged((a, b) =>
+        fastIsEqual(
+          [
+            'attributes' in a && a.attributes,
+            'savedObjectId' in a && a.savedObjectId,
+            'overrides' in a && a.overrides,
+            'disableTriggers' in a && a.disableTriggers,
+          ],
+          [
+            'attributes' in b && b.attributes,
+            'savedObjectId' in b && b.savedObjectId,
+            'overrides' in b && b.overrides,
+            'disableTriggers' in b && b.disableTriggers,
+          ]
         )
-        .subscribe(async (input) => {
-          await this.initializeSavedVis(input);
-          this.reload();
-        })
+      ),
+      skip(1),
+      withTrigger('attributesOrSavedObjectId')
     );
 
     // Update search context and reload on changes related to search
+    const searchContext$ = shouldFetch$<LensEmbeddableInput>(input$, () => this.getInput()).pipe(
+      withTrigger('searchContext')
+    );
+
+    // Merge and debounce the observables to avoid multiple reloads
     this.inputReloadSubscriptions.push(
-      shouldFetch$<LensEmbeddableInput>(this.getUpdated$(), () => this.getInput()).subscribe(
-        (input) => {
+      merge(searchContext$, attributesOrSavedObjectId$)
+        .pipe(debounceTime(0))
+        .subscribe(async ({ trigger, input }) => {
+          if (trigger === 'attributesOrSavedObjectId') {
+            await this.initializeSavedVis(input);
+          }
+
           // reset removable messages
           // Dashboard search/context changes are detected here
           this.additionalUserMessages = {};
+
           this.reload();
-        }
-      )
+        })
     );
   }
 
@@ -594,6 +632,9 @@ export class Embeddable
       ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
         frame: frameDatasourceAPI,
+        visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
+          this.activeVisualizationState
+        ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
         frame: frameDatasourceAPI,
@@ -867,6 +908,7 @@ export class Embeddable
               variables={{
                 embeddableTitle: this.getTitle(),
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
+                ...('overrides' in input ? { overrides: input.overrides } : {}),
               }}
               searchSessionId={this.getInput().searchSessionId}
               handleEvent={this.handleEvent}
@@ -944,11 +986,16 @@ export class Embeddable
    */
   private renderBadgeMessages = () => {
     const messages = this.getUserMessages('embeddableBadge');
+    const [warningOrErrorMessages, infoMessages] = partition(
+      messages,
+      ({ severity }) => severity !== 'info'
+    );
 
-    if (messages.length && this.badgeDomNode) {
+    if (this.badgeDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <EmbeddableMessagesPopover messages={messages} />
+          <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
+          <EmbeddableFeatureBadge messages={infoMessages} />
         </KibanaThemeProvider>,
         this.badgeDomNode
       );

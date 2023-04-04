@@ -15,7 +15,7 @@ import { getServiceGroups } from './get_service_groups';
 import { getServiceGroup } from './get_service_group';
 import { saveServiceGroup } from './save_service_group';
 import { deleteServiceGroup } from './delete_service_group';
-import { lookupServices } from './lookup_services';
+import { lookupServices, LookupServicesResponse } from './lookup_services';
 import {
   validateServiceGroupKuery,
   SavedServiceGroup,
@@ -84,7 +84,7 @@ const serviceGroupSaveRoute = createApmServerRoute({
     }),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (resources): ReturnType<typeof saveServiceGroup> => {
+  handler: async (resources): Promise<SavedServiceGroup> => {
     const { context, params } = resources;
     const { serviceGroupId } = params.query;
     const {
@@ -132,9 +132,7 @@ const serviceGroupServicesRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{ items: Awaited<ReturnType<typeof lookupServices>> }> => {
+  handler: async (resources): Promise<{ items: LookupServicesResponse }> => {
     const { params, context } = resources;
     const { kuery = '', start, end } = params.query;
     const {

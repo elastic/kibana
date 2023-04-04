@@ -15,14 +15,17 @@ import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
+import { getCpmStatus } from '../../common/utils/get_cpm_status';
 
 export const Configurations = () => {
   const location = useLocation();
   const dataViewQuery = useLatestFindingsDataView();
-  const getSetupStatus = useCspSetupStatusApi();
+  const { data: getSetupStatus } = useCspSetupStatusApi();
+  const { hasFindings, isCspmInstalled } = getCpmStatus(getSetupStatus);
 
-  const hasFindings = getSetupStatus.data?.status === 'indexed';
-  if (!hasFindings) return <NoFindingsStates />;
+  const noFindingsForPostureType = isCspmInstalled ? 'cspm' : 'kspm';
+
+  if (!hasFindings) return <NoFindingsStates posturetype={noFindingsForPostureType} />;
 
   return (
     <CloudPosturePage query={dataViewQuery}>

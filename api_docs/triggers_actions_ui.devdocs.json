@@ -2756,6 +2756,20 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertStatus.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.AlertStatus.status",
             "type": "CompoundType",
             "tags": [],
@@ -3666,6 +3680,27 @@
             "description": [],
             "signature": [
               "{ summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.alertsFilter",
+            "type": "Object",
+            "tags": [],
+            "label": "alertsFilter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.AlertsFilter",
+                "text": "AlertsFilter"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -5588,7 +5623,7 @@
         "signature": [
           "{ alertsTableConfiguration: ",
           "AlertsTableConfigurationRegistry",
-          "; casesData: { cases: Map<string, ",
+          "; cases: { data: Map<string, ",
           "Case",
           ">; isLoading: boolean; }; columns: ",
           "EuiDataGridColumn",
@@ -7032,10 +7067,10 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddAlertFlyout",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddRuleFlyout",
           "type": "Function",
           "tags": [],
-          "label": "getAddAlertFlyout",
+          "label": "getAddRuleFlyout",
           "description": [],
           "signature": [
             "(props: Omit<",
@@ -7050,7 +7085,7 @@
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddAlertFlyout.$1",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddRuleFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -7070,10 +7105,10 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
-          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditRuleFlyout",
           "type": "Function",
           "tags": [],
-          "label": "getEditAlertFlyout",
+          "label": "getEditRuleFlyout",
           "description": [],
           "signature": [
             "(props: Omit<",
@@ -7088,7 +7123,7 @@
           "children": [
             {
               "parentPluginId": "triggersActionsUi",
-              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout.$1",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditRuleFlyout.$1",
               "type": "Object",
               "tags": [],
               "label": "props",

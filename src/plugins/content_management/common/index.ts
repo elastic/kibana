@@ -12,11 +12,16 @@ export type {
   ProcedureSchemas,
   ProcedureName,
   GetIn,
+  GetResult,
   BulkGetIn,
+  BulkGetResult,
   CreateIn,
+  CreateResult,
   UpdateIn,
+  UpdateResult,
   DeleteIn,
+  DeleteResult,
   SearchIn,
+  SearchQuery,
+  SearchResult,
 } from './rpc';
-
-export type { Version } from './types';

@@ -17,7 +17,7 @@ export function TimeoutPrompt({
 }) {
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       iconColor="subdued"
       title={
         <h2>
@@ -46,7 +46,10 @@ export function TimeoutPrompt({
 function ApmSettingsDocLink() {
   const { docLinks } = useApmPluginContext().core;
   return (
-    <EuiLink href={docLinks.links.apm.kibanaSettings}>
+    <EuiLink
+      data-test-subj="apmApmSettingsDocLinkLearnMoreAboutApmSettingsInTheDocsLink"
+      href={docLinks.links.apm.kibanaSettings}
+    >
       {i18n.translate('xpack.apm.serviceMap.timeoutPrompt.docsLink', {
         defaultMessage: 'Learn more about APM settings in the docs',
       })}

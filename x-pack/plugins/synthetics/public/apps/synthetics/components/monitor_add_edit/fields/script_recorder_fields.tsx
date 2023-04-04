@@ -57,12 +57,13 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="syntheticsScriptRecorderFieldsShowScriptButton"
                 onClick={() => setShowScript(true)}
                 iconType="editorCodeBlock"
                 iconSide="right"
               >
                 <FormattedMessage
-                  id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.showScriptLabel"
+                  id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.recorder.showScriptLabel"
                   defaultMessage="Show script"
                 />
               </EuiButton>
@@ -70,13 +71,14 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
             <EuiFlexItem grow={false}>
               {isEditable && (
                 <EuiButton
+                  data-test-subj="syntheticsScriptRecorderFieldsRemoveScriptButton"
                   onClick={() => onChange({ scriptText: '', fileName: '' })}
                   iconType="trash"
                   iconSide="right"
                   color="danger"
                 >
                   <FormattedMessage
-                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.removeScriptLabel"
+                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.recorder.removeScriptLabel"
                     defaultMessage="Remove script"
                   />
                 </EuiButton>

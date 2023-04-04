@@ -77,6 +77,11 @@ export interface ResponseActionExecuteOutputContent {
   /* The current working directory used when the command was executed */
   cwd: string;
   output_file_id: string;
+  /** Informs whether the  stdout/stderr files are
+   * truncated due to size limitations (50 Mb each)
+   * */
+  output_file_stdout_truncated: boolean;
+  output_file_stderr_truncated: boolean;
 }
 
 export const ActivityLogItemTypes = {
@@ -313,6 +318,8 @@ export interface ActionDetails<
   TOutputContent extends object = object,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
+  /** The action id passed only if returnActionIdCommands contains the command */
+  action?: string;
   /** The action id */
   id: string;
   /**

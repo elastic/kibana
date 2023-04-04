@@ -113,6 +113,7 @@ export const ICMPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
         }
       >
         <EuiFieldNumber
+          data-test-subj="syntheticsICMPSimpleFieldsFieldNumber"
           min={0}
           value={fields[ConfigKey.WAIT]}
           onChange={(event) =>

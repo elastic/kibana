@@ -9,6 +9,7 @@ import { AreaSeries, Chart, Fit, LineSeries, ScaleType, Settings } from '@elasti
 import React from 'react';
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
+
 import { useKibana } from '../../../utils/kibana_react';
 
 interface Data {
@@ -23,10 +24,10 @@ export interface Props {
   data: Data[];
   chart: ChartType;
   state: State;
-  loading: boolean;
+  isLoading: boolean;
 }
 
-export function SloSparkline({ chart, data, id, loading, state }: Props) {
+export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
   const charts = useKibana().services.charts;
   const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -36,7 +37,7 @@ export function SloSparkline({ chart, data, id, loading, state }: Props) {
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
-  if (loading) {
+  if (isLoading) {
     return <EuiLoadingChart size="m" mono />;
   }
 
