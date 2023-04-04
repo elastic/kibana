@@ -98,7 +98,7 @@ describe('ModelVersionObserver', () => {
     await flushPromises();
   });
 
-  it('only emits distinct model version maps', async () => {
+  it('will not emit if the model version map is unchanged', async () => {
     (client.indices.get as jest.Mock).mockResolvedValue({
       a: { mappings: { _meta: { mappingVersions: { a: '1' } } } },
     });
