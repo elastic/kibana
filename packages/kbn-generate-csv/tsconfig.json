@@ -24,7 +24,5 @@
     "@kbn/reporting-common",
     "@kbn/config-schema",
     "@kbn/i18n",
-    "@kbn/screenshotting-plugin",
-    "@kbn/utility-types",
   ]
 }
