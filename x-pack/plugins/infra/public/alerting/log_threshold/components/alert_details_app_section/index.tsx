@@ -24,20 +24,23 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
   const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
   const TWENTY_TIMES_RULE_WINDOW_MS = 20 * ruleWindowSizeMS;
 
-  // The `CriterionPreview` chart shows all the series/data when there is a GroupBy in the rule parameters.
-  // e.g., `host. name`, the chart will show stacks of data by hostname.
-  // We only need the chart to show the series that is related to the selected alert.
-  // The chart series are built based on the GroupBy in the rule params
-  // Each series have an id which is the just a joining of fields value of the GroupBy `getChartGroupNames`
-  // We filter down the series using this groupName (id)
-
-  const alertFieldsByGroupBy = compact(
-    Object.keys(alert.fields).map((key) => {
-      const field = rule.params.groupBy?.find((groupByFiled) => groupByFiled === key);
+  /**
+   * The `CriterionPreview` chart shows all the series/data when there is a GroupBy in the rule parameters.
+   * e.g., `host.name`, the chart will show stacks of data by hostname.
+   * We only need the chart to show the series that is related to the selected alert.
+   * The chart series are built based on the GroupBy in the rule params
+   * Each series have an id which is the just a joining of fields value of the GroupBy `getChartGroupNames`
+   * We filter down the series using this group name
+   */
+  const alertFieldsFromGroupBy = compact(
+    rule.params.groupBy?.map((fieldNameGroupBy) => {
+      const field = Object.keys(alert.fields).find(
+        (alertFiledName) => alertFiledName === fieldNameGroupBy
+      );
       if (field) return alert.fields[field];
     })
   );
-  const selectedSeries = getChartGroupNames(alertFieldsByGroupBy);
+  const selectedSeries = getChartGroupNames(alertFieldsFromGroupBy);
 
   /**
    * This is part or the requirements (RFC).
