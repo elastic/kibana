@@ -92,8 +92,6 @@ describe.skip('Alert details expandable flyout left panel', { testIsolation: fal
       .and('have.text', 'Session view');
 
     openGraphAnalyzer();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT)
-      .should('be.visible')
-      .and('have.text', 'Analyzer graph');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('be.visible');
   });
 });

@@ -132,10 +132,9 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines = await client.asCurrentUser.transport.request<SearchResponse>({
-        body: {},
-        method: 'POST',
-        path: `/${request.params.engine_name}/_search`,
+      const engines = await client.asCurrentUser.search<SearchResponse>({
+        index: request.params.engine_name,
+        ...request.body,
       });
       return response.ok({ body: engines });
     })

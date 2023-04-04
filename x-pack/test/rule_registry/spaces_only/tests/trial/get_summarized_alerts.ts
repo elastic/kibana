@@ -37,7 +37,7 @@ import {
   MockAlertState,
   MockAllowedActionGroups,
 } from '../../../common/types';
-import { cleanupRegistryIndices } from '../../../common/lib/helpers/cleanup_registry_indices';
+import { cleanupRegistryIndices, getMockAlertFactory } from '../../../common/lib/helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetSummarizedAlertsTest({ getService }: FtrProviderContext) {
@@ -173,7 +173,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           producer: 'observability.test',
         },
         services: {
-          alertFactory: { create: sinon.stub() },
+          alertFactory: getMockAlertFactory(),
           shouldWriteAlerts: sinon.stub().returns(true),
         },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
@@ -332,7 +332,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           producer: 'observability.test',
         },
         services: {
-          alertFactory: { create: sinon.stub() },
+          alertFactory: getMockAlertFactory(),
           shouldWriteAlerts: sinon.stub().returns(true),
         },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
