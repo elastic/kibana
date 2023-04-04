@@ -128,7 +128,3 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
     return <div ref={controlGroupDomRef} />;
   }
 );
-
-// required for dynamic import using React.lazy()
-// eslint-disable-next-line import/no-default-export
-export default ControlGroupRenderer;

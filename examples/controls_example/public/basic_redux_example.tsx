@@ -14,7 +14,7 @@ import { ControlGroupRenderer, ControlStyle, ControlGroupAPI } from '@kbn/contro
 import { AwaitingControlGroupAPI } from '@kbn/controls-plugin/public/control_group';
 
 export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
-  const [controlGroupAPI, setControlGroupApi] = useState<AwaitingControlGroupAPI>();
+  const [controlGroupAPI, setControlGroupApi] = useState<AwaitingControlGroupAPI>(null);
 
   const Buttons = ({ api }: { api: ControlGroupAPI }) => {
     const controlStyle = api.select((state) => state.explicitInput.controlStyle);
@@ -34,7 +34,7 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
           },
         ]}
         idSelected={controlStyle}
-        onChange={(id, value) => controlGroupAPI?.dispatch.setControlStyle(value)}
+        onChange={(id, value) => api.dispatch.setControlStyle(value)}
         type="single"
       />
     );

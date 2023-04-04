@@ -33,7 +33,7 @@ interface Props {
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
-  const [controlGroup, setControlGroup] = useState<AwaitingControlGroupAPI>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -44,16 +44,16 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-7d', to: 'now' });
 
   useEffect(() => {
-    if (!controlGroup) {
+    if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+    const subscription = controlGroupAPI.onFiltersPublished$.subscribe((newFilters) => {
       setControlFilters([...newFilters]);
     });
     return () => {
       subscription.unsubscribe();
     };
-  }, [controlGroup]);
+  }, [controlGroupAPI]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -153,7 +153,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
             };
           }}
           query={query}
-          ref={setControlGroup}
+          ref={setControlGroupAPI}
           timeRange={timeRange}
         />
         <EuiCallOut title="Search results">
