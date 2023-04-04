@@ -1471,4 +1471,29 @@ describe('MetricVisComponent', function () {
       expect(secondary).toBe('1.12K%');
     });
   });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+  });
 });
