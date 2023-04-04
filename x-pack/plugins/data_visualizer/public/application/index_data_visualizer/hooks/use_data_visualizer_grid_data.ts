@@ -16,6 +16,7 @@ import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
@@ -392,7 +393,7 @@ export const useDataVisualizerGridData = (
   const createNonMetricCards = useCallback(() => {
     const allNonMetricFields = dataViewFields.filter((f) => {
       return (
-        (f.type !== KBN_FIELD_TYPES.NUMBER || f.timeSeriesMetric === 'counter') &&
+        (f.type !== KBN_FIELD_TYPES.NUMBER || isCounterTimeSeriesMetric(f)) &&
         f.displayName !== undefined &&
         isDisplayField(f.displayName) === true
       );

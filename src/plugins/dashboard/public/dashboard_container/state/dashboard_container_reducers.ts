@@ -7,8 +7,14 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
+
+import {
+  DashboardReduxState,
+  DashboardPublicState,
+  DashboardStateFromSaveModal,
+  DashboardStateFromSettingsFlyout,
+} from '../types';
 import { DashboardContainerInput } from '../../../common';
-import { DashboardPublicState, DashboardReduxState, DashboardStateFromSaveModal } from '../types';
 
 export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
@@ -48,6 +54,24 @@ export const dashboardContainerReducers = {
     if (action.payload.timeRange) {
       state.explicitInput.timeRange = action.payload.timeRange;
     }
+  },
+
+  setStateFromSettingsFlyout: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardStateFromSettingsFlyout>
+  ) => {
+    state.componentState.lastSavedId = action.payload.lastSavedId;
+
+    state.explicitInput.tags = action.payload.tags;
+    state.explicitInput.title = action.payload.title;
+    state.explicitInput.description = action.payload.description;
+    state.explicitInput.timeRestore = action.payload.timeRestore;
+
+    state.explicitInput.useMargins = action.payload.useMargins;
+    state.explicitInput.syncColors = action.payload.syncColors;
+    state.explicitInput.syncCursor = action.payload.syncCursor;
+    state.explicitInput.syncTooltips = action.payload.syncTooltips;
+    state.explicitInput.hidePanelTitles = action.payload.hidePanelTitles;
   },
 
   setDescription: (
@@ -101,29 +125,6 @@ export const dashboardContainerReducers = {
 
   resetToLastSavedInput: (state: DashboardReduxState) => {
     state.explicitInput = state.componentState.lastSavedInput;
-  },
-
-  // ------------------------------------------------------------------------------
-  // Options Reducers
-  // ------------------------------------------------------------------------------
-  setUseMargins: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.useMargins = action.payload;
-  },
-
-  setSyncCursor: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.syncCursor = action.payload;
-  },
-
-  setSyncColors: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.syncColors = action.payload;
-  },
-
-  setSyncTooltips: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.syncTooltips = action.payload;
-  },
-
-  setHidePanelTitles: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
-    state.explicitInput.hidePanelTitles = action.payload;
   },
 
   // ------------------------------------------------------------------------------
@@ -196,5 +197,13 @@ export const dashboardContainerReducers = {
 
   setFullScreenMode: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
     state.componentState.fullScreenMode = action.payload;
+  },
+
+  // ------------------------------------------------------------------------------
+  // Component state reducers
+  // ------------------------------------------------------------------------------
+
+  setHasOverlays: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
+    state.componentState.hasOverlays = action.payload;
   },
 };

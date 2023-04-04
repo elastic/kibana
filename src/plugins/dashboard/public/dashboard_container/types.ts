@@ -8,7 +8,7 @@
 
 import type { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import type { DashboardContainerInput } from '../../common/dashboard_container/types';
+import type { DashboardContainerInput, DashboardOptions } from '../../common';
 
 export type DashboardReduxState = ReduxEmbeddableState<
   DashboardContainerInput,
@@ -22,10 +22,13 @@ export type DashboardStateFromSaveModal = Pick<
 > &
   Pick<DashboardPublicState, 'lastSavedId'>;
 
+export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & DashboardOptions;
+
 export interface DashboardPublicState {
   lastSavedInput: DashboardContainerInput;
   isEmbeddedExternally?: boolean;
   hasUnsavedChanges?: boolean;
+  hasOverlays?: boolean;
   expandedPanelId?: string;
   fullScreenMode?: boolean;
   savedQueryId?: string;

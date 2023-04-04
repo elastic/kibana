@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+/* Header */
+
 export const EXPAND_DETAILS_BUTTON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.expandDetailButton',
   { defaultMessage: 'Expand alert details' }
@@ -33,6 +35,64 @@ export const RISK_SCORE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.riskScoreTitle',
   {
     defaultMessage: 'Risk score',
+  }
+);
+
+/* Description section */
+
+export const DESCRIPTION_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.descriptionTitle',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const RULE_DESCRIPTION_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.ruleDescriptionTitle',
+  {
+    defaultMessage: 'Rule description',
+  }
+);
+
+export const DOCUMENT_DESCRIPTION_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.documentDescriptionTitle',
+  {
+    defaultMessage: 'Document description',
+  }
+);
+export const DOCUMENT_DESCRIPTION_EXPAND_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.documentDescriptionExpandButton',
+  {
+    defaultMessage: 'Expand',
+  }
+);
+export const DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.documentDescriptionCollapseButton',
+  {
+    defaultMessage: 'Collapse',
+  }
+);
+
+export const ALERT_REASON_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.alertReasonTitle',
+  {
+    defaultMessage: 'Alert reason',
+  }
+);
+
+export const DOCUMENT_REASON_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.documentReasonTitle',
+  {
+    defaultMessage: 'Document reason',
+  }
+);
+
+/* Investigation section */
+
+export const INVESTIGATION_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationSectionTitle',
+  {
+    defaultMessage: 'Investigation',
   }
 );
 

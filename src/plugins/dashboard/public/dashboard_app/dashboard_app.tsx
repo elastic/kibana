@@ -7,7 +7,6 @@
  */
 
 import { History } from 'history';
-import { css } from '@emotion/react';
 import useMount from 'react-use/lib/useMount';
 import useObservable from 'react-use/lib/useObservable';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -65,11 +64,6 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
-  /**
-   * This state keeps track of the height of the top navigation bar so that padding at the
-   * top of the viewport can be adjusted dynamically.
-   */
-  const [topNavHeight, setTopNavHeight] = useState(0);
 
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
@@ -192,7 +186,7 @@ export function DashboardApp({
   }, [dashboardAPI, kbnUrlStateStorage]);
 
   return (
-    <div className={'dshAppWrapper'}>
+    <div className="dshAppWrapper">
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
@@ -200,28 +194,18 @@ export function DashboardApp({
         <>
           {dashboardAPI && (
             <DashboardAPIContext.Provider value={dashboardAPI}>
-              <DashboardTopNav
-                onHeightChange={setTopNavHeight}
-                redirectTo={redirectTo}
-                embedSettings={embedSettings}
-              />
+              <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
             </DashboardAPIContext.Provider>
           )}
 
           {getLegacyConflictWarning?.()}
-          <div
-            className="dashboardViewportWrapper"
-            css={css`
-              padding-top: ${topNavHeight}px;
-            `}
-          >
-            <DashboardRenderer
-              ref={setDashboardAPI}
-              savedObjectId={savedDashboardId}
-              showPlainSpinner={showPlainSpinner}
-              getCreationOptions={getCreationOptions}
-            />
-          </div>
+
+          <DashboardRenderer
+            ref={setDashboardAPI}
+            savedObjectId={savedDashboardId}
+            showPlainSpinner={showPlainSpinner}
+            getCreationOptions={getCreationOptions}
+          />
         </>
       )}
     </div>

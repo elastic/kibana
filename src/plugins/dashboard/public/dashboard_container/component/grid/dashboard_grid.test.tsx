@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import sizeMe from 'react-sizeme';
 import React from 'react';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -55,21 +54,11 @@ const createAndMountDashboardGrid = () => {
   });
   const component = mountWithIntl(
     <DashboardContainerContext.Provider value={dashboardContainer}>
-      <DashboardGrid />
+      <DashboardGrid viewportWidth={1000} />
     </DashboardContainerContext.Provider>
   );
   return { dashboardContainer, component };
 };
-
-beforeAll(() => {
-  // sizeme detects the width to be 0 in our test environment. noPlaceholder will mean that the grid contents will
-  // get rendered even when width is 0, which will improve our tests.
-  sizeMe.noPlaceholders = true;
-});
-
-afterAll(() => {
-  sizeMe.noPlaceholders = false;
-});
 
 test('renders DashboardGrid', async () => {
   const { component } = createAndMountDashboardGrid();

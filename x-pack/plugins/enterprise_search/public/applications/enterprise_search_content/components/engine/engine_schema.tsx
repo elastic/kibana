@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -19,12 +19,11 @@ import {
   EuiIcon,
   EuiLink,
   EuiPanel,
+  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { FieldIcon } from '@kbn/react-field';
 
 import { SchemaField } from '../../../../../common/types/engines';
 import { docLinks } from '../../../shared/doc_links';
@@ -37,6 +36,7 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { EngineIndicesLogic } from './engine_indices_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
+import { FieldIcon } from './field_icon';
 
 const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaField }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
@@ -144,11 +144,22 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
 
 export const EngineSchema: React.FC = () => {
   const { engineName } = useValues(EngineIndicesLogic);
+  const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
   const { isLoadingEngineSchema, schemaFields } = useValues(EngineViewLogic);
   const { fetchEngineSchema } = useActions(EngineViewLogic);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+
+  const toggleOnlyShowConflicts = useCallback(() => {
+    setOnlyShowConflicts(!onlyShowConflicts);
+    setItemIdToExpandedRowMap({});
+  }, [onlyShowConflicts]);
+
+  const filteredSchemaFields = useMemo(() => {
+    if (onlyShowConflicts) return schemaFields.filter((field) => field.type === 'conflict');
+    return schemaFields;
+  }, [onlyShowConflicts, schemaFields]);
 
   useEffect(() => {
     fetchEngineSchema({ engineName });
@@ -289,16 +300,28 @@ export const EngineSchema: React.FC = () => {
       }}
       engineName={engineName}
     >
-      <>
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexGroup>
+          <EuiSwitch
+            label={i18n.translate(
+              'xpack.enterpriseSearch.content.engine.schema.onlyShowConflicts',
+              {
+                defaultMessage: 'Only show conflicts',
+              }
+            )}
+            checked={onlyShowConflicts}
+            onChange={toggleOnlyShowConflicts}
+          />
+        </EuiFlexGroup>
         <EuiBasicTable
-          items={schemaFields}
+          items={filteredSchemaFields}
           columns={columns}
           loading={isLoadingEngineSchema}
           itemId="name"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isExpandable
         />
-      </>
+      </EuiFlexGroup>
     </EnterpriseSearchEnginesPageTemplate>
   );
 };
