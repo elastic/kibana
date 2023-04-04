@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { useFindCaseUserActions } from './use_find_case_user_actions';
+import { act, renderHook } from '@testing-library/react-hooks';
+
+import { useInfiniteFindCaseUserActions } from './use_infinite_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';
 import * as api from './api';
@@ -23,16 +24,14 @@ const initialData = {
   isLoading: true,
 };
 
-describe('UseFindCaseUserActions', () => {
+describe('UseInfiniteFindCaseUserActions', () => {
   const filterActionType: CaseUserActionTypeWithAll = 'all';
   const sortOrder: 'asc' | 'desc' = 'asc';
   const params = {
     type: filterActionType,
     sortOrder,
-    page: 1,
     perPage: 10,
   };
-
   const isEnabled = true;
 
   let appMockRender: AppMockRenderer;
@@ -45,7 +44,7 @@ describe('UseFindCaseUserActions', () => {
 
   it('returns proper state on findCaseUserActions', async () => {
     const { result, waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
+      () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
       { wrapper: appMockRender.AppWrapper }
     );
 
@@ -55,10 +54,15 @@ describe('UseFindCaseUserActions', () => {
       expect.objectContaining({
         ...initialData,
         data: {
-          userActions: [...findCaseUserActionsResponse.userActions],
-          total: 30,
-          perPage: 10,
-          page: 1,
+          pages: [
+            {
+              userActions: [...findCaseUserActionsResponse.userActions],
+              total: 30,
+              perPage: 10,
+              page: 1,
+            },
+          ],
+          pageParams: [undefined],
         },
         isError: false,
         isLoading: false,
@@ -72,12 +76,11 @@ describe('UseFindCaseUserActions', () => {
 
     const { waitForNextUpdate } = renderHook(
       () =>
-        useFindCaseUserActions(
+        useInfiniteFindCaseUserActions(
           basicCase.id,
           {
             type: 'user',
             sortOrder: 'desc',
-            page: 1,
             perPage: 5,
           },
           isEnabled
@@ -99,12 +102,11 @@ describe('UseFindCaseUserActions', () => {
 
     renderHook(
       () =>
-        useFindCaseUserActions(
+        useInfiniteFindCaseUserActions(
           basicCase.id,
           {
             type: 'user',
             sortOrder: 'desc',
-            page: 1,
             perPage: 5,
           },
           false
@@ -122,7 +124,7 @@ describe('UseFindCaseUserActions', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     const { waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
+      () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
       {
         wrapper: appMockRender.AppWrapper,
       }
@@ -136,5 +138,44 @@ describe('UseFindCaseUserActions', () => {
       expect.any(AbortSignal)
     );
     expect(addError).toHaveBeenCalled();
+  });
+
+  it('fetches next page with correct params', async () => {
+    const spy = jest.spyOn(api, 'findCaseUserActions');
+
+    const { result, waitFor } = renderHook(
+      () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitFor(() => result.current.isSuccess);
+
+    expect(result.current.data?.pages).toStrictEqual([findCaseUserActionsResponse]);
+
+    expect(result.current.hasNextPage).toBe(true);
+
+    act(() => {
+      result.current.fetchNextPage();
+    });
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith(
+        basicCase.id,
+        { type: 'all', sortOrder, page: 2, perPage: 10 },
+        expect.any(AbortSignal)
+      );
+    });
+    await waitFor(() => result.current.data?.pages.length === 2);
+  });
+
+  it('returns hasNextPage correctly', async () => {
+    jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
+
+    const { result } = renderHook(
+      () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    expect(result.current.hasNextPage).toBe(undefined);
   });
 });
