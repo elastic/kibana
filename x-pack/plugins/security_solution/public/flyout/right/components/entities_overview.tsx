@@ -6,27 +6,25 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-
-import { i18n } from '@kbn/i18n';
 import { useRightPanelContext } from '../context';
-import { ENTITIES_TEST_ID } from './test_ids';
-import { ENTITIES_TITLE } from './translations';
+import {
+  ENTITIES_HEADER_TEST_ID,
+  ENTITIES_CONTENT_TEST_ID,
+  ENTITIES_VIEW_ALL_BUTTON_TEST_ID,
+} from './test_ids';
+import { ENTITIES_TITLE, ENTITIES_TEXT, VIEW_ALL } from './translations';
 import { EntityPanel } from './entity_panel';
-import { ENTITY_TYPE, getField } from './utils';
+import { getField } from '../../shared/utils';
+import { ENTITY_TYPE, ENTITY_ICON } from '../../shared/constants';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
-import { VIEW_ALL } from '../../shared/translations';
-import { LeftPanelKey, LeftPanelEntitiesTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
 
+/**
+ * Entities section under Insights section, overview tab. It contains a preview of host and user information.
+ */
 export const EntitiesOverview: React.FC = () => {
   const { eventId, getFieldsData, indexName } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
@@ -36,7 +34,7 @@ export const EntitiesOverview: React.FC = () => {
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelEntitiesTabPath,
+      path: LeftPanelInsightsTabPath,
       params: {
         id: eventId,
         indexName,
@@ -50,37 +48,37 @@ export const EntitiesOverview: React.FC = () => {
 
   return (
     <>
-      <EuiTitle size="xxxs">
-        <EuiText>{ENTITIES_TITLE}</EuiText>
+      <EuiTitle size="xxs" data-test-subj={ENTITIES_HEADER_TEST_ID}>
+        <h5>{ENTITIES_TITLE}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup data-test-subj={ENTITIES_TEST_ID} direction="column" gutterSize="s">
-        <EuiFlexItem>
-          {userName && (
+      <EuiFlexGroup data-test-subj={ENTITIES_CONTENT_TEST_ID} direction="column" gutterSize="s">
+        {userName && (
+          <EuiFlexItem>
             <EntityPanel
               title={userName}
-              type={ENTITY_TYPE.user}
+              iconType={ENTITY_ICON[ENTITY_TYPE.user]}
               content={<UserEntityOverview userName={userName} />}
-              expandable={false}
             />
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {hostName && (
+          </EuiFlexItem>
+        )}
+        {hostName && (
+          <EuiFlexItem>
             <EntityPanel
               title={hostName}
-              type={ENTITY_TYPE.host}
+              iconType={ENTITY_ICON[ENTITY_TYPE.host]}
               content={<HostEntityOverview hostName={hostName} />}
-              expandable={false}
             />
-          )}
-        </EuiFlexItem>
-        <EuiButtonEmpty onClick={goToEntitiesTab} iconType="arrowStart" iconSide="left" size="s">
-          {VIEW_ALL(
-            i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.Entities', {
-              defaultMessage: 'entities',
-            })
-          )}
+          </EuiFlexItem>
+        )}
+        <EuiButtonEmpty
+          onClick={goToEntitiesTab}
+          iconType="arrowStart"
+          iconSide="left"
+          size="s"
+          data-test-subj={ENTITIES_VIEW_ALL_BUTTON_TEST_ID}
+        >
+          {VIEW_ALL(ENTITIES_TEXT)}
         </EuiButtonEmpty>
       </EuiFlexGroup>
     </>

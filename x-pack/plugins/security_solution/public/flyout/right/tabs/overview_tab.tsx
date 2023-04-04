@@ -21,6 +21,7 @@ export const OverviewTab: FC = memo(() => {
       <DescriptionSection />
       <EuiHorizontalRule margin="l" />
       <InvestigationSection />
+      <EuiHorizontalRule margin="l" />
       <Insights />
     </>
   );

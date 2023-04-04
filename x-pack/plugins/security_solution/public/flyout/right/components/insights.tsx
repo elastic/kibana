@@ -6,22 +6,26 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import { INSIGHTS_TEST_ID } from './test_ids';
 import { INSIGHTS_TITLE } from './translations';
-import type { OverviewSectionProps } from '../types';
-import { OverviewHeader } from './overview_header';
 import { EntitiesOverview } from './entities_overview';
+import { ExpandableSection } from './expandable_section';
 
-const Wrapper = styled.div``;
+export interface InsightsSectionProps {
+  /**
+   * Boolean to allow the component to be expanded or collapsed on first render
+   */
+  expanded?: boolean;
+}
 
-export const Insights: React.FC<OverviewSectionProps> = ({ expanded = false }) => {
+/**
+ * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
+ */
+export const Insights: React.FC<InsightsSectionProps> = ({ expanded = false }) => {
   return (
-    <Wrapper data-test-subj={INSIGHTS_TEST_ID}>
-      <OverviewHeader title={INSIGHTS_TITLE} expanded={expanded}>
-        <EntitiesOverview />
-      </OverviewHeader>
-    </Wrapper>
+    <ExpandableSection title={INSIGHTS_TITLE} expanded={expanded} data-test-subj={INSIGHTS_TEST_ID}>
+      <EntitiesOverview />
+    </ExpandableSection>
   );
 };
 

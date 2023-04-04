@@ -14,12 +14,3 @@ export const ENTITY_TYPE = {
   host: 'host',
   user: 'user',
 } as const;
-
-export const getField = (fieldsData: unknown, emptyValue?: string) => {
-  if (typeof fieldsData === 'string') {
-    return fieldsData;
-  } else if (Array.isArray(fieldsData) && fieldsData.length > 0) {
-    return fieldsData[0];
-  }
-  return emptyValue ?? null;
-};

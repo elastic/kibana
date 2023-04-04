@@ -53,7 +53,11 @@ export const HIGHLIGHTED_FIELDS_TEST_ID = 'securitySolutionDocumentDetailsFlyout
 export const HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID = 'query-toggle-header';
 export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
 export const INSIGHTS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsights';
-export const ENTITIES_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntities';
+export const INSIGHTS_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsHeader';
+export const ENTITIES_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesHeader';
+export const ENTITIES_CONTENT_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesContent';
+export const ENTITIES_VIEW_ALL_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesViewAllButton';
 export const ENTITY_PANEL_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanel';
 export const ENTITY_PANEL_ICON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelTypeIcon';
 export const ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID =

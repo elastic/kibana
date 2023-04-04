@@ -38,12 +38,18 @@ const StyledEuiBetaBadge = styled(EuiBetaBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
-const CONTEXT_ID = `flyout-host-entity-overview`;
+const CONTEXT_ID = `flyout-user-entity-overview`;
 
 export interface UserEntityOverviewProps {
+  /**
+   * User name for looking up user related ip addresses and risk classification
+   */
   userName: string;
 }
 
+/**
+ * User preview content for the entities preview in right flyout. It contains ip addresses and risk classification
+ */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
@@ -129,7 +135,6 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         <OverviewDescriptionList
           dataTestSubj={ENTITIES_USER_OVERVIEW_IP_TEST_ID}
           descriptionList={descriptionList}
-          key={'0'}
         />
       </EuiFlexItem>
       <EuiFlexItem>

@@ -15,7 +15,6 @@ import {
   EuiTitle,
   EuiPanel,
 } from '@elastic/eui';
-import { ENTITY_ICON } from './utils';
 import {
   ENTITY_PANEL_TEST_ID,
   ENTITY_PANEL_ICON_TEST_ID,
@@ -23,19 +22,36 @@ import {
   ENTITY_PANEL_HEADER_TEST_ID,
   ENTITY_PANEL_CONTENT_TEST_ID,
 } from './test_ids';
-import type { EntityType } from '../types';
 
 export interface EntityPanelProps {
+  /**
+   * String value of the title to be displayed in the header of panel
+   */
   title: string;
-  type: EntityType;
+  /**
+   * Icon string for displaying the specified icon in the header
+   */
+  iconType: string;
+  /**
+   * Content to show in the content section of the panel
+   */
   content?: string | React.ReactNode;
+  /**
+   * Boolean to determine the panel to be collapsable (with toggle)
+   */
   expandable?: boolean;
+  /**
+   * Boolean to allow the component to be expanded or collapsed on first render
+   */
   expanded?: boolean;
 }
 
+/**
+ * Panel component to display user or host information.
+ */
 export const EntityPanel: React.FC<EntityPanelProps> = ({
   title,
-  type,
+  iconType,
   content,
   expandable = false,
   expanded = false,
@@ -66,14 +82,14 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
     return (
       <EuiButtonIcon
         data-test-subj={ENTITY_PANEL_ICON_TEST_ID}
-        aria-label={`entity-icon-${type}`}
+        aria-label={'entity-icon'}
         color="text"
         display="empty"
-        iconType={ENTITY_ICON[type]}
+        iconType={iconType}
         size="s"
       />
     );
-  }, [type]);
+  }, [iconType]);
 
   const showContent = useMemo(() => {
     if (!content) {
@@ -89,7 +105,7 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
         gutterSize="xs"
         data-test-subj={ENTITY_PANEL_HEADER_TEST_ID}
       >
-        {expandable && toggleIcon}
+        {expandable && content && toggleIcon}
         <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
@@ -98,7 +114,7 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [title, icon, toggleIcon, expandable]);
+  }, [title, icon, content, toggleIcon, expandable]);
 
   return (
     <EuiSplitPanel.Outer grow hasBorder data-test-subj={ENTITY_PANEL_TEST_ID}>

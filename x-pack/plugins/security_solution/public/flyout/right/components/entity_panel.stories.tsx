@@ -7,64 +7,35 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { EuiSpacer } from '@elastic/eui';
 import { EntityPanel } from './entity_panel';
-import type { EntityType } from '../types';
 
 export default {
   component: EntityPanel,
   title: 'Flyout/EntityPanel',
 };
 
-const HOST = 'host';
-const USER = 'user';
-
 const defaultProps = {
   title: 'title',
-  type: HOST as EntityType,
+  iconType: 'storage',
   content: 'test content',
 };
 
 export const Default: Story<void> = () => {
-  return (
-    <>
-      <EntityPanel {...defaultProps} />
-      <EuiSpacer size="m" />
-      <EntityPanel {...defaultProps} type={USER as EntityType} />
-    </>
-  );
+  return <EntityPanel {...defaultProps} />;
 };
 
 export const Expandable: Story<void> = () => {
-  return (
-    <>
-      <EntityPanel {...defaultProps} expandable={true} />
-      <EuiSpacer size="m" />
-      <EntityPanel {...defaultProps} expandable={true} type={USER as EntityType} />
-    </>
-  );
+  return <EntityPanel {...defaultProps} expandable={true} />;
 };
 
 export const ExpandableDefaultOpen: Story<void> = () => {
-  return (
-    <>
-      <EntityPanel {...defaultProps} expandable={true} expanded={true} />
-      <EuiSpacer size="m" />
-      <EntityPanel {...defaultProps} expandable={true} expanded={true} type={USER as EntityType} />
-    </>
-  );
+  return <EntityPanel {...defaultProps} expandable={true} expanded={true} />;
 };
 
-export const Empty: Story<void> = () => {
-  return (
-    <>
-      <EntityPanel {...defaultProps} content={null} />
-      <EuiSpacer size="m" />
-      <EntityPanel {...defaultProps} content={null} type={USER as EntityType} />
-      <EuiSpacer size="m" />
-      <EntityPanel {...defaultProps} expandable={true} content={null} />
-      <EuiSpacer size="m" />
-      <EntityPanel {...defaultProps} expandable={true} content={null} type={USER as EntityType} />
-    </>
-  );
+export const EmptyDefault: Story<void> = () => {
+  return <EntityPanel {...defaultProps} content={null} />;
+};
+
+export const EmptyDefaultExpanded: Story<void> = () => {
+  return <EntityPanel {...defaultProps} expandable={true} content={null} />;
 };

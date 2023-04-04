@@ -37,12 +37,18 @@ import {
 const StyledEuiBetaBadge = styled(EuiBetaBadge)`
   margin-left: ${({ theme }) => theme.eui.euiSizeXS};
 `;
-const CONTEXT_ID = `flyout-user-entity-overview`;
+const CONTEXT_ID = `flyout-host-entity-overview`;
 
 export interface HostEntityOverviewProps {
+  /**
+   * Host name for looking up host related ip addresses and risk classification
+   */
   hostName: string;
 }
 
+/**
+ * Host preview content for the entities preview in right flyout. It contains ip addresses and risk classification
+ */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
@@ -129,7 +135,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         <OverviewDescriptionList
           dataTestSubj={ENTITIES_HOST_OVERVIEW_IP_TEST_ID}
           descriptionList={descriptionList}
-          key={'0'}
         />
       </EuiFlexItem>
       <EuiFlexItem>

@@ -18,9 +18,3 @@ export const ERROR_MESSAGE = (message: string) =>
     values: { message },
     defaultMessage: 'There was an error displaying {message}',
   });
-
-export const VIEW_ALL = (text: string) =>
-  i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.viewAllButton', {
-    values: { text },
-    defaultMessage: 'View all {text}',
-  });
