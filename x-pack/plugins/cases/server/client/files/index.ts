@@ -31,8 +31,7 @@ export const createFileEntities = (files: FileJSON[]): OwnerEntity[] => {
   return fileEntities;
 };
 
-export const deleteFiles = async (fileIds: string[], fileService: FileServiceStart) => {
+export const deleteFiles = async (fileIds: string[], fileService: FileServiceStart) =>
   pMap(fileIds, async (fileId: string) => fileService.delete({ id: fileId }), {
     concurrency: MAX_CONCURRENT_SEARCHES,
   });
-};
