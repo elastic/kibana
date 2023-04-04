@@ -72,6 +72,7 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
+import { createExtensionRegistry, DiscoverExtensionRegistry } from './extensions';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -156,6 +157,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
+  readonly extensions: DiscoverExtensionRegistry;
 }
 
 /**
@@ -210,6 +212,7 @@ export class DiscoverPlugin
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
+  private extensions = createExtensionRegistry();
   private stopUrlTracking: (() => void) | undefined = undefined;
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
@@ -325,7 +328,8 @@ export class DiscoverPlugin
           this.initializerContext,
           this.locator!,
           this.contextLocator!,
-          this.singleDocLocator!
+          this.singleDocLocator!,
+          this.extensions
         );
 
         // make sure the data view list is up to date
@@ -396,6 +400,7 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
+      extensions: this.extensions,
     };
   }
 
@@ -422,7 +427,8 @@ export class DiscoverPlugin
         this.initializerContext,
         this.locator!,
         this.contextLocator!,
-        this.singleDocLocator!
+        this.singleDocLocator!,
+        this.extensions
       );
     };
 
