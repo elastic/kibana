@@ -128,9 +128,15 @@ describe('RPC -> bulkGet()', () => {
                 item: {
                   any: 'object',
                 },
+                meta: {
+                  foo: 'bar',
+                },
               },
             },
           ],
+          meta: {
+            foo: 'bar',
+          },
         },
         outputSchema
       );

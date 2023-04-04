@@ -25,6 +25,7 @@ export const bulkGetSchemas: ProcedureSchemas = {
   out: schema.object(
     {
       hits: schema.arrayOf(getResultSchema),
+      meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
@@ -37,6 +38,11 @@ export interface BulkGetIn<T extends string = string, Options extends void | obj
   options?: Options;
 }
 
-export interface BulkGetResult<T = unknown, M = void> {
-  hits: Array<GetResult<T, M>>;
-}
+export type BulkGetResult<T = unknown, ItemMeta = void, ResultMeta = void> = ResultMeta extends void
+  ? {
+      hits: Array<GetResult<T, ItemMeta>>;
+    }
+  : {
+      hits: Array<GetResult<T, ItemMeta>>;
+      meta: ResultMeta;
+    };
