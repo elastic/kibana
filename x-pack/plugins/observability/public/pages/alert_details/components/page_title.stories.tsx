@@ -36,8 +36,8 @@ const defaultProps = {
 export const PageTitle = Template.bind({});
 PageTitle.args = defaultProps;
 
-export const PageTitleWithCustomAction = Template.bind({});
-PageTitleWithCustomAction.args = {
+export const PageTitleForAnomaly = Template.bind({});
+PageTitleForAnomaly.args = {
   ...{
     alert: {
       ...defaultProps.alert,
@@ -47,11 +47,9 @@ PageTitleWithCustomAction.args = {
       },
     },
   },
-  titleAction: 'detected',
 };
 
 export const PageTitleUsedWithinPageTemplate = TemplateWithPageTemplate.bind({});
 PageTitleUsedWithinPageTemplate.args = {
   ...defaultProps,
-  titleAction: 'breached',
 };

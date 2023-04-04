@@ -56,7 +56,6 @@ export function AlertDetails() {
     http,
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
-  const [titleAction, setTitleAction] = useState<string>();
 
   useEffect(() => {
     if (alert) {
@@ -109,7 +108,7 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle alert={alert} titleAction={titleAction} />,
+        pageTitle: <PageTitle alert={alert} />,
         rightSideItems: [
           <CasesContext
             owner={[observabilityFeatureId]}
@@ -131,7 +130,6 @@ export function AlertDetails() {
           rule={rule}
           timeZone={timeZone}
           setAlertSummaryFields={setSummaryFields}
-          setTitleAction={setTitleAction}
         />
       )}
     </ObservabilityPageTemplate>

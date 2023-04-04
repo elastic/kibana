@@ -33,7 +33,7 @@ describe('Page Title', () => {
     );
   });
 
-  it('should display Anomaly title with custom action', () => {
+  it('should display Anomaly title', () => {
     const props: PageTitleProps = {
       alert: {
         ...defaultProps.alert,
@@ -42,7 +42,6 @@ describe('Page Title', () => {
           [ALERT_RULE_CATEGORY]: 'Anomaly',
         },
       },
-      titleAction: 'detected',
     };
 
     const { getByTestId } = renderComp(props);
