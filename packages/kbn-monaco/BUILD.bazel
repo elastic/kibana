@@ -71,9 +71,9 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--env",
+   "--env",
     "prod",
-    "--no-stats"
+    "--stats=errors-only"
   ],
 )
 

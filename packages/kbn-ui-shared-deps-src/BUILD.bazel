@@ -97,7 +97,7 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--no-stats"
+    "--stats=errors-only"
   ],
 )
 
