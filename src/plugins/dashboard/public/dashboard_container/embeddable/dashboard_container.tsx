@@ -37,7 +37,7 @@ import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-f
 import {
   runClone,
   runSaveAs,
-  showOptions,
+  showSettings,
   runQuickSave,
   replacePanel,
   addFromLibrary,
@@ -521,7 +521,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public runSaveAs = runSaveAs;
   public runQuickSave = runQuickSave;
 
-  public showOptions = showOptions;
+  public showSettings = showSettings;
   public addFromLibrary = addFromLibrary;
 
   public replacePanel = replacePanel;
