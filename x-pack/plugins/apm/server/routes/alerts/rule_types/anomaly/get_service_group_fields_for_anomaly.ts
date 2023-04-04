@@ -74,9 +74,7 @@ export async function getServiceGroupFieldsForAnomaly({
       },
       aggs: {
         ...getServiceGroupFieldsAgg({
-          topHitsOpts: {
-            sort: [{ [TRANSACTION_DURATION]: { order: 'desc' as const } }],
-          },
+          sort: [{ [TRANSACTION_DURATION]: { order: 'desc' as const } }],
         }),
       },
     },

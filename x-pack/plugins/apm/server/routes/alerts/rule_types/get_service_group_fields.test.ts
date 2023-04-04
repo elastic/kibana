@@ -52,7 +52,7 @@ describe('getSourceFields', () => {
 
 describe('getSourceFieldsAgg', () => {
   it('should create a agg for specific source fields', () => {
-    const agg = getServiceGroupFieldsAgg({});
+    const agg = getServiceGroupFieldsAgg();
     expect(agg).toMatchInlineSnapshot(`
       Object {
         "source_fields": Object {
@@ -74,9 +74,7 @@ describe('getSourceFieldsAgg', () => {
   });
 
   it('should create an agg for specific source fields and fields from group-by', () => {
-    const agg = getServiceGroupFieldsAgg({
-      groupByOpts: ['service.node.name', 'service.version'],
-    });
+    const agg = getServiceGroupFieldsAgg();
     expect(agg).toMatchInlineSnapshot(`
       Object {
         "source_fields": Object {
@@ -88,8 +86,6 @@ describe('getSourceFieldsAgg', () => {
                 "service.environment",
                 "service.language.name",
                 "labels",
-                "service.node.name",
-                "service.version",
               ],
             },
             "size": 1,
@@ -101,9 +97,7 @@ describe('getSourceFieldsAgg', () => {
 
   it('should accept options for top_hits options', () => {
     const agg = getServiceGroupFieldsAgg({
-      topHitsOpts: {
-        sort: [{ 'transaction.duration.us': { order: 'desc' } }],
-      },
+      sort: [{ 'transaction.duration.us': { order: 'desc' } }],
     });
     expect(agg).toMatchInlineSnapshot(`
       Object {

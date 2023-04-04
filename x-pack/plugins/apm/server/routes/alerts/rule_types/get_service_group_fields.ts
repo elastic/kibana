@@ -17,19 +17,15 @@ export interface TermsAggFields {
   groupByOpts?: string[] | string | undefined;
 }
 
-export function getServiceGroupFieldsAgg({
-  topHitsOpts,
-  groupByOpts,
-}: TermsAggFields) {
+export function getServiceGroupFieldsAgg(
+  topHitsOpts: AggregationsTopHitsAggregation = {}
+) {
   return {
     source_fields: {
       top_hits: {
         size: 1,
         _source: {
-          includes: [
-            ...SERVICE_GROUP_SUPPORTED_FIELDS,
-            ...(groupByOpts ? [groupByOpts] : []).flat(),
-          ],
+          includes: SERVICE_GROUP_SUPPORTED_FIELDS,
         },
         ...topHitsOpts,
       },
