@@ -23,7 +23,6 @@ import {
   announce,
   Ghost,
 } from './providers';
-import { DragHandle } from './drag_handle';
 import { DropType } from './types';
 import { REORDER_ITEM_MARGIN } from './constants';
 import './sass/drag_drop.scss';
@@ -82,10 +81,6 @@ interface BaseProps {
    * Indicates whether or not this component is draggable.
    */
   draggable?: boolean;
-  /**
-   * Whether to include a drag handle (your component should provide a slot for `dragHandle` prop)
-   */
-  withDragHandle?: boolean;
   /**
    * Additional class names to apply when another element is over the drop target
    */
@@ -269,7 +264,6 @@ const DragInner = memo(function DragInner({
   extraKeyboardHandler,
   ariaDescribedBy,
   setA11yMessage,
-  withDragHandle,
   dataTestSubjPrefix,
   onTrackUICounterEvent,
 }: DragInnerProps) {
@@ -440,7 +434,6 @@ const DragInner = memo(function DragInner({
           (activeDraggingProps && dragType === 'move' && !keyboardMode) ||
           shouldShowGhostImageInstead,
         'domDragDrop--isDragStarted': activeDraggingProps,
-        'domDragDrop--withDragHandle': withDragHandle,
       })}
       data-test-subj={`${dataTestSubjPrefix}_draggable-${value.humanData.label}`}
     >
@@ -495,7 +488,6 @@ const DragInner = memo(function DragInner({
         onDragEnd: dragEnd,
         onDragStart: dragStart,
         onMouseDown: removeSelection,
-        ...(withDragHandle ? { dragHandle: <DragHandle /> } : {}),
       })}
     </div>
   );

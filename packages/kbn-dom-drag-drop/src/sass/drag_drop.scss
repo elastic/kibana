@@ -209,16 +209,6 @@ $reorderItemMargin: 8px;
   }
 }
 
-.domDragDrop__dragHandle {
-  opacity: .5;
-  transition: opacity $euiAnimSpeedFast ease;
-  cursor: grab;
-
-  .domDragDrop:hover & {
-    opacity: 1;
-  }
-}
-
 .domDragDrop__dropOverlayWrapper {
   position: relative;
   height: 100%;
