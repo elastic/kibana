@@ -44,7 +44,7 @@ describe('SyntheticsMonitorClient', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -233,7 +233,7 @@ const deletePayload = [
     ],
     max_redirects: '0',
     name: 'my mon',
-    params: '',
+    params: '{"username":"elastic"}',
     password: '',
     proxy_url: '',
     schedule: { number: '3', unit: 'm' },

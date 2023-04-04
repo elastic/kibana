@@ -12,6 +12,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import {
   invalidLicenseMessage,
@@ -34,6 +35,7 @@ import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { DisabledPrompt } from './disabled_prompt';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -114,8 +116,8 @@ export function ServiceMap({
 }) {
   const theme = useTheme();
   const license = useLicenseContext();
-
   const serviceName = useServiceName();
+  const { config } = useApmPluginContext();
 
   const {
     data = { elements: [] },
@@ -124,7 +126,11 @@ export function ServiceMap({
   } = useFetcher(
     (callApmApi) => {
       // When we don't have a license or a valid license, don't make the request.
-      if (!license || !isActivePlatinumLicense(license)) {
+      if (
+        !license ||
+        !isActivePlatinumLicense(license) ||
+        !config.serviceMapEnabled
+      ) {
         return;
       }
 
@@ -142,7 +148,16 @@ export function ServiceMap({
         },
       });
     },
-    [license, serviceName, environment, start, end, serviceGroupId, kuery]
+    [
+      license,
+      serviceName,
+      environment,
+      start,
+      end,
+      serviceGroupId,
+      kuery,
+      config.serviceMapEnabled,
+    ]
   );
 
   const { ref, height } = useRefDimensions();
@@ -159,6 +174,14 @@ export function ServiceMap({
     return (
       <PromptContainer>
         <LicensePrompt text={invalidLicenseMessage} />
+      </PromptContainer>
+    );
+  }
+
+  if (!config.serviceMapEnabled) {
+    return (
+      <PromptContainer>
+        <DisabledPrompt />
       </PromptContainer>
     );
   }

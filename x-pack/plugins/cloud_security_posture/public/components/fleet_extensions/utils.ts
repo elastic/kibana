@@ -18,18 +18,22 @@ import {
   CLOUDBEAT_AZURE,
   SUPPORTED_POLICY_TEMPLATES,
   SUPPORTED_CLOUDBEAT_INPUTS,
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
 import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
-import { assert } from '../../../common/utils/helpers';
 import { cloudPostureIntegrations } from '../../common/constants';
 
+// Posture policies only support the default namespace
+export const POSTURE_NAMESPACE = 'default';
+
 type PosturePolicyInput =
-  | { type: typeof CLOUDBEAT_AZURE; policy_template: 'cspm' }
-  | { type: typeof CLOUDBEAT_GCP; policy_template: 'cspm' }
-  | { type: typeof CLOUDBEAT_AWS; policy_template: 'cspm' }
-  | { type: typeof CLOUDBEAT_VANILLA; policy_template: 'kspm' }
-  | { type: typeof CLOUDBEAT_EKS; policy_template: 'kspm' };
+  | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_GCP; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_AWS; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_VANILLA; policy_template: typeof KSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_EKS; policy_template: typeof KSPM_POLICY_TEMPLATE };
 
 // Extend NewPackagePolicyInput with known string literals for input type and policy template
 export type NewPackagePolicyPostureInput = NewPackagePolicyInput & PosturePolicyInput;
@@ -75,6 +79,7 @@ export const getPosturePolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
+  namespace: POSTURE_NAMESPACE,
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars
@@ -106,13 +111,3 @@ export const getPolicyTemplateInputOptions = (policyTemplate: PosturePolicyTempl
     icon: o.icon,
     disabled: o.disabled,
   }));
-
-export const getEnabledPostureInput = (policy: NewPackagePolicy) => {
-  // Take first enabled input
-  const input = policy.inputs.find((i) => i.enabled);
-
-  assert(input, 'Missing enabled input'); // We can't provide a default input without knowing the policy template
-  assert(isPostureInput(input), 'Invalid enabled input');
-
-  return input;
-};

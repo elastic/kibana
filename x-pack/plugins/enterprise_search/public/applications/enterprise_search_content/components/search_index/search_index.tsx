@@ -38,6 +38,7 @@ import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/aut
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_configuration';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
+import { NoConnectorRecord } from './crawler/no_connector_record';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
@@ -224,12 +225,16 @@ export const SearchIndex: React.FC = () => {
         rightSideItems: getHeaderActions(index),
       }}
     >
-      <>
-        {indexName === index?.name && (
-          <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-        )}
-        {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
-      </>
+      {isCrawlerIndex(index) && !index.connector ? (
+        <NoConnectorRecord />
+      ) : (
+        <>
+          {indexName === index?.name && (
+            <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+          )}
+          {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
+        </>
+      )}
     </EnterpriseSearchContentPageTemplate>
   );
 };

@@ -11,6 +11,7 @@ import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
+import { PARAMETER_NOT_FOUND } from '../../handlers/action/create_queries';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
@@ -93,7 +94,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
       try {
         const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
-        const { response: osqueryAction } = await createActionHandler(
+        const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
           osqueryContext,
           request.body,
           {
@@ -102,6 +103,11 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             alertData,
           }
         );
+        if (!fleetActionsCount) {
+          return response.badRequest({
+            body: PARAMETER_NOT_FOUND,
+          });
+        }
 
         return response.ok({
           body: { data: osqueryAction },

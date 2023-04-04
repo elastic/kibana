@@ -186,7 +186,12 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} key={`case-action-menu-${theCase.id}`} />
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={panels}
+          key={`case-action-menu-${theCase.id}`}
+          data-test-subj={`case-action-menu-${theCase.id}`}
+        />
       </EuiPopover>
       {deleteAction.isModalVisible ? (
         <ConfirmDeleteCaseModal

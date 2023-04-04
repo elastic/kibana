@@ -29,18 +29,21 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const HostsTable = () => {
   const { baseRequest, setHostViewState, hostViewState } = useHostsViewContext();
-  const { onSubmit, unifiedSearchDateRange } = useUnifiedSearchContext();
+  const { onSubmit, searchCriteria } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
   // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
   // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
-  const { loading, nodes, error } = useSnapshot({
-    ...baseRequest,
-    metrics: HOST_TABLE_METRICS,
-  });
+  const { loading, nodes, error } = useSnapshot(
+    {
+      ...baseRequest,
+      metrics: HOST_TABLE_METRICS,
+    },
+    { abortable: true }
+  );
 
-  const { columns, items } = useHostsTable(nodes, { time: unifiedSearchDateRange });
+  const { columns, items } = useHostsTable(nodes, { time: searchCriteria.dateRange });
 
   useEffect(() => {
     if (hostViewState.loading !== loading || nodes.length !== hostViewState.totalHits) {

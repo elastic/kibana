@@ -38,7 +38,7 @@ interface IndicesTableProps {
   isLoading?: boolean;
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
-  onDelete: (index: ElasticsearchViewIndex) => void;
+  onDelete: (indexName: string) => void;
 }
 
 export const IndicesTable: React.FC<IndicesTableProps> = ({
@@ -175,7 +175,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
                 },
               }
             ),
-          onClick: (index) => onDelete(index),
+          onClick: (index) => onDelete(index.name),
           type: 'icon',
         },
       ],

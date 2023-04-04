@@ -15,6 +15,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 
@@ -84,6 +85,19 @@ export const RisksTable = ({
     <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="none">
       <EuiFlexItem>
         <EuiInMemoryTable<GroupedFindingsEvaluation>
+          className="risk-table"
+          css={
+            compact
+              ? css`
+                  thead {
+                    display: none;
+                  }
+                  .euiTable .euiTableRow .euiTableRowCell {
+                    border-top: none;
+                  }
+                `
+              : undefined
+          }
           items={sortedByComplianceScore}
           columns={columns}
         />

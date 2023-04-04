@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
-import { ServiceLocations } from '../../../../../../../common/runtime_types';
 import { selectServiceLocationsState } from '../../../../state';
 
 import {
@@ -19,10 +18,6 @@ import {
 } from './filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
-
-export const findLocationItem = (query: string, locations: ServiceLocations) => {
-  return locations.find(({ id, label }) => query === id || label === query);
-};
 
 export const FilterGroup = ({
   handleFilterChange,

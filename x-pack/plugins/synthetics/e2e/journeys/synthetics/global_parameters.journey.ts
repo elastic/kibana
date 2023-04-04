@@ -7,6 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { cleanTestParams } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
@@ -32,7 +33,7 @@ journey(`GlobalParameters`, async ({ page, params }) => {
   });
 
   step('Click text=Settings', async () => {
-    await page.click('text=Settings');
+    await page.click(byTestId('settings-page-link'));
     expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/alerting');
   });
   step('Click text=Global Parameters', async () => {

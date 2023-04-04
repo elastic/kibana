@@ -87,7 +87,8 @@ export const CUSTOM_COMBOBOX_OPTION_TEXT = i18n.translate(
 export const FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION = i18n.translate(
   'xpack.lists.exceptions.field.mappingConflict.description',
   {
-    defaultMessage: 'This field is defined as several types across different indices.',
+    defaultMessage:
+      'This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results.',
   }
 );
 

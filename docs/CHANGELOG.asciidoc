@@ -44,8 +44,6 @@ Review important information about the {kib} 8.7.0 release.
 [[release-notes-8.7.0]]
 == {kib} 8.7.0
 
-coming::[8.7.0]
-
 Review the following information about the {kib} 8.7.0 release.
 
 [float]
@@ -187,7 +185,9 @@ Machine Learning::
 * Anomaly Detection wizards: adds geo job wizard {kibana-pull}147043[#147043]
 
 Management::
-Adds field statistics popovers for Data Frame Analytics & Transform creation wizards {kibana-pull}149879[#149879]
+* Adds field statistics popovers for Data Frame Analytics & Transform creation wizards {kibana-pull}149879[#149879]
+* Transforms: Adds date picker to transform wizard for data view with time fields {kibana-pull}149049[#149049]
+* Transforms: Shows health status of transform in UI {kibana-pull}144157[#144157]
 
 Monitoring::
 * Adds duration configuration to Stack Monitoring Cluster Health rule {kibana-pull}147565[#147565]

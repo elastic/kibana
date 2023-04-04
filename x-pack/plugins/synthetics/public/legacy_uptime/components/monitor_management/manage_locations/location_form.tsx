@@ -67,7 +67,7 @@ export const LocationForm = ({
             {
               <FormattedMessage
                 id="xpack.synthetics.monitorManagement.agentCallout.content"
-                defaultMessage='If you intend to run "Browser" monitors on this private location, please ensure you are using the {code} Docker container, which contains the dependencies to run these monitors. For more information, {link}.'
+                defaultMessage='To run "Browser" monitors on this private location, make sure that you&apos;re using the {code} Docker container, which contains the dependencies necessary to run these monitors. For more information, {link}.'
                 values={{
                   code: <EuiCode>elastic-agent-complete</EuiCode>,
                   link: (

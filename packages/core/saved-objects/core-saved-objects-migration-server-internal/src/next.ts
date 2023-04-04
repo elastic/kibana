@@ -43,9 +43,12 @@ import type {
   WaitForMigrationCompletionState,
   CheckTargetMappingsState,
   PrepareCompatibleMigration,
+  CleanupUnknownAndExcluded,
+  CleanupUnknownAndExcludedWaitForTaskState,
 } from './state';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
+import { REMOVED_TYPES } from './core';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -63,12 +66,30 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
-    PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
-      Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
+    CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
+      Actions.cleanupUnknownAndExcluded({
+        client,
+        indexName: state.sourceIndex.value,
+        discardUnknownDocs: state.discardUnknownObjects,
+        excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
+        excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
+        knownTypes: state.knownTypes,
+        removedTypes: REMOVED_TYPES,
+      }),
+    CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK: (
+      state: CleanupUnknownAndExcludedWaitForTaskState
+    ) =>
+      Actions.waitForDeleteByQueryTask({
+        client,
+        taskId: state.deleteByQueryTaskId,
+        timeout: '120s',
+      }),
+    PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
+      Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
@@ -117,7 +138,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.bulkOverwriteTransformedDocuments({
         client,
         index: state.tempIndex,
-        transformedDocs: state.transformedDocBatches[state.currentBatch],
+        operations: state.bulkOperationBatches[state.currentBatch],
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.
@@ -178,14 +199,14 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.bulkOverwriteTransformedDocuments({
         client,
         index: state.targetIndex,
-        transformedDocs: state.transformedDocBatches[state.currentBatch],
+        operations: state.bulkOperationBatches[state.currentBatch],
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.
          * Although any further step must run "refresh" for the target index
-         * before we reach out to the MARK_VERSION_INDEX_READY step.
          * Right now, it's performed during OUTDATED_DOCUMENTS_REFRESH step.
          */
+        refresh: false,
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),

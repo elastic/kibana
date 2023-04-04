@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
@@ -48,7 +49,7 @@ export function validateMetricThreshold({
       };
       metric: string[];
       customMetricsError?: string;
-      customMetrics: Record<string, { aggType?: string; field?: string }>;
+      customMetrics: Record<string, { aggType?: string; field?: string; filter?: string }>;
       equation?: string;
     };
   } & { filterQuery?: string[] } = {};
@@ -169,7 +170,7 @@ export function validateMetricThreshold({
         );
       } else {
         c.customMetrics.forEach((metric) => {
-          const customMetricErrors: { aggType?: string; field?: string } = {};
+          const customMetricErrors: { aggType?: string; field?: string; filter?: string } = {};
           if (!metric.aggType) {
             customMetricErrors.aggType = i18n.translate(
               'xpack.infra.metrics.alertFlyout.error.customMetrics.aggTypeRequired',
@@ -185,6 +186,13 @@ export function validateMetricThreshold({
                 defaultMessage: 'Field is required',
               }
             );
+          }
+          if (metric.aggType === 'count' && metric.filter) {
+            try {
+              fromKueryExpression(metric.filter);
+            } catch (e) {
+              customMetricErrors.filter = e.message;
+            }
           }
           if (!isEmpty(customMetricErrors)) {
             errors[id].customMetrics[metric.name] = customMetricErrors;

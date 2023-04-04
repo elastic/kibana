@@ -76,6 +76,7 @@ interface Props {
   position: PopoverPosition;
   iconHasPanel?: boolean;
   iconSize?: 's' | 'xs';
+  locationId: string;
 }
 
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -107,17 +108,18 @@ export function ActionsPopover({
   position,
   iconHasPanel = true,
   iconSize = 's',
+  locationId,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const location = useLocationName({ locationId: monitor.location.id });
+  const location = useLocationName({ locationId });
   const locationName = location?.label || monitor.location.id;
 
   const isPrivateLocation = !Boolean(location?.isServiceManaged);
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: monitor.location.id,
+    locationId: locationId ?? monitor.location.id,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId });
 

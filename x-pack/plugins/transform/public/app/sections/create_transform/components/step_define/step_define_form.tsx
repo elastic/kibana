@@ -304,7 +304,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                     'xpack.transform.stepDefineForm.datePickerIconTipContent',
                     {
                       defaultMessage:
-                        'The time range will be applied to previews only and will not be part of the final transform configuration.',
+                        'The time range is applied to previews only and will not be part of the final transform configuration.',
                     }
                   )}
                 />
