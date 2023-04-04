@@ -138,12 +138,29 @@ describe('ModelVersionObserver', () => {
   });
 
   it('emits the expected values', async () => {
-    (client.indices.get as jest.Mock).mockResolvedValue({
+    (client.indices.get as jest.Mock).mockResolvedValueOnce({
       '.kibana_type_123': {
         mappings: {
           _meta: {
             mappingVersions: {
               a: '1',
+              b: '2',
+            },
+          },
+        },
+      },
+      '.kibana_type_345': {
+        mappings: {
+          _meta: {}, // bogus
+        },
+      },
+    } as IndicesGetResponse);
+    (client.indices.get as jest.Mock).mockResolvedValueOnce({
+      '.kibana_type_123': {
+        mappings: {
+          _meta: {
+            mappingVersions: {
+              a: '2',
               b: '2',
             },
           },
@@ -162,6 +179,8 @@ describe('ModelVersionObserver', () => {
 
     await tickOnce();
     expect(next).toHaveBeenNthCalledWith(1, { a: 1, b: 2 });
+    await tickOnce();
+    expect(next).toHaveBeenNthCalledWith(2, { a: 2, b: 2 });
 
     sub.unsubscribe();
   });
