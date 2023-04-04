@@ -29,7 +29,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
 
   setup(
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
-    { licensing, management, data, home, charts }: Dependencies
+    { licensing, management, data, home, charts, licenseManagement }: Dependencies
   ) {
     const esSection = management.sections.section.insightsAndAlerting;
 
@@ -75,6 +75,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           history,
           getUrlForApp: application.getUrlForApp,
           theme$,
+          licenseManagementLocator: licenseManagement?.locator,
           executionContext,
         });
 

@@ -375,7 +375,6 @@ export const useDataVisualizerGridData = (
         deletable: field.runtimeField !== undefined,
         supportedAggs: getSupportedAggs(field),
       };
-
       if (field.displayName !== metricConfig.fieldName) {
         metricConfig.displayName = field.displayName;
       }
