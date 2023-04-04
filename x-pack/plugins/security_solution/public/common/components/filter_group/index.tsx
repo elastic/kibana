@@ -6,6 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import type { ControlPanelState, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
 import type {
   ControlGroupInput,
   controlGroupInputBuilder,
@@ -212,8 +213,10 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
      *
      * */
 
-    const localInitialControls = cloneDeep(initialControls);
-    const resultControls = cloneDeep(initialControls);
+    const localInitialControls = cloneDeep(initialControls).filter(
+      (control) => control.persist === true
+    );
+    let resultControls = [] as FilterItemObj[];
 
     let overridingControls = initialUrlParam;
     if (!initialUrlParam || initialUrlParam.length === 0) {
@@ -231,40 +234,28 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
     // if initialUrlParam Exists... replace localInitialControls with what was provided in the Url
     if (overridingControls && !urlDataApplied.current) {
-      let maxInitialControlIdx = Math.max(
-        localInitialControls.length - 1,
-        (overridingControls?.length ?? 1) - 1
-      );
-      for (let counter = overridingControls.length - 1; counter >= 0; counter--) {
-        const urlControl = overridingControls[counter];
-        const idx = localInitialControls.findIndex(
-          (item) => item.fieldName === urlControl.fieldName
-        );
+      if (localInitialControls.length > 0) {
+        localInitialControls.forEach((persistControl) => {
+          const doesPersistControlAlreadyExist = overridingControls?.findIndex(
+            (control) => control.fieldName === persistControl.fieldName
+          );
 
-        if (idx !== -1) {
-          // if index found, replace that with what was provided in the Url
-          resultControls[idx] = {
-            ...localInitialControls[idx],
-            fieldName: urlControl.fieldName,
-            title: urlControl.title ?? urlControl.fieldName,
-            selectedOptions: urlControl.selectedOptions ?? [],
-            existsSelected: urlControl.existsSelected ?? false,
-            exclude: urlControl.exclude ?? false,
-          };
-        } else {
-          // if url param is not available in initialControl, start replacing the last slot in the
-          // initial Control with the last `not found` element in the Url Param
-          //
-          resultControls[maxInitialControlIdx] = {
-            fieldName: urlControl.fieldName,
-            selectedOptions: urlControl.selectedOptions ?? [],
-            title: urlControl.title ?? urlControl.fieldName,
-            existsSelected: urlControl.existsSelected ?? false,
-            exclude: urlControl.exclude ?? false,
-          };
-          maxInitialControlIdx--;
-        }
+          if (doesPersistControlAlreadyExist === -1) {
+            resultControls.push(persistControl);
+          }
+        });
       }
+
+      resultControls = [
+        ...resultControls,
+        ...overridingControls.map((item) => ({
+          fieldName: item.fieldName,
+          title: item.title,
+          selectedOptions: item.selectedOptions ?? [],
+          existsSelected: item.existsSelected ?? false,
+          exclude: item.existsSelected,
+        })),
+      ];
     }
 
     return resultControls;
@@ -333,10 +324,53 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     setShowFiltersChangedBanner(false);
   }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
 
+  const upsertPersistableControls = useCallback(() => {
+    const persistableControls = initialControls.filter((control) => control.persist === true);
+    if (persistableControls.length > 0) {
+      const currentPanels = controlGroup?.getInput().panels;
+      const orderedPanels = (
+        Object.values(currentPanels ?? []) as Array<ControlPanelState<OptionsListEmbeddableInput>>
+      ).sort((a, b) => a.order - b.order);
+      persistableControls.forEach((control) => {
+        const controlExists = (
+          Object.values(currentPanels ?? []) as Array<ControlPanelState<OptionsListEmbeddableInput>>
+        ).findIndex((currControl) => control.fieldName === currControl.explicitInput.fieldName);
+        if (controlExists === -1) {
+          // delete current controls
+          controlGroup?.updateInput({ panels: {} });
+
+          controlGroup?.addOptionsListControl({
+            title: initialControls[0].title,
+            hideExclude: true,
+            hideSort: true,
+            hidePanelTitles: true,
+            placeholder: '',
+            // option List controls will handle an invalid dataview
+            // & display an appropriate message
+            dataViewId: dataViewId ?? '',
+            selectedOptions: initialControls[0].selectedOptions,
+            ...initialControls[0],
+          });
+
+          orderedPanels.forEach((panel) => {
+            if (panel.explicitInput.fieldName)
+              controlGroup?.addOptionsListControl({
+                selectedOptions: [],
+                fieldName: panel.explicitInput.fieldName,
+                dataViewId: dataViewId ?? '',
+                ...panel.explicitInput,
+              });
+          });
+        }
+      });
+    }
+  }, [controlGroup, dataViewId, initialControls]);
+
   const saveChangesHandler = useCallback(() => {
+    upsertPersistableControls();
     switchToViewMode();
     setShowFiltersChangedBanner(false);
-  }, [switchToViewMode]);
+  }, [switchToViewMode, upsertPersistableControls]);
 
   const addControlsHandler = useCallback(() => {
     controlGroup?.openAddDataControlFlyout();

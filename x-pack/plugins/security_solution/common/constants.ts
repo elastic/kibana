@@ -487,6 +487,7 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     fieldName: 'kibana.alert.workflow_status',
     selectedOptions: ['open'],
     hideActionBar: true,
+    persist: true,
   },
   {
     title: 'Severity',
