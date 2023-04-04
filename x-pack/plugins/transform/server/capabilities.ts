@@ -18,7 +18,7 @@ export const TRANSFORM_PLUGIN_ID = 'transform' as const;
 
 export const setupCapabilities = (
   core: Pick<CoreSetup<PluginStartDependencies>, 'capabilities' | 'getStartServices'>,
-  securityPluginSetup?: SecurityPluginSetup
+  securitySetup?: SecurityPluginSetup
 ) => {
   core.capabilities.registerProvider(() => {
     return {
@@ -31,12 +31,12 @@ export const setupCapabilities = (
       return {};
     }
 
-    const isSecurityPluginEnabled = securityPluginSetup?.license.isEnabled() ?? false;
+    const isSecurityPluginEnabled = securitySetup?.license.isEnabled() ?? false;
     const startServices = await core.getStartServices();
-    const [, { security }] = startServices;
+    const [, { security: securityStart }] = startServices;
 
     // If security is not enabled or not available, transform should have full permission
-    if (!isSecurityPluginEnabled || !security) {
+    if (!isSecurityPluginEnabled || !securityStart) {
       return {
         transform: Object.keys(INITIAL_CAPABILITIES).reduce<Record<string, boolean>>((acc, p) => {
           acc[p] = true;
@@ -45,7 +45,7 @@ export const setupCapabilities = (
       };
     }
 
-    const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
+    const checkPrivileges = securityStart.authz.checkPrivilegesDynamicallyWithRequest(request);
 
     const { hasAllRequested, privileges } = await checkPrivileges({
       elasticsearch: {

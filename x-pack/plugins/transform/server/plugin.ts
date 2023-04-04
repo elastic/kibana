@@ -38,11 +38,11 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
 
   setup(
     coreSetup: CoreSetup<PluginStartDependencies>,
-    { licensing, features, alerting, security }: PluginSetupDependencies
+    { licensing, features, alerting, security: securitySetup }: PluginSetupDependencies
   ): {} {
     const { http, getStartServices } = coreSetup;
 
-    setupCapabilities(coreSetup, security);
+    setupCapabilities(coreSetup, securitySetup);
 
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
