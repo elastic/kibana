@@ -122,6 +122,62 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body).to.have.property('results');
         expect(getResponse.body.results.length).to.equal(samplesForFilteredTypes.length);
       });
+
+      it('should reject requests that try to filter by both type and ean', async () => {
+        const sampleType = sampleAssetDocs[0]['asset.type'];
+        const sampleEan = sampleAssetDocs[0]['asset.ean'];
+
+        const getResponse = await supertest
+          .get(ASSETS_ENDPOINT)
+          .query({ type: sampleType, ean: sampleEan })
+          .expect(400);
+
+        expect(getResponse.body.message).to.equal(
+          'Filters "type" and "ean" are mutually exclusive but found both.'
+        );
+      });
+
+      it('should return the asset matching a single ean', async () => {
+        await createSampleAssets(supertest);
+
+        const targetAsset = sampleAssetDocs[0];
+        const singleSampleEan = targetAsset['asset.ean'];
+
+        const getResponse = await supertest
+          .get(ASSETS_ENDPOINT)
+          .query({ size: 5, from: 'now-1d', ean: singleSampleEan })
+          .expect(200);
+
+        expect(getResponse.body).to.have.property('results');
+        expect(getResponse.body.results.length).to.equal(1);
+
+        const returnedAsset = getResponse.body.results[0];
+        delete returnedAsset['@timestamp'];
+        expect(returnedAsset).to.eql(targetAsset);
+      });
+
+      it('should return assets matching multiple eans', async () => {
+        await createSampleAssets(supertest);
+
+        const targetAssets = [sampleAssetDocs[0], sampleAssetDocs[2], sampleAssetDocs[4]];
+        const sampleEans = targetAssets.map((asset) => asset['asset.ean']);
+        sampleEans.push('ean-that-does-not-exist');
+
+        const getResponse = await supertest
+          .get(ASSETS_ENDPOINT)
+          .query({ size: 5, from: 'now-1d', ean: sampleEans })
+          .expect(200);
+
+        expect(getResponse.body).to.have.property('results');
+        expect(getResponse.body.results.length).to.equal(3);
+
+        delete getResponse.body.results[0]['@timestamp'];
+        delete getResponse.body.results[1]['@timestamp'];
+        delete getResponse.body.results[2]['@timestamp'];
+
+        // The order of the expected assets is fixed
+        expect(getResponse.body.results).to.eql(targetAssets);
+      });
     });
   });
 }

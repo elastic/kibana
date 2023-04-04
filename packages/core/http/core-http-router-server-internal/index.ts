@@ -17,4 +17,3 @@ export {
   isKibanaResponse,
   KibanaResponse,
 } from './src/response';
-export { RouteValidator } from './src/validator';
