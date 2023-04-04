@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch } from '@elastic/eui';
+import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 
 const debounceIntervalInMs = 1000;
@@ -16,14 +17,23 @@ const debounceIntervalInMs = 1000;
 export const LogsSearchBar = () => {
   const [filterQuery, setFilterQuery] = useLogsSearchUrlState();
   const [searchText, setSearchText] = useState(filterQuery.query);
+  const { services } = useKibanaContextForPlugin();
+  const { telemetry } = services;
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
   }, []);
 
-  useDebounce(() => setFilterQuery({ ...filterQuery, query: searchText }), debounceIntervalInMs, [
-    searchText,
-  ]);
+  useDebounce(
+    () => {
+      telemetry.reportHostsViewLogsQuerySubmitted({
+        query: filterQuery.query,
+      });
+      setFilterQuery({ ...filterQuery, query: searchText });
+    },
+    debounceIntervalInMs,
+    [searchText]
+  );
 
   return (
     <EuiFieldSearch

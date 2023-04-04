@@ -69,13 +69,6 @@ const hostsEntryClickedEvent: InfraTelemetryEvent = {
 const hostsViewLogsQuerySubmittedEvent: InfraTelemetryEvent = {
   eventType: InfraTelemetryEventTypes.HOSTS_VIEW_LOGS_QUERY_SUBMITTED,
   schema: {
-    host_filters: {
-      type: 'text',
-      _meta: {
-        description: 'Applied host search filter.',
-        optional: false,
-      },
-    },
     query: {
       type: 'text',
       _meta: {

@@ -128,7 +128,6 @@ describe('TelemetryService', () => {
       const telemetry = service.start();
 
       telemetry.reportHostsViewLogsQuerySubmitted({
-        host_filters: 'host.name:(gke-edge-lite-oblt-edge-lite-oblt-poo-f65a47f2-3wgt)',
         query: 'message:info',
       });
 
@@ -136,7 +135,6 @@ describe('TelemetryService', () => {
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
         InfraTelemetryEventTypes.HOSTS_VIEW_LOGS_QUERY_SUBMITTED,
         {
-          host_filters: 'host.name:(gke-edge-lite-oblt-edge-lite-oblt-poo-f65a47f2-3wgt)',
           query: 'message:info',
         }
       );

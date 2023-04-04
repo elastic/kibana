@@ -31,7 +31,6 @@ export interface HostEntryClickedParams {
 }
 
 export interface HostsViewLogsQuerySubmittedParams {
-  host_filters: string;
   query: string;
 }
 
