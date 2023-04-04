@@ -17,7 +17,7 @@ import {
   getWebHookAction,
   getRuleWithWebHookAction,
   getSimpleRuleOutputWithWebHookAction,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   createRule,
 } from '../../utils';
 
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
           log,
           getRuleWithWebHookAction(hookAction.id, true)
         );
-        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+        await waitForRuleSuccess({ supertest, log, id: rule.id });
       });
 
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const rule = await createRule(supertest, log, ruleWithAction);
-        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+        await waitForRuleSuccess({ supertest, log, id: rule.id });
       });
     });
   });
