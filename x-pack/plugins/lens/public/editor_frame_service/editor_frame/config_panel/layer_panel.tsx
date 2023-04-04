@@ -51,9 +51,6 @@ import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targe
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from './flyout_container';
 
-// hide the random sampling settings from the UI
-const DISPLAY_RANDOM_SAMPLING_SETTINGS = false;
-
 const initialActiveDimensionState = {
   isNew: false,
 };
@@ -350,7 +347,7 @@ export function LayerPanel(
               frame: props.framePublicAPI,
             }) &&
               activeVisualization.renderLayerSettings) ||
-              (layerDatasource?.renderLayerSettings && DISPLAY_RANDOM_SAMPLING_SETTINGS)
+              layerDatasource?.renderLayerSettings
           ),
           openLayerSettings: () => setPanelSettingsOpen(true),
           onCloneLayer,
@@ -683,8 +680,8 @@ export function LayerPanel(
           }}
         >
           <div id={layerId}>
-            <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
-              {layerDatasource?.renderLayerSettings && DISPLAY_RANDOM_SAMPLING_SETTINGS && (
+            <div className="lnsIndexPatternDimensionEditor--padded">
+              {layerDatasource?.renderLayerSettings && (
                 <>
                   <NativeRenderer
                     render={layerDatasource.renderLayerSettings}

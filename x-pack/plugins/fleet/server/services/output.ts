@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v5 as uuidv5 } from 'uuid';
+import { omit } from 'lodash';
+import { safeLoad } from 'js-yaml';
 
+import { SavedObjectsUtils } from '@kbn/core/server';
 import type {
   KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import { v5 as uuidv5 } from 'uuid';
-import { omit } from 'lodash';
-import { safeLoad } from 'js-yaml';
 
 import type { NewOutput, Output, OutputSOAttributes, AgentPolicy } from '../types';
 import {
@@ -33,6 +34,7 @@ import {
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
+import { auditLoggingService } from './audit_logging';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -198,19 +200,39 @@ class OutputService {
   }
 
   private async _getDefaultDataOutputsSO(soClient: SavedObjectsClientContract) {
-    return await this.encryptedSoClient.find<OutputSOAttributes>({
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
     });
+
+    for (const output of outputs.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return outputs;
   }
 
   private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
-    return await this.encryptedSoClient.find<OutputSOAttributes>({
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default_monitoring'],
       search: 'true',
     });
+
+    for (const output of outputs.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return outputs;
   }
 
   public async ensureDefaultOutput(
@@ -360,9 +382,17 @@ class OutputService {
       }
     }
 
+    const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'create',
+      id,
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
+
     const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
-      id: options?.id ? outputIdToUuid(options.id) : undefined,
+      id,
     });
 
     return outputSavedObjectToOutput(newSo);
@@ -400,6 +430,14 @@ class OutputService {
       sortOrder: 'desc',
     });
 
+    for (const output of outputs.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
     return {
       items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
@@ -417,6 +455,14 @@ class OutputService {
       search: escapeSearchQueryPhrase(proxyId),
     });
 
+    for (const output of outputs.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
     return {
       items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
@@ -430,6 +476,12 @@ class OutputService {
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id: outputSO.id,
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -466,6 +518,12 @@ class OutputService {
       appContextService.getInternalUserESClient(),
       id
     );
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'delete',
+      id: outputIdToUuid(id),
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
 
     return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
@@ -554,6 +612,12 @@ class OutputService {
         updateData.shipper = null;
       }
     }
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: outputIdToUuid(id),
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
 
     const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,

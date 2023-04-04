@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { useValues } from 'kea';
 
@@ -25,35 +25,30 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldIcon } from '../field_icon';
 
-import { addTypeToResults, ConvertedResultWithType, convertResults } from './convert_results';
+import {
+  addTypeToResults,
+  ConvertedResultWithType,
+  convertResultToFieldsAndIndex,
+  FieldValue,
+} from './convert_results';
 import { useSelectedDocument } from './document_context';
 import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
+import { FieldValueCell } from './field_value_cell';
 
 export const DocumentFlyout: React.FC = () => {
   const { fieldTypesByIndex } = useValues(EngineSearchPreviewLogic);
   const { selectedDocument, setSelectedDocument } = useSelectedDocument();
 
-  const index = selectedDocument?._meta.rawHit._index;
+  if (!selectedDocument) return null;
 
-  const [id, items] = useMemo((): [string | null, ConvertedResultWithType[]] => {
-    const fieldTypes = fieldTypesByIndex[index];
-    if (!selectedDocument || !fieldTypes) return [null, []];
-    const {
-      _meta: { id: encodedId },
-      id: _id,
-      ...otherFields
-    } = selectedDocument;
-    const [, parsedId] = JSON.parse(atob(encodedId));
-    const fields = {
-      ...Object.fromEntries(
-        Object.entries(otherFields).map(([key, { raw: value }]) => [key, value])
-      ),
-      id: parsedId,
-    };
-    return [parsedId, addTypeToResults(convertResults(fields), fieldTypes)];
-  }, [fieldTypesByIndex, index, selectedDocument]);
+  const id = selectedDocument._meta.rawHit.__id;
 
-  if (selectedDocument === null) return null;
+  const { fields, index } = convertResultToFieldsAndIndex(selectedDocument);
+  const fieldTypes = fieldTypesByIndex[index];
+
+  if (!fieldTypes) return null;
+
+  const items = addTypeToResults(fields, fieldTypes);
 
   const columns: Array<EuiBasicTableColumn<ConvertedResultWithType>> = [
     {
@@ -79,9 +74,11 @@ export const DocumentFlyout: React.FC = () => {
         'xpack.enterpriseSearch.content.engine.searchPreview.documentFlyout.valueLabel',
         { defaultMessage: 'Value' }
       ),
-      render: (value: string) => (
+      render: (value: FieldValue) => (
         <EuiText>
-          <code>{value}</code>
+          <code>
+            <FieldValueCell value={value} />
+          </code>
         </EuiText>
       ),
       truncateText: false,
