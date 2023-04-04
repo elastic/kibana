@@ -361,6 +361,7 @@ export default function ({ getService }: FtrProviderContext) {
             proxy_url: '',
             'response.include_body': 'always',
             'response.include_headers': false,
+            'response.include_body_max_bytes': '1024',
             revision: 1,
             schedule: {
               number: '60',
@@ -380,6 +381,7 @@ export default function ({ getService }: FtrProviderContext) {
             'url.port': null,
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
           });
         }
       } finally {
@@ -488,6 +490,7 @@ export default function ({ getService }: FtrProviderContext) {
             urls: '',
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
           });
         }
       } finally {
@@ -592,6 +595,7 @@ export default function ({ getService }: FtrProviderContext) {
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
           });
         }
       } finally {
