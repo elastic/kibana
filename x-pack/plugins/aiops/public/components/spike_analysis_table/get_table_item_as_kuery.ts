@@ -11,8 +11,8 @@ import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from './types';
 
-function isSignificantTerm(arg: unknown): arg is SignificantTerm {
-  return !Array.isArray(arg) && isPopulatedObject(arg, ['fieldName', 'fieldValue']);
+export function isSignificantTerm(arg: unknown): arg is SignificantTerm {
+  return isPopulatedObject(arg, ['fieldName', 'fieldValue']);
 }
 
 export const getTableItemAsKuery = (tableItem: GroupTableItem | SignificantTerm) => {
