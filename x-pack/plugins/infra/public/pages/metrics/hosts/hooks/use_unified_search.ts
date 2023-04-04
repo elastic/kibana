@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
 import { useCallback, useEffect } from 'react';
-import { buildEsQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import DateMath from '@kbn/datemath';
+import { buildEsQuery, type Query } from '@kbn/es-query';
 import { map, skip, startWith } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
-import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import {
   useHostsUrlState,
@@ -34,10 +34,15 @@ const buildQuerySubmittedPayload = (
   };
 };
 
+const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
+
+const getDefaultFromTimestamp = () => Date.now() - DEFAULT_FROM_IN_MILLISECONDS;
+const getDefaultToTimestamp = () => Date.now();
+
 export const useUnifiedSearch = () => {
-  const { state, dispatch, getTime, getDateRangeAsTimestamp } = useHostsUrlState();
+  const [state, setState] = useHostsUrlState();
   const { dataView } = useMetricsDataViewContext();
-  const { services } = useKibana<InfraClientStartDeps>();
+  const { services } = useKibanaContextForPlugin();
   const {
     data: {
       query: {
@@ -49,34 +54,7 @@ export const useUnifiedSearch = () => {
     telemetry,
   } = services;
 
-  const onSubmit = useCallback(
-    (data?: {
-      query?: Query;
-      dateRange?: TimeRange;
-      filters?: Filter[];
-      panelFilters?: Filter[];
-    }) => {
-      const {
-        panelFilters,
-        query,
-        // Makes sure default values are set in case `onSubmit` is called outside the unified search observables subscription
-        // and prevents their state values from being cleared.
-        dateRange = getTime(),
-        filters = filterManagerService.getFilters(),
-      } = data ?? {};
-
-      dispatch({
-        type: 'setQuery',
-        payload: {
-          query,
-          filters,
-          dateRange,
-          panelFilters,
-        },
-      });
-    },
-    [dispatch, filterManagerService, getTime]
-  );
+  const onSubmit = setState;
 
   const loadFiltersFromState = useCallback(() => {
     if (!deepEqual(filterManagerService.getFilters(), state.filters)) {
@@ -90,16 +68,9 @@ export const useUnifiedSearch = () => {
     }
   }, [queryStringService, state.query]);
 
-  const loadDateRangeFromState = useCallback(() => {
-    if (!deepEqual(timeFilterService.timefilter.getTime(), state.dateRange)) {
-      timeFilterService.timefilter.setTime(state.dateRange);
-    }
-  }, [timeFilterService, state.dateRange]);
-
   useEffectOnce(() => {
     loadFiltersFromState();
     loadQueryFromState();
-    loadDateRangeFromState();
   });
 
   useEffect(() => {
@@ -113,29 +84,30 @@ export const useUnifiedSearch = () => {
       map(() => queryStringService.getQuery() as Query)
     );
 
-    const dateRange$ = timeFilterService.timefilter.getTimeUpdate$().pipe(
-      startWith(undefined),
-      map(() => getTime())
-    );
-
     const subscription = combineLatest({
       filters: filters$,
       query: query$,
-      dateRange: dateRange$,
     })
       .pipe(skip(1))
-      .subscribe(({ filters, query, dateRange }) => {
-        onSubmit({
+      .subscribe(({ filters, query }) => {
+        setState({
           query,
           filters,
-          dateRange,
         });
       });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [filterManagerService, getTime, onSubmit, queryStringService, timeFilterService.timefilter]);
+  }, [filterManagerService, setState, queryStringService, timeFilterService.timefilter]);
+
+  const getDateRangeAsTimestamp = useCallback(() => {
+    const from = DateMath.parse(state.dateRange.from)?.valueOf() ?? getDefaultFromTimestamp();
+    const to =
+      DateMath.parse(state.dateRange.to, { roundUp: true })?.valueOf() ?? getDefaultToTimestamp();
+
+    return { from, to };
+  }, [state.dateRange]);
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {
@@ -145,19 +117,15 @@ export const useUnifiedSearch = () => {
     );
   }, [getDateRangeAsTimestamp, state, telemetry]);
 
-  const getAllFilters = useCallback(
-    () => [...state.filters, ...state.panelFilters],
-    [state.filters, state.panelFilters]
-  );
   const buildQuery = useCallback(() => {
-    return buildEsQuery(dataView, state.query, getAllFilters());
-  }, [dataView, state.query, getAllFilters]);
+    return buildEsQuery(dataView, state.query, [...state.filters, ...state.panelFilters]);
+  }, [dataView, state.query, state.filters, state.panelFilters]);
 
   return {
     buildQuery,
     onSubmit,
     getDateRangeAsTimestamp,
-    searchCriteria: { ...state },
+    searchCriteria: state,
   };
 };
 
