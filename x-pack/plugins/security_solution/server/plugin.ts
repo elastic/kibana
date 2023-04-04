@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import LRU from 'lru-cache';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
@@ -16,7 +17,6 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
-import LRU from '../node_modules/lru-cache';
 
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
@@ -142,6 +142,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
+    appFeatures.init(plugins.features);
 
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
@@ -293,10 +294,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerLimitedConcurrencyRoutes(core);
     registerPolicyRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
-
-    appFeatures.setup(core, plugins);
-    // plugins.features.registerKibanaFeature(getSecuritySolutionKibanaFeature(experimentalFeatures));
-    // plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationAlertType({ logger });

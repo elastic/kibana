@@ -7,6 +7,8 @@
 
 import type { AppFeatureKeys } from '../../../common';
 
+// DEFAULT_APP_FEATURES should be enabled all appFeatures by default. Authorization is handled by the Kibana role-based privileges.
+// Different distributions can disable appFeatures by using the setAppFeatures() method exposed in the plugin setup contract.
 export const DEFAULT_APP_FEATURES: AppFeatureKeys = {
   cases_base: true,
   rules_load_prepackaged: true,
