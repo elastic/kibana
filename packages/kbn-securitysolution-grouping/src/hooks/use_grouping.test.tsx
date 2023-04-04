@@ -70,6 +70,8 @@ describe('useGrouping', () => {
                 value: 18,
               },
             },
+            renderChildComponent: jest.fn(),
+            selectedGroup: 'test',
           })}
         </IntlProvider>
       );
@@ -84,7 +86,7 @@ describe('useGrouping', () => {
       getItem.mockReturnValue(
         JSON.stringify({
           'test-table': {
-            activePage: 0,
+            itemsPerPageOptions: [10, 25, 50, 100],
             itemsPerPage: 25,
             activeGroup: 'kibana.alert.rule.name',
             options: defaultGroupingOptions,
@@ -119,6 +121,8 @@ describe('useGrouping', () => {
                 value: 18,
               },
             },
+            renderChildComponent: jest.fn(),
+            selectedGroup: 'test',
           })}
         </IntlProvider>
       );

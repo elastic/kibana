@@ -40,31 +40,11 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
                 ...acc,
                 [group]: {
                   ...groupsById[id].pagingSettings[group],
-                  activePage: 0,
+                  itemsPerPage: 25,
                 },
               }),
               {}
             ),
-          },
-        },
-      };
-    }
-    case ActionType.updateGroupActivePage: {
-      const { id, activePage, selectedGroup } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...groupsById,
-          [id]: {
-            ...defaultGroup,
-            ...groupsById[id],
-            pagingSettings: {
-              ...groupsById[id].pagingSettings,
-              [selectedGroup]: {
-                ...(groupsById[id].pagingSettings[selectedGroup] ?? { itemsPerPage: 25 }),
-                activePage,
-              },
-            },
           },
         },
       };
@@ -81,7 +61,9 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
             pagingSettings: {
               ...groupsById[id].pagingSettings,
               [selectedGroup]: {
-                ...(groupsById[id].pagingSettings[selectedGroup] ?? { activePage: 0 }),
+                ...(groupsById[id].pagingSettings[selectedGroup] ?? {
+                  itemsPerPageOptions: [10, 25, 50, 100],
+                }),
                 itemsPerPage,
               },
             },
@@ -111,22 +93,9 @@ export const groupsReducerWithStorage = (state: GroupMap, action: Action) => {
   if (storage) {
     groupsInStorage = getAllGroupsInStorage(storage);
   }
-  const trackedGroupIds = Object.keys(state.groupById);
-
-  const adjustedStorageGroups = Object.entries(groupsInStorage).reduce(
-    (acc: GroupsById, [key, group]) => ({
-      ...acc,
-      [key]: {
-        // reset page to 0 if is initial state
-        ...(trackedGroupIds.includes(key) ? group : { ...group, activePage: 0 }),
-      },
-    }),
-    {} as GroupsById
-  );
 
   const groupsById: GroupsById = {
     ...state.groupById,
-    ...adjustedStorageGroups,
   };
 
   const newState = groupsReducer(state, action, groupsById);

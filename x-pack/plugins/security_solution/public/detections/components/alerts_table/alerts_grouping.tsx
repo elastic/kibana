@@ -12,7 +12,6 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { GroupOption } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
-import { buildEsQuery } from '@kbn/es-query';
 import { groupSelectors } from '../../../common/store/grouping';
 import type { State } from '../../../common/store';
 import { updateGroupSelector } from '../../../common/store/grouping/actions';
@@ -21,12 +20,7 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import {
-  getDefaultGroupingOptions,
-  renderGroupPanel,
-  getStats,
-  getAlertsGroupingQuery,
-} from './grouping_settings';
+import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
@@ -71,7 +65,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [telemetry]
   );
 
-  const { groupSelector, getGrouping, selectedGroups, pagination, resetPagination } = useGrouping({
+  const { groupSelector, getGrouping, selectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
       groupStatsRenderer: getStats,
@@ -104,43 +98,8 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     }
   }, [dispatch, groupSelector, groupSelectorInRedux, selectedGroups]);
 
-  const getAdditionalFilters = useCallback(
-    (level: number, parentGroupingFilter?: Filter[]) => {
-      try {
-        return [
-          buildEsQuery(undefined, props.globalQuery != null ? [props.globalQuery] : [], [
-            ...(props.globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
-            ...(props.defaultFilters ?? []),
-            ...(parentGroupingFilter ?? []),
-          ]),
-        ];
-      } catch (e) {
-        return [];
-      }
-    },
-    [props.defaultFilters, props.globalFilters, props.globalQuery]
-  );
-
-  const getQueryGroups = useCallback(
-    (additionalFilters, selectedGroup) => {
-      return getAlertsGroupingQuery({
-        additionalFilters,
-        selectedGroup,
-        from: props.from,
-        runtimeMappings: props.runtimeMappings,
-        to: props.to,
-        pageSize: pagination[selectedGroup] ? pagination[selectedGroup].itemsPerPage : 25,
-        pageIndex: pagination[selectedGroup] ? pagination[selectedGroup].activePage : 0,
-      });
-    },
-    [props.from, props.runtimeMappings, props.to, pagination]
-  );
-
   const getLevel = useCallback(
     (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => {
-      const additionalFilters = getAdditionalFilters(level, parentGroupingFilter);
-      const queryGroups = getQueryGroups(additionalFilters, selectedGroup);
-
       let rcc;
       if (level < selectedGroups.length - 1) {
         rcc = (groupingFilters: Filter[]) => {
@@ -160,14 +119,13 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           {...props}
           getGrouping={getGrouping}
           groupingLevel={level}
-          resetPagination={resetPagination}
-          queryGroups={queryGroups}
           renderChildComponent={rcc}
           selectedGroup={selectedGroup}
+          parentGroupingFilter={parentGroupingFilter}
         />
       );
     },
-    [getAdditionalFilters, getGrouping, getQueryGroups, props, resetPagination, selectedGroups]
+    [getGrouping, props, selectedGroups]
   );
 
   if (isEmpty(selectedPatterns)) {

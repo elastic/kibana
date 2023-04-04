@@ -10,7 +10,6 @@ import {
   ActionType,
   GroupOption,
   UpdateActiveGroups,
-  UpdateGroupActivePage,
   UpdateGroupItemsPerPage,
   UpdateGroupOptions,
 } from '../types';
@@ -27,23 +26,6 @@ const updateActiveGroups = ({
     id,
   },
   type: ActionType.updateActiveGroups,
-});
-
-const updateGroupActivePage = ({
-  activePage,
-  id,
-  selectedGroup,
-}: {
-  activePage: number;
-  id: string;
-  selectedGroup: string;
-}): UpdateGroupActivePage => ({
-  payload: {
-    activePage,
-    id,
-    selectedGroup,
-  },
-  type: ActionType.updateGroupActivePage,
 });
 
 const updateGroupItemsPerPage = ({
@@ -79,7 +61,6 @@ const updateGroupOptions = ({
 
 export const groupActions = {
   updateActiveGroups,
-  updateGroupActivePage,
   updateGroupItemsPerPage,
   updateGroupOptions,
 };

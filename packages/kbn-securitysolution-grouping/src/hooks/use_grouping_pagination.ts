@@ -17,11 +17,8 @@ export interface UseGroupingPaginationArgs {
 }
 
 interface GroupingPagination {
-  itemsPerPageOptions: number[];
   onChangeItemsPerPage: (newItemsPerPage: number, selectedGroup: string) => void;
-  onChangePage: (newActivePage: number, selectedGroup: string) => void;
   pagingSettings: GroupsPagingSettingsById;
-  resetPagination: () => void;
 }
 
 export const useGroupingPagination = ({
@@ -29,31 +26,9 @@ export const useGroupingPagination = ({
   groupingState,
   dispatch,
 }: UseGroupingPaginationArgs): GroupingPagination => {
-  const { activeGroups: selectedGroups, pagingSettings } = useMemo(
+  const { pagingSettings } = useMemo(
     () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
     [groupingId, groupingState]
-  );
-
-  const resetPagination = useCallback(() => {
-    console.log('packages: resetPagination', { groupingId, selectedGroups });
-    selectedGroups.forEach((selectedGroup) => {
-      dispatch(
-        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroup })
-      );
-    });
-  }, [dispatch, groupingId, selectedGroups]);
-
-  const setGroupsActivePage = useCallback(
-    (newActivePage: number, selectedGroup: string) => {
-      dispatch(
-        groupActions.updateGroupActivePage({
-          id: groupingId,
-          activePage: newActivePage,
-          selectedGroup,
-        })
-      );
-    },
-    [dispatch, groupingId]
   );
 
   const setGroupsItemsPerPage = useCallback(
@@ -71,12 +46,9 @@ export const useGroupingPagination = ({
 
   return useMemo(
     () => ({
-      itemsPerPageOptions: [10, 25, 50, 100],
       onChangeItemsPerPage: setGroupsItemsPerPage,
-      onChangePage: setGroupsActivePage,
       pagingSettings,
-      resetPagination,
     }),
-    [pagingSettings, resetPagination, setGroupsActivePage, setGroupsItemsPerPage]
+    [pagingSettings, setGroupsItemsPerPage]
   );
 };

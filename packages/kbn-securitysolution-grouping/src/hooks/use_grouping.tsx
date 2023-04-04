@@ -11,10 +11,9 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
 import { GroupingProps, GroupSelectorProps, isNoneGroup } from '..';
-import { useGroupingPagination } from './use_grouping_pagination';
 import { groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
-import { defaultGroup, GroupOption, GroupsPagingSettingsById } from './types';
+import { defaultGroup, GroupOption } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
 
 /** Interface for grouping object where T is the `GroupingAggregation`
@@ -23,8 +22,6 @@ import { Grouping as GroupingComponent } from '../components/grouping';
 interface Grouping<T> {
   getGrouping: (props: DynamicGroupingProps<T>) => React.ReactElement;
   groupSelector: React.ReactElement<GroupSelectorProps>;
-  pagination: GroupsPagingSettingsById;
-  resetPagination: () => void;
   selectedGroups: string[];
 }
 
@@ -48,6 +45,8 @@ export type DynamicGroupingProps<T> = Pick<
   | 'renderChildComponent'
   | 'selectedGroup'
   | 'takeActionItems'
+  | 'onChangeGroupsItemsPerPage'
+  | 'onChangeGroupsPage'
 >;
 
 /** Interface for configuring grouping package where T is the consumer `GroupingAggregation`
@@ -108,8 +107,6 @@ export const useGrouping = <T,>({
     tracker,
   });
 
-  const pagination = useGroupingPagination({ groupingId, groupingState, dispatch });
-
   const getGrouping = useCallback(
     /**
      *
@@ -125,12 +122,12 @@ export const useGrouping = <T,>({
           childGroups={selectedGroups.slice((props.groupingLevel ?? 0) + 1, selectedGroups.length)}
           groupingId={groupingId}
           groupSelector={groupSelector}
-          pagination={pagination}
           tracker={tracker}
           dispatch={dispatch}
+          groupingState={groupingState}
         />
       ),
-    [componentProps, groupSelector, groupingId, pagination, selectedGroups, tracker]
+    [componentProps, groupSelector, groupingId, groupingState, selectedGroups, tracker]
   );
 
   return useMemo(
@@ -138,15 +135,7 @@ export const useGrouping = <T,>({
       getGrouping,
       groupSelector,
       selectedGroups,
-      pagination: pagination.pagingSettings,
-      resetPagination: pagination.resetPagination,
     }),
-    [
-      getGrouping,
-      groupSelector,
-      pagination.pagingSettings,
-      pagination.resetPagination,
-      selectedGroups,
-    ]
+    [getGrouping, groupSelector, selectedGroups]
   );
 };
