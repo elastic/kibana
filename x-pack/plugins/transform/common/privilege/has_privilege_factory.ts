@@ -23,9 +23,9 @@ export interface TransformCapabilities {
   canUseTransformAlerts: boolean;
   canResetTransform: boolean;
 }
-type Capabilities = { [k in keyof TransformCapabilities]: boolean };
+export type Capabilities = { [k in keyof TransformCapabilities]: boolean };
 
-export const INITIAL_CAPABILITIES: Capabilities = {
+export const INITIAL_CAPABILITIES = Object.freeze<Capabilities>({
   canGetTransform: false,
   canDeleteTransform: false,
   canPreviewTransform: false,
@@ -35,7 +35,7 @@ export const INITIAL_CAPABILITIES: Capabilities = {
   canCreateTransformAlerts: false,
   canUseTransformAlerts: false,
   canResetTransform: false,
-} as const;
+});
 
 export type Privilege = [string, string];
 
@@ -106,7 +106,7 @@ export const getPrivilegesAndCapabilities = (
 
   const hasPrivilege = hasPrivilegeFactory(privilegesResult);
 
-  const capabilities = cloneDeep(INITIAL_CAPABILITIES);
+  const capabilities = cloneDeep<Capabilities>(INITIAL_CAPABILITIES);
   capabilities.canGetTransform =
     hasPrivilege(['cluster', 'cluster:monitor/transform/get']) &&
     hasPrivilege(['cluster', 'cluster:monitor/transform/stats/get']);
