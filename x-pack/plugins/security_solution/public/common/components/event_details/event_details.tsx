@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchHit } from '../../../../common/search_strategy';
-import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
+import { getMitreComponentPartsArray } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
 import {
@@ -181,9 +181,9 @@ const EventDetailsComponent: React.FC<Props> = ({
     range,
   } = useInvestigationTimeEnrichment(eventFields);
 
-  const threatDetails = useMemo(
-    () => getMitreComponentParts(rawEventData as SearchHit),
-    [rawEventData]
+  const threatDetailsArray = useMemo(
+    () => getMitreComponentPartsArray(rawEventData as SearchHit, data),
+    [rawEventData, data]
   );
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
@@ -233,23 +233,25 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
                 <EuiSpacer size="l" />
-                {threatDetails && threatDetails[0] && (
-                  <ThreatTacticContainer
-                    alignItems="flexStart"
-                    direction="column"
-                    wrap={false}
-                    gutterSize="none"
-                  >
-                    <>
-                      <EuiTitle size="xxs">
-                        <h5>{threatDetails[0].title}</h5>
-                      </EuiTitle>
-                      <ThreatTacticDescription>
-                        {threatDetails[0].description}
-                      </ThreatTacticDescription>
-                    </>
-                  </ThreatTacticContainer>
-                )}
+                {threatDetailsArray && threatDetailsArray.length > 0
+                  ? threatDetailsArray.map((threatDetails) => (
+                      <ThreatTacticContainer
+                        alignItems="flexStart"
+                        direction="column"
+                        wrap={false}
+                        gutterSize="none"
+                      >
+                        <>
+                          <EuiTitle size="xxs">
+                            <h5>{threatDetails[0].title}</h5>
+                          </EuiTitle>
+                          <ThreatTacticDescription>
+                            {threatDetails[0].description}
+                          </ThreatTacticDescription>
+                        </>
+                      </ThreatTacticContainer>
+                    ))
+                  : null}
                 <EuiSpacer size="l" />
                 {renderer != null && detailsEcsData != null && (
                   <div>
@@ -327,7 +329,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       detailsEcsData,
       isDraggable,
       goToTableTab,
-      threatDetails,
+      threatDetailsArray,
       showThreatSummary,
       hostRisk,
       userRisk,

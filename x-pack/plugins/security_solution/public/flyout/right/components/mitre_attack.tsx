@@ -9,28 +9,35 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
-import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
+import { getMitreComponentPartsArray } from '../../../detections/mitre/get_mitre_threat_component';
 import { useRightPanelContext } from '../context';
 
 export const MitreAttack: FC = () => {
-  const { searchHit } = useRightPanelContext();
-  const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
+  const { searchHit, dataFormattedForFieldBrowser } = useRightPanelContext();
+  const threatDetailsArray = useMemo(
+    () => getMitreComponentPartsArray(searchHit, dataFormattedForFieldBrowser),
+    [searchHit, dataFormattedForFieldBrowser]
+  );
 
-  if (!threatDetails || !threatDetails[0]) {
+  if (!threatDetailsArray || threatDetailsArray.length < 1) {
     return null;
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem data-test-subj={MITRE_ATTACK_TITLE_TEST_ID}>
-        <EuiTitle size="xxs">
-          <h5>{threatDetails[0].title}</h5>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem data-test-subj={MITRE_ATTACK_DETAILS_TEST_ID}>
-        {threatDetails[0].description}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      {threatDetailsArray.map((threatDetails) => (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem data-test-subj={MITRE_ATTACK_TITLE_TEST_ID}>
+            <EuiTitle size="xxs">
+              <h5>{threatDetails[0].title}</h5>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem data-test-subj={MITRE_ATTACK_DETAILS_TEST_ID}>
+            {threatDetails[0].description}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ))}
+    </>
   );
 };
 

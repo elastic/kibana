@@ -33,7 +33,7 @@ import {
   RULE_PANEL_TITLE,
   SEVERITY_TITLE,
 } from '../translation';
-import { getMitreComponentParts } from '../../../../../mitre/get_mitre_threat_component';
+import { getMitreComponentPartsArray } from '../../../../../mitre/get_mitre_threat_component';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import { SummaryPanel } from '../wrappers';
 import { RulePanelActions, RULE_PANEL_ACTIONS_CLASS } from './rule_panel_actions';
@@ -74,7 +74,10 @@ const RuleSection: React.FC<RuleSectionProps> = ({
 
 export const RulePanel = React.memo(({ data, id, searchHit, browserFields }: RulePanelProps) => {
   const ruleUuid = useMemo(() => getTimelineEventData(ALERT_RULE_UUID, data), [data]);
-  const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
+  const threatDetailsArray = useMemo(
+    () => getMitreComponentPartsArray(searchHit, data),
+    [searchHit, data]
+  );
   const alertRiskScore = useMemo(() => getTimelineEventData(ALERT_RISK_SCORE, data), [data]);
   const alertSeverity = useMemo(
     () => getTimelineEventData(ALERT_SEVERITY, data) as Severity,
@@ -142,11 +145,13 @@ export const RulePanel = React.memo(({ data, id, searchHit, browserFields }: Rul
             wrap={false}
             css={threatTacticContainerStyles}
           >
-            {shouldShowThreatDetails && (
-              <RuleSection title={threatDetails[0].title as string} grow={2}>
-                {threatDetails[0].description}
-              </RuleSection>
-            )}
+            {shouldShowThreatDetails
+              ? threatDetailsArray.map((threatDetails) => (
+                  <RuleSection title={threatDetails[0].title as string} grow={2}>
+                    {threatDetails[0].description}
+                  </RuleSection>
+                ))
+              : null}
           </EuiFlexGroup>
           <EuiSpacer />
         </EuiFlexItem>
