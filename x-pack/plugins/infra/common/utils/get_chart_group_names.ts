@@ -6,5 +6,5 @@
  */
 
 // It's simple function to be shared, but it is required on both sides server and frontend
-// We need to get consistent group names.
+// We need to get consistent group names when any changes occurs.
 export const getChartGroupNames = (fields: string[]) => fields.join(', ');
