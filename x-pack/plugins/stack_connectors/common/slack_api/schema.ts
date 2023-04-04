@@ -7,8 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const SlackApiConfigSchema = schema.object({});
-
 export const SlackApiSecretsSchema = schema.object({
   token: schema.string({ minLength: 1 }),
 });

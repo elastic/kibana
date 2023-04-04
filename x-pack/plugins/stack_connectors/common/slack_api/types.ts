@@ -12,32 +12,25 @@ import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@k
 import {
   ExecutorPostMessageParamsSchema,
   PostMessageSubActionParamsSchema,
-  SlackApiConfigSchema,
   SlackApiSecretsSchema,
   SlackApiParamsSchema,
 } from './schema';
 
-export type SlackApiConfig = TypeOf<typeof SlackApiConfigSchema>;
 export type SlackApiSecrets = TypeOf<typeof SlackApiSecretsSchema>;
 
 export type PostMessageParams = TypeOf<typeof ExecutorPostMessageParamsSchema>;
 export type PostMessageSubActionParams = TypeOf<typeof PostMessageSubActionParamsSchema>;
 export type SlackApiParams = TypeOf<typeof SlackApiParamsSchema>;
-export type SlackApiConnectorType = ConnectorType<
-  SlackApiConfig,
-  SlackApiSecrets,
-  SlackApiParams,
-  unknown
->;
+export type SlackApiConnectorType = ConnectorType<{}, SlackApiSecrets, SlackApiParams, unknown>;
 
 export type SlackApiExecutorOptions = ConnectorTypeExecutorOptions<
-  SlackApiConfig,
+  {},
   SlackApiSecrets,
   SlackApiParams
 >;
 
 export type SlackExecutorOptions = ConnectorTypeExecutorOptions<
-  SlackApiConfig,
+  {},
   SlackApiSecrets,
   SlackApiParams
 >;

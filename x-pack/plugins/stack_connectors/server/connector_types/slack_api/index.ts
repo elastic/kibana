@@ -17,11 +17,7 @@ import type {
   SlackApiConnectorType,
   SlackApiParams,
 } from '../../../common/slack_api/types';
-import {
-  SlackApiSecretsSchema,
-  SlackApiParamsSchema,
-  SlackApiConfigSchema,
-} from '../../../common/slack_api/schema';
+import { SlackApiSecretsSchema, SlackApiParamsSchema } from '../../../common/slack_api/schema';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';
@@ -40,9 +36,6 @@ export const getConnectorType = (): SlackApiConnectorType => {
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: {
-        schema: SlackApiConfigSchema,
-      },
       secrets: {
         schema: SlackApiSecretsSchema,
       },
@@ -74,13 +67,13 @@ const slackApiExecutor = async (
   const subAction = params.subAction;
 
   if (!api[subAction]) {
-    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+    const errorMessage = `[Action][ExternalService] -> [Slack API] Unsupported subAction type ${subAction}.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }
 
   if (!supportedSubActions.includes(subAction)) {
-    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
+    const errorMessage = `[Action][ExternalService] -> [Slack API] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }
