@@ -7,7 +7,6 @@
  */
 
 // @ts-ignore
-import sizeMe from 'react-sizeme';
 import React from 'react';
 
 import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
@@ -62,16 +61,6 @@ async function getDashboardContainer() {
   return dashboardContainer;
 }
 
-beforeAll(() => {
-  // sizeme detects the width to be 0 in our test environment. noPlaceholder will mean that the grid contents will
-  // get rendered even when width is 0, which will improve our tests.
-  sizeMe.noPlaceholders = true;
-});
-
-afterAll(() => {
-  sizeMe.noPlaceholders = false;
-});
-
 test('renders DashboardGrid', async () => {
   const dashboardContainer = await getDashboardContainer();
   const { Wrapper: DashboardReduxWrapper } = dashboardContainer.getReduxEmbeddableTools();
@@ -79,7 +68,7 @@ test('renders DashboardGrid', async () => {
   const component = mountWithIntl(
     <DashboardServicesProvider>
       <DashboardReduxWrapper>
-        <DashboardGrid />
+        <DashboardGrid viewportWidth={1000} />
       </DashboardReduxWrapper>
     </DashboardServicesProvider>
   );
@@ -94,7 +83,7 @@ test('renders DashboardGrid with no visualizations', async () => {
   const component = mountWithIntl(
     <DashboardServicesProvider>
       <DashboardReduxWrapper>
-        <DashboardGrid />
+        <DashboardGrid viewportWidth={1000} />
       </DashboardReduxWrapper>
     </DashboardServicesProvider>
   );
@@ -111,7 +100,7 @@ test('DashboardGrid removes panel when removed from container', async () => {
   const component = mountWithIntl(
     <DashboardServicesProvider>
       <DashboardReduxWrapper>
-        <DashboardGrid />
+        <DashboardGrid viewportWidth={1000} />
       </DashboardReduxWrapper>
     </DashboardServicesProvider>
   );
@@ -132,7 +121,7 @@ test('DashboardGrid renders expanded panel', async () => {
   const component = mountWithIntl(
     <DashboardServicesProvider>
       <DashboardReduxWrapper>
-        <DashboardGrid />
+        <DashboardGrid viewportWidth={1000} />
       </DashboardReduxWrapper>
     </DashboardServicesProvider>
   );

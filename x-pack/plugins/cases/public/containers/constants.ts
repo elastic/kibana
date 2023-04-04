@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsFeature, CaseUserActionTypeWithAll } from './types';
+import type { SingleCaseMetricsFeature } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 10;
@@ -27,17 +27,8 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
   caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
-  caseUserActions: (
-    id: string,
-    filterActionType: CaseUserActionTypeWithAll,
-    sortOrder: 'asc' | 'desc'
-  ) =>
-    [
-      ...casesQueriesKeys.case(id),
-      ...casesQueriesKeys.userActions,
-      filterActionType,
-      sortOrder,
-    ] as const,
+  caseUserActions: (id: string, params: unknown) =>
+    [...casesQueriesKeys.case(id), ...casesQueriesKeys.userActions, params] as const,
   caseUserActionsStats: (id: string) => [
     ...casesQueriesKeys.case(id),
     ...casesQueriesKeys.userActions,

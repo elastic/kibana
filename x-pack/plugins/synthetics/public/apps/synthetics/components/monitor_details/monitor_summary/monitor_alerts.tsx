@@ -15,7 +15,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RECORDS_FIELD, useTheme } from '@kbn/observability-plugin/public';
+import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
+import { useTheme } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
@@ -31,8 +32,9 @@ export const MonitorAlerts = ({
   from: string;
   dateLabel: string;
 }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const theme = useTheme();
 
