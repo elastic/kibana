@@ -24,3 +24,11 @@ export enum TIME_SERIES_METRIC_TYPES {
  */
 export const isCounterTimeSeriesMetric = (field?: DataViewField) =>
   field?.timeSeriesMetric === TIME_SERIES_METRIC_TYPES.COUNTER;
+
+/**
+ * Check if DataViewField is a 'gauge' time series metric field
+ * @param field optional DataViewField
+ * @returns a boolean
+ */
+export const isGaugeTimeSeriesMetric = (field?: DataViewField) =>
+  field?.timeSeriesMetric === TIME_SERIES_METRIC_TYPES.GAUGE;
