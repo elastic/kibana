@@ -13,9 +13,9 @@ import { CspClientPluginStartDeps } from '../../types';
 
 /**
  *  Returns the common logs-* data view with fields filtered by
- *  the given index pattern
+ *  fields present in the given index pattern
  */
-export const useDataViewForIndexPattern = (indexPattern: string) => {
+export const useFilteredDataView = (indexPattern: string) => {
   const {
     data: { dataViews },
   } = useKibana<CspClientPluginStartDeps>().services;
@@ -26,15 +26,17 @@ export const useDataViewForIndexPattern = (indexPattern: string) => {
       throw new Error('Findings data view not found');
     }
 
-    const indexPatternFields = (await dataViews.getFieldsForWildcard({
+    const indexPatternFields = await dataViews.getFieldsForWildcard({
       pattern: indexPattern,
-    })) as DataView['fields'];
+    });
 
     if (!indexPatternFields) {
       throw new Error('Error fetching fields for the index pattern');
     }
 
-    dataView.fields = indexPatternFields;
+    dataView.fields = dataView.fields.filter((field) =>
+      indexPatternFields.some((indexPatternField) => indexPatternField.name === field.name)
+    ) as DataView['fields'];
 
     return dataView;
   };

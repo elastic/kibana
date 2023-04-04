@@ -25,7 +25,8 @@ import { getVulnerabilitiesColumns } from './utils';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
-import { useDataViewForIndexPattern } from '../../common/api/use_data_view_for_index_pattern';
+import { useFilteredDataView } from '../../common/api/use_filtered_data_view';
+import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -35,9 +36,7 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
 });
 
 export const Vulnerabilities = () => {
-  const { data, isLoading, error } = useDataViewForIndexPattern(
-    LATEST_VULNERABILITIES_INDEX_PATTERN
-  );
+  const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
 
   if (error) {
     return <ErrorCallout error={error as Error} />;
@@ -100,18 +99,32 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         return vulnerability.finding?.vulnerability?.id || null;
       }
       if (columnId === 'cvss') {
+        if (!vulnerability.finding?.vulnerability.score.base) {
+          return null;
+        }
         return (
-          <>
-            {vulnerability.finding?.vulnerability.score.base}|
-            {vulnerability.finding?.vulnerability.score.version}
-          </>
+          <CVSScoreBadge
+            score={vulnerability.finding.vulnerability.score.base}
+            version={vulnerability.finding?.vulnerability.score.version}
+          />
         );
       }
       if (columnId === 'resource') {
         return vulnerability.resource?.name || null;
       }
       if (columnId === 'severity') {
-        return <>{vulnerability.finding?.vulnerability.severity || null}</>;
+        if (
+          !vulnerability.finding?.vulnerability.score.base ||
+          !vulnerability?.finding.vulnerability.severity
+        ) {
+          return null;
+        }
+        return (
+          <SeverityStatusBadge
+            score={vulnerability.finding.vulnerability.score.base}
+            status={vulnerability.finding.vulnerability.severity}
+          />
+        );
       }
       if (columnId === 'package-version') {
         return (
