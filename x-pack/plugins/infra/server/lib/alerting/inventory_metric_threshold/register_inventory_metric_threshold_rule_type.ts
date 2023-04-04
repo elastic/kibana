@@ -91,7 +91,7 @@ export async function registerMetricInventoryThresholdRuleType(
   alertingPlugin.registerType({
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
-      defaultMessage: 'Inventory threshold',
+      defaultMessage: 'Inventory',
     }),
     validate: {
       params: schema.object(

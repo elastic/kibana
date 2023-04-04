@@ -46,7 +46,7 @@ export function PageTitle({ alert }: PageTitleProps) {
         values={{
           ruleCategory: alert.fields[ALERT_RULE_CATEGORY],
         }}
-        defaultMessage="{ruleCategory} {ruleCategory, select, Anomaly {detected} other {breached}}"
+        defaultMessage="{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}"
       />
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
