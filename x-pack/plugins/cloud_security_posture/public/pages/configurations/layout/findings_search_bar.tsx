@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
-import type { FindingsBaseURLQuery } from '../types';
+import type { FindingsBaseURLQuery } from '../../../common/types';
 import type { CspClientPluginStartDeps } from '../../../types';
 import { PLUGIN_NAME } from '../../../../common';
 
