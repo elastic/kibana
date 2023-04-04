@@ -17,7 +17,7 @@ interface VerticalLinesProps {
   topTraceDuration: number;
 }
 
-export function VerticalLines({
+export function Vertical_lines({
   topTraceDuration,
   plotValues,
   marks = [],
