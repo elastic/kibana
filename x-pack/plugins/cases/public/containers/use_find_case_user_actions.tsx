@@ -18,17 +18,21 @@ export const useFindCaseUserActions = (
   params: {
     type: CaseUserActionTypeWithAll;
     sortOrder: 'asc' | 'desc';
-  }
+    page: number;
+    perPage: number;
+  },
+  isEnabled: boolean
 ) => {
   const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
 
   return useQuery<FindCaseUserActions, ServerError>(
-    casesQueriesKeys.caseUserActions(caseId, params.type, params.sortOrder),
+    casesQueriesKeys.caseUserActions(caseId, params),
     async () => {
       return findCaseUserActions(caseId, params, abortCtrlRef.signal);
     },
     {
+      enabled: isEnabled,
       onError: (error: ServerError) => {
         showErrorToast(error, { title: ERROR_TITLE });
       },
