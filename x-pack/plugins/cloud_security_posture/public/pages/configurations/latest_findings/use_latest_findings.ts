@@ -11,9 +11,8 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plug
 import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import type { Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import type { FindingsBaseEsQuery } from '../types';
+import type { Sort, FindingsBaseEsQuery } from '../../../common/types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
