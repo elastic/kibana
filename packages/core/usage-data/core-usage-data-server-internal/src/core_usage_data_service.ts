@@ -40,7 +40,10 @@ import {
   type InternalCoreUsageDataSetup,
 } from '@kbn/core-usage-data-base-server-internal';
 import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import {
+  MAIN_SAVED_OBJECT_INDEX,
+  type SavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server';
 
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './saved_objects';
@@ -60,26 +63,6 @@ export interface StartDeps {
   elasticsearch: ElasticsearchServiceStart;
   exposedConfigsToUsage: ExposedConfigsToUsage;
 }
-
-const kibanaIndex = '.kibana';
-
-/**
- * Because users can configure their Saved Object to any arbitrary index name,
- * we need to map customized index names back to a "standard" index name.
- *
- * e.g. If a user configures `kibana.index: .my_saved_objects` we want to the
- * collected data to be grouped under `.kibana` not ".my_saved_objects".
- *
- * This is rather brittle, but the option to configure index names might go
- * away completely anyway (see #60053).
- *
- * @param index The index name configured for this SO type
- * @param kibanaConfigIndex The default kibana index as configured by the user
- * with `kibana.index`
- */
-const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
-  return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
-};
 
 interface UsageDataAggs extends AggregationsMultiBucketAggregateBase {
   buckets: {
@@ -133,7 +116,7 @@ export class CoreUsageDataService
           .getTypeRegistry()
           .getAllTypes()
           .reduce((acc, type) => {
-            const index = type.indexPattern ?? kibanaIndex;
+            const index = type.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
             return acc.add(index);
           }, new Set<string>())
           .values()
@@ -151,7 +134,7 @@ export class CoreUsageDataService
             const stats = body[0];
 
             return {
-              alias: kibanaOrTaskManagerIndex(index, kibanaIndex),
+              alias: index,
               docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
               docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
               storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
@@ -192,7 +175,7 @@ export class CoreUsageDataService
       unknown,
       { aliases: UsageDataAggs }
     >({
-      index: kibanaIndex,
+      index: MAIN_SAVED_OBJECT_INDEX, // depends on the .kibana split (assuming 'legacy-url-alias' is stored in '.kibana')
       body: {
         track_total_hits: true,
         query: { match: { type: LEGACY_URL_ALIAS_TYPE } },

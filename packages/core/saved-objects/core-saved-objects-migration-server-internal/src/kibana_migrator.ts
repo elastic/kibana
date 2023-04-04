@@ -16,10 +16,11 @@ import Semver from 'semver';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectsRawDoc,
-  ISavedObjectTypeRegistry,
+import {
+  MAIN_SAVED_OBJECT_INDEX,
+  type SavedObjectUnsanitizedDoc,
+  type SavedObjectsRawDoc,
+  type ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsSerializer,
@@ -39,12 +40,7 @@ import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 import { runZeroDowntimeMigration } from './zdt';
 import { createMultiPromiseDefer, indexMapToIndexTypesMap } from './kibana_migrator_utils';
-import {
-  ALLOWED_CONVERT_VERSION,
-  DEFAULT_INDEX_TYPES_MAP,
-  LEGACY_SAVED_OBJECT_INDEX,
-  MAIN_SAVED_OBJECT_INDEX,
-} from './kibana_migrator_constants';
+import { ALLOWED_CONVERT_VERSION, DEFAULT_INDEX_TYPES_MAP } from './kibana_migrator_constants';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -195,7 +191,6 @@ export class KibanaMigrator implements IKibanaMigrator {
     // and check if some SO types have been moved to different indices
     const indicesWithMovingTypes = await getIndicesInvoledInRelocation({
       mainIndex: MAIN_SAVED_OBJECT_INDEX,
-      legacyIndex: LEGACY_SAVED_OBJECT_INDEX,
       client: this.client,
       indexTypesMap,
       logger: this.log,

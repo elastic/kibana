@@ -52,12 +52,11 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-
-const kibanaIndex = '.kibana';
 
 /**
  * @internal
@@ -125,7 +124,7 @@ export class SavedObjectsService
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
-        kibanaIndex,
+        kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
         savedObjectsConfig: this.config,
         kibanaVersion: this.kibanaVersion,
         typeRegistry: this.typeRegistry,
@@ -140,7 +139,7 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: firstValueFrom(this.migrator$),
-      kibanaIndex,
+      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
     });
 
@@ -198,7 +197,7 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getTypeRegistry: () => this.typeRegistry,
-      getKibanaIndex: () => kibanaIndex,
+      getKibanaIndex: () => MAIN_SAVED_OBJECT_INDEX,
     };
   }
 
@@ -280,7 +279,7 @@ export class SavedObjectsService
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
-        kibanaIndex,
+        MAIN_SAVED_OBJECT_INDEX,
         esClient,
         this.logger.get('repository'),
         includedHiddenTypes,
@@ -357,7 +356,7 @@ export class SavedObjectsService
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
-      kibanaIndex,
+      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       client,
       docLinks,
       waitForMigrationCompletion,

@@ -8,6 +8,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_INDEX_TYPES_MAP } from './kibana_migrator_constants';
 import {
@@ -16,7 +17,7 @@ import {
   getIndicesInvoledInRelocation,
   indexMapToIndexTypesMap,
 } from './kibana_migrator_utils';
-import { INDEX_MAP_8_8_0 } from './kibana_migrator_utils.fixtures';
+import { INDEX_MAP_BEFORE_SPLIT } from './kibana_migrator_utils.fixtures';
 
 describe('createMultiPromiseDefer', () => {
   it('creates defer objects with the same Promise', () => {
@@ -47,8 +48,7 @@ describe('getIndicesInvoledInRelocation', () => {
 
     return {
       client,
-      mainIndex: '.kibana',
-      legacyIndex: '.kibana_1',
+      mainIndex: MAIN_SAVED_OBJECT_INDEX,
       indexTypesMap: {},
       defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
       logger: loggerMock.create(),
@@ -65,7 +65,7 @@ describe('getIndicesInvoledInRelocation', () => {
 
     expect(params.client.indices.getMapping).toHaveBeenCalledTimes(1);
     expect(params.client.indices.getMapping).toHaveBeenCalledWith({
-      index: '.kibana',
+      index: MAIN_SAVED_OBJECT_INDEX,
     });
   });
 
@@ -92,7 +92,7 @@ describe('getIndicesInvoledInRelocation', () => {
     );
   });
 
-  it('assumes fresh deployment if the mainIndex and legacyIndex do not exist, returns an empty list of moving types', async () => {
+  it('assumes fresh deployment if the mainIndex does not exist, returns an empty list of moving types', async () => {
     const params = getIndicesInvoledInRelocationParams();
     params.client.indices.getMapping.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(
@@ -197,7 +197,7 @@ describe('getIndicesInvoledInRelocation', () => {
 
 describe('indexMapToIndexTypesMap', () => {
   it('converts IndexMap to IndexTypesMap', () => {
-    expect(indexMapToIndexTypesMap(INDEX_MAP_8_8_0)).toEqual(DEFAULT_INDEX_TYPES_MAP);
+    expect(indexMapToIndexTypesMap(INDEX_MAP_BEFORE_SPLIT)).toEqual(DEFAULT_INDEX_TYPES_MAP);
   });
 });
 

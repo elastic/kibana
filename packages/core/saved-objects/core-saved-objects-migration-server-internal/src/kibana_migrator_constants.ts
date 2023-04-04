@@ -21,9 +21,6 @@ export interface TypeStatusDetails {
   status: TypeStatus;
 }
 
-export const MAIN_SAVED_OBJECT_INDEX = '.kibana';
-export const LEGACY_SAVED_OBJECT_INDEX = '.kibana_1';
-
 // ensure plugins don't try to convert SO namespaceTypes after 8.0.0
 // see https://github.com/elastic/kibana/issues/147344
 export const ALLOWED_CONVERT_VERSION = '8.0.0';

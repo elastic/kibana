@@ -8,7 +8,7 @@
 
 import { IndexMap } from './core';
 
-export const INDEX_MAP_8_8_0: IndexMap = {
+export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
   '.kibana': {
     typeMappings: {
       'core-usage-stats': {

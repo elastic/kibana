@@ -38,13 +38,11 @@ export function createMultiPromiseDefer(indices: string[]): Record<string, Defer
 export async function getCurrentIndexTypesMap({
   client,
   mainIndex,
-  legacyIndex,
   defaultIndexTypesMap,
   logger,
 }: {
   client: ElasticsearchClient;
   mainIndex: string;
-  legacyIndex: string;
   defaultIndexTypesMap: IndexTypesMap;
   logger: Logger;
 }): Promise<IndexTypesMap | undefined> {
@@ -57,32 +55,13 @@ export async function getCurrentIndexTypesMap({
     // main index exists, try to extract the indexTypesMap from _meta
     const meta = Object.values(mapping)?.[0]?.mappings._meta;
     return meta?.indexTypesMap ?? defaultIndexTypesMap;
-  } catch (mainError) {
-    if (mainError.meta?.statusCode === 404) {
-      // the main index does NOT exist. Check if the legacy index (i.e. .kibana_1) exists
-      try {
-        await client.indices.getMapping({
-          index: legacyIndex,
-        });
-        // legacy exists, we assume we will have a default indexTypesMap after LEGACY migration
-        return defaultIndexTypesMap;
-      } catch (legacyError) {
-        if (legacyError.meta?.statusCode === 404) {
-          // legacy does NOT exist, we assume this is a fresh deployment
-          logger.debug(
-            `The ${mainIndex} and ${legacyIndex} indices do NOT exist. Assuming this is a fresh deployment`
-          );
-          return undefined;
-        } else {
-          logger.fatal(
-            `Cannot query the meta information on the ${legacyIndex} saved object index`
-          );
-          throw legacyError;
-        }
-      }
+  } catch (error) {
+    if (error.meta?.statusCode === 404) {
+      logger.debug(`The ${mainIndex} index do NOT exist. Assuming this is a fresh deployment`);
+      return undefined;
     } else {
       logger.fatal(`Cannot query the meta information on the ${mainIndex} saved object index`);
-      throw mainError;
+      throw error;
     }
   }
 }
@@ -90,14 +69,12 @@ export async function getCurrentIndexTypesMap({
 export async function getIndicesInvoledInRelocation({
   client,
   mainIndex,
-  legacyIndex,
   indexTypesMap,
   defaultIndexTypesMap,
   logger,
 }: {
   client: ElasticsearchClient;
   mainIndex: string;
-  legacyIndex: string;
   indexTypesMap: IndexTypesMap;
   defaultIndexTypesMap: IndexTypesMap;
   logger: Logger;
@@ -107,7 +84,6 @@ export async function getIndicesInvoledInRelocation({
   const currentIndexTypesMap = await getCurrentIndexTypesMap({
     client,
     mainIndex,
-    legacyIndex,
     defaultIndexTypesMap,
     logger,
   });
