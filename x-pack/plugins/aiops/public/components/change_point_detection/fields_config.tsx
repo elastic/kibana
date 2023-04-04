@@ -16,11 +16,12 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ChangePointsTable } from './change_points_table';
-import { SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
+import { MAX_CHANGE_POINT_CONFIGS, SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
 import { FunctionPicker } from './function_picker';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
@@ -99,7 +100,7 @@ export const FieldsConfig: FC = () => {
           </React.Fragment>
         );
       })}
-      <EuiButton onClick={onAdd}>
+      <EuiButton onClick={onAdd} disabled={fieldConfigs.length >= MAX_CHANGE_POINT_CONFIGS}>
         <FormattedMessage
           id="xpack.aiops.changePointDetection.addButtonLabel"
           defaultMessage="Add"
@@ -142,10 +143,12 @@ const FieldPanel: FC<FieldPanelProps> = ({
     progress,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
+  const accordionId = useGeneratedHtmlId({ prefix: 'fieldConfig' });
+
   return (
     <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
       <EuiAccordion
-        id={'temp_id'}
+        id={accordionId}
         initialIsOpen={true}
         buttonElement={'div'}
         buttonContent={
