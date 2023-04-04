@@ -35,6 +35,7 @@ export const CommandsForPlatforms: React.FunctionComponent<Props> = ({ commands 
         legend={i18n.translate('xpack.fleet.agentUninstallCommand.platformSelectAriaLabel', {
           defaultMessage: 'Platform',
         })}
+        data-test-subj="uninstall-commands-flyout-platforms-btn-group"
       />
 
       <EuiSpacer size="s" />
