@@ -176,7 +176,6 @@ packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server @elastic/kibana-core
 packages/core/http/core-http-server-internal @elastic/kibana-core
 packages/core/http/core-http-server-mocks @elastic/kibana-core
-packages/core/http/core-http-versioned-router-server-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-browser @elastic/kibana-core
 packages/core/i18n/core-i18n-browser-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
@@ -462,6 +461,7 @@ x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/route_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
+x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-monaco @elastic/appex-sharedux
 x-pack/plugins/monitoring_collection @elastic/infra-monitoring-ui
