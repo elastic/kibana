@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy } from 'lodash';
+import { partition, uniqBy } from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -75,8 +75,7 @@ import {
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -126,6 +125,7 @@ import {
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
+import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -347,13 +347,15 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
+  if (!messages.length) {
+    return null;
+  }
+
   return (
     <MessageList
       messages={messages}
-      useSmallIconsOnButton={true}
       customButtonStyles={css`
         block-size: ${euiTheme.size.l};
-        border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
         font-size: ${xsFontSize};
         padding: 0 ${euiTheme.size.xs};
         & > * {
@@ -630,6 +632,9 @@ export class Embeddable
       ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
         frame: frameDatasourceAPI,
+        visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
+          this.activeVisualizationState
+        ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
         frame: frameDatasourceAPI,
@@ -981,11 +986,16 @@ export class Embeddable
    */
   private renderBadgeMessages = () => {
     const messages = this.getUserMessages('embeddableBadge');
+    const [warningOrErrorMessages, infoMessages] = partition(
+      messages,
+      ({ severity }) => severity !== 'info'
+    );
 
-    if (messages.length && this.badgeDomNode) {
+    if (this.badgeDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <EmbeddableMessagesPopover messages={messages} />
+          <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
+          <EmbeddableFeatureBadge messages={infoMessages} />
         </KibanaThemeProvider>,
         this.badgeDomNode
       );
