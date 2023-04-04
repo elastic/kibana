@@ -35,7 +35,7 @@ const KIBANA_SYSTEM_INDICES_PATTERN = '.kibana_*';
 async function robustlyFetchIndices(client: ElasticsearchClient): Promise<IndicesGetResponse> {
   const run = async () => {
     try {
-      return client.indices.get({
+      return await client.indices.get({
         index: KIBANA_SYSTEM_INDICES_PATTERN,
         expand_wildcards: 'hidden',
       });
@@ -52,7 +52,7 @@ async function robustlyFetchIndices(client: ElasticsearchClient): Promise<Indice
     }
   };
 
-  return await pRetry(run, { retries: 5, maxTimeout: 10_000 });
+  return pRetry(run, { retries: 5, maxTimeout: 10_000 });
 }
 
 /**
