@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   getPrivilegesAndCapabilities,
   INITIAL_CAPABILITIES,
@@ -17,7 +18,7 @@ export const TRANSFORM_PLUGIN_ID = 'transform' as const;
 
 export const setupCapabilities = (
   core: Pick<CoreSetup<PluginStartDependencies>, 'capabilities' | 'getStartServices'>,
-  isSecurityPluginEnabled: boolean
+  securityPluginSetup?: SecurityPluginSetup
 ) => {
   core.capabilities.registerProvider(() => {
     return {
@@ -26,14 +27,22 @@ export const setupCapabilities = (
   });
 
   core.capabilities.registerSwitcher(async (request, capabilities, useDefaultCapabilities) => {
-    if (!isSecurityPluginEnabled || useDefaultCapabilities) {
+    if (useDefaultCapabilities) {
       return {};
     }
 
+    const isSecurityPluginEnabled = securityPluginSetup?.license.isEnabled() ?? false;
     const startServices = await core.getStartServices();
     const [, { security }] = startServices;
-    if (!security) {
-      return {};
+
+    // If security is not enabled or not available, transform should have full permission
+    if (!isSecurityPluginEnabled || !security) {
+      return {
+        transform: Object.keys(INITIAL_CAPABILITIES).reduce<Record<string, boolean>>((acc, p) => {
+          acc[p] = true;
+          return acc;
+        }, {}),
+      };
     }
 
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
