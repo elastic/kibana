@@ -81,7 +81,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
       {/* For now we show the history chart only if we have one criteria */}
       {rule.params.criteria.length === 1 && (
         <EuiFlexItem>
-          <LogsHistoryChart alert={alert} rule={rule} />
+          <LogsHistoryChart rule={rule} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

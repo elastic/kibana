@@ -9,7 +9,7 @@ import React from 'react';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { convertTo, TopAlert } from '@kbn/observability-plugin/public';
+import { convertTo } from '@kbn/observability-plugin/public';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -20,13 +20,7 @@ import { type PartialCriterion } from '../../../../../../common/alerting/logs/lo
 import { CriterionPreview } from '../../expression_editor/criterion_preview_chart';
 import { PartialRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
 
-const LogsHistoryChart = ({
-  rule,
-  alert,
-}: {
-  rule: Rule<PartialRuleParams>;
-  alert: TopAlert<Record<string, any>>;
-}) => {
+const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
   // Show the Logs History Chart ONLY if we have one criteria
   // So always pull the first criteria
   const criteria = rule.params.criteria[0];
