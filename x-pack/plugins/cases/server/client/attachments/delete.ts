@@ -6,13 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import pMap from 'p-map';
 
-import type { SavedObject } from '@kbn/core/server';
 import type { CommentAttributes } from '../../../common/api';
 import { Actions, ActionTypes } from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
-import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
@@ -20,8 +18,6 @@ import type { DeleteAllArgs, DeleteArgs } from './types';
 
 /**
  * Delete all comments for a case.
- *
- * @ignore
  */
 export async function deleteAll(
   { caseID }: DeleteAllArgs,
@@ -51,15 +47,9 @@ export async function deleteAll(
       })),
     });
 
-    const mapper = async (comment: SavedObject<CommentAttributes>) =>
-      attachmentService.delete({
-        attachmentId: comment.id,
-        refresh: false,
-      });
-
-    // Ensuring we don't too many concurrent deletions running.
-    await pMap(comments.saved_objects, mapper, {
-      concurrency: MAX_CONCURRENT_SEARCHES,
+    await attachmentService.bulkDelete({
+      attachmentIds: comments.saved_objects.map((so) => so.id),
+      refresh: false,
     });
 
     await userActionService.creator.bulkCreateAttachmentDeletion({
@@ -82,8 +72,6 @@ export async function deleteAll(
 
 /**
  * Deletes an attachment
- *
- * @ignore
  */
 export async function deleteComment(
   { caseID, attachmentID }: DeleteArgs,
@@ -118,8 +106,8 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
     }
 
-    await attachmentService.delete({
-      attachmentId: attachmentID,
+    await attachmentService.bulkDelete({
+      attachmentIds: [attachmentID],
       refresh: false,
     });
 
