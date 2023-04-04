@@ -52,7 +52,7 @@ export interface GroupModel {
 }
 
 export interface GroupPagingSettings {
-  activePage: number;
+  itemsPerPageOptions: number[];
   itemsPerPage: number;
 }
 
@@ -83,7 +83,7 @@ export const EMPTY_GROUP_BY_ID: GroupsById = {};
 export const defaultGroup: GroupModel = {
   pagingSettings: {
     none: {
-      activePage: 0,
+      itemsPerPageOptions: [10, 25, 50, 100],
       itemsPerPage: 25,
     },
   },

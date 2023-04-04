@@ -44,13 +44,6 @@ export const useGetGroupSelector = ({
   const { activeGroups: selectedGroups, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
 
-  const setGroupsActivePage = useCallback(
-    (selectedGroup: string, activePage: number) => {
-      dispatch(groupActions.updateGroupActivePage({ id: groupingId, activePage, selectedGroup }));
-    },
-    [dispatch, groupingId]
-  );
-
   const setSelectedGroups = useCallback(
     (activeGroups: string[]) => {
       dispatch(
@@ -84,7 +77,6 @@ export const useGetGroupSelector = ({
       const newSelectedGroups = isNoneGroup([groupSelection])
         ? [groupSelection]
         : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
-      newSelectedGroups.forEach((group) => setGroupsActivePage(group, 0));
       setSelectedGroups(newSelectedGroups);
 
       // built-in telemetry: UI-counter
@@ -115,7 +107,6 @@ export const useGetGroupSelector = ({
       onGroupChange,
       options,
       selectedGroups,
-      setGroupsActivePage,
       setOptions,
       setSelectedGroups,
       tracker,
