@@ -47,12 +47,27 @@ export const SimulateWatchResultsFlyout = ({
     switch (mode) {
       case 'simulate':
       case 'force_simulate':
-        return 'not simulated';
+        return i18n.translate(
+          'xpack.watcher.sections.watchEdit.simulateResults.table.statusColumnValue.notSimulated',
+          {
+            defaultMessage: 'not simulated',
+          }
+        );
       case 'execute':
       case 'force_execute':
-        return 'not executed';
+        return i18n.translate(
+          'xpack.watcher.sections.watchEdit.simulateResults.table.statusColumnValue.notExecuted',
+          {
+            defaultMessage: 'not executed',
+          }
+        );
       case 'skip':
-        return 'throttled';
+        return i18n.translate(
+          'xpack.watcher.sections.watchEdit.simulateResults.table.statusColumnValue.throttled',
+          {
+            defaultMessage: 'throttled',
+          }
+        );
       default:
         return '';
     }
@@ -192,11 +207,19 @@ export const SimulateWatchResultsFlyout = ({
 
   const conditionMetStatus = (details.result.condition.met && (
     <>
-      <EuiIcon color="green" type="check" /> Condition met
+      <EuiIcon color="green" type="check" />{' '}
+      <FormattedMessage
+        id="xpack.watcher.sections.watchEdit.simulateResults.conditionMetStatus"
+        defaultMessage="Condition met"
+      />
     </>
   )) || (
     <>
-      <EuiIcon color="subdued" type="cross" /> Condition not met
+      <EuiIcon color="subdued" type="cross" />{' '}
+      <FormattedMessage
+        id="xpack.watcher.sections.watchEdit.simulateResults.conditionNotMetStatus"
+        defaultMessage="Condition not met"
+      />
     </>
   );
 
