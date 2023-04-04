@@ -121,7 +121,7 @@ export function validateProjectMonitor(monitorFields: ProjectMonitor): Validatio
   if (isLeft(decodedMonitor)) {
     return {
       valid: false,
-      reason: `Failed to save or update monitor.Configuration is not valid`,
+      reason: `Failed to save or update monitor. Configuration is not valid`,
       details: [...formatErrors(decodedMonitor.left), locationsError]
         .filter((error) => error !== '')
         .join(' | '),
@@ -132,7 +132,7 @@ export function validateProjectMonitor(monitorFields: ProjectMonitor): Validatio
   if (locationsError) {
     return {
       valid: false,
-      reason: `Failed to save or update monitor.Configuration is not valid`,
+      reason: `Failed to save or update monitor. Configuration is not valid`,
       details: locationsError,
       payload: monitorFields,
     };
