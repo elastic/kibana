@@ -11,13 +11,11 @@ import {
   MlTrainedModelConfig,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-plugin/common/constants/trained_models';
+import { SUPPORTED_PYTORCH_TASKS, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 
 import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
 
 import {
-  BUILT_IN_MODEL_TAG as LOCAL_BUILT_IN_MODEL_TAG,
   generateMlInferencePipelineBody,
   getMlModelTypesForModelConfig,
   getRemoveProcessorForInferenceType,
@@ -25,7 +23,6 @@ import {
   parseMlInferenceParametersFromPipeline,
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
-  SUPPORTED_PYTORCH_TASKS as LOCAL_SUPPORTED_PYTORCH_TASKS,
 } from '.';
 
 const mockModel: MlTrainedModelConfig = {
@@ -65,10 +62,6 @@ describe('getMlModelTypesForModelConfig lib function', () => {
     const response = getMlModelTypesForModelConfig(builtInMockModel);
     expect(response.sort()).toEqual(expected.sort());
   });
-
-  it('local BUILT_IN_MODEL_TAG matches ml plugin', () => {
-    expect(LOCAL_BUILT_IN_MODEL_TAG).toEqual(BUILT_IN_MODEL_TAG);
-  });
 });
 
 describe('getRemoveProcessorForInferenceType lib function', () => {
@@ -105,11 +98,6 @@ describe('getRemoveProcessorForInferenceType lib function', () => {
 
 describe('getSetProcessorForInferenceType lib function', () => {
   const destinationField = 'dest';
-
-  it('local LOCAL_SUPPORTED_PYTORCH_TASKS matches ml plugin', () => {
-    expect(SUPPORTED_PYTORCH_TASKS).toEqual(LOCAL_SUPPORTED_PYTORCH_TASKS);
-  });
-
   it('should return expected value for TEXT_CLASSIFICATION', () => {
     const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
 

@@ -381,4 +381,47 @@ describe('updateAlertsStatus', () => {
       expect(alertsClient.bulkUpdateCases).not.toHaveBeenCalled();
     });
   });
+
+  describe('removeCaseIdFromAlerts', () => {
+    const alerts = [
+      {
+        id: 'c3869d546717e8c581add9cbf7d24578f34cd3e72cbc8d8b8e9a9330a899f70f',
+        index: '.internal.alerts-security.alerts-default-000001',
+      },
+    ];
+    const caseId = 'test-case';
+
+    it('update case info', async () => {
+      await alertService.removeCaseIdFromAlerts({ alerts, caseId });
+
+      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+    });
+
+    it('filters out alerts with empty id', async () => {
+      await alertService.removeCaseIdFromAlerts({
+        alerts: [{ id: '', index: 'test-index' }, ...alerts],
+        caseId,
+      });
+
+      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+    });
+
+    it('filters out alerts with empty index', async () => {
+      await alertService.removeCaseIdFromAlerts({
+        alerts: [{ id: 'test-id', index: '' }, ...alerts],
+        caseId,
+      });
+
+      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+    });
+
+    it('does not call the alerts client with no alerts', async () => {
+      await alertService.removeCaseIdFromAlerts({
+        alerts: [{ id: '', index: 'test-index' }],
+        caseId,
+      });
+
+      expect(alertsClient.removeCaseIdFromAlerts).not.toHaveBeenCalled();
+    });
+  });
 });
