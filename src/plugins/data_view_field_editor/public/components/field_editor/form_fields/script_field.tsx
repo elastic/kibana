@@ -251,7 +251,8 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
               fullWidth
             >
               <CodeEditor
-                languageId={PainlessLang.ID}
+                // languageId={PainlessLang.ID}
+                languageId={'css'}
                 suggestionProvider={suggestionProvider}
                 // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
                 width="99%"
