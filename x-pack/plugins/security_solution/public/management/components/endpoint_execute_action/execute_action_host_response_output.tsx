@@ -55,19 +55,19 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
 
 const SHELL_INFO = Object.freeze({
   shell: i18n.translate('xpack.securitySolution.responseActionExecuteAccordion.shellInformation', {
-    defaultMessage: 'Shell: ',
+    defaultMessage: 'Shell',
   }),
 
   returnCode: i18n.translate(
     'xpack.securitySolution.responseActionExecuteAccordion.shellReturnCode',
     {
-      defaultMessage: 'Return code: ',
+      defaultMessage: 'Return code',
     }
   ),
   currentDir: i18n.translate(
     'xpack.securitySolution.responseActionExecuteAccordion.currentWorkingDirectory',
     {
-      defaultMessage: 'Current working directory: ',
+      defaultMessage: 'Current working directory',
     }
   ),
 });
@@ -84,7 +84,10 @@ interface ShellInfoContentProps {
 }
 const ShellInfoContent = memo<ShellInfoContentProps>(({ content, textSize, title }) => (
   <StyledEuiText size={textSize}>
-    <strong>{title}</strong>
+    <strong>
+      {title}
+      {': '}
+    </strong>
     {content}
   </StyledEuiText>
 ));
