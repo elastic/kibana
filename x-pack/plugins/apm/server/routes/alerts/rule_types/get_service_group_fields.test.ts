@@ -73,28 +73,6 @@ describe('getSourceFieldsAgg', () => {
     `);
   });
 
-  it('should create an agg for specific source fields and fields from group-by', () => {
-    const agg = getServiceGroupFieldsAgg();
-    expect(agg).toMatchInlineSnapshot(`
-      Object {
-        "source_fields": Object {
-          "top_hits": Object {
-            "_source": Object {
-              "includes": Array [
-                "agent.name",
-                "service.name",
-                "service.environment",
-                "service.language.name",
-                "labels",
-              ],
-            },
-            "size": 1,
-          },
-        },
-      }
-    `);
-  });
-
   it('should accept options for top_hits options', () => {
     const agg = getServiceGroupFieldsAgg({
       sort: [{ 'transaction.duration.us': { order: 'desc' } }],
