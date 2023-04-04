@@ -8,7 +8,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
-import { EuiButtonEmpty, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -25,8 +25,6 @@ import { HeaderControl } from './components/header_control';
 import { paths } from '../../config/paths';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
-import { isApmIndicatorType } from '../../utils/slo/indicator';
-import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 
 export function SloDetailsPage() {
   const {
@@ -50,50 +48,11 @@ export function SloDetailsPage() {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
-  const handleNavigateToApm = () => {
-    if (
-      slo?.indicator.type === 'sli.apm.transactionDuration' ||
-      slo?.indicator.type === 'sli.apm.transactionErrorRate'
-    ) {
-      const {
-        indicator: {
-          params: { environment, filter, service, transactionName, transactionType },
-        },
-        timeWindow: { duration },
-      } = slo;
-
-      const url = convertSliApmParamsToApmAppDeeplinkUrl({
-        duration,
-        environment,
-        filter,
-        service,
-        transactionName,
-        transactionType,
-      });
-
-      navigateToUrl(basePath.prepend(url));
-    }
-  };
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: <HeaderTitle isLoading={isLoading} slo={slo} />,
-        rightSideItems: [
-          <HeaderControl isLoading={isLoading} slo={slo} />,
-          !!slo && isApmIndicatorType(slo.indicator.type) ? (
-            <EuiButtonEmpty
-              data-test-subj="sloDetailsExploreInApmButton"
-              disabled={isLoading}
-              iconType="popout"
-              onClick={handleNavigateToApm}
-            >
-              {i18n.translate('xpack.observability.slos.sloDetails.exploreInApm', {
-                defaultMessage: 'Explore in APM',
-              })}
-            </EuiButtonEmpty>
-          ) : null,
-        ],
+        rightSideItems: [<HeaderControl isLoading={isLoading} slo={slo} />],
         bottomBorder: false,
       }}
       data-test-subj="sloDetailsPage"
