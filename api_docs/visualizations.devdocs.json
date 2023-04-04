@@ -6731,9 +6731,9 @@
           "DisabledLabEmbeddable",
           ">; readonly savedObjectMetaData: ",
           {
-            "pluginId": "savedObjects",
+            "pluginId": "savedObjectsFinder",
             "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
+            "docId": "kibSavedObjectsFinderPluginApi",
             "section": "def-public.SavedObjectMetaData",
             "text": "SavedObjectMetaData"
           },
