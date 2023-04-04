@@ -38,7 +38,14 @@ describe('<CloudPosturePage />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed' },
+        data: {
+          cspm: { status: 'indexed' },
+          kspm: { status: 'indexed' },
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+          ],
+        },
       })
     );
 
@@ -144,7 +151,14 @@ describe('<CloudPosturePage />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'not-installed' },
+        data: {
+          kspm: { status: 'not-installed' },
+          cspm: { status: 'not-installed' },
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());

@@ -323,12 +323,12 @@ export const topNavStrings = {
       defaultMessage: 'Share Dashboard',
     }),
   },
-  options: {
-    label: i18n.translate('dashboard.topNave.optionsButtonAriaLabel', {
-      defaultMessage: 'options',
+  settings: {
+    label: i18n.translate('dashboard.topNave.settingsButtonAriaLabel', {
+      defaultMessage: 'settings',
     }),
-    description: i18n.translate('dashboard.topNave.optionsConfigDescription', {
-      defaultMessage: 'Options',
+    description: i18n.translate('dashboard.topNave.settingsConfigDescription', {
+      defaultMessage: 'Open dashboard settings',
     }),
   },
   clone: {
@@ -349,6 +349,11 @@ export const getControlButtonTitle = () =>
 export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
     defaultMessage: 'Add control',
+  });
+
+export const getEditControlGroupButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.editControlGroupButtonTitle', {
+    defaultMessage: 'Settings',
   });
 
 export const getOnlyOneTimeSliderControlMsg = () =>

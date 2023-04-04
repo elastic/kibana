@@ -12,6 +12,7 @@ import { ReplaySubject, Subject } from 'rxjs';
 import { AlertsService } from './alerts_service';
 import { IRuleTypeAlerts } from '../types';
 import { retryUntil } from './test_utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -78,32 +79,35 @@ const IlmPutBody = {
 
 interface GetIndexTemplatePutBodyOpts {
   context?: string;
+  namespace?: string;
   useLegacyAlerts?: boolean;
   useEcs?: boolean;
   secondaryAlias?: string;
 }
 const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
   const context = opts ? opts.context : undefined;
+  const namespace = (opts ? opts.namespace : undefined) ?? DEFAULT_NAMESPACE_STRING;
   const useLegacyAlerts = opts ? opts.useLegacyAlerts : undefined;
   const useEcs = opts ? opts.useEcs : undefined;
   const secondaryAlias = opts ? opts.secondaryAlias : undefined;
   return {
-    name: `.alerts-${context ? context : 'test'}.alerts-default-index-template`,
+    name: `.alerts-${context ? context : 'test'}.alerts-${namespace}-index-template`,
     body: {
-      index_patterns: [`.internal.alerts-${context ? context : 'test'}.alerts-default-*`],
+      index_patterns: [`.internal.alerts-${context ? context : 'test'}.alerts-${namespace}-*`],
       composed_of: [
         ...(useEcs ? ['.alerts-ecs-mappings'] : []),
         `.alerts-${context ? `${context}.alerts` : 'test.alerts'}-mappings`,
         ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
         '.alerts-framework-mappings',
       ],
+      priority: namespace.length,
       template: {
         settings: {
           auto_expand_replicas: '0-1',
           hidden: true,
           'index.lifecycle': {
             name: '.alerts-ilm-policy',
-            rollover_alias: `.alerts-${context ? context : 'test'}.alerts-default`,
+            rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
           },
           'index.mapping.total_fields.limit': 2500,
         },
@@ -112,7 +116,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
           _meta: {
             kibana: { version: '8.8.0' },
             managed: true,
-            namespace: 'default',
+            namespace,
           },
         },
         ...(secondaryAlias
@@ -128,7 +132,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
       _meta: {
         kibana: { version: '8.8.0' },
         managed: true,
-        namespace: 'default',
+        namespace,
       },
     },
   };
@@ -141,9 +145,10 @@ const TestRegistrationContext: IRuleTypeAlerts = {
 
 const getContextInitialized = async (
   alertsService: AlertsService,
-  context: string = TestRegistrationContext.context
+  context: string = TestRegistrationContext.context,
+  namespace: string = DEFAULT_NAMESPACE_STRING
 ) => {
-  const { result } = await alertsService.getContextInitializationPromise(context);
+  const { result } = await alertsService.getContextInitializationPromise(context, namespace);
   return result;
 };
 
@@ -465,6 +470,70 @@ describe('Alerts Service', () => {
       });
     });
 
+    test('should correctly install resources for custom namespace on demand when isSpaceAware is true', async () => {
+      alertsService.register({ ...TestRegistrationContext, isSpaceAware: true });
+      await retryUntil(
+        'context initialized',
+        async () => (await getContextInitialized(alertsService)) === true
+      );
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+        1,
+        getIndexTemplatePutBody()
+      );
+      expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(1, {
+        index: '.internal.alerts-test.alerts-default-*',
+        name: '.alerts-test.alerts-*',
+      });
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.create).toHaveBeenNthCalledWith(1, {
+        index: '.internal.alerts-test.alerts-default-000001',
+        body: {
+          aliases: {
+            '.alerts-test.alerts-default': {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+
+      await retryUntil(
+        'context in namespace initialized',
+        async () =>
+          (await getContextInitialized(
+            alertsService,
+            TestRegistrationContext.context,
+            'another-namespace'
+          )) === true
+      );
+
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+        2,
+        getIndexTemplatePutBody({ namespace: 'another-namespace' })
+      );
+      expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(2, {
+        index: '.internal.alerts-test.alerts-another-namespace-*',
+        name: '.alerts-test.alerts-*',
+      });
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
+      expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(4);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(4);
+      expect(clusterClient.indices.create).toHaveBeenNthCalledWith(2, {
+        index: '.internal.alerts-test.alerts-another-namespace-000001',
+        body: {
+          aliases: {
+            '.alerts-test.alerts-another-namespace': {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+    });
+
     test('should correctly install resources for context when secondaryAlias is defined', async () => {
       alertsService.register({ ...TestRegistrationContext, secondaryAlias: 'another.alias' });
       await retryUntil(
@@ -531,6 +600,7 @@ describe('Alerts Service', () => {
         body: {
           index_patterns: [`.internal.alerts-empty.alerts-default-*`],
           composed_of: ['.alerts-framework-mappings'],
+          priority: 7,
           template: {
             settings: {
               auto_expand_replicas: '0-1',
@@ -646,7 +716,10 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
-        await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
+        await alertsService.getContextInitializationPromise(
+          TestRegistrationContext.context,
+          DEFAULT_NAMESPACE_STRING
+        )
       ).toEqual({
         result: false,
         error:
@@ -677,7 +750,10 @@ describe('Alerts Service', () => {
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
 
       expect(
-        await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
+        await alertsService.getContextInitializationPromise(
+          TestRegistrationContext.context,
+          DEFAULT_NAMESPACE_STRING
+        )
       ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -701,7 +777,10 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
-        await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
+        await alertsService.getContextInitializationPromise(
+          TestRegistrationContext.context,
+          DEFAULT_NAMESPACE_STRING
+        )
       ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -746,7 +825,10 @@ describe('Alerts Service', () => {
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
 
       expect(
-        await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
+        await alertsService.getContextInitializationPromise(
+          TestRegistrationContext.context,
+          DEFAULT_NAMESPACE_STRING
+        )
       ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -794,7 +876,10 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
-        await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
+        await alertsService.getContextInitializationPromise(
+          TestRegistrationContext.context,
+          DEFAULT_NAMESPACE_STRING
+        )
       ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(`Failed to PUT mapping for alias alias_1: fail`);
@@ -849,7 +934,10 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
-        await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
+        await alertsService.getContextInitializationPromise(
+          TestRegistrationContext.context,
+          DEFAULT_NAMESPACE_STRING
+        )
       ).toEqual({
         error:
           'Failure during installation. Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default',
@@ -913,7 +1001,10 @@ describe('Alerts Service', () => {
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
 
       expect(
-        await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
+        await alertsService.getContextInitializationPromise(
+          TestRegistrationContext.context,
+          DEFAULT_NAMESPACE_STRING
+        )
       ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
@@ -984,7 +1075,10 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
-        await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
+        await alertsService.getContextInitializationPromise(
+          TestRegistrationContext.context,
+          DEFAULT_NAMESPACE_STRING
+        )
       ).toEqual({
         error:
           'Failure during installation. Attempted to create index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default, but the index already exists and is not the write index for the alias',

@@ -7,13 +7,23 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { MitreAttack } from '../components/mitre_attack';
+import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { DescriptionSection } from '../components/description_section';
+import { HighlightedFields } from '../components/highlighted_fields';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
  */
 export const OverviewTab: FC = memo(() => {
-  return <MitreAttack />;
+  return (
+    <>
+      <DescriptionSection />
+      <EuiHorizontalRule margin="l" />
+      <EuiPanel hasBorder hasShadow={false}>
+        <HighlightedFields />
+      </EuiPanel>
+    </>
+  );
 });
 
 OverviewTab.displayName = 'OverviewTab';

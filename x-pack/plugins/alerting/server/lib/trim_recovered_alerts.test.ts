@@ -40,7 +40,11 @@ describe('trimRecoveredAlerts', () => {
       trimmedAlertsRecovered: { 1: alert1, 3: alert3 },
       earlyRecoveredAlerts: {
         2: new Alert('2', {
-          meta: { flappingHistory: new Array(20).fill(false), flapping: false },
+          meta: {
+            flappingHistory: new Array(20).fill(false),
+            flapping: false,
+            uuid: expect.any(String),
+          },
         }),
       },
     });

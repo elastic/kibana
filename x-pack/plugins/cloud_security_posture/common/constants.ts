@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PostureTypes } from './types';
+
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
@@ -26,12 +28,28 @@ export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
 
+export const VULNERABILITIES_INDEX_NAME = 'logs-cloud_security_posture.vulnerabilities';
+export const VULNERABILITIES_INDEX_PATTERN = 'logs-cloud_security_posture.vulnerabilities-default*';
+export const VULNERABILITIES_INDEX_DEFAULT_NS =
+  'logs-cloud_security_posture.vulnerabilities-default';
+
+export const LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME =
+  'logs-cloud_security_posture.vulnerabilities_latest';
+export const LATEST_VULNERABILITIES_INDEX_PATTERN =
+  'logs-cloud_security_posture.vulnerabilities_latest-*';
+export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
+  'logs-cloud_security_posture.vulnerabilities_latest-default';
+
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
 export const CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE =
   'cloud_security_posture_latest_index_add_ingest_timestamp_pipeline';
+export const CSP_LATEST_VULNERABILITIES_INGEST_TIMESTAMP_PIPELINE =
+  'cloud_security_posture_latest_vulnerabilities_index_add_ingest_timestamp_pipeline';
 
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
+
+export const POSTURE_TYPE_ALL = 'all';
 
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.
@@ -69,3 +87,10 @@ export const SUPPORTED_CLOUDBEAT_INPUTS = [
   CLOUDBEAT_VULN_MGMT_GCP,
   CLOUDBEAT_VULN_MGMT_AZURE,
 ] as const;
+
+export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
+  [KSPM_POLICY_TEMPLATE]: KSPM_POLICY_TEMPLATE,
+  [CSPM_POLICY_TEMPLATE]: CSPM_POLICY_TEMPLATE,
+  [VULN_MGMT_POLICY_TEMPLATE]: VULN_MGMT_POLICY_TEMPLATE,
+  [POSTURE_TYPE_ALL]: POSTURE_TYPE_ALL,
+} as const;

@@ -136,8 +136,8 @@ export const previewRulesRoute = async (
           .atSpace(spaceId, {
             elasticsearch: {
               index: {
-                [`${DEFAULT_PREVIEW_INDEX}`]: ['read'],
-                [`.internal${DEFAULT_PREVIEW_INDEX}-`]: ['read'],
+                [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]: ['read'],
+                [`.internal${DEFAULT_PREVIEW_INDEX}-${spaceId}-*`]: ['read'],
               },
               cluster: [],
             },
@@ -195,6 +195,7 @@ export const previewRulesRoute = async (
               | 'setContext'
               | 'getContext'
               | 'hasContext'
+              | 'getUuid'
             >;
             alertLimit: {
               getValue: () => number;
@@ -223,6 +224,7 @@ export const previewRulesRoute = async (
             createdAt: new Date(),
             createdBy: username ?? 'preview-created-by',
             producer: 'preview-producer',
+            revision: 0,
             ruleTypeId,
             ruleTypeName,
             updatedAt: new Date(),

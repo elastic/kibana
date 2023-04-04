@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
-
-import { noop } from 'lodash/fp';
+import { useCallback, useMemo } from 'react';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useUiSetting$, useHttp } from '../../../lib/kibana';
-import { checkRecognizer, getModules } from '../api';
-import type { SecurityJob } from '../types';
-import { createSecurityJobs } from './use_security_jobs_helpers';
+import { useUiSetting$ } from '../../../lib/kibana';
+import type { inputsModel } from '../../../store';
+import { useFetchJobsSummaryQuery } from '../../ml/hooks/use_fetch_jobs_summary_query';
 import { useMlCapabilities } from '../../ml/hooks/use_ml_capabilities';
 import * as i18n from '../../ml/translations';
-import { getJobsSummary } from '../../ml/api/get_jobs_summary';
-import type { inputsModel } from '../../../store';
+import type { SecurityJob } from '../types';
+import { useFetchModulesQuery } from './use_fetch_modules_query';
+import { useFetchRecognizerQuery } from './use_fetch_recognizer_query';
+import { createSecurityJobs } from './use_security_jobs_helpers';
 
 export interface UseSecurityJobsReturn {
   loading: boolean;
@@ -40,62 +39,59 @@ export interface UseSecurityJobsReturn {
  *
  */
 export const useSecurityJobs = (): UseSecurityJobsReturn => {
-  const [jobs, setJobs] = useState<SecurityJob[]>([]);
-  const [loading, setLoading] = useState(true);
   const mlCapabilities = useMlCapabilities();
   const [securitySolutionDefaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const http = useHttp();
   const { addError } = useAppToasts();
-  const refetch = useRef<inputsModel.Refetch>(noop);
   const isMlAdmin = hasMlAdminPermissions(mlCapabilities);
   const isLicensed = hasMlLicense(mlCapabilities);
+  const isMlEnabled = isMlAdmin && isLicensed;
 
-  useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
+  const onError = useCallback(
+    (error) => {
+      addError(error, { title: i18n.SIEM_JOB_FETCH_FAILURE });
+    },
+    [addError]
+  );
 
-    async function fetchSecurityJobIdsFromGroupsData() {
-      setLoading(true);
-      if (isMlAdmin && isLicensed) {
-        try {
-          // Batch fetch all installed jobs, ML modules, and check which modules are compatible with securitySolutionDefaultIndex
-          const [jobSummaryData, modulesData, compatibleModules] = await Promise.all([
-            getJobsSummary({ http, signal: abortCtrl.signal }),
-            getModules({ signal: abortCtrl.signal }),
-            checkRecognizer({
-              indexPatternName: securitySolutionDefaultIndex,
-              signal: abortCtrl.signal,
-            }),
-          ]);
+  const {
+    data: jobSummaryData,
+    isFetching: isJobSummaryFetching,
+    refetch: refetchJobsSummary,
+  } = useFetchJobsSummaryQuery({}, { enabled: isMlEnabled, onError });
 
-          const compositeSecurityJobs = createSecurityJobs(
-            jobSummaryData,
-            modulesData,
-            compatibleModules
-          );
+  const {
+    data: modulesData,
+    isFetching: isModulesFetching,
+    refetch: refetchModules,
+  } = useFetchModulesQuery({}, { enabled: isMlEnabled, onError });
 
-          if (isSubscribed) {
-            setJobs(compositeSecurityJobs);
-          }
-        } catch (error) {
-          if (isSubscribed) {
-            addError(error, { title: i18n.SIEM_JOB_FETCH_FAILURE });
-          }
-        }
-      }
-      if (isSubscribed) {
-        setLoading(false);
-      }
+  const {
+    data: compatibleModules,
+    isFetching: isRecognizerFetching,
+    refetch: refetchRecognizer,
+  } = useFetchRecognizerQuery(
+    { indexPatternName: securitySolutionDefaultIndex },
+    { enabled: isMlEnabled, onError }
+  );
+
+  const refetch = useCallback(() => {
+    refetchJobsSummary();
+    refetchModules();
+    refetchRecognizer();
+  }, [refetchJobsSummary, refetchModules, refetchRecognizer]);
+
+  const jobs = useMemo(() => {
+    if (jobSummaryData && modulesData && compatibleModules) {
+      return createSecurityJobs(jobSummaryData, modulesData, compatibleModules);
     }
+    return [];
+  }, [compatibleModules, jobSummaryData, modulesData]);
 
-    fetchSecurityJobIdsFromGroupsData();
-
-    refetch.current = fetchSecurityJobIdsFromGroupsData;
-    return () => {
-      isSubscribed = false;
-      abortCtrl.abort();
-    };
-  }, [isMlAdmin, isLicensed, securitySolutionDefaultIndex, addError, http]);
-
-  return { isLicensed, isMlAdmin, jobs, loading, refetch: refetch.current };
+  return {
+    isLicensed,
+    isMlAdmin,
+    jobs,
+    loading: isJobSummaryFetching || isModulesFetching || isRecognizerFetching,
+    refetch,
+  };
 };

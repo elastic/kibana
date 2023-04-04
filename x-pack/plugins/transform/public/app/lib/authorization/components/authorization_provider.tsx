@@ -25,6 +25,7 @@ const initialCapabilities: Capabilities = {
   canDeleteTransform: false,
   canPreviewTransform: false,
   canCreateTransform: false,
+  canScheduleNowTransform: false,
   canStartStopTransform: false,
   canCreateTransformAlerts: false,
   canUseTransformAlerts: false,
@@ -93,6 +94,8 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
   value.capabilities.canCreateTransformAlerts = value.capabilities.canCreateTransform;
 
   value.capabilities.canUseTransformAlerts = value.capabilities.canGetTransform;
+
+  value.capabilities.canScheduleNowTransform = value.capabilities.canStartStopTransform;
 
   return (
     <AuthorizationContext.Provider value={{ ...value }}>{children}</AuthorizationContext.Provider>
