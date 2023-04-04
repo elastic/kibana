@@ -6,6 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import moment from 'moment';
+import { css } from '@emotion/react';
 import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -14,9 +15,16 @@ import * as i18n from '../../translations';
 import { ButtonGroupField } from '../fields/button_group_field';
 import { getInitialByWeekday } from '../../helpers/get_initial_by_weekday';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
-import './recurring_schedule.scss';
 
 const UseField = getUseField({ component: Field });
+
+const styles = {
+  flexField: css`
+    .euiFormRow__labelWrapper {
+      margin-bottom: unset;
+    }
+  `,
+};
 
 export const CustomRecurringSchedule: React.FC = React.memo(() => {
   const [{ startDate, recurringSchedule }] = useFormData({
@@ -60,7 +68,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
             <EuiFlexItem>
               <UseField
                 path="recurringSchedule.interval"
-                className="recurringScheduleFlexField"
+                css={styles.flexField}
                 componentProps={{
                   'data-test-subj': 'interval-field',
                   euiFieldProps: {
