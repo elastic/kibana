@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { useRefresh } from '@kbn/ml-date-picker';
@@ -14,12 +14,16 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
-  ChangePointType,
   FieldConfig,
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
-import { SPLIT_FIELD_CARDINALITY_LIMIT, COMPOSITE_AGG_SIZE } from './constants';
+import {
+  type ChangePointType,
+  COMPOSITE_AGG_SIZE,
+  EXCLUDED_CHANGE_POINT_TYPES,
+  SPLIT_FIELD_CARDINALITY_LIMIT,
+} from './constants';
 
 interface RequestOptions {
   index: string;
@@ -179,40 +183,39 @@ export function useChangePointResults(
 
         setProgress(Math.min(Math.round((pageNumber / totalAggPages) * 100), 100));
 
-        let groups = buckets.map((v) => {
-          const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
-          const timeAsString = v.change_point_request.bucket?.key;
-          const rawPValue = v.change_point_request.type[changePointType].p_value;
+        let groups = buckets
+          .map((v) => {
+            const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
+            const timeAsString = v.change_point_request.bucket?.key;
+            const rawPValue = v.change_point_request.type[changePointType].p_value;
 
-          return {
-            ...(isSingleMetric
-              ? {}
-              : {
-                  group: {
-                    name: fieldConfig.splitField,
-                    value: v.key.splitFieldTerm,
-                  },
-                }),
-            type: changePointType,
-            p_value: rawPValue,
-            timestamp: timeAsString,
-            label: changePointType,
-            reason: v.change_point_request.type[changePointType].reason,
-            id: `${fieldConfig.splitField}_${v.key.splitFieldTerm}`,
-          } as ChangePointAnnotation;
-        });
+            return {
+              ...(isSingleMetric
+                ? {}
+                : {
+                    group: {
+                      name: fieldConfig.splitField,
+                      value: v.key.splitFieldTerm,
+                    },
+                  }),
+              type: changePointType,
+              p_value: rawPValue,
+              timestamp: timeAsString,
+              label: changePointType,
+              reason: v.change_point_request.type[changePointType].reason,
+              id: isSingleMetric
+                ? 'single_metric'
+                : `${fieldConfig.splitField}_${v.key?.splitFieldTerm}`,
+            } as ChangePointAnnotation;
+          })
+          .filter((v) => !EXCLUDED_CHANGE_POINT_TYPES.has(v.type));
 
         if (Array.isArray(requestParams.changePointType)) {
           groups = groups.filter((v) => requestParams.changePointType!.includes(v.type));
         }
 
         setResults((prev) => {
-          return (
-            (prev ?? [])
-              .concat(groups)
-              // Lower p_value indicates a bigger change point, hence the acs sorting
-              .sort((a, b) => a.p_value - b.p_value)
-          );
+          return (prev ?? []).concat(groups);
         });
 
         if (

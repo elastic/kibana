@@ -22,7 +22,7 @@ import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { DEFAULT_AGG_FUNCTION } from './constants';
+import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
@@ -78,16 +78,6 @@ export const ChangePointDetectionContext = createContext<{
   selectedChangePoints: {},
   setSelectedChangePoints: () => {},
 });
-
-export type ChangePointType =
-  | 'dip'
-  | 'spike'
-  | 'distribution_change'
-  | 'step_change'
-  | 'trend_change'
-  | 'stationary'
-  | 'non_stationary'
-  | 'indeterminable';
 
 export interface ChangePointAnnotation {
   id: string;

@@ -25,7 +25,8 @@ import { FieldsConfig } from './fields_config';
 import { useDataSource } from '../../hooks/use_data_source';
 import { ChangePointTypeFilter } from './change_point_type_filter';
 import { SearchBarWrapper } from './search_bar';
-import { ChangePointType, useChangePointDetectionContext } from './change_point_detection_context';
+import { useChangePointDetectionContext } from './change_point_detection_context';
+import { type ChangePointType } from './constants';
 
 export const ChangePointDetectionPage: FC = () => {
   const [isFlyoutVisible, setFlyoutVisible] = useState<boolean>(false);
