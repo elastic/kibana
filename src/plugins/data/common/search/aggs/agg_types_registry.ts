@@ -51,7 +51,10 @@ export class AggTypesRegistry {
   start = (aggTypesDependencies: AggTypesDependencies) => {
     const initializedAggTypes = new Map();
 
-    const getInitializedFromCache = <T = unknown>(key: string, agg: ((aggTypesDependencies: AggTypesDependencies) => T) | undefined): T | undefined => {
+    const getInitializedFromCache = <T = unknown>(
+      key: string,
+      agg: ((aggTypesDependencies: AggTypesDependencies) => T) | undefined
+    ): T | undefined => {
       if (initializedAggTypes.has(key)) {
         return initializedAggTypes.get(key);
       }
