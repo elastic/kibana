@@ -198,9 +198,8 @@ export function registerTransactionDurationRuleType({
       // Converts threshold to microseconds because this is the unit used on transactionDuration
       const thresholdMicroseconds = ruleParams.threshold * 1000;
 
-      const triggeredBuckets: Array<Record<string, any>> = [];
+      const triggeredBuckets = [];
 
-      // console.log("response: ", JSON.stringify(response, null, 4));
       const predefinedGroupby: string[] = [
         SERVICE_NAME,
         SERVICE_ENVIRONMENT,
