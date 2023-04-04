@@ -82,7 +82,10 @@ function SamplingSlider({
             step={1}
             min={0}
             max={values.length - 1}
-            ticks={values.map((v, i) => ({ label: `${v * 100}%`, value: i }))}
+            ticks={values.map((v, i) => ({
+              label: `${v * 100}%`.slice(Number.isInteger(v * 100) ? 0 : 1),
+              value: i,
+            }))}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
