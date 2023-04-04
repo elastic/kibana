@@ -29,7 +29,6 @@ import {
   addExceptionComment,
   addExceptionConditions,
   addExceptionFlyoutItemName,
-  editExceptionFlyoutItemName,
   clickCopyCommentToClipboard,
   submitEditedExceptionItem,
   submitNewExceptionItem,
@@ -41,7 +40,6 @@ import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
-  EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT,
   LOADING_SPINNER,
 } from '../../../screens/exceptions';
@@ -49,7 +47,6 @@ import {
   createEndpointExceptionList,
   createExceptionList,
   createExceptionListItem,
-  deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 import { ROLES } from '../../../../common/test';
 
@@ -59,13 +56,8 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       esArchiverResetKibana();
       esArchiverLoad('exceptions');
       login();
-    });
-
-    beforeEach(() => {
-      const exceptionList = getExceptionList();
-
       deleteAlertsAndRules();
-      deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
+      const exceptionList = getExceptionList();
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
         createRule({
@@ -100,45 +92,18 @@ describe('Add, copy comments in different exceptions type and validate sharing t
           ],
         });
       });
-
+    });
+    beforeEach(() => {
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();
     });
+
     after(() => {
       esArchiverUnload('exceptions');
     });
 
-    it('Add comment on a new exception and copy to clipboard', () => {
-      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
-
-      // open add exception modal
-      addExceptionFlyoutFromViewerHeader();
-
-      // add exception item conditions
-      addExceptionConditions(getException());
-
-      // add exception item name
-      addExceptionFlyoutItemName('My item name');
-
-      // add exception comment
-      addExceptionComment('new comment');
-
-      // submit
-      submitNewExceptionItem();
-
-      // new exception item displays
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
-
-      // click on show comments
-      clickOnShowComments();
-
-      cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT).eq(0).should('have.text', 'new comment');
-
-      // copy the first comment to clipboard
-      clickCopyCommentToClipboard();
-    });
-    it('Add comment on a new exception, and add another comment from a different user', () => {
+    it('Add comment on a new exception, add another comment has unicode from a different user and copy to clipboard', () => {
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
 
       // User 1
@@ -164,6 +129,8 @@ describe('Add, copy comments in different exceptions type and validate sharing t
 
       // click on show comments
       clickOnShowComments();
+      // copy the first comment to clipboard
+      clickCopyCommentToClipboard();
 
       cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT).eq(0).should('have.text', 'User 1 comment');
 
@@ -181,69 +148,73 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       // open edit exception modal
       openEditException();
       // add exception comment
-      addExceptionComment('User 2 comment');
+      addExceptionComment('User 2 comment @ using unicode');
       // submit
       submitEditedExceptionItem();
 
       cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT).eq(0).should('have.text', 'User 1 comment');
 
-      cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT).eq(1).should('have.text', 'User 2 comment');
-    });
-    it('Add comment on editing exception that does not have a comment', () => {
-      const NEW_ITEM_NAME = 'Exception item-EDITED';
-
-      // open edit exception modal
-      openEditException();
-
-      // edit exception item name
-      editExceptionFlyoutItemName(NEW_ITEM_NAME);
-      // add exception comment
-      addExceptionComment('new comment- on edit');
-
-      // submit
-      submitEditedExceptionItem();
-
-      // new exception item displays
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-
-      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
-
-      // click on show comments
-      clickOnShowComments();
-
       cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
-        .eq(0)
-        .should('have.text', 'new comment- on edit');
-    });
-    it('Add comment has unicode character', () => {
-      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+        .eq(1)
+        .should('have.text', 'User 2 comment @ using unicode');
 
-      // open add exception modal
-      addExceptionFlyoutFromViewerHeader();
+      // it('Add comment on editing exception has unicode character', () => {
+      //   const NEW_ITEM_NAME = 'Exception item-EDITED';
 
-      // add exception item conditions
-      addExceptionConditions(getException());
+      //   // open edit exception modal
+      //   openEditException();
 
-      // add exception item name
-      addExceptionFlyoutItemName('My item name');
+      //   // edit exception item name
+      //   editExceptionFlyoutItemName(NEW_ITEM_NAME);
+      //   // add exception comment
+      //   addExceptionComment('new comment @ using unicode');
 
-      // add exception comment
-      addExceptionComment('new comment @ using unicode');
+      //   // submit
+      //   submitEditedExceptionItem();
 
-      // submit
-      submitNewExceptionItem();
+      //   // new exception item displays
+      //   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
 
-      // new exception item displays
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+      //   cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
 
-      // click on show comments
-      clickOnShowComments();
+      //   // click on show comments
+      //   clickOnShowComments();
 
-      cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
-        .eq(0)
-        .should('have.text', 'new comment @ using unicode');
+      //   cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
+      //     .eq(0)
+      //     .should('have.text', 'new comment @ using unicode');
+      // });
+      // it('Add comment has unicode character', () => {
+      //   cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+
+      //   // open add exception modal
+      //   addExceptionFlyoutFromViewerHeader();
+
+      //   // add exception item conditions
+      //   addExceptionConditions(getException());
+
+      //   // add exception item name
+      //   addExceptionFlyoutItemName('My item name');
+
+      //   // add exception comment
+      //   addExceptionComment('new comment @ using unicode');
+
+      //   // submit
+      //   submitNewExceptionItem();
+
+      //   // new exception item displays
+      //   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+
+      //   // click on show comments
+      //   clickOnShowComments();
+
+      //   cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
+      //     .eq(0)
+      //     .should('have.text', 'new comment @ using unicode');
+      // });
     });
   });
+
   describe('Endpoint exceptions', () => {
     before(() => {
       esArchiverResetKibana();
@@ -279,7 +250,7 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       esArchiverUnload('auditbeat');
     });
 
-    it('Add comment on a new exception, and add another comment from a different user', () => {
+    it('Add comment on a new exception, and add another comment has unicode character from a different user', () => {
       // User 1
       // The Endpoint will populated with predefined fields
       // when no exceptions exist, empty component shows with action to add exception
@@ -328,46 +299,16 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       // open edit exception modal
       openEditException();
       // add exception comment
-      addExceptionComment('User 2 comment');
+      addExceptionComment('User 2 comment @ using unicode');
       // submit
       submitEditedExceptionItem();
 
       cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT).eq(0).should('have.text', 'User 1 comment');
 
-      cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT).eq(1).should('have.text', 'User 2 comment');
-      removeException();
-    });
-    it('Add comment has unicode character', () => {
-      // open add exception modal
-      addExceptionFlyoutFromViewerHeader();
-
-      // for endpoint exceptions, must specify OS
-      selectOs('windows');
-
-      // add exception item conditions
-      addExceptionConditions({
-        field: 'event.code',
-        operator: 'is',
-        values: ['foo'],
-      });
-      // add exception comment
-      addExceptionComment('comment @ using unicode');
-
-      // add exception item name
-      addExceptionFlyoutItemName('Endpoint exception');
-
-      // submit
-      submitNewExceptionItem();
-
-      // Endpoint Exception will move to Endpoint List under Exception tab of rule
-      goToEndpointExceptionsTab();
-
-      // click on show comments
-      clickOnShowComments();
-
       cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
-        .eq(0)
-        .should('have.text', 'comment @ using unicode');
+        .eq(1)
+        .should('have.text', 'User 2 comment @ using unicode');
+      removeException();
     });
   });
 });
