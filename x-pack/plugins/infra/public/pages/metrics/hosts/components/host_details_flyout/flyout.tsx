@@ -18,16 +18,15 @@ import {
   EuiSpacer,
   EuiTabs,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { navigateToUptime } from './links/navigate_to_uptime';
 import { LinkToApmTraces } from './links/link_to_apm_traces';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import { metadataTab } from './metadata';
-import type { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { processesTab } from './processes';
@@ -45,7 +44,7 @@ const NODE_TYPE = 'host' as InventoryItemType;
 
 export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>().services;
+  const { share } = useKibanaContextForPlugin().services;
 
   const currentTimeRange = {
     ...getDateRangeAsTimestamp(),
