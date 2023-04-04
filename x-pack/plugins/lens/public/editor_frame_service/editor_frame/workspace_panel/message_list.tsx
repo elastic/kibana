@@ -25,11 +25,9 @@ import { UserMessage } from '../../../types';
 
 export const MessageList = ({
   messages,
-  useSmallIconsOnButton,
   customButtonStyles,
 }: {
   messages: UserMessage[];
-  useSmallIconsOnButton?: boolean;
   customButtonStyles?: SerializedStyles;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -87,7 +85,7 @@ export const MessageList = ({
           >
             {errorCount > 0 && (
               <>
-                <EuiIcon type={IconError} size={useSmallIconsOnButton ? 's' : undefined} />
+                <EuiIcon type={IconError} />
                 {errorCount}
               </>
             )}
@@ -95,7 +93,6 @@ export const MessageList = ({
               <>
                 <EuiIcon
                   type={IconWarning}
-                  size={useSmallIconsOnButton ? 's' : undefined}
                   css={css`
                     margin-left: 4px;
                   `}
