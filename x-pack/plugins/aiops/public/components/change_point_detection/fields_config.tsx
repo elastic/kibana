@@ -36,6 +36,9 @@ import { useSplitFieldCardinality } from './use_split_field_cardinality';
 
 const selectControlCss = { width: '300px' };
 
+/**
+ * Contains panels with controls and change point results.
+ */
 export const FieldsConfig: FC = () => {
   const {
     requestParams: { fieldConfigs },
@@ -153,12 +156,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
         buttonElement={'div'}
         buttonContent={
           <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
-            <EuiFlexItem
-              css={{
-                visibility: progress === null ? 'hidden' : 'visible',
-              }}
-              grow={false}
-            >
+            <EuiFlexItem css={{ visibility: progress === null ? 'hidden' : 'visible' }} grow={true}>
               <EuiProgress
                 label={
                   <FormattedMessage
@@ -205,9 +203,6 @@ interface FieldsControlsProps {
 
 /**
  * Renders controls for fields selection and emits updates on change.
- * @param fieldConfig
- * @param onChange
- * @constructor
  */
 export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange, children }) => {
   const { splitFieldsOptions } = useChangePointDetectionContext();
@@ -221,18 +216,18 @@ export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange,
   );
 
   return (
-    <EuiFlexGroup alignItems={'center'}>
+    <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'m'}>
       <EuiFlexItem grow={false} css={{ width: '200px' }}>
         <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={selectControlCss}>
+      <EuiFlexItem grow={true} css={selectControlCss}>
         <MetricFieldSelector
           value={fieldConfig.metricField!}
           onChange={(v) => onChangeFn('metricField', v)}
         />
       </EuiFlexItem>
       {splitFieldsOptions.length > 0 ? (
-        <EuiFlexItem grow={false} css={selectControlCss}>
+        <EuiFlexItem grow={true} css={selectControlCss}>
           <SplitFieldSelector
             value={fieldConfig.splitField}
             onChange={(v) => onChangeFn('splitField', v!)}
