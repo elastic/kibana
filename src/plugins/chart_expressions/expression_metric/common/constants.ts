@@ -30,8 +30,9 @@ export const AvailableMetricIcons = {
   FLAG: 'flag',
   HEART: 'heart',
   MAP_MARKER: 'mapMarker',
-  PIN_FILLED: 'pinFilled',
+  PIN: 'pin',
   STAR_EMPTY: 'starEmpty',
-  STAR_FILLED: 'starFilled',
   TAG: 'tag',
+  GLOBE: 'globe',
+  TEMPERATURE: 'temperature',
 } as const;

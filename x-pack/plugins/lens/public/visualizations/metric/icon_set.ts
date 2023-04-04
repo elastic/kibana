@@ -35,6 +35,18 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
     }),
   },
   {
+    value: 'globe',
+    label: i18n.translate('xpack.lens.metric.iconSelect.globeLabel', {
+      defaultMessage: 'Globe',
+    }),
+  },
+  {
+    value: 'temperature',
+    label: i18n.translate('xpack.lens.metric.iconSelect.temperatureLabel', {
+      defaultMessage: 'Temperature',
+    }),
+  },
+  {
     value: 'asterisk',
     label: i18n.translate('xpack.lens.metric.iconSelect.asteriskIconLabel', {
       defaultMessage: 'Asterisk',
@@ -88,7 +100,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
     }),
   },
   {
-    value: 'pinFilled',
+    value: 'pin',
     label: i18n.translate('xpack.lens.metric.iconSelect.mapPinLabel', {
       defaultMessage: 'Map Pin',
     }),
@@ -96,12 +108,6 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
   {
     value: 'starEmpty',
     label: i18n.translate('xpack.lens.metric.iconSelect.starLabel', { defaultMessage: 'Star' }),
-  },
-  {
-    value: 'starFilled',
-    label: i18n.translate('xpack.lens.metric.iconSelect.starFilledLabel', {
-      defaultMessage: 'Star filled',
-    }),
   },
   {
     value: 'tag',
