@@ -45,7 +45,7 @@
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps"],
     "xpack.aiops": ["packages/ml/aiops_components", "plugins/aiops"],
-    "xpack.ml": ["packages/ml/date_picker", "plugins/ml"],
+    "xpack.ml": ["packages/ml/date_picker", "packages/ml/trained_models_utils", "plugins/ml"],
     "xpack.monitoring": ["plugins/monitoring"],
     "xpack.osquery": ["plugins/osquery"],
     "xpack.painlessLab": "plugins/painless_lab",
