@@ -21,7 +21,7 @@ export interface CoreApi {
    */
   register: ContentRegistry['register'];
   /** Handler to retrieve a content crud instance */
-  crud: (contentType: string) => ContentCrud;
+  crud: <T = unknown>(contentType: string) => ContentCrud<T>;
   /** Content management event bus */
   eventBus: EventBus;
 }

@@ -27,6 +27,7 @@ Object {
   "type": "render",
   "value": Object {
     "canNavigateToLens": false,
+    "overrides": undefined,
     "params": Object {
       "listenOnChange": true,
     },
@@ -168,6 +169,7 @@ Object {
   "type": "render",
   "value": Object {
     "canNavigateToLens": false,
+    "overrides": undefined,
     "params": Object {
       "listenOnChange": true,
     },
