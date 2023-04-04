@@ -2594,6 +2594,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     if (this._registry.isSingleNamespace(type)) {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
+
+    if (savedObject.typeMigrationVersion && !savedObject.migrationVersion) {
+      savedObject.migrationVersion = { [type]: savedObject.typeMigrationVersion };
+    }
+
     return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 

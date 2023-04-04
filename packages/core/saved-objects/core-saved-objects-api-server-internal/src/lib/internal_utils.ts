@@ -147,7 +147,10 @@ export function getSavedObjectFromSource<T>(
     version: encodeHitVersion(doc),
     attributes: doc._source[type],
     references: doc._source.references || [],
-    migrationVersion: doc._source.migrationVersion,
+    migrationVersion:
+      doc._source.migrationVersion || !doc._source.typeMigrationVersion
+        ? doc._source.migrationVersion
+        : { [type]: doc._source.typeMigrationVersion },
     coreMigrationVersion: doc._source.coreMigrationVersion,
     typeMigrationVersion: doc._source.typeMigrationVersion,
   };
