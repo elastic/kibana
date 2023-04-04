@@ -25,48 +25,41 @@ export async function getAllRelatedAssets(
   esClient: ElasticsearchClient,
   options: GetAllRelatedAssetsOptions
 ) {
-  const { ean, from, to, type, relation } = options;
+  // How to put size into this?
+  const { ean, from, to, type, relation, maxDistance, size } = options;
 
   const primary = await findPrimary(esClient, { ean, from, to });
 
-  // Distance 1
-  const relatedAssets = await findRelatedAssets(esClient, primary, { relation, from, to });
+  let assetsToFetch = primary;
+  let currentDistance = 1;
+  const relatedAssets = [];
+  while (currentDistance <= maxDistance) {
+    const results = flatten(
+      await Promise.all(
+        assetsToFetch.map((asset) => findRelatedAssets(esClient, asset, { relation, from, to }))
+      )
+    );
 
-  // Distance 2
-  // Do we run these in parallel or in sequence?
-  // Sequence might make more sense if we want to bail before size?
-  const moreRelatedAssets = flatten(
-    await Promise.all(
-      relatedAssets.map((asset) => findRelatedAssets(esClient, asset, { relation, from, to }))
-    )
-  );
+    if (results.length === 0) {
+      break;
+    }
 
-  // Distance 3
-  const evenMoreRelatedAssets = flatten(
-    await Promise.all(
-      moreRelatedAssets.map((asset) => findRelatedAssets(esClient, asset, { relation, from, to }))
-    )
-  );
+    relatedAssets.push(...results.map(withDistance(currentDistance)));
 
-  // Bail if maxDistance is 1, else go for the next hop
-  // Start with size = maxAssets, for each jump, deduct previousHop from size
-  // If size = 0, don't do anything.
+    assetsToFetch = results;
+    currentDistance++;
+  }
 
-  // Filter down related by type
   return {
-    primary,
-    related: [
-      ...relatedAssets.map(withDistance(1)),
-      ...moreRelatedAssets.map(withDistance(2)),
-      ...evenMoreRelatedAssets.map(withDistance(3)),
-    ],
+    primary: primary[0],
+    [relation]: relatedAssets,
   };
 }
 
 async function findPrimary(
   esClient: ElasticsearchClient,
   { ean, from, to }: Pick<GetAllRelatedAssetsOptions, 'ean' | 'from' | 'to'>
-): Promise<Asset> {
+): Promise<Asset[]> {
   const primaryResults = await getAssets({
     esClient,
     size: 1,
@@ -77,7 +70,11 @@ async function findPrimary(
     throw new Error(`Could not find asset with ean=${ean}`);
   }
 
-  return primaryResults[0];
+  if (primaryResults.length > 1) {
+    throw new Error(`Illegal state: Found more than one asset with the same ean (ean=${ean}).`);
+  }
+
+  return primaryResults;
 }
 
 async function findRelatedAssets(
@@ -101,6 +98,7 @@ async function findRelatedAssets(
   const indirectlyRelatedAssets = await getRelatedAssets({
     esClient,
     ean: primary['asset.ean'],
+    excludeEans: directlyRelatedEans,
     relation,
     from,
     to,

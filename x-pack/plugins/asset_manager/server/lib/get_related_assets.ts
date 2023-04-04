@@ -14,6 +14,7 @@ import { ElasticsearchAccessorOptions } from '../types';
 interface GetRelatedAssetsOptions extends ElasticsearchAccessorOptions {
   size?: number;
   ean: string;
+  excludeEans?: string[];
   from?: string;
   to?: string;
   relation: Relation;
@@ -25,6 +26,7 @@ export async function getRelatedAssets({
   from = 'now-24h',
   to = 'now',
   ean,
+  excludeEans,
   relation,
 }: GetRelatedAssetsOptions): Promise<Asset[]> {
   // Maybe it makes the most sense to validate the filters here?
@@ -62,6 +64,16 @@ export async function getRelatedAssets({
       },
     },
   };
+
+  if (excludeEans && excludeEans.length) {
+    dsl.query!.bool!.must_not = [
+      {
+        terms: {
+          'asset.ean': excludeEans,
+        },
+      },
+    ];
+  }
 
   debug('Performing Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
 
