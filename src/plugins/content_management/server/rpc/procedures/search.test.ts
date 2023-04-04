@@ -120,6 +120,9 @@ describe('RPC -> search()', () => {
               cursor: '',
             },
           },
+          meta: {
+            foo: 'bar',
+          },
         },
         outputSchema
       );

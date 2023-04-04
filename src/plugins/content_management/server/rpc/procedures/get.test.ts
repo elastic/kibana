@@ -109,6 +109,9 @@ describe('RPC -> get()', () => {
             item: {
               any: 'object',
             },
+            meta: {
+              foo: 'bar',
+            },
           },
         },
         outputSchema

@@ -43,6 +43,7 @@ export const searchSchemas: ProcedureSchemas = {
           cursor: schema.maybe(schema.string()),
         }),
       }),
+      meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
@@ -69,11 +70,21 @@ export interface SearchIn<T extends string = string, Options extends void | obje
   options?: Options;
 }
 
-export interface SearchResult<T = unknown> {
-  hits: T[];
-  pagination: {
-    total: number;
-    /** Page number or cursor */
-    cursor?: string;
-  };
-}
+export type SearchResult<T = unknown, M = void> = M extends void
+  ? {
+      hits: T[];
+      pagination: {
+        total: number;
+        /** Page number or cursor */
+        cursor?: string;
+      };
+    }
+  : {
+      hits: T[];
+      pagination: {
+        total: number;
+        /** Page number or cursor */
+        cursor?: string;
+      };
+      meta: M;
+    };
