@@ -51,6 +51,7 @@ export const renderApp = (
               }}
             >
               <EventAnnotationGroupListView
+                savedObjectsTagging={services.savedObjectsTagging}
                 uiSettings={services.core.uiSettings}
                 eventAnnotationService={services.eventAnnotationService}
                 visualizeCapabilities={services.core.application.capabilities.visualize}

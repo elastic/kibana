@@ -12,19 +12,36 @@ import {
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
 } from './list_view';
-import { TableListView } from '@kbn/content-management-table-list';
+import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { EventAnnotationServiceType } from '../event_annotation_service/types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '../../common';
+import { EventAnnotationGroupConfig, EVENT_ANNOTATION_GROUP_TYPE } from '../../common';
+import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
+
+import { EuiButton, EuiFlyout } from '@elastic/eui';
+import { act } from 'react-dom/test-utils';
+import { EventAnnotationGroupEditor } from './event_annotation_group_editor';
 
 describe('annotation list view', () => {
+  const group: EventAnnotationGroupConfig = {
+    annotations: [],
+    description: '',
+    tags: [],
+    indexPatternId: 'my-index-pattern',
+    title: 'My group',
+    ignoreGlobalFilters: false,
+  };
+
   let wrapper: ShallowWrapper<typeof EventAnnotationGroupListView>;
   let mockEventAnnotationService: EventAnnotationServiceType;
+
   beforeEach(() => {
     mockEventAnnotationService = {
       findAnnotationGroupContent: jest.fn(),
       deleteAnnotationGroups: jest.fn(),
+      loadAnnotationGroup: jest.fn().mockResolvedValue(group),
+      updateAnnotationGroup: jest.fn(() => Promise.resolve()),
     } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType;
 
     const mockUiSettings = {
@@ -40,18 +57,22 @@ describe('annotation list view', () => {
     wrapper = shallow<typeof EventAnnotationGroupListView>(
       <EventAnnotationGroupListView
         eventAnnotationService={mockEventAnnotationService}
+        savedObjectsTagging={taggingApiMock.create()}
         uiSettings={mockUiSettings}
         visualizeCapabilities={{
           delete: true,
+          save: true,
         }}
       />
     );
   });
 
   it('renders a table list view', () => {
-    expect(wrapper.debug()).toMatchInlineSnapshot(
-      `"<Memo(TableListViewComp) id=\\"annotation\\" headingId=\\"eventAnnotationGroupsListingHeading\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" tableListTitle=\\"Annotation Library\\" onClickTitle={[Function: onClickTitle]} />"`
-    );
+    expect(wrapper.debug()).toMatchInlineSnapshot(`
+      "<div data-test-id=\\"annotationLibraryListingView\\">
+        <Memo(TableListViewComp) findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" tableListTitle=\\"Annotation Library\\" onClickTitle={[Function: onClickTitle]} />
+      </div>"
+    `);
   });
 
   it('searches for groups', () => {
@@ -119,6 +140,48 @@ describe('annotation list view', () => {
           ],
         ]
       `);
+    });
+  });
+
+  describe('editing groups', () => {
+    it('prevents editing when user is missing perms', () => {
+      wrapper.setProps({ visualizeCapabilities: { save: false } });
+
+      expect(wrapper.find(TableListView).prop('deleteItems')).toBeUndefined();
+    });
+
+    it('edits existing group', async () => {
+      expect(wrapper.find(EuiFlyout).exists()).toBeFalsy();
+
+      act(() => {
+        wrapper.find(TableListView).prop('editItem')!({ id: '1234' } as UserContentCommonSchema);
+      });
+
+      // wait one tick to give promise time to settle
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockEventAnnotationService.loadAnnotationGroup).toHaveBeenCalledWith('1234');
+
+      expect(wrapper.find(EuiFlyout).exists()).toBeTruthy();
+
+      const updatedGroup = { ...group, tags: ['my-new-tag'] };
+
+      wrapper.find(EventAnnotationGroupEditor).prop('update')(updatedGroup);
+
+      (
+        wrapper.find('[data-test-subj="saveAnnotationGroup"]') as ShallowWrapper<
+          Parameters<typeof EuiButton>[0]
+        >
+      ).prop('onClick')!({} as any);
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockEventAnnotationService.updateAnnotationGroup).toHaveBeenCalledWith(
+        updatedGroup,
+        '1234'
+      );
+
+      expect(wrapper.find(EuiFlyout).exists()).toBeFalsy();
     });
   });
 });
