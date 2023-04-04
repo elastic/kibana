@@ -139,6 +139,21 @@ describe('use cases add to existing case modal hook', () => {
     );
   });
 
+  it('should call getAttachments with the case info', async () => {
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick({ id: 'test' } as Case);
+      return null;
+    });
+
+    const result = appMockRender.render(<TestComponent />);
+    userEvent.click(result.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(getAttachments).toHaveBeenCalledTimes(1);
+      expect(getAttachments).toHaveBeenCalledWith({ theCase: { id: 'test' } });
+    });
+  });
+
   it('should call createAttachments when a case is selected and show a toast message', async () => {
     const mockBulkCreateAttachments = jest.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
