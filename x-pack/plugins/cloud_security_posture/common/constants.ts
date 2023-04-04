@@ -39,6 +39,7 @@ export const LATEST_VULNERABILITIES_INDEX_PATTERN =
   'logs-cloud_security_posture.vulnerabilities_latest*';
 export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
+export const DATA_VIEW_INDEX_PATTERN = 'logs-*';
 
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
 export const CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE =
