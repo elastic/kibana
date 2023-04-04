@@ -59,7 +59,9 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/discover-plugin"
+    "@kbn/discover-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/ui-theme"
   ],
   "exclude": ["target/**/*"]
 }
