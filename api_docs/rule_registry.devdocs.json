@@ -1676,9 +1676,21 @@
             "text": "RuleExecutorOptions"
           },
           "<Params, ",
-          "WrappedLifecycleRuleState",
+          {
+            "pluginId": "@kbn/alerting-state-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingStateTypesPluginApi",
+            "section": "def-common.WrappedLifecycleRuleState",
+            "text": "WrappedLifecycleRuleState"
+          },
           "<State>, InstanceState, InstanceContext, ActionGroupIds>) => Promise<{ state: ",
-          "WrappedLifecycleRuleState",
+          {
+            "pluginId": "@kbn/alerting-state-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingStateTypesPluginApi",
+            "section": "def-common.WrappedLifecycleRuleState",
+            "text": "WrappedLifecycleRuleState"
+          },
           "<State>; }>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
