@@ -25,7 +25,7 @@ describe('Page Title', () => {
     );
   };
 
-  it('should display Log threshold title', () => {
+  it('should display Log threshold title with default action', () => {
     const { getByTestId } = renderComp(defaultProps);
 
     expect(getByTestId('page-title-container').children.item(0)?.textContent).toEqual(
@@ -33,7 +33,7 @@ describe('Page Title', () => {
     );
   });
 
-  it('should display Anomaly title', () => {
+  it('should display Anomaly title with custom action', () => {
     const props: PageTitleProps = {
       alert: {
         ...defaultProps.alert,
