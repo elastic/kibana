@@ -48,9 +48,6 @@ export const SearchIndexRouter: React.FC = () => {
       <Route path={SEARCH_INDEX_PATH} exact>
         <SearchIndex />
       </Route>
-      <Route path={SEARCH_INDEX_SELECT_CONNECTOR_PATH} exact>
-        <SelectConnector />
-      </Route>
       <Route path={SEARCH_INDEX_TAB_DETAIL_PATH}>
         <SearchIndex />
       </Route>

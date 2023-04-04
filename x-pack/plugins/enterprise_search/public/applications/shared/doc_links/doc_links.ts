@@ -78,6 +78,7 @@ class DocLinks {
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
+  public ingestionApis: string;
   public ingestPipelines: string;
   public kibanaSecurity: string;
   public languageAnalyzers: string;
@@ -197,6 +198,7 @@ class DocLinks {
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
+    this.ingestionApis = '';
     this.ingestPipelines = '';
     this.kibanaSecurity = '';
     this.languageAnalyzers = '';
@@ -317,6 +319,7 @@ class DocLinks {
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
+    this.ingestionApis = docLinks.links.enterpriseSearch.ingestionApis;
     this.ingestPipelines = docLinks.links.enterpriseSearch.ingestPipelines;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;

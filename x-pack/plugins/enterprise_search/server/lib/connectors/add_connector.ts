@@ -68,7 +68,7 @@ export const addConnector = async (
     index_name: string;
     is_native: boolean;
     language: string | null;
-    service_type?: string | null;
+    service_type: string | null;
   }
 ): Promise<{ id: string; index_name: string }> => {
   const connectorsIndexExists = await client.asCurrentUser.indices.exists({

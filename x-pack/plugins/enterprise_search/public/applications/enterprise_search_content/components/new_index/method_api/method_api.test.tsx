@@ -9,8 +9,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiSteps } from '@elastic/eui';
-
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
 import { MethodApi } from './method_api';
@@ -25,6 +23,5 @@ describe('MethodApi', () => {
     const template = wrapper.find(NewSearchIndexTemplate);
 
     expect(template.prop('type')).toEqual('api');
-    expect(template.find(EuiSteps)).toHaveLength(1);
   });
 });

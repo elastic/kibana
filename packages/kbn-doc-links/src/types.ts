@@ -124,6 +124,7 @@ export interface DocLinks {
     readonly documentLevelSecurity: string;
     readonly elser: string;
     readonly engines: string;
+    readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
