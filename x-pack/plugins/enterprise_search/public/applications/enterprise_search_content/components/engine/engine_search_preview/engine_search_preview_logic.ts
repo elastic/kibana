@@ -83,7 +83,7 @@ export const EngineSearchPreviewLogic = kea<
               return Object.values(mappings).some(({ metadata_field: isMeta }) => !isMeta);
             })
             .map(([key]) => {
-              return [key, { raw: {}, snippet: {} }];
+              return [key, { raw: {}, snippet: { fallback: true } }];
             })
         );
 
