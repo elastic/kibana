@@ -203,7 +203,7 @@ export const fetchRulesSnoozeSettings = async ({
     method: 'GET',
     query: {
       filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
-      fields: ['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule'],
+      fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
       per_page: ids.length,
     },
     signal,
