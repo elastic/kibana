@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { ReactElement, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   ScaleType,
@@ -21,6 +21,8 @@ import {
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PersistedLogViewReference } from '../../../../../common/log_views';
+import { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,
   LoadingState,
@@ -54,15 +56,19 @@ const GROUP_LIMIT = 5;
 interface Props {
   ruleParams: PartialRuleParams;
   chartCriterion: Partial<Criterion>;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   showThreshold: boolean;
+  executionTimeRange?: ExecutionTimeRange;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
   ruleParams,
   chartCriterion,
-  sourceId,
+  logViewReference,
   showThreshold,
+  executionTimeRange,
+  annotations,
 }) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
@@ -102,28 +108,34 @@ export const CriterionPreview: React.FC<Props> = ({
           ? NUM_BUCKETS
           : NUM_BUCKETS / 4
       } // Display less data for groups due to space limitations
-      sourceId={sourceId}
+      logViewReference={logViewReference}
       threshold={ruleParams.count}
       chartAlertParams={chartAlertParams}
       showThreshold={showThreshold}
+      executionTimeRange={executionTimeRange}
+      annotations={annotations}
     />
   );
 };
 
 interface ChartProps {
   buckets: number;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   threshold?: Threshold;
   chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   showThreshold: boolean;
+  executionTimeRange?: ExecutionTimeRange;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
   buckets,
-  sourceId,
+  logViewReference,
   threshold,
   chartAlertParams,
   showThreshold,
+  executionTimeRange,
+  annotations,
 }) => {
   const { uiSettings } = useKibana().services;
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
@@ -135,9 +147,10 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     hasError,
     chartPreviewData: series,
   } = useChartPreviewData({
-    sourceId,
+    logViewReference,
     ruleParams: chartAlertParams,
     buckets,
+    executionTimeRange,
   });
 
   useDebounce(
@@ -279,6 +292,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               ]}
             />
           ) : null}
+          {annotations}
           {showThreshold && threshold && isAbove ? (
             <RectAnnotation
               id="above-threshold"

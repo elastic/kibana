@@ -70,14 +70,16 @@ jest.mock('@kbn/field-formats-plugin/common', () => ({
   },
 }));
 
-jest.mock('@elastic/numeral', () => ({
-  language: jest.fn(() => 'en'),
-  languageData: jest.fn(() => ({
+jest.mock('@elastic/numeral', () => {
+  const actualNumeral = jest.requireActual('@elastic/numeral');
+  actualNumeral.language = jest.fn(() => 'en');
+  actualNumeral.languageData = jest.fn(() => ({
     currency: {
       symbol: '$',
     },
-  })),
-}));
+  }));
+  return actualNumeral;
+});
 
 type Props = MetricVisComponentProps;
 
@@ -1101,15 +1103,27 @@ describe('MetricVisComponent', function () {
     });
 
     it('should do nothing if primary metric is not filterable', () => {
-      const event: MetricElementEvent = {
-        type: 'metricElementEvent',
-        rowIndex: 1,
-        columnIndex: 0,
+      const props = {
+        ...defaultProps,
+        filterable: false,
       };
+      const metricComponent = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+          }}
+          data={table}
+          {...props}
+        />
+      );
 
-      fireFilter(event, false, true);
-
-      expect(fireEventSpy).not.toHaveBeenCalled();
+      expect(metricComponent.find(Settings).props().onElementClick).toBeUndefined();
     });
   });
 
@@ -1381,12 +1395,12 @@ describe('MetricVisComponent', function () {
       const base = 1024;
 
       const { primary: bytesValue } = getFormattedMetrics(base - 1, 0, { id: 'bytes' });
-      expect(bytesValue).toBe('1,023 byte');
+      expect(bytesValue).toBe('1,023 B');
 
       const { primary: kiloBytesValue } = getFormattedMetrics(Math.pow(base, 1), 0, {
         id: 'bytes',
       });
-      expect(kiloBytesValue).toBe('1 kB');
+      expect(kiloBytesValue).toBe('1 KB');
 
       const { primary: megaBytesValue } = getFormattedMetrics(Math.pow(base, 2), 0, {
         id: 'bytes',
@@ -1396,7 +1410,27 @@ describe('MetricVisComponent', function () {
       const { primary: moreThanPetaValue } = getFormattedMetrics(Math.pow(base, 6), 0, {
         id: 'bytes',
       });
-      expect(moreThanPetaValue).toBe('1,024 PB');
+      expect(moreThanPetaValue).toBe('1 EB');
+    });
+
+    it('correctly formats bits (decimal)', () => {
+      const base = 1000;
+      const bitFormat = {
+        id: 'number',
+        params: { pattern: '0.0bitd' },
+      };
+
+      const { primary: bytesValue } = getFormattedMetrics(base - 1, 0, bitFormat);
+      expect(bytesValue).toBe('999 bit');
+
+      const { primary: kiloBytesValue } = getFormattedMetrics(Math.pow(base, 1), 0, bitFormat);
+      expect(kiloBytesValue).toBe('1 kbit');
+
+      const { primary: megaBytesValue } = getFormattedMetrics(Math.pow(base, 2), 0, bitFormat);
+      expect(megaBytesValue).toBe('1 Mbit');
+
+      const { primary: moreThanPetaValue } = getFormattedMetrics(Math.pow(base, 6), 0, bitFormat);
+      expect(moreThanPetaValue).toBe('1 Ebit');
     });
 
     it('correctly formats durations', () => {

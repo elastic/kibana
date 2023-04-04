@@ -17,7 +17,7 @@ import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from 
 import { GenericIndexPatternColumn } from '../form_based';
 import { FormBasedPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
-import { DateRange } from '../../../../common';
+import { DateRange } from '../../../../common/types';
 import { getOperationSupportMatrix } from './operation_support';
 
 export type FormBasedDimensionTriggerProps =
