@@ -16,8 +16,10 @@ import {
   EuiIcon,
   EuiText,
   EuiOutsideClickDetector,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import type { LayerType } from '../../../..';
 import type { LayerAction, Visualization } from '../../../../types';
 import { getCloneLayerAction } from './clone_layer_action';
@@ -81,6 +83,7 @@ const InContextMenuActions = (props: LayerActionsProps) => {
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: dataTestSubject,
   });
+  const { euiTheme } = useEuiTheme();
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -130,6 +133,14 @@ const InContextMenuActions = (props: LayerActionsProps) => {
                 closePopover();
                 i.execute();
               }}
+              {...(i.color
+                ? {
+                    css: css`
+                      color: ${euiTheme.colors[i.color]};
+                    `,
+                    size: 's', // need to be explicit here as css prop will disable the default small size
+                  }
+                : {})}
             >
               <EuiText size={'s'} color={i.color}>
                 {i.displayName}
