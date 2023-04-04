@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -134,6 +135,22 @@ describe('ModelVersionObserver', () => {
     await tickOnce(10_000);
 
     expect(client.indices.get).toHaveBeenCalledTimes(6); // 1 initial + 5 retries
+    expect(logger.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry unretryable errors', async () => {
+    (client.indices.get as jest.Mock).mockRejectedValue(
+      new errors.ResponseError({ statusCode: 400, meta: {} as any, warnings: [] })
+    );
+
+    const observer = createTestModelVersionObserver({ client, logger, pollInterval: 500 });
+    const sub = observer.modelVersionMap$.subscribe();
+
+    await tickOnce(10_000);
+    sub.unsubscribe(); // let's say we unsubbed.
+    await tickOnce(10_000); // no further polling should occur
+
+    expect(client.indices.get).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledTimes(1);
   });
 
