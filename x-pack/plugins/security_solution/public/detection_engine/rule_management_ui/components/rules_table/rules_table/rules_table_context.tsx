@@ -388,13 +388,18 @@ interface ExtendedData {
 }
 
 function useFindExtendedRules(...params: Parameters<typeof useFindRules>) {
-  const { data: { rules, total } = { rules: [], total: 0 }, ...restResult } = useFindRules(
-    ...params
-  );
+  const {
+    data: { rules, total } = { rules: [], total: 0 },
+    refetch: refetchRules,
+    ...restResult
+  } = useFindRules(...params);
 
   // Fetch rule snooze settings
-  const { data: rulesSnoozeSettings, isError: isSnoozeSettingsFetchingError } =
-    useFetchRulesSnoozeSettings(rules.map((x) => x.id));
+  const {
+    data: rulesSnoozeSettings,
+    isError: isSnoozeSettingsFetchingError,
+    refetch: refetchSnoozeSettings,
+  } = useFetchRulesSnoozeSettings(rules.map((x) => x.id));
 
   const extendedData = useMemo<ExtendedData>(() => {
     if (isSnoozeSettingsFetchingError) {
@@ -421,9 +426,14 @@ function useFindExtendedRules(...params: Parameters<typeof useFindRules>) {
       total,
     };
   }, [rules, total, rulesSnoozeSettings, isSnoozeSettingsFetchingError]);
+  const refetchRulesAndSnoozeSettings = useCallback(async () => {
+    await refetchRules();
+    await refetchSnoozeSettings();
+  }, [refetchRules, refetchSnoozeSettings]);
 
   return {
     ...restResult,
+    refetch: refetchRulesAndSnoozeSettings,
     data: extendedData,
   };
 }
