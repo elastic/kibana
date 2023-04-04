@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { isEqual, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SelectableUrlList } from '@kbn/observability-plugin/public';
+import { SelectableUrlList } from '@kbn/exploratory-view-plugin/public';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../../translations';
 import { formatToSec } from '../../ux_metrics/key_ux_metrics';

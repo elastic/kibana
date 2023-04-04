@@ -1126,4 +1126,69 @@ describe('embeddable', () => {
     expect(test.initializeSavedVis).toHaveBeenCalledTimes(2);
     expect(test.expressionRenderer).toHaveBeenCalledTimes(2);
   });
+
+  it('should pass over the overrides as variables', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        data: dataMock,
+        expressionRenderer,
+        coreStart: {} as CoreStart,
+        basePath,
+        dataViews: {} as DataViewsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
+        },
+        inspector: inspectorPluginMock.createStartContract(),
+        getTrigger,
+        theme: themeServiceMock.createStartContract(),
+        visualizationMap: defaultVisualizationMap,
+        datasourceMap: defaultDatasourceMap,
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            indexPatterns: {},
+            indexPatternRefs: [],
+          }),
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
+      },
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+        overrides: {
+          settings: {
+            onBrushEnd: 'ignore',
+          },
+        },
+      } as LensEmbeddableInput
+    );
+    embeddable.render(mountpoint);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+    expect(expressionRenderer.mock.calls[0][0]!.variables).toEqual(
+      expect.objectContaining({
+        overrides: {
+          settings: {
+            onBrushEnd: 'ignore',
+          },
+        },
+      })
+    );
+  });
 });

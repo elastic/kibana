@@ -6,17 +6,31 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import { debounce } from 'lodash';
+import classNames from 'classnames';
+import useResizeObserver from 'use-resize-observer/polyfilled';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { EuiPortal } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
-import { css } from '@emotion/react';
-import { EuiPortal } from '@elastic/eui';
 import { DashboardGrid } from '../grid';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { useDashboardContainerContext } from '../../dashboard_container_context';
+
+export const useDebouncedWidthObserver = (wait = 250) => {
+  const [width, setWidth] = useState<number>(0);
+  const onWidthCange = useMemo(() => debounce(setWidth, wait), [wait]);
+  const { ref } = useResizeObserver<HTMLDivElement>({
+    onResize: (dimensions) => {
+      if (width === 0) setWidth(dimensions.width);
+      if (dimensions.width !== width) onWidthCange(dimensions.width);
+    },
+  });
+  return { ref, width };
+};
 
 export const DashboardViewportComponent = () => {
   const {
@@ -42,16 +56,19 @@ export const DashboardViewportComponent = () => {
 
   const viewMode = select((state) => state.explicitInput.viewMode);
   const dashboardTitle = select((state) => state.explicitInput.title);
-  const useMargins = select((state) => state.explicitInput.useMargins);
   const description = select((state) => state.explicitInput.description);
   const expandedPanelId = select((state) => state.componentState.expandedPanelId);
-  const expandedPanelStyles = css`
-    flex: 1;
-  `;
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
+  const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver();
+
+  const classes = classNames({
+    dshDashboardViewport: true,
+    'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
+  });
+
   return (
-    <>
+    <div className={'dshDashboardViewportWrapper'}>
       {controlsEnabled && controlGroup && viewMode !== ViewMode.PRINT ? (
         <div
           className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
@@ -59,21 +76,21 @@ export const DashboardViewportComponent = () => {
         />
       ) : null}
       <div
-        data-shared-items-count={panelCount}
+        ref={resizeRef}
+        className={classes}
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
-        className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
-        css={expandedPanelId ? expandedPanelStyles : undefined}
+        data-shared-items-count={panelCount}
       >
         {panelCount === 0 && (
           <div className="dshDashboardEmptyScreen">
             <DashboardEmptyScreen isEditMode={viewMode === ViewMode.EDIT} />
           </div>
         )}
-        <DashboardGrid />
+        <DashboardGrid viewportWidth={viewportWidth} />
       </div>
-    </>
+    </div>
   );
 };
 
