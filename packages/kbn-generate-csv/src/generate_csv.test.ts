@@ -24,13 +24,13 @@ import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 import { CsvGenerator } from './generate_csv';
-import { CancellationToken, UI_SETTINGS_DATEFORMAT_TZ } from '@kbn/reporting-common';
 import {
-  CsvConfig,
-  JobParams,
+  CancellationToken,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
-} from '../types';
+  UI_SETTINGS_DATEFORMAT_TZ,
+} from '@kbn/reporting-common';
+import { CsvConfig, JobParams } from '../types';
 
 const createMockJob = (baseObj: any = {}): JobParams => ({
   ...baseObj,
@@ -80,11 +80,6 @@ const mockFieldFormatsRegistry = {
     .fn()
     .mockImplementation(() => ({ id: 'string', convert: jest.fn().mockImplementation(identity) })),
 } as unknown as FieldFormatsRegistry;
-
-// const getMockConfig = (properties: DeepPartial<CsvConfig>) => {
-//   const config = createMockConfig(properties);
-//   return config.get('csv');
-// };
 
 beforeEach(async () => {
   content = '';
