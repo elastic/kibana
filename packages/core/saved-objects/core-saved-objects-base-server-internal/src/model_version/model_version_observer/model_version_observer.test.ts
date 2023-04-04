@@ -239,11 +239,11 @@ describe('ModelVersionObserver', () => {
 
   it('can return just the latest value', async () => {
     const observer = createTestModelVersionObserver({ client, logger, pollInterval: 500 });
-    await expect(observer.getCurrentModelVersion()).resolves.toEqual({});
+    await expect(observer.getCurrentModelVersionMap()).resolves.toEqual({});
     await tickOnce(1000); // Ensure that we are not polling
     expect(client.indices.get).toHaveBeenCalledTimes(1);
 
-    await expect(observer.getCurrentModelVersion()).resolves.toEqual({});
+    await expect(observer.getCurrentModelVersionMap()).resolves.toEqual({});
     await tickOnce(1000); // Ensure that we are not polling
     expect(client.indices.get).toHaveBeenCalledTimes(2);
   });

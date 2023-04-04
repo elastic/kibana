@@ -130,7 +130,7 @@ export class ModelVersionObserver {
     };
   };
 
-  public async getCurrentModelVersion(): Promise<ModelVersionMap> {
+  public async getCurrentModelVersionMap(): Promise<ModelVersionMap> {
     return await Rx.firstValueFrom(this.modelVersionMap$);
   }
 }
