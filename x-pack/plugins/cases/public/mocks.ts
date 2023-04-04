@@ -10,7 +10,12 @@ import type { CasesUiStart } from './types';
 
 const apiMock: jest.Mocked<CasesUiStart['api']> = {
   getRelatedCases: jest.fn(),
-  cases: { find: jest.fn(), getCasesMetrics: jest.fn(), getCasesStatus: jest.fn() },
+  cases: {
+    find: jest.fn(),
+    getCasesMetrics: jest.fn(),
+    getCasesStatus: jest.fn(),
+    bulkGet: jest.fn(),
+  },
 };
 
 const uiMock: jest.Mocked<CasesUiStart['ui']> = {
