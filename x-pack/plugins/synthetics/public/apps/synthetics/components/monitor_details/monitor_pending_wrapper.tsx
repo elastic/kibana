@@ -72,7 +72,12 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
           body={<p>{MONITOR_PENDING_CONTENT}</p>}
         />
       ) : null}
-      <div style={loaded && hasPing ? undefined : { display: 'none' }}>{children}</div>
+      <div
+        style={loaded && hasPing ? undefined : { display: 'none' }}
+        data-test-subj="syntheticsPendingWrapperChildren"
+      >
+        {children}
+      </div>
     </>
   );
 };
