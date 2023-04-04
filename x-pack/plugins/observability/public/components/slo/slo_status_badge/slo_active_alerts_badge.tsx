@@ -48,7 +48,7 @@ export function SloActiveAlertsBadge({ activeAlerts }: Props) {
           'xpack.observability.slo.slo.activeAlertsBadge.ariaLabel',
           { defaultMessage: 'active alerts badge' }
         )}
-        data-test-subj="o11ySlosPageSloActiveAlertsBadge"
+        data-test-subj="o11ySloActiveAlertsBadge"
       >
         {i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
           defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
