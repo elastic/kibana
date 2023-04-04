@@ -56,24 +56,24 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
     }
   }, [pingsLoaded, latestPing, dispatch, unlisten]);
 
-  if (!loaded) {
-    return (
-      <PageLoader
-        icon={<EuiLoadingSpinner size="xxl" />}
-        title={<h3>{LOADING_TITLE}</h3>}
-        body={<p>{LOADING_DESCRIPTION}</p>}
-      />
-    );
-  }
-
-  return !hasPing ? (
-    <PageLoader
-      icon={<EuiLoadingChart size="xl" mono />}
-      title={<h3>{MONITOR_PENDING_HEADING}</h3>}
-      body={<p>{MONITOR_PENDING_CONTENT}</p>}
-    />
-  ) : (
-    <>{children}</>
+  return (
+    <>
+      {!loaded ? (
+        <PageLoader
+          icon={<EuiLoadingSpinner size="xxl" />}
+          title={<h3>{LOADING_TITLE}</h3>}
+          body={<p>{LOADING_DESCRIPTION}</p>}
+        />
+      ) : null}
+      {loaded && !hasPing ? (
+        <PageLoader
+          icon={<EuiLoadingChart size="xl" mono />}
+          title={<h3>{MONITOR_PENDING_HEADING}</h3>}
+          body={<p>{MONITOR_PENDING_CONTENT}</p>}
+        />
+      ) : null}
+      <div style={loaded && hasPing ? undefined : { display: 'none' }}>{children}</div>
+    </>
   );
 };
 
