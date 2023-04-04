@@ -70,3 +70,17 @@ export const CONTEXT_MENU_RESET = i18n.translate(
     defaultMessage: 'Reset Controls',
   }
 );
+
+export const SAVE_CHANGES = i18n.translate(
+  'xpack.securitySolution.filtersGroup.contextMenu.saveChanges',
+  {
+    defaultMessage: 'Save Changes',
+  }
+);
+
+export const REVERT_CHANGES = i18n.translate(
+  'xpack.securitySolution.filtersGroup.contextMenu.revertChanges',
+  {
+    defaultMessage: 'Revert Changes',
+  }
+);

@@ -5,11 +5,25 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { FC } from 'react';
 import React from 'react';
-import { FILTER_GROUP_BANNER_MESSAGE, FILTER_GROUP_BANNER_TITLE } from './translations';
+import {
+  FILTER_GROUP_BANNER_MESSAGE,
+  FILTER_GROUP_BANNER_TITLE,
+  REVERT_CHANGES,
+  SAVE_CHANGES,
+} from './translations';
 
-export const FiltersChangedBanner = () => {
+interface FiltersChangesBanner {
+  saveChangesHandler: () => void;
+  discardChangesHandler: () => void;
+}
+
+export const FiltersChangedBanner: FC<FiltersChangesBanner> = ({
+  saveChangesHandler,
+  discardChangesHandler,
+}) => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
       <EuiFlexItem grow={true}>
@@ -19,6 +33,10 @@ export const FiltersChangedBanner = () => {
           iconType={'iInCircle'}
         >
           <p>{FILTER_GROUP_BANNER_MESSAGE}</p>
+          <EuiButton color={'primary'} onClick={saveChangesHandler}>
+            {SAVE_CHANGES}
+          </EuiButton>
+          <EuiButtonEmpty onClick={discardChangesHandler}>{REVERT_CHANGES}</EuiButtonEmpty>
         </EuiCallOut>
       </EuiFlexItem>
     </EuiFlexGroup>

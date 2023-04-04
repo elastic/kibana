@@ -406,6 +406,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             </EuiFlexItem>
           ) : null}
           {!isViewMode &&
+          !showFiltersChangedBanner &&
           (Object.keys(controlGroupInputUpdates?.panels ?? {}).length > NUM_OF_CONTROLS.MIN ||
             Object.keys(controlGroupInputUpdates?.panels ?? {}).length < NUM_OF_CONTROLS.MAX) ? (
             <>
@@ -427,7 +428,10 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         {showFiltersChangedBanner ? (
           <>
             <EuiSpacer size="l" />
-            <FiltersChangedBanner />
+            <FiltersChangedBanner
+              saveChangesHandler={saveChangesHandler}
+              discardChangesHandler={discardChangesHandler}
+            />
           </>
         ) : null}
       </FilterWrapper>
