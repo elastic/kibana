@@ -29,12 +29,12 @@ import { useLastPage } from './use_last_page';
 const getIconsCss = (hasNextPage: boolean | undefined, euiTheme: EuiThemeComputed<{}>): string => {
   const customSize = hasNextPage
     ? {
-        showMoreSectionSize: euiTheme.size.xxxl,
-        marginTopShowMoreSectionSize: euiTheme.size.xxl,
-        marginBottomShowMoreSectionSize: euiTheme.size.xxl,
+        showMoreSectionSize: euiTheme.size.xxxxl,
+        marginTopShowMoreSectionSize: euiTheme.size.xxxl,
+        marginBottomShowMoreSectionSize: euiTheme.size.xxxl,
       }
     : {
-        showMoreSectionSize: euiTheme.size.s,
+        showMoreSectionSize: euiTheme.size.m,
         marginTopShowMoreSectionSize: euiTheme.size.m,
         marginBottomShowMoreSectionSize: euiTheme.size.m,
       };
