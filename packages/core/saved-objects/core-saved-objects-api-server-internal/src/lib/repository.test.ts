@@ -2952,6 +2952,7 @@ describe('SavedObjectsRepository', () => {
           namespaces: [namespace ?? 'default'],
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '1.1.1',
+          managed: false,
         });
       });
     });
@@ -3539,6 +3540,7 @@ describe('SavedObjectsRepository', () => {
                 'migrationVersion',
                 'coreMigrationVersion',
                 'typeMigrationVersion',
+                'managed',
                 'updated_at',
                 'created_at',
                 'originId',

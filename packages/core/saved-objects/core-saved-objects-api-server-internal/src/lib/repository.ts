@@ -2320,6 +2320,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       refresh = DEFAULT_REFRESH_SETTING,
       initialize = false,
       upsertAttributes,
+      managed,
     } = options;
 
     if (!id) {
@@ -2391,6 +2392,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       },
       migrationVersion,
       typeMigrationVersion,
+      managed,
       updated_at: time,
     });
 
