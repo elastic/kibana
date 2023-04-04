@@ -134,6 +134,7 @@ export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
   [ConfigKey.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
   [ConfigKey.USERNAME]: '',
   [ConfigKey.MODE]: Mode.ANY,
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: '1024',
 };
 
 export const DEFAULT_ICMP_SIMPLE_FIELDS: ICMPSimpleFields = {

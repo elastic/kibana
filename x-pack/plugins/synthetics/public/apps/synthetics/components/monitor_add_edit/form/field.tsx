@@ -32,6 +32,7 @@ export const Field = memo<Props>(
     fieldError,
     dependencies,
     customHook,
+    hidden,
   }: Props) => {
     const { register, watch, control, setValue, reset, getFieldState, formState } =
       useFormContext<FormConfig>();
@@ -73,6 +74,7 @@ export const Field = memo<Props>(
       'aria-label': ariaLabel,
       helpText,
       fullWidth: true,
+      style: hidden && hidden(dependenciesValues) ? { display: 'none' } : undefined,
     };
 
     return controlled ? (

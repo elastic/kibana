@@ -68,6 +68,7 @@ import {
   VerificationMode,
   FieldMap,
   FormLocation,
+  ResponseBodyIndexPolicy,
 } from '../types';
 import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
 import { getDefaultFormFields } from './defaults';
@@ -1279,5 +1280,21 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       })),
       disabled: readOnly,
     }),
+  },
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: {
+    fieldKey: ConfigKey.RESPONSE_BODY_MAX_BYTES,
+    component: FieldNumber,
+    label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyMaxBytes.label', {
+      defaultMessage: 'Response body max bytes',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.responseBodyMaxBytes.helpText', {
+      defaultMessage: 'Control the maximum size of the stored body contents.',
+    }),
+    hidden: (dependencies) => {
+      const [responseBodyIndex] = dependencies || [];
+      return responseBodyIndex === ResponseBodyIndexPolicy.NEVER;
+    },
+    props: (): EuiFieldNumberProps => ({ min: 1, step: 'any', readOnly }),
+    dependencies: [ConfigKey.RESPONSE_BODY_INDEX],
   },
 });

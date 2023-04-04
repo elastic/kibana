@@ -59,6 +59,7 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
     components: [
       FIELD(readOnly)[ConfigKey.RESPONSE_HEADERS_INDEX],
       FIELD(readOnly)[ConfigKey.RESPONSE_BODY_INDEX],
+      FIELD(readOnly)[ConfigKey.RESPONSE_BODY_MAX_BYTES],
     ],
   },
   responseChecks: {

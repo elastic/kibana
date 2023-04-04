@@ -194,6 +194,7 @@ export const HTTPAdvancedFieldsCodec = t.intersection([
   }),
   t.partial({
     [ConfigKey.MODE]: ModeCodec,
+    [ConfigKey.RESPONSE_BODY_MAX_BYTES]: t.string,
   }),
 ]);
 

@@ -63,6 +63,7 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   label?: string;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
+  hidden?: (depenencies?: unknown[]) => boolean;
   props?: (params: {
     field?: ControllerRenderProps<FormConfig, TFieldKey>;
     formState: FormState<FormConfig>;
@@ -129,6 +130,7 @@ export interface FieldMap {
   [ConfigKey.REQUEST_BODY_CHECK]: FieldMeta<ConfigKey.REQUEST_BODY_CHECK>;
   [ConfigKey.RESPONSE_HEADERS_INDEX]: FieldMeta<ConfigKey.RESPONSE_HEADERS_INDEX>;
   [ConfigKey.RESPONSE_BODY_INDEX]: FieldMeta<ConfigKey.RESPONSE_BODY_INDEX>;
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: FieldMeta<ConfigKey.RESPONSE_BODY_MAX_BYTES>;
   [ConfigKey.RESPONSE_STATUS_CHECK]: FieldMeta<ConfigKey.RESPONSE_STATUS_CHECK>;
   [ConfigKey.RESPONSE_HEADERS_CHECK]: FieldMeta<ConfigKey.RESPONSE_HEADERS_CHECK>;
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: FieldMeta<ConfigKey.RESPONSE_BODY_CHECK_POSITIVE>;

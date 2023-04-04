@@ -44,6 +44,7 @@ export enum ConfigKey {
   RESPONSE_BODY_INDEX = 'response.include_body',
   RESPONSE_HEADERS_CHECK = 'check.response.headers',
   RESPONSE_HEADERS_INDEX = 'response.include_headers',
+  RESPONSE_BODY_MAX_BYTES = 'response.include_body_max_bytes',
   RESPONSE_RECEIVE_CHECK = 'check.receive',
   RESPONSE_STATUS_CHECK = 'check.response.status',
   REQUEST_BODY_CHECK = 'check.request.body',
