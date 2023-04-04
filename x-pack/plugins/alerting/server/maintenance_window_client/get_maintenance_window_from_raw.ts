@@ -18,7 +18,7 @@ export const getMaintenanceWindowFromRaw = ({
   attributes,
 }: GetMaintenanceWindowFromRawParams) => {
   const { events, expirationDate } = attributes;
-  const { startDate, endDate, status } = getMaintenanceWindowDateAndStatus({
+  const { eventStartTime, eventEndTime, status } = getMaintenanceWindowDateAndStatus({
     events,
     expirationDate: new Date(expirationDate),
     dateToCompare: new Date(),
@@ -27,8 +27,8 @@ export const getMaintenanceWindowFromRaw = ({
   return {
     ...attributes,
     id,
-    startDate,
-    endDate,
+    eventStartTime,
+    eventEndTime,
     status,
   };
 };

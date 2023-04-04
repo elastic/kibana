@@ -33,10 +33,15 @@ export const findMaintenanceWindowsRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
-        const maintenanceWindows = await maintenanceWindowClient.find(req.body);
+        const result = await maintenanceWindowClient.find(req.body);
 
         return res.ok({
-          body: maintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
+          body: {
+            data: result.data.map((maintenanceWindow) =>
+              rewriteMaintenanceWindowRes(maintenanceWindow)
+            ),
+            total: result.data.length,
+          },
         });
       })
     )

@@ -23,8 +23,8 @@ jest.mock('../lib/license_api_access', () => ({
 
 const mockMaintenanceWindow = {
   ...getMockMaintenanceWindow(),
-  startDate: new Date().toISOString(),
-  endDate: new Date().toISOString(),
+  eventStartTime: new Date().toISOString(),
+  eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
   id: 'test-id',
 };

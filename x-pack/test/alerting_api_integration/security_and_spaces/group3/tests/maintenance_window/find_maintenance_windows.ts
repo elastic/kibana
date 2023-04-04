@@ -79,13 +79,13 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(response.body.length).to.eql(2);
+              expect(response.body.total).to.eql(2);
               expect(response.statusCode).to.eql(200);
-              expect(response.body[0].title).to.eql('test-maintenance-window');
-              expect(response.body[0].duration).to.eql(3600000);
-              expect(response.body[0].r_rule.dtstart).to.eql(createParams.r_rule.dtstart);
-              expect(response.body[0].events.length).to.be.greaterThan(0);
-              expect(response.body[0].status).to.eql('running');
+              expect(response.body.data[0].title).to.eql('test-maintenance-window');
+              expect(response.body.data[0].duration).to.eql(3600000);
+              expect(response.body.data[0].r_rule.dtstart).to.eql(createParams.r_rule.dtstart);
+              expect(response.body.data[0].events.length).to.be.greaterThan(0);
+              expect(response.body.data[0].status).to.eql('running');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

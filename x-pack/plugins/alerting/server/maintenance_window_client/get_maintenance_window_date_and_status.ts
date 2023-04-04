@@ -14,8 +14,8 @@ export interface DateSearchResult {
 }
 
 export interface MaintenanceWindowDateAndStatus {
-  startDate: string | null;
-  endDate: string | null;
+  eventStartTime: string | null;
+  eventEndTime: string | null;
   status: MaintenanceWindowStatus;
   index?: number;
 }
@@ -33,8 +33,8 @@ export const getMaintenanceWindowDateAndStatus = ({
   // No events, status is finished
   if (!events.length) {
     return {
-      startDate: null,
-      endDate: null,
+      eventStartTime: null,
+      eventEndTime: null,
       status: MaintenanceWindowStatus.Finished,
     };
   }
@@ -43,16 +43,16 @@ export const getMaintenanceWindowDateAndStatus = ({
   // Past expiration, show the last event, but status is now archived
   if (moment.utc(expirationDate).isBefore(dateToCompare)) {
     return {
-      startDate: event.gte,
-      endDate: event.lte,
+      eventStartTime: event.gte,
+      eventEndTime: event.lte,
       status: MaintenanceWindowStatus.Archived,
       index,
     };
   }
 
   return {
-    startDate: event.gte,
-    endDate: event.lte,
+    eventStartTime: event.gte,
+    eventEndTime: event.lte,
     status,
     index,
   };

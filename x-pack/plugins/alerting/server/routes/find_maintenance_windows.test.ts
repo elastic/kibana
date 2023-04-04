@@ -25,15 +25,15 @@ const mockMaintenanceWindows = {
   data: [
     {
       ...getMockMaintenanceWindow(),
-      startDate: new Date().toISOString(),
-      endDate: new Date().toISOString(),
+      eventStartTime: new Date().toISOString(),
+      eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
       id: 'test-id1',
     },
     {
       ...getMockMaintenanceWindow(),
-      startDate: new Date().toISOString(),
-      endDate: new Date().toISOString(),
+      eventStartTime: new Date().toISOString(),
+      eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
       id: 'test-id2',
     },
@@ -67,7 +67,10 @@ describe('findMaintenanceWindowsRoute', () => {
       filter: 'maintenance-window.attributes.title: test-title',
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
+      body: {
+        data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
+        total: 2,
+      },
     });
   });
 

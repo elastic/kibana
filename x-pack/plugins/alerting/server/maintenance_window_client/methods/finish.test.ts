@@ -96,8 +96,8 @@ describe('MaintenanceWindowClient - finish', () => {
       { version: '123' }
     );
     expect(result.status).toEqual('upcoming');
-    expect(result.startDate).toEqual('2023-03-05T00:00:00.000Z');
-    expect(result.endDate).toEqual('2023-03-05T01:00:00.000Z');
+    expect(result.eventStartTime).toEqual('2023-03-05T00:00:00.000Z');
+    expect(result.eventEndTime).toEqual('2023-03-05T01:00:00.000Z');
   });
 
   it('should keep events that were finished in the past', async () => {

@@ -52,8 +52,8 @@ describe('getMaintenanceWindowDateAndStatus', () => {
       expirationDate: moment().add(1, 'year').toDate(),
     });
 
-    expect(result.startDate).toEqual(null);
-    expect(result.endDate).toEqual(null);
+    expect(result.eventStartTime).toEqual(null);
+    expect(result.eventEndTime).toEqual(null);
     expect(result.status).toEqual('finished');
   });
 
@@ -65,8 +65,8 @@ describe('getMaintenanceWindowDateAndStatus', () => {
       expirationDate: moment().subtract(1, 'minute').toDate(),
     });
 
-    expect(result.startDate).toEqual('2023-03-25T00:00:00.000Z');
-    expect(result.endDate).toEqual('2023-03-25T01:00:00.000Z');
+    expect(result.eventStartTime).toEqual('2023-03-25T00:00:00.000Z');
+    expect(result.eventEndTime).toEqual('2023-03-25T01:00:00.000Z');
     expect(result.status).toEqual('archived');
 
     jest.useFakeTimers().setSystemTime(new Date('2023-03-28T00:30:00.000Z'));
@@ -76,8 +76,8 @@ describe('getMaintenanceWindowDateAndStatus', () => {
       expirationDate: moment().subtract(1, 'minute').toDate(),
     });
 
-    expect(result.startDate).toEqual('2023-03-28T00:00:00.000Z');
-    expect(result.endDate).toEqual('2023-03-28T01:00:00.000Z');
+    expect(result.eventStartTime).toEqual('2023-03-28T00:00:00.000Z');
+    expect(result.eventEndTime).toEqual('2023-03-28T01:00:00.000Z');
     expect(result.status).toEqual('archived');
 
     jest.useFakeTimers().setSystemTime(new Date('2023-04-28T00:30:00.000Z'));
@@ -87,8 +87,8 @@ describe('getMaintenanceWindowDateAndStatus', () => {
       expirationDate: moment().subtract(1, 'minute').toDate(),
     });
 
-    expect(result.startDate).toEqual('2023-03-31T00:00:00.000Z');
-    expect(result.endDate).toEqual('2023-03-31T01:00:00.000Z');
+    expect(result.eventStartTime).toEqual('2023-03-31T00:00:00.000Z');
+    expect(result.eventEndTime).toEqual('2023-03-31T01:00:00.000Z');
     expect(result.status).toEqual('archived');
   });
 });

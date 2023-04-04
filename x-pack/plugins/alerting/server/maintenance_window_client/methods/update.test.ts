@@ -111,8 +111,8 @@ describe('MaintenanceWindowClient - update', () => {
       expect.objectContaining({
         id: 'test-id',
         status: 'finished',
-        startDate: '2023-03-05T00:00:00.000Z',
-        endDate: '2023-03-05T01:00:00.000Z',
+        eventStartTime: '2023-03-05T00:00:00.000Z',
+        eventEndTime: '2023-03-05T01:00:00.000Z',
       })
     );
   });
