@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { type EuiBasicTableColumn, EuiInMemoryTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  type EuiBasicTableColumn,
+  EuiInMemoryTable,
+  EuiBadge,
+  EuiEmptyPrompt,
+  EuiToolTip,
+  EuiIcon,
+} from '@elastic/eui';
 import React, { type FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
@@ -41,9 +48,10 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   const dateFormatter = useMemo(() => fieldFormats.deserialize({ id: 'date' }), [fieldFormats]);
 
-  const sorting = {
+  const defaultSorting = {
     sort: {
       field: 'p_value',
+      // Lower p_value indicates a bigger change point, hence the acs sorting
       direction: 'asc' as const,
     },
   };
@@ -84,11 +92,23 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     },
     {
       field: 'p_value',
-      name: i18n.translate(
-        'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel',
-        {
-          defaultMessage: 'p-value',
-        }
+      name: (
+        <EuiToolTip
+          content={i18n.translate('xpack.aiops.changePointDetection.pValueTooltip', {
+            defaultMessage:
+              'Indicates how extreme the change is. Lower values indicate greater change.',
+          })}
+        >
+          <span>
+            {i18n.translate(
+              'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel',
+              {
+                defaultMessage: 'p-value',
+              }
+            )}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
       ),
       sortable: true,
       truncateText: false,
@@ -139,7 +159,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       items={annotations}
       columns={columns}
       pagination={{ pageSizeOptions: [5, 10, 15] }}
-      sorting={sorting}
+      sorting={defaultSorting}
       message={
         <EuiEmptyPrompt
           iconType="search"
