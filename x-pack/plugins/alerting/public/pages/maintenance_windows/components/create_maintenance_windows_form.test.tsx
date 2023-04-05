@@ -8,7 +8,10 @@
 import React from 'react';
 import { within } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
-import { CreateMaintenanceWindowFormProps, CreateMaintenanceWindowForm } from './form';
+import {
+  CreateMaintenanceWindowFormProps,
+  CreateMaintenanceWindowForm,
+} from './create_maintenance_windows_form';
 
 const formProps: CreateMaintenanceWindowFormProps = {
   onCancel: jest.fn(),

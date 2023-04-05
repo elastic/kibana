@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { MaintenanceWindowsPage } from '../pages/maintenance_windows';
-import { MaintenanceWindowsCreatePage } from '../pages/maintenance_windows/create';
+import { MaintenanceWindowsCreatePage } from '../pages/maintenance_windows/maintenance_window_create_page';
 
 interface Route {
   handler: () => JSX.Element;

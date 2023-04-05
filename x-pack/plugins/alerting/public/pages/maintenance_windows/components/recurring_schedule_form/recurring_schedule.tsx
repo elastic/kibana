@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import moment from 'moment';
-import { EuiHorizontalRule, EuiSplitPanel } from '@elastic/eui';
+import { EuiFormLabel, EuiHorizontalRule, EuiSplitPanel } from '@elastic/eui';
 import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
@@ -23,11 +23,12 @@ import { DatePickerField } from '../fields/date_picker_field';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { recurringSummary } from '../../helpers/recurring_summary';
 import { getPresets } from '../../helpers/get_presets';
+import { FormProps } from '../schema';
 
 const UseField = getUseField({ component: Field });
 
 export const RecurringSchedule: React.FC = React.memo(() => {
-  const [{ startDate, recurringSchedule }] = useFormData({
+  const [{ startDate, recurringSchedule }] = useFormData<FormProps>({
     watch: [
       'startDate',
       'recurringSchedule.frequency',
@@ -116,11 +117,16 @@ export const RecurringSchedule: React.FC = React.memo(() => {
             path="recurringSchedule.count"
             componentProps={{
               'data-test-subj': 'count-field',
+              id: 'count',
               euiFieldProps: {
                 type: 'number',
                 min: 1,
-                prepend: i18n.CREATE_FORM_COUNT_AFTER,
-                append: i18n.CREATE_FORM_COUNT_OCCURRENCE,
+                prepend: (
+                  <EuiFormLabel htmlFor={'count'}>{i18n.CREATE_FORM_COUNT_AFTER}</EuiFormLabel>
+                ),
+                append: (
+                  <EuiFormLabel htmlFor={'count'}>{i18n.CREATE_FORM_COUNT_OCCURRENCE}</EuiFormLabel>
+                ),
               },
             }}
           />

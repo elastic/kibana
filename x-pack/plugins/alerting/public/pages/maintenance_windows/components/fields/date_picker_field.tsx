@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import moment from 'moment';
 import { Moment } from 'moment';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 import {
@@ -14,7 +13,7 @@ import {
   useFormContext,
   FieldHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { get } from 'lodash';
+import { getSelectedForDatePicker as getSelected } from '../../helpers/get_selected_for_date_picker';
 
 interface DatePickerFieldProps {
   field: FieldHook;
@@ -26,13 +25,8 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = React.memo(
   ({ field, showTimeSelect = true, ...rest }) => {
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [field.path] });
-    // parse from a string date to moment() if there is an intitial value
-    // otherwise just get the current date
-    const initialValue = get(form, field.path);
-    let selected = moment();
-    if (initialValue && moment(initialValue).isValid()) {
-      selected = moment(initialValue);
-    }
+
+    const selected = getSelected(form, field.path);
 
     const onChange = useCallback(
       (currentDate: Moment | null) => {

@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { isString } from 'lodash';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 
@@ -25,22 +24,22 @@ export const styles = {
 };
 
 interface TitleProps {
-  title: string | React.ReactNode;
-  description?: string | React.ReactNode;
+  title: string;
+  description?: string;
 }
 const Title = React.memo<TitleProps>(({ title, description }) => {
   return (
     <EuiFlexGroup direction="column" alignItems="baseline" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="l">
-          <h1>{isString(title) ? <TruncatedText text={title} /> : title}</h1>
+          <h1>{<TruncatedText text={title} />}</h1>
         </EuiTitle>
       </EuiFlexItem>
       {description ? (
         <>
           <EuiSpacer size="xs" />
           <EuiFlexItem data-test-subj="description">
-            <div>{isString(description) ? <TruncatedText text={description} /> : description}</div>
+            <TruncatedText text={description} />
           </EuiFlexItem>
         </>
       ) : null}
@@ -50,9 +49,9 @@ const Title = React.memo<TitleProps>(({ title, description }) => {
 Title.displayName = 'Title';
 
 export interface PageHeaderProps {
+  title: string;
   showBackButton?: boolean;
-  title: string | React.ReactNode;
-  description?: string | React.ReactNode;
+  description?: string;
 }
 
 export const PageHeader = React.memo<PageHeaderProps>(

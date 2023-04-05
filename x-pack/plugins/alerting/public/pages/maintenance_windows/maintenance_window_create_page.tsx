@@ -12,7 +12,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
 import * as i18n from './translations';
 import { PageHeader } from './components/page_header';
-import { CreateMaintenanceWindowForm } from './components/form';
+import { CreateMaintenanceWindowForm } from './components/create_maintenance_windows_form';
 import { AlertingDeepLinkId } from '../../config';
 
 export const MaintenanceWindowsCreatePage = React.memo(() => {
