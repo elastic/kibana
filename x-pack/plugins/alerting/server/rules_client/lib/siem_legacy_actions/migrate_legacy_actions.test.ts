@@ -126,23 +126,6 @@ describe('Legacy rule action migration logic', () => {
       );
 
       expect(migratedProperties).toEqual({ legacyActions: [], legacyActionsReferences: [] });
-
-      // TODO: check why action is lost
-      // expect(migratedRule?.actions).toEqual([
-      //   {
-      //     id: connectorId,
-      //     actionTypeId: '.email',
-      //     group: 'default',
-      //     params: {
-      //       message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-      //       subject: 'Test Actions',
-      //       to: ['test@test.com'],
-      //     },
-      //   },
-      // ]);
-      // expect(migratedRule?.notifyWhen).toEqual('onActiveAlert');
-      // expect(migratedRule?.throttle).toBeNull();
-      // expect(migratedRule?.muteAll).toBeFalsy();
     });
 
     test('it migrates a rule with daily legacy actions', async () => {
