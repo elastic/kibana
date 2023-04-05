@@ -176,12 +176,15 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
     this.controlGroup
       .getOutput$()
       .pipe(
-        distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
-          compareAllFilters(filtersA, filtersB)
-        ),
+        // distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
+        //   compareAllFilters(filtersA, filtersB)
+        // ),
         skip(1) // skip first filter output because it will have been applied in initialize
       )
-      .subscribe(() => this.forceRefresh())
+      .subscribe((output) => {
+        console.log('subscription from dashboard -- controlGroup output changed', output);
+        this.forceRefresh();
+      })
   );
 
   subscriptions.add(
