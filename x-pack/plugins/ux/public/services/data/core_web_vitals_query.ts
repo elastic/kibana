@@ -34,7 +34,7 @@ export function transformCoreWebVitalsResponse<T>(
   response?: ESSearchResponse<
     T,
     ReturnType<typeof coreWebVitalsQuery>,
-    { restTotalHitsAsInt: true }
+    { restTotalHitsAsInt: false }
   >,
   percentile = PERCENTILE_DEFAULT
 ): UXMetrics | undefined {

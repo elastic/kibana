@@ -19,14 +19,14 @@ export function formatHasRumResult<T>(
   esResult: ESSearchResponse<
     T,
     ReturnType<typeof hasRumDataQuery>,
-    { restTotalHitsAsInt: true }
+    { restTotalHitsAsInt: false }
   >,
   indices?: string
 ) {
   if (!esResult) return esResult;
   return {
     indices,
-    hasData: esResult.hits.total > 0,
+    hasData: esResult.hits.total.value > 0,
     serviceName:
       esResult.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
   };

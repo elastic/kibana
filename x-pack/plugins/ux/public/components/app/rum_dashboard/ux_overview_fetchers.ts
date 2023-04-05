@@ -109,19 +109,23 @@ async function esQuery<T>(
   dataStartPlugin: DataPublicPluginStart,
   query: IKibanaSearchRequest<T> & { params: { index?: string } }
 ) {
-  return new Promise<ESSearchResponse<{}, T, { restTotalHitsAsInt: true }>>(
+  return new Promise<ESSearchResponse<{}, T, { restTotalHitsAsInt: false }>>(
     (resolve, reject) => {
-      const search$ = dataStartPlugin.search.search(query).subscribe({
-        next: (result) => {
-          if (isCompleteResponse(result)) {
-            resolve(result.rawResponse as any);
-            search$.unsubscribe();
-          }
-        },
-        error: (err) => {
-          reject(err);
-        },
-      });
+      const search$ = dataStartPlugin.search
+        .search(query, {
+          legacyHitsTotal: false,
+        })
+        .subscribe({
+          next: (result) => {
+            if (isCompleteResponse(result)) {
+              resolve(result.rawResponse as any);
+              search$.unsubscribe();
+            }
+          },
+          error: (err) => {
+            reject(err);
+          },
+        });
     }
   );
 }
