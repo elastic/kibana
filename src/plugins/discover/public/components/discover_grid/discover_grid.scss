@@ -40,20 +40,20 @@
 }
 
 .dscDiscoverGrid__cellPopover {
-  min-width: 100px;
-  min-height: 100px;
+  min-height: 140px;
   max-width: 900px !important;
-  max-height: 800px !important;
 
   &.dscDiscoverGrid__cellPopover--withJson {
     resize: horizontal;
+    min-width: 516px;
     width: 516px;
   }
 
   &:not(.dscDiscoverGrid__cellPopover--withJson) {
     resize: both;
+    min-width: 300px;
     width: 400px;
-    height: 150px;
+    max-height: 390px !important;
   }
 
   & > div {
