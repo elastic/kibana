@@ -58,6 +58,7 @@
     "@kbn/ml-query-utils",
     "@kbn/saved-search-plugin",
     "@kbn/unified-field-list-plugin",
+    "@kbn/core-execution-context-common",
   ],
   "exclude": [
     "target/**/*",
