@@ -7,7 +7,7 @@
 
 import { getAlertPaddedTimeRange } from './get_alert_padded_time_range';
 
-describe('getAlertTimeRange', () => {
+describe('getAlertPaddedTimeRange', () => {
   const mockedDate = '2023-03-28T09:22:32.660Z';
   const mockDate = jest
     .spyOn(global.Date, 'now')
