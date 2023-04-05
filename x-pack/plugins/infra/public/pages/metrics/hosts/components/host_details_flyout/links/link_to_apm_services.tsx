@@ -7,8 +7,9 @@
 import React from 'react';
 import { stringify } from 'querystring';
 import { encode } from '@kbn/rison';
+import { css } from '@emotion/react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 
@@ -20,6 +21,7 @@ interface LinkToApmServicesProps {
 export const LinkToApmServices = ({ hostName, apmField }: LinkToApmServicesProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
+  const { euiTheme } = useEuiTheme();
 
   const queryString = new URLSearchParams(
     encode(
@@ -34,7 +36,12 @@ export const LinkToApmServices = ({ hostName, apmField }: LinkToApmServicesProps
   return (
     <RedirectAppLinks coreStart={services}>
       <EuiLink href={linkToApmServices} data-test-subj="infraHostsViewFlyoutApmServicesLink">
-        <EuiIcon type="popout" />{' '}
+        <EuiIcon
+          type="popout"
+          css={css`
+            margin-right: ${euiTheme.size.xs}; ;
+          `}
+        />
         <FormattedMessage
           id="xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel"
           defaultMessage="APM Services"

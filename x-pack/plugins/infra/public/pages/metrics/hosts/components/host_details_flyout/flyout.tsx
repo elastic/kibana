@@ -13,17 +13,14 @@ import {
   EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiTab,
   EuiSpacer,
   EuiTabs,
+  useEuiTheme,
 } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { navigateToUptime } from './links/navigate_to_uptime';
+import { LinkToUptime } from './links/link_to_uptime';
 import { LinkToApmServices } from './links/link_to_apm_services';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import { metadataTab } from './metadata';
@@ -44,7 +41,7 @@ const NODE_TYPE = 'host' as InventoryItemType;
 
 export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { share } = useKibanaContextForPlugin().services;
+  const { euiTheme } = useEuiTheme();
 
   const currentTimeRange = {
     ...getDateRangeAsTimestamp(),
@@ -86,19 +83,10 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
           <EuiFlexItem
             grow={false}
             css={css`
-              padding-right: 20px;
+              margin-right: ${euiTheme.size.l};
             `}
           >
-            <EuiLink
-              data-test-subj="infraHostsViewFlyoutUptimeLink"
-              onClick={() => navigateToUptime(share.url.locators, NODE_TYPE, node)}
-            >
-              <EuiIcon type="popout" />{' '}
-              <FormattedMessage
-                id="xpack.infra.hostsViewPage.flyout.uptimeLinkLabel"
-                defaultMessage="Uptime"
-              />
-            </EuiLink>
+            <LinkToUptime nodeType={NODE_TYPE} node={node} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
