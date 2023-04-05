@@ -70,7 +70,11 @@ export const getNormalizeHTTPFields = ({
       (yamlConfig as Record<keyof HTTPFields, unknown>)[ConfigKey.REQUEST_BODY_CHECK] as string,
       defaultFields[ConfigKey.REQUEST_BODY_CHECK]
     ),
-    [ConfigKey.RESPONSE_BODY_MAX_BYTES]: `${get(yamlConfig, ConfigKey.RESPONSE_BODY_MAX_BYTES)}`,
+    [ConfigKey.RESPONSE_BODY_MAX_BYTES]: `${get(
+      yamlConfig,
+      ConfigKey.RESPONSE_BODY_MAX_BYTES,
+      defaultFields[ConfigKey.RESPONSE_BODY_MAX_BYTES]
+    )}`,
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],

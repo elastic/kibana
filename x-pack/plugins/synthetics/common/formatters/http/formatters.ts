@@ -27,6 +27,7 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.PORT]: null,
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: arrayToJsonFormatter,
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: arrayToJsonFormatter,
+  [ConfigKey.RESPONSE_JSON_CHECK]: arrayToJsonFormatter,
   [ConfigKey.RESPONSE_HEADERS_CHECK]: objectToJsonFormatter,
   [ConfigKey.RESPONSE_STATUS_CHECK]: arrayToJsonFormatter,
   [ConfigKey.REQUEST_HEADERS_CHECK]: objectToJsonFormatter,

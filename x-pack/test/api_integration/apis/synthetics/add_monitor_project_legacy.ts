@@ -256,6 +256,9 @@ export default function ({ getService }: FtrProviderContext) {
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             'check.response.body.negative': [],
             'check.response.body.positive': ['Saved', 'saved'],
+            'check.response.json': [
+              { description: 'check status', expression: 'foo.bar == "myValue"' },
+            ],
             'check.response.headers': {},
             'check.request.body': {
               type: 'text',

@@ -145,7 +145,7 @@ export const ModeCodec = tEnum<Mode>('Mode', Mode);
 export type ModeType = t.TypeOf<typeof ModeCodec>;
 
 export const ResponseCheckJSONCodec = t.interface({
-  label: t.string,
+  description: t.string,
   expression: t.string,
 });
 export type ResponseCheckJSON = t.TypeOf<typeof ResponseCheckJSONCodec>;

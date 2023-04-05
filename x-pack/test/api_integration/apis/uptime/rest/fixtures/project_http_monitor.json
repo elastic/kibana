@@ -70,7 +70,8 @@
             "Saved",
             "saved"
           ]
-        }
+        },
+        "json": [{"description":"check status","expression":"foo.bar == \"myValue\""}]
       },
       "hash": "ekrjelkjrelkjre",
       "ssl.verification_mode": "strict"

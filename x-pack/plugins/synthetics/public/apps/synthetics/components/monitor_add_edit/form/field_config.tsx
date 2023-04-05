@@ -1405,7 +1405,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     props: ({ field, setValue }): KeyValuePairsFieldProps => ({
       readOnly,
       keyLabel: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.key.label', {
-        defaultMessage: 'Label',
+        defaultMessage: 'Description',
       }),
       valueLabel: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.value.label', {
         defaultMessage: 'Expression',
@@ -1419,23 +1419,23 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       onChange: (pairs) => {
         const value: ResponseCheckJSON[] = pairs
           .map((pair) => {
-            const [label, expression] = pair;
+            const [description, expression] = pair;
             return {
-              label,
+              description,
               expression,
             };
           })
-          .filter((pair) => pair.label || pair.expression);
+          .filter((pair) => pair.description || pair.expression);
         if (!isEqual(value, field?.value)) {
           setValue(ConfigKey.RESPONSE_JSON_CHECK, value);
         }
       },
-      defaultPairs: field?.value.map((check) => [check.label, check.expression]) || [],
+      defaultPairs: field?.value.map((check) => [check.description, check.expression]) || [],
     }),
     validation: () => {
       return {
         validate: (value: ResponseCheckJSON[]) => {
-          if (value.some((check) => !check.expression || !check.label)) {
+          if (value.some((check) => !check.expression || !check.description)) {
             return i18n.translate('xpack.synthetics.monitorConfig.responseJSON.error', {
               defaultMessage:
                 'Invalid JSON expression. Please ensure both the label and expression are defined.',
