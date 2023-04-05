@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -18,8 +19,8 @@ import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
 } from '../../../../../common/types/data_frame_analytics';
+import { KibanaUrlConfig } from '../../../../../common/types/custom_urls';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
-import { JobType } from '../../../../../common/types/saved_objects';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
 import {
@@ -51,7 +52,6 @@ export interface TimeRange {
 
 export interface CustomUrlSettings {
   label: string;
-  jobType: JobType;
   type: string;
   // Note timeRange is only editable in new URLs for Dashboard and Discover URLs,
   // as for other URLs we have no way of knowing how the field will be used in the URL.
@@ -89,7 +89,7 @@ export function getNewCustomUrlDefaults(
 
   // For the Discover option, set the default data view to that
   // which matches the indices configured in the job datafeed.
-  let query: estypes.QueryDslQueryContainer;
+  let query: estypes.QueryDslQueryContainer = {};
   let indicesName: string | undefined;
   let jobId;
   if (
@@ -112,12 +112,10 @@ export function getNewCustomUrlDefaults(
   const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
   kibanaSettings.discoverIndexPatternId = defaultDataViewId;
   kibanaSettings.filters =
-    // @ts-ignore
     defaultDataViewId === null ? [] : getFiltersForDSLQuery(query, defaultDataViewId, jobId);
 
   return {
     label: '',
-    jobType: isAnomalyDetectionJob(job) ? 'anomaly-detector' : 'data-frame-analytics',
     type: urlType,
     // Note timeRange is only editable in new URLs for Dashboard and Discover URLs,
     // as for other URLs we have no way of knowing how the field will be used in the URL.
@@ -291,7 +289,7 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
   });
 
   // Add the index pattern and query to the appState part of the URL.
-  const appState: any = {
+  const appState: SerializableRecord = {
     index: discoverIndexPatternId,
     filters,
   };
@@ -315,7 +313,7 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
 
   const urlValue = `discover#/?_g=${_g}&_a=${_a}`;
 
-  const urlToAdd: any = {
+  const urlToAdd: KibanaUrlConfig = {
     url_name: settings.label,
     url_value: urlValue,
     time_range: TIME_RANGE_TYPE.AUTO,
@@ -353,8 +351,8 @@ function buildAppStateQueryParam(queryFieldNames: string[]) {
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
 async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Promise<string> {
-  // @ts-ignore
-  const bucketSpanSecs = parseInterval(job.analysis_config.bucket_span).asSeconds();
+  const interval = parseInterval(job.analysis_config.bucket_span);
+  const bucketSpanSecs = interval !== null ? interval.asSeconds() : 0;
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
   // tokens with values from the highest scoring anomaly, or if no anomalies, with
@@ -362,7 +360,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Pr
   let testUrl = customUrl.url_value;
 
   // Query to look for the highest scoring anomaly.
-  const body: any = {
+  const body: estypes.SearchRequest['body'] = {
     query: {
       bool: {
         must: [{ term: { job_id: job.job_id } }, { term: { result_type: 'record' } }],
@@ -396,7 +394,8 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Pr
     // No anomalies yet for this job, so do a preview of the search
     // configured in the job datafeed to obtain sample docs.
 
-    let { datafeed_config: datafeedConfig, ...jobConfig } = job;
+    let { datafeed_config: datafeedConfig } = job;
+    let jobConfig = job;
     try {
       // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
       const [{ jobs }, { datafeeds }] = await Promise.all([
@@ -414,12 +413,22 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: UrlConfig): Pr
       return testUrl;
     }
 
-    const preview = await ml.jobs.datafeedPreview(undefined, jobConfig, datafeedConfig);
+    if (datafeedConfig.authorization !== undefined) {
+      delete datafeedConfig.authorization;
+    }
+    if (datafeedConfig && jobConfig.datafeed_config !== undefined) {
+      delete jobConfig.datafeed_config;
+    }
+
+    const preview = (await ml.jobs.datafeedPreview(
+      undefined,
+      jobConfig,
+      datafeedConfig
+    )) as unknown as estypes.MlPreviewDatafeedResponse<Record<string, unknown>>['data'];
 
     const docTimeFieldName = job.data_description.time_field;
 
     // Create a dummy object which contains the fields necessary to build the URL.
-    // @ts-ignore
     const firstBucket = preview[0];
     if (firstBucket !== undefined) {
       testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, firstBucket, docTimeFieldName!);

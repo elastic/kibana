@@ -230,12 +230,10 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   );
 
   const openCustomUrl = (item: DataGridItem, customUrl: KibanaUrlConfig) => {
-    // eslint-disable-next-line no-console
-    console.log('Data Frame Analytics Results Table - open customUrl for record:', item);
     // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
     const urlPath = replaceTokensInDFAUrlValue(
       customUrl,
-      item as any,
+      item,
       data.query.timefilter.timefilter.getTime()
     );
     openCustomUrlWindow(urlPath, customUrl, basePath.get());

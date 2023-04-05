@@ -34,7 +34,7 @@ export function replaceTokensInDFAUrlValue(
 ) {
   // If urlValue contains $earliest$ and $latest$ tokens, add in times to the test doc.
   const urlValue = customUrlConfig.url_value;
-  const record = { ...doc } as any;
+  const record = { ...doc };
   if (urlValue.includes('$earliest$') && timeRange !== undefined) {
     record.earliest = timeRange.from;
   }
@@ -51,7 +51,7 @@ export function replaceTokensInDFAUrlValue(
 export function replaceTokensInUrlValue(
   customUrlConfig: UrlConfig | KibanaUrlConfig,
   jobBucketSpanSecs: number,
-  doc: AnomalyRecordDoc,
+  doc: AnomalyRecordDoc | Record<string, unknown>,
   timeFieldName: 'timestamp' | string
 ) {
   // If urlValue contains $earliest$ and $latest$ tokens, add in times to the test doc.
@@ -89,7 +89,7 @@ export function replaceTokensInUrlValue(
 // substituted from the supplied anomaly record.
 export function getUrlForRecord(
   urlConfig: UrlConfig | KibanaUrlConfig,
-  record: CustomUrlAnomalyRecordDoc
+  record: CustomUrlAnomalyRecordDoc | DataGridItem
 ) {
   if (isKibanaUrl(urlConfig) === true) {
     return buildKibanaUrl(urlConfig, record);
@@ -196,7 +196,7 @@ export const getQueryField = (str: string): string => {
   return fieldName;
 };
 const getQueryStringResultProvider =
-  (record: CustomUrlAnomalyRecordDoc, getResultTokenValue: GetResultTokenValue) =>
+  (record: CustomUrlAnomalyRecordDoc | DataGridItem, getResultTokenValue: GetResultTokenValue) =>
   (resultPrefix: string, queryString: string, resultPostfix: string, isKuery: boolean): string => {
     const URL_LENGTH_LIMIT = 2000;
 
@@ -255,7 +255,7 @@ const getQueryStringResultProvider =
  * Builds a Kibana dashboard or Discover URL from the supplied config, with any
  * dollar delimited tokens substituted from the supplied anomaly record.
  */
-function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc) {
+function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc | DataGridItem) {
   const urlValue = urlConfig.url_value;
 
   const isLuceneQueryLanguage = urlValue.includes('language:lucene');

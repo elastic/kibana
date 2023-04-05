@@ -6,9 +6,9 @@
  */
 
 import { isValidLabel, isValidTimeRange } from '../../util/custom_url_utils';
-import { UrlConfig, KibanaUrlConfig } from '../../../../common/types/custom_urls';
+import { UrlConfig, isKibanaUrlConfigWithTimeRange } from '../../../../common/types/custom_urls';
 
-export function isValidCustomUrls(customUrls: Array<KibanaUrlConfig | UrlConfig>) {
+export function isValidCustomUrls(customUrls: UrlConfig[]) {
   if (customUrls === undefined || customUrls.length === 0) {
     return true;
   }
@@ -20,9 +20,8 @@ export function isValidCustomUrls(customUrls: Array<KibanaUrlConfig | UrlConfig>
     const otherUrls = [...customUrls];
     otherUrls.splice(index, 1); // Don't compare label with itself.
     let itemValid = isValidLabel(label, otherUrls);
-    if (itemValid === true) {
+    if (itemValid === true && isKibanaUrlConfigWithTimeRange(customUrl)) {
       // Validate the time range.
-      // @ts-ignore
       const timeRange = customUrl.time_range;
       itemValid = isValidTimeRange(timeRange);
     }

@@ -36,5 +36,10 @@ export interface PerPartitionCategorization {
 export type CustomSettings = estypes.MlCustomSettings;
 
 export function isAnomalyDetectionJob(arg: unknown): arg is Job {
-  return isPopulatedObject(arg, ['analysis_config']);
+  return (
+    isPopulatedObject(arg) &&
+    typeof arg.id === 'string' &&
+    arg.selected !== undefined &&
+    arg.bucketSpanSeconds !== undefined
+  );
 }

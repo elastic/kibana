@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { AnomalyRecordDoc } from './anomalies';
 
 /**
@@ -19,9 +20,22 @@ export interface KibanaUrlConfig extends BaseUrlConfig {
   time_range?: string;
 }
 
+export interface KibanaUrlConfigWithTimeRange extends BaseUrlConfig {
+  time_range: string;
+}
+
 export type UrlConfig = BaseUrlConfig | KibanaUrlConfig;
 
 export interface CustomUrlAnomalyRecordDoc extends AnomalyRecordDoc {
   earliest: string;
   latest: string;
+}
+
+export function isKibanaUrlConfigWithTimeRange(arg: unknown): arg is KibanaUrlConfigWithTimeRange {
+  return (
+    isPopulatedObject(arg) &&
+    arg.url_name !== undefined &&
+    arg.url_value !== undefined &&
+    typeof arg.time_range === 'string'
+  );
 }
