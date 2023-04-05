@@ -232,8 +232,8 @@ describe('Entity Analytics Dashboard', () => {
 
         cy.get(OPTION_LIST_LABELS).eq(0).should('include.text', 'Status');
         cy.get(OPTION_LIST_VALUES(0)).should('include.text', 'open');
-        cy.get(OPTION_LIST_LABELS).eq(2).should('include.text', 'User');
-        cy.get(OPTION_LIST_VALUES(2)).should('include.text', TEST_USER_NAME);
+        cy.get(OPTION_LIST_LABELS).eq(1).should('include.text', 'User');
+        cy.get(OPTION_LIST_VALUES(1)).should('include.text', TEST_USER_NAME);
       });
     });
   });
