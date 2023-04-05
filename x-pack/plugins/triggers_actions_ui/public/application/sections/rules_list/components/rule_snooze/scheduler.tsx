@@ -124,10 +124,6 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
     [initialSchedule]
   );
 
-  const scheduleLog = useMemo(() => {
-    console.log('change!', initialSchedule);
-  }, [initialSchedule]);
-
   const defaultTz = useDefaultTimzezone();
   const initialState = useMemo(() => {
     if (!initialSchedule) {
