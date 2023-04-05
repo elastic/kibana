@@ -312,6 +312,8 @@ examples/developer_examples @elastic/appex-sharedux
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/kibana-docs
+packages/kbn-doc-table-browser @elastic/TEAM_NAME
+packages/kbn-doc-table-mocks @elastic/TEAM_NAME
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
