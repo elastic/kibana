@@ -23,7 +23,6 @@ import { useHistory } from 'react-router-dom';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
-import { Direction } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
 
@@ -63,8 +62,6 @@ const ActionsTableComponent = () => {
   const { data: actionsData } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    direction: Direction.desc,
-    sortField: '@timestamp',
     filterQuery: {
       exists: {
         field: 'user_id',
