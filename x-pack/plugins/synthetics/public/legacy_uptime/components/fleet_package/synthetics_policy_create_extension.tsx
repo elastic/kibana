@@ -10,10 +10,6 @@ import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/pu
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
-import { PolicyConfig } from './types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
-
-export const defaultConfig: PolicyConfig = DEFAULT_FIELDS;
 
 /**
  * Exports Synthetics-specific package policy instructions
