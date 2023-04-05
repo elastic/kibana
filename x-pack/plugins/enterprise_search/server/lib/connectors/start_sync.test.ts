@@ -19,6 +19,7 @@ describe('startSync lib function', () => {
     asCurrentUser: {
       get: jest.fn(),
       index: jest.fn(),
+      update: jest.fn(),
     },
     asInternalUser: {},
   };
@@ -164,5 +165,53 @@ describe('startSync lib function', () => {
       startConnectorSync(mockClient as unknown as IScopedClusterClient, 'connectorId')
     ).rejects.toEqual(new Error(ErrorCode.RESOURCE_NOT_FOUND));
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
+  });
+
+  it('should set sync_now for crawler and not index a sync job', async () => {
+    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+      return Promise.resolve({
+        _primary_term: 1,
+        _seq_no: 10,
+        _source: {
+          api_key_id: null,
+          configuration: { config: { label: 'label', value: 'haha' } },
+          created_at: null,
+          custom_scheduling: {},
+          error: null,
+          filtering: [{ active: 'filtering' }],
+          index_name: 'index_name',
+          language: 'nl',
+          last_seen: null,
+          last_sync_error: null,
+          last_sync_status: null,
+          last_synced: null,
+          pipeline: { name: 'pipeline' },
+          scheduling: { enabled: true, interval: '1 2 3 4 5' },
+          service_type: 'elastic-crawler',
+          status: 'not connected',
+          sync_now: false,
+        },
+        index: CONNECTORS_INDEX,
+      });
+    });
+    mockClient.asCurrentUser.update.mockImplementation(() => ({ _id: 'fakeId' }));
+
+    await expect(
+      startConnectorSync(mockClient as unknown as IScopedClusterClient, 'connectorId', 'syncConfig')
+    ).resolves.toEqual({ _id: 'fakeId' });
+    expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
+    expect(mockClient.asCurrentUser.update).toHaveBeenCalledWith({
+      doc: {
+        configuration: {
+          config: { label: 'label', value: 'haha' },
+          nextSyncConfig: { label: 'nextSyncConfig', value: 'syncConfig' },
+        },
+        sync_now: true,
+      },
+      id: 'connectorId',
+      if_primary_term: 1,
+      if_seq_no: 10,
+      index: CONNECTORS_INDEX,
+    });
   });
 });

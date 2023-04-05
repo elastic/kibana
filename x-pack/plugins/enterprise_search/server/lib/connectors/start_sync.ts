@@ -8,6 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import {
   ConnectorConfiguration,
@@ -39,7 +40,20 @@ export const startConnectorSync = async (
 
     const now = new Date().toISOString();
 
-    const result = await client.asCurrentUser.index<ConnectorSyncJobDocument>({
+    if (connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
+      return await client.asCurrentUser.update({
+        doc: {
+          configuration,
+          sync_now: true,
+        },
+        id: connectorId,
+        if_primary_term: connectorResult._primary_term,
+        if_seq_no: connectorResult._seq_no,
+        index: CONNECTORS_INDEX,
+      });
+    }
+
+    return await client.asCurrentUser.index<ConnectorSyncJobDocument>({
       document: {
         cancelation_requested_at: null,
         canceled_at: null,
@@ -67,8 +81,6 @@ export const startConnectorSync = async (
       },
       index: CONNECTORS_JOBS_INDEX,
     });
-
-    return result;
   } else {
     throw new Error(ErrorCode.RESOURCE_NOT_FOUND);
   }
