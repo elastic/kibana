@@ -8,7 +8,7 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import type { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { RulesTableUtilityBar } from './rules_table_utility_bar';

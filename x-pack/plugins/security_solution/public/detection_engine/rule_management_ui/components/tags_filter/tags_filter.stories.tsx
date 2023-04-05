@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import {ThemeProvider} from 'styled-components';
-import {Story} from '@storybook/react';
-import {euiLightVars} from '@kbn/ui-theme';
+import { ThemeProvider } from 'styled-components';
+import type { Story } from '@storybook/react';
+import { euiLightVars } from '@kbn/ui-theme';
 
-import {TagsFilterPopover, TagsFilterPopoverProps} from './tags_filter';
-
+import type { TagsFilterPopoverProps } from './tags_filter';
+import { TagsFilterPopover } from './tags_filter';
 
 // addDecorator((storyFn) => (
 //   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
@@ -34,11 +34,13 @@ export default {
   component: TagsFilterPopover,
   decorators: [
     (Story: Story) => (
-      <ThemeProvider theme={() => ({eui: euiLightVars, darkMode: false})}><Story/></ThemeProvider>
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <Story />
+      </ThemeProvider>
     ),
   ],
   argTypes: {
-    onSelectedTagsChanged: {action: 'selectedTagsChanged'},
+    onSelectedTagsChanged: { action: 'selectedTagsChanged' },
     selectedTags: {
       defaultValue: ['tag_one'],
       control: 'object',
@@ -48,9 +50,11 @@ export default {
       control: 'object',
     },
   },
-}
+};
 
-export const DefaultState: Story<TagsFilterPopoverProps> = (args) => <TagsFilterPopover {...args} />;
+export const DefaultState: Story<TagsFilterPopoverProps> = (args) => (
+  <TagsFilterPopover {...args} />
+);
 
 // DefaultState.args = {
 //

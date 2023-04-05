@@ -154,7 +154,7 @@ const RulesPageComponent: React.FC = () => {
                 </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          {/*  */}
+            {/*  */}
           </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
             prePackagedTimelineStatus === 'timelineNeedUpdate') && (

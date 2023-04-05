@@ -227,31 +227,31 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       tableProps = {
         'data-test-subj': 'rules-management-table',
         columns: rulesColumns,
-      }
+      };
       break;
     case AllRulesTabs.monitoring:
       tableProps = {
         'data-test-subj': 'rules-monitoring-table',
-        columns: monitoringColumns
-      }
+        columns: monitoringColumns,
+      };
       break;
     case AllRulesTabs.updates:
       tableProps = {
         'data-test-subj': 'rules-updates-table',
         columns: rulesColumns,
-      }
+      };
       break;
     case AllRulesTabs.addRules:
       tableProps = {
         'data-test-subj': 'rules-new-table',
         columns: rulesColumns,
-      }
+      };
       break;
     default:
-    tableProps = {
+      tableProps = {
         'data-test-subj': 'rules-management-table',
         columns: rulesColumns,
-      }
+      };
       break;
   }
 

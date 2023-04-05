@@ -92,7 +92,7 @@ const RulesTableFiltersComponent = () => {
       </EuiFlexItem>
       <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
 
-      {/*<EuiFlexItem grow={false}>*/}
+      {/* <EuiFlexItem grow={false}>*/}
       {/*  <EuiFilterGroup>*/}
       {/*    <EuiFilterButton*/}
       {/*      hasActiveFilters={showElasticRules}*/}
@@ -112,9 +112,9 @@ const RulesTableFiltersComponent = () => {
       {/*      {rulesCustomCount != null ? ` (${rulesCustomCount})` : ''}*/}
       {/*    </EuiFilterButton>*/}
       {/*  </EuiFilterGroup>*/}
-      {/*</EuiFlexItem>*/}
+      {/* </EuiFlexItem>*/}
 
-      {/*<EuiFlexItem grow={false}>*/}
+      {/* <EuiFlexItem grow={false}>*/}
       {/*  <EuiFilterGroup>*/}
       {/*    <EuiFilterButton*/}
       {/*      hasActiveFilters={enabled === true}*/}
@@ -132,7 +132,7 @@ const RulesTableFiltersComponent = () => {
       {/*      {i18n.DISABLED_RULES}*/}
       {/*    </EuiFilterButton>*/}
       {/*  </EuiFilterGroup>*/}
-      {/*</EuiFlexItem>*/}
+      {/* </EuiFlexItem>*/}
     </FilterWrapper>
   );
 };

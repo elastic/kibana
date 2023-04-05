@@ -595,8 +595,6 @@ export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
   }
 );
 
-
-
 export const ENABLED_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
   {

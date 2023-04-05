@@ -8,13 +8,13 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import type { ComponentMeta, ComponentStory } from '@storybook/react';
 
+import { savedRuleMock } from '../../../rule_management/logic/mock';
 import { MlRuleWarningPopover } from './ml_rule_warning_popover';
 import type { MlRuleWarningPopoverComponentProps } from './ml_rule_warning_popover';
-import { savedRuleMock } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/mock';
-import { mockSecurityJobs } from '@kbn/security-solution-plugin/public/common/components/ml_popover/api.mock';
+import { mockSecurityJobs } from '../../../../common/components/ml_popover/api.mock';
 
 const mlRuleWarningPopover: ComponentMeta<typeof MlRuleWarningPopover> = {
   title: 'Rules Table/MlRuleWarningPopover',
