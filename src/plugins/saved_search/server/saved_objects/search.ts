@@ -39,29 +39,16 @@ export function getSavedSearchObjectType(
       properties: {
         title: { type: 'text' },
         description: { type: 'text' },
-        version: { type: 'integer' },
       },
     },
     schemas: {
       '8.8.0': schema.object({
+        // General
         title: schema.string(),
         description: schema.string({ defaultValue: '' }),
-        version: schema.maybe(schema.number()),
+
+        // Data grid
         columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
-        viewMode: schema.maybe(
-          schema.oneOf([
-            schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
-            schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
-          ])
-        ),
-        hideChart: schema.boolean({ defaultValue: false }),
-        isTextBasedQuery: schema.boolean({ defaultValue: false }),
-        usesAdHocDataView: schema.maybe(schema.boolean()),
-        hideAggregatedPreview: schema.maybe(schema.boolean()),
-        hits: schema.maybe(schema.number()),
-        kibanaSavedObjectMeta: schema.object({
-          searchSourceJSON: schema.string(),
-        }),
         sort: schema.oneOf(
           [
             schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 })),
@@ -83,6 +70,20 @@ export function getSavedSearchObjectType(
           { defaultValue: {} }
         ),
         rowHeight: schema.maybe(schema.number()),
+        rowsPerPage: schema.maybe(schema.number()),
+
+        // Chart
+        hideChart: schema.boolean({ defaultValue: false }),
+        breakdownField: schema.maybe(schema.string()),
+
+        // Search
+        kibanaSavedObjectMeta: schema.object({
+          searchSourceJSON: schema.string(),
+        }),
+        isTextBasedQuery: schema.boolean({ defaultValue: false }),
+        usesAdHocDataView: schema.maybe(schema.boolean()),
+
+        // Time
         timeRestore: schema.maybe(schema.boolean()),
         timeRange: schema.maybe(
           schema.object({
@@ -96,8 +97,19 @@ export function getSavedSearchObjectType(
             value: schema.number(),
           })
         ),
-        rowsPerPage: schema.maybe(schema.number()),
-        breakdownField: schema.maybe(schema.string()),
+
+        // Display
+        viewMode: schema.maybe(
+          schema.oneOf([
+            schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
+            schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
+          ])
+        ),
+        hideAggregatedPreview: schema.maybe(schema.boolean()),
+
+        // Legacy
+        hits: schema.maybe(schema.number()),
+        version: schema.maybe(schema.number()),
       }),
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
