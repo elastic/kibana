@@ -10,10 +10,28 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": ["@kbn/field-formats-plugin", "@kbn/discover-plugin"]
+  "kbn_references": [
+    "@kbn/field-formats-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/doc-table-mocks",
+    "@kbn/data-views-plugin",
+    "@kbn/i18n",
+    "@kbn/monaco",
+    "@kbn/kibana-react-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/core",
+    "@kbn/saved-search-plugin",
+    "@kbn/es-query",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/ui-theme",
+    "@kbn/data-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/kibana-utils-plugin",
+  ]
 }

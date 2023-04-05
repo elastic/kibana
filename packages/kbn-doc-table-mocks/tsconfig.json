@@ -10,10 +10,19 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/data-views-plugin",
+    "@kbn/doc-table-browser",
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/core",
+    "@kbn/navigation-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/charts-plugin",
+  ]
 }
