@@ -17,6 +17,7 @@ import {
   FormMonitorTypeCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
+  ResponseCheckJSONCodec,
   ScheduleUnitCodec,
   SourceTypeCodec,
   TLSVersionCodec,
@@ -199,6 +200,7 @@ export const HTTPSensitiveAdvancedFieldsCodec = t.intersection([
   }),
   t.partial({
     [ConfigKey.PROXY_HEADERS]: t.record(t.string, t.string),
+    [ConfigKey.RESPONSE_JSON_CHECK]: t.array(ResponseCheckJSONCodec),
   }),
 ]);
 

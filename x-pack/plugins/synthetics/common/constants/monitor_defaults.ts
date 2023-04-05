@@ -122,6 +122,7 @@ export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
   [ConfigKey.PROXY_HEADERS]: {},
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: [],
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: [],
+  [ConfigKey.RESPONSE_JSON_CHECK]: [],
   [ConfigKey.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
   [ConfigKey.RESPONSE_HEADERS_CHECK]: {},
   [ConfigKey.RESPONSE_HEADERS_INDEX]: true,

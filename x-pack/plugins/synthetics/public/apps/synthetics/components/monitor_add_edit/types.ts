@@ -17,6 +17,7 @@ import {
   ServiceLocation,
   FormMonitorType,
   MonitorFields,
+  ResponseCheckJSON,
 } from '../../../../../common/runtime_types/monitor_management';
 import { AlertConfigKey } from './constants';
 
@@ -54,6 +55,11 @@ export type FormConfig = MonitorFields & {
   };
   ssl: {
     supported_protocols: MonitorFields[ConfigKey.TLS_VERSION];
+  };
+  check: {
+    response: {
+      json: ResponseCheckJSON[];
+    };
   };
 };
 
@@ -135,6 +141,7 @@ export interface FieldMap {
   [ConfigKey.RESPONSE_HEADERS_CHECK]: FieldMeta<ConfigKey.RESPONSE_HEADERS_CHECK>;
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: FieldMeta<ConfigKey.RESPONSE_BODY_CHECK_POSITIVE>;
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: FieldMeta<ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE>;
+  [ConfigKey.RESPONSE_JSON_CHECK]: FieldMeta<ConfigKey.RESPONSE_JSON_CHECK>;
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: FieldMeta<ConfigKey.RESPONSE_RECEIVE_CHECK>;
   [ConfigKey.REQUEST_SEND_CHECK]: FieldMeta<ConfigKey.REQUEST_SEND_CHECK>;
   ['source.inline']: FieldMeta<ConfigKey.SOURCE_INLINE>;

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
@@ -53,6 +54,7 @@ import {
   ResponseBodyIndexField,
   ResponseBodyIndexFieldProps,
   ControlledFieldProp,
+  KeyValuePairsField,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
@@ -69,6 +71,7 @@ import {
   FieldMap,
   FormLocation,
   ResponseBodyIndexPolicy,
+  ResponseCheckJSON,
 } from '../types';
 import {
   AlertConfigKey,
@@ -77,6 +80,7 @@ import {
 } from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
+import { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
 const getScheduleContent = (value: number) => {
   if (value > 60) {
@@ -1383,5 +1387,62 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     props: (): HeaderFieldProps => ({
       readOnly,
     }),
+  },
+  ['check.response.json']: {
+    fieldKey: ConfigKey.RESPONSE_JSON_CHECK,
+    component: KeyValuePairsField,
+    label: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.label', {
+      defaultMessage: 'Check response body contains JSON',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.helpText', {
+      defaultMessage:
+        'A list of expressions executed against the body when parsed as JSON. Body sizes must be less than or equal to 100 MiB',
+    }),
+    controlled: true,
+    error: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.error', {
+      defaultMessage: 'Header key must be a valid HTTP token.',
+    }),
+    props: ({ field, setValue }): KeyValuePairsFieldProps => ({
+      readOnly,
+      keyLabel: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.key.label', {
+        defaultMessage: 'Label',
+      }),
+      valueLabel: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.value.label', {
+        defaultMessage: 'Expression',
+      }),
+      addPairControlLabel: i18n.translate(
+        'xpack.synthetics.monitorConfig.responseJSON.addPair.label',
+        {
+          defaultMessage: 'Add expression',
+        }
+      ),
+      onChange: (pairs) => {
+        const value: ResponseCheckJSON[] = pairs
+          .map((pair) => {
+            const [label, expression] = pair;
+            return {
+              label,
+              expression,
+            };
+          })
+          .filter((pair) => pair.label || pair.expression);
+        if (!isEqual(value, field?.value)) {
+          setValue(ConfigKey.RESPONSE_JSON_CHECK, value);
+        }
+      },
+      defaultPairs: field?.value.map((check) => [check.label, check.expression]) || [],
+    }),
+    validation: () => {
+      return {
+        validate: (value: ResponseCheckJSON[]) => {
+          if (value.some((check) => !check.expression || !check.label)) {
+            return i18n.translate('xpack.synthetics.monitorConfig.responseJSON.error', {
+              defaultMessage:
+                'Invalid JSON expression. Please ensure both the label and expression are defined.',
+            });
+          }
+        },
+      };
+    },
   },
 });

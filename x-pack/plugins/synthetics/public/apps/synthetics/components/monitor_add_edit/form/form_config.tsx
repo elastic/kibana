@@ -79,6 +79,7 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
       FIELD(readOnly)[ConfigKey.RESPONSE_HEADERS_CHECK],
       FIELD(readOnly)[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE],
       FIELD(readOnly)[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE],
+      FIELD(readOnly)[ConfigKey.RESPONSE_JSON_CHECK],
     ],
   },
 });

@@ -28,6 +28,7 @@
   "proxy_headers": {},
   "check.response.body.negative": [],
   "check.response.body.positive": [],
+  "check.response.json": [],
   "response.include_body": "never",
   "response.include_body_max_bytes": "1024",
   "check.request.headers": {
