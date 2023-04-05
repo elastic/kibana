@@ -17,7 +17,7 @@ interface Props {
 }
 
 const RECT_ANNOTATION_TITLE = i18n.translate(
-  'observabilityAlertDetails.alertTimeRangeAnnotation.detailsTooltip',
+  'observabilityAlertDetails.alertActiveTimeRangeAnnotation.detailsTooltip',
   {
     defaultMessage: 'Active',
   }
