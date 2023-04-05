@@ -42,6 +42,11 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LensPublicSetup } from '@kbn/lens-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+
 import {
   createRegionMapFn,
   regionMapRenderer,
@@ -78,6 +83,7 @@ import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_s
 import { MapInspectorView, VectorTileInspectorView } from './inspector';
 
 import { setupLensChoroplethChart } from './lens';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -91,6 +97,7 @@ export interface MapsPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
   screenshotMode?: ScreenshotModePluginSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -106,13 +113,13 @@ export interface MapsPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
-  savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
+  contentManagement: ContentManagementPublicStart;
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -196,6 +203,14 @@ export class MapsPlugin
         const { renderApp } = await lazyLoadMapModules();
         return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
       },
+    });
+
+    plugins.contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: getAppTitle(),
     });
 
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
