@@ -144,6 +144,11 @@ export class AutocompleteListener implements ESQLParserListener {
   enterStatsCommand(ctx: StatsCommandContext) {
     this.suggestions = [];
     this.parentContext = ESQLParser.STATS;
+    const fn = ctx.fields();
+    if (!fn) {
+      this.suggestions = [buildNewVarDefinition(this.getNewVarName())];
+      return;
+    }
   }
 
   enterEvalCommand(ctx: EvalCommandContext) {

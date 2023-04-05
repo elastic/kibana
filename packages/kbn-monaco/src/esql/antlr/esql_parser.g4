@@ -105,7 +105,7 @@ evalCommand
     ;
 
 statsCommand
-    : STATS fields (BY qualifiedNames)?
+    : STATS fields? (BY qualifiedNames)?
     ;
 
 sourceIdentifier
