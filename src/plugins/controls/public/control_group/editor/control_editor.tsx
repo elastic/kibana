@@ -272,16 +272,15 @@ export const ControlEditor = ({
               />
             </EuiFormRow>
           )}
-          {CustomSettings &&
-            (factory as IEditableControlFactory).controlEditorOptionsComponent && (
-              <EuiFormRow label={ControlGroupStrings.manageControl.getControlSettingsTitle()}>
-                <CustomSettings
-                  onChange={onTypeEditorChange}
-                  initialInput={embeddable?.getInput()}
-                  fieldType={fieldRegistry?.[selectedField].field.type}
-                />
-              </EuiFormRow>
-            )}
+          {CustomSettings && (factory as IEditableControlFactory).controlEditorOptionsComponent && (
+            <EuiFormRow label={ControlGroupStrings.manageControl.getControlSettingsTitle()}>
+              <CustomSettings
+                onChange={onTypeEditorChange}
+                initialInput={embeddable?.getInput()}
+                fieldType={fieldRegistry?.[selectedField].field.type}
+              />
+            </EuiFormRow>
+          )}
           {removeControl && (
             <>
               <EuiSpacer size="l" />
