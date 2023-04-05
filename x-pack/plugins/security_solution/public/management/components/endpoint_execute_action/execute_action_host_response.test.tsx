@@ -47,9 +47,10 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
 
   it('should show shell info and shell code', async () => {
     render();
-    expect(renderResult.getByTestId(`test-executeResponseOutput-context`)).toBeTruthy();
-    expect(renderResult.getByTestId(`test-executeResponseOutput-shell`)).toBeTruthy();
-    expect(renderResult.getByTestId(`test-executeResponseOutput-cwd`)).toBeTruthy();
+    const { queryByTestId } = renderResult;
+    expect(queryByTestId(`test-executeResponseOutput-context`)).toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-shell`)).toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-cwd`)).toBeInTheDocument();
   });
 
   it('should show execute context accordion as `closed`', async () => {
@@ -61,14 +62,16 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
 
   it('should show current working directory', async () => {
     render();
-    expect(renderResult.getByTestId(`test-executeResponseOutput-context`)).toBeTruthy();
-    expect(renderResult.getByTestId(`test-executeResponseOutput-cwd`)).toBeTruthy();
+    const { queryByTestId } = renderResult;
+    expect(queryByTestId(`test-executeResponseOutput-context`)).toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-cwd`)).toBeInTheDocument();
   });
 
   it('should show execute output and execute errors', async () => {
     render();
-    expect(renderResult.getByTestId(`test-executeResponseOutput-${outputSuffix}`)).toBeTruthy();
-    expect(renderResult.getByTestId(`test-executeResponseOutput-error`)).toBeTruthy();
+    const { queryByTestId } = renderResult;
+    expect(queryByTestId(`test-executeResponseOutput-${outputSuffix}`)).toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-error`)).toBeInTheDocument();
   });
 
   it('should show execute output accordion as `open`', async () => {
@@ -88,8 +91,8 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
         },
       },
     };
-    render();
 
+    render();
     expect(
       renderResult.getByTestId(`test-executeResponseOutput-${outputSuffix}`).textContent
     ).toContain(`Execution output (truncated)${getEmptyValue()}`);
@@ -105,8 +108,8 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
         },
       },
     };
-    render();
 
+    render();
     expect(renderResult.getByTestId('test-executeResponseOutput-error').textContent).toContain(
       `Execution error (truncated)${getEmptyValue()}`
     );
@@ -114,8 +117,10 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
 
   it('should not show execute output accordions when no output in action details', () => {
     (renderProps.action as ActionDetails).outputs = undefined;
+
     render();
-    expect(renderResult.queryByTestId(`test-executeResponseOutput-context`)).toBeNull();
-    expect(renderResult.queryByTestId(`test-executeResponseOutput-${outputSuffix}`)).toBeNull();
+    const { queryByTestId } = renderResult;
+    expect(queryByTestId(`test-executeResponseOutput-context`)).not.toBeInTheDocument();
+    expect(queryByTestId(`test-executeResponseOutput-${outputSuffix}`)).not.toBeInTheDocument();
   });
 });
