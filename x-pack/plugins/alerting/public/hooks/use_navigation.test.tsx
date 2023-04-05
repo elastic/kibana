@@ -86,7 +86,7 @@ describe('useNavigation', () => {
 
       expect(mockNavigateTo).toHaveBeenCalledWith(APP_ID, {
         deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
-        path: 'create',
+        path: '/create',
       });
     });
   });

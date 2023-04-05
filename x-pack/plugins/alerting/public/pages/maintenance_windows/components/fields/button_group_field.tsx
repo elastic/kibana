@@ -30,17 +30,20 @@ export const ButtonGroupField: React.FC<ButtonGroupFieldProps> = React.memo(
 
     const onChange = useCallback(
       (current: string) => {
-        if (type === 'multi') {
-          const newSelectedValue = { ...selected, [current]: !selected[current] };
-          // Don't allow the user to deselect all options
-          if (!Object.values(newSelectedValue).every((v) => v === false)) {
-            setFieldValue(field.path, newSelectedValue);
-          }
-        } else {
-          setFieldValue(field.path, current);
+        setFieldValue(field.path, current);
+      },
+      [setFieldValue, field.path]
+    );
+
+    const onChangeMulti = useCallback(
+      (current: string) => {
+        const newSelectedValue = { ...selected, [current]: !selected[current] };
+        // Don't allow the user to deselect all options
+        if (!Object.values(newSelectedValue).every((v) => v === false)) {
+          setFieldValue(field.path, newSelectedValue);
         }
       },
-      [setFieldValue, selected, type, field.path]
+      [setFieldValue, selected, field.path]
     );
 
     return (
@@ -50,7 +53,7 @@ export const ButtonGroupField: React.FC<ButtonGroupFieldProps> = React.memo(
             buttonSize="compressed"
             isFullWidth
             legend={legend}
-            onChange={onChange}
+            onChange={onChangeMulti}
             idToSelectedMap={selected}
             options={options}
             type="multi"

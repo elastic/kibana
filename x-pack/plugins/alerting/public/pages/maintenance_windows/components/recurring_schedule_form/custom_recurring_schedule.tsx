@@ -6,20 +6,29 @@
  */
 import React, { useMemo } from 'react';
 import moment from 'moment';
+import { css } from '@emotion/react';
 import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { CREATE_FORM_CUSTOM_FREQUENCY, Frequency, WEEKDAY_OPTIONS } from '../../constants';
 import * as i18n from '../../translations';
 import { ButtonGroupField } from '../fields/button_group_field';
 import { getInitialByWeekday } from '../../helpers/get_initial_by_weekday';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
-import './recurring_schedule.scss';
+import { FormProps } from '../schema';
 
 const UseField = getUseField({ component: Field });
 
+const styles = {
+  flexField: css`
+    .euiFormRow__labelWrapper {
+      margin-bottom: unset;
+    }
+  `,
+};
+
 export const CustomRecurringSchedule: React.FC = React.memo(() => {
-  const [{ startDate, recurringSchedule }] = useFormData({
+  const [{ startDate, recurringSchedule }] = useFormData<FormProps>({
     watch: [
       'startDate',
       'recurringSchedule.frequency',
@@ -44,7 +53,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
       },
       {
         id: 'weekday',
-        label: i18n.CREATE_FORM_WEEKDAY_SHORT(dayOfWeek!)[isLastOfMonth ? 0 : nthWeekdayOfMonth!],
+        label: i18n.CREATE_FORM_WEEKDAY_SHORT(dayOfWeek)[isLastOfMonth ? 0 : nthWeekdayOfMonth],
       },
     ];
   }, [startDate]);
@@ -60,13 +69,17 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
             <EuiFlexItem>
               <UseField
                 path="recurringSchedule.interval"
-                className="recurringScheduleFlexField"
+                css={styles.flexField}
                 componentProps={{
                   'data-test-subj': 'interval-field',
+                  id: 'interval',
                   euiFieldProps: {
-                    type: 'number',
                     min: 1,
-                    prepend: i18n.CREATE_FORM_INTERVAL_EVERY,
+                    prepend: (
+                      <EuiFormLabel htmlFor={'interval'}>
+                        {i18n.CREATE_FORM_INTERVAL_EVERY}
+                      </EuiFormLabel>
+                    ),
                   },
                 }}
               />
@@ -90,7 +103,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
       recurringSchedule?.frequency === Frequency.DAILY ? (
         <UseField
           path="recurringSchedule.byweekday"
-          config={{ label: ' ', validations: [], defaultValue: defaultByWeekday }}
+          config={{ label: '', validations: [], defaultValue: defaultByWeekday }}
           component={ButtonGroupField}
           componentProps={{
             'data-test-subj': 'byweekday-field',
@@ -104,7 +117,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
       {recurringSchedule?.customFrequency === Frequency.MONTHLY ? (
         <UseField
           path="recurringSchedule.bymonth"
-          config={{ label: ' ', validations: [], defaultValue: 'day' }}
+          config={{ label: '', validations: [], defaultValue: 'day' }}
           component={ButtonGroupField}
           componentProps={{
             'data-test-subj': 'bymonth-field',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -15,18 +15,29 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { AlertingPluginStart } from '../plugin';
-import { routes } from '../routes';
+import { paths } from '../config';
+
+const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maintenance_windows'));
+const MaintenanceWindowsCreateLazy: React.FC = React.lazy(
+  () => import('../pages/maintenance_windows/maintenance_window_create_page')
+);
 
 const App = React.memo(() => {
   return (
     <>
       <Switch>
-        {Object.keys(routes.maintenanceWindows).map((path) => {
-          const { handler, exact } = routes.maintenanceWindows[path];
-          const Wrapper = () => handler();
-          return <Route key={path} path={path} exact={exact} component={Wrapper} />;
-        })}
+        <Route path="/" exact>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <MaintenanceWindowsLazy />
+          </Suspense>
+        </Route>
+        <Route path={paths.alerting.maintenanceWindowsCreate} exact>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <MaintenanceWindowsCreateLazy />
+          </Suspense>
+        </Route>
       </Switch>
     </>
   );

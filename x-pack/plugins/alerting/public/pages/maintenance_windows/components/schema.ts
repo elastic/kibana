@@ -58,8 +58,8 @@ export const schema: FormSchema<FormProps> = {
       defaultValue: Frequency.DAILY,
     },
     interval: {
-      type: FIELD_TYPES.TEXT,
-      label: ' ',
+      type: FIELD_TYPES.NUMBER,
+      label: '',
       defaultValue: 1,
       validations: [
         {
@@ -73,12 +73,12 @@ export const schema: FormSchema<FormProps> = {
       validations: [],
     },
     until: {
-      label: ' ',
+      label: '',
       defaultValue: moment().endOf('day').toISOString(),
       validations: [],
     },
     count: {
-      label: ' ',
+      label: '',
       type: FIELD_TYPES.TEXT,
       defaultValue: 1,
       validations: [

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import moment from 'moment';
 import {
   Form,
@@ -40,14 +40,14 @@ export const useTimeZone = (): string => {
 
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>(
   ({ onCancel, onSuccess, initialValue }) => {
+    const [defaultDateValue] = useState<string>(moment().toISOString());
     const timezone = useTimeZone();
 
     const { mutate: createMaintenanceWindow } = useCreateMaintenanceWindow();
 
     const submitMaintenanceWindow = useCallback(
-      async ({ fields, ...data }, isValid) => {
+      async (formData, isValid) => {
         if (isValid) {
-          const { ...formData } = data;
           const startDate = moment(formData.startDate);
           const endDate = moment(formData.endDate);
           await createMaintenanceWindow(
@@ -64,18 +64,17 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     );
 
     const { form } = useForm<FormProps>({
-      defaultValue: { ...initialValue },
+      defaultValue: initialValue,
       options: { stripEmptyFields: false },
       schema,
       onSubmit: submitMaintenanceWindow,
     });
 
-    const [{ recurring }] = useFormData({
+    const [{ recurring }] = useFormData<FormProps>({
       form,
       watch: ['recurring'],
     });
     const isRecurring = recurring || false;
-    const defaultDateValue = moment().toISOString();
 
     return (
       <Form form={form}>

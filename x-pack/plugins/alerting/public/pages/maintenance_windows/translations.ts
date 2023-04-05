@@ -88,6 +88,13 @@ export const CREATE_FORM_SCHEDULE = i18n.translate(
   }
 );
 
+export const CREATE_FORM_SCHEDULE_INVALID = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.scheduleInvalid',
+  {
+    defaultMessage: 'The end date must be greater than or equal to the start date.',
+  }
+);
+
 export const CREATE_FORM_REPEAT = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.repeat',
   {

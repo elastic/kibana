@@ -6,15 +6,15 @@
  */
 
 import React, { useCallback } from 'react';
-import moment from 'moment';
 import { Moment } from 'moment';
-import { EuiDatePicker, EuiDatePickerRange, EuiFormRow } from '@elastic/eui';
+import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import {
   useFormData,
   useFormContext,
   FieldHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { get } from 'lodash';
+import * as i18n from '../../translations';
+import { getSelectedForDatePicker as getSelected } from '../../helpers/get_selected_for_date_picker';
 
 interface DatePickerRangeFieldProps {
   fields: { startDate: FieldHook<string, string>; endDate: FieldHook<string, string> };
@@ -27,19 +27,8 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [fields.startDate.path, fields.endDate.path] });
 
-    function getSelected(path: string) {
-      // parse from a string date to moment() if there is an intitial value
-      // otherwise just get the current date
-      const initialValue = get(form, path);
-      let selected = moment();
-      if (initialValue && moment(initialValue).isValid()) {
-        selected = moment(initialValue);
-      }
-      return selected;
-    }
-
-    const startDate = getSelected(fields.startDate.path);
-    const endDate = getSelected(fields.endDate.path);
+    const startDate = getSelected(form, fields.startDate.path);
+    const endDate = getSelected(form, fields.endDate.path);
 
     const onChange = useCallback(
       (currentDate: Moment | null, path: string) => {
@@ -48,34 +37,47 @@ export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.m
       },
       [setFieldValue]
     );
+    const isInvalid = startDate.isAfter(endDate);
 
     return (
-      <EuiFormRow label={fields.startDate.label} {...rest} fullWidth>
-        <EuiDatePickerRange
-          isInvalid={startDate > endDate}
-          startDateControl={
-            <EuiDatePicker
-              selected={startDate}
-              onChange={(date) => date && onChange(date, fields.startDate.path)}
-              startDate={startDate}
-              endDate={endDate}
-              aria-label="Start date"
-              showTimeSelect={showTimeSelect}
-            />
-          }
-          endDateControl={
-            <EuiDatePicker
-              selected={endDate}
-              onChange={(date) => date && onChange(date, fields.endDate.path)}
-              startDate={startDate}
-              endDate={endDate}
-              aria-label="End date"
-              showTimeSelect={showTimeSelect}
-            />
-          }
-          fullWidth
-        />
-      </EuiFormRow>
+      <>
+        <EuiFormRow label={fields.startDate.label} {...rest} fullWidth>
+          <EuiDatePickerRange
+            isInvalid={isInvalid}
+            startDateControl={
+              <EuiDatePicker
+                selected={startDate}
+                onChange={(date) => date && onChange(date, fields.startDate.path)}
+                startDate={startDate}
+                endDate={endDate}
+                aria-label="Start date"
+                showTimeSelect={showTimeSelect}
+                minDate={startDate}
+              />
+            }
+            endDateControl={
+              <EuiDatePicker
+                selected={endDate}
+                onChange={(date) => date && onChange(date, fields.endDate.path)}
+                startDate={startDate}
+                endDate={endDate}
+                aria-label="End date"
+                showTimeSelect={showTimeSelect}
+                minDate={startDate}
+              />
+            }
+            fullWidth
+          />
+        </EuiFormRow>
+        {isInvalid ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="danger">
+              {i18n.CREATE_FORM_SCHEDULE_INVALID}
+            </EuiText>
+          </>
+        ) : null}
+      </>
     );
   }
 );
