@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -45,6 +45,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     uiSettings,
   } = useAiopsAppContext();
 
+  const mounted = useRef(false);
   const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -60,11 +61,13 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
   useEffect(
     function cancelRequestOnLeave() {
+      mounted.current = true;
       return () => {
+        mounted.current = false;
         cancelRequest();
       };
     },
-    [cancelRequest]
+    [cancelRequest, mounted]
   );
 
   const {
@@ -116,7 +119,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     setData(null);
 
     try {
-      const resp = await runCategorizeRequest(
+      const { categories, sparkLinesPerCategory: sparkLines } = await runCategorizeRequest(
         index,
         selectedField.name,
         timeField,
@@ -126,7 +129,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         intervalMs
       );
 
-      setData({ categories: resp.categories, sparkLines: resp.sparkLinesPerCategory });
+      if (mounted.current === true) {
+        setData({ categories, sparkLines });
+      }
     } catch (error) {
       toasts.addError(error, {
         title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
@@ -135,7 +140,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       });
     }
 
-    setLoading(false);
+    if (mounted.current === true) {
+      setLoading(false);
+    }
   }, [
     selectedField,
     dataView,

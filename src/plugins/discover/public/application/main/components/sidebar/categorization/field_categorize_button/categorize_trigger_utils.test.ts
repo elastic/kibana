@@ -6,40 +6,41 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+// import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+// import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 // import { getCategorizeInformation } from './categorize_trigger_utils';
 
-const field = {
-  name: 'fieldName',
-  type: 'string',
-  esTypes: ['text'],
-  count: 1,
-  scripted: false,
-  searchable: true,
-  aggregatable: true,
-  readFromDocValues: true,
-  visualizable: true,
-} as DataViewField;
+// const field = {
+//   name: 'fieldName',
+//   type: 'string',
+//   esTypes: ['text'],
+//   count: 1,
+//   scripted: false,
+//   searchable: true,
+//   aggregatable: true,
+//   readFromDocValues: true,
+//   visualizable: true,
+// } as DataViewField;
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
 );
 
-const uiActions = {
-  getTriggerCompatibleActions: mockGetActions,
-} as unknown as UiActionsStart;
+// const uiActions = {
+//   getTriggerCompatibleActions: mockGetActions,
+// } as unknown as UiActionsStart;
 
-const action: Action = {
-  id: 'action',
-  type: 'VISUALIZE_FIELD',
-  getIconType: () => undefined,
-  getDisplayName: () => 'Action',
-  isCompatible: () => Promise.resolve(true),
-  execute: () => Promise.resolve(),
-};
+// const action: Action = {
+//   id: 'action',
+//   type: 'VISUALIZE_FIELD',
+//   getIconType: () => undefined,
+//   getDisplayName: () => 'Action',
+//   isCompatible: () => Promise.resolve(true),
+//   execute: () => Promise.resolve(),
+// };
 
-const dataViewMock = { id: '1', toSpec: () => ({}) } as DataView;
+// const dataViewMock = { id: '1', toSpec: () => ({}) } as DataView;
 
 describe('visualize_trigger_utils', () => {
   afterEach(() => {
