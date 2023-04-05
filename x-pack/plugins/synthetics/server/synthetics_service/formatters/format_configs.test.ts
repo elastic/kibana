@@ -39,8 +39,16 @@ const testHTTPConfig: Partial<MonitorFields> = {
   proxy_url: '${proxyUrl}',
   'check.response.body.negative': [],
   'check.response.body.positive': [],
+  'check.response.json': [
+    {
+      description: 'test description',
+      expression: 'foo.bar == "myValue"',
+    },
+  ],
   'response.include_body': 'on_error' as ResponseBodyIndexPolicy,
-  'check.response.headers': {},
+  'check.response.headers': {
+    'test-header': 'test-value',
+  },
   'response.include_headers': true,
   'check.response.status': [],
   'check.request.body': { type: 'text' as CodeEditorMode, value: '' },
@@ -95,6 +103,15 @@ describe('formatMonitorConfig', () => {
 
       expect(yamlConfig).toEqual({
         'check.request.method': 'GET',
+        'check.response.headers': {
+          'test-header': 'test-value',
+        },
+        'check.response.json': [
+          {
+            description: 'test description',
+            expression: 'foo.bar == "myValue"',
+          },
+        ],
         enabled: true,
         locations: [],
         max_redirects: '0',
@@ -125,6 +142,15 @@ describe('formatMonitorConfig', () => {
 
         expect(yamlConfig).toEqual({
           'check.request.method': 'GET',
+          'check.response.headers': {
+            'test-header': 'test-value',
+          },
+          'check.response.json': [
+            {
+              description: 'test description',
+              expression: 'foo.bar == "myValue"',
+            },
+          ],
           enabled: true,
           locations: [],
           max_redirects: '0',
