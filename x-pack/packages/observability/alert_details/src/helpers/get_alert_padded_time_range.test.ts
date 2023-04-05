@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAlertTimeRange } from './get_alert_time_range';
+import { getAlertPaddedTimeRange } from './get_alert_padded_time_range';
 
 describe('getAlertTimeRange', () => {
   const mockedDate = '2023-03-28T09:22:32.660Z';
@@ -31,7 +31,7 @@ describe('getAlertTimeRange', () => {
   ];
 
   it.each(testData)('%s', (_, start, end, output) => {
-    expect(getAlertTimeRange(start, end)).toEqual(output);
+    expect(getAlertPaddedTimeRange(start, end)).toEqual(output);
   });
 
   describe('active alert', () => {
@@ -43,7 +43,7 @@ describe('getAlertTimeRange', () => {
         from: '2023-03-28T03:45:02.660Z',
         to: mockedDate,
       };
-      expect(getAlertTimeRange(start)).toEqual(output);
+      expect(getAlertPaddedTimeRange(start)).toEqual(output);
     });
 
     it('with end time than 10 minutes before now', () => {
@@ -55,7 +55,7 @@ describe('getAlertTimeRange', () => {
         from: '2023-03-28T04:47:32.660Z',
         to: mockedDate,
       };
-      expect(getAlertTimeRange(start, end)).toEqual(output);
+      expect(getAlertPaddedTimeRange(start, end)).toEqual(output);
     });
   });
 });
