@@ -3978,6 +3978,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discover-extender-plugin@link:examples/discover_extender":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-plugin@link:src/plugins/discover":
   version "0.0.0"
   uid ""

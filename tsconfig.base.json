@@ -620,6 +620,8 @@
       "@kbn/developer-examples-plugin/*": ["examples/developer_examples/*"],
       "@kbn/discover-enhanced-plugin": ["x-pack/plugins/discover_enhanced"],
       "@kbn/discover-enhanced-plugin/*": ["x-pack/plugins/discover_enhanced/*"],
+      "@kbn/discover-extender-plugin": ["examples/discover_extender"],
+      "@kbn/discover-extender-plugin/*": ["examples/discover_extender/*"],
       "@kbn/discover-plugin": ["src/plugins/discover"],
       "@kbn/discover-plugin/*": ["src/plugins/discover/*"],
       "@kbn/doc-links": ["packages/kbn-doc-links"],

@@ -1,0 +1,11 @@
+{
+  "type": "plugin",
+  "id": "@kbn/discover-extender-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "plugin": {
+    "id": "discoverExtender",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": ["discover"]
+  }
+}
