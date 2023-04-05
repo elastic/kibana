@@ -6,14 +6,9 @@
  */
 
 import { escapeKuery } from '@kbn/es-query';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import { isSignificantTerm, type SignificantTerm } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from './types';
-
-export function isSignificantTerm(arg: unknown): arg is SignificantTerm {
-  return isPopulatedObject(arg, ['fieldName', 'fieldValue']);
-}
 
 export const getTableItemAsKuery = (tableItem: GroupTableItem | SignificantTerm) => {
   if (isSignificantTerm(tableItem)) {

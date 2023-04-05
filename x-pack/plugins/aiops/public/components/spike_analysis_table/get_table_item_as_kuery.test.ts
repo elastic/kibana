@@ -9,16 +9,7 @@ import { finalSignificantTermGroups } from '../../../common/__mocks__/artificial
 import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { getGroupTableItems } from './get_group_table_items';
-import { isSignificantTerm, getTableItemAsKuery } from './get_table_item_as_kuery';
-
-describe('isSignificantTerm', () => {
-  it('identifies significant terms', () => {
-    expect(isSignificantTerm({})).toBeFalsy();
-    expect(isSignificantTerm({ fieldName: 'response_code' })).toBeFalsy();
-    expect(isSignificantTerm({ fieldValue: '500' })).toBeFalsy();
-    expect(isSignificantTerm(significantTerms[0])).toBeTruthy();
-  });
-});
+import { getTableItemAsKuery } from './get_table_item_as_kuery';
 
 describe('getTableItemAsKuery', () => {
   it('returns a KUERY for a significant term', () => {
