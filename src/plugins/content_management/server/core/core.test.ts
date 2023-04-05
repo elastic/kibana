@@ -853,11 +853,7 @@ describe('Content Core', () => {
         test('stores "delete" events', async () => {
           const { fooContentCrud, ctx, eventStream } = setup({ registerFooType: true });
 
-          await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(
-            ctx,
-            { title: 'Hello' },
-            { id: '1234' }
-          );
+          await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
           await fooContentCrud!.delete(ctx, '1234');
 
           const findEvent = async () => {
