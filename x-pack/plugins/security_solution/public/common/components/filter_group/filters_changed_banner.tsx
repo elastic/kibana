@@ -33,10 +33,16 @@ export const FiltersChangedBanner: FC<FiltersChangesBanner> = ({
           iconType={'iInCircle'}
         >
           <p>{FILTER_GROUP_BANNER_MESSAGE}</p>
-          <EuiButton color={'primary'} onClick={saveChangesHandler}>
+          <EuiButton
+            data-test-subj="filter-group__save"
+            color={'primary'}
+            onClick={saveChangesHandler}
+          >
             {SAVE_CHANGES}
           </EuiButton>
-          <EuiButtonEmpty onClick={discardChangesHandler}>{REVERT_CHANGES}</EuiButtonEmpty>
+          <EuiButtonEmpty data-test-subj="filter-group__discard" onClick={discardChangesHandler}>
+            {REVERT_CHANGES}
+          </EuiButtonEmpty>
         </EuiCallOut>
       </EuiFlexItem>
     </EuiFlexGroup>

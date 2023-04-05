@@ -9,7 +9,6 @@ import {
   DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   FILTER_GROUP_ADD_CONTROL,
-  FILTER_GROUP_DISCARD_CHANGES,
   FILTER_GROUP_CONTEXT_EDIT_CONTROLS,
   FILTER_GROUP_EDIT_CONTROLS_PANEL,
   FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
@@ -22,6 +21,7 @@ import {
   DETECTION_PAGE_FILTER_GROUP_LOADING,
   DETECTION_PAGE_FILTERS_LOADING,
   OPTION_LISTS_LOADING,
+  FILTER_GROUP_CONTEXT_DISCARD_CHANGES,
 } from '../../screens/common/filter_group';
 import { waitForPageFilters } from '../alerts';
 
@@ -55,8 +55,8 @@ export const saveFilterGroupControls = () => {
 };
 
 export const discardFilterGroupControls = () => {
-  cy.get(FILTER_GROUP_DISCARD_CHANGES).trigger('click');
-  cy.get(FILTER_GROUP_DISCARD_CHANGES).should('not.exist');
+  openFilterGroupContextMenu();
+  cy.get(FILTER_GROUP_CONTEXT_DISCARD_CHANGES).trigger('click', { force: true });
 };
 
 export const openAddFilterGroupControlPanel = () => {
