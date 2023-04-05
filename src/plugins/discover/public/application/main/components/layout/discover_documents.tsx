@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -178,6 +179,21 @@ function DiscoverDocumentsComponent({
     [isPlainRecord, uiSettings, dataView.timeFieldName]
   );
 
+  const dataGridExtension = useObservable(services.extensions.get$('data_grid'));
+  const defaultControlColumns = dataGridExtension?.defaultLeadingControlColumns;
+
+  const controlColumnIds = useMemo(() => {
+    const ids: string[] = [];
+    if (!defaultControlColumns?.expand?.disabled) ids.push('openDetails');
+    if (!defaultControlColumns?.select?.disabled) ids.push('select');
+    return ids;
+  }, [defaultControlColumns?.expand?.disabled, defaultControlColumns?.select?.disabled]);
+
+  const customControlColumns = useMemo(
+    () => dataGridExtension?.getLeadingControlColumns?.(),
+    [dataGridExtension]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -257,6 +273,8 @@ function DiscoverDocumentsComponent({
               onFieldEdited={onFieldEdited}
               savedSearchId={savedSearch.id}
               DocumentView={DiscoverGridFlyout}
+              controlColumnIds={controlColumnIds}
+              customControlColumns={customControlColumns}
               services={services}
             />
           </div>
