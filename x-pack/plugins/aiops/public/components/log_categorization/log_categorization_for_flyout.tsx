@@ -18,6 +18,7 @@ import type { EventRate, Category, SparkLinesPerCategory } from './use_categoriz
 import { CategoryTable } from './category_table';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { InformationText } from './information_text';
+import { createMergedEsQuery } from '../../application/utils/search_utils';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -38,9 +39,14 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 }) => {
   const {
     notifications: { toasts },
+    data: {
+      query: { getState },
+    },
+    uiSettings,
   } = useAiopsAppContext();
+
   const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
-  const [aiopsListState /* , setAiopsListState*/] = useState(restorableDefaults);
+  const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
@@ -76,7 +82,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     setGlobalState,
     undefined,
     undefined,
-    BAR_TARGET
+    BAR_TARGET,
+    true
   );
 
   useEffect(() => {
@@ -86,6 +93,13 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         to: globalState.time.to,
       });
     }
+
+    const { filters, query } = getState();
+
+    setAiopsListState({
+      ...aiopsListState,
+      searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.time), timefilter]);
 

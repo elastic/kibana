@@ -35,7 +35,8 @@ export const useData = (
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedSignificantTerm?: SignificantTerm,
   selectedGroup?: GroupTableItem | null,
-  barTarget: number = DEFAULT_BAR_TARGET
+  barTarget: number = DEFAULT_BAR_TARGET,
+  readOnly: boolean = false
 ) => {
   const {
     uiSettings,
@@ -59,7 +60,7 @@ export const useData = (
     });
 
     if (searchData === undefined || aiopsListState.searchString !== '') {
-      if (aiopsListState.filters) {
+      if (aiopsListState.filters && readOnly === false) {
         const globalFilters = filterManager?.getGlobalFilters();
 
         if (filterManager) filterManager.setFilters(aiopsListState.filters);
