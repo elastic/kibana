@@ -10,6 +10,9 @@ import './discover_field.scss';
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+  EuiPopoverFooter,
+  EuiFlexItem,
+  EuiFlexGroup,
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -19,9 +22,10 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
-  FieldPopoverVisualize,
+  FieldVisualizeButton,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
+import useObservable from 'react-use/lib/useObservable';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -271,6 +275,8 @@ function DiscoverFieldComponent({
     [field.name]
   );
 
+  const fieldPopoverExtension = useObservable(services.extensions.get$('field_popover'));
+
   const renderPopover = () => {
     const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
 
@@ -307,15 +313,32 @@ function DiscoverFieldComponent({
           </>
         )}
 
-        <FieldPopoverVisualize
-          field={field}
-          dataView={dataView}
-          multiFields={rawMultiFields}
-          trackUiMetric={trackUiMetric}
-          contextualFields={contextualFields}
-          originatingApp={PLUGIN_ID}
-          uiActions={getUiActions()}
-        />
+        {(!fieldPopoverExtension?.disableDefaultBottomButton ||
+          fieldPopoverExtension.CustomBottomButton) && (
+          <EuiPopoverFooter>
+            <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
+              {!fieldPopoverExtension?.disableDefaultBottomButton && (
+                <EuiFlexItem>
+                  <FieldVisualizeButton
+                    field={field}
+                    dataView={dataView}
+                    multiFields={rawMultiFields}
+                    trackUiMetric={trackUiMetric}
+                    contextualFields={contextualFields}
+                    originatingApp={PLUGIN_ID}
+                    uiActions={getUiActions()}
+                  />
+                </EuiFlexItem>
+              )}
+
+              {fieldPopoverExtension?.CustomBottomButton && (
+                <EuiFlexItem>
+                  <fieldPopoverExtension.CustomBottomButton />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        )}
       </>
     );
   };
