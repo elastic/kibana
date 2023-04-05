@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CsvMetrics } from '@kbn/reporting-common';
+import { TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common';
 import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
@@ -42,30 +42,6 @@ export interface ReportOutput extends TaskRunResult {
 export type PngMetrics = PngScreenshotResult['metrics'];
 
 export type PdfMetrics = PdfScreenshotResult['metrics'];
-
-export interface TaskRunMetrics {
-  csv?: CsvMetrics;
-  png?: PngMetrics;
-  pdf?: PdfMetrics;
-}
-
-export interface TaskRunResult {
-  content_type: string | null;
-  csv_contains_formulas?: boolean;
-  max_size_reached?: boolean;
-  warnings?: string[];
-  metrics?: TaskRunMetrics;
-
-  /**
-   * When running a report task we may finish with warnings that were triggered
-   * by an error. We can pass the error code via the task run result to the
-   * task runner so that it can be recorded for telemetry.
-   *
-   * Alternatively, this field can be populated in the event that the task does
-   * not complete in the task runner's error handler.
-   */
-  error_code?: string;
-}
 
 export interface ReportFields {
   queue_time_ms?: number[]; // runtime field: started_at - created_at
