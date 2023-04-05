@@ -8,6 +8,7 @@
 
 import type { PaletteOutput } from '@kbn/coloring';
 import { LayoutDirection, MetricWTrend } from '@elastic/charts';
+import { $Values } from '@kbn/utility-types';
 import {
   Datatable,
   ExpressionFunctionDefinition,
@@ -16,7 +17,13 @@ import {
 import { ExpressionValueVisDimension, prepareLogTable } from '@kbn/visualizations-plugin/common';
 import type { AllowedSettingsOverrides, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VisParams, visType } from './expression_renderers';
-import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
+import {
+  EXPRESSION_METRIC_NAME,
+  EXPRESSION_METRIC_TRENDLINE_NAME,
+  AvailableMetricIcons,
+} from '../constants';
+
+export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
 
 export interface MetricArguments {
   metric: ExpressionValueVisDimension | string;
@@ -28,6 +35,7 @@ export interface MetricArguments {
   secondaryPrefix?: string;
   progressDirection: LayoutDirection;
   color?: string;
+  icon?: string;
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;
   minTiles?: number;
