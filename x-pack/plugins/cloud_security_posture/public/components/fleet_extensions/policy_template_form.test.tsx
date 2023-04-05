@@ -198,7 +198,7 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'kspm',
     }));
-    policy.name = 'cloud_security_posture-0';
+    policy.name = 'cloud_security_posture-1';
 
     (useParams as jest.Mock).mockReturnValue({
       integration: 'kspm',
@@ -211,7 +211,7 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyK8s(),
-        name: 'cloud_security_posture-0',
+        name: 'cloud_security_posture-1',
       },
     });
 
@@ -220,7 +220,7 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...policy,
-        name: 'kspm-0',
+        name: 'kspm-1',
       },
     });
   });
@@ -232,7 +232,7 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'cspm',
     }));
-    policy.name = 'cloud_security_posture-0';
+    policy.name = 'cloud_security_posture-1';
 
     (useParams as jest.Mock).mockReturnValue({
       integration: 'cspm',
@@ -245,7 +245,7 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyAWS(),
-        name: 'cloud_security_posture-0',
+        name: 'cloud_security_posture-1',
       },
     });
 
@@ -254,7 +254,7 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...policy,
-        name: 'cspm-0',
+        name: 'cspm-1',
       },
     });
   });
