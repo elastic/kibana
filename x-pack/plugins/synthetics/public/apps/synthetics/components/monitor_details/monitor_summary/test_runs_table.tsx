@@ -98,8 +98,12 @@ export const TestRunsTable = ({
             align: 'left',
             field: 'timestamp',
             name: SCREENSHOT_LABEL,
-            render: (_timestamp: string, item) => (
-              <JourneyLastScreenshot checkGroupId={item.monitor.check_group} size={[100, 64]} />
+            render: (timestamp: string, item) => (
+              <JourneyLastScreenshot
+                checkGroupId={item.monitor.check_group}
+                size={[100, 64]}
+                timestamp={timestamp}
+              />
             ),
           },
         ]

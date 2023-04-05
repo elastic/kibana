@@ -44,6 +44,9 @@ export const CspCounterCard = (counter: CspCounterCardProps) => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-around',
+          '.euiText h6': {
+            textTransform: 'capitalize',
+          },
         }}
         titleSize="s"
         title={counter.title}

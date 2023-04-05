@@ -401,7 +401,7 @@ export async function persistedStateToExpression(
 }
 
 export function getMissingIndexPattern(
-  currentDatasource: Datasource | null,
+  currentDatasource: Datasource | null | undefined,
   currentDatasourceState: { state: unknown } | null,
   indexPatterns: IndexPatternMap
 ) {

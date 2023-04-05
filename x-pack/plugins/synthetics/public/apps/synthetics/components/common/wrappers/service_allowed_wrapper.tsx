@@ -27,7 +27,7 @@ export const ServiceAllowedWrapper: React.FC = ({ children }) => {
     return (
       <EuiEmptyPrompt
         title={<h2>{MONITOR_MANAGEMENT_LABEL}</h2>}
-        body={<p>{PUBLIC_BETA_DESCRIPTION}</p>}
+        body={<p>{ACCESS_RESTRICTED_MESSAGE}</p>}
         actions={[
           <EuiButton color="primary" fill isDisabled={!signupUrl} href={signupUrl ?? undefined}>
             {REQUEST_ACCESS_LABEL}
@@ -55,10 +55,9 @@ const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
   }
 );
 
-export const PUBLIC_BETA_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.monitorManagement.publicBetaDescription',
+export const ACCESS_RESTRICTED_MESSAGE = i18n.translate(
+  'xpack.synthetics.monitorManagement.accessRestricted',
   {
-    defaultMessage:
-      "We've got a brand new app on the way. In the meantime, we're excited to give you early access to our globally managed testing infrastructure. This will allow you to upload synthetic monitors using our new point and click script recorder and manage your monitors with a new UI.",
+    defaultMessage: 'Your access to globally managed testing infrastructure is restricted.',
   }
 );

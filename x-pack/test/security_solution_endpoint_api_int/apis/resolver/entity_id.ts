@@ -34,8 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/150799
-  describe.skip('Resolver handling of entity ids', () => {
+  describe('Resolver handling of entity ids', () => {
     describe('entity api', () => {
       let origin: Event;
       let genData: InsertedEvents;

@@ -6,14 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import { usePreviousPeriodLabel } from './use_previous_period_text';
 import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
-import { useFetcher } from './use_fetcher';
-import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
-import { useTimeRange } from './use_time_range';
 import { useAnyOfApmParams } from './use_apm_params';
+import { FETCH_STATUS, useFetcher } from './use_fetcher';
+import { usePreviousPeriodLabel } from './use_previous_period_text';
+import { useTimeRange } from './use_time_range';
 
 export function useTransactionLatencyChartsFetcher({
   kuery,
@@ -22,7 +22,8 @@ export function useTransactionLatencyChartsFetcher({
   kuery: string;
   environment: string;
 }) {
-  const { transactionType, serviceName } = useApmServiceContext();
+  const { transactionType, serviceName, transactionTypeStatus } =
+    useApmServiceContext();
   const {
     urlParams: { transactionName, latencyAggregationType },
   } = useLegacyUrlParams();
@@ -38,6 +39,10 @@ export function useTransactionLatencyChartsFetcher({
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
+      if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
+        return Promise.resolve(undefined);
+      }
+
       if (
         serviceName &&
         start &&
@@ -76,6 +81,7 @@ export function useTransactionLatencyChartsFetcher({
       end,
       transactionName,
       transactionType,
+      transactionTypeStatus,
       latencyAggregationType,
       offset,
       comparisonEnabled,

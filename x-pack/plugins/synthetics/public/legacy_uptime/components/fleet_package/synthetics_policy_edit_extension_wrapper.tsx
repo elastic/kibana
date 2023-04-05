@@ -14,8 +14,8 @@ import type {
 } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEditMonitorLocator } from '../../../apps/synthetics/hooks';
-import { PolicyConfig, MonitorFields } from './types';
-import { ConfigKey, DataStream, TLSFields } from './types';
+import type { PolicyConfig, MonitorFields, TLSFields } from './types';
+import { ConfigKey, DataStream } from './types';
 import { SyntheticsPolicyEditExtension } from './synthetics_policy_edit_extension';
 import {
   PolicyConfigContextProvider,
@@ -80,10 +80,10 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         };
 
         enableTLS =
-          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_tls_enabled ??
+          formattedDefaultConfigForMonitorType[ConfigKey.METADATA]?.is_tls_enabled ??
           Boolean(vars?.[ConfigKey.TLS_VERIFICATION_MODE]?.value);
         enableZipUrlTLS =
-          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_zip_url_tls_enabled ??
+          formattedDefaultConfigForMonitorType[ConfigKey.METADATA]?.is_zip_url_tls_enabled ??
           Boolean(vars?.[ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]?.value);
 
         const formattedDefaultConfig: Partial<PolicyConfig> = {

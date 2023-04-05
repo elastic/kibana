@@ -92,7 +92,6 @@ export {
   type QuerySubscriberParams,
 } from './hooks/use_query_subscriber';
 
-export { wrapFieldNameOnDot } from './utils/wrap_field_name_on_dot';
 export {
   getFieldTypeName,
   getFieldTypeDescription,

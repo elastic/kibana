@@ -11,7 +11,11 @@ import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-serv
 import type { Logger } from '@kbn/logging';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -47,7 +51,12 @@ export const registerUpdateRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      logger.warn("The update saved object API '/api/saved_objects/{type}/{id}' is deprecated.");
+      logWarnOnExternalRequest({
+        method: 'get',
+        path: '/api/saved_objects/{type}/{id}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { attributes, version, references, upsert } = req.body;
       const options: SavedObjectsUpdateOptions = { version, references, upsert };

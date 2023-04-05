@@ -15,9 +15,11 @@ import {
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type Model, type Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
+import type { BulkOperation } from './model/create_batches';
 
 interface StateTransitionLogMeta extends LogMeta {
   kibana: {
@@ -128,9 +130,9 @@ export async function migrationStateActionMachine({
             ),
           },
           ...{
-            transformedDocBatches: (
-              (newState as ReindexSourceToTempIndexBulk).transformedDocBatches ?? []
-            ).map((batches) => batches.map((doc) => ({ _id: doc._id }))) as [SavedObjectsRawDoc[]],
+            bulkOperationBatches: redactBulkOperationBatches(
+              (newState as ReindexSourceToTempIndexBulk).bulkOperationBatches ?? [[]]
+            ),
           },
         };
 
@@ -212,3 +214,11 @@ export async function migrationStateActionMachine({
     }
   }
 }
+
+const redactBulkOperationBatches = (
+  bulkOperationBatches: BulkOperation[][]
+): BulkOperationContainer[][] => {
+  return bulkOperationBatches.map((batch) =>
+    batch.map((operation) => (Array.isArray(operation) ? operation[0] : operation))
+  );
+};

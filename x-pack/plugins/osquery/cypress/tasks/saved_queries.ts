@@ -6,6 +6,7 @@
  */
 
 import { RESULTS_TABLE_BUTTON } from '../screens/live_query';
+import { closeToastIfVisible } from './integrations';
 import {
   checkResults,
   BIG_QUERY,
@@ -15,6 +16,7 @@ import {
   selectAllAgents,
   submitQuery,
 } from './live_query';
+import { navigateTo } from './navigation';
 
 export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescription: string) =>
   it(
@@ -71,7 +73,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
 
       // visit Status results
       cy.react('EuiTab', { props: { id: 'status' } }).click();
-      cy.react('EuiTableRow').should('have.lengthOf', 1);
+      cy.react('EuiTableRow').should('have.lengthOf', 2);
 
       // save new query
       cy.contains('Exit full screen').should('not.exist');
@@ -81,10 +83,10 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       findFormFieldByRowsLabelAndType('Description (optional)', savedQueryDescription);
       cy.react('EuiButtonDisplay').contains('Save').click();
       cy.contains('Successfully saved');
-      cy.getBySel('toastCloseButton').click();
+      closeToastIfVisible();
 
       // play saved query
-      cy.contains('Saved queries').click();
+      navigateTo('/app/osquery/saved_queries');
       cy.contains(savedQueryId);
       cy.react('PlayButtonComponent', {
         props: { savedQuery: { attributes: { id: savedQueryId } } },

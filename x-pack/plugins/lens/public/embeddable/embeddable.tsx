@@ -55,6 +55,7 @@ import {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
   type CellValueContext,
+  shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
@@ -73,6 +74,8 @@ import {
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
@@ -96,6 +99,7 @@ import {
   AddUserMessages,
   isMessageRemovable,
   UserMessagesGetter,
+  UserMessagesDisplayLocationId,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -192,6 +196,52 @@ export interface ViewUnderlyingDataArgs {
   filters: Filter[];
   query: Query | AggregateQuery | undefined;
   columns: string[];
+}
+
+function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; canEdit: boolean }) {
+  const showMore = errors.length > 1;
+  const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
+  return (
+    <div className="lnsEmbeddedError">
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        data-test-subj="embeddable-lens-failure"
+        body={
+          <>
+            {errors.length ? (
+              <>
+                <p>{errors[0].longMessage}</p>
+                {showMore && !canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.moreErrors"
+                      defaultMessage="Edit in Lens editor to see more errors"
+                    />
+                  </p>
+                ) : null}
+                {canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.fixErrors"
+                      defaultMessage="Edit in Lens editor to fix the error"
+                    />
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <p>
+                <FormattedMessage
+                  id="xpack.lens.embeddable.failure"
+                  defaultMessage="Visualization couldn't be displayed"
+                />
+              </p>
+            )}
+          </>
+        }
+      />
+    </div>
+  );
 }
 
 const getExpressionFromDocument = async (
@@ -296,6 +346,27 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
   );
 };
 
+const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
+  'visualization',
+  'visualizationOnEmbeddable',
+];
+
+const MessagesBadge = ({ onMount }: { onMount: (el: HTMLDivElement) => void }) => (
+  <div
+    css={css({
+      position: 'absolute',
+      zIndex: 2,
+      left: 0,
+      bottom: 0,
+    })}
+    ref={(el) => {
+      if (el) {
+        onMount(el);
+      }
+    }}
+  />
+);
+
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements
@@ -311,7 +382,6 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
-  private badgeDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
@@ -432,20 +502,14 @@ export class Embeddable
 
     // Update search context and reload on changes related to search
     this.inputReloadSubscriptions.push(
-      this.getUpdated$()
-        .pipe(map(() => this.getInput()))
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              [a.filters, a.query, a.timeRange, a.searchSessionId],
-              [b.filters, b.query, b.timeRange, b.searchSessionId]
-            )
-          ),
-          skip(1)
-        )
-        .subscribe(async (input) => {
+      shouldFetch$<LensEmbeddableInput>(this.getUpdated$(), () => this.getInput()).subscribe(
+        (input) => {
+          // reset removable messages
+          // Dashboard search/context changes are detected here
+          this.additionalUserMessages = {};
           this.onContainerStateChanged(input);
-        })
+        }
+      )
     );
   }
 
@@ -503,41 +567,34 @@ export class Embeddable
     );
   };
 
-  private get hasAnyErrors() {
-    return this.getUserMessages(undefined, { severity: 'error' }).length > 0;
-  }
-
   private _userMessages: UserMessage[] = [];
 
   // loads all available user messages
   private loadUserMessages() {
     const userMessages: UserMessage[] = [];
 
-    if (this.activeVisualizationState && this.activeDatasource) {
-      userMessages.push(
-        ...getApplicationUserMessages({
-          visualizationType: this.savedVis?.visualizationType,
-          visualization: {
-            state: this.activeVisualizationState,
-            activeId: this.activeVisualizationId,
-          },
-          visualizationMap: this.deps.visualizationMap,
-          activeDatasource: this.activeDatasource,
-          activeDatasourceState: { state: this.activeDatasourceState },
-          dataViews: {
-            indexPatterns: this.indexPatterns,
-            indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
-          },
-          core: this.deps.coreStart,
-        })
-      );
-    }
-
-    const mergedSearchContext = this.getMergedSearchContext();
+    userMessages.push(
+      ...getApplicationUserMessages({
+        visualizationType: this.savedVis?.visualizationType,
+        visualization: {
+          state: this.activeVisualizationState,
+          activeId: this.activeVisualizationId,
+        },
+        visualizationMap: this.deps.visualizationMap,
+        activeDatasource: this.activeDatasource,
+        activeDatasourceState: { state: this.activeDatasourceState },
+        dataViews: {
+          indexPatterns: this.indexPatterns,
+          indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
+        },
+        core: this.deps.coreStart,
+      })
+    );
 
     if (!this.savedVis) {
       return userMessages;
     }
+    const mergedSearchContext = this.getMergedSearchContext();
 
     const frameDatasourceAPI: FrameDatasourceAPI = {
       dataViews: {
@@ -585,17 +642,13 @@ export class Embeddable
 
     if (addedMessageIds.length) {
       this.additionalUserMessages = newMessageMap;
-      this.renderBadgeMessages();
+      this.renderUserMessages();
     }
 
     return () => {
-      const withMessagesRemoved = {
-        ...this.additionalUserMessages,
-      };
-
-      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
-
-      this.additionalUserMessages = withMessagesRemoved;
+      messages.forEach(({ uniqueId }) => {
+        delete this.additionalUserMessages[uniqueId];
+      });
     };
   };
 
@@ -634,14 +687,18 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
-    const { ast, indexPatterns, indexPatternRefs } = await getExpressionFromDocument(
-      this.savedVis,
-      this.deps.documentToExpression
-    );
+    try {
+      const { ast, indexPatterns, indexPatternRefs } = await getExpressionFromDocument(
+        this.savedVis,
+        this.deps.documentToExpression
+      );
 
-    this.expression = ast;
-    this.indexPatterns = indexPatterns;
-    this.indexPatternRefs = indexPatternRefs;
+      this.expression = ast;
+      this.indexPatterns = indexPatterns;
+      this.indexPatternRefs = indexPatternRefs;
+    } catch {
+      // nothing, errors should be reported via getUserMessages
+    }
 
     if (metaInfo?.sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
       this.addUserMessages([
@@ -835,22 +892,22 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
-    const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
+    const blockingErrors = this.getUserMessages(blockingMessageDisplayLocations, {
       severity: 'error',
     });
 
     this.updateOutput({
       loading: true,
-      error: errors.length
+      error: blockingErrors.length
         ? new Error(
-            typeof errors[0].longMessage === 'string'
-              ? errors[0].longMessage
-              : errors[0].shortMessage
+            typeof blockingErrors[0].longMessage === 'string'
+              ? blockingErrors[0].longMessage
+              : blockingErrors[0].shortMessage
           )
         : undefined,
     });
 
-    if (errors.length) {
+    if (blockingErrors.length) {
       this.renderComplete.dispatchError();
     } else {
       this.renderComplete.dispatchInProgress();
@@ -858,59 +915,94 @@ export class Embeddable
 
     const input = this.getInput();
 
-    render(
-      <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-        <ExpressionWrapper
-          ExpressionRenderer={this.expressionRenderer}
-          expression={this.expression || null}
-          errors={errors}
-          lensInspector={this.lensInspector}
-          searchContext={this.getMergedSearchContext()}
-          variables={{
-            embeddableTitle: this.getTitle(),
-            ...(input.palette ? { theme: { palette: input.palette } } : {}),
-          }}
-          searchSessionId={this.externalSearchContext.searchSessionId}
-          handleEvent={this.handleEvent}
-          onData$={this.updateActiveData}
-          onRender$={this.onRender}
-          interactive={!input.disableTriggers}
-          renderMode={input.renderMode}
-          syncColors={input.syncColors}
-          syncTooltips={input.syncTooltips}
-          syncCursor={input.syncCursor}
-          hasCompatibleActions={this.hasCompatibleActions}
-          getCompatibleCellValueActions={this.getCompatibleCellValueActions}
-          className={input.className}
-          style={input.style}
-          executionContext={this.getExecutionContext()}
-          canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-          onRuntimeError={(message) => {
-            this.updateOutput({ error: new Error(message) });
-            this.logError('runtime');
-          }}
-          noPadding={this.visDisplayOptions.noPadding}
-        />
-        <div
-          css={css({
-            position: 'absolute',
-            zIndex: 2,
-            left: 0,
-            bottom: 0,
-          })}
-          ref={(el) => {
-            if (el) {
+    if (this.expression && !blockingErrors.length) {
+      render(
+        <>
+          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+            <ExpressionWrapper
+              ExpressionRenderer={this.expressionRenderer}
+              expression={this.expression || null}
+              lensInspector={this.lensInspector}
+              searchContext={this.getMergedSearchContext()}
+              variables={{
+                embeddableTitle: this.getTitle(),
+                ...(input.palette ? { theme: { palette: input.palette } } : {}),
+              }}
+              searchSessionId={this.externalSearchContext.searchSessionId}
+              handleEvent={this.handleEvent}
+              onData$={this.updateActiveData}
+              onRender$={this.onRender}
+              interactive={!input.disableTriggers}
+              renderMode={input.renderMode}
+              syncColors={input.syncColors}
+              syncTooltips={input.syncTooltips}
+              syncCursor={input.syncCursor}
+              hasCompatibleActions={this.hasCompatibleActions}
+              getCompatibleCellValueActions={this.getCompatibleCellValueActions}
+              className={input.className}
+              style={input.style}
+              executionContext={this.getExecutionContext()}
+              addUserMessages={(messages) => this.addUserMessages(messages)}
+              onRuntimeError={(message) => {
+                this.updateOutput({ error: new Error(message) });
+                this.logError('runtime');
+              }}
+              noPadding={this.visDisplayOptions.noPadding}
+            />
+          </KibanaThemeProvider>
+          <MessagesBadge
+            onMount={(el) => {
               this.badgeDomNode = el;
               this.renderBadgeMessages();
-            }
-          }}
-        />
-      </KibanaThemeProvider>,
-      domNode
-    );
+            }}
+          />
+        </>,
+        domNode
+      );
+    }
+
+    this.renderUserMessages();
   }
 
-  private renderBadgeMessages() {
+  private renderUserMessages() {
+    const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
+      severity: 'error',
+    });
+
+    if (errors.length && this.domNode) {
+      render(
+        <>
+          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+            <I18nProvider>
+              <VisualizationErrorPanel
+                errors={errors}
+                canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
+              />
+            </I18nProvider>
+          </KibanaThemeProvider>
+          <MessagesBadge
+            onMount={(el) => {
+              this.badgeDomNode = el;
+              this.renderBadgeMessages();
+            }}
+          />
+        </>,
+        this.domNode
+      );
+    }
+
+    this.renderBadgeMessages();
+  }
+
+  badgeDomNode?: HTMLDivElement;
+
+  /**
+   * This method is called on every render, and also whenever the badges dom node is created
+   * That happens after either the expression renderer or the visualization error panel is rendered.
+   *
+   * You should not call this method on its own. Use renderUserMessages instead.
+   */
+  private renderBadgeMessages = () => {
     const messages = this.getUserMessages('embeddableBadge');
 
     if (messages.length && this.badgeDomNode) {
@@ -921,7 +1013,7 @@ export class Embeddable
         this.badgeDomNode
       );
     }
-  }
+  };
 
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
@@ -1080,7 +1172,11 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
-    this.handleContainerStateChanged(this.input);
+    if (this.handleContainerStateChanged(this.input)) {
+      // reset removable messages
+      // Unified histogram search/context changes are detected here
+      this.additionalUserMessages = {};
+    }
     if (this.domNode) {
       this.render(this.domNode);
     }
@@ -1184,7 +1280,10 @@ export class Embeddable
       ]);
     }
 
-    if (this.hasAnyErrors) {
+    const blockingErrors = this.getUserMessages(blockingMessageDisplayLocations, {
+      severity: 'error',
+    });
+    if (blockingErrors.length) {
       this.logError('validation');
     }
 

@@ -49,16 +49,11 @@ const reducer = (state: HostsState, action: Action): HostsState => {
     case 'setFilter':
       return { ...state, filters: [...action.payload] };
     case 'setQuery':
-      const { filters, query, panelFilters, ...payload } = action.payload;
-      const newFilters = !filters ? state.filters : filters;
-      const newControlPanelFilters = !panelFilters ? state.panelFilters : panelFilters;
-      const newQuery = !query ? state.query : query;
+      const payload = Object.fromEntries(Object.entries(action.payload).filter(([_, v]) => !!v));
+
       return {
         ...state,
         ...payload,
-        filters: [...newFilters],
-        query: { ...newQuery },
-        panelFilters: [...newControlPanelFilters],
       };
     default:
       throw new Error();
@@ -79,7 +74,8 @@ export const useHostsUrlState = () => {
 
   const getDateRangeAsTimestamp = useCallback(() => {
     const from = DateMath.parse(state.dateRange.from)?.valueOf() ?? getDefaultFromTimestamp();
-    const to = DateMath.parse(state.dateRange.to)?.valueOf() ?? getDefaultToTimestamp();
+    const to =
+      DateMath.parse(state.dateRange.to, { roundUp: true })?.valueOf() ?? getDefaultToTimestamp();
 
     return { from, to };
   }, [state.dateRange]);

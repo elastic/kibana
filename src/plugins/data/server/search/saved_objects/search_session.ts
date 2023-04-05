@@ -64,4 +64,14 @@ export const searchSessionSavedObjectType: SavedObjectsType = {
     },
   },
   migrations: searchSessionSavedObjectMigrations,
+  excludeOnUpgrade: async () => {
+    return {
+      bool: {
+        must: [
+          { term: { type: SEARCH_SESSION_TYPE } },
+          { match: { 'search-session.persisted': false } },
+        ],
+      },
+    };
+  },
 };

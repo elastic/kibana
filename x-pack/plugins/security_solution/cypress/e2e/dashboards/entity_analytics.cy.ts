@@ -30,7 +30,7 @@ import {
   HOSTS_TABLE_ALERT_CELL,
 } from '../../screens/entity_analytics';
 import { openRiskTableFilterAndSelectTheLowOption } from '../../tasks/host_risk';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { getNewRule } from '../../objects/rule';
 import { QUERY_TAB_BUTTON } from '../../screens/timeline';
@@ -143,7 +143,7 @@ describe('Entity Analytics Dashboard', () => {
 
     describe('With alerts data', () => {
       before(() => {
-        createCustomRuleEnabled(getNewRule());
+        createRule(getNewRule());
       });
 
       beforeEach(() => {
@@ -203,7 +203,7 @@ describe('Entity Analytics Dashboard', () => {
 
     describe('With alerts data', () => {
       before(() => {
-        createCustomRuleEnabled(getNewRule());
+        createRule(getNewRule());
       });
 
       beforeEach(() => {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ChildProcess, spawn } from 'child_process';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosRequestConfig } from 'axios';
+import execa from 'execa';
 import { Manager } from './resource_manager';
 import { getLatestVersion } from './artifact_manager';
 import { AgentManagerParams } from './agent';
 
 export class FleetManager extends Manager {
-  private fleetProcess?: ChildProcess;
+  private fleetContainerId?: string;
   private config: AgentManagerParams;
   private log: ToolingLog;
   private requestOptions: AxiosRequestConfig;
@@ -25,77 +25,65 @@ export class FleetManager extends Manager {
   }
   public async setup(): Promise<void> {
     this.log.info('Setting fleet up');
-    return new Promise(async (res, rej) => {
-      try {
-        // default fleet server policy no longer created by default
-        const {
-          data: {
-            item: { id: policyId },
-          },
-        } = await axios.post(
-          `${this.config.kibanaUrl}/api/fleet/agent_policies`,
-          {
-            name: 'Default Fleet Server policy',
-            description: '',
-            namespace: 'default',
-            monitoring_enabled: ['logs', 'metrics'],
-            has_fleet_server: true,
-          },
-          this.requestOptions
-        );
 
-        const response = await axios.post(
-          `${this.config.kibanaUrl}/api/fleet/service_tokens`,
-          {},
-          this.requestOptions
-        );
-        const serviceToken = response.data.value;
-        const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
-        this.log.info(artifact);
+    // default fleet server policy no longer created by default
+    const {
+      data: {
+        item: { id: policyId },
+      },
+    } = await axios.post(
+      `${this.config.kibanaUrl}/api/fleet/agent_policies`,
+      {
+        name: 'Default Fleet Server policy',
+        description: '',
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        has_fleet_server: true,
+      },
+      this.requestOptions
+    );
 
-        const host = 'host.docker.internal';
+    const response = await axios.post(
+      `${this.config.kibanaUrl}/api/fleet/service_tokens`,
+      {},
+      this.requestOptions
+    );
+    const serviceToken = response.data.value;
+    const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
+    this.log.info(artifact);
 
-        const args = [
-          'run',
-          '-p',
-          `8220:8220`,
-          '--add-host',
-          'host.docker.internal:host-gateway',
-          '--env',
-          'FLEET_SERVER_ENABLE=true',
-          '--env',
-          `FLEET_SERVER_ELASTICSEARCH_HOST=http://${host}:${this.config.esPort}`,
-          '--env',
-          `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
-          '--env',
-          `FLEET_SERVER_POLICY=${policyId}`,
-          '--rm',
-          artifact,
-        ];
-        this.log.info('docker ' + args.join(' '));
-        this.fleetProcess = spawn('docker', args, {
-          stdio: 'inherit',
-        });
-        this.fleetProcess.on('error', rej);
-        setTimeout(res, 15000);
-      } catch (error) {
-        rej(error);
-      }
-    });
+    const host = 'host.docker.internal';
+
+    const dockerArgs = [
+      'run',
+      '--detach',
+      '-p',
+      `8220:8220`,
+      '--add-host',
+      'host.docker.internal:host-gateway',
+      '--env',
+      'FLEET_SERVER_ENABLE=true',
+      '--env',
+      `FLEET_SERVER_ELASTICSEARCH_HOST=http://${host}:${this.config.esPort}`,
+      '--env',
+      `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
+      '--env',
+      `FLEET_SERVER_POLICY=${policyId}`,
+      '--rm',
+      artifact,
+    ];
+
+    this.log.info('docker ' + dockerArgs.join(' '));
+    this.fleetContainerId = (await execa('docker', dockerArgs)).stdout;
   }
 
   protected _cleanup() {
     this.log.info('Removing old fleet config');
-    if (this.fleetProcess) {
+    if (this.fleetContainerId) {
       this.log.info('Closing fleet process');
-      if (!this.fleetProcess.kill(9)) {
-        this.log.warning('Unable to kill fleet server process');
-      }
 
-      this.fleetProcess.on('close', () => {
-        this.log.info('Fleet server process closed');
-      });
-      delete this.fleetProcess;
+      execa.sync('docker', ['kill', this.fleetContainerId]);
+      this.log.info('Fleet server process closed');
     }
   }
 }

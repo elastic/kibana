@@ -112,6 +112,10 @@ export const TIMELINE_TEMPLATE_DETAILS = 'Timeline template';
 
 export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
 
+export const SUPPRESS_BY_DETAILS = 'Suppress alerts by';
+
+export const SUPPRESS_FOR_DETAILS = 'Suppress alerts for';
+
 export const TIMELINE_FIELD = (field: string) => {
   return `[data-test-subj="formatted-field-${field}"]`;
 };

@@ -50,11 +50,13 @@ interface ExceptionsListCardProps {
     id,
     includeExpiredExceptions,
     listId,
+    name,
     namespaceType,
   }: {
     id: string;
     includeExpiredExceptions: boolean;
     listId: string;
+    name: string;
     namespaceType: NamespaceType;
   }) => () => Promise<void>;
   readOnly: boolean;

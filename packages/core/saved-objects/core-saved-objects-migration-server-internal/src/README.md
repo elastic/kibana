@@ -369,9 +369,9 @@ completed this step:
  - temp index has a write block
  - temp index is not found
 ### New control state
-1. If `currentBatch` is the last batch in `transformedDocBatches`
+1. If `currentBatch` is the last batch in `bulkOperationBatches`
   → `REINDEX_SOURCE_TO_TEMP_READ`
-2. If there are more batches left in `transformedDocBatches`
+2. If there are more batches left in `bulkOperationBatches`
   → `REINDEX_SOURCE_TO_TEMP_INDEX_BULK`
 
 ## REINDEX_SOURCE_TO_TEMP_CLOSE_PIT

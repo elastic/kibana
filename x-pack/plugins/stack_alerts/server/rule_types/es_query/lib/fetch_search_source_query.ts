@@ -122,7 +122,11 @@ export function updateSearchSource(
       // add additional filter for documents with a timestamp greater then
       // the timestamp of the previous run, so that those documents are not counted twice
       const field = index.fields.find((f) => f.name === timeFieldName);
-      const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
+      const addTimeRangeField = buildRangeFilter(
+        field!,
+        { gt: latestTimestamp, format: 'strict_date_optional_time' },
+        index
+      );
       filters.push(addTimeRangeField);
     }
   }
