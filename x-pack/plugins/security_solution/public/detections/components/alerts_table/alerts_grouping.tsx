@@ -161,6 +161,13 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
         setPageVar(DEFAULT_PAGE_INDEX, level, 'index');
       }
 
+      const resetGroupChildrenPagination = (parentLevel: number) => {
+        setPageIndex((allPages) => {
+          const resetPages = allPages.splice(parentLevel + 1, allPages.length);
+          return [...allPages, ...resetPages.map(() => DEFAULT_PAGE_INDEX)];
+        });
+      };
+
       return (
         <GroupedSubLevel
           {...props}
@@ -173,6 +180,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           selectedGroup={selectedGroup}
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
+          resetGroupChildrenPagination={() => resetGroupChildrenPagination(level)}
         />
       );
     },

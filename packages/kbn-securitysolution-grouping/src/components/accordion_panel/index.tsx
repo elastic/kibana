@@ -8,7 +8,7 @@
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { firstNonNullValue } from '../../helpers';
 import type { RawBucket } from '../types';
 import { createGroupFilter } from './helpers';
@@ -24,6 +24,7 @@ interface GroupPanelProps<T> {
   level?: number;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
+  resetGroupChildrenPagination: () => void;
   selectedGroup: string;
   groupingLevel?: number;
 }
@@ -49,11 +50,23 @@ const GroupPanelComponent = <T,>({
   groupPanelRenderer,
   isLoading,
   level = 0,
+  resetGroupChildrenPagination,
   onToggleGroup,
   renderChildComponent,
   selectedGroup,
   groupingLevel = 0,
 }: GroupPanelProps<T>) => {
+  const lastForceState = useRef(forceState);
+  useEffect(() => {
+    if (lastForceState.current === 'open' && forceState === 'closed') {
+      // when parent group closes, reset pagination of any child groups
+      resetGroupChildrenPagination();
+      lastForceState.current = 'closed';
+    } else if (lastForceState.current === 'closed' && forceState === 'open') {
+      lastForceState.current = 'open';
+    }
+  }, [resetGroupChildrenPagination, forceState, selectedGroup]);
+
   const groupFieldValue = useMemo(() => firstNonNullValue(groupBucket.key), [groupBucket.key]);
 
   const groupFilters = useMemo(

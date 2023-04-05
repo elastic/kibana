@@ -51,6 +51,7 @@ interface OwnProps {
   pageSize: number;
   parentGroupingFilter?: string;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
+  resetGroupChildrenPagination: () => void;
   runtimeMappings: MappingRuntimeFields;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
@@ -77,6 +78,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   pageSize,
   parentGroupingFilter,
   renderChildComponent,
+  resetGroupChildrenPagination,
   runtimeMappings,
   selectedGroup,
   setPageIndex,
@@ -113,14 +115,14 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     },
     [
       browserFields,
-      indexPattern,
-      uiSettings,
       defaultFilters,
-      globalFilters,
-      parentGroupingFilter,
       from,
-      to,
+      globalFilters,
       globalQuery,
+      indexPattern,
+      parentGroupingFilter,
+      to,
+      uiSettings,
     ]
   );
 
@@ -185,10 +187,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   useInspectButton({
     deleteQuery,
     loading: isLoadingGroups,
-    response,
-    setQuery,
     refetch,
     request,
+    response,
+    setQuery,
     uniqueQueryId,
   });
 
@@ -208,10 +210,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const getTakeActionItems = useCallback(
     (groupFilters: Filter[], groupNumber: number) =>
       takeActionItems({
-        query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
-        tableId,
         groupNumber,
+        query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         selectedGroup,
+        tableId,
       }),
     [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
@@ -219,17 +221,18 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   return useMemo(
     () =>
       getGrouping({
+        activePage: pageIndex,
         data: alertsGroupsData?.aggregations,
         groupingLevel,
         inspectButton: inspect,
         isLoading: loading || isLoadingGroups,
-        renderChildComponent,
-        selectedGroup,
-        takeActionItems: getTakeActionItems,
         itemsPerPage: pageSize,
-        activePage: pageIndex,
         onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
         onChangeGroupsPage: (index) => setPageIndex(index),
+        renderChildComponent,
+        resetGroupChildrenPagination,
+        selectedGroup,
+        takeActionItems: getTakeActionItems,
       }),
     [
       alertsGroupsData?.aggregations,

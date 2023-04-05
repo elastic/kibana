@@ -38,15 +38,18 @@ type StaticGroupingProps<T> = Pick<
  */
 export type DynamicGroupingProps<T> = Pick<
   GroupingProps<T>,
+  | 'activePage'
   | 'data'
   | 'groupingLevel'
   | 'inspectButton'
   | 'isLoading'
-  | 'renderChildComponent'
-  | 'selectedGroup'
-  | 'takeActionItems'
+  | 'itemsPerPage'
   | 'onChangeGroupsItemsPerPage'
   | 'onChangeGroupsPage'
+  | 'renderChildComponent'
+  | 'resetGroupChildrenPagination'
+  | 'selectedGroup'
+  | 'takeActionItems'
 >;
 
 /** Interface for configuring grouping package where T is the consumer `GroupingAggregation`
@@ -119,7 +122,6 @@ export const useGrouping = <T,>({
         <GroupingComponent
           {...componentProps}
           {...props}
-          childGroups={selectedGroups.slice((props.groupingLevel ?? 0) + 1, selectedGroups.length)}
           dispatch={dispatch}
           groupSelector={groupSelector}
           groupingId={groupingId}
@@ -127,7 +129,7 @@ export const useGrouping = <T,>({
           tracker={tracker}
         />
       ),
-    [componentProps, groupSelector, groupingId, groupingState, selectedGroups, tracker]
+    [componentProps, groupSelector, groupingId, groupingState, tracker]
   );
 
   return useMemo(

@@ -29,19 +29,24 @@ import { getTelemetryEvent } from '../telemetry/const';
 import { Action, GroupMap } from '../hooks/types';
 
 export interface GroupingProps<T> {
-  childGroups: string[];
+  activePage: number;
   data?: GroupingAggregation<T>;
   dispatch: React.Dispatch<Action>;
-  groupingId: string;
   groupPanelRenderer?: GroupPanelRenderer<T>;
-  groupingLevel?: number;
   groupSelector?: JSX.Element;
   // list of custom UI components which correspond to your custom rendered metrics aggregations
   groupStatsRenderer?: GroupStatsRenderer<T>;
+  groupingId: string;
+  groupingLevel?: number;
+  groupingState: GroupMap;
   inspectButton?: JSX.Element;
   isLoading: boolean;
+  itemsPerPage: number;
+  onChangeGroupsItemsPerPage?: (size: number) => void;
+  onChangeGroupsPage?: (index: number) => void;
   onGroupToggle?: OnGroupToggle;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
+  resetGroupChildrenPagination: () => void;
   selectedGroup: string;
   takeActionItems: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
   tracker?: (
@@ -50,17 +55,11 @@ export interface GroupingProps<T> {
     count?: number | undefined
   ) => void;
   unit?: (n: number) => string;
-  onChangeGroupsPage?: (index: number) => void;
-  onChangeGroupsItemsPerPage?: (size: number) => void;
-  groupingState: GroupMap;
-  itemsPerPage: number;
-  activePage: number;
 }
 
 const GroupingComponent = <T,>({
-  childGroups,
+  activePage,
   data,
-  dispatch,
   groupPanelRenderer,
   groupSelector,
   groupStatsRenderer,
@@ -68,16 +67,16 @@ const GroupingComponent = <T,>({
   groupingLevel = 0,
   inspectButton,
   isLoading,
+  itemsPerPage,
+  onChangeGroupsItemsPerPage,
+  onChangeGroupsPage,
   onGroupToggle,
   renderChildComponent,
+  resetGroupChildrenPagination,
   selectedGroup,
   takeActionItems,
   tracker,
   unit = defaultUnit,
-  onChangeGroupsPage,
-  onChangeGroupsItemsPerPage,
-  itemsPerPage,
-  activePage,
 }: GroupingProps<T>) => {
   const [trigger, setTrigger] = useState<
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
@@ -103,6 +102,7 @@ const GroupingComponent = <T,>({
         return (
           <span key={groupKey}>
             <GroupPanel
+              resetGroupChildrenPagination={resetGroupChildrenPagination}
               extraAction={
                 <GroupStats
                   bucketKey={groupKey}
