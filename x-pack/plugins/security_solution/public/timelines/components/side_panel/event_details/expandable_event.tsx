@@ -131,7 +131,11 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
         {isAlert && isOnAlertsPage && (
           <EuiCopy textToCopy={alertDetailsLink}>
             {(copy) => (
-              <EuiButtonEmpty onClick={copy} iconType="share">
+              <EuiButtonEmpty
+                onClick={copy}
+                iconType="share"
+                data-test-subj="copy-alert-flyout-link"
+              >
                 {i18n.SHARE_ALERT}
               </EuiButtonEmpty>
             )}
