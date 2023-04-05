@@ -5,36 +5,13 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { FILTER_AGGREGATION_SUB_AGG_NAME } from '../constants';
 import { HostsMetricsAggregationQueryConfig } from '../types';
 
 const FIELD_NAME = 'cpu_usage';
-const FILTER: estypes.QueryDslQueryContainer = {
-  bool: {
-    must: [
-      {
-        exists: {
-          field: 'system.cpu.user.pct',
-        },
-      },
-      {
-        exists: {
-          field: 'system.cpu.system.pct',
-        },
-      },
-      {
-        exists: {
-          field: 'system.cpu.cores',
-        },
-      },
-    ],
-  },
-};
 
 export const cpu: HostsMetricsAggregationQueryConfig = {
   fieldName: FIELD_NAME,
-  filter: FILTER,
   runtimeField: {
     [FIELD_NAME]: {
       type: 'double',
@@ -44,7 +21,27 @@ export const cpu: HostsMetricsAggregationQueryConfig = {
     },
   },
   aggregation: {
-    filter: FILTER,
+    filter: {
+      bool: {
+        must: [
+          {
+            exists: {
+              field: 'system.cpu.user.pct',
+            },
+          },
+          {
+            exists: {
+              field: 'system.cpu.system.pct',
+            },
+          },
+          {
+            exists: {
+              field: 'system.cpu.cores',
+            },
+          },
+        ],
+      },
+    },
     aggs: {
       [FILTER_AGGREGATION_SUB_AGG_NAME]: {
         avg: {

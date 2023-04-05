@@ -173,16 +173,16 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('should return 1 host sorted by cpu asc', async () => {
+      it('should return 1 host sorted by memoryTotal asc', async () => {
         const body: GetHostsRequestBodyPayload = {
           ...basePayload,
           limit: 1,
           metrics: [
             {
-              type: 'cpu',
+              type: 'memoryTotal',
             },
           ],
-          sortField: 'cpu',
+          sortField: 'memoryTotal',
           sortDirection: 'asc',
         };
         const response = await makeRequest({ body, expectedHTTPCode: 200 });
@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
               { name: 'host.os.name', value: 'CentOS Linux' },
               { name: 'cloud.provider', value: 'gcp' },
             ],
-            metrics: [{ name: 'cpu', value: 0.3514166666666667 }],
+            metrics: [{ name: 'memoryTotal', value: 15768940544 }],
             name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
           },
         ]);

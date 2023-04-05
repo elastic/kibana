@@ -26,7 +26,7 @@ export interface TabProps {
 }
 
 export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
-  const nodeId = node.name;
+  const nodeId = node.name.name;
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const {

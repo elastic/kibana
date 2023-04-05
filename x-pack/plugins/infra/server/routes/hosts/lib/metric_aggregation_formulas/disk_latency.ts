@@ -5,41 +5,13 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { FILTER_AGGREGATION_SUB_AGG_NAME } from '../constants';
 import { HostsMetricsAggregationQueryConfig } from '../types';
 
 const FIELD_NAME = 'disk_latency';
-const FILTER: estypes.QueryDslQueryContainer = {
-  bool: {
-    must: [
-      {
-        exists: {
-          field: 'system.diskio.read.time',
-        },
-      },
-      {
-        exists: {
-          field: 'system.diskio.write.time',
-        },
-      },
-      {
-        exists: {
-          field: 'system.diskio.read.count',
-        },
-      },
-      {
-        exists: {
-          field: 'system.diskio.write.count',
-        },
-      },
-    ],
-  },
-};
 
 export const diskLatency: HostsMetricsAggregationQueryConfig = {
   fieldName: FIELD_NAME,
-  filter: FILTER,
   runtimeField: {
     [FIELD_NAME]: {
       type: 'double',
@@ -49,7 +21,32 @@ export const diskLatency: HostsMetricsAggregationQueryConfig = {
     },
   },
   aggregation: {
-    filter: FILTER,
+    filter: {
+      bool: {
+        must: [
+          {
+            exists: {
+              field: 'system.diskio.read.time',
+            },
+          },
+          {
+            exists: {
+              field: 'system.diskio.write.time',
+            },
+          },
+          {
+            exists: {
+              field: 'system.diskio.read.count',
+            },
+          },
+          {
+            exists: {
+              field: 'system.diskio.write.count',
+            },
+          },
+        ],
+      },
+    },
     aggs: {
       [FILTER_AGGREGATION_SUB_AGG_NAME]: {
         avg: {

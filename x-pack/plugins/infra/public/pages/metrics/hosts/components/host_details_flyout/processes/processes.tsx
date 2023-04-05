@@ -56,7 +56,7 @@ export const Processes = ({ currentTime, node, nodeType }: ProcessesProps) => {
 
   const hostTerm = useMemo(() => {
     const field = getFieldByType(nodeType) ?? nodeType;
-    return { [field]: node.name };
+    return { [field]: node.name.name };
   }, [node, nodeType]);
 
   const {

@@ -90,7 +90,7 @@ const createAggregationForSorting = (params: GetHostsRequestBodyPayload) => {
     throw new Error('sortField must be informed');
   }
 
-  const { fieldName, filter } = metricsAggregationFormulas[params.sortField as HostMetricType];
+  const { fieldName, aggregation } = metricsAggregationFormulas[params.sortField as HostMetricType];
 
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#_ordering_by_a_sub_aggregation
   // This may return wrong values. Ideally we would get the top hosts by the actual metric aggregation.
@@ -98,24 +98,40 @@ const createAggregationForSorting = (params: GetHostsRequestBodyPayload) => {
   // Max and Min might not represent the actual order, but sorting by avg could return wrong values too.
   const aggType = params.sortDirection === 'asc' ? 'min' : 'max';
   return {
-    [SORT_BY_AGGREGATION_NAME]: {
-      filter,
-      aggs: {
-        [FILTER_AGGREGATION_SUB_AGG_NAME]: {
+    [SORT_BY_AGGREGATION_NAME]: aggregation.filter
+      ? {
+          filter: aggregation.filter,
+          aggs: {
+            [FILTER_AGGREGATION_SUB_AGG_NAME]: {
+              [aggType]: {
+                field: fieldName,
+              },
+            },
+          },
+        }
+      : {
           [aggType]: {
             field: fieldName,
           },
         },
-      },
-    },
   };
 };
 
-export const getOrder = (params: GetHostsRequestBodyPayload) => {
+export const getOrder = (
+  params: GetHostsRequestBodyPayload
+): estypes.AggregationsAggregateOrder => {
+  if (!params.sortField || params.sortField === 'name') {
+    return {
+      _key: params.sortDirection ?? 'asc',
+    };
+  }
+
+  const { aggregation } = metricsAggregationFormulas[params.sortField as HostMetricType];
+  const sortByFieldName = aggregation.filter
+    ? `${SORT_BY_AGGREGATION_NAME}>${FILTER_AGGREGATION_SUB_AGG_NAME}`
+    : SORT_BY_AGGREGATION_NAME;
+
   return {
-    [!params.sortField || params.sortField === 'name'
-      ? '_key'
-      : `${SORT_BY_AGGREGATION_NAME}>${FILTER_AGGREGATION_SUB_AGG_NAME}`]:
-      params.sortDirection ?? 'asc',
+    [sortByFieldName]: params.sortDirection ?? 'asc',
   };
 };

@@ -65,7 +65,6 @@ export const FilteredHostsSearchAggregationResponseRT = rt.union([
 export interface HostsMetricsAggregationQueryConfig {
   fieldName: string;
   aggregation: estypes.AggregationsAggregationContainer;
-  filter?: estypes.QueryDslQueryContainer;
   runtimeField?: estypes.MappingRuntimeFields;
 }
 
