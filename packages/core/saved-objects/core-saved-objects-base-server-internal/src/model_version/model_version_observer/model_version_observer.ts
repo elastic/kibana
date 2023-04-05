@@ -34,7 +34,7 @@ const POLL_INTERVAL_MS = 30_000;
 /** TODO: Is this the correct pattern? In this way we will also be matching indices after "the split" */
 const KIBANA_SYSTEM_INDICES_PATTERN = '.kibana_*';
 
-async function robustlyFetchIndices(
+async function robustlyFetchMappings(
   client: ElasticsearchClient
 ): Promise<IndicesGetMappingResponse> {
   const run = async () => {
@@ -110,7 +110,7 @@ export class ModelVersionObserver {
       while (true) {
         if (subscriber.closed) break;
         try {
-          const indices = await robustlyFetchIndices(this.client);
+          const indices = await robustlyFetchMappings(this.client);
           let modelVersionMap: ModelVersionMap = {};
           for (const { mappings } of Object.values(indices)) {
             // Is this a Kibana system index for an SO type?
