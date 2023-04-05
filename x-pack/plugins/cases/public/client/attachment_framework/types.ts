@@ -39,6 +39,7 @@ export interface AttachmentType<Props> {
   icon: IconType;
   displayName: string;
   getAttachmentViewObject: () => AttachmentViewObject<Props>;
+  getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;

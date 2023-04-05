@@ -140,10 +140,108 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
 
+    it('renders correctly when deleting an external reference attachment with getAttachmentRemovalObject defined', async () => {
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      const attachment = getExternalReferenceAttachment();
+      externalReferenceAttachmentTypeRegistry.register({
+        ...attachment,
+        getAttachmentRemovalObject: () => ({
+          event: 'removed my own attachment',
+        }),
+      });
+
+      const userAction = getExternalReferenceUserAction({ action: Actions.delete });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
+    });
+
+    it('renders correctly when deleting an external reference attachment without getAttachmentRemovalObject defined', async () => {
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      const attachment = getExternalReferenceAttachment();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getExternalReferenceUserAction({ action: Actions.delete });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('removed attachment')).toBeInTheDocument();
+    });
+
     it('renders correctly when deleting a persistable state attachment', async () => {
       const userAction = getPersistableStateUserAction({ action: Actions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('removed attachment')).toBeInTheDocument();
+    });
+
+    it('renders correctly when deleting a persistable state attachment with getAttachmentRemovalObject defined', async () => {
+      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+      const attachment = getPersistableStateAttachment();
+      persistableStateAttachmentTypeRegistry.register({
+        ...attachment,
+        getAttachmentRemovalObject: () => ({
+          event: 'removed my own attachment',
+        }),
+      });
+
+      const userAction = getPersistableStateUserAction({ action: Actions.delete });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        persistableStateAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
+    });
+
+    it('renders correctly when deleting a persistable state attachment without getAttachmentRemovalObject defined', async () => {
+      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+      const attachment = getPersistableStateAttachment();
+      persistableStateAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getPersistableStateUserAction({ action: Actions.delete });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        persistableStateAttachmentTypeRegistry,
         userAction,
       });
 
