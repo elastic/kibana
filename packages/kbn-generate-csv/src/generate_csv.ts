@@ -24,11 +24,13 @@ import {
   AuthenticationExpiredError,
   ReportingError,
   CONTENT_TYPE_CSV,
+  TaskRunResult,
+  byteSizeValueToNumber,
 } from '@kbn/reporting-common';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { i18nTexts } from './i18n_texts';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
-import { CsvConfig, JobParams, TaskRunResult, byteSizeValueToNumber } from '../types';
+import { CsvConfig, JobParams } from '../types';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -317,7 +319,7 @@ export class CsvGenerator {
 
     const { maxSizeBytes, bom, escapeFormulaValues, timezone } = settings;
     const indexPatternTitle = index.getIndexPattern();
-    const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
+    const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes, bom));
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
