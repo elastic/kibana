@@ -221,6 +221,8 @@ $reorderItemMargin: 8px;
   width: 100%;
   height: 100%;
   z-index: $domDragDropZLevel3;
+  transition: $euiAnimSpeedFast ease-in-out;
+  transition-property: background-color, border-color, opacity;
 
   .domDragDrop-isDropTarget & {
     @include mixinDomDroppable;
