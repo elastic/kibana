@@ -7,7 +7,6 @@
 
 import { EuiFilterButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { FILTER_NAMES } from '../translations';
 
@@ -18,10 +17,6 @@ interface ActionsLogWithRuleToggleProps {
 
 export const ActionsLogWithRuleToggle = React.memo(
   ({ isFlyout, dataTestSubj }: ActionsLogWithRuleToggleProps) => {
-    const responseActionsEnabled = useIsExperimentalFeatureEnabled(
-      'endpointResponseActionsEnabled'
-    );
-
     const { withAutomatedActions: withAutomatedActionsUrlParam, setUrlWithAutomatedActions } =
       useActionHistoryUrlParams();
 
@@ -31,8 +26,6 @@ export const ActionsLogWithRuleToggle = React.memo(
         setUrlWithAutomatedActions(!withAutomatedActionsUrlParam);
       }
     }, [isFlyout, setUrlWithAutomatedActions, withAutomatedActionsUrlParam]);
-
-    if (!responseActionsEnabled) return null;
 
     return (
       <EuiFilterButton
