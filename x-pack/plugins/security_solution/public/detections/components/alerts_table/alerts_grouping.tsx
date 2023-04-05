@@ -12,6 +12,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { GroupOption } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { groupSelectors } from '../../../common/store/grouping';
 import type { State } from '../../../common/store';
 import { updateGroupSelector } from '../../../common/store/grouping/actions';
@@ -45,14 +46,33 @@ const DEFAULT_PAGE_SIZE = 25;
 const DEFAULT_PAGE_INDEX = 0;
 const MAX_GROUPING_LEVELS = 3;
 
+const useStorage = (storage: Storage, tableId: string) =>
+  useMemo(
+    () => ({
+      getStoragePageSize: (): number[] => {
+        const pageSizes = storage.get(`grouping-table-${tableId}`);
+        if (!pageSizes) {
+          return Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_INDEX);
+        }
+        return pageSizes;
+      },
+      setStoragePageSize: (pageSizes: number[]) => {
+        storage.set(`grouping-table-${tableId}`, pageSizes);
+      },
+    }),
+    [storage, tableId]
+  );
+
 export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
   const { indexPattern, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
 
   const {
-    services: { telemetry },
+    services: { storage, telemetry },
   } = useKibana();
+
+  const { getStoragePageSize, setStoragePageSize } = useStorage(storage, props.tableId);
 
   const { onGroupChange, onGroupToggle } = useMemo(
     () => ({
@@ -105,9 +125,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const [pageIndex, setPageIndex] = useState<number[]>(
     Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_INDEX)
   );
-  const [pageSize, setPageSize] = useState<number[]>(
-    Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_SIZE)
-  );
+  const [pageSize, setPageSize] = useState<number[]>(getStoragePageSize);
 
   const resetAllPagination = useCallback(() => {
     setPageIndex((curr) => curr.map(() => DEFAULT_PAGE_INDEX));
@@ -131,11 +149,12 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
         setPageSize((currentIndex) => {
           const newArr = [...currentIndex];
           newArr[groupingLevel] = newNumber;
+          setStoragePageSize(newArr);
           return newArr;
         });
       }
     },
-    []
+    [setStoragePageSize]
   );
 
   const nonGroupingFilters = useRef({
