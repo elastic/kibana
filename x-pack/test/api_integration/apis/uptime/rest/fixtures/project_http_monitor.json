@@ -57,7 +57,7 @@
       },
       "response": {
         "include_body": "always",
-        "include_body_max_bytes": "900"
+        "include_body_max_bytes": 900
       },
       "tags": "tag2,tag2",
       "response.include_headers": false,
