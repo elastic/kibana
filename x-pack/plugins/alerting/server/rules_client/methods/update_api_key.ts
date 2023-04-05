@@ -76,10 +76,13 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
   const username = await context.getUserName();
 
   let createdAPIKey = null;
+  let isAuthTypeApiKey = false;
   try {
-    createdAPIKey = await context.createAPIKey(
-      generateAPIKeyName(attributes.alertTypeId, attributes.name)
-    );
+    isAuthTypeApiKey = await context.isAuthenticationTypeAPIKey();
+    const name = generateAPIKeyName(attributes.alertTypeId, attributes.name);
+    createdAPIKey = isAuthTypeApiKey
+      ? await context.getAuthenticationAPIKey(name)
+      : await context.createAPIKey(name);
   } catch (error) {
     throw Boom.badRequest(
       `Error updating API key for rule: could not create API key - ${error.message}`
@@ -88,7 +91,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
 
   const updateAttributes = updateMeta(context, {
     ...attributes,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username, false),
+    ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
     updatedAt: new Date().toISOString(),
     updatedBy: username,
   });
