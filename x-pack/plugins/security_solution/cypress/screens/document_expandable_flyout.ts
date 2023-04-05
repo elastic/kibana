@@ -335,3 +335,6 @@ export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ADD_TO_TIMELINE =
   getDataTestSubjectSelector('actionItem-security-detailsFlyout-cellActions-addToTimeline');
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD =
   getDataTestSubjectSelector('actionItem-security-detailsFlyout-cellActions-copyToClipboard');
+
+export const DOCUMENT_DETAILS_FLYOUT_CLOSE_BUTTON =
+  getDataTestSubjectSelector('euiFlyoutCloseButton');
