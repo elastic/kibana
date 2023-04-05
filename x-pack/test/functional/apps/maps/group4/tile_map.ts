@@ -8,10 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'lens', 'maps', 'timePicker']);
-  const testSubjects = getService('testSubjects');
-  const filterBar = getService('filterBar');
 
   describe.only('tile_map visualization', () => {
     before(async () => {
