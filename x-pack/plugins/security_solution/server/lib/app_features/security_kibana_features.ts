@@ -137,7 +137,7 @@ export const getSecurityBaseKibanaFeature = (
   subFeatures: getSubFeatures(experimentalFeatures),
 });
 
-export function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
+function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
   const subFeatures: SubFeatureConfig[] = [];
   if (experimentalFeatures.endpointRbacEnabled) {
     subFeatures.push(
