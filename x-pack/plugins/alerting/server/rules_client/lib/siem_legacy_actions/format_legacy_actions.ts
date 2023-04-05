@@ -126,7 +126,6 @@ export const formatLegacyActionsForSiemRules = async <T extends Rule>(
     const { legacyRuleActions, ruleThrottle } = legacyRuleActionsMatch;
     return {
       ...rule,
-      // TODO: investigate failure
       actions: [...rule.actions, ...legacyRuleActions],
       throttle: (legacyRuleActions.length ? ruleThrottle : rule.throttle) ?? 'no_actions',
       notifyWhen: transformToNotifyWhen(ruleThrottle),
