@@ -25,7 +25,7 @@ const mergeAndReplaceArrays = <T, S>(destinationObj: T, srcObj: S): T => {
 export class EndpointPolicyResponseGenerator extends BaseDataGenerator {
   generate(overrides: DeepPartial<HostPolicyResponse> = {}): HostPolicyResponse {
     const ts = overrides['@timestamp'] ?? new Date().getTime();
-    const agentVersion = overrides.agent?.version ?? this.seededUUIDv4();
+    const agentVersion = overrides.agent?.id ?? this.seededUUIDv4();
     const overallStatus =
       overrides.Endpoint?.policy?.applied?.status ?? this.randomHostPolicyResponseActionStatus();
 
