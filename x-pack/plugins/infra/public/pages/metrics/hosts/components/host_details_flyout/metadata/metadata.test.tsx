@@ -110,6 +110,7 @@ describe('Single Host Metadata (Hosts View)', () => {
     mockUseMetadata({ metadata: [] });
     const result = renderHostMetadata();
 
+    expect(result.queryByTestId('infraMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraMetadataNoData')).toBeInTheDocument();
   });
 
@@ -117,6 +118,7 @@ describe('Single Host Metadata (Hosts View)', () => {
     mockUseMetadata({ loading: true });
     const result = renderHostMetadata();
 
+    expect(result.queryByTestId('infraMetadataSearchBarInput')).toBeInTheDocument();
     expect(result.queryByTestId('infraHostMetadataLoading')).toBeInTheDocument();
   });
 });

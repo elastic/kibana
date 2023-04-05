@@ -56,7 +56,16 @@ const SetSearchFilterRT = rt.partial({
   searchFilter: SearchFilterRT,
 });
 
-const ActionRT = rt.intersection([SetClickedItemIdRT, SetFlyoutTabId, SetSearchFilterRT]);
+const SetMetadataSearchRT = rt.partial({
+  metadataSearch: SearchFilterRT,
+});
+
+const ActionRT = rt.intersection([
+  SetClickedItemIdRT,
+  SetFlyoutTabId,
+  SetSearchFilterRT,
+  SetMetadataSearchRT,
+]);
 
 const HostFlyoutOpenRT = rt.type({
   clickedItemId: ClickedItemIdRT,

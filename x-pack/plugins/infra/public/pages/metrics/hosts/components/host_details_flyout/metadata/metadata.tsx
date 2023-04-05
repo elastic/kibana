@@ -18,6 +18,7 @@ import { Table } from './table';
 import { getAllFields } from './utils';
 import type { HostNodeRow } from '../../../hooks/use_hosts_table';
 import type { MetricsTimeInput } from '../../../../metric_detail/hooks/use_metrics_time';
+import { useHostFlyoutOpen } from '../../../hooks/use_host_flyout_open_url_state';
 
 export interface TabProps {
   currentTimeRange: MetricsTimeInput;
@@ -37,15 +38,18 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
-  const [metadataSearchFilter, setMetadataSearchFilter] = useState('');
+  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
-    metadataSearchFilter ? Query.parse(metadataSearchFilter) : Query.MATCH_ALL
+    hostFlyoutOpen.metadataSearch ? Query.parse(hostFlyoutOpen.metadataSearch) : Query.MATCH_ALL
   );
 
   const debouncedSearchOnChange = useMemo(
     () =>
-      debounce<(queryText: string) => void>((queryText) => setMetadataSearchFilter(queryText), 500),
-    [setMetadataSearchFilter]
+      debounce<(queryText: string) => void>(
+        (queryText) => setHostFlyoutOpen({ metadataSearch: String(queryText) ?? '' }),
+        500
+      ),
+    [setHostFlyoutOpen]
   );
 
   const searchBarOnChange = useCallback(
@@ -56,13 +60,17 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
     [setSearchBarState, debouncedSearchOnChange]
   );
 
-  const queriedMetadata = EuiSearchBar.Query.execute(searchBarState, fields, {
-    defaultFields: ['name', 'value'],
-  });
-
-  if (metadataLoading) {
-    return <LoadingPlaceholder />;
-  }
+  const getQueriedMetadata = () => {
+    try {
+      const metadataResult = EuiSearchBar.Query.execute(searchBarState, fields, {
+        defaultFields: ['name', 'value'],
+      });
+      return metadataResult;
+    } catch (errorM) {
+      // The error is shown in the search bar already
+      return [];
+    }
+  };
 
   if (error) {
     return (
@@ -93,7 +101,8 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
       </EuiCallOut>
     );
   }
-  return fields.length > 0 ? (
+
+  return (
     <>
       <EuiSearchBar
         query={searchBarState}
@@ -103,31 +112,36 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
           placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
             defaultMessage: 'Search for metadata…',
           }),
+          'data-test-subj': 'infraMetadataSearchBarInput',
         }}
       />
       <EuiSpacer size="m" />
-      {queriedMetadata.length > 0 ? (
-        <Table rows={queriedMetadata} />
+      {metadataLoading ? (
+        <LoadingPlaceholder />
+      ) : fields.length > 0 ? (
+        getQueriedMetadata()?.length > 0 ? (
+          <Table rows={getQueriedMetadata()} />
+        ) : (
+          <EuiCallOut
+            data-test-subj="infraMetadataNoDataFound"
+            title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
+              defaultMessage: 'There is no data to display.',
+            })}
+            size="m"
+            iconType="iInCircle"
+          />
+        )
       ) : (
         <EuiCallOut
-          data-test-subj="infraMetadataNoDataFound"
+          data-test-subj="infraMetadataNoData"
           title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
-            defaultMessage: 'There is no data to display.',
+            defaultMessage: 'Sorry, there is no metadata related to this host.',
           })}
           size="m"
           iconType="iInCircle"
         />
       )}
     </>
-  ) : (
-    <EuiCallOut
-      data-test-subj="infraMetadataNoData"
-      title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
-        defaultMessage: 'Sorry, there is no metadata related to this host.',
-      })}
-      size="m"
-      iconType="iInCircle"
-    />
   );
 };
 
