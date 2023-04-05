@@ -580,76 +580,249 @@ describe('createCommentUserActionBuilder', () => {
     expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
   });
 
-  describe('External references', () => {
+  describe('Attachment framework', () => {
     let appMockRender: AppMockRenderer;
 
     beforeEach(() => {
       appMockRender = createAppMockRenderer();
     });
 
-    it('renders correctly an external reference', async () => {
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
+    describe('External references', () => {
+      it('renders correctly an external reference', async () => {
+        const externalReferenceAttachmentTypeRegistry =
+          new ExternalReferenceAttachmentTypeRegistry();
+        externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
 
-      const userAction = getExternalReferenceUserAction();
-      const damagedRaccoon = userProfiles[0];
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-          comments: [
-            {
-              ...externalReferenceAttachment,
-              createdBy: {
-                username: damagedRaccoon.user.username,
-                fullName: damagedRaccoon.user.full_name,
-                email: damagedRaccoon.user.email,
+        const userAction = getExternalReferenceUserAction();
+        const damagedRaccoon = userProfiles[0];
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          externalReferenceAttachmentTypeRegistry,
+          caseData: {
+            ...builderArgs.caseData,
+            comments: [
+              {
+                ...externalReferenceAttachment,
+                createdBy: {
+                  username: damagedRaccoon.user.username,
+                  fullName: damagedRaccoon.user.full_name,
+                  email: damagedRaccoon.user.email,
+                },
               },
-            },
-          ],
-        },
-        userAction,
+            ],
+          },
+          userAction,
+        });
+
+        const createdUserAction = builder.build();
+        const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+        expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+        expect(result.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
+        expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+        expect(screen.getByText('added a chart')).toBeInTheDocument();
       });
 
-      const createdUserAction = builder.build();
-      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+      it('renders correctly if the reference is not registered', async () => {
+        const externalReferenceAttachmentTypeRegistry =
+          new ExternalReferenceAttachmentTypeRegistry();
 
-      expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
-      expect(result.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
-      expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-      expect(screen.getByText('added a chart')).toBeInTheDocument();
-    });
+        const userAction = getExternalReferenceUserAction();
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          externalReferenceAttachmentTypeRegistry,
+          caseData: {
+            ...builderArgs.caseData,
+            comments: [externalReferenceAttachment],
+          },
+          userAction,
+        });
 
-    it('renders correctly if the reference is not registered', async () => {
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+        const createdUserAction = builder.build();
+        const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      const userAction = getExternalReferenceUserAction();
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
-        },
-        userAction,
+        expect(result.getByTestId('comment-externalReference-not-found')).toBeInTheDocument();
+        expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
+        expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
       });
 
-      const createdUserAction = builder.build();
-      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+      it('deletes the attachment correctly', async () => {
+        const externalReferenceAttachmentTypeRegistry =
+          new ExternalReferenceAttachmentTypeRegistry();
+        externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
 
-      expect(result.getByTestId('comment-externalReference-not-found')).toBeInTheDocument();
-      expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
-      expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
+        const userAction = getExternalReferenceUserAction();
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          externalReferenceAttachmentTypeRegistry,
+          caseData: {
+            ...builderArgs.caseData,
+            comments: [externalReferenceAttachment],
+          },
+          userAction,
+        });
+
+        const createdUserAction = builder.build();
+        const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+        expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+
+        await deleteAttachment(result, 'trash', 'Delete');
+
+        await waitFor(() => {
+          expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+            'external-reference-comment-id',
+            'Deleted attachment'
+          );
+        });
+      });
     });
 
-    it('renders correctly an external reference with actions', async () => {
-      const ActionsView = () => {
-        return <>{'Attachment actions'}</>;
-      };
+    describe('Persistable state', () => {
+      it('renders correctly a persistable state attachment', async () => {
+        const MockComponent = jest.fn((props) => {
+          return (
+            <div data-test-subj={`attachment_${props.persistableStateAttachmentState.test_foo}`} />
+          );
+        });
+
+        const SpyLazyFactory = jest.fn(() => {
+          return Promise.resolve().then(() => {
+            return {
+              default: React.memo(MockComponent),
+            };
+          });
+        });
+
+        const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+        persistableStateAttachmentTypeRegistry.register(
+          getPersistableStateAttachment({
+            children: React.lazy(SpyLazyFactory),
+          })
+        );
+
+        const userAction = getPersistableStateUserAction();
+        const attachment01 = {
+          ...persistableStateAttachment,
+          persistableStateAttachmentState: { test_foo: '01' },
+          createdBy: {
+            username: userProfiles[0].user.username,
+            fullName: userProfiles[0].user.full_name,
+            email: userProfiles[0].user.email,
+            profileUid: userProfiles[0].uid,
+          },
+        };
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          persistableStateAttachmentTypeRegistry,
+          caseData: {
+            ...builderArgs.caseData,
+            comments: [attachment01],
+          },
+          userAction,
+        });
+
+        const result = appMockRender.render(<EuiCommentList comments={builder.build()} />);
+
+        await waitFor(() => {
+          expect(result.getByTestId('attachment_01')).toBeInTheDocument();
+          expect(MockComponent).toHaveBeenCalledTimes(1);
+          expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
+        });
+
+        expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+        expect(result.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
+        expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+        expect(screen.getByText('added an embeddable')).toBeInTheDocument();
+
+        result.unmount();
+
+        const attachment02 = {
+          ...persistableStateAttachment,
+          persistableStateAttachmentState: { test_foo: '02' },
+        };
+        const updateBuilder = createCommentUserActionBuilder({
+          ...builderArgs,
+          persistableStateAttachmentTypeRegistry,
+          caseData: {
+            ...builderArgs.caseData,
+            comments: [attachment02],
+          },
+          userAction,
+        });
+
+        const result2 = appMockRender.render(<EuiCommentList comments={updateBuilder.build()} />);
+
+        await waitFor(() => {
+          expect(result2.getByTestId('attachment_02')).toBeInTheDocument();
+          expect(MockComponent).toHaveBeenCalledTimes(2);
+          expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      it('renders correctly if the reference is not registered', async () => {
+        const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+
+        const userAction = getPersistableStateUserAction();
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          persistableStateAttachmentTypeRegistry,
+          caseData: {
+            ...builderArgs.caseData,
+            comments: [persistableStateAttachment],
+          },
+          userAction,
+        });
+
+        const createdUserAction = builder.build();
+        const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+        expect(result.getByTestId('comment-persistableState-not-found')).toBeInTheDocument();
+        expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
+        expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
+      });
+
+      it('deletes the attachment correctly', async () => {
+        const attachment = getPersistableStateAttachment();
+        const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+        persistableStateAttachmentTypeRegistry.register(attachment);
+
+        const userAction = getPersistableStateUserAction();
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          persistableStateAttachmentTypeRegistry,
+          caseData: {
+            ...builderArgs.caseData,
+            comments: [persistableStateAttachment],
+          },
+          userAction,
+        });
+
+        const createdUserAction = builder.build();
+        const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+        expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+
+        await deleteAttachment(result, 'trash', 'Delete');
+
+        await waitFor(() => {
+          expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+            'persistable-state-comment-id',
+            'Deleted attachment'
+          );
+        });
+      });
+    });
+
+    it('shows correctly the visible primary actions', async () => {
+      const onClick = jest.fn();
 
       const attachment = getExternalReferenceAttachment({
-        actions: <ActionsView />,
+        getActions: () => [
+          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
+          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
+          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+        ],
       });
 
       const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
@@ -667,15 +840,37 @@ describe('createCommentUserActionBuilder', () => {
       });
 
       const createdUserAction = builder.build();
-      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
-      expect(screen.getByText('Attachment actions')).toBeInTheDocument();
+      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
+      expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
+
+      userEvent.click(screen.getByLabelText('My primary button'), undefined, {
+        skipPointerEventsCheck: true,
+      });
+
+      userEvent.click(screen.getByLabelText('My primary 2 button'), undefined, {
+        skipPointerEventsCheck: true,
+      });
+
+      expect(onClick).toHaveBeenCalledTimes(2);
     });
 
-    it('deletes the attachment correctly', async () => {
+    it('shows correctly the non visible primary actions', async () => {
+      const onClick = jest.fn();
+
+      const attachment = getExternalReferenceAttachment({
+        getActions: () => [
+          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
+          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
+          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+        ],
+      });
+
       const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
+      externalReferenceAttachmentTypeRegistry.register(attachment);
 
       const userAction = getExternalReferenceUserAction();
       const builder = createCommentUserActionBuilder({
@@ -689,190 +884,111 @@ describe('createCommentUserActionBuilder', () => {
       });
 
       const createdUserAction = builder.build();
-      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
+      expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
 
-      await deleteAttachment(result, 'trash', 'Delete');
+      expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
+      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
 
-      await waitFor(() => {
-        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
-          'external-reference-comment-id',
-          'Deleted attachment'
-        );
+      expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
+
+      userEvent.click(screen.getByText('My primary 3 button'), undefined, {
+        skipPointerEventsCheck: true,
       });
-    });
-  });
 
-  describe('Persistable state', () => {
-    let appMockRender: AppMockRenderer;
-
-    beforeEach(() => {
-      appMockRender = createAppMockRenderer();
+      expect(onClick).toHaveBeenCalled();
     });
 
-    it('renders correctly a persistable state attachment', async () => {
-      const MockComponent = jest.fn((props) => {
-        return (
-          <div data-test-subj={`attachment_${props.persistableStateAttachmentState.test_foo}`} />
-        );
+    it('shows correctly the registered primary actions and non-primary actions', async () => {
+      const onClick = jest.fn();
+
+      const attachment = getExternalReferenceAttachment({
+        getActions: () => [
+          { label: 'My button', iconType: 'trash', onClick },
+          { label: 'My button 2', iconType: 'download', onClick },
+          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
+          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
+          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+        ],
       });
 
-      const SpyLazyFactory = jest.fn(() => {
-        return Promise.resolve().then(() => {
-          return {
-            default: React.memo(MockComponent),
-          };
-        });
-      });
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
 
-      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-      persistableStateAttachmentTypeRegistry.register(
-        getPersistableStateAttachment({
-          children: React.lazy(SpyLazyFactory),
-        })
-      );
-
-      const userAction = getPersistableStateUserAction();
-      const attachment01 = {
-        ...persistableStateAttachment,
-        persistableStateAttachmentState: { test_foo: '01' },
-        createdBy: {
-          username: userProfiles[0].user.username,
-          fullName: userProfiles[0].user.full_name,
-          email: userProfiles[0].user.email,
-          profileUid: userProfiles[0].uid,
-        },
-      };
+      const userAction = getExternalReferenceUserAction();
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        persistableStateAttachmentTypeRegistry,
+        externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [attachment01],
-        },
-        userAction,
-      });
-
-      const result = appMockRender.render(<EuiCommentList comments={builder.build()} />);
-
-      await waitFor(() => {
-        expect(result.getByTestId('attachment_01')).toBeInTheDocument();
-        expect(MockComponent).toHaveBeenCalledTimes(1);
-        expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
-      });
-
-      expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
-      expect(result.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
-      expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-      expect(screen.getByText('added an embeddable')).toBeInTheDocument();
-
-      result.unmount();
-
-      const attachment02 = {
-        ...persistableStateAttachment,
-        persistableStateAttachmentState: { test_foo: '02' },
-      };
-      const updateBuilder = createCommentUserActionBuilder({
-        ...builderArgs,
-        persistableStateAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-          comments: [attachment02],
-        },
-        userAction,
-      });
-
-      const result2 = appMockRender.render(<EuiCommentList comments={updateBuilder.build()} />);
-
-      await waitFor(() => {
-        expect(result2.getByTestId('attachment_02')).toBeInTheDocument();
-        expect(MockComponent).toHaveBeenCalledTimes(2);
-        expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    it('renders correctly if the reference is not registered', async () => {
-      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-
-      const userAction = getPersistableStateUserAction();
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        persistableStateAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-          comments: [persistableStateAttachment],
+          comments: [externalReferenceAttachment],
         },
         userAction,
       });
 
       const createdUserAction = builder.build();
-      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-persistableState-not-found')).toBeInTheDocument();
-      expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
-      expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
-    });
+      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
+      expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
 
-    it('renders correctly a persistable state with actions', async () => {
-      const ActionsView = () => {
-        return <>{'Attachment actions'}</>;
-      };
+      expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
+      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
 
-      const attachment = getPersistableStateAttachment({
-        actions: <ActionsView />,
+      expect(screen.getByText('My button')).toBeInTheDocument();
+      expect(screen.getByText('My button 2')).toBeInTheDocument();
+      expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
+
+      userEvent.click(screen.getByText('My button'), undefined, { skipPointerEventsCheck: true });
+      userEvent.click(screen.getByText('My button 2'), undefined, {
+        skipPointerEventsCheck: true,
       });
 
-      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-      persistableStateAttachmentTypeRegistry.register(attachment);
+      expect(onClick).toHaveBeenCalledTimes(2);
+    });
 
-      const userAction = getPersistableStateUserAction();
+    it('divides correctly less than two primary actions', async () => {
+      const onClick = jest.fn();
+
+      const attachment = getExternalReferenceAttachment({
+        getActions: () => [
+          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
+        ],
+      });
+
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getExternalReferenceUserAction();
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        persistableStateAttachmentTypeRegistry,
+        externalReferenceAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [persistableStateAttachment],
+          comments: [externalReferenceAttachment],
         },
         userAction,
       });
 
       const createdUserAction = builder.build();
-      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
-      expect(screen.getByText('Attachment actions')).toBeInTheDocument();
-    });
+      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
 
-    it('deletes the attachment correctly', async () => {
-      const attachment = getPersistableStateAttachment();
-      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-      persistableStateAttachmentTypeRegistry.register(attachment);
-
-      const userAction = getPersistableStateUserAction();
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        persistableStateAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-          comments: [persistableStateAttachment],
-        },
-        userAction,
+      userEvent.click(screen.getByLabelText('My primary button'), undefined, {
+        skipPointerEventsCheck: true,
       });
 
-      const createdUserAction = builder.build();
-      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
-
-      expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
-
-      await deleteAttachment(result, 'trash', 'Delete');
-
-      await waitFor(() => {
-        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
-          'persistable-state-comment-id',
-          'Deleted attachment'
-        );
-      });
+      expect(onClick).toHaveBeenCalled();
     });
   });
 });
