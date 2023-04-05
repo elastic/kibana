@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/jest-serializers",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

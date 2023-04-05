@@ -1,12 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "rootDir": "src",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -15,7 +10,11 @@
     ],
   },
   "include": [
-    "src/**/*",
-    "src/@types/assets"
+    "**/*.ts",
+  ],
+  "kbn_references": [
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

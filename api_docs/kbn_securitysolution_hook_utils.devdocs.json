@@ -41,6 +41,7 @@
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-hook-utils",
@@ -56,6 +57,7 @@
             ],
             "path": "packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -78,6 +80,7 @@
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/use_is_mounted/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [
           "A {@link GetIsMounted } getter function returning whether the component is currently mounted"
@@ -108,6 +111,7 @@
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-hook-utils",
@@ -125,6 +129,7 @@
             ],
             "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -155,6 +160,7 @@
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-hook-utils",
@@ -170,6 +176,7 @@
             ],
             "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -201,6 +208,7 @@
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-hook-utils",
@@ -210,7 +218,8 @@
             "label": "loading",
             "description": [],
             "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-hook-utils",
@@ -223,7 +232,8 @@
               "unknown"
             ],
             "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-hook-utils",
@@ -236,7 +246,8 @@
               "Result | undefined"
             ],
             "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-hook-utils",
@@ -250,6 +261,7 @@
             ],
             "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-hook-utils",
@@ -263,6 +275,7 @@
                 ],
                 "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -286,6 +299,7 @@
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -300,6 +314,7 @@
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

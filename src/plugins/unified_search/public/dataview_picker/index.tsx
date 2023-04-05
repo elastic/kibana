@@ -7,113 +7,45 @@
  */
 
 import React from 'react';
-import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { ChangeDataView } from './change_dataview';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
-export type ChangeDataViewTriggerProps = EuiButtonProps & {
-  label: string;
-  title?: string;
-};
+export type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from './data_view_picker';
 
-export enum TextBasedLanguages {
-  SQL = 'SQL',
-  ESQL = 'ESQL',
-}
+/**
+ * The Lazily-loaded `DataViewsList` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const DataViewsListLazy = React.lazy(() => import('./dataview_list'));
 
-export interface OnSaveTextLanguageQueryProps {
-  onSave: () => void;
-  onCancel: () => void;
-}
+/**
+ * A `DataViewsList` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `DataViewsLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const DataViewsList = withSuspense(DataViewsListLazy);
 
-/** @public */
-export interface DataViewPickerProps {
-  /**
-   * The properties of the button that triggers the dataview picker.
-   */
-  trigger: ChangeDataViewTriggerProps;
-  /**
-   * Flag that should be enabled when the current dataview is missing.
-   */
-  isMissingCurrent?: boolean;
-  /**
-   * Callback that is called when the user changes the currently selected dataview.
-   */
-  onChangeDataView: (newId: string) => void;
-  /**
-   * The id of the selected dataview.
-   */
-  currentDataViewId?: string;
-  /**
-   * The adHocDataviews.
-   */
-  adHocDataViews?: DataView[];
-  /**
-   * EuiSelectable properties.
-   */
-  selectableProps?: EuiSelectableProps;
-  /**
-   * Callback that is called when the user clicks the add runtime field option.
-   * Also works as a flag to show the add runtime field button.
-   */
-  onAddField?: () => void;
-  /**
-   * Callback that is called when the user clicks the create dataview option.
-   * Also works as a flag to show the create dataview button.
-   */
-  onDataViewCreated?: () => void;
-  /**
-   * List of the supported text based languages (SQL, ESQL) etc.
-   * Defined per application, if not provided, no text based languages
-   * will be available.
-   */
-  textBasedLanguages?: TextBasedLanguages[];
-  /**
-   * Callback that is called when the user clicks the Save and switch transition modal button
-   */
-  onSaveTextLanguageQuery?: ({ onSave, onCancel }: OnSaveTextLanguageQueryProps) => void;
-}
+/**
+ * The Lazily-loaded `DataViewSelector` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const DataViewSelectorLazy = React.lazy(() => import('./data_view_selector'));
 
-export interface DataViewPickerPropsExtended extends DataViewPickerProps {
-  /**
-   * Callback that is called when the user clicks the submit button
-   */
-  onTextLangQuerySubmit?: (query?: Query | AggregateQuery) => void;
-  /**
-   * Text based language that is currently selected; depends on the query
-   */
-  textBasedLanguage?: string;
-}
+/**
+ * A `DataViewSelector` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `DataViewSelectorLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const DataViewSelector = withSuspense(DataViewSelectorLazy);
 
-export const DataViewPicker = ({
-  isMissingCurrent,
-  currentDataViewId,
-  adHocDataViews,
-  onChangeDataView,
-  onAddField,
-  onDataViewCreated,
-  trigger,
-  selectableProps,
-  textBasedLanguages,
-  onSaveTextLanguageQuery,
-  onTextLangQuerySubmit,
-  textBasedLanguage,
-}: DataViewPickerPropsExtended) => {
-  return (
-    <ChangeDataView
-      isMissingCurrent={isMissingCurrent}
-      currentDataViewId={currentDataViewId}
-      onChangeDataView={onChangeDataView}
-      onAddField={onAddField}
-      onDataViewCreated={onDataViewCreated}
-      trigger={trigger}
-      adHocDataViews={adHocDataViews}
-      selectableProps={selectableProps}
-      textBasedLanguages={textBasedLanguages}
-      onSaveTextLanguageQuery={onSaveTextLanguageQuery}
-      onTextLangQuerySubmit={onTextLangQuerySubmit}
-      textBasedLanguage={textBasedLanguage}
-    />
-  );
-};
+/**
+ * The Lazily-loaded `DataViewPicker` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const DataViewPickerLazy = React.lazy(() => import('./data_view_picker'));
+
+/**
+ * A `DataViewPicker` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `DataViewPickerLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const DataViewPicker = withSuspense(DataViewPickerLazy);

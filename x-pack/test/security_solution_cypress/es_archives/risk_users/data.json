@@ -1,0 +1,199 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "a4cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f",
+    "index": "ml_user_risk_score_latest_default",
+    "source": {
+      "@timestamp": "2021-03-10T14:51:05.766Z",
+      "user": {
+        "name": "user1",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score_norm": 21,
+          "rule_risks": [
+            {
+              "rule_name": "Unusual Linux Username",
+              "rule_risk": 42
+            }
+          ]
+        }
+      },
+      "ingest_timestamp": "2021-03-09T18:02:08.319296053Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb71f",
+    "index": "ml_user_risk_score_latest_default",
+    "source": {
+      "@timestamp": "2021-03-10T14:51:05.766Z",
+      "user": {
+        "name": "user2",
+        "risk": {
+          "calculated_score_norm": 50,
+          "calculated_level": "Moderate",
+          "rule_risks": [
+            {
+              "rule_name": "Unusual Linux Username",
+              "rule_risk": 42
+            }
+          ]
+        }
+      },
+      "ingest_timestamp": "2021-03-09T18:02:08.319296053Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb72f",
+    "index": "ml_user_risk_score_latest_default",
+    "source": {
+      "@timestamp": "2021-03-10T14:51:05.766Z",
+      "user": {
+        "name": "user3",
+        "risk": {
+          "calculated_score_norm": 50,
+          "calculated_level": "Moderate",
+          "rule_risks": [
+            {
+              "rule_name": "Unusual Linux Username",
+              "rule_risk": 42
+            }
+          ]
+        }
+      },
+      "ingest_timestamp": "2021-03-09T18:02:08.319296053Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb73f",
+    "index": "ml_user_risk_score_latest_default",
+    "source": {
+      "@timestamp": "2021-03-10T14:51:05.766Z",
+      "user": {
+        "name": "user4",
+        "risk": {
+          "calculated_score_norm": 50,
+          "calculated_level": "Moderate",
+          "rule_risks": [
+            {
+              "rule_name": "Unusual Linux Username",
+              "rule_risk": 42
+            }
+          ]
+        }
+      },
+      "ingest_timestamp": "2021-03-09T18:02:08.319296053Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f",
+    "index": "ml_user_risk_score_latest_default",
+    "source": {
+      "@timestamp": "2021-03-10T14:51:05.766Z",
+      "user": {
+        "name": "user5",
+        "risk": {
+          "calculated_score_norm": 50,
+          "calculated_level": "Moderate",
+          "rule_risks": [
+            {
+              "rule_name": "Unusual Linux Username",
+              "rule_risk": 42
+            }
+          ]
+        }
+      },
+      "ingest_timestamp": "2021-03-09T18:02:08.319296053Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb75f",
+    "index": "ml_user_risk_score_latest_default",
+    "source": {
+      "@timestamp": "2021-03-10T14:51:05.766Z",
+      "user": {
+        "name": "user6",
+        "risk": {
+          "calculated_score_norm": 50,
+          "calculated_level": "Moderate",
+          "rule_risks": [
+            {
+              "rule_name": "Unusual Linux Username",
+              "rule_risk": 42
+            }
+          ]
+        }
+      },
+      "ingest_timestamp": "2021-03-09T18:02:08.319296053Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a4cf452c1e0375c3d4412cb550bd1783358468b3b3b777da4829d72c7d6fb74f",
+    "index": "ml_user_risk_score_default",
+    "source": {
+      "@timestamp": "2021-03-10T14:51:05.766Z",
+      "user": {
+        "name": "user1",
+        "risk": {
+          "calculated_score_norm": 21,
+          "calculated_level": "Low",
+          "rule_risks": [
+            {
+              "rule_name": "Unusual Linux Username",
+              "rule_risk": 42
+            }
+          ]
+        }
+      },
+      "ingest_timestamp": "2021-03-09T18:02:08.319296053Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a4cf452c1e0375c3d4412cb550bd1783358468b3123314829d72c7df6fb74",
+    "index": "ml_user_risk_score_latest_default",
+    "source": {
+      "@timestamp": "2021-03-10T14:52:05.766Z",
+      "user": {
+        "name": "test",
+        "risk": {
+          "calculated_score_norm": 21,
+          "calculated_level": "Low",
+          "rule_risks": [
+            {
+              "rule_name": "Unusual Linux Username",
+              "rule_risk": 42
+            }
+          ]
+        }
+      },
+      "ingest_timestamp": "2021-03-09T18:02:08.319296053Z"
+    }
+  }
+}

@@ -7,14 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { SecurityPageName } from '../../../app/types';
-import type { SiemRouteType } from '../../utils/route/types';
 import type { LinkCategories } from '../../links';
-
-export interface TabNavigationComponentProps {
-  pageName: string;
-  tabName: SiemRouteType | undefined;
-  pathName: string;
-}
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };
 
@@ -49,9 +42,11 @@ export type UrlStateType =
   | 'explore'
   | 'dashboards'
   | 'indicators'
+  | 'cloud_defend'
   | 'cloud_posture'
   | 'findings'
-  | 'entity_analytics';
+  | 'entity_analytics'
+  | 'data_quality';
 
 export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
@@ -62,6 +57,9 @@ export interface NavTab {
   urlKey?: UrlStateType;
   pageId?: SecurityPageName;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }
 export const securityNavKeys = [
   SecurityPageName.alerts,
@@ -77,7 +75,7 @@ export const securityNavKeys = [
   SecurityPageName.hosts,
   SecurityPageName.network,
   SecurityPageName.overview,
-  SecurityPageName.responseActions,
+  SecurityPageName.responseActionsHistory,
   SecurityPageName.rules,
   SecurityPageName.timelines,
   SecurityPageName.trustedApps,
@@ -87,8 +85,9 @@ export const securityNavKeys = [
   SecurityPageName.cloudSecurityPostureDashboard,
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,
-  SecurityPageName.cloudSecurityPostureRules,
+  SecurityPageName.cloudDefendPolicies,
   SecurityPageName.entityAnalytics,
+  SecurityPageName.dataQuality,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 
@@ -113,4 +112,7 @@ export interface NavLinkItem {
   title: string;
   skipUrlState?: boolean;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }

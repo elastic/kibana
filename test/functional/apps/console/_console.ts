@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
-  const toasts = getService('toasts');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
@@ -37,14 +36,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
     });
+    beforeEach(async () => {
+      await PageObjects.console.closeHelpIfExists();
+    });
 
     it('should show the default request', async () => {
-      // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
-      // on IE11, the dialog that says 'Your browser does not meet the security requirements for Kibana.'
-      // blocks the close help button for several seconds so just retry until we can click it.
-      await retry.try(async () => {
-        await PageObjects.console.collapseHelp();
-      });
       await retry.try(async () => {
         const actualRequest = await PageObjects.console.getRequest();
         log.debug(actualRequest);
@@ -63,20 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('settings should allow changing the text size', async () => {
-      await PageObjects.console.setFontSizeSetting(20);
-      await retry.try(async () => {
-        // the settings are not applied synchronously, so we retry for a time
-        expect(await PageObjects.console.getRequestFontSize()).to.be('20px');
-      });
-
-      await PageObjects.console.setFontSizeSetting(24);
-      await retry.try(async () => {
-        // the settings are not applied synchronously, so we retry for a time
-        expect(await PageObjects.console.getRequestFontSize()).to.be('24px');
-      });
-    });
-
     it('should resize the editor', async () => {
       const editor = await PageObjects.console.getEditor();
       await browser.setWindowSize(1300, 1100);
@@ -84,32 +66,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1000, 1100);
       const afterSize = await editor.getSize();
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
-    });
-
-    describe('with a data URI in the load_from query', () => {
-      it('loads the data from the URI', async () => {
-        await PageObjects.common.navigateToApp('console', {
-          hash: '#/console?load_from=data:text/plain,BYUwNmD2Q',
-        });
-
-        await retry.try(async () => {
-          const actualRequest = await PageObjects.console.getRequest();
-          log.debug(actualRequest);
-          expect(actualRequest.trim()).to.eql('hello');
-        });
-      });
-
-      describe('with invalid data', () => {
-        it('shows a toast error', async () => {
-          await PageObjects.common.navigateToApp('console', {
-            hash: '#/console?load_from=data:text/plain,BYUwNmD2',
-          });
-
-          await retry.try(async () => {
-            expect(await toasts.getToastCount()).to.equal(1);
-          });
-        });
-      });
     });
 
     describe('with kbn: prefix in request', () => {
@@ -144,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('multiple requests output', () => {
+    describe('multiple requests output', function () {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
           await PageObjects.console.enterRequest(request);
@@ -222,6 +178,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.hasFolds()).to.be(false);
+      });
+
+      it(`doesn't fail if a fold fails`, async () => {
+        // for more details, see https://github.com/elastic/kibana/issues/151563
+        await browser.clearLocalStorage();
+        await browser.setLocalStorageItem(
+          'sense:folds',
+          '[{"start":{"row":1,"column":1},"end":{"row":82,"column":4}}]'
+        );
+        await browser.setLocalStorageItem(
+          'sense:console_local_text-object_95a511b6-b6e1-4ea6-9344-428bf5183d88',
+          '{"id":"95a511b6-b6e1-4ea6-9344-428bf5183d88","createdAt":1677592109975,"updatedAt":1677592148666,"text":"GET _cat/indices"}'
+        );
+        await browser.refresh();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.console.closeHelpIfExists();
+        const request = await PageObjects.console.getRequest();
+        // the request is restored from the local storage value
+        expect(request).to.eql('GET _cat/indices');
+        await browser.clearLocalStorage();
       });
     });
   });

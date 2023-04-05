@@ -86,7 +86,7 @@ describe('filter manager utilities', () => {
       expect(result).toEqual({ key: 'test', value: 'example' });
     });
 
-    test('should throw an error if no functions match', async (done) => {
+    test('should throw an error if no functions match', async () => {
       const filter = buildEmptyFilter(true);
 
       mapping.throws(filter);
@@ -98,7 +98,6 @@ describe('filter manager utilities', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toBe('No mappings have been found for filter.');
-        done();
       }
     });
   });

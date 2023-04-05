@@ -11,11 +11,10 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
-import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
+import type { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs, XYRender } from '../types';
 import {
   hasAreaLayer,
   hasBarLayer,
-  hasHistogramBarLayer,
   validateExtents,
   validateFillOpacity,
   validateMarkSizeRatioLimits,
@@ -63,7 +62,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
 
   const {
     referenceLines = [],
-    annotationLayers = [],
     // data_layer args
     seriesType,
     accessors,
@@ -101,7 +99,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
     ...appendLayerIds(referenceLines, 'referenceLines'),
-    ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
 
   logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
@@ -114,9 +111,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
-  const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
-
-  validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
+  validateValueLabels(args.valueLabels, hasBar);
   validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
   validateMarkSizeRatioLimits(args.markSizeRatio);
   validateLineWidthForChartType(lineWidth, args.seriesType);
@@ -138,6 +133,11 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
       },
+      canNavigateToLens: Boolean(handlers.variables.canNavigateToLens),
+      syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+      syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
+      syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
+      overrides: handlers.variables?.overrides as XYRender['value']['overrides'],
     },
   };
 };

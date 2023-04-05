@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent } from '../../../../types';
 import {
-  sendPutAgentReassign,
+  sendPostAgentReassign,
   sendPostBulkAgentReassign,
   useStartServices,
   useGetAgentPolicies,
@@ -71,7 +71,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         throw new Error('No selected agent policy id');
       }
       const res = isSingleAgent
-        ? await sendPutAgentReassign((agents[0] as Agent).id, {
+        ? await sendPostAgentReassign((agents[0] as Agent).id, {
             policy_id: selectedAgentPolicyId,
           })
         : await sendPostBulkAgentReassign({
@@ -85,7 +85,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       const successMessage = i18n.translate(
         'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
         {
-          defaultMessage: 'Agent policy reassigned',
+          defaultMessage: 'Reassigning agent policy',
         }
       );
       notifications.toasts.addSuccess(successMessage);

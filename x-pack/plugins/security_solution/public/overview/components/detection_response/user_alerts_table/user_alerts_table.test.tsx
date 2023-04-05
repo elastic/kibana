@@ -14,6 +14,7 @@ import { parsedVulnerableUserAlertsResult } from './mock_data';
 import type { UseUserAlertsItems } from './use_user_alerts_items';
 import { UserAlertsTable } from './user_alerts_table';
 
+const userName = 'crffn20qcs';
 const mockGetAppUrl = jest.fn();
 jest.mock('../../../../common/lib/kibana/hooks', () => {
   const original = jest.requireActual('../../../../common/lib/kibana/hooks');
@@ -22,6 +23,13 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
     useNavigation: () => ({
       getAppUrl: mockGetAppUrl,
     }),
+  };
+});
+
+const mockNavigateToAlertsPageWithFilters = jest.fn();
+jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
+  return {
+    useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
   };
 });
 
@@ -98,7 +106,7 @@ describe('UserAlertsTable', () => {
     mockUseUserAlertsItemsReturn({ items: [parsedVulnerableUserAlertsResult[0]] });
     const { queryByTestId } = renderComponent();
 
-    expect(queryByTestId('userSeverityAlertsTable-userName')).toHaveTextContent('crffn20qcs');
+    expect(queryByTestId('userSeverityAlertsTable-userName')).toHaveTextContent(userName);
     expect(queryByTestId('userSeverityAlertsTable-totalAlerts')).toHaveTextContent('4');
     expect(queryByTestId('userSeverityAlertsTable-critical')).toHaveTextContent('4');
     expect(queryByTestId('userSeverityAlertsTable-high')).toHaveTextContent('1');
@@ -123,5 +131,32 @@ describe('UserAlertsTable', () => {
 
     fireEvent.click(page3);
     expect(mockSetPage).toHaveBeenCalledWith(2);
+  });
+
+  it('should open timeline with filters when total alerts is clicked', () => {
+    mockUseUserAlertsItemsReturn({ items: [parsedVulnerableUserAlertsResult[0]] });
+    const { getByTestId } = renderComponent();
+
+    fireEvent.click(getByTestId('userSeverityAlertsTable-totalAlertsLink'));
+
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'Username' },
+    ]);
+  });
+
+  it('should open timeline with filters when critical alerts link is clicked', () => {
+    mockUseUserAlertsItemsReturn({ items: [parsedVulnerableUserAlertsResult[0]] });
+    const { getByTestId } = renderComponent();
+
+    fireEvent.click(getByTestId('userSeverityAlertsTable-criticalLink'));
+
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'Username' },
+      {
+        fieldName: 'kibana.alert.severity',
+        selectedOptions: ['critical'],
+        title: 'Severity',
+      },
+    ]);
   });
 });

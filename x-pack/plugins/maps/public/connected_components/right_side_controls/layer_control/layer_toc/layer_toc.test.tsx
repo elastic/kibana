@@ -22,6 +22,9 @@ const mockLayers = [
     getId: () => {
       return '1';
     },
+    getParent: () => {
+      return undefined;
+    },
     supportsFitToBounds: () => {
       return true;
     },
@@ -29,6 +32,9 @@ const mockLayers = [
   {
     getId: () => {
       return '2';
+    },
+    getParent: () => {
+      return undefined;
     },
     supportsFitToBounds: () => {
       return false;
@@ -39,7 +45,11 @@ const mockLayers = [
 const defaultProps = {
   layerList: mockLayers,
   isReadOnly: false,
-  updateLayerOrder: () => {},
+  openTOCDetails: [],
+  moveLayerToBottom: () => {},
+  moveLayerToLeftOfTarget: () => {},
+  setLayerParent: () => {},
+  createLayerGroup: () => {},
 };
 
 describe('LayerTOC', () => {

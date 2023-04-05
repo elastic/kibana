@@ -1,0 +1,27 @@
+
+title: Agent diagnostics
+type: object
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  createTime:
+    type: string
+  filePath:
+    type: string
+  actionId:
+    type: string
+  status:
+    enum:
+      - READY
+      - AWAITING_UPLOAD
+      - DELETED
+      - IN_PROGRESS
+required:
+  - id
+  - name
+  - createTime
+  - filePath
+  - actionId
+  - status

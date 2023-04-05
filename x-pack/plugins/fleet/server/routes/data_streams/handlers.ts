@@ -11,11 +11,13 @@ import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common/types';
 import type { GetDataStreamsResponse } from '../../../common/types';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
+import { dataStreamService } from '../../services/data_streams';
 
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
 
-const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
+const MANAGED_BY = 'fleet';
+const LEGACY_MANAGED_BY = 'ingest-manager';
 
 interface ESDataStreamInfo {
   name: string;
@@ -49,18 +51,25 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
   try {
     // Get matching data streams, their stats, and package SOs
-    const [
-      { data_streams: dataStreamsInfo },
-      { data_streams: dataStreamStats },
-      packageSavedObjects,
-    ] = await Promise.all([
-      esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
-      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN, human: true }),
+    const [dataStreamsInfo, dataStreamStats, packageSavedObjects] = await Promise.all([
+      dataStreamService.getAllFleetDataStreams(esClient),
+      dataStreamService.getAllFleetDataStreamsStats(esClient),
       getPackageSavedObjects(savedObjects.client),
     ]);
 
-    const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
-    const dataStreamsStatsByName = keyBy(dataStreamStats, 'data_stream');
+    // managed_by property 'ingest-manager' added to allow for legacy data streams to be displayed
+    // See https://github.com/elastic/elastic-agent/issues/654
+
+    const filteredDataStreamsInfo = dataStreamsInfo.filter(
+      (ds) => ds?._meta?.managed_by === MANAGED_BY || ds?._meta?.managed_by === LEGACY_MANAGED_BY
+    );
+
+    const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(filteredDataStreamsInfo, 'name');
+
+    const filteredDataStreamsStats = dataStreamStats.filter(
+      (dss) => !!dataStreamsInfoByName[dss.data_stream]
+    );
+    const dataStreamsStatsByName = keyBy(filteredDataStreamsStats, 'data_stream');
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
@@ -113,6 +122,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     // Query additional information for each data stream
     const dataStreamPromises = dataStreamNames.map(async (dataStreamName) => {
       const dataStream = dataStreams[dataStreamName];
+
       const dataStreamResponse: DataStream = {
         index: dataStreamName,
         dataset: '',
@@ -198,6 +208,6 @@ export const getListHandler: RequestHandler = async (context, request, response)
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

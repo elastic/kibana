@@ -30,7 +30,7 @@ export interface TreeOptions {
   descendantLevels: number;
   descendants: number;
   ancestors: number;
-  timeRange: {
+  timeRange?: {
     from: string;
     to: string;
   };

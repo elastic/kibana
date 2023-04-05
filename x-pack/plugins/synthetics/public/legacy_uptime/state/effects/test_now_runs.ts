@@ -7,8 +7,9 @@
 
 import { takeEvery } from 'redux-saga/effects';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { TestNowResponse } from '../../../../common/types';
 import { testNowMonitorAction } from '../actions';
-import { type TestNowResponse, triggerTestNowMonitor } from '../api';
+import { triggerTestNowMonitor } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchTestNowMonitorEffect() {

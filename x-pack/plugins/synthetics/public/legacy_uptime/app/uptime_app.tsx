@@ -104,7 +104,15 @@ const Application = (props: UptimeAppProps) => {
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
-        <KibanaThemeProvider theme$={props.appMountParameters.theme$}>
+        <KibanaThemeProvider
+          theme$={props.appMountParameters.theme$}
+          modify={{
+            breakpoint: {
+              xxl: 1600,
+              xxxl: 2000,
+            },
+          }}
+        >
           <ReduxProvider store={store}>
             <KibanaContextProvider
               services={{
@@ -116,6 +124,7 @@ const Application = (props: UptimeAppProps) => {
                 inspector: startPlugins.inspector,
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
+                exploratoryView: startPlugins.exploratoryView,
                 cases: startPlugins.cases,
               }}
             >

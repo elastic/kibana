@@ -1,17 +1,23 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "./index.ts"],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../inspector/tsconfig.json" },
-    { "path": "../field_formats/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/logging",
+    "@kbn/utility-types",
+    "@kbn/interpreter",
+    "@kbn/i18n",
+    "@kbn/std",
+    "@kbn/core-execution-context-common",
+    "@kbn/tinymath",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

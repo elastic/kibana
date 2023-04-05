@@ -9,6 +9,8 @@
 import React from 'react';
 import { EuiTitle, EuiText, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useStateSelector } from '../../state_utils';
+import { PreviewState } from './types';
 
 import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from './field_preview_context';
@@ -23,12 +25,14 @@ const i18nTexts = {
   }),
 };
 
+const isLoadingSelector = (state: PreviewState) => state.isLoadingDocuments;
+const documentSourceSelector = (state: PreviewState) => state.documentSource;
+
 export const FieldPreviewHeader = () => {
   const { dataView } = useFieldEditorContext();
-  const {
-    from,
-    currentDocument: { isLoading: isFetchingDocument },
-  } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
+  const isFetchingDocument = useStateSelector(controller.state$, isLoadingSelector);
+  const documentSource = useStateSelector(controller.state$, documentSourceSelector);
 
   return (
     <div>
@@ -47,9 +51,10 @@ export const FieldPreviewHeader = () => {
       <EuiText>
         <EuiTextColor color="subdued" data-test-subj="subTitle">
           {i18n.translate('indexPatternFieldEditor.fieldPreview.subTitle', {
-            defaultMessage: 'From: {from}',
+            defaultMessage: 'From: {documentSource}',
             values: {
-              from: from.value === 'cluster' ? dataView.title : i18nTexts.customData,
+              documentSource:
+                documentSource === 'cluster' ? dataView.getIndexPattern() : i18nTexts.customData,
             },
           })}
         </EuiTextColor>

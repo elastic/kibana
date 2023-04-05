@@ -9,46 +9,27 @@
 import Path from 'path';
 import Os from 'os';
 
-import Uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { Config } from '../../functional_test_runner';
 import { DedicatedTaskRunner } from '../../functional_test_runner/lib';
-import { parseRawFlags, getArgValue } from './kibana_cli_args';
+import { parseRawFlags, getArgValue, remapPluginPaths } from './kibana_cli_args';
 
-function extendNodeOptions(installDir?: string) {
-  if (!installDir) {
-    return {};
-  }
-
-  const testOnlyRegisterPath = Path.relative(
-    installDir,
-    require.resolve('./babel_register_for_test_plugins')
-  );
-
-  return {
-    NODE_OPTIONS: `--require=${testOnlyRegisterPath}${
-      process.env.NODE_OPTIONS ? ` ${process.env.NODE_OPTIONS}` : ''
-    }`,
-  };
-}
-
-export async function runKibanaServer({
-  procs,
-  config,
-  options,
-  onEarlyExit,
-}: {
+export async function runKibanaServer(options: {
   procs: ProcRunner;
   config: Config;
-  options: { installDir?: string; extraKbnOpts?: string[] };
+  installDir?: string;
+  extraKbnOpts?: string[];
+  logsDir?: string;
   onEarlyExit?: (msg: string) => void;
 }) {
-  const runOptions = config.get('kbnTestServer.runOptions');
+  const { config, procs } = options;
+  const runOptions = options.config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const devMode = !installDir;
-  const useTaskRunner = config.get('kbnTestServer.useDedicatedTaskRunner');
+  const useTaskRunner = options.config.get('kbnTestServer.useDedicatedTaskRunner');
 
   const procRunnerOpts = {
     cwd: installDir || REPO_ROOT,
@@ -60,11 +41,10 @@ export async function runKibanaServer({
     env: {
       FORCE_COLOR: 1,
       ...process.env,
-      ...config.get('kbnTestServer.env'),
-      ...extendNodeOptions(installDir),
+      ...options.config.get('kbnTestServer.env'),
     },
     wait: runOptions.wait,
-    onEarlyExit,
+    onEarlyExit: options.onEarlyExit,
   };
 
   const prefixArgs = devMode
@@ -75,7 +55,7 @@ export async function runKibanaServer({
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs: string[] = config.get('kbnTestServer.serverArgs') || [];
 
-  const kbnFlags = parseRawFlags([
+  let kbnFlags = parseRawFlags([
     // When installDir is passed, we run from a built version of Kibana which uses different command line
     // arguments. If installDir is not passed, we run from source code.
     ...(installDir ? [...buildArgs, ...serverArgs] : [...sourceArgs, ...serverArgs]),
@@ -84,10 +64,18 @@ export async function runKibanaServer({
     ...(options.extraKbnOpts ?? []),
   ]);
 
+  if (installDir) {
+    kbnFlags = remapPluginPaths(kbnFlags, installDir);
+  }
+
+  const mainName = useTaskRunner ? 'kbn-ui' : 'kibana';
   const promises = [
     // main process
-    procs.run(useTaskRunner ? 'kbn-ui' : 'kibana', {
+    procs.run(mainName, {
       ...procRunnerOpts,
+      writeLogsToPath: options.logsDir
+        ? Path.resolve(options.logsDir, `${mainName}.log`)
+        : undefined,
       args: [
         ...prefixArgs,
         ...parseRawFlags([
@@ -96,7 +84,7 @@ export async function runKibanaServer({
             ? []
             : [
                 '--node.roles=["ui"]',
-                `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${Uuid.v4()}`)}`,
+                `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${uuidv4()}`)}`,
               ]),
         ]),
       ],
@@ -110,13 +98,16 @@ export async function runKibanaServer({
     promises.push(
       procs.run('kbn-tasks', {
         ...procRunnerOpts,
+        writeLogsToPath: options.logsDir
+          ? Path.resolve(options.logsDir, 'kbn-tasks.log')
+          : undefined,
         args: [
           ...prefixArgs,
           ...parseRawFlags([
             ...kbnFlags,
             `--server.port=${DedicatedTaskRunner.getPort(config.get('servers.kibana.port'))}`,
             '--node.roles=["background_tasks"]',
-            `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${Uuid.v4()}`)}`,
+            `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${uuidv4()}`)}`,
             ...(typeof mainUuid === 'string' && mainUuid
               ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
               : []),

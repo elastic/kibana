@@ -33,7 +33,7 @@ Sample data sets come with sample visualizations, dashboards, and more to help y
 . On the *Sample eCommerce orders* card, click *Add data*.
 +
 [role="screenshot"]
-image::images/addData_sampleDataCards_8.4.0.png[Add data UI for the sample data sets]
+image::images/addData_sampleDataCards_8.6.0.png[Add data UI for the sample data sets]
 
 [float]
 [[explore-the-data]]
@@ -72,7 +72,7 @@ A dashboard is a collection of panels that you can use to visualize the data. Pa
 . Click *[eCommerce] Revenue Dashboard*.
 +
 [role="screenshot"]
-image::images/dashboard_ecommerceRevenueDashboard_7.15.0.png[The [eCommerce] Revenue Dashboard that comes with the Sample eCommerce order data set]
+image::images/dashboard_ecommerceRevenueDashboard_8.6.0.png[The [eCommerce] Revenue Dashboard that comes with the Sample eCommerce order data set]
 
 [float]
 [[create-a-visualization]]
@@ -115,7 +115,7 @@ You can interact with the dashboard data using controls that allow you to apply 
 . Click *Apply changes*.
 +
 [role="screenshot"]
-image::images/sampleDataFilter_dashboard_8.4.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data from the Gnomehouse manufacturer]
+image::images/sampleDataFilter_dashboard_8.6.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data from the Gnomehouse manufacturer]
 
 [float]
 [[filter-and-query-the-data]]
@@ -126,7 +126,7 @@ To view a subset of the data, you can apply filters to the dashboard data. Apply
 . Click *Add filter*.
 +
 [role="screenshot"]
-image::images/addFilter_dashboard_8.4.0.png[The Add filter action that applies dashboard-level filters]
+image::images/addFilter_dashboard_8.6.0.png[The Add filter action that applies dashboard-level filters]
 
 . From the *Field* dropdown, select *day_of_week*.
 
@@ -135,12 +135,12 @@ image::images/addFilter_dashboard_8.4.0.png[The Add filter action that applies d
 . From the *Value* dropdown, select *Wednesday*.
 +
 [role="screenshot"]
-image::images/addFilterOptions_dashboard_8.4.0.png[The Add filter options configured to display only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
+image::images/addFilterOptions_dashboard_8.6.0.png[The Add filter options configured to display only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
 
 . Click *Add filter*.
 +
 [role="screenshot"]
-image::images/dashboard_sampleDataAddFilter_8.4.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
+image::images/dashboard_sampleDataAddFilter_8.6.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
 
 [float]
 [[quick-start-whats-next]]

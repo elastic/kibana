@@ -73,7 +73,7 @@ elastic/security-team#4241
 The subject should contain a succinct description of the change. Use the imperative, present tense: "change" not "changed" nor "changes".
 
 #### Body
-Just as in the subject, use the imperative, present tense: "change" not "changed" nor "changes". The body should include the motivation for the change and contrast this with previous behavior.
+Just as in the subject, use the imperative, present tense: "change" not "changed" nor "changes". The body should include the motivation for the change and contrast this with previous behavior. Don't forget to include related GitHub issue.
 
 #### Footer
 
@@ -89,7 +89,11 @@ You should review every line of code you have been asked to review and consider 
 
 #### Functionality
 
-Do the changes do what the developer intended? It is hard to understand how some changes will impact a user when you are just reading code. You should run the code yourself and validate the behavior.
+Check Acceptance Criteria of the issue related to the PR. Do the changes cover the AC? It is hard to understand how some changes will impact a user when you are just reading code. You should run the code yourself and validate the behavior. Think about edge cases and how the change might affect other features not directly related to the PR in question
+
+#### UX/UI
+
+Do the changes match the designs? If there were no designs provided, do a sanity UX/UI check: do the changes follow the best practives, are they consistent with the rest of the plugin, Security Solution, Kibana? Are there any custom UX components or behaviours implemented? If yes, could they be implemented with what's already available in EUI or other Kibana plugins?
 
 #### Complexity
 

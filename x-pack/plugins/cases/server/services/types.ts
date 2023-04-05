@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsCreateOptions } from '@kbn/core/server';
+import type { SavedObjectsCreateOptions } from '@kbn/core/server';
 
 export type RefreshSetting = NonNullable<SavedObjectsCreateOptions['refresh']>;
 

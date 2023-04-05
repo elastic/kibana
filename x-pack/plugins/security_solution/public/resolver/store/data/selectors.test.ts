@@ -6,7 +6,7 @@
  */
 
 import * as selectors from './selectors';
-import type { DataState, TimeRange } from '../../types';
+import type { DataState } from '../../types';
 import type { ResolverAction } from '../actions';
 import { dataReducer } from './reducer';
 import { createStore } from 'redux';
@@ -425,7 +425,7 @@ describe('data state', () => {
         expect(selectors.timeRangeFilters(state())?.to).toBe(new Date(maxDate).toISOString());
       });
       describe('when resolver receives time range filters', () => {
-        const timeRangeFilters: TimeRange = {
+        const timeRangeFilters = {
           to: 'to',
           from: 'from',
         };

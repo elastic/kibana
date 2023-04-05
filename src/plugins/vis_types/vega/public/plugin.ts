@@ -58,7 +58,7 @@ export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
   dataViews: DataViewsPublicPluginStart;
-  usageCollection?: UsageCollectionStart;
+  usageCollection: UsageCollectionStart;
 }
 
 /** @internal */
@@ -104,9 +104,6 @@ export class VegaPlugin implements Plugin<void, void> {
     setDataViews(dataViews);
     setDocLinks(core.docLinks);
     setMapsEms(mapsEms);
-
-    if (usageCollection) {
-      setUsageCollectionStart(usageCollection);
-    }
+    setUsageCollectionStart(usageCollection);
   }
 }

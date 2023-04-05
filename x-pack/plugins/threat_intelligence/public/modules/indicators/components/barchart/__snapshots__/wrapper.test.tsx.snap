@@ -1,0 +1,112 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<IndicatorsBarChartWrapper /> when not loading or refetching should render barchart and field selector dropdown 1`] = `
+<DocumentFragment>
+  <div
+    style="position: relative;"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <h2
+          class="euiTitle emotion-euiTitle-s"
+        >
+          Trend
+        </h2>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div
+          class="euiComboBox euiComboBox--prepended css-18y0wn9"
+          data-test-subj="tiIndicatorFieldSelectorDropdown"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--group"
+          >
+            <label
+              class="euiFormLabel euiFormControlLayout__prepend"
+              for="generated-id__eui-combobox-id"
+            >
+              Stack by
+            </label>
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <div
+                class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--inGroup"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
+              >
+                <span
+                  class="euiComboBoxPill euiComboBoxPill--plainText"
+                >
+                  threat.feed.name
+                </span>
+                <div
+                  class="euiComboBox__input"
+                  style="font-size: 14px; display: inline-block;"
+                >
+                  <input
+                    aria-autocomplete="list"
+                    aria-controls=""
+                    aria-expanded="false"
+                    data-test-subj="comboBoxSearchInput"
+                    id="generated-id__eui-combobox-id"
+                    role="combobox"
+                    style="box-sizing: content-box; width: 2px;"
+                    value=""
+                  />
+                  <div
+                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                  />
+                </div>
+              </div>
+              <div
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              >
+                <button
+                  aria-label="Open list of options"
+                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                  data-test-subj="comboBoxToggleListButton"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="echChart"
+      style="width: 100%; height: 200px;"
+    >
+      <div
+        class="echChartBackground"
+        style="background-color: transparent;"
+      />
+      <div
+        class="echChartStatus"
+        data-ech-render-complete="false"
+        data-ech-render-count="0"
+      />
+      <div
+        class="echChartResizer"
+      />
+      <div
+        class="echContainer"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;

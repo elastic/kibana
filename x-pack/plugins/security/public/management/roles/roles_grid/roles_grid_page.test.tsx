@@ -234,4 +234,22 @@ describe('<RolesGridPage />', () => {
       },
     ]);
   });
+
+  it('hides controls when `readOnly` is enabled', async () => {
+    const wrapper = mountWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={coreMock.createStart().notifications}
+        readOnly
+      />
+    );
+    const initialIconCount = wrapper.find(EuiIcon).length;
+
+    await waitForRender(wrapper, (updatedWrapper) => {
+      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    });
+
+    expect(findTestSubject(wrapper, 'createRoleButton')).toHaveLength(0);
+  });
 });

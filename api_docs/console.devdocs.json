@@ -19,10 +19,10 @@
           },
           " implements ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<void, void, ",
@@ -31,6 +31,7 @@
         ],
         "path": "src/plugins/console/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "console",
@@ -44,6 +45,7 @@
             ],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "console",
@@ -54,16 +56,17 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
                 ],
                 "path": "src/plugins/console/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -79,10 +82,10 @@
             "signature": [
               "({ notifications, getStartServices, http }: ",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, { devTools, home, share, usageCollection }: ",
@@ -98,6 +101,7 @@
             ],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "console",
@@ -108,16 +112,17 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/console/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -132,6 +137,7 @@
                 ],
                 "path": "src/plugins/console/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -149,6 +155,7 @@
             ],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -167,6 +174,7 @@
         "description": [],
         "path": "src/plugins/console/public/types/plugin_dependencies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "console",
@@ -194,7 +202,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/console/public/types/plugin_dependencies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -215,10 +224,17 @@
             "text": "ConsoleUILocatorParams"
           },
           " extends ",
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "src/plugins/console/public/types/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "console",
@@ -231,7 +247,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/console/public/types/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -260,6 +277,7 @@
       ],
       "path": "src/plugins/console/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -275,6 +293,7 @@
       ],
       "path": "src/plugins/console/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

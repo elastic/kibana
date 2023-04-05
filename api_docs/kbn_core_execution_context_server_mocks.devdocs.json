@@ -14,20 +14,29 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-execution-context-server-mocks",
-        "id": "def-server.executionContextServiceMock",
+        "id": "def-common.executionContextServiceMock",
         "type": "Object",
         "tags": [],
         "label": "executionContextServiceMock",
         "description": [],
         "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server-mocks",
-            "id": "def-server.executionContextServiceMock.createInternalSetupContract",
+            "id": "def-common.executionContextServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -39,12 +48,13 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-mocks",
-            "id": "def-server.executionContextServiceMock.createInternalStartContract",
+            "id": "def-common.executionContextServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
@@ -56,40 +66,55 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-mocks",
-            "id": "def-server.executionContextServiceMock.createSetupContract",
+            "id": "def-common.executionContextServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-server",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextServerPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-mocks",
-            "id": "def-server.executionContextServiceMock.createStartContract",
+            "id": "def-common.executionContextServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-server",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextServerPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -97,13 +122,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

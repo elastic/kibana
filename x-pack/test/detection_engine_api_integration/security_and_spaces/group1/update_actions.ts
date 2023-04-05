@@ -6,33 +6,42 @@
  */
 
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   removeServerGeneratedProperties,
   getRuleWithWebHookAction,
   getSimpleRuleOutputWithWebHookAction,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   createRule,
   getSimpleRule,
   updateRule,
-  installPrePackagedRules,
+  installMockPrebuiltRules,
   getRule,
   createNewAction,
   findImmutableRuleById,
-  getPrePackagedRulesStatus,
+  getPrebuiltRulesAndTimelinesStatus,
   getSimpleRuleOutput,
+  ruleToUpdateSchema,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
+  const es = getService('es');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+
+  const getImmutableRule = async () => {
+    await installMockPrebuiltRules(supertest, es);
+    return getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+  };
 
   describe('update_actions', () => {
     describe('updating actions', () => {
@@ -50,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should be able to create a new webhook action and update a rule with the webhook action', async () => {
@@ -62,8 +71,11 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(updatedRule);
 
         const expected = {
-          ...getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`),
-          version: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
+          ...getSimpleRuleOutputWithWebHookAction(
+            `${bodyToCompare.actions?.[0].id}`,
+            `${bodyToCompare.actions?.[0].uuid}`
+          ),
+          revision: 1, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
         };
         expect(bodyToCompare).to.eql(expected);
       });
@@ -78,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(ruleAfterActionRemoved);
         const expected = {
           ...getSimpleRuleOutput(),
-          version: 3, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
+          revision: 2, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
         };
         expect(bodyToCompare).to.eql(expected);
       });
@@ -89,90 +101,95 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, rule);
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
+        await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
         const hookAction = await createNewAction(supertest, log);
         const rule = getSimpleRule();
         await createRule(supertest, log, rule);
-        const ruleToUpdate: CreateRulesSchema = {
+        const ruleToUpdate: RuleCreateProps = {
           ...getRuleWithWebHookAction(hookAction.id, true, rule),
           meta: {}, // create a rule with the action attached and a meta field
         };
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
+        await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
       it('should not change properties of immutable rule when applying actions to it', async () => {
-        await installPrePackagedRules(supertest, log);
-        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
-        const immutableRule = await getRule(supertest, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
-        const hookAction = await createNewAction(supertest, log);
-        const newRuleToUpdate = getSimpleRule(immutableRule.rule_id);
-        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, newRuleToUpdate);
-        const updatedRule = await updateRule(supertest, log, ruleToUpdate);
-        const bodyToCompare = removeServerGeneratedProperties(updatedRule);
+        // actions and throttle to be removed from assertion (it asserted in a separate test case)
+        const actionsProps = ['actions', 'throttle'];
 
-        const expected = {
-          ...getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`),
-          rule_id: immutableRule.rule_id, // Rule id should match the same as the immutable rule
-          version: immutableRule.version, // This version number should not change when an immutable rule is updated
-          immutable: true, // It should stay immutable true when returning
-          required_fields: immutableRule.required_fields, // required_fields cannot be modified, so newRuleToUpdate will have required_fields from immutable rule
+        const immutableRule = await getImmutableRule();
+        const hookAction = await createNewAction(supertest, log);
+        const ruleToUpdate = getRuleWithWebHookAction(
+          hookAction.id,
+          immutableRule.enabled,
+          ruleToUpdateSchema(immutableRule)
+        );
+        const updatedRule = await updateRule(supertest, log, ruleToUpdate);
+        const expected = omit(removeServerGeneratedProperties(updatedRule), actionsProps);
+
+        const immutableRuleToAssert = {
+          ...omit(removeServerGeneratedProperties(immutableRule), actionsProps),
+          revision: 1, // Unlike `version` which is static for immutable rules, `revision` will increment when an action/exception is added
         };
-        expect(bodyToCompare).to.eql(expected);
+
+        expect(immutableRuleToAssert).to.eql(expected);
+        expect(expected.immutable).to.be(true); // It should stay immutable true when returning
       });
 
       it('should be able to create a new webhook action and attach it to an immutable rule', async () => {
-        await installPrePackagedRules(supertest, log);
-        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
-        const immutableRule = await getRule(supertest, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        const immutableRule = await getImmutableRule();
         const hookAction = await createNewAction(supertest, log);
-        const newRuleToUpdate = getSimpleRule(immutableRule.rule_id);
-        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, newRuleToUpdate);
+        const ruleToUpdate = getRuleWithWebHookAction(
+          hookAction.id,
+          immutableRule.enabled,
+          ruleToUpdateSchema(immutableRule)
+        );
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
         const bodyToCompare = removeServerGeneratedProperties(updatedRule);
 
-        const expected = getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`);
+        const expected = getSimpleRuleOutputWithWebHookAction(
+          `${bodyToCompare.actions?.[0].id}`,
+          `${bodyToCompare.actions?.[0].uuid}`
+        );
 
         expect(bodyToCompare.actions).to.eql(expected.actions);
+        expect(bodyToCompare.throttle).to.eql(expected.throttle);
       });
 
       it('should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
-        await installPrePackagedRules(supertest, log);
-        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
-        const immutableRule = await getRule(supertest, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        const immutableRule = await getImmutableRule();
         const hookAction = await createNewAction(supertest, log);
-        const newRuleToUpdate = getSimpleRule(immutableRule.rule_id);
-        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, newRuleToUpdate);
+        const ruleToUpdate = getRuleWithWebHookAction(
+          hookAction.id,
+          immutableRule.enabled,
+          ruleToUpdateSchema(immutableRule)
+        );
         await updateRule(supertest, log, ruleToUpdate);
 
-        const status = await getPrePackagedRulesStatus(supertest, log);
+        const status = await getPrebuiltRulesAndTimelinesStatus(supertest);
         expect(status.rules_not_installed).to.eql(0);
       });
 
       it('should be able to create a new webhook action, attach it to an immutable rule and the rule should stay immutable when searching against immutable tags', async () => {
-        await installPrePackagedRules(supertest, log);
-        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
-        const immutableRule = await getRule(supertest, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        const immutableRule = await getImmutableRule();
         const hookAction = await createNewAction(supertest, log);
-        const newRuleToUpdate = getSimpleRule(immutableRule.rule_id);
-        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, newRuleToUpdate);
-        await updateRule(supertest, log, ruleToUpdate);
-        const body = await findImmutableRuleById(
-          supertest,
-          log,
-          '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
+        const ruleToUpdate = getRuleWithWebHookAction(
+          hookAction.id,
+          immutableRule.enabled,
+          ruleToUpdateSchema(immutableRule)
         );
+        await updateRule(supertest, log, ruleToUpdate);
+        const body = await findImmutableRuleById(supertest, log, ELASTIC_SECURITY_RULE_ID);
 
         expect(body.data.length).to.eql(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
         const bodyToCompare = removeServerGeneratedProperties(body.data[0]);
-        const expected = getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`);
+        const expected = getSimpleRuleOutputWithWebHookAction(
+          `${bodyToCompare.actions?.[0].id}`,
+          `${bodyToCompare.actions?.[0].uuid}`
+        );
 
         expect(bodyToCompare.actions).to.eql(expected.actions);
         expect(bodyToCompare.immutable).to.be(true);

@@ -1,0 +1,62 @@
+{
+  "id": "@kbn/shared-ux-storybook-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook-config",
+        "id": "def-common.TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "TITLE",
+        "description": [
+          "The title of the Storybook."
+        ],
+        "signature": [
+          "\"Shared UX Storybook\""
+        ],
+        "path": "packages/shared-ux/storybook/config/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook-config",
+        "id": "def-common.URL",
+        "type": "string",
+        "tags": [],
+        "label": "URL",
+        "description": [
+          "The remote URL of the root from which Storybook loads stories for Shared UX."
+        ],
+        "signature": [
+          "\"https://github.com/elastic/kibana/tree/main/packages/shared_ux\""
+        ],
+        "path": "packages/shared-ux/storybook/config/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

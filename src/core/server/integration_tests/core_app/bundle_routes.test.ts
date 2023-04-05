@@ -15,8 +15,7 @@ import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
-import { registerRouteForBundle } from '../../core_app/bundle_routes/bundles_route';
-import { FileHashCache } from '../../core_app/bundle_routes/file_hash_cache';
+import { registerRouteForBundle, FileHashCache } from '@kbn/core-apps-server-internal';
 
 const buildNum = 1234;
 const fooPluginFixture = resolve(__dirname, './__fixtures__/plugin/foo');

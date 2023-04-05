@@ -5,33 +5,26 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from '@kbn/core/server';
-import {
-  CaseUserActionsResponse,
-  CaseUserActionsResponseRt,
-  CaseUserActionResponse,
-} from '../../../common/api';
+import type { CaseUserActionsDeprecatedResponse } from '../../../common/api';
+import { CaseUserActionsDeprecatedResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import { UserActionGet } from './client';
+import type { UserActionGet } from './types';
+import { extractAttributes } from './utils';
 
 export const get = async (
   { caseId }: UserActionGet,
   clientArgs: CasesClientArgs
-): Promise<CaseUserActionsResponse> => {
+): Promise<CaseUserActionsDeprecatedResponse> => {
   const {
-    unsecuredSavedObjectsClient,
     services: { userActionService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const userActions = await userActionService.getAll({
-      unsecuredSavedObjectsClient,
-      caseId,
-    });
+    const userActions = await userActionService.getAll(caseId);
 
     await authorization.ensureAuthorized({
       entities: userActions.saved_objects.map((userAction) => ({
@@ -43,7 +36,7 @@ export const get = async (
 
     const resultsToEncode = extractAttributes(userActions);
 
-    return CaseUserActionsResponseRt.encode(resultsToEncode);
+    return CaseUserActionsDeprecatedResponseRt.encode(resultsToEncode);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve user actions case id: ${caseId}: ${error}`,
@@ -52,9 +45,3 @@ export const get = async (
     });
   }
 };
-
-function extractAttributes(
-  userActions: SavedObjectsFindResponse<CaseUserActionResponse>
-): CaseUserActionsResponse {
-  return userActions.saved_objects.map((so) => so.attributes);
-}

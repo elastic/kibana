@@ -112,6 +112,34 @@ describe('output preconfiguration', () => {
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
   });
 
+  it('should create a preconfigured output with ca_trusted_fingerprint that does not exists', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'non-existing-output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['http://test.fr'],
+        ca_trusted_fingerprint: 'testfingerprint',
+      },
+    ]);
+
+    expect(mockedOutputService.create).toBeCalled();
+    expect(mockedOutputService.create).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        ca_trusted_fingerprint: 'testfingerprint',
+      }),
+      expect.anything()
+    );
+    expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+  });
+
   it('should create preconfigured logstash output that does not exist', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -146,7 +174,7 @@ describe('output preconfiguration', () => {
     ]);
 
     expect(mockedOutputService.create).toBeCalled();
-    expect(mockedOutputService.create.mock.calls[0][1].hosts).toEqual(['http://default-es:9200']);
+    expect(mockedOutputService.create.mock.calls[0][2].hosts).toEqual(['http://default-es:9200']);
   });
 
   it('should update output if non preconfigured output with the same id exists', async () => {
@@ -179,6 +207,7 @@ describe('output preconfiguration', () => {
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).toBeCalled();
     expect(mockedOutputService.update).toBeCalledWith(
+      expect.anything(),
       expect.anything(),
       'existing-output-1',
       expect.objectContaining({
@@ -268,6 +297,8 @@ describe('output preconfiguration', () => {
   describe('cleanPreconfiguredOutputs', () => {
     it('should not delete non deleted preconfigured output', async () => {
       const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
       mockedOutputService.list.mockResolvedValue({
         items: [
           { id: 'output1', is_preconfigured: true } as Output,
@@ -277,7 +308,7 @@ describe('output preconfiguration', () => {
         perPage: 10000,
         total: 1,
       });
-      await cleanPreconfiguredOutputs(soClient, [
+      await cleanPreconfiguredOutputs(soClient, esClient, [
         {
           id: 'output1',
           is_default: false,
@@ -301,6 +332,7 @@ describe('output preconfiguration', () => {
 
     it('should delete deleted preconfigured output', async () => {
       const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mockedOutputService.list.mockResolvedValue({
         items: [
           { id: 'output1', is_preconfigured: true } as Output,
@@ -310,7 +342,7 @@ describe('output preconfiguration', () => {
         perPage: 10000,
         total: 1,
       });
-      await cleanPreconfiguredOutputs(soClient, [
+      await cleanPreconfiguredOutputs(soClient, esClient, [
         {
           id: 'output1',
           is_default: false,
@@ -328,6 +360,7 @@ describe('output preconfiguration', () => {
 
     it('should update default deleted preconfigured output', async () => {
       const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mockedOutputService.list.mockResolvedValue({
         items: [
           { id: 'output1', is_preconfigured: true, is_default: true } as Output,
@@ -337,11 +370,12 @@ describe('output preconfiguration', () => {
         perPage: 10000,
         total: 1,
       });
-      await cleanPreconfiguredOutputs(soClient, []);
+      await cleanPreconfiguredOutputs(soClient, esClient, []);
 
       expect(mockedOutputService.delete).not.toBeCalled();
       expect(mockedOutputService.update).toBeCalledTimes(2);
       expect(mockedOutputService.update).toBeCalledWith(
+        expect.anything(),
         expect.anything(),
         'output1',
         expect.objectContaining({
@@ -350,6 +384,7 @@ describe('output preconfiguration', () => {
         { fromPreconfiguration: true }
       );
       expect(mockedOutputService.update).toBeCalledWith(
+        expect.anything(),
         expect.anything(),
         'output2',
         expect.objectContaining({

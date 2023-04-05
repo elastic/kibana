@@ -27,7 +27,7 @@ export class UnifiedFieldListPlugin
   public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
     this.logger.debug('unifiedFieldList: Setup');
 
-    defineRoutes(core);
+    defineRoutes(core, this.logger);
 
     return {};
   }

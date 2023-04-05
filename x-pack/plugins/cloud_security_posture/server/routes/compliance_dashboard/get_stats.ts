@@ -7,15 +7,9 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { ComplianceDashboardData, Score } from '../../../common/types';
-
-/**
- * @param value value is [0, 1] range
- */
-export const roundScore = (value: number): Score => Number((value * 100).toFixed(1));
-
-export const calculatePostureScore = (passed: number, failed: number): Score =>
-  roundScore(passed / (passed + failed));
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { calculatePostureScore } from '../../../common/utils/helpers';
+import type { ComplianceDashboardData } from '../../../common/types';
 
 export interface FindingsEvaluationsQueryResult {
   failed_findings: {
@@ -23,6 +17,9 @@ export interface FindingsEvaluationsQueryResult {
   };
   passed_findings: {
     doc_count: number;
+  };
+  resources_evaluated?: {
+    value: number;
   };
 }
 
@@ -35,13 +32,28 @@ export const findingsEvaluationAggsQuery = {
   },
 };
 
+const uniqueResourcesCountQuery = {
+  resources_evaluated: {
+    cardinality: {
+      field: 'resource.id',
+    },
+  },
+};
+
 export const getEvaluationsQuery = (
   query: QueryDslQueryContainer,
-  pitId: string
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields
 ): SearchRequest => ({
-  query,
   size: 0,
-  aggs: findingsEvaluationAggsQuery,
+  // creates the `safe_posture_type` runtime fields,
+  // `safe_posture_type` is used by the `query` to filter by posture type for older findings without this field
+  runtime_mappings: runtimeMappings,
+  query,
+  aggs: {
+    ...findingsEvaluationAggsQuery,
+    ...uniqueResourcesCountQuery,
+  },
   pit: {
     id: pitId,
   },
@@ -50,27 +62,29 @@ export const getEvaluationsQuery = (
 export const getStatsFromFindingsEvaluationsAggs = (
   findingsEvaluationsAggs: FindingsEvaluationsQueryResult
 ): ComplianceDashboardData['stats'] => {
+  const resourcesEvaluated = findingsEvaluationsAggs.resources_evaluated?.value;
   const failedFindings = findingsEvaluationsAggs.failed_findings.doc_count || 0;
   const passedFindings = findingsEvaluationsAggs.passed_findings.doc_count || 0;
   const totalFindings = failedFindings + passedFindings;
-  if (!totalFindings) throw new Error("couldn't calculate posture score");
-  const postureScore = calculatePostureScore(passedFindings, failedFindings);
+  const postureScore = calculatePostureScore(passedFindings, failedFindings) || 0;
 
   return {
     totalFailed: failedFindings,
     totalPassed: passedFindings,
     totalFindings,
     postureScore,
+    ...(resourcesEvaluated && { resourcesEvaluated }),
   };
 };
 
 export const getStats = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields
 ): Promise<ComplianceDashboardData['stats']> => {
   const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
-    getEvaluationsQuery(query, pitId)
+    getEvaluationsQuery(query, pitId, runtimeMappings)
   );
 
   const findingsEvaluations = evaluationsQueryResult.aggregations;

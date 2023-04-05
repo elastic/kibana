@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { API_ACTION_NAME, AiopsExplainLogRateSpikesApiAction } from './explain_log_rate_spikes';
 
 interface StreamState {
   ccsWarning: boolean;
-  changePoints: ChangePoint[];
+  significantTerms: SignificantTerm[];
+  significantTermsGroups: SignificantTermGroup[];
   errors: string[];
   loaded: number;
   loadingState: string;
+  remainingFieldCandidates?: string[];
+  groupsMissing?: boolean;
 }
 
 export const initialState: StreamState = {
   ccsWarning: false,
-  changePoints: [],
+  significantTerms: [],
+  significantTermsGroups: [],
   errors: [],
   loaded: 0,
   loadingState: '',
@@ -34,10 +38,10 @@ export function streamReducer(
   }
 
   switch (action.type) {
-    case API_ACTION_NAME.ADD_CHANGE_POINTS:
-      return { ...state, changePoints: [...state.changePoints, ...action.payload] };
-    case API_ACTION_NAME.ADD_CHANGE_POINTS_HISTOGRAM:
-      const changePoints = state.changePoints.map((cp) => {
+    case API_ACTION_NAME.ADD_SIGNIFICANT_TERMS:
+      return { ...state, significantTerms: [...state.significantTerms, ...action.payload] };
+    case API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_HISTOGRAM:
+      const significantTerms = state.significantTerms.map((cp) => {
         const cpHistogram = action.payload.find(
           (h) => h.fieldName === cp.fieldName && h.fieldValue === cp.fieldValue
         );
@@ -46,10 +50,23 @@ export function streamReducer(
         }
         return cp;
       });
-      return { ...state, changePoints };
+      return { ...state, significantTerms };
+    case API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP:
+      return { ...state, significantTermsGroups: action.payload };
+    case API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM:
+      const significantTermsGroups = state.significantTermsGroups.map((cpg) => {
+        const cpHistogram = action.payload.find((h) => h.id === cpg.id);
+        if (cpHistogram) {
+          cpg.histogram = cpHistogram.histogram;
+        }
+        return cpg;
+      });
+      return { ...state, significantTermsGroups };
     case API_ACTION_NAME.ADD_ERROR:
       return { ...state, errors: [...state.errors, action.payload] };
-    case API_ACTION_NAME.RESET:
+    case API_ACTION_NAME.RESET_ERRORS:
+      return { ...state, errors: [] };
+    case API_ACTION_NAME.RESET_ALL:
       return initialState;
     case API_ACTION_NAME.UPDATE_LOADING_STATE:
       return { ...state, ...action.payload };

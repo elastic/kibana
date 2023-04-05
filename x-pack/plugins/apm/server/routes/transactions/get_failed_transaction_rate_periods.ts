@@ -4,9 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Setup } from '../../lib/helpers/setup_request';
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { Coordinate } from '../../../typings/timeseries';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
+
+export interface FailedTransactionRateResponse {
+  currentPeriod: {
+    timeseries: Coordinate[];
+    average: number | null;
+  };
+  previousPeriod: {
+    timeseries: Coordinate[];
+    average: number | null;
+  };
+}
 
 export async function getFailedTransactionRatePeriods({
   environment,
@@ -14,31 +28,37 @@ export async function getFailedTransactionRatePeriods({
   serviceName,
   transactionType,
   transactionName,
-  setup,
-  searchAggregatedTransactions,
+  apmEventClient,
   start,
   end,
   offset,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   transactionType: string;
   transactionName?: string;
-  setup: Setup;
-  searchAggregatedTransactions: boolean;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   offset?: string;
-}) {
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
+}): Promise<FailedTransactionRateResponse> {
   const commonProps = {
     environment,
     kuery,
     serviceName,
     transactionTypes: [transactionType],
     transactionName,
-    setup,
-    searchAggregatedTransactions,
+    apmEventClient,
+    documentType,
+    rollupInterval,
+    bucketSizeInSeconds,
   };
 
   const currentPeriodPromise = getFailedTransactionRate({

@@ -43,6 +43,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         loadTestFile(require.resolve('./expression'));
         loadTestFile(require.resolve('./filters'));
         loadTestFile(require.resolve('./custom_elements'));
+        loadTestFile(require.resolve('./datasource'));
         loadTestFile(require.resolve('./feature_controls/canvas_security'));
         loadTestFile(require.resolve('./feature_controls/canvas_spaces'));
         loadTestFile(require.resolve('./embeddables/lens'));

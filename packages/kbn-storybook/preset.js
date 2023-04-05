@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-const webpackConfig = require('./target_node/webpack.config');
+const webpackConfig = require('./src/webpack.config');
 
 module.exports = {
   managerEntries: (entry = []) => {
-    return [require.resolve('./target_node/lib/register'), ...entry];
+    return [require.resolve('./src/lib/register'), ...entry];
   },
   webpackFinal: (config) => {
     return webpackConfig({ config });
   },
   config: (entry) => {
-    return [...entry, require.resolve('./target_node/lib/decorators')];
+    return [...entry, require.resolve('./src/lib/decorators')];
   },
 };

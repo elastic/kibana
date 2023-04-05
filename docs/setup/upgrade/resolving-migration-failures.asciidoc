@@ -62,6 +62,37 @@ Unable to migrate the corrupt saved object document with _id: 'marketing_space:d
 
 To delete the documents that cause migrations to fail, take the following steps:
 
+. Create a role as follows:
++
+[source,sh]
+--------------------------------------------
+PUT _security/role/grant_kibana_system_indices
+{
+  "indices": [
+    {
+      "names": [
+        ".kibana*"
+      ],
+      "privileges": [
+        "all"
+      ],
+      "allow_restricted_indices": true
+    }
+  ]
+}
+--------------------------------------------
+
+. Create a user with the role above and `superuser` built-in role:
++
+[source,sh]
+--------------------------------------------
+POST /_security/user/temporarykibanasuperuser
+{
+  "password" : "l0ng-r4nd0m-p@ssw0rd",
+  "roles" : [ "superuser", "grant_kibana_system_indices" ]
+}
+--------------------------------------------
+
 . Remove the write block which the migration system has placed on the previous index:
 +
 [source,sh]
@@ -102,7 +133,7 @@ Migrations will fail if saved objects belong to an unknown
 saved object type. Unknown saved objects are typically caused by performing manual modifications
 to the {es} index (no longer allowed in 8.x), or by disabling a plugin that had previously created a saved object.
 
-We recommend using the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant]
+We recommend using the <<upgrade-assistant,Upgrade Assistant>>
 to discover and remedy any unknown saved object types. {kib} version 7.17.0 deployments containing unknown saved
 object types will also log the following warning message:
 

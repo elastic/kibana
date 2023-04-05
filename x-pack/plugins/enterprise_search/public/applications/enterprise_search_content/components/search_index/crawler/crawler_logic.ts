@@ -9,9 +9,11 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { flashAPIErrors, flashSuccessToast } from '../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../shared/http';
+import { StartSyncApiLogic, StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
 import { GetCrawlerApiLogic, GetCrawlerArgs } from '../../../api/crawler/get_crawler_api_logic';
 import {
   CrawlerData,
@@ -20,6 +22,13 @@ import {
   CrawlEvent,
   CrawlRequest,
 } from '../../../api/crawler/types';
+
+import {
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
+} from '../../../api/index/cached_fetch_index_api_logic';
+
+import { isCrawlerIndex } from '../../../utils/indices';
 import { IndexNameLogic } from '../index_name_logic';
 
 export interface CrawlRequestOverrides {
@@ -31,14 +40,18 @@ export interface CrawlRequestOverrides {
 }
 
 export interface CrawlerValues {
+  connectorId: string | null;
   data: CrawlerData | null;
   dataLoading: boolean;
   domains: CrawlerDomain[];
   events: CrawlEvent[];
+  indexData?: ElasticsearchIndexWithIngestion;
   mostRecentCrawlRequest: CrawlRequest | null;
   mostRecentCrawlRequestStatus: CrawlerStatus | null;
   timeoutId: NodeJS.Timeout | null;
 }
+
+type StartSyncApiValues = Actions<StartSyncArgs, {}>;
 
 export type CrawlerActions = Pick<
   Actions<GetCrawlerArgs, CrawlerData>,
@@ -46,6 +59,8 @@ export type CrawlerActions = Pick<
 > & {
   createNewTimeoutForCrawlerData(duration: number): { duration: number };
   fetchCrawlerData(): void;
+  makeFetchIndexRequest: CachedFetchIndexApiLogicActions['makeRequest'];
+  makeStartSyncRequest: StartSyncApiValues['makeRequest'];
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   reApplyCrawlRules(domain?: CrawlerDomain): { domain?: CrawlerDomain };
   startCrawl(overrides?: CrawlRequestOverrides): { overrides?: CrawlRequestOverrides };
@@ -60,13 +75,17 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     stopCrawl: () => null,
   },
   connect: {
-    actions: [GetCrawlerApiLogic, ['apiError', 'apiSuccess']],
-    values: [GetCrawlerApiLogic, ['status', 'data']],
+    actions: [
+      GetCrawlerApiLogic,
+      ['apiError', 'apiSuccess'],
+      StartSyncApiLogic,
+      ['makeRequest as makeStartSyncRequest'],
+      CachedFetchIndexApiLogic,
+      ['makeRequest as makeFetchIndexRequest'],
+    ],
+    values: [GetCrawlerApiLogic, ['status', 'data'], CachedFetchIndexApiLogic, ['indexData']],
   },
-  listeners: ({ actions }) => ({
-    apiError: (error) => {
-      flashAPIErrors(error);
-    },
+  listeners: ({ actions, values }) => ({
     fetchCrawlerData: () => {
       const { indexName } = IndexNameLogic.values;
 
@@ -101,14 +120,15 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       }
     },
     startCrawl: async ({ overrides = {} }) => {
-      const { indexName } = IndexNameLogic.values;
-      const { http } = HttpLogic.values;
-
       try {
-        await http.post(`/internal/enterprise_search/indices/${indexName}/crawler/crawl_requests`, {
-          body: JSON.stringify({ overrides }),
-        });
-        actions.fetchCrawlerData();
+        if (isCrawlerIndex(values.indexData) && values.indexData.connector) {
+          actions.makeStartSyncRequest({
+            connectorId: values.indexData.connector.id,
+            nextSyncConfig: overrides,
+          });
+
+          actions.fetchCrawlerData();
+        }
       } catch (e) {
         flashAPIErrors(e);
       }

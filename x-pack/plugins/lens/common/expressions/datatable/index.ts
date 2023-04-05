@@ -7,8 +7,5 @@
 
 export * from './datatable_column';
 export * from './datatable';
-export * from './summary';
-export * from './transpose_helpers';
-export * from './utils';
 
-export type { DatatableProps } from './types';
+export type { DatatableProps, DatatableExpressionFunction } from './types';

@@ -9,12 +9,11 @@
 import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
   Lifecycle,
-  readConfigFile,
   ProviderCollection,
   Providers,
   readProviderSpec,
@@ -32,8 +31,7 @@ export class FunctionalTestRunner {
   private readonly esVersion: EsVersion;
   constructor(
     private readonly log: ToolingLog,
-    private readonly configFile: string,
-    private readonly configOverrides: any,
+    private readonly config: Config,
     esVersion?: string | EsVersion
   ) {
     this.esVersion =
@@ -47,8 +45,8 @@ export class FunctionalTestRunner {
   async run(abortSignal?: AbortSignal) {
     const testStats = await this.getTestStats();
 
-    return await this.runHarness(async (config, lifecycle, coreProviders) => {
-      SuiteTracker.startTracking(lifecycle, this.configFile);
+    return await this.runHarness(async (lifecycle, coreProviders) => {
+      SuiteTracker.startTracking(lifecycle, this.config.path);
 
       const realServices =
         !testStats || (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
@@ -56,19 +54,19 @@ export class FunctionalTestRunner {
       const providers = realServices
         ? new ProviderCollection(this.log, [
             ...coreProviders,
-            ...readProviderSpec('Service', config.get('services')),
-            ...readProviderSpec('PageObject', config.get('pageObjects')),
+            ...readProviderSpec('Service', this.config.get('services')),
+            ...readProviderSpec('PageObject', this.config.get('pageObjects')),
           ])
-        : this.getStubProviderCollection(config, coreProviders);
+        : this.getStubProviderCollection(coreProviders);
 
       if (realServices) {
         if (providers.hasService('es')) {
-          await this.validateEsVersion(config);
+          await this.validateEsVersion();
         }
         await providers.loadAll();
       }
 
-      const customTestRunner = config.get('testRunner');
+      const customTestRunner = this.config.get('testRunner');
       if (customTestRunner) {
         this.log.warning(
           'custom test runner defined, ignoring all mocha/suite/filtering related options'
@@ -78,7 +76,7 @@ export class FunctionalTestRunner {
 
       let reporter;
       let reporterOptions;
-      if (config.get('mochaOpts.dryRun')) {
+      if (this.config.get('mochaOpts.dryRun')) {
         // override default reporter for dryRun results
         const targetFile = Path.resolve(REPO_ROOT, 'target/functional-tests/dryRunOutput.json');
         reporter = 'json';
@@ -88,22 +86,22 @@ export class FunctionalTestRunner {
         this.log.info(`Dry run results will be stored in ${targetFile}`);
       }
 
-      const mocha = await setupMocha(
+      const mocha = await setupMocha({
         lifecycle,
-        this.log,
-        config,
+        log: this.log,
+        config: this.config,
         providers,
-        this.esVersion,
+        esVersion: this.esVersion,
         reporter,
-        reporterOptions
-      );
+        reporterOptions,
+      });
 
       // there's a bug in mocha's dry run, see https://github.com/mochajs/mocha/issues/4838
       // until we can update to a mocha version where this is fixed, we won't actually
       // execute the mocha dry run but simulate it by reading the suites and tests of
       // the mocha object and writing a report file with similar structure to the json report
       // (just leave out some execution details like timing, retry and erros)
-      if (config.get('mochaOpts.dryRun')) {
+      if (this.config.get('mochaOpts.dryRun')) {
         return this.simulateMochaDryRun(mocha);
       }
 
@@ -123,8 +121,8 @@ export class FunctionalTestRunner {
     });
   }
 
-  private async validateEsVersion(config: Config) {
-    const es = createEsClientForFtrConfig(config);
+  private async validateEsVersion() {
+    const es = createEsClientForFtrConfig(this.config);
 
     let esInfo;
     try {
@@ -151,13 +149,19 @@ export class FunctionalTestRunner {
   }
 
   async getTestStats() {
-    return await this.runHarness(async (config, lifecycle, coreProviders) => {
-      if (config.get('testRunner')) {
+    return await this.runHarness(async (lifecycle, coreProviders) => {
+      if (this.config.get('testRunner')) {
         return;
       }
 
-      const providers = this.getStubProviderCollection(config, coreProviders);
-      const mocha = await setupMocha(lifecycle, this.log, config, providers, this.esVersion);
+      const providers = this.getStubProviderCollection(coreProviders);
+      const mocha = await setupMocha({
+        lifecycle,
+        log: this.log,
+        config: this.config,
+        providers,
+        esVersion: this.esVersion,
+      });
 
       const queue = new Set([mocha.suite]);
       const allTests: Test[] = [];
@@ -178,7 +182,7 @@ export class FunctionalTestRunner {
     });
   }
 
-  private getStubProviderCollection(config: Config, coreProviders: Providers) {
+  private getStubProviderCollection(coreProviders: Providers) {
     // when we want to load the tests but not actually run anything we can
     // use stubbed providers which allow mocha to do it's thing without taking
     // too much time
@@ -206,32 +210,30 @@ export class FunctionalTestRunner {
       ...coreProviders,
       ...readStubbedProviderSpec(
         'Service',
-        config.get('services'),
-        config.get('servicesRequiredForTestAnalysis')
+        this.config.get('services'),
+        this.config.get('servicesRequiredForTestAnalysis')
       ),
-      ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
+      ...readStubbedProviderSpec('PageObject', this.config.get('pageObjects'), []),
     ]);
   }
 
   private async runHarness<T = any>(
-    handler: (config: Config, lifecycle: Lifecycle, coreProviders: Providers) => Promise<T>
+    handler: (lifecycle: Lifecycle, coreProviders: Providers) => Promise<T>
   ): Promise<T> {
     let runErrorOccurred = false;
     const lifecycle = new Lifecycle(this.log);
 
     try {
-      const config = await this.readConfigFile();
-      this.log.debug('Config loaded');
-
       if (
-        (!config.get('testFiles') || config.get('testFiles').length === 0) &&
-        !config.get('testRunner')
+        this.config.module.type !== 'journey' &&
+        (!this.config.get('testFiles') || this.config.get('testFiles').length === 0) &&
+        !this.config.get('testRunner')
       ) {
         throw new Error('No tests defined.');
       }
 
       const dockerServers = new DockerServersService(
-        config.get('dockerServers'),
+        this.config.get('dockerServers'),
         this.log,
         lifecycle
       );
@@ -240,13 +242,13 @@ export class FunctionalTestRunner {
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => lifecycle,
         log: () => this.log,
-        config: () => config,
+        config: () => this.config,
         dockerServers: () => dockerServers,
         esVersion: () => this.esVersion,
-        dedicatedTaskRunner: () => new DedicatedTaskRunner(config, this.log),
+        dedicatedTaskRunner: () => new DedicatedTaskRunner(this.config, this.log),
       });
 
-      return await handler(config, lifecycle, coreProviders);
+      return await handler(lifecycle, coreProviders);
     } catch (runError) {
       runErrorOccurred = true;
       throw runError;
@@ -263,10 +265,6 @@ export class FunctionalTestRunner {
         }
       }
     }
-  }
-
-  public async readConfigFile() {
-    return await readConfigFile(this.log, this.esVersion, this.configFile, this.configOverrides);
   }
 
   simulateMochaDryRun(mocha: any) {

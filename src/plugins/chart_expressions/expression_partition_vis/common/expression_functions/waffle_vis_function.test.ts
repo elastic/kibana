@@ -16,7 +16,7 @@ import {
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { waffleVisFunction } from './waffle_vis_function';
-import { PARTITION_LABELS_VALUE } from '../constants';
+import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#waffleVis', () => {
@@ -35,6 +35,7 @@ describe('interpreter/functions#waffleVis', () => {
   const visConfig: WaffleVisConfig = {
     addTooltip: true,
     showValuesInLegend: true,
+    metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
     truncateLegend: true,
@@ -52,15 +53,18 @@ describe('interpreter/functions#waffleVis', () => {
       percentDecimals: 2,
       truncate: 100,
       last_level: false,
+      colorOverrides: {},
     },
-    metric: {
-      type: 'vis_dimension',
-      accessor: 0,
-      format: {
-        id: 'number',
-        params: {},
+    metrics: [
+      {
+        type: 'vis_dimension',
+        accessor: 0,
+        format: {
+          id: 'number',
+          params: {},
+        },
       },
-    },
+    ],
     bucket: {
       type: 'vis_dimension',
       accessor: 1,
@@ -116,5 +120,24 @@ describe('interpreter/functions#waffleVis', () => {
     await fn(context, visConfig, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
+  });
+
+  it('should pass over overrides from variables', async () => {
+    const overrides = {
+      settings: {
+        onBrushEnd: 'ignore',
+      },
+    };
+    const handlers = {
+      variables: { overrides },
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+    const result = await fn(context, visConfig, handlers);
+
+    expect(result).toEqual({
+      type: 'render',
+      as: PARTITION_VIS_RENDERER_NAME,
+      value: expect.objectContaining({ overrides }),
+    });
   });
 });

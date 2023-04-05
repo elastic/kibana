@@ -21,51 +21,66 @@
   - [LEGACY_DELETE](#legacy_delete)
     - [Next action](#next-action-6)
     - [New control state](#new-control-state-6)
-  - [WAIT_FOR_YELLOW_SOURCE](#wait_for_yellow_source)
+  - [WAIT_FOR_MIGRATION_COMPLETION](#wait_for_migration_completion)
     - [Next action](#next-action-7)
     - [New control state](#new-control-state-7)
-  - [SET_SOURCE_WRITE_BLOCK](#set_source_write_block)
+  - [WAIT_FOR_YELLOW_SOURCE](#wait_for_yellow_source)
     - [Next action](#next-action-8)
     - [New control state](#new-control-state-8)
-  - [CREATE_REINDEX_TEMP](#create_reindex_temp)
+  - [UPDATE_SOURCE_MAPPINGS_PROPERTIES](#update_source_mappings_properties)
     - [Next action](#next-action-9)
     - [New control state](#new-control-state-9)
-  - [REINDEX_SOURCE_TO_TEMP_OPEN_PIT](#reindex_source_to_temp_open_pit)
+  - [SET_SOURCE_WRITE_BLOCK](#set_source_write_block)
     - [Next action](#next-action-10)
     - [New control state](#new-control-state-10)
-  - [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
+  - [CREATE_REINDEX_TEMP](#create_reindex_temp)
     - [Next action](#next-action-11)
     - [New control state](#new-control-state-11)
-  - [REINDEX_SOURCE_TO_TEMP_TRANSFORM](#REINDEX_SOURCE_TO_TEMP_TRANSFORM)
+  - [REINDEX_SOURCE_TO_TEMP_OPEN_PIT](#reindex_source_to_temp_open_pit)
     - [Next action](#next-action-12)
     - [New control state](#new-control-state-12)
-  - [REINDEX_SOURCE_TO_TEMP_INDEX_BULK](#reindex_source_to_temp_index_bulk)
+  - [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
     - [Next action](#next-action-13)
     - [New control state](#new-control-state-13)
-  - [REINDEX_SOURCE_TO_TEMP_CLOSE_PIT](#reindex_source_to_temp_close_pit)
+  - [REINDEX_SOURCE_TO_TEMP_TRANSFORM](#reindex_source_to_temp_transform)
     - [Next action](#next-action-14)
     - [New control state](#new-control-state-14)
-  - [SET_TEMP_WRITE_BLOCK](#set_temp_write_block)
+  - [REINDEX_SOURCE_TO_TEMP_INDEX_BULK](#reindex_source_to_temp_index_bulk)
     - [Next action](#next-action-15)
     - [New control state](#new-control-state-15)
-  - [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
+  - [REINDEX_SOURCE_TO_TEMP_CLOSE_PIT](#reindex_source_to_temp_close_pit)
     - [Next action](#next-action-16)
     - [New control state](#new-control-state-16)
-  - [OUTDATED_DOCUMENTS_SEARCH](#outdated_documents_search)
+  - [SET_TEMP_WRITE_BLOCK](#set_temp_write_block)
     - [Next action](#next-action-17)
     - [New control state](#new-control-state-17)
-  - [OUTDATED_DOCUMENTS_TRANSFORM](#outdated_documents_transform)
+  - [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
     - [Next action](#next-action-18)
     - [New control state](#new-control-state-18)
-  - [UPDATE_TARGET_MAPPINGS](#update_target_mappings)
+  - [OUTDATED_DOCUMENTS_SEARCH](#outdated_documents_search)
     - [Next action](#next-action-19)
     - [New control state](#new-control-state-19)
-  - [UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK](#update_target_mappings_wait_for_task)
+  - [OUTDATED_DOCUMENTS_TRANSFORM](#outdated_documents_transform)
     - [Next action](#next-action-20)
     - [New control state](#new-control-state-20)
-  - [MARK_VERSION_INDEX_READY_CONFLICT](#mark_version_index_ready_conflict)
+  - [CHECK_TARGET_MAPPINGS](#check_target_mappings)
     - [Next action](#next-action-21)
     - [New control state](#new-control-state-21)
+  - [UPDATE_TARGET_MAPPINGS_PROPERTIES](#update_target_mappings_properties)
+    - [Next action](#next-action-22)
+    - [New control state](#new-control-state-22)
+  - [UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK](#update_target_mappings_properties_wait_for_task)
+    - [Next action](#next-action-23)
+    - [New control state](#new-control-state-23)
+  - [CHECK_VERSION_INDEX_READY_ACTIONS](#check_version_index_ready_actions)
+    - [Next action](#next-action-24)
+    - [New control state](#new-control-state-24)
+  - [MARK_VERSION_INDEX_READY](#mark_version_index_ready)
+    - [Next action](#next-action-25)
+    - [New control state](#new-control-state-25)
+  - [MARK_VERSION_INDEX_READY_CONFLICT](#mark_version_index_ready_conflict)
+    - [Next action](#next-action-26)
+    - [New control state](#new-control-state-26)
 - [Manual QA Test Plan](#manual-qa-test-plan)
   - [1. Legacy pre-migration](#1-legacy-pre-migration)
   - [2. Plugins enabled/disabled](#2-plugins-enableddisabled)
@@ -98,7 +113,7 @@ The design goals for the algorithm was to keep downtime below 10 minutes for
 and explicit as possible.
 
 The algorithm is implemented as a state-action machine based on https://www.microsoft.com/en-us/research/uploads/prod/2016/12/Computation-and-State-Machines.pdf
- 
+
 The state-action machine defines it's behaviour in steps. Each step is a
 transition from a control state s_i to the contral state s_i+1 caused by an
 action a_i.
@@ -152,20 +167,22 @@ index.
     1. The Elasticsearch shard allocation cluster setting `cluster.routing.allocation.enable` needs to be unset or set to 'all'. When set to 'primaries', 'new_primaries' or 'none', the migration will timeout when waiting for index green status before bulk indexing because the replica cannot be allocated.
 
     As per the Elasticsearch docs https://www.elastic.co/guide/en/elasticsearch/reference/8.2/restart-cluster.html#restart-cluster-rolling when Cloud performs a rolling restart such as during an upgrade, it will temporarily disable shard allocation. Kibana therefore keeps retrying the INIT step to wait for shard allocation to be enabled again.
-    
+
     The check only considers persistent and transient settings and does not take static configuration in `elasticsearch.yml` into account since there are no known use cases for doing so. If `cluster.routing.allocation.enable` is configured in `elaticsearch.yml` and not set to the default of 'all', the migration will timeout. Static settings can only be returned from the `nodes/info` API.
       → `INIT`
-  
-    2. If `.kibana` is pointing to an index that belongs to a later version of
+
+    2. If `.kibana` is pointing to more than one index.
+      → `FATAL`
+
+    3. If `.kibana` is pointing to an index that belongs to a later version of
     Kibana .e.g. a 7.11.0 instance found the `.kibana` alias pointing to
     `.kibana_7.12.0_001` fail the migration
       → `FATAL`
 
-2. If `.kibana` and the version specific aliases both exists and are pointing
-to the same index. This version's migration has already been completed. Since
-the same version could have plugins enabled at any time that would introduce
-new transforms or mappings.
-  →  `OUTDATED_DOCUMENTS_SEARCH`
+2. If `waitForMigrations` was set we're running on a background-tasks node and
+we should not participate in the migration but instead wait for the ui node(s)
+to complete the migration.
+  → `WAIT_FOR_MIGRATION_COMPLETION`
 
 3. If the `.kibana` alias exists we’re migrating from either a v1 or v2 index
 and the migration source index is the index the `.kibana` alias points to.
@@ -259,6 +276,15 @@ new `.kibana` alias that points to `.kibana_pre6.5.0_001`.
    `index_not_found_exception` another instance has already completed this step.
   → `SET_SOURCE_WRITE_BLOCK`
 
+## WAIT_FOR_MIGRATION_COMPLETION
+### Next action
+`fetchIndices`
+### New control state
+1. If the ui node finished the migration
+  → `DONE`
+2. Otherwise wait 2s and check again
+  → `WAIT_FOR_MIGRATION_COMPLETION`
+
 ## WAIT_FOR_YELLOW_SOURCE
 ### Next action
 `waitForIndexStatus` (status='yellow')
@@ -267,10 +293,31 @@ Wait for the source index to become yellow. This means the index's primary has b
 
 ### New control state
 1. If the action succeeds
-  → `SET_SOURCE_WRITE_BLOCK`
+  → `UPDATE_SOURCE_MAPPINGS_PROPERTIES`
 2. If the action fails with a `index_not_yellow_timeout`
   → `WAIT_FOR_YELLOW_SOURCE`
-  
+
+## UPDATE_SOURCE_MAPPINGS_PROPERTIES
+### Next action
+`updateSourceMappingsProperties`
+
+This action checks for source mappings changes.
+And if there are some, it tries to patch the mappings.
+- If there were no changes or the patch was successful, that reports either the changes are compatible or the source is already up to date, depending on the version migration completion state. Either way, it does not require a follow-up reindexing.
+- If the patch is failed and the version migration is incomplete, it reports an incompatible state that requires reindexing.
+- If the patch is failed and the version migration is complete, it reports an error as it means an incompatible mappings change in an already migrated environment.
+The latter usually happens when a new plugin is enabled that brings some incompatible changes or when there are incompatible changes in the development environment.
+
+### New control state
+1. If the mappings are updated and the migration is already completed.
+  → `OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT`
+2. If the mappings are updated and the migration is still in progress.
+  → `CLEANUP_UNKNOWN_AND_EXCLUDED`
+3. If the mappings are not updated due to incompatible changes and the migration is still in progress.
+  → `CHECK_UNKNOWN_DOCUMENTS`
+4. If the mappings are not updated due to incompatible changes and the migration is already completed.
+  → `FATAL`
+
 ## SET_SOURCE_WRITE_BLOCK
 ### Next action
 `setWriteBlock`
@@ -284,7 +331,7 @@ Set a write block on the source index to prevent any older Kibana instances from
 ### Next action
 `createIndex`
 
-This operation is idempotent, if the index already exist, we wait until its status turns green. 
+This operation is idempotent, if the index already exist, we wait until its status turns green.
 
 - Because we will be transforming documents before writing them into this index, we can already set the mappings to the target mappings for this version. The source index might contain documents belonging to a disabled plugin. So set `dynamic: false` mappings for any unknown saved object types.
 - (Since we never query the temporary index we can potentially disable refresh to speed up indexing performance. Profile to see if gains justify complexity)
@@ -320,7 +367,7 @@ Read the next batch of outdated documents from the source index by using search 
 `transformRawDocs`
 
 Transform the current batch of documents
-  
+
 In order to support sharing saved objects to multiple spaces in 8.0, the
 transforms will also regenerate document `_id`'s. To ensure that this step
 remains idempotent, the new `_id` is deterministically generated using UUIDv5
@@ -334,7 +381,7 @@ ensuring that each Kibana instance generates the same new `_id` for the same doc
 Use the bulk API create action to write a batch of up-to-date documents. The
 create action ensures that there will be only one write per reindexed document
 even if multiple Kibana instances are performing this step. Use
-`refresh=false` to speed up the create actions, the `UPDATE_TARGET_MAPPINGS`
+`refresh=false` to speed up the create actions, the `UPDATE_TARGET_MAPPINGS_PROPERTIES`
 step will ensure that the index is refreshed before we start serving traffic.
 
 The following errors are ignored because it means another instance already
@@ -343,11 +390,11 @@ completed this step:
  - temp index has a write block
  - temp index is not found
 ### New control state
-1. If `currentBatch` is the last batch in `transformedDocBatches`
+1. If `currentBatch` is the last batch in `bulkOperationBatches`
   → `REINDEX_SOURCE_TO_TEMP_READ`
-2. If there are more batches left in `transformedDocBatches`
+2. If there are more batches left in `bulkOperationBatches`
   → `REINDEX_SOURCE_TO_TEMP_INDEX_BULK`
-   
+
 ## REINDEX_SOURCE_TO_TEMP_CLOSE_PIT
 ### Next action
 `closePIT`
@@ -362,7 +409,7 @@ completed this step:
 Set a write block on the temporary index so that we can clone it.
 ### New control state
   → `CLONE_TEMP_TO_TARGET`
-  
+
 ## CLONE_TEMP_TO_TARGET
 ### Next action
 `cloneIndex`
@@ -394,7 +441,7 @@ and transform them to ensure that everything is up to date.
 1. Found outdated documents?
   → `OUTDATED_DOCUMENTS_TRANSFORM`
 2. All documents up to date
-  → `UPDATE_TARGET_MAPPINGS`
+  → `UPDATE_TARGET_MAPPINGS_PROPERTIES`
 
 ## OUTDATED_DOCUMENTS_TRANSFORM
 ### Next action
@@ -405,7 +452,22 @@ Once transformed we use an index operation to overwrite the outdated document wi
 ### New control state
   → `OUTDATED_DOCUMENTS_SEARCH`
 
-## UPDATE_TARGET_MAPPINGS
+## CHECK_TARGET_MAPPINGS
+
+### Next action
+
+`checkTargetMappings`
+
+Compare the calculated mappings' hashes against those stored in the `<index>.mappings._meta`.
+
+### New control state
+
+1. If calculated mappings don't match, we must update them.
+  → `UPDATE_TARGET_MAPPINGS_PROPERTIES`
+2. If calculated mappings and stored mappings match, we can skip directly to the next step.
+  → `CHECK_VERSION_INDEX_READY_ACTIONS`
+
+## UPDATE_TARGET_MAPPINGS_PROPERTIES
 ### Next action
 `updateAndPickupMappings`
 
@@ -413,9 +475,31 @@ If another instance has some plugins disabled it will disable the mappings of th
 update the mappings and then use an update_by_query to ensure that all fields are “picked-up” and ready to be searched over.
 
 ### New control state
-  → `UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK`
+  → `UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK`
 
-## UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK
+## UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK
+### Next action
+`waitForPickupUpdatedMappingsTask`
+
+### New control state
+  → `MARK_VERSION_INDEX_READY`
+
+## CHECK_VERSION_INDEX_READY_ACTIONS
+
+Check if the state contains some `versionIndexReadyActions` from the `INIT` action.
+
+### Next action
+
+None
+
+### New control state
+
+1. If there are some `versionIndexReadyActions`, we performed a full migration and need to point the aliases to our newly migrated index.
+  → `MARK_VERSION_INDEX_READY`
+2. If there are no `versionIndexReadyActions`, another instance already completed this migration and we only transformed outdated documents and updated the mappings for in case a new plugin was enabled.
+  → `DONE`
+
+## MARK_VERSION_INDEX_READY
 ### Next action
 `updateAliases`
 
@@ -531,4 +615,3 @@ have data loss when there's a user error.
    other half.
 5. Ensure that the document from step (2) has been migrated
    (`migrationVersion` contains 7.11.0)
-

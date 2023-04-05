@@ -21,6 +21,7 @@ export const metricBuckets: TableRequestProcessorsFunction =
       column.metrics
         .filter((row) => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
         .forEach((metric) => {
+          // @ts-ignore should be typed
           const fn = bucketTransform[metric.type];
           if (fn) {
             try {

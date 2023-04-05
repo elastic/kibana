@@ -12,7 +12,7 @@ import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
 import prettier from 'prettier';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { transformFileStream } from '@kbn/dev-utils';
 import ejs from 'ejs';
 import { Minimatch } from 'minimatch';
@@ -86,7 +86,7 @@ export async function renderTemplates({
     excludeFiles(
       ([] as string[]).concat(
         answers.ui ? [] : 'public/**/*',
-        answers.ui && !answers.internal ? [] : ['translations/**/*', 'i18nrc.json'],
+        answers.ui && !answers.internal ? [] : ['translations/**/*', '.i18nrc.json'],
         answers.server ? [] : 'server/**/*',
         !answers.internal ? [] : ['.eslintrc.js', 'tsconfig.json', 'package.json', '.gitignore']
       )

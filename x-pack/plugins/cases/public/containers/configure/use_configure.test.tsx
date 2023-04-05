@@ -7,12 +7,8 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import {
-  initialState,
-  useCaseConfigure,
-  ReturnUseCaseConfigure,
-  ConnectorConfiguration,
-} from './use_configure';
+import type { ReturnUseCaseConfigure, ConnectorConfiguration } from './use_configure';
+import { initialState, useCaseConfigure } from './use_configure';
 import { mappings, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 import { ConnectorTypes } from '../../../common/api';

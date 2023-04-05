@@ -7,16 +7,17 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { Query } from '@kbn/es-query';
-import { GetStateReturn } from '../../services/discover_state';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -29,10 +30,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 function getProps(savePermissions = true): DiscoverTopNavProps {
   discoverServiceMock.capabilities.discover!.save = savePermissions;
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  stateContainer.internalState.transitions.setDataView(dataViewMock);
 
   return {
-    stateContainer: {} as GetStateReturn,
-    dataView: dataViewMock,
+    stateContainer,
     savedSearch: savedSearchMock,
     navigateTo: jest.fn(),
     query: {} as Query,
@@ -44,21 +46,35 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     onFieldEdited: jest.fn(),
     onChangeDataView: jest.fn(),
     isPlainRecord: false,
+    persistDataView: jest.fn(),
+    updateAdHocDataViewId: jest.fn(),
+    updateDataViewList: jest.fn(),
+    onDataViewCreated: jest.fn(),
   };
 }
 
 describe('Discover topnav component', () => {
   test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
     const props = getProps(true);
-    const component = shallowWithIntl(<DiscoverTopNav {...props} />);
-    const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
+    const component = mountWithIntl(
+      <DiscoverMainProvider value={props.stateContainer}>
+        <DiscoverTopNav {...props} />
+      </DiscoverMainProvider>
+    );
+    const topNavMenu = component.find(TopNavMenu);
+    const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect', 'save']);
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
     const props = getProps(false);
-    const component = shallowWithIntl(<DiscoverTopNav {...props} />);
-    const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
+    const component = mountWithIntl(
+      <DiscoverMainProvider value={props.stateContainer}>
+        <DiscoverTopNav {...props} />
+      </DiscoverMainProvider>
+    );
+    const topNavMenu = component.find(TopNavMenu).props();
+    const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect']);
   });
 });

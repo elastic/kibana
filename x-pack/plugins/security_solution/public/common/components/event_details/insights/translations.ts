@@ -34,6 +34,13 @@ export const PROCESS_ANCESTRY_ERROR = i18n.translate(
   }
 );
 
+export const PROCESS_ANCESTRY_FILTER = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.insights.processAncestryFilter',
+  {
+    defaultMessage: 'Process Ancestry Alert IDs',
+  }
+);
+
 export const PROCESS_ANCESTRY_EMPTY = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_process_ancestry_empty',
   {
@@ -136,9 +143,22 @@ export const SIMPLE_ALERT_TABLE_LIMITED = i18n.translate(
   }
 );
 
-export const ALERT_UPSELL = i18n.translate(
+export const INSIGHTS_UPSELL = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.insights.alertUpsellTitle',
   {
-    defaultMessage: 'Get more insights with a subscription',
+    defaultMessage: 'Get more insights with a platinum subscription',
+  }
+);
+
+export const SUPPRESSED_ALERTS_COUNT = (count?: number) =>
+  i18n.translate('xpack.securitySolution.alertDetails.overview.insights.suppressedAlertsCount', {
+    defaultMessage: '{count} suppressed {count, plural, =1 {alert} other {alerts}}',
+    values: { count },
+  });
+
+export const SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.insights.suppressedAlertsCountTechnicalPreview',
+  {
+    defaultMessage: 'Technical Preview',
   }
 );

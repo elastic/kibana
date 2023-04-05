@@ -56,7 +56,10 @@ describe('LogEntry search strategy', () => {
     const response = await lastValueFrom(
       logEntrySearchStrategy.search(
         {
-          params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
+          params: {
+            logView: { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+            logEntryId: 'LOG_ENTRY_ID',
+          },
         },
         {},
         mockDependencies
@@ -70,6 +73,8 @@ describe('LogEntry search strategy', () => {
         params: expect.objectContaining({
           index: 'log-indices-*',
           body: expect.objectContaining({
+            track_total_hits: false,
+            terminate_after: 1,
             query: {
               ids: {
                 values: ['LOG_ENTRY_ID'],
@@ -84,8 +89,6 @@ describe('LogEntry search strategy', () => {
               },
             },
           }),
-          terminate_after: 1,
-          track_total_hits: false,
         }),
       },
       expect.anything(),
@@ -141,7 +144,10 @@ describe('LogEntry search strategy', () => {
       logEntrySearchStrategy.search(
         {
           id: requestId,
-          params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
+          params: {
+            logView: { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+            logEntryId: 'LOG_ENTRY_ID',
+          },
         },
         {},
         mockDependencies
@@ -193,7 +199,10 @@ describe('LogEntry search strategy', () => {
     const response = logEntrySearchStrategy.search(
       {
         id: logEntrySearchRequestStateRT.encode({ esRequestId: 'UNKNOWN_ID' }),
-        params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
+        params: {
+          logView: { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+          logEntryId: 'LOG_ENTRY_ID',
+        },
       },
       {},
       mockDependencies

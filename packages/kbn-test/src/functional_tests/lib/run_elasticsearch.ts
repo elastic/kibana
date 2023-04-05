@@ -9,7 +9,7 @@
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { Config } from '../../functional_test_runner';
 import { createTestEsCluster } from '../../es';
 
@@ -18,6 +18,7 @@ interface RunElasticsearchOptions {
   esFrom?: string;
   config: Config;
   onEarlyExit?: (msg: string) => void;
+  logsDir?: string;
 }
 
 interface CcsConfig {
@@ -62,26 +63,41 @@ function getEsConfig({
 export async function runElasticsearch(
   options: RunElasticsearchOptions
 ): Promise<() => Promise<void>> {
-  const { log } = options;
+  const { log, logsDir } = options;
   const config = getEsConfig(options);
 
   if (!config.ccsConfig) {
-    const node = await startEsNode(log, 'ftr', config);
+    const node = await startEsNode({
+      log,
+      name: 'ftr',
+      logsDir,
+      config,
+    });
     return async () => {
       await node.cleanup();
     };
   }
 
   const remotePort = await getPort();
-  const remoteNode = await startEsNode(log, 'ftr-remote', {
-    ...config,
-    port: parseInt(new URL(config.ccsConfig.remoteClusterUrl).port, 10),
-    transportPort: remotePort,
+  const remoteNode = await startEsNode({
+    log,
+    name: 'ftr-remote',
+    logsDir,
+    config: {
+      ...config,
+      port: parseInt(new URL(config.ccsConfig.remoteClusterUrl).port, 10),
+      transportPort: remotePort,
+    },
   });
 
-  const localNode = await startEsNode(log, 'ftr-local', {
-    ...config,
-    esArgs: [...config.esArgs, `cluster.remote.ftr-remote.seeds=localhost:${remotePort}`],
+  const localNode = await startEsNode({
+    log,
+    name: 'ftr-local',
+    logsDir,
+    config: {
+      ...config,
+      esArgs: [...config.esArgs, `cluster.remote.ftr-remote.seeds=localhost:${remotePort}`],
+    },
   });
 
   return async () => {
@@ -90,12 +106,19 @@ export async function runElasticsearch(
   };
 }
 
-async function startEsNode(
-  log: ToolingLog,
-  name: string,
-  config: EsConfig & { transportPort?: number },
-  onEarlyExit?: (msg: string) => void
-) {
+async function startEsNode({
+  log,
+  name,
+  config,
+  onEarlyExit,
+  logsDir,
+}: {
+  log: ToolingLog;
+  name: string;
+  config: EsConfig & { transportPort?: number };
+  onEarlyExit?: (msg: string) => void;
+  logsDir?: string;
+}) {
   const cluster = createTestEsCluster({
     clusterName: `cluster-${name}`,
     esArgs: config.esArgs,
@@ -106,6 +129,7 @@ async function startEsNode(
     port: config.port,
     ssl: config.ssl,
     log,
+    writeLogsToPath: logsDir ? resolve(logsDir, `es-cluster-${name}.log`) : undefined,
     basePath: resolve(REPO_ROOT, '.es'),
     nodes: [
       {

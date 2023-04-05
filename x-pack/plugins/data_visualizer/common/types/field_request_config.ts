@@ -18,6 +18,7 @@ export interface FieldRequestConfig {
   type: SupportedFieldType;
   cardinality: number;
   existsInDocs: boolean;
+  supportedAggs?: Set<string>;
 }
 
 export interface DocumentCountBuckets {
@@ -40,6 +41,7 @@ export interface GeoPointExample {
 }
 
 export interface FieldVisStats {
+  totalDocuments?: number;
   error?: Error;
   cardinality?: number;
   count?: number;
@@ -63,9 +65,7 @@ export interface FieldVisStats {
   max?: number;
   median?: number;
   min?: number;
-  topValues?: Array<{ key: number | string; doc_count: number }>;
-  topValuesSampleSize?: number;
-  topValuesSamplerShardSize?: number;
+  topValues?: Array<{ key: number | string; doc_count: number; percent: number }>;
   examples?: Array<string | GeoPointExample | object>;
   timeRangeEarliest?: number;
   timeRangeLatest?: number;

@@ -199,7 +199,7 @@ export function estimateCapacity(
           max_throughput_per_minute_per_kibana: capacityPerMinutePerKibana,
           max_throughput_per_minute: assumedCapacityAvailablePerMinute,
           minutes_to_drain_overdue:
-            overdue / (assumedKibanaInstances * averageCapacityUsedByPersistedTasksPerKibana),
+            overdue ?? 0 / (assumedKibanaInstances * averageCapacityUsedByPersistedTasksPerKibana),
           avg_recurring_required_throughput_per_minute: averageRecurringRequiredPerMinute,
           avg_recurring_required_throughput_per_minute_per_kibana:
             assumedAverageRecurringRequiredThroughputPerMinutePerKibana,

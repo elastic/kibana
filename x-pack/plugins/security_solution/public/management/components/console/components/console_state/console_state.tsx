@@ -7,6 +7,10 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { useReducer, memo, createContext, useContext, useEffect, useCallback } from 'react';
+import {
+  useSaveInputHistoryToStorage,
+  useStoredInputHistory,
+} from './hooks/use_stored_input_history';
 import { useWithManagedConsoleState } from '../console_manager/console_manager';
 import type { InitialStateInterface } from './state_reducer';
 import { initiateState, stateDataReducer } from './state_reducer';
@@ -20,19 +24,37 @@ type ConsoleStateProviderProps = PropsWithChildren<{}> & InitialStateInterface;
  * A Console wide data store for internal state management between inner components
  */
 export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
-  ({ commands, scrollToBottom, keyCapture, HelpComponent, dataTestSubj, managedKey, children }) => {
+  ({
+    commands,
+    scrollToBottom,
+    keyCapture,
+    HelpComponent,
+    dataTestSubj,
+    storagePrefix,
+    managedKey,
+    children,
+  }) => {
     const [getConsoleState, storeConsoleState] = useWithManagedConsoleState(managedKey);
+    const storedInputHistoryData = useStoredInputHistory(storagePrefix);
+    const saveInputHistoryData = useSaveInputHistoryToStorage(storagePrefix);
 
     const stateInitializer = useCallback(
       (stateInit: InitialStateInterface): ConsoleDataState => {
-        return initiateState(stateInit, getConsoleState ? getConsoleState() : undefined);
+        const createdInitState = initiateState(
+          stateInit,
+          getConsoleState ? getConsoleState() : undefined
+        );
+
+        createdInitState.input.history = storedInputHistoryData;
+
+        return createdInitState;
       },
-      [getConsoleState]
+      [getConsoleState, storedInputHistoryData]
     );
 
     const [state, dispatch] = useReducer(
       stateDataReducer,
-      { commands, scrollToBottom, keyCapture, HelpComponent, dataTestSubj },
+      { commands, scrollToBottom, keyCapture, HelpComponent, dataTestSubj, storagePrefix },
       stateInitializer
     );
 
@@ -44,6 +66,14 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
         storeConsoleState(state);
       }
     }, [state, storeConsoleState]);
+
+    // Anytime `input.history` changes and a `storagePrefix` is defined, then persist
+    // the input history to storage
+    useEffect(() => {
+      if (storagePrefix && state.input.history) {
+        saveInputHistoryData(state.input.history);
+      }
+    }, [saveInputHistoryData, state.input.history, storagePrefix]);
 
     return (
       <ConsoleStateContext.Provider value={{ state, dispatch }}>

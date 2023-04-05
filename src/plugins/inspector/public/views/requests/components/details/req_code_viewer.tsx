@@ -132,7 +132,7 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} data-test-subj="inspectorRequestCodeViewerContainer">
         <CodeEditor
           languageId={XJsonLang.ID}
           value={json}

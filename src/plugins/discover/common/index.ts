@@ -28,4 +28,8 @@ export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
 export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';
 export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';
+export const SHOW_LEGACY_FIELD_TOP_VALUES = 'discover:showLegacyFieldTopValues';
 export const ENABLE_SQL = 'discover:enableSql';
+
+export { DISCOVER_APP_LOCATOR, DiscoverAppLocatorDefinition } from './locator';
+export type { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';

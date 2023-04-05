@@ -12,3 +12,4 @@ export type { UseFetchAlerts } from './use_fetch_alerts';
 export { useFetchAlerts } from './use_fetch_alerts';
 export { DefaultSort } from './constants';
 export { useBulkActions } from './use_bulk_actions';
+export { useActionsColumn } from './use_actions_column';

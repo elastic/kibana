@@ -12,7 +12,6 @@ import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
@@ -63,8 +62,17 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const [hasDataView, setHasDataView] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { services } = useKibana<CoreStart & AppPluginStartDependencies>();
-  const { http, docLinks, dataViews, share, uiSettings, application, chrome, dataViewEditor } =
-    services;
+  const {
+    http,
+    docLinks,
+    dataViews,
+    share,
+    uiSettings,
+    application,
+    chrome,
+    dataViewEditor,
+    customBranding,
+  } = services;
   const addBasePath = http.basePath.prepend;
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
@@ -178,6 +186,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         chrome,
         docLinks,
         http,
+        customBranding,
       },
       dataViews: {
         ...dataViews,
@@ -214,45 +223,45 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           showDevToolsLink: !!devTools,
           showManagementLink: !!manageDataFeatures,
         }),
+        bottomBorder: true,
       }}
-      template="empty"
+      panelled={false}
     >
-      <>
-        <section aria-labelledby="kbnOverviewApps__title" className="kbnOverviewApps">
-          <EuiScreenReaderOnly>
-            <h2 id="kbnOverviewApps__title">
-              <FormattedMessage
-                id="kibanaOverview.apps.title"
-                defaultMessage="Explore these apps"
-              />
-            </h2>
-          </EuiScreenReaderOnly>
+      <KibanaPageTemplate.Section
+        bottomBorder
+        aria-labelledby="kbnOverviewApps__title"
+        className="kbnOverviewApps"
+      >
+        <EuiScreenReaderOnly>
+          <h2 id="kbnOverviewApps__title">
+            <FormattedMessage id="kibanaOverview.apps.title" defaultMessage="Explore these apps" />
+          </h2>
+        </EuiScreenReaderOnly>
 
-          {mainApps.length ? (
-            <>
-              <EuiFlexGroup
-                className="kbnOverviewApps__group kbnOverviewApps__group--primary"
-                justifyContent="center"
-              >
-                {mainApps.map(renderAppCard)}
-              </EuiFlexGroup>
-
-              <EuiSpacer size="l" />
-            </>
-          ) : null}
-
-          {remainingApps.length ? (
+        {mainApps.length ? (
+          <>
             <EuiFlexGroup
-              className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
+              className="kbnOverviewApps__group kbnOverviewApps__group--primary"
               justifyContent="center"
             >
-              {remainingApps.map(renderAppCard)}
+              {mainApps.map(renderAppCard)}
             </EuiFlexGroup>
-          ) : null}
-        </section>
 
-        <EuiHorizontalRule aria-hidden="true" margin="xl" />
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
 
+        {remainingApps.length ? (
+          <EuiFlexGroup
+            className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
+            justifyContent="center"
+          >
+            {remainingApps.map(renderAppCard)}
+          </EuiFlexGroup>
+        ) : null}
+      </KibanaPageTemplate.Section>
+
+      <KibanaPageTemplate.Section bottomBorder paddingSize="xl">
         <EuiFlexGroup
           alignItems="flexStart"
           className={`kbnOverviewSupplements ${
@@ -332,9 +341,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-      </>
-
-      <EuiHorizontalRule margin="xl" aria-hidden="true" />
+      </KibanaPageTemplate.Section>
 
       <OverviewPageFooter
         addBasePath={addBasePath}

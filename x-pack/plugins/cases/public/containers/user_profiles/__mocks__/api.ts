@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { UserProfile } from '@kbn/security-plugin/common';
-import { userProfiles } from '../api.mock';
+import type { UserProfile } from '@kbn/security-plugin/common';
+import { userProfiles, suggestionUserProfiles } from '../api.mock';
 
-export const suggestUserProfiles = async (): Promise<UserProfile[]> =>
-  Promise.resolve(userProfiles);
+export const suggestUserProfiles = async (): Promise<UserProfile[]> => suggestionUserProfiles;
 
-export const bulkGetUserProfiles = async (): Promise<UserProfile[]> =>
-  Promise.resolve(userProfiles);
+export const bulkGetUserProfiles = async (): Promise<UserProfile[]> => userProfiles;
+
+export const getCurrentUserProfile = async (): Promise<UserProfile> => userProfiles[0];

@@ -18,6 +18,10 @@ export const mockRequestHandler = {
   },
 };
 
+export const mockMl = {
+  trainedModelsProvider: jest.fn(),
+};
+
 export const mockConfig = {
   host: 'http://localhost:3002',
   accessCheckTimeout: 5000,
@@ -34,4 +38,5 @@ export const mockDependencies = {
   config: mockConfig,
   log: mockLogger,
   enterpriseSearchRequestHandler: mockRequestHandler as any,
+  ml: mockMl as any,
 };

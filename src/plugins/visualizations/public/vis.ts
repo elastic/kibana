@@ -35,6 +35,7 @@ import {
   getSavedObjects,
   getSpaces,
   getFieldsFormats,
+  getSavedObjectTagging,
 } from './services';
 import { BaseVisType } from './vis_types';
 import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
@@ -58,6 +59,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
         search: getSearch(),
         savedObjectsClient: getSavedObjects().client,
         spaces: getSpaces(),
+        savedObjectsTagging: getSavedObjectTagging()?.getTaggingApi(),
       });
     } catch (e) {
       return inputSearchSource;

@@ -7,9 +7,7 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import type { UserEcs } from '../../../../ecs/user';
-import type { SourceEcs } from '../../../../ecs/source';
-import type { HostEcs } from '../../../../ecs/host';
+import type { UserEcs, SourceEcs, HostEcs } from '@kbn/securitysolution-ecs';
 import type {
   CursorType,
   Inspect,

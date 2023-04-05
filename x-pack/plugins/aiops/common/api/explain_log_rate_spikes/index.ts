@@ -6,10 +6,14 @@
  */
 
 export {
-  addChangePointsAction,
-  addChangePointsHistogramAction,
+  addSignificantTermsAction,
+  addSignificantTermsGroupAction,
+  addSignificantTermsGroupHistogramAction,
+  addSignificantTermsHistogramAction,
   addErrorAction,
-  resetAction,
+  pingAction,
+  resetAllAction,
+  resetErrorsAction,
   updateLoadingStateAction,
   API_ACTION_NAME,
 } from './actions';

@@ -10,33 +10,42 @@ import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import type { ActionEdges, ActionsStrategyResponse, Direction } from '../../common/search_strategy';
-import type { ESTermQuery } from '../../common/typed_json';
+import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
+import type { ESTermQuery, ESExistsQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { Direction } from '../../common/search_strategy';
 
-interface UseAllLiveQueries {
+export interface UseAllLiveQueriesConfig {
   activePage: number;
-  direction: Direction;
+  direction?: Direction;
   limit: number;
   sortField: string;
-  filterQuery?: ESTermQuery | string;
+  filterQuery?: ESTermQuery | ESExistsQuery | string;
   skip?: boolean;
+  alertId?: string;
 }
+
+// Make sure we keep this and ACTIONS_QUERY_KEY in osquery_flyout.tsx in sync.
+const ACTIONS_QUERY_KEY = 'actions';
 
 export const useAllLiveQueries = ({
   activePage,
-  direction,
+  direction = Direction.desc,
   limit,
   sortField,
   filterQuery,
   skip = false,
-}: UseAllLiveQueries) => {
+  alertId,
+}: UseAllLiveQueriesConfig) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery(
-    ['actions', { activePage, direction, limit, sortField }],
+    [
+      ACTIONS_QUERY_KEY,
+      { activePage, direction, limit, sortField, ...(alertId ? { alertId } : {}) },
+    ],
     () =>
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',

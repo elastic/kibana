@@ -11,7 +11,6 @@ import {
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Environment } from '../../../common/environment_rt';
-import { Setup } from '../../lib/helpers/setup_request';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
@@ -20,24 +19,30 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
   TRANSACTION_SAMPLED,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+
+export type TraceSamplesResponse = Array<{
+  traceId: string;
+  transactionId: string;
+}>;
 
 export async function getTraceSamplesByQuery({
-  setup,
+  apmEventClient,
   start,
   end,
   environment,
   query,
   type,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   environment: Environment;
   query: string;
   type: TraceSearchType;
-}) {
+}): Promise<TraceSamplesResponse> {
   const size = 500;
 
   let traceIds: string[] = [];
@@ -45,7 +50,7 @@ export async function getTraceSamplesByQuery({
   if (type === TraceSearchType.kql) {
     traceIds =
       (
-        await setup.apmEventClient.search('get_trace_ids_by_kql_query', {
+        await apmEventClient.search('get_trace_ids_by_kql_query', {
           apm: {
             events: [
               ProcessorEvent.transaction,
@@ -54,6 +59,7 @@ export async function getTraceSamplesByQuery({
             ],
           },
           body: {
+            track_total_hits: false,
             size: 0,
             query: {
               bool: {
@@ -80,7 +86,7 @@ export async function getTraceSamplesByQuery({
   } else if (type === TraceSearchType.eql) {
     traceIds =
       (
-        await setup.apmEventClient.eqlSearch('get_trace_ids_by_eql_query', {
+        await apmEventClient.eqlSearch('get_trace_ids_by_eql_query', {
           apm: {
             events: [
               ProcessorEvent.transaction,
@@ -88,19 +94,17 @@ export async function getTraceSamplesByQuery({
               ProcessorEvent.error,
             ],
           },
-          body: {
-            size: 1000,
-            filter: {
-              bool: {
-                filter: [
-                  ...rangeQuery(start, end),
-                  ...environmentQuery(environment),
-                ],
-              },
+          size: 1000,
+          filter: {
+            bool: {
+              filter: [
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+              ],
             },
-            event_category_field: PROCESSOR_EVENT,
-            query,
           },
+          event_category_field: PROCESSOR_EVENT,
+          query,
           filter_path: 'hits.sequences.events._source.trace.id',
         })
       ).hits?.sequences?.flatMap((sequence) =>
@@ -114,13 +118,14 @@ export async function getTraceSamplesByQuery({
     return [];
   }
 
-  const traceSamplesResponse = await setup.apmEventClient.search(
+  const traceSamplesResponse = await apmEventClient.search(
     'get_trace_samples_by_trace_ids',
     {
       apm: {
         events: [ProcessorEvent.transaction],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {

@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export type InputsModelId = 'global' | 'timeline';
+export enum InputsModelId {
+  global = 'global',
+  timeline = 'timeline',
+  socTrends = 'socTrends',
+}
+
 export type TimeRangeKinds = 'absolute' | 'relative';

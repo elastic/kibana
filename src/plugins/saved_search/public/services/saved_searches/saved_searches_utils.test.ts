@@ -14,7 +14,8 @@ import {
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
-import type { SavedSearchAttributes, SavedSearch } from './types';
+import type { SavedSearchAttributes } from '../../../common';
+import type { SavedSearch } from './types';
 
 describe('saved_searches_utils', () => {
   describe('fromSavedSearchAttributes', () => {
@@ -28,11 +29,20 @@ describe('saved_searches_utils', () => {
         grid: {},
         hideChart: true,
         isTextBasedQuery: false,
+        usesAdHocDataView: false,
       };
 
-      expect(fromSavedSearchAttributes('id', attributes, createSearchSourceMock(), {}))
-        .toMatchInlineSnapshot(`
+      expect(
+        fromSavedSearchAttributes(
+          'id',
+          attributes,
+          ['tags-1', 'tags-2'],
+          createSearchSourceMock(),
+          {}
+        )
+      ).toMatchInlineSnapshot(`
         Object {
+          "breakdownField": undefined,
           "columns": Array [
             "a",
             "b",
@@ -67,9 +77,14 @@ describe('saved_searches_utils', () => {
           },
           "sharingSavedObjectProps": Object {},
           "sort": Array [],
+          "tags": Array [
+            "tags-1",
+            "tags-2",
+          ],
           "timeRange": undefined,
           "timeRestore": undefined,
           "title": "saved search",
+          "usesAdHocDataView": false,
           "viewMode": undefined,
         }
       `);
@@ -110,10 +125,12 @@ describe('saved_searches_utils', () => {
         grid: {},
         hideChart: true,
         isTextBasedQuery: true,
+        usesAdHocDataView: false,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
         Object {
+          "breakdownField": undefined,
           "columns": Array [
             "c",
             "d",
@@ -138,6 +155,7 @@ describe('saved_searches_utils', () => {
           "timeRange": undefined,
           "timeRestore": false,
           "title": "title",
+          "usesAdHocDataView": false,
           "viewMode": undefined,
         }
       `);

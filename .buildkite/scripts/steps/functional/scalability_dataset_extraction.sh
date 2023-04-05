@@ -15,19 +15,16 @@ OUTPUT_DIR="${KIBANA_DIR}/${OUTPUT_REL}"
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Extract APM metrics"
-scalabilityJourneys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
+for journey in x-pack/performance/journeys/*; do
+  echo "Looking for journey=${journey} and BUILD_ID=${BUILD_ID} in APM traces"
 
-for i in "${scalabilityJourneys[@]}"; do
-    JOURNEY_NAME="${i}"
-    echo "Looking for JOURNEY=${JOURNEY_NAME} and BUILD_ID=${BUILD_ID} in APM traces"
-
-    node scripts/extract_performance_testing_dataset \
-        --config "x-pack/test/performance/journeys/${i}/config.ts" \ \
-        --buildId "${BUILD_ID}" \
-        --es-url "${ES_SERVER_URL}" \
-        --es-username "${USER_FROM_VAULT}" \
-        --es-password "${PASS_FROM_VAULT}" \
-        --without-static-resources
+  node scripts/extract_performance_testing_dataset \
+    --config "${journey}" \
+    --buildId "${BUILD_ID}" \
+    --es-url "${ES_SERVER_URL}" \
+    --es-username "${USER_FROM_VAULT}" \
+    --es-password "${PASS_FROM_VAULT}" \
+    --without-static-resources
 done
 
 echo "--- Creating scalability dataset in ${OUTPUT_REL}"
@@ -49,8 +46,13 @@ cd "${OUTPUT_DIR}/.."
 gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
 cd -
 
-echo "--- Promoting '${BUILD_ID}' dataset to LATEST"
-cd "${OUTPUT_DIR}/.."
-echo "${BUILD_ID}" > LATEST
-gsutil cp LATEST "${GCS_BUCKET}"
-cd -
+if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
+  echo "--- Promoting '${BUILD_ID}' dataset to LATEST"
+  cd "${OUTPUT_DIR}/.."
+  echo "${BUILD_ID}" > latest
+  gsutil cp latest "${GCS_BUCKET}"
+  cd -
+else
+  echo "--- Skipping promotion of dataset to LATEST"
+  echo "$BUILDKITE_PIPELINE_SLUG is not 'kibana-single-user-performance', so skipping"
+fi

@@ -26,10 +26,12 @@ export const CategorizationDetector: FC = () => {
       jobCreator.setDetectorType(categorizationDetectorType);
       jobCreatorUpdate();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categorizationDetectorType]);
 
   useEffect(() => {
     setCategorizationDetectorType(jobCreator.selectedDetectorType);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   function onCountSelection() {

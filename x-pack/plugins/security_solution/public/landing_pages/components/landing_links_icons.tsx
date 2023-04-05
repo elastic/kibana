@@ -14,6 +14,7 @@ import {
   withSecuritySolutionLink,
 } from '../../common/components/links';
 import type { NavLinkItem } from '../../common/components/navigation/types';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 interface LandingLinksImagesProps {
   items: NavLinkItem[];
@@ -36,7 +37,7 @@ const StyledEuiTitle = styled(EuiTitle)`
 
 export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) => (
   <EuiFlexGrid columns={3} gutterSize="xl">
-    {items.map(({ title, description, id, icon, isBeta }) => (
+    {items.map(({ title, description, id, icon, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
         <EuiFlexGroup
           direction="column"
@@ -53,13 +54,18 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
             <StyledEuiTitle size="xxs">
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <SecuritySolutionLinkAnchor deepLinkId={id}>
+                  <SecuritySolutionLinkAnchor
+                    deepLinkId={id}
+                    onClick={() => {
+                      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
+                    }}
+                  >
                     <h2>{title}</h2>
                   </SecuritySolutionLinkAnchor>
                 </EuiFlexItem>
                 {isBeta && (
                   <EuiFlexItem grow={false}>
-                    <NavItemBetaBadge />
+                    <NavItemBetaBadge text={betaOptions?.text} />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

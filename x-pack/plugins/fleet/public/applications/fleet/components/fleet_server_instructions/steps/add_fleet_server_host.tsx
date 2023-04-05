@@ -8,30 +8,36 @@
 import React, { useState, useCallback } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
 import {
+  EuiSwitch,
   EuiButton,
   EuiCallOut,
   EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormErrorText,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiText,
+  EuiFormRow,
+  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { FleetServerHost } from '../../../types';
+
 import { useStartServices, useLink } from '../../../hooks';
 import type { FleetServerHostForm } from '../hooks';
-import { FleetServerHostComboBox } from '../components';
+import { MultiRowInput } from '../../../sections/settings/components/multi_row_input';
+import { FleetServerHostSelect } from '../components';
 
 export const getAddFleetServerHostStep = ({
   fleetServerHostForm,
   disabled,
+  onClose,
 }: {
   fleetServerHostForm: FleetServerHostForm;
   disabled: boolean;
+  onClose: () => void;
 }): EuiStepProps => {
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle', {
@@ -39,38 +45,48 @@ export const getAddFleetServerHostStep = ({
     }),
     status: disabled ? 'disabled' : undefined,
     children: disabled ? null : (
-      <AddFleetServerHostStepContent fleetServerHostForm={fleetServerHostForm} />
+      <AddFleetServerHostStepContent fleetServerHostForm={fleetServerHostForm} onClose={onClose} />
     ),
   };
 };
 
 export const AddFleetServerHostStepContent = ({
   fleetServerHostForm,
+  onClose,
 }: {
   fleetServerHostForm: FleetServerHostForm;
+  onClose: () => void;
 }) => {
   const {
-    fleetServerHost,
-    fleetServerHostSettings,
     setFleetServerHost,
-    validateFleetServerHost,
+    fleetServerHost: selectedFleetServerHost,
     saveFleetServerHost,
+    fleetServerHosts,
     error,
+    validate,
+    inputs,
   } = fleetServerHostForm;
-
   const [isLoading, setIsLoading] = useState(false);
-  const [submittedFleetServerHost, setSubmittedFleetServerHost] = useState<string>();
+  const [submittedFleetServerHost, setSubmittedFleetServerHost] = useState<FleetServerHost>();
   const { notifications } = useStartServices();
   const { getHref } = useLink();
 
   const onSubmit = useCallback(async () => {
     try {
-      setSubmittedFleetServerHost('');
+      setSubmittedFleetServerHost(undefined);
       setIsLoading(true);
 
-      if (validateFleetServerHost()) {
-        await saveFleetServerHost();
-        setSubmittedFleetServerHost(fleetServerHost);
+      const newFleetServerHost = {
+        name: inputs.nameInput.value,
+        host_urls: inputs.hostUrlsInput.value,
+        is_default: true,
+        id: 'fleet-server-host',
+        is_preconfigured: false,
+      };
+
+      if (validate()) {
+        setFleetServerHost(await saveFleetServerHost(newFleetServerHost));
+        setSubmittedFleetServerHost(newFleetServerHost);
       }
     } catch (err) {
       notifications.toasts.addError(err, {
@@ -81,18 +97,14 @@ export const AddFleetServerHostStepContent = ({
     } finally {
       setIsLoading(false);
     }
-  }, [validateFleetServerHost, saveFleetServerHost, fleetServerHost, notifications.toasts]);
-
-  const onChange = useCallback(
-    (host: string) => {
-      setFleetServerHost(host);
-
-      if (error) {
-        validateFleetServerHost();
-      }
-    },
-    [error, setFleetServerHost, validateFleetServerHost]
-  );
+  }, [
+    inputs.nameInput.value,
+    inputs.hostUrlsInput.value,
+    setFleetServerHost,
+    validate,
+    saveFleetServerHost,
+    notifications.toasts,
+  ]);
 
   return (
     <EuiForm onSubmit={onSubmit}>
@@ -104,22 +116,73 @@ export const AddFleetServerHostStepContent = ({
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFlexGroup wrap>
-        <EuiFlexItem
-          css={`
-            max-width: 100%;
-          `}
-        >
-          <FleetServerHostComboBox
-            fleetServerHost={fleetServerHost}
-            fleetServerHostSettings={fleetServerHostSettings}
-            isDisabled={isLoading}
-            isInvalid={!!error}
-            onFleetServerHostChange={onChange}
-          />
-          {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+      {selectedFleetServerHost ? (
+        <FleetServerHostSelect
+          setFleetServerHost={setFleetServerHost}
+          selectedFleetServerHost={selectedFleetServerHost}
+          fleetServerHosts={fleetServerHosts}
+        />
+      ) : null}
+      {!selectedFleetServerHost ? (
+        <>
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.fleetServerSetup.nameInputLabel"
+                defaultMessage="Name"
+              />
+            }
+            {...inputs.nameInput.formRowProps}
+          >
+            <EuiFieldText
+              data-test-subj="fleetServerSetup.nameInput"
+              fullWidth
+              placeholder={i18n.translate('xpack.fleet.fleetServerSetup.nameInputPlaceholder', {
+                defaultMessage: 'Specify name',
+              })}
+              {...inputs.nameInput.props}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.fleetServerSetup.hostUrlLabel"
+                defaultMessage="URL"
+              />
+            }
+          >
+            <>
+              <MultiRowInput
+                data-test-subj="fleetServerSetup.multiRowInput"
+                {...inputs.hostUrlsInput.props}
+                placeholder={i18n.translate(
+                  'xpack.fleet.fleetServerSetup.fleetServerHostsInputPlaceholder',
+                  {
+                    defaultMessage: 'Specify host URL',
+                  }
+                )}
+                isUrl
+              />
+              {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
+            </>
+          </EuiFormRow>
+          {fleetServerHosts.length > 0 ? (
+            <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>
+              <EuiSwitch
+                data-test-subj="fleetServerHostsFlyout.isDefaultSwitch"
+                {...inputs.isDefaultInput.props}
+                disabled={false}
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.fleetServerHostsFlyout.defaultOutputSwitchLabel"
+                    defaultMessage="Make this Fleet server the default one."
+                  />
+                }
+              />
+            </EuiFormRow>
+          ) : null}
           <EuiButton
             isLoading={isLoading}
             onClick={onSubmit}
@@ -130,8 +193,8 @@ export const AddFleetServerHostStepContent = ({
               defaultMessage="Add host"
             />
           </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </>
+      ) : null}
       {submittedFleetServerHost && (
         <>
           <EuiSpacer size="m" />
@@ -150,14 +213,15 @@ export const AddFleetServerHostStepContent = ({
               id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessText"
               defaultMessage="Added {host}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
               values={{
-                host: submittedFleetServerHost,
+                host: submittedFleetServerHost.host_urls[0],
                 fleetSettingsLink: (
-                  <EuiLink href={getHref('settings')}>
+                  // eslint-disable-next-line @elastic/eui/href-or-on-click
+                  <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                       defaultMessage="Fleet Settings"
                     />
-                  </EuiLink>
+                  </EuiButtonEmpty>
                 ),
               }}
             />

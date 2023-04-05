@@ -163,7 +163,6 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   const {
     services: { api },
   } = useAppContext();
-
   const { data } = api.useLoadMlUpgradeMode();
   const mlUpgradeModeEnabled = !!data?.mlUpgradeModeEnabled;
 
@@ -273,7 +272,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
           <EuiSpacer size="l" />
 
           <EuiCallOut
-            iconType="alert"
+            iconType="warning"
             color="danger"
             title={`Invalid search: ${searchError.message}`}
           />

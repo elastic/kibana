@@ -15,13 +15,14 @@ import {
 } from './workplace_search';
 
 export interface InitialAppData {
+  access?: ProductAccess;
+  appSearch?: AppSearchAccount;
+  configuredLimits?: ConfiguredLimits;
   enterpriseSearchVersion?: string;
+  features?: ProductFeatures;
   kibanaVersion?: string;
   readOnlyMode?: boolean;
   searchOAuth?: SearchOAuth;
-  configuredLimits?: ConfiguredLimits;
-  access?: ProductAccess;
-  appSearch?: AppSearchAccount;
   workplaceSearch?: WorkplaceSearchInitialData;
 }
 
@@ -32,7 +33,16 @@ export interface ConfiguredLimits {
 
 export interface ProductAccess {
   hasAppSearchAccess: boolean;
+  hasSearchEnginesAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
+}
+
+export interface ProductFeatures {
+  hasConnectors: boolean;
+  hasDefaultIngestPipeline: boolean;
+  hasNativeConnectors: boolean;
+  hasSearchApplications: boolean;
+  hasWebCrawler: boolean;
 }
 
 export interface SearchOAuth {
@@ -51,4 +61,10 @@ export interface Meta {
   page: MetaPage;
 }
 
+export interface ClientConfigType {
+  canDeployEntSearch: boolean;
+  host?: string;
+}
+
 export type { ElasticsearchIndexWithPrivileges } from './indices';
+export type { KibanaDeps } from './kibana_deps';

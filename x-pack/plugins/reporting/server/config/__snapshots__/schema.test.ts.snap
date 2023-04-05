@@ -36,7 +36,7 @@ Object {
     "pollEnabled": true,
     "pollInterval": "PT3S",
     "pollIntervalErrorMultiplier": 10,
-    "timeout": "PT2M",
+    "timeout": "PT4M",
   },
   "roles": Object {
     "allow": Array [
@@ -82,7 +82,7 @@ Object {
     "pollEnabled": true,
     "pollInterval": "PT3S",
     "pollIntervalErrorMultiplier": 10,
-    "timeout": "PT2M",
+    "timeout": "PT4M",
   },
   "roles": Object {
     "allow": Array [

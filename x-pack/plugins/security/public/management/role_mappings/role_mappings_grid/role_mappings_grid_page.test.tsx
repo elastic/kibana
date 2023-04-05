@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
@@ -26,8 +26,15 @@ describe('RoleMappingsGridPage', () => {
 
   const renderView = (
     roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
-    rolesAPI: ReturnType<typeof rolesAPIClientMock.create> = rolesAPIClientMock.create()
+    rolesAPI: ReturnType<typeof rolesAPIClientMock.create> = rolesAPIClientMock.create(),
+    readOnly: boolean = false
   ) => {
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      role_mappings: {
+        save: !readOnly,
+      },
+    };
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
         <RoleMappingsGridPage
@@ -37,6 +44,7 @@ describe('RoleMappingsGridPage', () => {
           docLinks={coreStart.docLinks}
           history={history}
           navigateToApp={coreStart.application.navigateToApp}
+          readOnly={!coreStart.application.capabilities.role_mappings.save}
         />
       </KibanaContextProvider>
     );
@@ -48,7 +56,7 @@ describe('RoleMappingsGridPage', () => {
     coreStart = coreMock.createStart();
   });
 
-  it('renders an empty prompt when no role mappings exist', async () => {
+  it('renders a create prompt when no role mappings exist', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([]);
     roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
@@ -65,7 +73,17 @@ describe('RoleMappingsGridPage', () => {
 
     expect(wrapper.find(SectionLoading)).toHaveLength(0);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
-    expect(wrapper.find(EmptyPrompt)).toHaveLength(1);
+
+    const emptyPrompts = wrapper.find(EmptyPrompt);
+    expect(emptyPrompts).toHaveLength(1);
+    expect(emptyPrompts.at(0).props().readOnly).toBeFalsy();
+
+    const euiEmptyPrompts = wrapper.find(EuiEmptyPrompt);
+    expect(euiEmptyPrompts).toHaveLength(1);
+    expect(euiEmptyPrompts.at(0).props().actions).not.toBeNull();
+
+    const createButton = wrapper.find('EuiButton[data-test-subj="createRoleMappingButton"]');
+    expect(createButton).toHaveLength(1);
   });
 
   it('renders a permission denied message when unauthorized to manage role mappings', async () => {
@@ -298,5 +316,86 @@ describe('RoleMappingsGridPage', () => {
       'EuiButtonEmpty[data-test-subj="deleteRoleMappingButton-some-realm"]'
     );
     expect(deleteButton).toHaveLength(1);
+  });
+
+  describe('read-only', () => {
+    it('renders an empty prompt when no role mappings exist', async () => {
+      const roleMappingsAPI = roleMappingsAPIClientMock.create();
+      roleMappingsAPI.getRoleMappings.mockResolvedValue([]);
+      roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: true,
+      });
+
+      const wrapper = renderView(roleMappingsAPI, undefined, true);
+      expect(wrapper.find(SectionLoading)).toHaveLength(1);
+      expect(wrapper.find(EmptyPrompt)).toHaveLength(0);
+
+      await nextTick();
+      wrapper.update();
+
+      expect(wrapper.find(SectionLoading)).toHaveLength(0);
+      expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
+
+      const emptyPrompts = wrapper.find(EmptyPrompt);
+      expect(emptyPrompts).toHaveLength(1);
+      expect(emptyPrompts.at(0).props().readOnly).toBeTruthy();
+
+      const euiEmptyPrompts = wrapper.find(EuiEmptyPrompt);
+      expect(euiEmptyPrompts).toHaveLength(1);
+      expect(euiEmptyPrompts.at(0).props().actions).toBeNull();
+    });
+
+    it('hides controls when `readOnly` is enabled', async () => {
+      const roleMappingsAPI = roleMappingsAPIClientMock.create();
+      roleMappingsAPI.getRoleMappings.mockResolvedValue([
+        {
+          name: 'some-realm',
+          enabled: true,
+          roles: ['superuser'],
+          rules: { field: { username: '*' } },
+        },
+      ]);
+      roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: true,
+      });
+      roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
+        {
+          name: 'some-realm',
+          success: true,
+        },
+      ]);
+
+      const wrapper = renderView(roleMappingsAPI, undefined, true);
+      await nextTick();
+      wrapper.update();
+
+      const bulkButton = wrapper.find('EuiButtonEmpty[data-test-subj="bulkDeleteActionButton"]');
+      expect(bulkButton).toHaveLength(0);
+
+      const createButton = wrapper.find('EuiButton[data-test-subj="createRoleMappingButton"]');
+      expect(createButton).toHaveLength(0);
+
+      const editButton = wrapper.find(
+        'EuiButtonEmpty[data-test-subj="editRoleMappingButton-some-realm"]'
+      );
+      expect(editButton).toHaveLength(0);
+
+      const cloneButton = wrapper.find(
+        'EuiButtonEmpty[data-test-subj="cloneRoleMappingButton-some-realm"]'
+      );
+      expect(cloneButton).toHaveLength(0);
+
+      const deleteButton = wrapper.find(
+        'EuiButtonEmpty[data-test-subj="deleteRoleMappingButton-some-realm"]'
+      );
+      expect(deleteButton).toHaveLength(0);
+
+      const actionMenuButton = wrapper.find(
+        'EuiButtonIcon[data-test-subj="euiCollapsedItemActionsButton"]'
+      );
+      expect(actionMenuButton).toHaveLength(0);
+    });
   });
 });

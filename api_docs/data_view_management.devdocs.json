@@ -16,6 +16,7 @@
       "description": [],
       "path": "src/plugins/data_view_management/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -29,6 +30,7 @@
       "description": [],
       "path": "src/plugins/data_view_management/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true

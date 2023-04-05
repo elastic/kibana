@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -14,5 +11,14 @@
     "common/**/*.json",
     "public/**/*.json"
   ],
-  "references": [{ "path": "../../core/tsconfig.json" }]
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/field-types",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
 }

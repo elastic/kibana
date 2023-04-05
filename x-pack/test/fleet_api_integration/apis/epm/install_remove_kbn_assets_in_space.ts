@@ -50,6 +50,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs and uninstalls all assets (non default space)', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     before(async () => {
       await createSpace(testSpaceId);
     });

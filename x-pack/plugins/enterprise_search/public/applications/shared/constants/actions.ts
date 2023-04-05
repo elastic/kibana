@@ -45,6 +45,10 @@ export const CONTINUE_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Continue' }
 );
 
+export const BACK_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.backButtonLabel', {
+  defaultMessage: 'Back',
+});
+
 export const CLOSE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.actions.closeButtonLabel',
   { defaultMessage: 'Close' }

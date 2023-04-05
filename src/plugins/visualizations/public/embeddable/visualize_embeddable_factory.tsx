@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
-import type { SavedObjectMetaData, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 
 import {
@@ -134,7 +135,7 @@ export class VisualizeEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('visualizations.displayName', {
-      defaultMessage: 'Visualization',
+      defaultMessage: 'visualization',
     });
   }
 
@@ -280,7 +281,6 @@ export class VisualizeEmbeddableFactory
         title: props.newTitle,
         lastSavedTitle: '',
         getEsType: () => this.type,
-        getDisplayName: this.getDisplayName || (() => this.type),
       },
       false,
       props.isTitleDuplicateConfirmed,

@@ -15,8 +15,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ESFilter } from '@kbn/core/types/elasticsearch';
-import { FieldValueSuggestions } from '@kbn/observability-plugin/public';
+import type { ESFilter } from '@kbn/es-types';
+import { FieldValueSuggestions } from '@kbn/exploratory-view-plugin/public';
 import { useLocalUIFilters } from '../hooks/use_local_uifilters';
 
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';

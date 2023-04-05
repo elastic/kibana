@@ -11,10 +11,12 @@ import { useLocationMonitors } from './use_location_monitors';
 import { defaultCore, WrappedHelper } from '../../../../../apps/synthetics/utils/testing';
 
 describe('useLocationMonitors', () => {
-  it('returns expected results', () => {
-    const { result } = renderHook(() => useLocationMonitors(), { wrapper: WrappedHelper });
+  it('returns expected results', async () => {
+    const { result, waitFor } = renderHook(() => useLocationMonitors(), { wrapper: WrappedHelper });
 
-    expect(result.current).toStrictEqual({ locationMonitors: [], loading: true });
+    await waitFor(() => result.current.loading === false);
+
+    expect(result.current).toStrictEqual({ locationMonitors: [], loading: false });
     expect(defaultCore.savedObjects.client.find).toHaveBeenCalledWith({
       aggs: {
         locations: {

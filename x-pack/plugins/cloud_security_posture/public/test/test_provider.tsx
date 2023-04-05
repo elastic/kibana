@@ -8,7 +8,9 @@
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -17,6 +19,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { CspClientPluginStartDeps } from '../types';
 
 interface CspAppDeps {
@@ -33,6 +36,7 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
     charts: chartPluginMock.createStartContract(),
     discover: discoverPluginMock.createStartContract(),
     fleet: fleetMock.createStartMock(),
+    licensing: licensingMock.createStart(),
   },
   params = coreMock.createAppMountParameters(),
   children,

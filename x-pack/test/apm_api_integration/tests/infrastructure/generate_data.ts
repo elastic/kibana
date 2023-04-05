@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export async function generateData({
@@ -17,10 +17,12 @@ export async function generateData({
   end: number;
 }) {
   const serviceRunsInContainerInstance = apm
-    .service('synth-go', 'production', 'go')
+    .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
     .instance('instance-a');
 
-  const serviceInstance = apm.service('synth-java', 'production', 'java').instance('instance-b');
+  const serviceInstance = apm
+    .service({ name: 'synth-java', environment: 'production', agentName: 'java' })
+    .instance('instance-b');
 
   await synthtraceEsClient.index(
     timerange(start, end)
@@ -28,7 +30,7 @@ export async function generateData({
       .generator((timestamp) => {
         return [
           serviceRunsInContainerInstance
-            .transaction('GET /apple 🍎')
+            .transaction({ transactionName: 'GET /apple 🍎' })
             .defaults({
               'container.id': 'foo',
               'host.hostname': 'bar',
@@ -38,7 +40,7 @@ export async function generateData({
             .duration(1000)
             .success(),
           serviceInstance
-            .transaction('GET /banana 🍌')
+            .transaction({ transactionName: 'GET /banana 🍌' })
             .defaults({
               'host.hostname': 'bar',
             })

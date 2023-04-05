@@ -7,15 +7,22 @@
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-import { ExplainLogRateSpikesProvider } from './explain_log_rate_spikes';
+import { ExplainLogRateSpikesPageProvider } from './explain_log_rate_spikes_page';
 import { ExplainLogRateSpikesAnalysisTableProvider } from './explain_log_rate_spikes_analysis_table';
+import { ExplainLogRateSpikesAnalysisGroupsTableProvider } from './explain_log_rate_spikes_analysis_groups_table';
+import { ExplainLogRateSpikesDataGeneratorProvider } from './explain_log_rate_spikes_data_generator';
 
 export function AiopsProvider(context: FtrProviderContext) {
-  const explainLogRateSpikes = ExplainLogRateSpikesProvider(context);
+  const explainLogRateSpikesPage = ExplainLogRateSpikesPageProvider(context);
   const explainLogRateSpikesAnalysisTable = ExplainLogRateSpikesAnalysisTableProvider(context);
+  const explainLogRateSpikesAnalysisGroupsTable =
+    ExplainLogRateSpikesAnalysisGroupsTableProvider(context);
+  const explainLogRateSpikesDataGenerator = ExplainLogRateSpikesDataGeneratorProvider(context);
 
   return {
-    explainLogRateSpikes,
+    explainLogRateSpikesPage,
     explainLogRateSpikesAnalysisTable,
+    explainLogRateSpikesAnalysisGroupsTable,
+    explainLogRateSpikesDataGenerator,
   };
 }

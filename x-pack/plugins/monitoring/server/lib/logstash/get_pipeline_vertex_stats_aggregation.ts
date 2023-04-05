@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import {
+  PostLogstashPipelineRequestParams,
+  PostLogstashPipelineRequestPayload,
+} from '../../../common/http_api/logstash';
 import { LegacyRequest, PipelineVersion } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { Globals } from '../../static_globals';
@@ -174,7 +178,7 @@ function fetchPipelineVertexTimeSeriesStats({
     }),
   };
 
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType: 'logstash',
@@ -214,7 +218,11 @@ export function getPipelineVertexStatsAggregation({
   version,
   vertexId,
 }: {
-  req: LegacyRequest;
+  req: LegacyRequest<
+    PostLogstashPipelineRequestParams,
+    unknown,
+    PostLogstashPipelineRequestPayload
+  >;
   timeSeriesIntervalInSeconds: number;
   clusterUuid: string;
   pipelineId: string;
@@ -253,16 +261,15 @@ export function getPipelineVertexStatsAggregation({
     },
   ];
 
-  const start = version.firstSeen;
-  const end = version.lastSeen;
+  const start = req.payload.timeRange.min;
+  const end = req.payload.timeRange.max;
 
-  const moduleType = 'logstash';
   const dataset = 'node_stats';
   const type = 'logstash_stats';
 
   const query = createQuery({
     type,
-    dsDataset: `${moduleType}.${dataset}`,
+    dsDataset: getLogstashDataset(dataset),
     metricset: dataset,
     start,
     end,

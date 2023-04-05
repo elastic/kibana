@@ -25,7 +25,7 @@ export class ContactCardEmbeddableFactory
   public readonly type = CONTACT_CARD_EMBEDDABLE;
 
   constructor(
-    private readonly execTrigger: UiActionsStart['executeTriggerActions'],
+    protected readonly execTrigger: UiActionsStart['executeTriggerActions'],
     private readonly overlays: CoreStart['overlays']
   ) {}
 
@@ -37,6 +37,10 @@ export class ContactCardEmbeddableFactory
     return i18n.translate('embeddableApi.samples.contactCard.displayName', {
       defaultMessage: 'contact card',
     });
+  }
+
+  public getDefaultInput() {
+    return {};
   }
 
   public getExplicitInput = (): Promise<Partial<ContactCardEmbeddableInput>> => {

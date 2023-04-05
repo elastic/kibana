@@ -41,7 +41,7 @@ import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
 import { getClusterRuleDataForClusters, getInstanceRuleDataForClusters } from '../kibana/rules';
 import { Globals } from '../../static_globals';
-import { getNewIndexPatterns } from './get_index_patterns';
+import { getIndexPatterns } from './get_index_patterns';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -55,7 +55,7 @@ export async function getClustersFromRequest(
     codePaths,
   }: { clusterUuid?: string; start?: number; end?: number; codePaths: string[] }
 ) {
-  const logsIndexPattern = getNewIndexPatterns({
+  const logsIndexPattern = getIndexPatterns({
     config: Globals.app.config,
     type: 'logs',
     moduleType: 'elasticsearch',

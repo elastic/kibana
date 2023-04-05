@@ -12,7 +12,7 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiFlexGrid,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -21,9 +21,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { LogstashTemplate } from './logstash_template';
-// @ts-ignore
 import { DetailStatus } from '../../../components/logstash/detail_status';
-// @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { AlertsCallout } from '../../../alerts/callout';
 import { useCharts } from '../../hooks/use_charts';

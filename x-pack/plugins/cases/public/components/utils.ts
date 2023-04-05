@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import type {
+  FieldConfig,
+  ValidationConfig,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorTypes } from '../../common/api';
-import { FieldConfig, ValidationConfig } from '../common/shared_imports';
-import { CasesPluginStart } from '../types';
+import type { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
-import { CaseActionConnector } from './types';
+import type { CaseActionConnector } from './types';
 
 export const getConnectorById = (
   id: string,
@@ -89,4 +92,8 @@ export const getConnectorIcon = (
 
 export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
   return connector?.isDeprecated ?? false;
+};
+
+export const removeItemFromSessionStorage = (key: string) => {
+  window.sessionStorage.removeItem(key);
 };

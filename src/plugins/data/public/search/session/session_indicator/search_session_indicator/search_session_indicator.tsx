@@ -75,7 +75,7 @@ const ContinueInBackgroundButton = ({
   <EuiToolTip content={saveDisabledReasonText}>
     <EuiButtonEmpty
       onClick={onContinueInBackground}
-      data-test-subj={'searchSessionIndicatorContinueInBackgroundBtn'}
+      data-test-subj={'searchSessionIndicatorSaveBtn'}
       isDisabled={saveDisabled}
       {...buttonProps}
     >
@@ -311,7 +311,7 @@ const searchSessionIndicatorViewStateToProps: {
   [SearchSessionState.Canceled]: {
     button: {
       color: 'danger',
-      iconType: 'alert',
+      iconType: 'error',
       'aria-label': i18n.translate('data.searchSessionIndicator.canceledIconAriaLabel', {
         defaultMessage: 'Search session stopped',
       }),

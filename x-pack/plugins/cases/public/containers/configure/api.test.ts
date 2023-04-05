@@ -6,7 +6,7 @@
  */
 
 import {
-  fetchConnectors,
+  getSupportedActionConnectors,
   getCaseConfigure,
   postCaseConfigure,
   patchCaseConfigure,
@@ -37,7 +37,7 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await fetchConnectors({ signal: abortCtrl.signal });
+      await getSupportedActionConnectors({ signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure/connectors/_find', {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -45,7 +45,7 @@ describe('Case Configuration API', () => {
     });
 
     test('happy path', async () => {
-      const resp = await fetchConnectors({ signal: abortCtrl.signal });
+      const resp = await getSupportedActionConnectors({ signal: abortCtrl.signal });
       expect(resp).toEqual(connectorsMock);
     });
   });

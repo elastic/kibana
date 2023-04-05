@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
+    "outDir": "target/types",
   },
   "include": [
     ".storybook/**/*",
@@ -13,10 +10,13 @@
     "server/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics-client",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

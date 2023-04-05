@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetMapping } from './types';
+import type { GetMapping } from './types';
 
 // Mappings are done directly in the connector configuration
 export const getMapping: GetMapping = () => [];

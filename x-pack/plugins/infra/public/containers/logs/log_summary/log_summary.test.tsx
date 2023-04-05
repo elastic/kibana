@@ -14,14 +14,23 @@ import { useLogSummary } from './log_summary';
 import { fetchLogSummary } from './api/fetch_log_summary';
 import { datemathToEpochMillis } from '../../../utils/datemath';
 
+const LOG_VIEW_REFERENCE = { type: 'log-view-reference' as const, logViewId: 'LOG_VIEW_ID' };
+const CHANGED_LOG_VIEW_REFERENCE = {
+  type: 'log-view-reference' as const,
+  logViewId: 'CHANGED_LOG_VIEW_ID',
+};
+
 // Typescript doesn't know that `fetchLogSummary` is a jest mock.
 // We use a second variable with a type cast to help the compiler further down the line.
 jest.mock('./api/fetch_log_summary', () => ({ fetchLogSummary: jest.fn() }));
 const fetchLogSummaryMock = fetchLogSummary as jest.MockedFunction<typeof fetchLogSummary>;
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({ services: mockCoreMock.createStart() }),
-}));
+jest.mock('../../../hooks/use_kibana', () => {
+  const services = mockCoreMock.createStart();
+  return {
+    useKibanaContextForPlugin: () => ({ services }),
+  };
+});
 
 describe('useLogSummary hook', () => {
   beforeEach(() => {
@@ -29,7 +38,7 @@ describe('useLogSummary hook', () => {
   });
 
   it('provides an empty list of buckets by default', () => {
-    const { result } = renderHook(() => useLogSummary('SOURCE_ID', null, null, null));
+    const { result } = renderHook(() => useLogSummary(LOG_VIEW_REFERENCE, null, null, null));
     expect(result.current.buckets).toEqual([]);
   });
 
@@ -48,9 +57,9 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(secondMockResponse);
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      ({ sourceId }) => useLogSummary(sourceId, startTimestamp, endTimestamp, null),
+      ({ logViewReference }) => useLogSummary(logViewReference, startTimestamp, endTimestamp, null),
       {
-        initialProps: { sourceId: 'INITIAL_SOURCE_ID' },
+        initialProps: { logViewReference: LOG_VIEW_REFERENCE },
       }
     );
 
@@ -59,19 +68,19 @@ describe('useLogSummary hook', () => {
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        sourceId: 'INITIAL_SOURCE_ID',
+        logView: LOG_VIEW_REFERENCE,
       }),
       expect.anything()
     );
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
-    rerender({ sourceId: 'CHANGED_SOURCE_ID' });
+    rerender({ logViewReference: CHANGED_LOG_VIEW_REFERENCE });
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        sourceId: 'CHANGED_SOURCE_ID',
+        logView: CHANGED_LOG_VIEW_REFERENCE,
       }),
       expect.anything()
     );
@@ -93,7 +102,8 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(secondMockResponse);
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      ({ filterQuery }) => useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, filterQuery),
+      ({ filterQuery }) =>
+        useLogSummary(LOG_VIEW_REFERENCE, startTimestamp, endTimestamp, filterQuery),
       {
         initialProps: { filterQuery: 'INITIAL_FILTER_QUERY' },
       }
@@ -131,7 +141,7 @@ describe('useLogSummary hook', () => {
     const firstRange = createMockDateRange();
     const { waitForNextUpdate, rerender } = renderHook(
       ({ startTimestamp, endTimestamp }) =>
-        useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, null),
+        useLogSummary(LOG_VIEW_REFERENCE, startTimestamp, endTimestamp, null),
       {
         initialProps: firstRange,
       }
@@ -157,6 +167,34 @@ describe('useLogSummary hook', () => {
       expect.objectContaining({
         startTimestamp: secondRange.startTimestamp,
         endTimestamp: secondRange.endTimestamp,
+      }),
+      expect.anything()
+    );
+  });
+
+  it("doesn't query for new summary buckets when the previous request is still in flight", async () => {
+    fetchLogSummaryMock.mockResolvedValueOnce(createMockResponse([]));
+
+    const firstRange = createMockDateRange();
+    const { waitForNextUpdate, rerender } = renderHook(
+      ({ startTimestamp, endTimestamp }) =>
+        useLogSummary(LOG_VIEW_REFERENCE, startTimestamp, endTimestamp, null),
+      {
+        initialProps: firstRange,
+      }
+    );
+
+    const secondRange = createMockDateRange('now-20s', 'now');
+
+    // intentionally don't wait for an update to test the throttling
+    rerender(secondRange);
+    await waitForNextUpdate();
+
+    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
+    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        startTimestamp: firstRange.startTimestamp,
+        endTimestamp: firstRange.endTimestamp,
       }),
       expect.anything()
     );

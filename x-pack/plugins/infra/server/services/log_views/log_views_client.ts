@@ -19,7 +19,9 @@ import {
   LogIndexReference,
   LogView,
   LogViewAttributes,
+  LogViewReference,
   LogViewsStaticConfig,
+  persistedLogViewReferenceRT,
   ResolvedLogView,
   resolveLogView,
 } from '../../../common/log_views';
@@ -65,9 +67,11 @@ export class LogViewsClient implements ILogViewsClient {
       );
   }
 
-  public async getResolvedLogView(logViewId: string): Promise<ResolvedLogView> {
-    const logView = await this.getLogView(logViewId);
-    const resolvedLogView = await this.resolveLogView(logView.attributes);
+  public async getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView> {
+    const logView = persistedLogViewReferenceRT.is(logViewReference)
+      ? await this.getLogView(logViewReference.logViewId)
+      : logViewReference;
+    const resolvedLogView = await this.resolveLogView(logView.id, logView.attributes);
     return resolvedLogView;
   }
 
@@ -98,8 +102,11 @@ export class LogViewsClient implements ILogViewsClient {
     return getLogViewFromSavedObject(savedObject);
   }
 
-  public async resolveLogView(logViewAttributes: LogViewAttributes): Promise<ResolvedLogView> {
-    return await resolveLogView(logViewAttributes, await this.dataViews, this.config);
+  public async resolveLogView(
+    logViewId: string,
+    logViewAttributes: LogViewAttributes
+  ): Promise<ResolvedLogView> {
+    return await resolveLogView(logViewId, logViewAttributes, await this.dataViews, this.config);
   }
 
   private async getSavedLogView(logViewId: string): Promise<LogView> {

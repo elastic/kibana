@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-doc-links-server",
+  "owner": "@elastic/kibana-core"
+}

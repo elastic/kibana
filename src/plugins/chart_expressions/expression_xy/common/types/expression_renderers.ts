@@ -6,16 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { AnnotationTooltipFormatter } from '@elastic/charts';
+import { CustomAnnotationTooltip } from '@elastic/charts';
+import { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import {
   AvailableAnnotationIcon,
   ManualPointEventAnnotationArgs,
 } from '@kbn/event-annotation-plugin/common';
 import { XY_VIS_RENDERER } from '../constants';
-import { XYProps } from './expression_functions';
+import type { AllowedXYOverrides, XYProps } from './expression_functions';
 
 export interface XYChartProps {
   args: XYProps;
+  syncTooltips: boolean;
+  syncCursor: boolean;
+  syncColors: boolean;
+  canNavigateToLens?: boolean;
+  overrides?: AllowedXYOverrides & AllowedSettingsOverrides;
 }
 
 export interface XYRender {
@@ -24,9 +30,10 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export interface CollectiveConfig extends Omit<ManualPointEventAnnotationArgs, 'icon'> {
-  roundedTimestamp: number;
+export interface MergedAnnotation extends Omit<ManualPointEventAnnotationArgs, 'icon'> {
+  timebucket: number;
   position: 'bottom';
   icon?: AvailableAnnotationIcon | string;
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
+  customTooltip: CustomAnnotationTooltip;
+  isGrouped: boolean;
 }

@@ -9,9 +9,10 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
@@ -45,17 +46,40 @@ const getDataVisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string)
   getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectDateViewLabel', {
-      defaultMessage: 'Data View',
+      defaultMessage: 'Select Data View',
     }),
   },
 ];
 
 const getExplainLogRateSpikesBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
   {
-    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {
-      defaultMessage: 'Data View',
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
+      defaultMessage: 'Select Data View',
+    }),
+  },
+];
+
+const getLogCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
+      defaultMessage: 'Select Data View',
+    }),
+  },
+];
+
+const getChangePointDetectionBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('CHANGE_POINT_DETECTION', navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
+      defaultMessage: 'Select Data View',
     }),
   },
 ];
@@ -64,11 +88,11 @@ export const indexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/jobs/new_job/step/index_or_search',
+  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX),
   render: (props, deps) => (
     <PageWrapper
       {...props}
-      nextStepPath="/jobs/new_job/step/job_type"
+      nextStepPath={createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE)}
       deps={deps}
       mode={MODE.NEW_JOB}
     />
@@ -81,14 +105,14 @@ export const dataVizIndexOrSearchRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'data_view_datavisualizer',
-  path: '/datavisualizer_index_select',
+  path: createPath(ML_PAGES.DATA_VISUALIZER_INDEX_SELECT),
   title: i18n.translate('xpack.ml.selectDataViewLabel', {
     defaultMessage: 'Select Data View',
   }),
   render: (props, deps) => (
     <PageWrapper
       {...props}
-      nextStepPath="/jobs/new_job/datavisualizer"
+      nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER)}
       deps={deps}
       mode={MODE.DATAVISUALIZER}
     />
@@ -101,19 +125,59 @@ export const explainLogRateSpikesIndexOrSearchRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'data_view_explain_log_rate_spikes',
-  path: '/aiops/explain_log_rate_spikes_index_select',
+  path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT),
   title: i18n.translate('xpack.ml.selectDataViewLabel', {
     defaultMessage: 'Select Data View',
   }),
   render: (props, deps) => (
     <PageWrapper
       {...props}
-      nextStepPath="aiops/explain_log_rate_spikes"
+      nextStepPath={createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES)}
       deps={deps}
       mode={MODE.DATAVISUALIZER}
     />
   ),
   breadcrumbs: getExplainLogRateSpikesBreadcrumbs(navigateToPath, basePath),
+});
+
+export const logCategorizationIndexOrSearchRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_view_log_categorization',
+  path: createPath(ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT),
+  title: i18n.translate('xpack.ml.selectDataViewLabel', {
+    defaultMessage: 'Select Data View',
+  }),
+  render: (props, deps) => (
+    <PageWrapper
+      {...props}
+      nextStepPath={createPath(ML_PAGES.AIOPS_LOG_CATEGORIZATION)}
+      deps={deps}
+      mode={MODE.DATAVISUALIZER}
+    />
+  ),
+  breadcrumbs: getLogCategorizationBreadcrumbs(navigateToPath, basePath),
+});
+
+export const changePointDetectionIndexOrSearchRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_view_change_point_detection',
+  path: createPath(ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT),
+  title: i18n.translate('xpack.ml.selectDataViewLabel', {
+    defaultMessage: 'Select Data View',
+  }),
+  render: (props, deps) => (
+    <PageWrapper
+      {...props}
+      nextStepPath={createPath(ML_PAGES.AIOPS_CHANGE_POINT_DETECTION)}
+      deps={deps}
+      mode={MODE.DATAVISUALIZER}
+    />
+  ),
+  breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
@@ -142,6 +206,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
     undefined,
     deps.config,
     deps.dataViewsContract,
+    deps.getSavedSearchDeps,
     mode === MODE.NEW_JOB ? newJobResolvers : dataVizResolvers
   );
   return (

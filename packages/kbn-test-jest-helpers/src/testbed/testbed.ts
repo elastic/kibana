@@ -55,18 +55,18 @@ const defaultConfig: TestBedConfig = {
   });
   ```
  */
-export function registerTestBed<T extends string = string>(
-  Component: ComponentType<any>,
-  config: AsyncTestBedConfig
-): AsyncSetupFunc<T>;
-export function registerTestBed<T extends string = string>(
-  Component: ComponentType<any>,
-  config?: TestBedConfig
-): SyncSetupFunc<T>;
-export function registerTestBed<T extends string = string>(
-  Component: ComponentType<any>,
-  config?: AsyncTestBedConfig | TestBedConfig
-): SetupFunc<T> {
+export function registerTestBed<T extends string = string, P extends object = any>(
+  Component: ComponentType<P>,
+  config: AsyncTestBedConfig<P>
+): AsyncSetupFunc<T, Partial<P>>;
+export function registerTestBed<T extends string = string, P extends object = any>(
+  Component: ComponentType<P>,
+  config?: TestBedConfig<P>
+): SyncSetupFunc<T, Partial<P>>;
+export function registerTestBed<T extends string = string, P extends object = any>(
+  Component: ComponentType<P>,
+  config?: AsyncTestBedConfig<P> | TestBedConfig<P>
+): SetupFunc<T, Partial<P>> {
   const {
     defaultProps = defaultConfig.defaultProps,
     memoryRouter = defaultConfig.memoryRouter!,
@@ -263,7 +263,7 @@ export function registerTestBed<T extends string = string>(
           .slice(1) // we remove the first row as it is the table header
           .map((row) => ({
             reactWrapper: row,
-            columns: row.find('td').map((col) => ({
+            columns: row.find('.euiTableCellContent').map((col) => ({
               reactWrapper: col,
               // We can't access the td value with col.text() because
               // eui adds an extra div in td on mobile => (.euiTableRowCell__mobileHeader)

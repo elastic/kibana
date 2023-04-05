@@ -52,7 +52,7 @@ describe('<TemplateEdit />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
   });
 
@@ -195,6 +195,7 @@ describe('<TemplateEdit />', () => {
         // Make some changes to the mappings
         await act(async () => {
           actions.clickEditButtonAtField(0); // Select the first field to edit
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         });
         component.update();
 
@@ -204,6 +205,7 @@ describe('<TemplateEdit />', () => {
         // Change the field name
         await act(async () => {
           form.setInputValue('nameParameterInput', UPDATED_MAPPING_TEXT_FIELD_NAME);
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         });
 
         // Save changes on the field

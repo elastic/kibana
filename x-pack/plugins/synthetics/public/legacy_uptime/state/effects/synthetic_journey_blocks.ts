@@ -7,16 +7,18 @@
 
 import { Action } from 'redux-actions';
 import { call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
-import { ScreenshotBlockDoc } from '../../../../common/runtime_types/ping/synthetics';
+import {
+  ScreenshotBlockDoc,
+  ScreenshotBlockCache,
+  isPendingBlock,
+} from '../../../../common/runtime_types';
 import { fetchScreenshotBlockSet } from '../api/journey';
 import {
   fetchBlocksAction,
   setBlockLoadingAction,
-  isPendingBlock,
   pruneCacheAction,
   putBlocksAction,
   putCacheSize,
-  ScreenshotBlockCache,
   updateHitCountsAction,
 } from '../reducers/synthetics';
 import { syntheticsSelector } from '../selectors';

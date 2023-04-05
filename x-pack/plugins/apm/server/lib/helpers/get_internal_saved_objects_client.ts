@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
-import { withApmSpan } from '../../utils/with_apm_span';
+import { CoreStart } from '@kbn/core/server';
 
 export type InternalSavedObjectsClient = Awaited<
   ReturnType<typeof getInternalSavedObjectsClient>
 >;
-export async function getInternalSavedObjectsClient(core: CoreSetup) {
-  return withApmSpan('get_internal_saved_objects_client', () =>
-    core.getStartServices().then(async ([coreStart]) => {
-      return coreStart.savedObjects.createInternalRepository();
-    })
-  );
+
+export async function getInternalSavedObjectsClient(coreStart: CoreStart) {
+  return coreStart.savedObjects.createInternalRepository();
 }

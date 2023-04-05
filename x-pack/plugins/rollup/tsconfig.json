@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -12,22 +9,31 @@
     "public/**/*",
     "server/**/*",
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
     // required plugins
-    { "path": "../../../src/plugins/management/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
+    "@kbn/management-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/features-plugin",
     // optional plugins
-    { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../index_management/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/vis_types/timeseries/tsconfig.json" },
+    "@kbn/home-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/vis-type-timeseries-plugin",
     // required bundles
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/data-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/analytics",
+    "@kbn/i18n",
+    "@kbn/core-http-browser",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
 
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

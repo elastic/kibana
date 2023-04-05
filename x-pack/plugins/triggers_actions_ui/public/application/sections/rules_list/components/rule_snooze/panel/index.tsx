@@ -22,6 +22,7 @@ type SnoozePanelProps = Pick<
   | 'activeSnoozes'
   | 'hasTitle'
   | 'inPopover'
+  | 'showAddSchedule'
 >;
 
 export const SnoozePanel: React.FC<SnoozePanelProps> = ({
@@ -33,6 +34,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
   activeSnoozes,
   hasTitle = true,
   inPopover = false,
+  showAddSchedule,
 }) => {
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
   const [initialSchedule, setInitialSchedule] = useState<SnoozeSchedule | null>(null);
@@ -103,6 +105,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
       unsnoozeRule={onUnsnoozeRule}
       interval={interval}
       showCancel={showCancel}
+      showAddSchedule={showAddSchedule}
       scheduledSnoozes={scheduledSnoozes}
       activeSnoozes={activeSnoozes}
       navigateToScheduler={onOpenScheduler}

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import { getInterval } from '../get_interval';
+import { UI_SETTINGS } from '../../../../common/constants';
 import type { Annotation, Panel } from '../../../../common/types';
 import { buildAnnotationRequest } from './build_request_body';
 import type {
@@ -31,7 +33,6 @@ export async function getAnnotationRequestParams(
     capabilities,
     uiSettings,
     cachedIndexPatternFetcher,
-    buildSeriesMetaParams,
   }: AnnotationServices
 ): Promise<EsSearchRequest> {
   const annotationIndex = await cachedIndexPatternFetcher(annotation.index_pattern);
@@ -44,7 +45,21 @@ export async function getAnnotationRequestParams(
     annotationIndex,
     capabilities,
     uiSettings,
-    getMetaParams: () => buildSeriesMetaParams(annotationIndex, Boolean(panel.use_kibana_indexes)),
+    getMetaParams: async () => {
+      const maxBuckets = await uiSettings.get<number>(UI_SETTINGS.MAX_BUCKETS_SETTING);
+      const { min, max } = req.body.timerange;
+      const timeField =
+        annotation.time_field ?? annotationIndex.indexPattern?.timeFieldName ?? panel.time_field;
+
+      return {
+        timeField,
+        ...getInterval(timeField!, panel, annotationIndex, {
+          min,
+          max,
+          maxBuckets,
+        }),
+      };
+    },
   });
 
   return {

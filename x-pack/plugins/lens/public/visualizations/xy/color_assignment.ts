@@ -12,11 +12,11 @@ import { euiLightVars } from '@kbn/ui-theme';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
-  isRangeAnnotation,
+  isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
 import type { AccessorConfig, FramePublicAPI } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { FormatFactory } from '../../../common';
+import { FormatFactory } from '../../../common/types';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import {
@@ -104,10 +104,10 @@ export function getColorAssignments(
   });
 }
 
-function getDisabledConfig(accessor: string) {
+function getDisabledConfig(accessor: string): AccessorConfig {
   return {
-    columnId: accessor as string,
-    triggerIcon: 'disabled' as const,
+    columnId: accessor,
+    triggerIconType: 'disabled',
   };
 }
 
@@ -125,8 +125,10 @@ export function getAssignedColorConfig(
     const annotation = layer.annotations.find((a) => a.id === accessor);
     return {
       columnId: accessor,
-      triggerIcon: annotation?.isHidden ? ('invisible' as const) : ('color' as const),
-      color: isRangeAnnotation(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor,
+      triggerIconType: annotation?.isHidden ? 'invisible' : 'color',
+      color: isRangeAnnotationConfig(annotation)
+        ? defaultAnnotationRangeColor
+        : defaultAnnotationColor,
     };
   }
   const layerContainsSplits = isDataLayer(layer) && !layer.collapseFn && layer.splitAccessor;
@@ -158,8 +160,8 @@ export function getAssignedColorConfig(
         )
       : undefined;
   return {
-    columnId: accessor as string,
-    triggerIcon: assignedColor ? 'color' : 'disabled',
+    columnId: accessor,
+    triggerIconType: assignedColor ? 'color' : 'disabled',
     color: assignedColor ?? undefined,
   };
 }
@@ -184,8 +186,8 @@ export function getAccessorColorConfigs(
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (currentYConfig?.color) {
       return {
-        columnId: accessor as string,
-        triggerIcon: 'color',
+        columnId: accessor,
+        triggerIconType: 'color',
         color: currentYConfig.color,
       };
     }

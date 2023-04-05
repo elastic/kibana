@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { DataPanelWrapper } from './data_panel_wrapper';
-import { Datasource, DatasourceDataPanelProps } from '../../types';
-import { DragDropIdentifier } from '../../drag_drop';
+import { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createMockFramePublicAPI, mockStoreDeps, mountWithProvider } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
@@ -26,12 +26,15 @@ describe('Data Panel Wrapper', () => {
       const datasourceMap = {
         activeDatasource: {
           renderDataPanel,
+          getUsedDataViews: jest.fn(),
+          getLayers: jest.fn(() => []),
         } as unknown as Datasource,
       };
 
       const mountResult = await mountWithProvider(
         <DataPanelWrapper
           datasourceMap={datasourceMap}
+          visualizationMap={{} as VisualizationMap}
           showNoDataPopover={() => {}}
           core={{} as DatasourceDataPanelProps['core']}
           dropOntoWorkspace={(field: DragDropIdentifier) => {}}

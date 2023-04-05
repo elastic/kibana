@@ -12,13 +12,11 @@ export {
   writeFileAsync,
   makeDirAsync,
   accessAsync,
-  globAsync,
   // functions
   normalizePath,
   difference,
   isPropertyWithKey,
   isI18nTranslateFunction,
-  node,
   formatJSString,
   formatHTMLString,
   traverseNodes,
@@ -31,7 +29,7 @@ export {
   extractValuesKeysFromNode,
   arrayify,
   // classes
-  ErrorReporter, // @ts-ignore
+  ErrorReporter,
 } from './utils';
 
 export { verifyICUMessage } from './verify_icu_message';

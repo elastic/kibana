@@ -21,7 +21,7 @@ import type {
   PostLogstashApiKeyResponse,
 } from '../../../common/types';
 import { outputService } from '../../services/output';
-import { defaultIngestErrorHandler, FleetUnauthorizedError } from '../../errors';
+import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
 
@@ -39,7 +39,7 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -62,7 +62,7 @@ export const getOneOuputHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -75,7 +75,7 @@ export const putOuputHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
-    await outputService.update(soClient, request.params.outputId, request.body);
+    await outputService.update(soClient, esClient, request.params.outputId, request.body);
     const output = await outputService.get(soClient, request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
@@ -95,7 +95,7 @@ export const putOuputHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -109,7 +109,7 @@ export const postOuputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
-    const output = await outputService.create(soClient, data, { id });
+    const output = await outputService.create(soClient, esClient, data, { id });
     if (output.is_default || output.is_default_monitoring) {
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
     }
@@ -120,7 +120,7 @@ export const postOuputHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -143,7 +143,7 @@ export const deleteOutputHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -164,6 +164,6 @@ export const postLogstashApiKeyHandler: RequestHandler = async (context, request
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

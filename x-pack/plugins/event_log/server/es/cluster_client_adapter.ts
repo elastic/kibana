@@ -12,7 +12,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
@@ -50,6 +50,27 @@ interface QueryOptionsEventsBySavedObjectFilter {
   legacyIds?: string[];
 }
 
+interface QueryOptionsEventsWithAuthFilter {
+  index: string;
+  namespace: string | undefined;
+  type: string;
+  ids: string[];
+  authFilter: KueryNode;
+}
+
+export interface AggregateEventsWithAuthFilter {
+  index: string;
+  namespaces?: Array<string | undefined>;
+  type: string;
+  authFilter: KueryNode;
+  aggregateOptions: AggregateOptionsType;
+  includeSpaceAgnostic?: boolean;
+}
+
+export type FindEventsOptionsWithAuthFilter = QueryOptionsEventsWithAuthFilter & {
+  findOptions: FindOptionsType;
+};
+
 export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
   findOptions: FindOptionsType;
 };
@@ -61,6 +82,13 @@ export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySave
 export interface AggregateEventsBySavedObjectResult {
   aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
+
+type GetQueryBodyWithAuthFilterOpts =
+  | (FindEventsOptionsWithAuthFilter & {
+      namespaces: AggregateEventsWithAuthFilter['namespaces'];
+      includeSpaceAgnostic?: AggregateEventsWithAuthFilter['includeSpaceAgnostic'];
+    })
+  | AggregateEventsWithAuthFilter;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
@@ -381,6 +409,50 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
+  public async queryEventsWithAuthFilter(
+    queryOptions: FindEventsOptionsWithAuthFilter
+  ): Promise<QueryEventsBySavedObjectResult> {
+    const { index, type, ids, findOptions } = queryOptions;
+    const { page, per_page: perPage, sort } = findOptions;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    const query = getQueryBodyWithAuthFilter(
+      this.logger,
+      { ...queryOptions, namespaces: [queryOptions.namespace] },
+      pick(queryOptions.findOptions, ['start', 'end', 'filter'])
+    );
+
+    const body: estypes.SearchRequest['body'] = {
+      size: perPage,
+      from: (page - 1) * perPage,
+      query,
+      ...(sort
+        ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
+        : {}),
+    };
+
+    try {
+      const {
+        hits: { hits, total },
+      } = await esClient.search<IValidatedEvent>({
+        index,
+        track_total_hits: true,
+        body,
+      });
+      return {
+        page,
+        per_page: perPage,
+        total: isNumber(total) ? total : total!.value,
+        data: hits.map((hit) => hit._source),
+      };
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
+      );
+    }
+  }
+
   public async aggregateEventsBySavedObjects(
     queryOptions: AggregateEventsOptionsBySavedObjectFilter
   ): Promise<AggregateEventsBySavedObjectResult> {
@@ -415,6 +487,184 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       );
     }
   }
+
+  public async aggregateEventsWithAuthFilter(
+    queryOptions: AggregateEventsWithAuthFilter
+  ): Promise<AggregateEventsBySavedObjectResult> {
+    const { index, type, aggregateOptions } = queryOptions;
+    const { aggs } = aggregateOptions;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    const query = getQueryBodyWithAuthFilter(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
+    );
+
+    const body: estypes.SearchRequest['body'] = {
+      size: 0,
+      query,
+      aggs,
+    };
+
+    try {
+      const { aggregations } = await esClient.search<IValidatedEvent>({
+        index,
+        body,
+      });
+      return {
+        aggregations,
+      };
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by for type "${type}" and auth filter failed with: ${err.message}`
+      );
+    }
+  }
+}
+
+export function getQueryBodyWithAuthFilter(
+  logger: Logger,
+  opts: GetQueryBodyWithAuthFilterOpts,
+  queryOptions: QueryOptionsType
+) {
+  const { namespaces, type, authFilter, includeSpaceAgnostic } = opts;
+  const { start, end, filter } = queryOptions ?? {};
+  const ids = 'ids' in opts ? opts.ids : [];
+
+  const namespaceQuery = (namespaces ?? [undefined]).map((namespace) =>
+    getNamespaceQuery(namespace)
+  );
+  let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
+  try {
+    const filterKueryNode = filter ? fromKueryExpression(filter) : null;
+    const queryFilter = filterKueryNode
+      ? nodeBuilder.and([filterKueryNode, authFilter as KueryNode])
+      : authFilter;
+    dslFilterQuery = queryFilter ? toElasticsearchQuery(queryFilter) : undefined;
+  } catch (err) {
+    logger.debug(
+      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+        message: err.message,
+        statusCode: err.statusCode,
+      })}`
+    );
+    throw err;
+  }
+
+  const savedObjectsQueryMust: estypes.QueryDslQueryContainer[] = [
+    {
+      term: {
+        'kibana.saved_objects.rel': {
+          value: SAVED_OBJECT_REL_PRIMARY,
+        },
+      },
+    },
+    {
+      term: {
+        'kibana.saved_objects.type': {
+          value: type,
+        },
+      },
+    },
+    {
+      bool: {
+        ...(includeSpaceAgnostic
+          ? {
+              should: [
+                {
+                  bool: {
+                    should: namespaceQuery,
+                  },
+                },
+                {
+                  match: {
+                    ['kibana.saved_objects.space_agnostic']: true,
+                  },
+                },
+              ],
+            }
+          : { should: namespaceQuery }),
+      },
+    },
+  ];
+
+  const musts: estypes.QueryDslQueryContainer[] = [
+    {
+      nested: {
+        path: 'kibana.saved_objects',
+        query: {
+          bool: {
+            must: reject(savedObjectsQueryMust, isUndefined),
+          },
+        },
+      },
+    },
+  ];
+
+  if (ids.length) {
+    musts.push({
+      bool: {
+        should: {
+          bool: {
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          terms: {
+                            // default maximum of 65,536 terms, configurable by index.max_terms_count
+                            'kibana.saved_objects.id': ids,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                range: {
+                  'kibana.version': {
+                    gte: LEGACY_ID_CUTOFF_VERSION,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+  }
+
+  if (start) {
+    musts.push({
+      range: {
+        '@timestamp': {
+          gte: start,
+        },
+      },
+    });
+  }
+  if (end) {
+    musts.push({
+      range: {
+        '@timestamp': {
+          lte: end,
+        },
+      },
+    });
+  }
+
+  return {
+    bool: {
+      ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+      must: reject(musts, isUndefined),
+    },
+  };
 }
 
 function getNamespaceQuery(namespace?: string) {
@@ -446,9 +696,15 @@ export function getQueryBody(
   const { start, end, filter } = queryOptions ?? {};
 
   const namespaceQuery = getNamespaceQuery(namespace);
+  let filterKueryNode;
+  try {
+    filterKueryNode = JSON.parse(filter ?? '');
+  } catch (e) {
+    filterKueryNode = filter ? fromKueryExpression(filter) : null;
+  }
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
-    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
+    dslFilterQuery = filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     logger.debug(
       `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
@@ -474,7 +730,6 @@ export function getQueryBody(
         },
       },
     },
-    // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
     namespaceQuery,
   ];
 
@@ -492,6 +747,7 @@ export function getQueryBody(
   ];
 
   const shouldQuery = [];
+
   shouldQuery.push({
     bool: {
       must: [

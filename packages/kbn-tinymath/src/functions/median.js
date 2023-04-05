@@ -33,8 +33,6 @@ const findMedian = (a) => {
  * median([1, 9], 2, 4, [3, 5]) // returns [median([1, 2, 4, 3]), median([9, 2, 4, 5])] = [2.5, 4.5]
  */
 
-module.exports = { median };
-
 function median(...args) {
   if (args.length === 1) {
     if (Array.isArray(args[0])) return findMedian(args[0]);
@@ -48,3 +46,4 @@ function median(...args) {
   }
   return findMedian(args);
 }
+module.exports = { median };

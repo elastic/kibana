@@ -82,6 +82,7 @@ export const JobDetails: FC = () => {
       title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.bucketSpan.title', {
         defaultMessage: 'Bucket span',
       }),
+      // @ts-expect-error bucketSpan is of type estypes.Duration
       description: jobCreator.bucketSpan,
     },
   ];

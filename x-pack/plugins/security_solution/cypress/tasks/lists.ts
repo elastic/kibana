@@ -70,9 +70,7 @@ export const exportValueList = (): Cypress.Chainable<JQuery<HTMLElement>> => {
  * Given an array of value lists this will delete them all using Cypress Request and the lists REST API
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
  */
-export const deleteValueLists = (
-  lists: string[]
-): Array<Cypress.Chainable<Cypress.Response<unknown>>> => {
+const deleteValueLists = (lists: string[]): Array<Cypress.Chainable<Cypress.Response<unknown>>> => {
   return lists.map((list) => deleteValueList(list));
 };
 
@@ -80,7 +78,7 @@ export const deleteValueLists = (
  * Given a single value list this will delete it using Cypress Request and lists REST API
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
  */
-export const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response<unknown>> => {
+const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response<unknown>> => {
   return cy.request({
     method: 'DELETE',
     url: `api/lists?id=${list}`,
@@ -99,7 +97,7 @@ export const deleteValueList = (list: string): Cypress.Chainable<Cypress.Respons
  * @param testSuggestions The type of test to use rather than the fixture file which is useful for ranges
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-import-list-items.html
  */
-export const uploadListItemData = (
+const uploadListItemData = (
   file: string,
   type: string,
   data: string

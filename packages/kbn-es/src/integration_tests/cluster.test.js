@@ -59,6 +59,7 @@ function mockEsBin({ exitCode, start }) {
     jest.requireActual('execa')(
       process.execPath,
       [
+        '--require=@kbn/babel-register/install',
         require.resolve('./__fixtures__/es_bin.js'),
         JSON.stringify({
           exitCode,

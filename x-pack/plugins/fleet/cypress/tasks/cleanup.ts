@@ -48,3 +48,18 @@ export function cleanupDownloadSources() {
       });
   });
 }
+
+export function deleteFleetServerDocs(ignoreUnavailable: boolean = false) {
+  cy.task('deleteDocsByQuery', {
+    index: '.fleet-servers',
+    query: { match_all: {} },
+    ignoreUnavailable,
+  });
+}
+export function deleteAgentDocs(ignoreUnavailable: boolean = false) {
+  cy.task('deleteDocsByQuery', {
+    index: '.fleet-agents',
+    query: { match_all: {} },
+    ignoreUnavailable,
+  });
+}

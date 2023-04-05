@@ -7,12 +7,14 @@ Object {
       "aaa": "625b32086eb1d1203564cf85062dd22e",
       "bbb": "18c78c995965207ed3f6e7fc5c6e55fe",
       "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
+      "created_at": "00da57df13e94e9d98437d13ace4bfe0",
       "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
       "namespace": "2f4316de49999235636386fe51dc06c1",
       "namespaces": "2f4316de49999235636386fe51dc06c1",
       "originId": "2f4316de49999235636386fe51dc06c1",
       "references": "7997cf5a56cc02bdc9c93361bde732b0",
       "type": "2f4316de49999235636386fe51dc06c1",
+      "typeMigrationVersion": "539e3ecebb3abc1133618094cc3b7ae7",
       "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
     },
   },
@@ -26,6 +28,9 @@ Object {
     },
     "coreMigrationVersion": Object {
       "type": "keyword",
+    },
+    "created_at": Object {
+      "type": "date",
     },
     "migrationVersion": Object {
       "dynamic": "true",
@@ -57,6 +62,9 @@ Object {
     "type": Object {
       "type": "keyword",
     },
+    "typeMigrationVersion": Object {
+      "type": "version",
+    },
     "updated_at": Object {
       "type": "date",
     },
@@ -69,6 +77,7 @@ Object {
   "_meta": Object {
     "migrationMappingPropertyHashes": Object {
       "coreMigrationVersion": "2f4316de49999235636386fe51dc06c1",
+      "created_at": "00da57df13e94e9d98437d13ace4bfe0",
       "firstType": "635418ab953d81d93f1190b70a8d3f57",
       "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
       "namespace": "2f4316de49999235636386fe51dc06c1",
@@ -78,6 +87,7 @@ Object {
       "secondType": "72d57924f415fbadb3ee293b67d233ab",
       "thirdType": "510f1f0adb69830cf8a1c5ce2923ed82",
       "type": "2f4316de49999235636386fe51dc06c1",
+      "typeMigrationVersion": "539e3ecebb3abc1133618094cc3b7ae7",
       "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
     },
   },
@@ -85,6 +95,9 @@ Object {
   "properties": Object {
     "coreMigrationVersion": Object {
       "type": "keyword",
+    },
+    "created_at": Object {
+      "type": "date",
     },
     "firstType": Object {
       "dynamic": "strict",
@@ -138,6 +151,9 @@ Object {
     },
     "type": Object {
       "type": "keyword",
+    },
+    "typeMigrationVersion": Object {
+      "type": "version",
     },
     "updated_at": Object {
       "type": "date",

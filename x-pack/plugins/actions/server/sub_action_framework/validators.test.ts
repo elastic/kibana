@@ -14,7 +14,7 @@ import {
   TestSecrets,
   TestSubActionConnector,
 } from './mocks';
-import { IService } from './types';
+import { IService, SubActionConnectorType, ValidatorType } from './types';
 import { buildValidators } from './validators';
 
 describe('Validators', () => {
@@ -36,6 +36,39 @@ describe('Validators', () => {
     return buildValidators({ configurationUtilities: mockedActionsConfig, connector });
   };
 
+  const createValidatorWithCustomValidation = (Service: IService<TestConfig, TestSecrets>) => {
+    const configValidator = jest.fn();
+    const secretsValidator = jest.fn();
+
+    const connector: SubActionConnectorType<TestConfig, TestSecrets> = {
+      id: '.test',
+      name: 'Test',
+      minimumLicenseRequired: 'basic' as const,
+      supportedFeatureIds: ['alerting'],
+      schema: {
+        config: TestConfigSchema,
+        secrets: TestSecretsSchema,
+      },
+      validators: [
+        {
+          type: ValidatorType.CONFIG,
+          validator: configValidator,
+        },
+        {
+          type: ValidatorType.SECRETS,
+          validator: secretsValidator,
+        },
+      ],
+      Service,
+    };
+
+    return {
+      validators: buildValidators({ configurationUtilities: mockedActionsConfig, connector }),
+      configValidator,
+      secretsValidator,
+    };
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.clearAllMocks();
@@ -47,21 +80,21 @@ describe('Validators', () => {
     const validator = createValidator(TestSubActionConnector);
     const { config, secrets } = validator;
 
-    expect(config).toEqual(TestConfigSchema);
-    expect(secrets).toEqual(TestSecretsSchema);
+    expect(config).toEqual({ schema: TestConfigSchema });
+    expect(secrets).toEqual({ schema: TestSecretsSchema });
   });
 
   it('should validate the params correctly', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(params.validate({ subAction: 'test', subActionParams: {} }));
+    expect(params.schema.validate({ subAction: 'test', subActionParams: {} }));
   });
 
   it('should allow any field in subActionParams', async () => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
     expect(
-      params.validate({
+      params.schema.validate({
         subAction: 'test',
         subActionParams: {
           foo: 'foo',
@@ -94,6 +127,30 @@ describe('Validators', () => {
   ])('should throw if the subAction is %p', async (subAction) => {
     const validator = createValidator(TestSubActionConnector);
     const { params } = validator;
-    expect(() => params.validate({ subAction, subActionParams: {} })).toThrow();
+    expect(() => params.schema.validate({ subAction, subActionParams: {} })).toThrow();
+  });
+
+  it('calls the config and secrets custom validator functions', () => {
+    const validator = createValidatorWithCustomValidation(TestSubActionConnector);
+
+    validator.validators.config.customValidator?.(
+      { url: 'http://www.example.com' },
+      { configurationUtilities: mockedActionsConfig }
+    );
+
+    validator.validators.secrets.customValidator?.(
+      { password: '123', username: 'sam' },
+      { configurationUtilities: mockedActionsConfig }
+    );
+
+    expect(validator.configValidator).toHaveBeenCalledWith(
+      { url: 'http://www.example.com' },
+      expect.anything()
+    );
+
+    expect(validator.secretsValidator).toHaveBeenCalledWith(
+      { password: '123', username: 'sam' },
+      expect.anything()
+    );
   });
 });

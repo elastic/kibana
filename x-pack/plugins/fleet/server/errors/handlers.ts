@@ -22,20 +22,23 @@ import {
   AgentActionNotFoundError,
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
-  IngestManagerError,
+  FleetError,
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
   RegistryConnectionError,
   RegistryError,
   RegistryResponseError,
   PackageFailedVerificationError,
+  PackagePolicyNotFoundError,
+  FleetUnauthorizedError,
+  PackagePolicyNameExistsError,
 } from '.';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams
 ) => IKibanaResponse | Promise<IKibanaResponse>;
 interface IngestErrorHandlerParams {
-  error: IngestManagerError | Boom.Boom | Error;
+  error: FleetError | Boom.Boom | Error;
   response: KibanaResponseFactory;
   request?: KibanaRequest;
   context?: RequestHandlerContext;
@@ -43,7 +46,7 @@ interface IngestErrorHandlerParams {
 // unsure if this is correct. would prefer to use something "official"
 // this type is based on BadRequest values observed while debugging https://github.com/elastic/kibana/issues/75862
 
-const getHTTPResponseCode = (error: IngestManagerError): number => {
+const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof RegistryResponseError) {
     // 4xx/5xx's from EPR
     return 500;
@@ -52,7 +55,7 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
     // Connection errors (ie. RegistryConnectionError) / fallback  (RegistryError) from EPR
     return 502; // Bad Gateway
   }
-  if (error instanceof PackageNotFoundError) {
+  if (error instanceof PackageNotFoundError || error instanceof PackagePolicyNotFoundError) {
     return 404; // Not Found
   }
   if (error instanceof AgentPolicyNameExistsError) {
@@ -73,13 +76,19 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof AgentActionNotFoundError) {
     return 404;
   }
+  if (error instanceof FleetUnauthorizedError) {
+    return 403; // Unauthorized
+  }
+  if (error instanceof PackagePolicyNameExistsError) {
+    return 409; // Conflict
+  }
   return 400; // Bad Request
 };
 
-export function ingestErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
+export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
   const logger = appContextService.getLogger();
   // our "expected" errors
-  if (error instanceof IngestManagerError) {
+  if (error instanceof FleetError) {
     // only log the message
     logger.error(error.message);
     return {
@@ -109,10 +118,10 @@ export function ingestErrorToResponseOptions(error: IngestErrorHandlerParams['er
   };
 }
 
-export const defaultIngestErrorHandler: IngestErrorHandler = async ({
+export const defaultFleetErrorHandler: IngestErrorHandler = async ({
   error,
   response,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
-  const options = ingestErrorToResponseOptions(error);
+  const options = fleetErrorToResponseOptions(error);
   return response.customError(options);
 };

@@ -114,6 +114,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
     }, PROGRESS_REFRESH_INTERVAL_MS);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialized]);
 
   return (

@@ -37,7 +37,6 @@ export function setupFleetAndAgents(providerContext: FtrProviderContext) {
   before(async () => {
     // Use elastic/fleet-server service account to execute setup to verify privilege configuration
     const es = providerContext.getService('es');
-    // @ts-expect-error SecurityCreateServiceTokenRequest should not require `name`
     const { token } = await es.security.createServiceToken({
       namespace: 'elastic',
       service: 'fleet-server',

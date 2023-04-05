@@ -74,7 +74,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
 
   return {
     async getDebugState(testSubj: string): Promise<HeatmapDebugState> {
-      const state = await elasticChart.getChartDebugData(testSubj);
+      const state = await elasticChart.getChartDebugData(testSubj, 0, 5000);
       if (!state) {
         throw new Error('Swim lane debug state is not available');
       }
@@ -198,7 +198,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
     async assertActivePage(testSubj: string, expectedPage: number) {
       const pagination = await testSubjects.find(`${testSubj} > mlSwimLanePagination`);
       const activePage = await pagination.findByCssSelector(
-        '.euiPaginationButton-isActive .euiButtonEmpty__text'
+        '.euiPaginationButton[aria-current] .euiButtonEmpty__text'
       );
       const text = await activePage.getVisibleText();
       expect(text).to.eql(expectedPage);

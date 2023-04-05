@@ -171,7 +171,7 @@ export class GisPageObject extends FtrService {
       }
       await this.testSubjects.click('savedObjectTitle');
     }
-    await this.testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -533,9 +533,9 @@ export class GisPageObject extends FtrService {
     await this.waitForLayersToLoad();
   }
 
-  async selectEMSBoundariesSource() {
-    this.log.debug(`Select Elastic Maps Service boundaries source`);
-    await this.testSubjects.click('emsBoundaries');
+  async selectLayerGroupCard() {
+    this.log.debug(`Click layer group card`);
+    await this.testSubjects.click('layerGroup');
   }
 
   async selectFileUploadCard() {
@@ -543,19 +543,11 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click('uploadFile');
   }
 
-  async selectVectorLayer(vectorLayerName: string) {
-    this.log.debug(`Select EMS vector layer ${vectorLayerName}`);
-    if (!vectorLayerName) {
-      throw new Error(`You did not provide the EMS layer to select`);
-    }
-    await this.comboBox.set('emsVectorComboBox', vectorLayerName);
-    await this.waitForLayersToLoad();
-  }
-
   async removeLayer(layerName: string) {
     this.log.debug(`Remove layer ${layerName}`);
     await this.openLayerPanel(layerName);
     await this.testSubjects.click(`mapRemoveLayerButton`);
+    await this.common.clickConfirmOnModal();
     await this.waitForLayerDeleted(layerName);
   }
 

@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/managed-vscode-config",
-        "id": "def-server.updateVscodeConfig",
+        "id": "def-common.updateVscodeConfig",
         "type": "Function",
         "tags": [],
         "label": "updateVscodeConfig",
@@ -27,10 +35,11 @@
         ],
         "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/managed-vscode-config",
-            "id": "def-server.updateVscodeConfig.$1",
+            "id": "def-common.updateVscodeConfig.$1",
             "type": "Array",
             "tags": [],
             "label": "keys",
@@ -43,11 +52,12 @@
             ],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/managed-vscode-config",
-            "id": "def-server.updateVscodeConfig.$2",
+            "id": "def-common.updateVscodeConfig.$2",
             "type": "string",
             "tags": [],
             "label": "infoText",
@@ -59,11 +69,12 @@
             ],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/managed-vscode-config",
-            "id": "def-server.updateVscodeConfig.$3",
+            "id": "def-common.updateVscodeConfig.$3",
             "type": "string",
             "tags": [],
             "label": "json",
@@ -75,6 +86,7 @@
             ],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -87,7 +99,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/managed-vscode-config",
-        "id": "def-server.MANAGED_CONFIG_FILES",
+        "id": "def-common.MANAGED_CONFIG_FILES",
         "type": "Array",
         "tags": [],
         "label": "MANAGED_CONFIG_FILES",
@@ -97,11 +109,12 @@
         ],
         "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/managed-vscode-config",
-        "id": "def-server.MANAGED_CONFIG_KEYS",
+        "id": "def-common.MANAGED_CONFIG_KEYS",
         "type": "Array",
         "tags": [],
         "label": "MANAGED_CONFIG_KEYS",
@@ -114,17 +127,10 @@
         ],
         "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

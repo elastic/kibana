@@ -10,7 +10,8 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import type { RowRenderer } from '../../../../../../../common/types';
-import type { Ecs } from '../../../../../../../common/ecs';
+import { TimelineId } from '../../../../../../../common/types';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import {
@@ -50,7 +51,7 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         data: auditd,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -79,7 +80,7 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         data: auditd,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
       const wrapper = mount(
         <TestProviders>
@@ -110,7 +111,7 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         data: auditdFile,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
 
       const wrapper = shallow(<span>{children}</span>);
@@ -139,7 +140,7 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         data: auditdFile,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
       const wrapper = mount(
         <TestProviders>

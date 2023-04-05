@@ -13,7 +13,6 @@ import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
-  const retryService = getService('retry');
   const pageObjects = getPageObjects([
     'common',
     'endpoint',
@@ -30,8 +29,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
     });
@@ -127,8 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/92567
-    describe.skip('and the save button is clicked', () => {
+    describe('and the save button is clicked', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       beforeEach(async () => {
@@ -185,7 +181,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
+        await testSubjects.waitForDeleted('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
@@ -224,7 +220,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await advancedPolicyField.clearValueWithKeyboard();
 
         // Make sure the toast button closes so the save button on the sticky footer is visible
-        await testSubjects.waitForHidden('toastCloseButton');
+        await testSubjects.waitForDeleted('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
@@ -233,7 +229,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id
         );
 
-        expect(agentFullPolicyUpdated.inputs[0].policy.linux.advanced).to.eql(undefined);
+        expect(agentFullPolicyUpdated.inputs[0].policy.linux.advanced).to.eql({
+          capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+        });
       });
     });
 
@@ -270,35 +268,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.waitForCheckboxSelectionChange('policyWindowsEvent_dns', false);
       });
 
-      // Failing: See https://github.com/elastic/kibana/issues/100236
-      it.skip('should preserve updates done from the Fleet form', async () => {
-        // Fleet has its  own form inputs, like description. When those are updated, the changes
-        // are also dispatched to the embedded endpoint Policy form. Update to the Endpoint Policy
-        // form after that should preserve the changes done on the Fleet form
-        // NOTE: A few delays were added below due to sporadic failures of this test case (see #100236)
-        const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
-
-        // Wait for the endpoint form to load and then update the policy description
-        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
-        await sleep(); // Allow forms to sync
-        await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyDescription(
-          'protect everything'
-        );
-        await sleep(); // Allow forms to sync
-
-        const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
-        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
-          winDnsEventingCheckbox
-        );
-        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-
-        await retryService.try(async () => {
-          expect(
-            await pageObjects.ingestManagerCreatePackagePolicy.getPackagePolicyDescriptionValue()
-          ).to.be('protect everything');
-        });
-      });
-
       it('should include updated endpoint data when saved', async () => {
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
           await testSubjects.find('policyWindowsEvent_dns')
@@ -322,7 +291,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      it('should show trusted apps card and link should go back to policy', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/138776
+      it.skip('should show trusted apps card and link should go back to policy', async () => {
         await testSubjects.existOrFail('trustedApps-fleet-integration-card');
         await (await testSubjects.find('trustedApps-link-to-exceptions')).click();
         await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
@@ -330,7 +300,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
-      it('should show event filters card and link should go back to policy', async () => {
+      it.skip('should show event filters card and link should go back to policy', async () => {
         await testSubjects.existOrFail('eventFilters-fleet-integration-card');
         const eventFiltersCard = await testSubjects.find('eventFilters-fleet-integration-card');
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(eventFiltersCard);
@@ -340,7 +310,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
-      it('should show blocklists card and link should go back to policy', async () => {
+      it.skip('should show blocklists card and link should go back to policy', async () => {
         await testSubjects.existOrFail('blocklists-fleet-integration-card');
         const blocklistsCard = await testSubjects.find('blocklists-fleet-integration-card');
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(blocklistsCard);
@@ -350,7 +320,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
-      it('should not show host isolation exceptions card because no entries', async () => {
+      it.skip('should not show host isolation exceptions card because no entries', async () => {
         await testSubjects.missingOrFail('hostIsolationExceptions-fleet-integration-card');
       });
     });

@@ -19,6 +19,8 @@ export interface TagAttributes {
   color: string;
 }
 
+export type TagWithOptionalId = Omit<Tag, 'id'> & { id?: string };
+
 export interface GetAllTagsOptions {
   asSystemRequest?: boolean;
 }

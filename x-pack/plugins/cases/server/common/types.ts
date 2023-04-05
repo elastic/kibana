@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
-import { SavedObjectFindOptions } from '../../common/api';
+import type {
+  CaseAttributes,
+  CommentAttributes,
+  CommentRequestExternalReferenceSOType,
+  FileAttachmentMetadata,
+  SavedObjectFindOptions,
+} from '../../common/api';
 
 /**
  * This structure holds the alert ID and index from an alert comment
@@ -19,3 +26,14 @@ export interface AlertInfo {
 export type SavedObjectFindOptionsKueryNode = Omit<SavedObjectFindOptions, 'filter'> & {
   filter?: KueryNode;
 };
+
+export type CaseSavedObject = SavedObject<CaseAttributes>;
+
+export type FileAttachmentRequest = Omit<
+  CommentRequestExternalReferenceSOType,
+  'externalReferenceMetadata'
+> & {
+  externalReferenceMetadata: FileAttachmentMetadata;
+};
+
+export type AttachmentSavedObject = SavedObject<CommentAttributes>;

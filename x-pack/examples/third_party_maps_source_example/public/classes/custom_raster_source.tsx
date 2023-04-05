@@ -5,26 +5,30 @@
  * 2.0.
  */
 
-import { ReactElement } from 'react';
+import _ from 'lodash';
+import React, { ReactElement } from 'react';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { FieldFormatter, MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
 import type {
   AbstractSourceDescriptor,
   Attribution,
-  DataFilters,
   DataRequestMeta,
+  SourceRequestMeta,
   Timeslice,
 } from '@kbn/maps-plugin/common/descriptor_types';
 import type {
+  DataRequest,
   IField,
   ImmutableSourceProperty,
-  ITMSSource,
+  IRasterSource,
   SourceEditorArgs,
 } from '@kbn/maps-plugin/public';
+import { RasterTileSourceData } from '@kbn/maps-plugin/public/classes/sources/raster_source';
+import { RasterTileSource } from 'maplibre-gl';
 
 type CustomRasterSourceDescriptor = AbstractSourceDescriptor;
 
-export class CustomRasterSource implements ITMSSource {
+export class CustomRasterSource implements IRasterSource {
   static type = 'CUSTOM_RASTER';
 
   readonly _descriptor: CustomRasterSourceDescriptor;
@@ -37,6 +41,31 @@ export class CustomRasterSource implements ITMSSource {
 
   constructor(sourceDescriptor: CustomRasterSourceDescriptor) {
     this._descriptor = sourceDescriptor;
+  }
+  async hasLegendDetails(): Promise<boolean> {
+    return true;
+  }
+
+  renderLegendDetails(): ReactElement<any> | null {
+    return <img alt="Radar legend" src="https://nowcoast.noaa.gov/images/legends/radar.png" />;
+  }
+  async canSkipSourceUpdate(
+    dataRequest: DataRequest,
+    nextRequestMeta: DataRequestMeta
+  ): Promise<boolean> {
+    const prevMeta = dataRequest.getMeta();
+    if (!prevMeta) {
+      return Promise.resolve(false);
+    }
+
+    return Promise.resolve(_.isEqual(prevMeta.timeslice, nextRequestMeta.timeslice));
+  }
+
+  isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData): boolean {
+    if (!sourceData.url) {
+      return false;
+    }
+    return mbSource.tiles?.[0] !== sourceData.url;
   }
 
   cloneDescriptor(): CustomRasterSourceDescriptor {
@@ -73,10 +102,6 @@ export class CustomRasterSource implements ITMSSource {
     return false;
   }
 
-  isGeoGridPrecisionAware(): boolean {
-    return false;
-  }
-
   isQueryAware(): boolean {
     return false;
   }
@@ -107,10 +132,6 @@ export class CustomRasterSource implements ITMSSource {
 
   getQueryableIndexPatternIds(): string[] {
     return [];
-  }
-
-  getGeoGridPrecision(zoom: number): number {
-    return 0;
   }
 
   isESSource(): boolean {
@@ -150,11 +171,11 @@ export class CustomRasterSource implements ITMSSource {
     return true;
   }
 
-  async getUrlTemplate(dataFilters: DataFilters): Promise<string> {
+  async getUrlTemplate(requestMeta: SourceRequestMeta): Promise<string> {
     const defaultUrl =
       'https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer/export?dpi=96&transparent=true&format=png32&time={time}&layers=show%3A3&bbox=-{bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256%2C256&f=image';
 
-    const { timeslice, timeFilters } = dataFilters;
+    const { timeslice, timeFilters } = requestMeta;
     let timestamp;
 
     if (timeslice) {

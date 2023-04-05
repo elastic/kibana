@@ -19,9 +19,20 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.uiSettings.update({
+        'histogram:maxBars': 100,
+      });
+      await browser.refresh();
 
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
+    });
+
+    after(async () => {
+      await kibanaServer.uiSettings.update({
+        'histogram:maxBars': 1000,
+      });
+      await browser.refresh();
     });
 
     loadTestFile(require.resolve('./_inspector'));

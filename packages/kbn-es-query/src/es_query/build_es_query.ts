@@ -45,7 +45,7 @@ function removeMatchAll<T>(filters: T[]) {
  * @public
  */
 export function buildEsQuery(
-  indexPattern: DataViewBase | undefined,
+  indexPattern: DataViewBase | DataViewBase[] | undefined,
   queries: AnyQuery | AnyQuery[],
   filters: Filter | Filter[],
   config: EsQueryConfig = {
@@ -60,13 +60,14 @@ export function buildEsQuery(
   const validQueries = queries.filter(isOfQueryType).filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
   const kueryQuery = buildQueryFromKuery(
-    indexPattern,
+    Array.isArray(indexPattern) ? indexPattern[0] : indexPattern,
     queriesByLanguage.kuery,
     { allowLeadingWildcards: config.allowLeadingWildcards },
     {
       dateFormatTZ: config.dateFormatTZ,
       filtersInMustClause: config.filtersInMustClause,
       nestedIgnoreUnmapped: config.nestedIgnoreUnmapped,
+      caseInsensitive: config.caseInsensitive,
     }
   );
   const luceneQuery = buildQueryFromLucene(

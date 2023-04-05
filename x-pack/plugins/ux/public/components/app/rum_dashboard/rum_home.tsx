@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
@@ -55,18 +55,17 @@ export function RumHome() {
     : undefined;
 
   return (
-    <Fragment>
-      <PageTemplateComponent
-        noDataConfig={isLoading ? undefined : noDataConfig}
-        pageHeader={{ children: <PageHeader /> }}
-        isPageDataLoaded={isLoading === false}
-      >
-        {isLoading && <EmptyStateLoading />}
-        <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
-          <RumOverview />
-        </div>
-      </PageTemplateComponent>
-    </Fragment>
+    <PageTemplateComponent
+      noDataConfig={isLoading ? undefined : noDataConfig}
+      pageHeader={{ children: <PageHeader /> }}
+      isPageDataLoaded={isLoading === false}
+      isEmptyState={isLoading}
+    >
+      {isLoading && <EmptyStateLoading />}
+      <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+        <RumOverview />
+      </div>
+    </PageTemplateComponent>
   );
 }
 

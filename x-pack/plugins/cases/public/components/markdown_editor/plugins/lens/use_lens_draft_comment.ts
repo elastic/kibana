@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiMarkdownAstNodePosition } from '@elastic/eui';
+import type { EuiMarkdownAstNodePosition } from '@elastic/eui';
 import { useCallback, useEffect, useState } from 'react';
 import { first } from 'rxjs/operators';
 import { useKibana } from '../../../../common/lib/kibana';

@@ -58,6 +58,7 @@ export const EntityConfig: FC<EntityConfigProps> = ({
         }),
       },
     ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModelPlotEnabled, config]);
 
   const orderOptions: EuiRadioGroupOption[] = useMemo(() => {

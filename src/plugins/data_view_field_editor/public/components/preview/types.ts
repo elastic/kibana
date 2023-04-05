@@ -6,17 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import React from 'react';
-import type { RuntimeField, RuntimeType } from '../../shared_imports';
+import { BehaviorSubject } from 'rxjs';
+import type {
+  RuntimeType,
+  RuntimeField,
+  SerializedFieldFormat,
+  RuntimePrimitiveTypes,
+} from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
+import type { PreviewController } from './preview_controller';
 
-export type From = 'cluster' | 'custom';
+export type DocumentSource = 'cluster' | 'custom';
 
 export interface EsDocument {
   _id: string;
   _index: string;
   _source: {
+    [key: string]: unknown;
+  };
+  fields: {
     [key: string]: unknown;
   };
   [key: string]: unknown;
@@ -33,6 +41,20 @@ interface PreviewError {
         reason?: string;
         [key: string]: unknown;
       };
+}
+
+export interface PreviewState {
+  pinnedFields: Record<string, boolean>;
+  isLoadingDocuments: boolean;
+  customId: string | undefined;
+  documents: EsDocument[];
+  currentIdx: number;
+  documentSource: DocumentSource;
+  scriptEditorValidation: {
+    isValidating: boolean;
+    isValid: boolean;
+    message: string | null;
+  };
 }
 
 export interface FetchDocError {
@@ -56,30 +78,47 @@ export interface Params {
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;
   format: SerializedFieldFormat | null;
-  document: { [key: string]: unknown } | null;
+  document: EsDocument | null;
+  // used for composite subfields
+  parentName: string | null;
 }
 
 export interface FieldPreview {
   key: string;
   value: unknown;
   formattedValue?: string;
+  type?: string;
 }
 
+export interface FieldTypeInfo {
+  name: string;
+  type: string;
+}
+
+export enum ChangeType {
+  UPSERT = 'upsert',
+  DELETE = 'delete',
+}
+export interface Change {
+  changeType: ChangeType;
+  type?: RuntimePrimitiveTypes;
+}
+
+export type ChangeSet = Record<string, Change>;
+
 export interface Context {
+  controller: PreviewController;
   fields: FieldPreview[];
+  fieldPreview$: BehaviorSubject<FieldPreview[] | undefined>;
   error: PreviewError | null;
+  fieldTypeInfo?: FieldTypeInfo[];
+  initialPreviewComplete: boolean;
   params: {
     value: Params;
     update: (updated: Partial<Params>) => void;
   };
   isPreviewAvailable: boolean;
   isLoadingPreview: boolean;
-  currentDocument: {
-    value?: EsDocument;
-    id?: string;
-    isLoading: boolean;
-    isCustomId: boolean;
-  };
   documents: {
     loadSingle: (id: string) => void;
     loadFromCluster: () => Promise<void>;
@@ -89,26 +128,11 @@ export interface Context {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
   };
-  from: {
-    value: From;
-    set: (value: From) => void;
-  };
   navigation: {
     isFirstDoc: boolean;
     isLastDoc: boolean;
-    next: () => void;
-    prev: () => void;
   };
   reset: () => void;
-  pinnedFields: {
-    value: { [key: string]: boolean };
-    set: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
-  };
-  validation: {
-    setScriptEditorValidation: React.Dispatch<
-      React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>
-    >;
-  };
 }
 
 export type PainlessExecuteContext =

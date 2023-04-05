@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FilterAggType } from './types';
 
 export const FILTERS = {

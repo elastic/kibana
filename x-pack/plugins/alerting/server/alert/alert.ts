@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { v4 as uuidV4 } from 'uuid';
+import { get, isEmpty } from 'lodash';
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -13,6 +16,7 @@ import {
   rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
+  LastScheduledActions,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -23,7 +27,6 @@ interface ScheduledExecutionOptions<
   ActionGroupIds extends string = DefaultActionGroupId
 > {
   actionGroup: ActionGroupIds;
-  subgroup?: string;
   context: Context;
   state: State;
 }
@@ -34,13 +37,13 @@ export type PublicAlert<
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
   Alert<State, Context, ActionGroupIds>,
+  | 'getContext'
   | 'getState'
+  | 'getUuid'
+  | 'hasContext'
   | 'replaceState'
   | 'scheduleActions'
-  | 'scheduleActionsWithSubGroup'
   | 'setContext'
-  | 'getContext'
-  | 'hasContext'
 >;
 
 export class Alert<
@@ -59,17 +62,34 @@ export class Alert<
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
+    this.meta.uuid = meta.uuid ?? uuidV4();
+
+    if (!this.meta.flappingHistory) {
+      this.meta.flappingHistory = [];
+    }
   }
 
   getId() {
     return this.id;
   }
 
+  getUuid() {
+    return this.meta.uuid!;
+  }
+
   hasScheduledActions() {
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  isThrottled(throttle: string | null) {
+  isThrottled({
+    throttle,
+    actionHash,
+    uuid,
+  }: {
+    throttle: string | null;
+    actionHash?: string;
+    uuid?: string;
+  }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
@@ -79,19 +99,25 @@ export class Alert<
       this.scheduledActionGroupIsUnchanged(
         this.meta.lastScheduledActions,
         this.scheduledExecutionOptions
-      ) &&
-      this.scheduledActionSubgroupIsUnchanged(
-        this.meta.lastScheduledActions,
-        this.scheduledExecutionOptions
-      ) &&
-      this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now()
+      )
     ) {
-      return true;
+      if (uuid && actionHash) {
+        if (this.meta.lastScheduledActions.actions) {
+          const actionInState =
+            this.meta.lastScheduledActions.actions[uuid] ||
+            this.meta.lastScheduledActions.actions[actionHash]; // actionHash must be removed once all the hash identifiers removed from the task state
+          const lastTriggerDate = actionInState?.date;
+          return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
+        }
+        return false;
+      } else {
+        return this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now();
+      }
     }
     return false;
   }
 
-  scheduledActionGroupOrSubgroupHasChanged(): boolean {
+  scheduledActionGroupHasChanged(): boolean {
     if (!this.meta.lastScheduledActions && this.scheduledExecutionOptions) {
       // it is considered a change when there are no previous scheduled actions
       // and new scheduled actions
@@ -100,18 +126,11 @@ export class Alert<
 
     if (this.meta.lastScheduledActions && this.scheduledExecutionOptions) {
       // compare previous and new scheduled actions if both exist
-      return (
-        !this.scheduledActionGroupIsUnchanged(
-          this.meta.lastScheduledActions,
-          this.scheduledExecutionOptions
-        ) ||
-        !this.scheduledActionSubgroupIsUnchanged(
-          this.meta.lastScheduledActions,
-          this.scheduledExecutionOptions
-        )
+      return !this.scheduledActionGroupIsUnchanged(
+        this.meta.lastScheduledActions,
+        this.scheduledExecutionOptions
       );
     }
-
     // no previous and no new scheduled actions
     return false;
   }
@@ -121,15 +140,6 @@ export class Alert<
     scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
   ) {
     return lastScheduledActions.group === scheduledExecutionOptions.actionGroup;
-  }
-
-  private scheduledActionSubgroupIsUnchanged(
-    lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
-    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
-  ) {
-    return lastScheduledActions.subgroup && scheduledExecutionOptions.subgroup
-      ? lastScheduledActions.subgroup === scheduledExecutionOptions.subgroup
-      : true;
   }
 
   getLastScheduledActions() {
@@ -168,22 +178,6 @@ export class Alert<
     return this;
   }
 
-  scheduleActionsWithSubGroup(
-    actionGroup: ActionGroupIds,
-    subgroup: string,
-    context: Context = {} as Context
-  ) {
-    this.ensureHasNoScheduledActions();
-    this.setContext(context);
-    this.scheduledExecutionOptions = {
-      actionGroup,
-      subgroup,
-      context,
-      state: this.state,
-    };
-    return this;
-  }
-
   setContext(context: Context) {
     this.context = context;
     return this;
@@ -200,8 +194,26 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds, subgroup?: string) {
-    this.meta.lastScheduledActions = { group, subgroup, date: new Date() };
+  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null, uuid?: string) {
+    if (!this.meta.lastScheduledActions) {
+      this.meta.lastScheduledActions = {} as LastScheduledActions;
+    }
+    const date = new Date();
+    this.meta.lastScheduledActions.group = group;
+    this.meta.lastScheduledActions.date = date;
+
+    if (this.meta.lastScheduledActions.group !== group) {
+      this.meta.lastScheduledActions.actions = {};
+    } else if (uuid) {
+      if (!this.meta.lastScheduledActions.actions) {
+        this.meta.lastScheduledActions.actions = {};
+      }
+      // remove deprecated actionHash
+      if (!!actionHash && this.meta.lastScheduledActions.actions[actionHash]) {
+        delete this.meta.lastScheduledActions.actions[actionHash];
+      }
+      this.meta.lastScheduledActions.actions[uuid] = { date };
+    }
   }
 
   /**
@@ -211,10 +223,61 @@ export class Alert<
     return rawAlertInstance.encode(this.toRaw());
   }
 
-  toRaw(): RawAlertInstance {
-    return {
-      state: this.state,
-      meta: this.meta,
-    };
+  toRaw(recovered: boolean = false): RawAlertInstance {
+    return recovered
+      ? {
+          // for a recovered alert, we only care to track the flappingHistory,
+          // the flapping flag, and the UUID
+          meta: {
+            flappingHistory: this.meta.flappingHistory,
+            flapping: this.meta.flapping,
+            uuid: this.meta.uuid,
+          },
+        }
+      : {
+          state: this.state,
+          meta: this.meta,
+        };
+  }
+
+  setFlappingHistory(fh: boolean[] = []) {
+    this.meta.flappingHistory = fh;
+  }
+
+  getFlappingHistory() {
+    return this.meta.flappingHistory;
+  }
+
+  setFlapping(f: boolean) {
+    this.meta.flapping = f;
+  }
+
+  getFlapping() {
+    return this.meta.flapping || false;
+  }
+
+  incrementPendingRecoveredCount() {
+    if (!this.meta.pendingRecoveredCount) {
+      this.meta.pendingRecoveredCount = 0;
+    }
+    this.meta.pendingRecoveredCount++;
+  }
+
+  getPendingRecoveredCount() {
+    return this.meta.pendingRecoveredCount || 0;
+  }
+
+  resetPendingRecoveredCount() {
+    this.meta.pendingRecoveredCount = 0;
+  }
+
+  isFilteredOut(summarizedAlerts: CombinedSummarizedAlerts | null) {
+    if (summarizedAlerts === null) {
+      return false;
+    }
+
+    return !summarizedAlerts.all.data.some(
+      (alert) => get(alert, ALERT_INSTANCE_ID) === this.getId()
+    );
   }
 }

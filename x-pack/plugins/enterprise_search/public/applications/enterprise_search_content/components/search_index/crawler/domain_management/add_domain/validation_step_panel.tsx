@@ -10,10 +10,12 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
 
 import { CrawlerDomainValidationStep } from '../../../../../api/crawler/types';
@@ -26,6 +28,9 @@ interface ValidationStepPanelProps {
   label: string;
   step: CrawlerDomainValidationStep;
 }
+
+const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
 
 export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
   step,
@@ -49,7 +54,11 @@ export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
       {showErrorMessage && (
         <>
           <EuiSpacer size="xs" />
-          <EuiMarkdownFormat textSize="s" data-test-subj="errorMessage">
+          <EuiMarkdownFormat
+            textSize="s"
+            data-test-subj="errorMessage"
+            processingPluginList={processingPlugins}
+          >
             {step.message || ''}
           </EuiMarkdownFormat>
           {action && (

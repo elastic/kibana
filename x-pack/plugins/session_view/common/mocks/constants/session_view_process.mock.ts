@@ -13,6 +13,8 @@ import {
   EventAction,
   EventKind,
   ProcessMap,
+  AlertTypeCount,
+  ProcessEventAlertCategory,
 } from '../../types/process_tree';
 
 export const mockEvents: ProcessEvent[] = [
@@ -158,7 +160,7 @@ export const mockEvents: ProcessEvent[] = [
     },
     event: {
       action: EventAction.fork,
-      category: 'process',
+      category: ['process'],
       kind: EventKind.event,
       id: '1',
     },
@@ -209,6 +211,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -316,7 +319,7 @@ export const mockEvents: ProcessEvent[] = [
     },
     event: {
       action: EventAction.exec,
-      category: 'process',
+      category: ['process'],
       kind: EventKind.event,
       id: '2',
     },
@@ -352,6 +355,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -459,7 +463,7 @@ export const mockEvents: ProcessEvent[] = [
     },
     event: {
       action: EventAction.end,
-      category: 'process',
+      category: ['process'],
       kind: EventKind.event,
       id: '3',
     },
@@ -511,6 +515,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -622,7 +627,7 @@ export const mockEvents: ProcessEvent[] = [
     },
     event: {
       action: EventAction.end,
-      category: 'process',
+      category: ['process'],
       kind: EventKind.event,
       id: '4',
     },
@@ -645,6 +650,12 @@ export const mockEvents: ProcessEvent[] = [
   },
 ] as ProcessEvent[];
 
+export const mockAlertTypeCounts: AlertTypeCount[] = [
+  { category: ProcessEventAlertCategory.file, count: 0 },
+  { category: ProcessEventAlertCategory.network, count: 2 },
+  { category: ProcessEventAlertCategory.process, count: 1 },
+];
+
 export const mockAlerts: ProcessEvent[] = [
   {
     kibana: {
@@ -665,7 +676,7 @@ export const mockAlerts: ProcessEvent[] = [
         reason: 'process event created low alert cmd test alert.',
         original_time: '2021-11-23T15:25:04.218Z',
         original_event: {
-          action: 'exec',
+          action: EventAction.exec,
         },
         uuid: '6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38',
       },
@@ -797,7 +808,7 @@ export const mockAlerts: ProcessEvent[] = [
           },
         },
       },
-      name: '',
+      name: 'vi',
       args_count: 2,
       args: ['vi', 'cmd/config.ini'],
       working_directory: '/home/vagrant',
@@ -811,7 +822,7 @@ export const mockAlerts: ProcessEvent[] = [
     },
     event: {
       action: EventAction.exec,
-      category: 'process',
+      category: ['process'],
       kind: EventKind.signal,
       id: '5',
     },
@@ -851,7 +862,7 @@ export const mockAlerts: ProcessEvent[] = [
         reason: 'process event created low alert cmd test alert.',
         original_time: '2021-11-23T15:25:05.202Z',
         original_event: {
-          action: 'exit',
+          action: EventAction.end,
         },
         uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
       },
@@ -998,7 +1009,7 @@ export const mockAlerts: ProcessEvent[] = [
     },
     event: {
       action: EventAction.end,
-      category: 'process',
+      category: ['process'],
       kind: EventKind.signal,
       id: '6',
     },
@@ -1020,6 +1031,402 @@ export const mockAlerts: ProcessEvent[] = [
     },
   },
 ];
+
+export const mockFileAlert = {
+  kibana: {
+    alert: {
+      rule: {
+        category: 'Custom Query Rule',
+        consumer: 'siem',
+        name: 'File telemetry',
+        uuid: '709d3890-4c71-11ec-8c67-01ccde9db9bf',
+        enabled: true,
+        description: 'File telemetry',
+        risk_score: 21,
+        severity: 'low',
+        query: "process.executable: '/usr/bin/vi'",
+      },
+      status: 'active',
+      workflow_status: 'open',
+      reason: 'process event created low alert File telemetry.',
+      original_time: '2021-11-23T15:25:05.202Z',
+      original_event: {
+        action: EventAction.end,
+      },
+      uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
+    },
+  },
+  '@timestamp': '2021-11-23T15:26:34.860Z',
+  user: {
+    name: 'vagrant',
+    id: '1000',
+  },
+  group: {
+    id: '1000',
+    name: 'vagrant',
+  },
+  process: {
+    pid: 3535,
+    user: {
+      name: 'vagrant',
+      id: '1000',
+    },
+    group: {
+      id: '1000',
+      name: 'vagrant',
+    },
+    exit_code: 137,
+    executable: '/usr/bin/vi',
+    command_line: 'bash',
+    interactive: true,
+    entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
+    parent: {
+      pid: 2442,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
+      executable: '/usr/bin/bash',
+      command_line: 'bash',
+      interactive: true,
+      entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+      name: '',
+      args_count: 2,
+      args: ['vi', 'cmd/config.ini'],
+      working_directory: '/home/vagrant',
+      start: '2021-11-23T15:26:34.860Z',
+      tty: {
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
+    },
+    session_leader: {
+      pid: 2442,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
+      executable: '/usr/bin/bash',
+      command_line: 'bash',
+      interactive: true,
+      entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+      name: '',
+      args_count: 2,
+      args: ['vi', 'cmd/config.ini'],
+      working_directory: '/home/vagrant',
+      start: '2021-11-23T15:26:34.860Z',
+      tty: {
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
+    },
+    entry_leader: {
+      pid: 2442,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
+      executable: '/usr/bin/bash',
+      command_line: 'bash',
+      interactive: true,
+      entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+      name: '',
+      args_count: 2,
+      args: ['vi', 'cmd/config.ini'],
+      working_directory: '/home/vagrant',
+      start: '2021-11-23T15:26:34.860Z',
+      tty: {
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
+    },
+    group_leader: {
+      pid: 2442,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
+      executable: '/usr/bin/bash',
+      command_line: 'bash',
+      interactive: true,
+      entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+      name: '',
+      args_count: 2,
+      args: ['vi', 'cmd/config.ini'],
+      working_directory: '/home/vagrant',
+      start: '2021-11-23T15:26:34.860Z',
+      tty: {
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
+    },
+    name: '',
+    args_count: 2,
+    args: ['vi', 'cmd/config.ini'],
+    working_directory: '/home/vagrant',
+    start: '2021-11-23T15:26:34.860Z',
+    tty: {
+      char_device: {
+        major: 8,
+        minor: 1,
+      },
+    },
+  },
+  file: {
+    path: '/home/jon/new_file.txt',
+    extension: 'txt',
+    name: 'new_file.txt',
+  },
+  event: {
+    action: EventAction.exec,
+    category: ['file'],
+    kind: EventKind.signal,
+    id: '6',
+  },
+  host: {
+    architecture: 'x86_64',
+    hostname: 'james-fleet-714-2',
+    id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
+    ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+    mac: ['42:01:0a:84:00:32'],
+    name: 'james-fleet-714-2',
+    os: {
+      family: 'centos',
+      full: 'CentOS 7.9.2009',
+      kernel: '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021',
+      name: 'Linux',
+      platform: 'centos',
+      version: '7.9.2009',
+    },
+  },
+};
+
+export const mockNetworkAlert = {
+  kibana: {
+    alert: {
+      rule: {
+        category: 'Custom Query Rule',
+        consumer: 'siem',
+        name: 'Network telemetry',
+        uuid: '709d3890-4c71-11ec-8c67-01ccde9db9bf',
+        enabled: true,
+        description: 'Network telemetry',
+        risk_score: 21,
+        severity: 'low',
+        query: "process.executable: '/usr/bin/vi'",
+      },
+      status: 'active',
+      workflow_status: 'open',
+      reason: 'process event created low alert File telemetry.',
+      original_time: '2021-11-23T15:25:05.202Z',
+      original_event: {
+        action: EventAction.end,
+      },
+      uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
+    },
+  },
+  '@timestamp': '2021-11-23T15:26:34.860Z',
+  user: {
+    name: 'vagrant',
+    id: '1000',
+  },
+  group: {
+    id: '1000',
+    name: 'vagrant',
+  },
+  process: {
+    pid: 3535,
+    user: {
+      name: 'vagrant',
+      id: '1000',
+    },
+    group: {
+      id: '1000',
+      name: 'vagrant',
+    },
+    exit_code: 137,
+    executable: '/usr/bin/vi',
+    command_line: 'bash',
+    interactive: true,
+    entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
+    parent: {
+      pid: 2442,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
+      executable: '/usr/bin/bash',
+      command_line: 'bash',
+      interactive: true,
+      entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+      name: '',
+      args_count: 2,
+      args: ['vi', 'cmd/config.ini'],
+      working_directory: '/home/vagrant',
+      start: '2021-11-23T15:26:34.860Z',
+      tty: {
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
+    },
+    session_leader: {
+      pid: 2442,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
+      executable: '/usr/bin/bash',
+      command_line: 'bash',
+      interactive: true,
+      entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+      name: '',
+      args_count: 2,
+      args: ['vi', 'cmd/config.ini'],
+      working_directory: '/home/vagrant',
+      start: '2021-11-23T15:26:34.860Z',
+      tty: {
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
+    },
+    entry_leader: {
+      pid: 2442,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
+      executable: '/usr/bin/bash',
+      command_line: 'bash',
+      interactive: true,
+      entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+      name: '',
+      args_count: 2,
+      args: ['vi', 'cmd/config.ini'],
+      working_directory: '/home/vagrant',
+      start: '2021-11-23T15:26:34.860Z',
+      tty: {
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
+    },
+    group_leader: {
+      pid: 2442,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
+      executable: '/usr/bin/bash',
+      command_line: 'bash',
+      interactive: true,
+      entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+      name: '',
+      args_count: 2,
+      args: ['vi', 'cmd/config.ini'],
+      working_directory: '/home/vagrant',
+      start: '2021-11-23T15:26:34.860Z',
+      tty: {
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
+    },
+    name: '',
+    args_count: 2,
+    args: ['vi', 'cmd/config.ini'],
+    working_directory: '/home/vagrant',
+    start: '2021-11-23T15:26:34.860Z',
+    tty: {
+      char_device: {
+        major: 8,
+        minor: 1,
+      },
+    },
+  },
+  network: {
+    transport: 'TCP',
+    protocol: 'http',
+    type: 'IP4',
+  },
+  destination: {
+    address: '127.0.0.1',
+    ip: '127.0.0.1',
+    port: 2222,
+  },
+  source: {
+    address: '128.32.0.1',
+    ip: '128.32.0.1',
+    port: 1111,
+  },
+  event: {
+    action: EventAction.exec,
+    category: ['network'],
+    kind: EventKind.signal,
+    id: '6',
+  },
+  host: {
+    architecture: 'x86_64',
+    hostname: 'james-fleet-714-2',
+    id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
+    ip: ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'],
+    mac: ['42:01:0a:84:00:32'],
+    name: 'james-fleet-714-2',
+    os: {
+      family: 'centos',
+      full: 'CentOS 7.9.2009',
+      kernel: '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021',
+      name: 'Linux',
+      platform: 'centos',
+      version: '7.9.2009',
+    },
+  },
+};
 
 export const mockData: ProcessEventsPage[] = [
   {
@@ -1278,7 +1685,7 @@ export const childProcessMock: Process = {
       '@timestamp': '2021-11-23T15:25:05.210Z',
       event: {
         kind: EventKind.event,
-        category: 'process',
+        category: ['process'],
         action: EventAction.exec,
         id: '1',
       },
@@ -1333,7 +1740,6 @@ export const childProcessMock: Process = {
       },
     } as ProcessEvent),
   isUserEntered: () => false,
-  getMaxAlertLevel: () => null,
   getEndTime: () => '',
   isDescendantOf: () => false,
 };
@@ -1364,7 +1770,7 @@ export const processMock: Process = {
       '@timestamp': '2021-11-23T15:25:04.210Z',
       event: {
         kind: EventKind.event,
-        category: 'process',
+        category: ['process'],
         action: EventAction.exec,
         id: '2',
       },
@@ -1392,6 +1798,7 @@ export const processMock: Process = {
         id: '1000',
         name: 'vagrant',
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       process: {
         args: ['bash'],
         args_count: 1,
@@ -1436,7 +1843,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         session_leader: {
           pid: 2442,
           user: {
@@ -1462,7 +1869,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         entry_leader: {
           pid: 2442,
           user: {
@@ -1488,7 +1895,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         group_leader: {
           pid: 2442,
           user: {
@@ -1514,11 +1921,10 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
       },
     } as ProcessEvent),
   isUserEntered: () => false,
-  getMaxAlertLevel: () => null,
   getEndTime: () => '',
   isDescendantOf: () => false,
 };
@@ -1566,7 +1972,6 @@ export const mockProcessMap = mockEvents.reduce(
       getOutput: () => '',
       getDetails: () => event,
       isUserEntered: () => false,
-      getMaxAlertLevel: () => null,
       isVerbose: () => true,
       getEndTime: () => '',
       isDescendantOf: () => false,

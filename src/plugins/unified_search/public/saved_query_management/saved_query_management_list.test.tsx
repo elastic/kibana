@@ -65,22 +65,20 @@ describe('Saved query management list component', () => {
       hasFiltersOrQuery: false,
       savedQueryService: {
         ...dataMock.query.savedQueries,
-        findSavedQueries: jest.fn().mockResolvedValue({
-          queries: [
-            {
-              id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-              attributes: {
-                title: 'Test',
-                description: '',
-                query: {
-                  query: 'category.keyword : "Men\'s Shoes" ',
-                  language: 'kuery',
-                },
-                filters: [],
+        getAllSavedQueries: jest.fn().mockResolvedValue([
+          {
+            id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+            attributes: {
+              title: 'Test',
+              description: '',
+              query: {
+                query: 'category.keyword : "Men\'s Shoes" ',
+                language: 'kuery',
               },
+              filters: [],
             },
-          ],
-        }),
+          },
+        ]),
         deleteSavedQuery: jest.fn(),
       },
     };
@@ -96,9 +94,7 @@ describe('Saved query management list component', () => {
       ...props,
       savedQueryService: {
         ...dataMock.query.savedQueries,
-        findSavedQueries: jest.fn().mockResolvedValue({
-          queries: [],
-        }),
+        getAllSavedQueries: jest.fn().mockResolvedValue([]),
       },
     };
     const component = mount(wrapSavedQueriesListComponentInContext(newProps));
@@ -126,7 +122,7 @@ describe('Saved query management list component', () => {
       component.find('[data-test-subj="saved-query-management-apply-changes-button"]').length
     ).toBeTruthy();
     component
-      .find('[data-test-subj="saved-query-management-apply-changes-button"]')
+      .find('button[data-test-subj="saved-query-management-apply-changes-button"]')
       .first()
       .simulate('click');
     expect(onLoadSpy).toBeCalled();

@@ -1,0 +1,13 @@
+title: Connector request properties for a Jira connector
+required:
+  - apiUrl
+  - projectKey
+description: Defines properties for connectors when type is `.jira`.
+type: object
+properties:
+  apiUrl:
+    description: The Jira instance URL.
+    type: string
+  projectKey:
+    description: The Jira project key.
+    type: string

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-avatar-solution",
+  "owner": "@elastic/appex-sharedux"
+}

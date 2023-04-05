@@ -41,26 +41,46 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       });
     },
 
+    async performIndexActionInDetailPanel(action: string) {
+      await this.clickContextMenuInDetailPanel();
+      if (action === 'flush') {
+        await testSubjects.click('flushIndexMenuButton');
+      }
+    },
+
+    async clickContextMenuInDetailPanel() {
+      await testSubjects.click('indexActionsContextMenuButton');
+    },
+
     async getIndexList() {
       const table = await find.byCssSelector('table');
-      const $ = await table.parseDomContent();
-      const indexList = await $.findTestSubjects('indexTableRow')
-        .toArray()
-        .map((row) => {
+      const rows = await table.findAllByTestSubject('indexTableRow');
+      return await Promise.all(
+        rows.map(async (row) => {
           return {
-            indexName: $(row).findTestSubject('indexTableIndexNameLink').text(),
-            indexHealth: $(row).findTestSubject('indexTableCell-health').text(),
-            indexStatus: $(row).findTestSubject('indexTableCell-status').text(),
-            indexPrimary: $(row).findTestSubject('indexTableCell-primary').text(),
-            indexReplicas: $(row).findTestSubject('indexTableCell-replica').text(),
-            indexDocuments: $(row)
-              .findTestSubject('indexTableCell-documents')
-              .text()
-              .replace('documents', ''),
-            indexSize: $(row).findTestSubject('indexTableCell-size').text(),
+            indexLink: await row.findByTestSubject('indexTableIndexNameLink'),
+            indexName: await (
+              await row.findByTestSubject('indexTableIndexNameLink')
+            ).getVisibleText(),
+            indexHealth: await (
+              await row.findByTestSubject('indexTableCell-health')
+            ).getVisibleText(),
+            indexStatus: await (
+              await row.findByTestSubject('indexTableCell-status')
+            ).getVisibleText(),
+            indexPrimary: await (
+              await row.findByTestSubject('indexTableCell-primary')
+            ).getVisibleText(),
+            indexReplicas: await (
+              await row.findByTestSubject('indexTableCell-replica')
+            ).getVisibleText(),
+            indexDocuments: await (
+              await (await row.findByTestSubject('indexTableCell-documents')).getVisibleText()
+            ).replace('documents', ''),
+            indexSize: await (await row.findByTestSubject('indexTableCell-size')).getVisibleText(),
           };
-        });
-      return indexList;
+        })
+      );
     },
 
     async changeTabs(

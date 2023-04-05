@@ -269,7 +269,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   );
 
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
-    defaultMessage: 'Find apps, content, and more. Ex: Discover',
+    defaultMessage: 'Find apps, content, and more.',
   });
   const keyboardShortcutTooltip = `${i18n.translate(
     'xpack.globalSearchBar.searchBar.shortcutTooltip.description',
@@ -333,6 +333,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         buttonRef: setButtonRef,
+        panelStyle: { marginTop: '6px' },
       }}
       popoverButton={
         <EuiHeaderSectionItemButton

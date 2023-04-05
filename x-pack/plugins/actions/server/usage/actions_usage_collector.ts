@@ -47,6 +47,13 @@ export function createActionsUsageCollector(
       count_actions_executions_failed_by_type_per_day: byTypeSchema,
       avg_execution_time_per_day: { type: 'long' },
       avg_execution_time_by_type_per_day: byTypeSchema,
+      count_connector_types_by_action_run_outcome_per_day: {
+        DYNAMIC_KEY: {
+          success: { type: 'long' },
+          failure: { type: 'long' },
+          unknown: { type: 'long' },
+        },
+      },
     },
     fetch: async () => {
       try {
@@ -77,6 +84,7 @@ export function createActionsUsageCollector(
           count_actions_executions_failed_by_type_per_day: {},
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
+          count_connector_types_by_action_run_outcome_per_day: {},
         };
       }
     },

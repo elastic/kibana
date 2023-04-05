@@ -7,16 +7,21 @@
  */
 
 import React from 'react';
-import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/public';
+import { CoreStart, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface ICoreStartContext {
   appName: string;
   uiSettings: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
   storage: IStorageWrapper;
+  core: CoreStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  data: DataPublicPluginStart;
 }
 
-export const CoreStartContext = React.createContext<ICoreStartContext | null>(null);
+export const CoreStartContext = React.createContext<ICoreStartContext>({} as ICoreStartContext);
 
 export const CoreStartContextProvider = CoreStartContext.Provider;

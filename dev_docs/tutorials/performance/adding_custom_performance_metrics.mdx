@@ -1,0 +1,187 @@
+---
+id: kibDevTutorialAddingCustomPerformanceMetrics
+slug: /kibana-dev-docs/tutorial/performance/adding_custom_performance_metrics
+title: Adding Performance Metrics
+summary: Learn how to instrument your code and analyze performance
+date: 2023-01-13
+tags: ['kibana', 'onboarding', 'setup', 'performance', 'development', 'telemetry']
+---
+
+# Build and track custom performance metrics
+Having access to performance metrics allows us to better understand user experience across Kibana, identify issues and fix it.
+Custom metrics allows to monitor critical flows like server start, saved objects fetching or dashboard loading times.
+
+## Instrument your code to report metric event.
+We use event-based telemetry (EBT) to report client-side metrics as events.
+If you want to add a custom metric on server side, please notify the #kibana-core team in advance.
+
+Let's assume we intend to report the performance of a specific action called `APP_ACTION`.
+In order to do so, we need to first measure the timing of that action. The [`performance.now()`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now) API can help with that:
+
+```typescript
+const actionStartTime = performance.now();
+// action is started and finished
+const actionDuration = window.performance.now() - actionStartTime; // Duration in milliseconds
+```
+
+Once we have the time measurement, we can use the `reportPerformanceMetricEvent` API to report it.
+
+```typescript
+reportPerformanceMetricEvent(analytics, {
+  eventName: APP_ACTION,     
+  duration: actionDuration,
+});
+```
+
+After the journey run is finished, the metric will be delivered to the [Telemetry Staging](https://telemetry-v2-staging.elastic.dev/) cluster, alongside with the event's context.
+The data is updated periodically, so you might have to wait up to 30 minutes to see your data in the index.
+
+Once indexed, this metric will appear in `ebt-kibana` index. It is also mapped into an additional index, dedicated to performance metrics.
+We recommend using the `Kibana Performance` space on the telemetry cluster, where you get an `index patten` to easily access this data.
+Each document in the index has the following structure:
+
+```typescript
+{
+  "_index": "backing-ebt-kibana-browser-performance-metrics-000001",    // Performance metrics are stored at a dedicated simplified index (browser \ server). 
+  "_source": {
+    "timestamp": "2022-08-31T11:29:58.275Z"
+    "event_type": "performance_metric",                                 // All events share a common event type to simplify mapping
+    "eventName": APP_ACTION,                                            // Event name as specified when reporting it
+    "duration": 736,                                                    // Event duration as specified when reporting it
+    "context": {                                                        // Context holds information identifying the deployment, version, application and page that generated the event
+      "version": "8.5.0-SNAPSHOT",
+      "applicationId": "dashboards",
+      "page": "app",
+      "entityId": "61c58ad0-3dd3-11e8-b2b9-5d5dc1715159",
+      "branch": "main",
+      "labels": {
+        "journeyName": "flight_dashboard",
+        ...
+      }
+      ...
+    },
+    ...
+  },
+}
+```
+
+### Performance events with breakdowns and metadata
+
+Lets assume we are interested in benchmarking the performance of a more complex event `COMPLEX_APP_ACTION`, that is made up of two steps: 
+ - `INSPECT_DATA` measures the time it takes to retrieve a user's profile and check if there is a cached version of their data.
+    - If the cached data is fresh it proceeds with a flow `use-local-data`
+    - If data needs to be refreshed, it proceeds with a flow `load-data-from-api`.
+ - `PROCESS_DATA` loads and processes the data depending on the flow chosen in the previous step.
+
+We could utilize the additional options supported by the `reportPerformanceMetricEvent` API:
+
+```typescript
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+
+reportPerformanceMetricEvent(analytics, {
+  eventName: COMPLEX_APP_ACTION,     
+  duration,                                   // Total duration in milliseconds
+  key1    : INSPECT_DATA,                     // Claiming free key1 to be used for INSPECT_DATA
+  value1  : durationOfStepA,                  // Total duration of step INSPECT_DATA in milliseconds
+  key2    : PROCESS_DATA,                     // Claiming free key2 to be used for PROCESS_DATA
+  value2  : durationOfStepB,                  // Total duration of step PROCESS_DATA in milliseconds
+  meta: {
+    dataSource: 'flow2',                     // Providing event specific context. This can be useful to create meaningful aggregations.
+  },
+});
+```
+
+This event will be indexed with the following structure:
+
+```typescript
+{
+  "_index": "backing-ebt-kibana-browser-performance-metrics-000001",    // Performance metrics are stored in a dedicated simplified index (browser \ server). 
+  "_source": {
+    "timestamp": "2022-08-31T11:29:58.275Z"
+    "event_type": "performance_metric",                                 // All events share a common event type to simplify mapping
+    "eventName": COMPLEX_APP_ACTION,                                    // Event name as specified when reporting it
+    "duration": 736,                                                    // Event duration as specified when reporting it
+    "key1": INSPECT_DATA,                                               // The key name of INSPECT_DATA
+    "value1": 250,                                                      // The duration of step INSPECT_DATA
+    "key2": PROCESS_DATA,                                               // The key name of PROCESS_DATA
+    "value2": 520,                                                      // The duration of step PROCESS_DATA
+    "meta": {
+      "dataSource": 'load-data-from-api', 
+    },    
+    "context": {                                                        // Context holds information identifying the deployment, version, application and page that generated the event
+      "version": "8.5.0-SNAPSHOT",
+      "cluster_name": "job-ftr_configs_2-cluster-ftr",
+      "pageName": "application:dashboards:app",
+      "applicationId": "dashboards",
+      "page": "app",
+      "entityId": "61c58ad0-3dd3-11e8-b2b9-5d5dc1715159",
+      "branch": "main",
+      "labels": {
+        "journeyName": "flight_dashboard",
+      }
+      ...
+    },
+    ...
+  },
+}
+```
+
+The performance metrics API supports **5 numbered free fields** that can be used to report numeric metrics that you intend to analyze.
+Note that they can be used for any type of numeric information you may want to report and use to create your own flexible schema, 
+without having to add custom mappings.
+
+If you want to provide event specific context, you can add properties to the `meta` field.
+The `meta` object is stored as a [flattened field](https://www.elastic.co/guide/en/elasticsearch/reference/current/flattened.html) hence 
+it's searchable and can be used to further breakdown event metrics.
+
+**Note**: It's important to keep in mind `free field` values are integers and floating point values will be rounded.
+
+### How to choose and measure events
+
+Events should be meaningful and can have multiple sub metrics which will give specific information of certain actions. For example 
+page-load events can be composed of render time, data load time during the page-load and so on. It's important to understand these 
+events will have meaning for performance investigations and that can be used in visualizations, aggregations. Considering this, 
+creating an event for cpuUsage does not bring any value because it doesn't bring any context with itself and reporting multiple of these 
+events in different places of code will have so much variability during performance analysis of your code. However it can be nice attribute
+to follow if it's important for you to look inside of a specific event e.g. `page-load`. 
+
+- **Make sure that the event is clearly defined and consistent** (i.e. same code flow is executed each time).
+  Consider the start point and endpoint of the measurement and what happens between those points.
+  For example: a `app-data-load` event should not include the time it takes to render the data.
+- **Choose event names wisely**.
+  Try to balance event names specificity. Calling an event `load` is too generic, calling an event `tsvb-data-load` is too specific (instead the visualization 
+  type can be specified in a `meta` field)
+- **Distinguish between flows with event context**. 
+  If a function that loads data is called when an app loads, when the user changes filters and when the refresh button is clicked, you should distinguish between
+  these flows by specifying a `meta` field.
+- **Avoid duplicate events**.
+  Make sure that measurement and reporting happens in a point of the code that is executed only once. 
+  For example, make sure that refresh events are reported only once per button click.
+- **Measure as close to the event as possible**.
+  For example, if you're measuring the execution of a specific React Effect execution, place the measurement code inside the effect.
+  try to place the measurement start right before  the navigation is performed and stop measuring as soon as all resources are loaded
+- **Use the `window.performance` API**.
+  The [`performance.now()`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now) API can be used to accurate way to receive timestamps 
+  The [`performance.mark()`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark) API can be used to track performance without having to pollute the 
+  code.
+- **Keep performance in mind**. Reporting the performance of Kibana should never harm its own performance. 
+  Avoid sending events too frequently (`onMouseMove`) or adding serialized JSON objects (whole `SavedObjects`) into the meta object.
+
+### Analyzing journey results
+The telemetry data will be reported to the Telemetry Staging cluster alongside with execution context.
+Use the `context.labels.ciBuildName` label to filter down events to only those originating from performance runs and visualize the duration of events (or their breakdowns):
+ - Be sure to narrow your analysis down to performance events by specifying a filter `context.labels.ciBuildName: kibana-single-user-performance`.
+   Otherwise you might be looking at results originating from different hardware.
+ - You can look at the results of a specific journey by filtering on `context.labels.journeyName`.
+
+Please contact the #kibana-performance team if you need more help visualizing and tracking the results.
+
+### Production performance tracking
+
+All users who are opted in to report telemetry will start reporting event based telemetry as well.
+The data is available to be analyzed on the production telemetry cluster.
+
+# Analytics Client
+
+Holds the public APIs to report events, enrich the events' context and set up the transport mechanisms. Please checkout package documentation to get more information about
+[Analytics Client](https://github.com/elastic/kibana/blob/main/packages/analytics/README.md).

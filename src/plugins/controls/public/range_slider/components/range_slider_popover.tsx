@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, ComponentProps, Ref, useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import {
@@ -18,20 +18,25 @@ import {
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
+import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
+import { RangeValue } from '../../../common/range_slider/types';
 import { pluginServices } from '../../services';
 import { rangeSliderReducers } from '../range_slider_reducers';
-import { RangeSliderReduxState, RangeValue } from '../types';
+import { RangeSliderReduxState } from '../types';
 import { RangeSliderStrings } from './range_slider_strings';
 
-export const RangeSliderPopover: FC = () => {
+// Unfortunately, wrapping EuiDualRange in `withEuiTheme` has created this annoying/verbose typing
+export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
+
+export const RangeSliderPopover: FC<{ rangeRef?: Ref<EuiDualRangeRef> }> = ({ rangeRef }) => {
   const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
-  const rangeRef = useRef<EuiDualRange | null>(null);
 
   // Controls Services Context
-  const { dataViews } = pluginServices.getHooks();
-  const { get: getDataViewById } = dataViews.useService();
+  const {
+    dataViews: { get: getDataViewById },
+  } = pluginServices.getServices();
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
@@ -141,8 +146,8 @@ export const RangeSliderPopover: FC = () => {
         <EuiFlexItem>
           <EuiDualRange
             id={id}
-            min={hasAvailableRange ? rangeSliderMin : undefined}
-            max={hasAvailableRange ? rangeSliderMax : undefined}
+            min={hasAvailableRange ? rangeSliderMin : 0}
+            max={hasAvailableRange ? rangeSliderMax : 100}
             onChange={([newLowerBound, newUpperBound]) => {
               const updatedLowerBound =
                 typeof newLowerBound === 'number' ? String(newLowerBound) : value[0];

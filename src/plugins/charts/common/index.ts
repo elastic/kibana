@@ -13,11 +13,12 @@ export type {
   CustomPaletteArguments,
   CustomPaletteState,
   SystemPaletteArguments,
+  SystemPaletteExpressionFunctionDefinition,
 } from './expressions/palette';
 export { palette, systemPalette } from './expressions/palette';
 
 export { paletteIds, defaultCustomColors } from './constants';
-export type { ColorSchema, RawColorSchema, ColorMap } from './static';
+export type { AllowedSettingsOverrides, ColorSchema, RawColorSchema, ColorMap } from './static';
 export {
   ColorSchemas,
   vislibColorMaps,

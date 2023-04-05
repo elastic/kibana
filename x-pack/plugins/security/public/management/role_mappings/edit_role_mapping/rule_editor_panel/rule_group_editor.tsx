@@ -31,8 +31,13 @@ interface Props {
   ruleDepth: number;
   onChange: (rule: RuleGroup) => void;
   onDelete: () => void;
+  readOnly?: boolean;
 }
 export class RuleGroupEditor extends Component<Props, {}> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   public render() {
     return (
       <EuiPanel
@@ -48,26 +53,29 @@ export class RuleGroupEditor extends Component<Props, {}> {
                   rule={this.props.rule}
                   onChange={this.props.onChange}
                   parentRule={this.props.parentRule}
+                  readOnly={this.props.readOnly}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="danger"
-                  onClick={this.props.onDelete}
-                  size="s"
-                  iconType="trash"
-                  data-test-subj="deleteRuleGroupButton"
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.editRoleMapping.deleteRuleGroupButton"
-                    defaultMessage="Delete"
-                  />
-                </EuiButtonEmpty>
+                {this.props.readOnly === false && (
+                  <EuiButtonEmpty
+                    color="danger"
+                    onClick={this.props.onDelete}
+                    size="s"
+                    iconType="trash"
+                    data-test-subj="deleteRuleGroupButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.editRoleMapping.deleteRuleGroupButton"
+                      defaultMessage="Delete"
+                    />
+                  </EuiButtonEmpty>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           {this.renderSubRules()}
-          {this.props.allowAdd && (
+          {this.props.allowAdd && this.props.readOnly === false && (
             <EuiFlexItem>
               <AddRuleButton onClick={this.onAddRuleClick} />
             </EuiFlexItem>
@@ -105,6 +113,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
                   updatedRule.removeRule(subRuleIndex);
                   this.props.onChange(updatedRule);
                 }}
+                readOnly={this.props.readOnly}
               />
             </EuiFlexItem>
             {divider}
@@ -127,6 +136,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
                 updatedRule.removeRule(subRuleIndex);
                 this.props.onChange(updatedRule);
               }}
+              readOnly={this.props.readOnly}
             />
           </EuiFlexItem>
           {divider}

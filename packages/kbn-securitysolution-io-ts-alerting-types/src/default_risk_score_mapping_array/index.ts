@@ -8,11 +8,11 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { RiskScoreMapping, risk_score_mapping } from '../risk_score_mapping';
+import { RiskScoreMapping } from '../risk_score_mapping';
 
 /**
  * Types the DefaultStringArray as:
- *   - If null or undefined, then a default risk_score_mapping array will be set
+ *   - If null or undefined, then a default RiskScoreMapping array will be set
  */
 export const DefaultRiskScoreMappingArray = new t.Type<
   RiskScoreMapping,
@@ -20,8 +20,8 @@ export const DefaultRiskScoreMappingArray = new t.Type<
   unknown
 >(
   'DefaultRiskScoreMappingArray',
-  risk_score_mapping.is,
+  RiskScoreMapping.is,
   (input, context): Either<t.Errors, RiskScoreMapping> =>
-    input == null ? t.success([]) : risk_score_mapping.validate(input, context),
+    input == null ? t.success([]) : RiskScoreMapping.validate(input, context),
   t.identity
 );

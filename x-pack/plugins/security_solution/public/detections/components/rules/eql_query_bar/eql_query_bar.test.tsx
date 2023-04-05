@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { mockIndexPattern, TestProviders, useFormFieldMock } from '../../../../common/mock';
-import { mockQueryBar } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
+import { mockQueryBar } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import type { EqlQueryBarProps } from './eql_query_bar';
 import { EqlQueryBar } from './eql_query_bar';
 import { getEqlValidationError } from './validators.mock';

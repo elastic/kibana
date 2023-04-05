@@ -11,7 +11,6 @@ import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths'
 
 export interface APMIndices {
   apmIndices?: {
-    sourcemap?: string;
     error?: string;
     onboarding?: string;
     span?: string;

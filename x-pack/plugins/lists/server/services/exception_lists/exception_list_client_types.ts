@@ -21,6 +21,7 @@ import type {
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
+  ExpireTimeOrUndefined,
   ExportExceptionDetails,
   FilterOrUndefined,
   FoundExceptionListItemSchema,
@@ -46,6 +47,7 @@ import type {
   PitId,
   PitOrUndefined,
   SearchAfterOrUndefined,
+  SearchOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Tags,
@@ -241,6 +243,8 @@ export interface CreateExceptionListItemOptions {
   comments: CreateCommentsArray;
   /** an array with the exception list item entries */
   entries: EntriesArray;
+  /** an optional datetime string with an expiration time */
+  expireTime: ExpireTimeOrUndefined;
   /** the "item_id" of the exception list item */
   itemId: ItemId;
   /** the "list_id" of the parent exception list */
@@ -287,6 +291,17 @@ export interface CreateEndpointListItemOptions {
 }
 
 /**
+ * ExceptionListClient.duplicateExceptionListAndItems
+ * {@link ExceptionListClient.duplicateExceptionListAndItems}
+ */
+export interface DuplicateExceptionListOptions {
+  /** The single list id to do the search against */
+  listId: ListId;
+  /** saved object namespace (single | agnostic) */
+  namespaceType: NamespaceType;
+}
+
+/**
  * ExceptionListClient.updateExceptionListItem
  * {@link ExceptionListClient.updateExceptionListItem}
  */
@@ -297,6 +312,8 @@ export interface UpdateExceptionListItemOptions {
   comments: UpdateCommentsArray;
   /** item exception entries logic */
   entries: EntriesArray;
+  /** an optional datetime string with an expiration time */
+  expireTime: ExpireTimeOrUndefined;
   /** the "id" of the exception list item */
   id: IdOrUndefined;
   /** the "item_id" of the exception list item */
@@ -361,6 +378,8 @@ export interface FindExceptionListItemOptions {
   perPage: PerPageOrUndefined;
   /** The Point in Time (pit) id if there is one, otherwise "undefined" can be send in */
   pit?: PitOrUndefined;
+  /** The simple search parameter if there is one, otherwise "undefined" can be sent in */
+  search?: SearchOrUndefined;
   /** The search_after parameter if there is one, otherwise "undefined" can be sent in */
   searchAfter?: SearchAfterOrUndefined;
   /** The page number or "undefined" if there is no page number to continue from */
@@ -382,6 +401,8 @@ export interface FindEndpointListItemOptions {
   perPage: PerPageOrUndefined;
   /** The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in */
   pit?: PitOrUndefined;
+  /** The simple search parameter if there is one, otherwise "undefined" can be sent in */
+  search?: SearchOrUndefined;
   /** The search_after parameter if there is one, otherwise "undefined" can be sent in */
   searchAfter?: SearchAfterOrUndefined;
   /** The page number or "undefined" if there is no page number to continue from */
@@ -407,6 +428,8 @@ export interface FindExceptionListsItemOptions {
   perPage: PerPageOrUndefined;
   /** The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in */
   pit?: PitOrUndefined;
+  /** The simple search parameter if there is one, otherwise "undefined" can be sent in */
+  search?: SearchOrUndefined;
   /** The search_after parameter if there is one, otherwise "undefined" can be sent in */
   searchAfter?: SearchAfterOrUndefined;
   /** The page number or "undefined" if there is no page number to continue from */
@@ -472,6 +495,8 @@ export interface ExportExceptionListAndItemsOptions {
   id: IdOrUndefined;
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
+  /** whether or not to include expired exceptions */
+  includeExpiredExceptions: boolean;
 }
 
 /**
@@ -495,6 +520,7 @@ export interface ImportExceptionListAndItemsOptions {
   maxExceptionsImportSize: number;
   /** whether or not to overwrite an exception list with imported list if a matching list_id found */
   overwrite: boolean;
+  generateNewListId: boolean;
 }
 
 /**

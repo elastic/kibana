@@ -1,0 +1,34 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/core-theme-browser",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-execution-context-browser",
+    "@kbn/core-http-browser",
+    "@kbn/core-fatal-errors-browser",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-application-browser",
+    "@kbn/core-doc-links-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-deprecations-browser",
+    "@kbn/core-overlays-browser",
+    "@kbn/core-saved-objects-browser",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-custom-branding-browser"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -28,6 +28,12 @@ export function ingestionStatusToText(ingestionStatus: IngestionStatus): string 
       { defaultMessage: 'Sync failure' }
     );
   }
+  if (ingestionStatus === IngestionStatus.CONFIGURED) {
+    return i18n.translate(
+      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.configured.label',
+      { defaultMessage: 'Configured' }
+    );
+  }
   return i18n.translate(
     'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
     { defaultMessage: 'Incomplete' }

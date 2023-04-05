@@ -13,3 +13,6 @@ yarn kbn bootstrap
 for version in $(cat versions.json | jq -r '.versions[].version'); do
   node scripts/es snapshot --download-only --base-path "$ES_CACHE_DIR" --version "$version"
 done
+
+echo "--- Cloning repos for docs build"
+node scripts/validate_next_docs --clone-only

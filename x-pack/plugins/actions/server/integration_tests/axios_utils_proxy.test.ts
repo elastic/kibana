@@ -14,10 +14,9 @@ import http from 'http';
 import https from 'https';
 import axios from 'axios';
 import { duration as momentDuration } from 'moment';
-import { schema } from '@kbn/config-schema';
 import getPort from 'get-port';
 
-import { request } from '../builtin_action_types/lib/axios_utils';
+import { request } from '../lib/axios_utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -593,12 +592,6 @@ const BaseActionsConfig: ActionsConfig = {
   maxResponseContentLength: ByteSizeValue.parse('1mb'),
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
-  cleanupFailedExecutionsTask: {
-    enabled: true,
-    cleanupInterval: schema.duration().validate('5m'),
-    idleInterval: schema.duration().validate('1h'),
-    pageSize: 100,
-  },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

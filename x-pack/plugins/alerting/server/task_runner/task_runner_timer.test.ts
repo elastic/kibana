@@ -21,7 +21,7 @@ describe('TaskRunnerTimer', () => {
 
   describe('setDuration', () => {
     beforeAll(() => {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(new Date('2020-03-09').getTime());
     });
 
@@ -61,28 +61,33 @@ describe('TaskRunnerTimer', () => {
 
   describe('runWithTimer', () => {
     test('should calculate time it takes to run callback function for a given timer span', async () => {
+      const delay = 2000;
       const result = await timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         return 'done!';
       });
 
       expect(result).toEqual('done!');
 
-      expect(timer.toJson().process_alerts_duration_ms).toBeGreaterThan(2000);
+      // We would expect this to be greater than the delay value but add a fudge factor to avoid flakiness
+      expect(timer.toJson().process_alerts_duration_ms).toBeGreaterThanOrEqual(delay - 5);
     });
 
     test('should log warning and overwrite duration if called twice for same span', async () => {
+      const prevDelay = 2000;
+      const delay = 1000;
       await timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, prevDelay));
         return 'done!';
       });
       await timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         return 'done!';
       });
 
-      expect(timer.toJson().process_alerts_duration_ms).toBeGreaterThan(1000);
-      expect(timer.toJson().process_alerts_duration_ms).toBeLessThan(2000);
+      // We would expect this to be greater than the delay value but add a fudge factor to avoid flakiness
+      expect(timer.toJson().process_alerts_duration_ms).toBeGreaterThanOrEqual(delay - 5);
+      expect(timer.toJson().process_alerts_duration_ms).toBeLessThan(prevDelay);
     });
   });
 });

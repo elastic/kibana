@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
@@ -68,7 +68,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        const serviceInstance = apm.service(serviceName, 'production', 'go').instance('instance-a');
+        const serviceInstance = apm
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
+          .instance('instance-a');
 
         await synthtraceEsClient.index([
           timerange(start, end)
@@ -76,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(appleTransaction.successRate)
             .generator((timestamp) =>
               serviceInstance
-                .transaction(appleTransaction.name)
+                .transaction({ transactionName: appleTransaction.name })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
@@ -86,8 +88,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(appleTransaction.failureRate)
             .generator((timestamp) =>
               serviceInstance
-                .transaction(appleTransaction.name)
-                .errors(serviceInstance.error('error 1', 'foo').timestamp(timestamp))
+                .transaction({ transactionName: appleTransaction.name })
+                .errors(
+                  serviceInstance.error({ message: 'error 1', type: 'foo' }).timestamp(timestamp)
+                )
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()
@@ -97,7 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(bananaTransaction.successRate)
             .generator((timestamp) =>
               serviceInstance
-                .transaction(bananaTransaction.name)
+                .transaction({ transactionName: bananaTransaction.name })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
@@ -107,8 +111,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(bananaTransaction.failureRate)
             .generator((timestamp) =>
               serviceInstance
-                .transaction(bananaTransaction.name)
-                .errors(serviceInstance.error('error 2', 'bar').timestamp(timestamp))
+                .transaction({ transactionName: bananaTransaction.name })
+                .errors(
+                  serviceInstance.error({ message: 'error 2', type: 'bar' }).timestamp(timestamp)
+                )
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()

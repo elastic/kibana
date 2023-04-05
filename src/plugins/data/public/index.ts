@@ -139,6 +139,8 @@ export type {
   ParsedInterval,
   // expressions
   ExecutionContextSearch,
+  ExpressionFunctionKql,
+  ExpressionFunctionLucene,
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
   ExpressionValueSearchContext,
@@ -167,6 +169,7 @@ export type {
   IEsError,
   Reason,
   WaitUntilNextSessionCompletesOptions,
+  SearchResponseWarning,
 } from './search';
 
 export {
@@ -178,10 +181,10 @@ export {
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
   isEsError,
+  getSearchErrorOverrideDisplay,
   SearchSource,
   SearchSessionState,
   SortDirection,
-  handleResponse,
 } from './search';
 
 export type {
@@ -269,6 +272,9 @@ export type {
   GlobalQueryStateFromUrl,
 } from './query';
 
+export type { ShardFailureRequest } from './shard_failure_modal';
+export { ShardFailureOpenModalButton } from './shard_failure_modal';
+
 export type { AggsStart } from './search/aggs';
 
 export { getTime } from '../common';
@@ -292,7 +298,6 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  IDataPluginServices,
   DataPublicPluginStartActions,
 } from './types';
 

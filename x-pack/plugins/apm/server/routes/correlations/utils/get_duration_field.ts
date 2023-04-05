@@ -9,7 +9,7 @@ import {
   SPAN_DURATION,
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 const {

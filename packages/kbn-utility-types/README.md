@@ -5,7 +5,6 @@ TypeScript utility types for usage in Kibana.
 - This package re-exports a subset of the items in [`utility-types`](https://github.com/piotrwitek/utility-types)
 - You can also add more utility types here.
 
-
 ## Usage
 
 ```ts
@@ -15,10 +14,11 @@ type A = Observable<string>;
 type B = UnwrapObservable<A>; // string
 ```
 
-
 ## Reference
 
 - `Assign<T, U>` &mdash; From `U` assign properties to `T` (just like object assign).
+- `DotObject<T>` &mdash; Convert type `T` to a flattened structure.
+- `DedotObject<T>` &mdash; The inverse of `DotObject<T>`: convert the flattened type `T` to a deeply-nested type.
 - `Ensure<T, X>` &mdash; Makes sure `T` is of type `X`.
 - `ObservableLike<T>` &mdash; Minimal interface for an object resembling an `Observable`.
 - `PublicContract<T>` &mdash; Returns an object with public keys only.

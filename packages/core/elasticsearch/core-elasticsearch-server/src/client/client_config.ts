@@ -9,6 +9,23 @@
 import type { Duration } from 'moment';
 
 /**
+ * Definition of an API that should redact the requested body in the logs
+ */
+export interface ElasticsearchApiToRedactInLogs {
+  /**
+   * The ES path.
+   * - If specified as a string, it'll be checked as `contains`.
+   * - If specified as a RegExp, it'll be tested against the path.
+   */
+  path: string | RegExp;
+  /**
+   * HTTP method.
+   * If not provided, the path will be checked for all methods.
+   */
+  method?: string;
+}
+
+/**
  * Configuration options to be used to create a {@link IClusterClient | cluster client}
  *
  * @public
@@ -17,6 +34,8 @@ export interface ElasticsearchClientConfig {
   customHeaders: Record<string, string>;
   requestHeadersWhitelist: string[];
   maxSockets: number;
+  maxIdleSockets: number;
+  idleSocketTimeout: Duration;
   compression: boolean;
   sniffOnStart: boolean;
   sniffOnConnectionFault: boolean;
@@ -30,6 +49,7 @@ export interface ElasticsearchClientConfig {
   requestTimeout?: Duration | number;
   caFingerprint?: string;
   ssl?: ElasticsearchClientSslConfig;
+  apisToRedactInLogs?: ElasticsearchApiToRedactInLogs[];
 }
 
 /**

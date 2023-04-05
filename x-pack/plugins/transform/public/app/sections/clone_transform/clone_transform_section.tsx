@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
@@ -140,7 +140,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
                 defaultMessage: 'An error occurred getting the transform configuration.',
               })}
               color="danger"
-              iconType="alert"
+              iconType="warning"
             >
               <pre>{JSON.stringify(errorMessage)}</pre>
             </EuiCallOut>

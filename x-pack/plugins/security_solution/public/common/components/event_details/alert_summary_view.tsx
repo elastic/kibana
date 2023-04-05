@@ -19,14 +19,14 @@ const AlertSummaryViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
   eventId: string;
   isDraggable?: boolean;
-  timelineId: string;
+  scopeId: string;
   title: string;
   goToTable: () => void;
   isReadOnly?: boolean;
-}> = ({ browserFields, data, eventId, isDraggable, timelineId, title, goToTable, isReadOnly }) => {
+}> = ({ browserFields, data, eventId, isDraggable, scopeId, title, goToTable, isReadOnly }) => {
   const summaryRows = useMemo(
-    () => getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId, isReadOnly }),
-    [browserFields, data, eventId, isDraggable, timelineId, isReadOnly]
+    () => getSummaryRows({ browserFields, data, eventId, isDraggable, scopeId, isReadOnly }),
+    [browserFields, data, eventId, isDraggable, scopeId, isReadOnly]
   );
 
   return (

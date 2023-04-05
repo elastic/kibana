@@ -12,23 +12,22 @@ import {
   savedQueryIdOrUndefined,
   packIdOrUndefined,
   queryOrUndefined,
-  queriesOrUndefined,
-  stringArrayOrUndefined,
-} from '../../common/schemas';
+  arrayQueries,
+} from '@kbn/osquery-io-ts-types';
 
-export const createLiveQueryRequestBodySchema = t.type({
-  agent_ids: stringArrayOrUndefined,
+export const createLiveQueryRequestBodySchema = t.partial({
+  agent_ids: t.array(t.string),
   agent_all: t.union([t.boolean, t.undefined]),
-  agent_platforms: stringArrayOrUndefined,
-  agent_policy_ids: stringArrayOrUndefined,
+  agent_platforms: t.array(t.string),
+  agent_policy_ids: t.array(t.string),
   query: queryOrUndefined,
-  queries: queriesOrUndefined,
+  queries: arrayQueries,
   saved_query_id: savedQueryIdOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,
   pack_id: packIdOrUndefined,
-  alert_ids: stringArrayOrUndefined,
-  case_ids: stringArrayOrUndefined,
-  event_ids: stringArrayOrUndefined,
+  alert_ids: t.array(t.string),
+  case_ids: t.array(t.string),
+  event_ids: t.array(t.string),
   metadata: t.union([t.object, t.undefined]),
 });
 

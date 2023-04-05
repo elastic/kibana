@@ -37,14 +37,17 @@ export { overviewPageActions, OverviewPageFooter } from './overview_page';
 export type { KibanaReactOverlays } from './overlays';
 export { createReactOverlays } from './overlays';
 
-export { useUiSetting, useUiSetting$ } from './ui_settings';
+export {
+  useUiSetting,
+  useGlobalUiSetting,
+  useUiSetting$,
+  useGlobalUiSetting$,
+} from './ui_settings';
 
 export { useExecutionContext } from './use_execution_context';
 
-export type { TableListViewProps, TableListViewState } from './table_list_view';
-export { TableListView } from './table_list_view';
-
 export type { ToolbarButtonProps } from './toolbar_button';
+/** @deprecated ToolbarButton - use `ToolbarButton` from `@kbn/shared-ux-button-toolbar` */
 export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
 
 export { Route } from './router';
@@ -75,9 +78,8 @@ export { ValidatedDualRange } from './validated_range';
 export type { ToastInput, KibanaReactNotifications } from './notifications';
 export { createNotifications } from './notifications';
 
+/** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 export { Markdown, MarkdownSimple } from './markdown';
-
-export { reactToUiComponent, uiToReactComponent } from './adapters';
 
 export { toMountPoint, MountPointPortal } from './util';
 export type { ToMountPointOptions } from './util';

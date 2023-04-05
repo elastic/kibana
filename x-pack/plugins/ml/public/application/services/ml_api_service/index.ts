@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
+import { jsonSchemaProvider } from './json_schema';
 import { HttpService } from '../http_service';
 
 import { annotationsApiProvider } from './annotations';
@@ -44,6 +45,7 @@ import type { DataRecognizerConfigResponse, Module } from '../../../../common/ty
 import { getHttp } from '../../util/dependency_cache';
 import type { RuntimeMappings } from '../../../../common/types/fields';
 import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
+import { notificationsProvider } from './notifications';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -54,6 +56,7 @@ export interface MlInfoResponse {
   };
   upgrade_mode: boolean;
   cloudId?: string;
+  isCloudTrial?: boolean;
 }
 
 export interface BucketSpanEstimatorResponse {
@@ -729,5 +732,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jobs: jobsApiProvider(httpService),
     savedObjects: savedObjectsApiProvider(httpService),
     trainedModels: trainedModelsApiProvider(httpService),
+    notifications: notificationsProvider(httpService),
+    jsonSchema: jsonSchemaProvider(httpService),
   };
 }

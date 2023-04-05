@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
+import type { CasesUiStart, CasesPluginSetup, CasesPluginStart, CasesUiSetup } from './types';
 import { KibanaServices } from './common/lib/kibana';
-import { CasesUiConfigType } from '../common/ui/types';
+import type { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
@@ -27,6 +27,7 @@ import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import { registerCaseFileKinds } from './files';
 
 /**
  * @public
@@ -52,6 +53,9 @@ export class CasesUiPlugin
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
 
+    const config = this.initializerContext.config.get<CasesUiConfigType>();
+    registerCaseFileKinds(config.files, plugins.files);
+
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: APP_ID,
@@ -67,7 +71,7 @@ export class CasesUiPlugin
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: APP_ID,
       title: APP_TITLE,
-      order: 0,
+      order: 1,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
@@ -103,7 +107,13 @@ export class CasesUiPlugin
 
   public start(core: CoreStart, plugins: CasesPluginStart): CasesUiStart {
     const config = this.initializerContext.config.get<CasesUiConfigType>();
-    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
+
+    KibanaServices.init({
+      ...core,
+      ...plugins,
+      kibanaVersion: this.kibanaVersion,
+      config,
+    });
 
     /**
      * getCasesContextLazy returns a new component each time is being called. To avoid re-renders
@@ -130,14 +140,14 @@ export class CasesUiPlugin
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
-        // @deprecated Please use the hook getUseCasesAddToNewCaseFlyout
+        // @deprecated Please use the hook useCasesAddToNewCaseFlyout
         getCreateCaseFlyout: (props) =>
           getCreateCaseFlyoutLazy({
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
-        // @deprecated Please use the hook getUseCasesAddToExistingCaseModal
+        // @deprecated Please use the hook useCasesAddToExistingCaseModal
         getAllCasesSelectorModal: (props) =>
           getAllCasesSelectorModalLazy({
             ...props,
@@ -146,8 +156,8 @@ export class CasesUiPlugin
           }),
       },
       hooks: {
-        getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
-        getUseCasesAddToExistingCaseModal: useCasesAddToExistingCaseModal,
+        useCasesAddToNewCaseFlyout,
+        useCasesAddToExistingCaseModal,
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),

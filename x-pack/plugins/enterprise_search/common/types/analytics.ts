@@ -6,9 +6,14 @@
  */
 
 export interface AnalyticsCollection {
-  id: string;
+  events_datastream: string;
   name: string;
-  event_retention_day_length: number;
 }
 
-export type AnalyticsCollectionDocument = Omit<AnalyticsCollection, 'id'>;
+export interface AnalyticsEventsIndexExists {
+  exists: boolean;
+}
+
+export interface AnalyticsCollectionDataViewId {
+  data_view_id: string | null;
+}

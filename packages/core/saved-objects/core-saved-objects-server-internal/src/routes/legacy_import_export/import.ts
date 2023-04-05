@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../../internal_types';
 import { importDashboards } from './lib';

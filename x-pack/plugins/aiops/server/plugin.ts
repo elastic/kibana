@@ -32,7 +32,10 @@ export class AiopsPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<AiopsPluginStartDeps>, plugins: AiopsPluginSetupDeps) {
+  public setup(
+    core: CoreSetup<AiopsPluginStartDeps, AiopsPluginSetupDeps>,
+    plugins: AiopsPluginSetupDeps
+  ) {
     this.logger.debug('aiops: Setup');
 
     // Subscribe to license changes and store the current license in `currentLicense`.
@@ -47,8 +50,8 @@ export class AiopsPlugin
 
     // Register server side APIs
     if (AIOPS_ENABLED) {
-      core.getStartServices().then(([_, depsStart]) => {
-        defineExplainLogRateSpikesRoute(router, aiopsLicense, this.logger);
+      core.getStartServices().then(([coreStart, depsStart]) => {
+        defineExplainLogRateSpikesRoute(router, aiopsLicense, this.logger, coreStart);
       });
     }
 

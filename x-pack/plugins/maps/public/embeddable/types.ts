@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
+import { Observable } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
 import {
   Embeddable,
@@ -13,7 +13,7 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 
@@ -32,6 +32,7 @@ interface MapEmbeddableState {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  timeslice?: [number, number];
   filterByMapExtent?: boolean;
   isMovementSynchronized?: boolean;
 }
@@ -47,6 +48,6 @@ export type MapEmbeddableOutput = EmbeddableOutput & {
 };
 
 export type MapEmbeddableType = Embeddable<MapEmbeddableInput, MapEmbeddableOutput> & {
-  setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void;
+  getOnRenderComplete$(): Observable<void>;
   setIsSharable(isSharable: boolean): void;
 };

@@ -164,7 +164,6 @@ const rules = {
     terms: {
       __template: {
         field: '',
-        size: 10,
       },
       field: '{field}',
       size: 10,
@@ -173,7 +172,7 @@ const rules = {
         __template: {
           _key: 'asc',
         },
-        _term: { __one_of: ['asc', 'desc'] },
+        _key: { __one_of: ['asc', 'desc'] },
         _count: { __one_of: ['asc', 'desc'] },
         '*': { __one_of: ['asc', 'desc'] },
       },
@@ -268,11 +267,11 @@ const rules = {
     date_histogram: {
       __template: {
         field: 'date',
-        interval: 'month',
+        fixed_interval: '1d',
       },
       field: '{field}',
-      interval: {
-        __one_of: ['year', 'quarter', 'week', 'day', 'hour', 'minute', 'second'],
+      fixed_interval: {
+        __one_of: ['1d', '1h', '1m', '1s', '1ms'],
       },
       min_doc_count: 0,
       extended_bounds: {
@@ -294,13 +293,30 @@ const rules = {
       keyed: { __one_of: [true, false] },
       pre_zone: '-01:00',
       post_zone: '-01:00',
-      pre_zone_adjust_large_interval: { __one_of: [true, false] },
       factor: 1000,
       pre_offset: '1d',
       post_offset: '1d',
       format: 'yyyy-MM-dd',
       time_zone: '00:00',
       missing: '',
+      calendar_interval: {
+        __one_of: [
+          'year',
+          'quarter',
+          'month',
+          'week',
+          'day',
+          'hour',
+          'minute',
+          '1y',
+          '1q',
+          '1M',
+          '1w',
+          '1d',
+          '1h',
+          '1m',
+        ],
+      },
     },
     geo_distance: {
       __template: {
@@ -317,11 +333,53 @@ const rules = {
     geohash_grid: {
       __template: {
         field: '',
-        precision: 3,
+        precision: 5,
+        size: 10,
       },
       field: '{field}',
       precision: { __one_of: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
-      size: 10,
+      bounds: {
+        top_left: [-180, 90],
+        bottom_right: [180, -90],
+      },
+      size: 10000,
+      shard_size: 10,
+    },
+    geohex_grid: {
+      __template: {
+        field: '',
+        precision: 6,
+        size: 10,
+      },
+      field: '{field}',
+      precision: {
+        __one_of: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+      },
+      bounds: {
+        top_left: [-180, 90],
+        bottom_right: [180, -90],
+      },
+      size: 10000,
+      shard_size: 10,
+    },
+    geotile_grid: {
+      __template: {
+        field: '',
+        precision: 7,
+        size: 10,
+      },
+      bounds: {
+        top_left: [-180, 90],
+        bottom_right: [180, -90],
+      },
+      field: '{field}',
+      precision: {
+        __one_of: [
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+          25, 26, 27, 28, 29,
+        ],
+      },
+      size: 10000,
       shard_size: 10,
     },
     composite: {
@@ -473,7 +531,7 @@ const rules = {
       percents: [],
     },
     sum_bucket: simple_pipeline,
-    moving_avg: {
+    moving_fn: {
       __template: {
         buckets_path: '',
       },
@@ -489,6 +547,7 @@ const rules = {
         gamma: 0.5,
         period: 7,
       },
+      script: '',
     },
     cumulative_sum: {
       __template: {

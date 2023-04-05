@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiProvider } from '@elastic/eui';
+import { EuiProvider, EuiProviderProps } from '@elastic/eui';
 import createCache from '@emotion/cache';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
@@ -18,6 +18,7 @@ import { getColorMode } from './utils';
 
 interface KibanaThemeProviderProps {
   theme$: Observable<CoreTheme>;
+  modify?: EuiProviderProps<{}>['modify'];
 }
 
 const defaultTheme: CoreTheme = {
@@ -37,7 +38,7 @@ emotionCache.compat = true;
 /**
  * Copied from the `kibana_react` plugin, to avoid cyclical dependency
  */
-export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, children }) => {
+export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modify, children }) => {
   const theme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(theme), [theme]);
   return (
@@ -46,6 +47,7 @@ export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, chil
       cache={{ default: emotionCache, global: globalCache }}
       globalStyles={false}
       utilityClasses={false}
+      modify={modify}
     >
       {children}
     </EuiProvider>

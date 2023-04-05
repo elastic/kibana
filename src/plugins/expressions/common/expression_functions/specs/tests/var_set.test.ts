@@ -47,7 +47,7 @@ describe('expression_functions', () => {
     });
 
     it('stores context if value is not set', () => {
-      const actual = fn(input, { name: ['test'], value: [] }, context);
+      const actual = fn(input, { name: ['test'] }, context);
       expect(variables.test).toEqual(input);
       expect(actual).toEqual(input);
     });

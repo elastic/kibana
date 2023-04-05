@@ -17,8 +17,10 @@ import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { buildPhrasesFilter } from '@kbn/es-query';
 import { VectorStyle } from '../../../styles/vector/vector_style';
+import type { DynamicSizeProperty } from '../../../styles/vector/properties/dynamic_size_property';
+import type { StaticSizeProperty } from '../../../styles/vector/properties/static_size_property';
 import { getField } from '../../../../../common/elasticsearch_util';
-import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
+import { LAYER_TYPE, SOURCE_TYPES, VECTOR_STYLES } from '../../../../../common/constants';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   AbstractVectorLayer,
@@ -45,6 +47,7 @@ import {
   getAggsMeta,
   getHitsMeta,
 } from '../../../util/tile_meta_feature_utils';
+import { syncBoundsData } from '../bounds_data';
 
 const MAX_RESULT_WINDOW_DATA_REQUEST_ID = 'maxResultWindow';
 
@@ -77,7 +80,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       : super.isInitialDataLoadComplete();
   }
 
-  async getBounds(syncContext: DataRequestContext) {
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     // Add filter to narrow bounds to features with matching join keys
     let joinKeyFilter;
     if (this.getSource().isESSource()) {
@@ -93,12 +96,18 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
     }
 
-    return super.getBounds({
-      ...syncContext,
-      dataFilters: {
-        ...syncContext.dataFilters,
-        joinKeyFilter,
+    const syncContext = getDataRequestContext(this.getId());
+    return syncBoundsData({
+      layerId: this.getId(),
+      syncContext: {
+        ...syncContext,
+        dataFilters: {
+          ...syncContext.dataFilters,
+          joinKeyFilter,
+        },
       },
+      source: this.getSource(),
+      sourceQuery: this.getQuery(),
     });
   }
 
@@ -218,7 +227,23 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
     await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
 
+    let maxLineWidth = 0;
+    const lineWidth = this.getCurrentStyle()
+      .getAllStyleProperties()
+      .find((styleProperty) => {
+        return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
+      });
+    if (lineWidth) {
+      if (!lineWidth.isDynamic() && lineWidth.isComplete()) {
+        maxLineWidth = (lineWidth as StaticSizeProperty).getOptions().size;
+      } else if (lineWidth.isDynamic() && lineWidth.isComplete()) {
+        maxLineWidth = (lineWidth as DynamicSizeProperty).getOptions().maxSize;
+      }
+    }
+    const buffer = Math.ceil(3.5 * maxLineWidth);
+
     await syncMvtSourceData({
+      buffer,
       hasLabels: this.getCurrentStyle().hasLabels(),
       layerId: this.getId(),
       layerName: await this.getDisplayName(),

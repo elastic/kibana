@@ -117,10 +117,12 @@ describe('loadActionErrorLog', () => {
           "query": Object {
             "date_end": "2022-03-23T16:17:53.482Z",
             "date_start": "2022-03-23T16:17:53.482Z",
-            "filter": "kibana.alert.rule.execution.uuid: 123 and message: \\"test\\" OR error.message: \\"test\\"",
+            "filter": "(message: \\"test\\" OR error.message: \\"test\\") and kibana.alert.rule.execution.uuid: 123",
+            "namespace": undefined,
             "page": 1,
             "per_page": 10,
             "sort": "[{\\"@timestamp\\":{\\"order\\":\\"asc\\"}}]",
+            "with_auth": false,
           },
         },
       ]

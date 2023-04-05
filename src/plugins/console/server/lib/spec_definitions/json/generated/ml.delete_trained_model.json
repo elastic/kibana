@@ -1,5 +1,9 @@
 {
   "ml.delete_trained_model": {
+    "url_params": {
+      "timeout": "",
+      "force": "__flag__"
+    },
     "methods": [
       "DELETE"
     ],

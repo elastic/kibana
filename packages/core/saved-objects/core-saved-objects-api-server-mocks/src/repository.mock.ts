@@ -15,6 +15,7 @@ const create = () => {
     create: jest.fn(),
     bulkCreate: jest.fn(),
     bulkUpdate: jest.fn(),
+    bulkDelete: jest.fn(),
     delete: jest.fn(),
     bulkGet: jest.fn(),
     find: jest.fn(),
@@ -30,6 +31,7 @@ const create = () => {
     removeReferencesTo: jest.fn(),
     collectMultiNamespaceReferences: jest.fn(),
     updateObjectsSpaces: jest.fn(),
+    getCurrentNamespace: jest.fn(),
   };
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({

@@ -17,6 +17,7 @@ export {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
   FLEET_ENDPOINT_PACKAGE,
   // Saved object type
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -25,6 +26,7 @@ export {
   OUTPUT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   // Fleet server index
   FLEET_SERVER_SERVERS_INDEX,
   FLEET_SERVER_ARTIFACTS_INDEX,
@@ -36,6 +38,7 @@ export {
   AGENTS_PREFIX,
   AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS,
   agentPolicyStatuses,
+  FleetServerAgentComponentStatuses,
   // Routes
   PACKAGE_POLICY_API_ROOT,
   AGENT_API_ROUTES,
@@ -47,6 +50,8 @@ export {
   // Should probably be removed
   SO_SEARCH_LIMIT,
   // Statuses
+  // Authz
+  ENDPOINT_PRIVILEGES,
 } from './constants';
 export {
   // Route services
@@ -59,13 +64,14 @@ export {
   fleetSetupRouteService,
   // Package policy helpers
   isValidNamespace,
+  INVALID_NAMESPACE_CHARACTERS,
   // TODO Should probably not be exposed by Fleet
   decodeCloudId,
+  getFileMetadataIndexName,
+  getFileDataIndexName,
 } from './services';
 
 export type { FleetAuthz } from './authz';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export { createFleetAuthzMock } from './mocks';
 export type {
   // Request/Response
   GetOneAgentResponse,
@@ -88,7 +94,7 @@ export type {
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   GetPackagesResponse,
   BulkInstallPackagesResponse,
   FleetErrorResponse,
@@ -140,6 +146,7 @@ export type {
   KibanaAssetReference,
   KibanaSavedObjectType,
   EsAssetReference,
+  AssetsGroupedByServiceByType,
   KibanaAssetTypeToParts,
   KibanaAssetParts,
   KibanaAssetType,
@@ -177,6 +184,7 @@ export type {
   InstallFailed,
   // Fleet server models
   FleetServerAgent,
+  FleetServerAgentComponentStatus,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';

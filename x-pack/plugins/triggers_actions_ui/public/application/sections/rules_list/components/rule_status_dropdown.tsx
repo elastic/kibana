@@ -20,10 +20,9 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { SnoozeSchedule } from '../../../../types';
 import { SnoozePanel } from './rule_snooze';
-
-import { Rule } from '../../../../types';
+import { isRuleSnoozed } from '../../../lib';
+import { Rule, SnoozeSchedule } from '../../../../types';
 
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
@@ -44,11 +43,6 @@ export interface ComponentOpts {
   direction?: 'column' | 'row';
   hideSnoozeOption?: boolean;
 }
-
-export const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean }) =>
-  Boolean(
-    (rule.isSnoozedUntil && new Date(rule.isSnoozedUntil).getTime() > Date.now()) || rule.muteAll
-  );
 
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   rule,

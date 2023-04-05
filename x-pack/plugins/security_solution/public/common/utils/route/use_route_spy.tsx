@@ -8,4 +8,7 @@
 import { useContext } from 'react';
 import { RouterSpyStateContext } from './helpers';
 
+/**
+ * @deprecated
+ */
 export const useRouteSpy = () => useContext(RouterSpyStateContext);

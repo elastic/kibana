@@ -26,7 +26,7 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;
 
@@ -56,7 +56,7 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;
 
@@ -80,7 +80,7 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;
 
@@ -115,6 +115,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": false,
   },
 }
 `;
@@ -144,13 +145,13 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;
 
 exports[`agent configuration queries listConfigurations fetches configurations 1`] = `
 Object {
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
   "size": 200,
 }
 `;
@@ -208,7 +209,7 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;
 
@@ -255,6 +256,6 @@ Object {
       },
     },
   },
-  "index": "myIndex",
+  "index": ".apm-agent-configuration",
 }
 `;

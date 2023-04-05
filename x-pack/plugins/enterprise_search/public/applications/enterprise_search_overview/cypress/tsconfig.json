@@ -1,6 +1,18 @@
 {
   "extends": "../../shared/cypress/tsconfig.json",
-  "references": [{ "path": "../../shared/cypress/tsconfig.json" }],
-  "compilerOptions": { "outDir": "../../../../target/cypress/types/enterprise_search" },
-  "include": ["./**/*"]
+  "compilerOptions": { "outDir": "target/types" },
+  "include": ["./**/*"],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    { "path": "../../shared/cypress/tsconfig.json" },
+    // cypress projects that are nested inside of other ts project use code
+    // from the parent ts project in ways that can't be automatically deteceted
+    // at this time so we have to force the inclusion of this reference
+    {
+      "path": "../../../../tsconfig.json",
+      "force": true
+    },
+  ],
 }

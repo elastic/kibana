@@ -9,7 +9,11 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageContentBody, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import {
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiSpacer,
+  EuiCallOut,
+} from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateDeserialized } from '../../../../common';
@@ -132,7 +136,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="systemTemplateEditCallout"
           >
             <FormattedMessage

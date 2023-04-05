@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { encode } from '@kbn/rison';
 import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
@@ -57,7 +58,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: ROLES, route: string) => {
+const getUrlWithRoute = (role: ROLES, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -100,14 +101,14 @@ export const constructUrlWithUser = (user: User, route: string) => {
   return builtUrl.href;
 };
 
-export const getCurlScriptEnvVars = () => ({
+const getCurlScriptEnvVars = () => ({
   ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
   ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
   ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
   KIBANA_URL: Cypress.config().baseUrl,
 });
 
-export const postRoleAndUser = (role: ROLES) => {
+const postRoleAndUser = (role: ROLES) => {
   const env = getCurlScriptEnvVars();
   const detectionsRoleScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh`;
   const detectionsRoleJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`;
@@ -136,23 +137,25 @@ export const deleteRoleAndUser = (role: ROLES) => {
 };
 
 export const loginWithUser = (user: User) => {
-  cy.request({
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: {
-        username: user.username,
-        password: user.password,
+  cy.session(user, () => {
+    cy.request({
+      body: {
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: {
+          username: user.username,
+          password: user.password,
+        },
       },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    method: 'POST',
-    url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
+      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      method: 'POST',
+      url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
+    });
   });
 };
 
-export const loginWithRole = async (role: ROLES) => {
+const loginWithRole = async (role: ROLES) => {
   postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
@@ -163,19 +166,21 @@ export const loginWithRole = async (role: ROLES) => {
     port: Cypress.env('configport'),
   } as UrlObject);
   cy.log(`origin: ${theUrl}`);
-  cy.request({
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: {
-        username: role,
-        password: 'changeme',
+  cy.session(role, () => {
+    cy.request({
+      body: {
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: {
+          username: role,
+          password: 'changeme',
+        },
       },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    method: 'POST',
-    url: getUrlWithRoute(role, LOGIN_API_ENDPOINT),
+      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      method: 'POST',
+      url: getUrlWithRoute(role, LOGIN_API_ENDPOINT),
+    });
   });
 };
 
@@ -215,20 +220,25 @@ const loginViaEnvironmentCredentials = () => {
     `Authenticating via environment credentials from the \`CYPRESS_${ELASTICSEARCH_USERNAME}\` and \`CYPRESS_${ELASTICSEARCH_PASSWORD}\` environment variables`
   );
 
-  // programmatically authenticate without interacting with the Kibana login page
-  cy.request({
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: {
-        username: Cypress.env(ELASTICSEARCH_USERNAME),
-        password: Cypress.env(ELASTICSEARCH_PASSWORD),
+  const username = Cypress.env(ELASTICSEARCH_USERNAME);
+  const password = Cypress.env(ELASTICSEARCH_PASSWORD);
+
+  cy.session([username, password], () => {
+    // programmatically authenticate without interacting with the Kibana login page
+    cy.request({
+      body: {
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: {
+          username,
+          password,
+        },
       },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
-    method: 'POST',
-    url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
+      headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
+      method: 'POST',
+      url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
+    });
   });
 };
 
@@ -314,24 +324,38 @@ export const waitForPage = (url: string) => {
   );
 };
 
-export const visit = (
-  url: string,
-  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void,
-  role?: ROLES
-) => {
-  cy.visit(
-    `${
-      role ? getUrlWithRoute(role, url) : url
-    }?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
-    {
-      onBeforeLoad(win) {
-        if (onBeforeLoadCallback) {
-          onBeforeLoadCallback(win);
-        }
-        disableNewFeaturesTours(win);
-      },
-    }
-  );
+export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, role?: ROLES) => {
+  const timerangeConfig = {
+    from: 1547914976217,
+    fromStr: '2019-01-19T16:22:56.217Z',
+    kind: 'relative',
+    to: 1579537385745,
+    toStr: 'now',
+  };
+
+  const timerange = encode({
+    global: {
+      linkTo: ['timeline'],
+      timerange: timerangeConfig,
+    },
+    timeline: {
+      linkTo: ['global'],
+      timerange: timerangeConfig,
+    },
+  });
+
+  return cy.visit(role ? getUrlWithRoute(role, url) : url, {
+    ...options,
+    qs: {
+      ...options.qs,
+      timerange,
+    },
+    onBeforeLoad: (win) => {
+      options.onBeforeLoad?.(win);
+
+      disableNewFeaturesTours(win);
+    },
+  });
 };
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {

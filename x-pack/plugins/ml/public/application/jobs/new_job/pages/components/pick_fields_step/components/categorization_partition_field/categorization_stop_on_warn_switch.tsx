@@ -21,10 +21,12 @@ export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
   useEffect(() => {
     jobCreator.perPartitionStopOnWarn = stopOnWarn;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stopOnWarn]);
 
   useEffect(() => {
     setStopOnWarn(jobCreator.perPartitionStopOnWarn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (

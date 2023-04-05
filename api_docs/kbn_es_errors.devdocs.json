@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/es-errors",
-        "id": "def-server.isResponseError",
+        "id": "def-common.isResponseError",
         "type": "Function",
         "tags": [],
         "label": "isResponseError",
@@ -25,10 +33,11 @@
         ],
         "path": "packages/kbn-es-errors/src/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/es-errors",
-            "id": "def-server.isResponseError.$1",
+            "id": "def-common.isResponseError.$1",
             "type": "Unknown",
             "tags": [],
             "label": "error",
@@ -38,6 +47,7 @@
             ],
             "path": "packages/kbn-es-errors/src/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -46,7 +56,7 @@
       },
       {
         "parentPluginId": "@kbn/es-errors",
-        "id": "def-server.isUnauthorizedError",
+        "id": "def-common.isUnauthorizedError",
         "type": "Function",
         "tags": [],
         "label": "isUnauthorizedError",
@@ -58,10 +68,11 @@
         ],
         "path": "packages/kbn-es-errors/src/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/es-errors",
-            "id": "def-server.isUnauthorizedError.$1",
+            "id": "def-common.isUnauthorizedError.$1",
             "type": "Unknown",
             "tags": [],
             "label": "error",
@@ -71,6 +82,7 @@
             ],
             "path": "packages/kbn-es-errors/src/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -81,7 +93,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/es-errors",
-        "id": "def-server.ElasticsearchErrorDetails",
+        "id": "def-common.ElasticsearchErrorDetails",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchErrorDetails",
@@ -90,10 +102,11 @@
         ],
         "path": "packages/kbn-es-errors/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/es-errors",
-            "id": "def-server.ElasticsearchErrorDetails.error",
+            "id": "def-common.ElasticsearchErrorDetails.error",
             "type": "Object",
             "tags": [],
             "label": "error",
@@ -102,7 +115,8 @@
               "{ type: string; reason?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-es-errors/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -112,7 +126,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/es-errors",
-        "id": "def-server.UnauthorizedError",
+        "id": "def-common.UnauthorizedError",
         "type": "Type",
         "tags": [],
         "label": "UnauthorizedError",
@@ -125,17 +139,10 @@
         ],
         "path": "packages/kbn-es-errors/src/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

@@ -466,4 +466,86 @@ describe('validateKibanaPrivileges', () => {
       `Feature [foo] does not support privilege [read].`,
     ]);
   });
+
+  const fooSubFeature = new KibanaFeature({
+    id: 'foo',
+    name: 'Foo',
+    privileges: {
+      all: {
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+      read: {
+        disabled: true,
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+    subFeatures: [
+      {
+        name: 'Require All Spaces Enabled',
+        requireAllSpaces: true,
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'test',
+                name: 'foo',
+                includeIn: 'none',
+                ui: ['test-ui'],
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    app: [],
+    category: { id: 'foo', label: 'foo' },
+  });
+
+  test('returns no error when subfeature requireAllSpaces enabled and all spaces selected', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooSubFeature],
+        [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: {
+              foo: ['all', 'test'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([]);
+  });
+  test('returns error when subfeature requireAllSpaces enabled but not all spaces selected', () => {
+    expect(
+      validateKibanaPrivileges(
+        [fooSubFeature],
+        [
+          {
+            spaces: ['foo-space'],
+            base: [],
+            feature: {
+              foo: ['all', 'test'],
+            },
+          },
+        ]
+      ).validationErrors
+    ).toEqual([
+      'Sub-feature privilege [Foo - Require All Spaces Enabled] requires all spaces to be selected but received [foo-space]',
+    ]);
+  });
 });

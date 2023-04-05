@@ -18,11 +18,13 @@ export interface BaseIncrementOptions {
 export type IncrementSavedObjectsImportOptions = BaseIncrementOptions & {
   overwrite: boolean;
   createNewCopies: boolean;
+  compatibilityMode?: boolean;
 };
 
 /** @internal */
 export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptions & {
   createNewCopies: boolean;
+  compatibilityMode?: boolean;
 };
 
 /** @internal */
@@ -42,6 +44,8 @@ export interface ICoreUsageStatsClient {
   incrementSavedObjectsBulkResolve(options: BaseIncrementOptions): Promise<void>;
 
   incrementSavedObjectsBulkUpdate(options: BaseIncrementOptions): Promise<void>;
+
+  incrementSavedObjectsBulkDelete(options: BaseIncrementOptions): Promise<void>;
 
   incrementSavedObjectsCreate(options: BaseIncrementOptions): Promise<void>;
 

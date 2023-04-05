@@ -1,0 +1,8 @@
+title: Create SLO response
+type: object
+required:
+  - id
+properties:
+  id:
+    type: string
+    example: 8853df00-ae2e-11ed-90af-09bb6422b258

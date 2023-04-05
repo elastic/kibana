@@ -115,10 +115,13 @@ Example.args = {
       },
     },
     container: {
-      os: 'Linux',
-      type: 'Kubernetes',
-      isContainerized: true,
       totalNumberInstances: 1,
+      image: 'container image name',
+    },
+    kubernetes: {
+      deployments: ['opbeans-java', 'opbeans-go-nsn'],
+      replicasets: ['opbeans-go-6dff977956', 'opbeans-go-nsn-864bdcbc5b'],
+      namespaces: ['default'],
     },
     cloud: {
       provider: 'gcp',

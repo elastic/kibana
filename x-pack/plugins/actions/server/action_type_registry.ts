@@ -11,12 +11,7 @@ import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/s
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import {
-  ExecutorError,
-  getActionTypeFeatureUsageName,
-  TaskRunnerFactory,
-  ILicenseState,
-} from './lib';
+import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
 import {
   ActionType,
   PreConfiguredAction,
@@ -147,20 +142,17 @@ export class ActionTypeRegistry {
       );
     }
 
+    const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
+      actionTypeId: actionType.id,
+      actionTypeMaxAttempts: actionType.maxAttempts,
+    });
+
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
-        maxAttempts: actionType.maxAttempts || 1,
-        getRetry(attempts: number, error: unknown) {
-          if (error instanceof ExecutorError) {
-            return error.retry == null ? false : error.retry;
-          }
-          // Only retry other kinds of errors based on attempts
-          return attempts < (actionType.maxAttempts ?? 0);
-        },
-        createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(context, actionType.maxAttempts),
+        maxAttempts,
+        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
     // No need to notify usage on basic action types
@@ -211,5 +203,16 @@ export class ActionTypeRegistry {
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
       }));
+  }
+
+  /**
+   * Returns the actions configuration utilities
+   */
+  public getUtils(): ActionsConfigurationUtilities {
+    return this.actionsConfigUtils;
+  }
+
+  public getAllTypes(): string[] {
+    return [...this.list().map(({ id }) => id)];
   }
 }

@@ -395,6 +395,25 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it('should return examples for non-aggregatable fields', async () => {
+        const { body } = await supertest
+          .post(API_PATH)
+          .set(COMMON_HEADERS)
+          .send({
+            dataViewId: 'logstash-2015.09.22',
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            fieldName: 'extension', // `extension.keyword` is an aggregatable field but `extension` is not
+          })
+          .expect(200);
+
+        expect(body.totalDocuments).to.eql(4634);
+        expect(body.sampledDocuments).to.eql(100);
+        expect(body.sampledValues).to.eql(100);
+        expect(body.topValues.buckets.length).to.be.greaterThan(0);
+      });
+
       it('should return top values for index pattern runtime string fields', async () => {
         const { body } = await supertest
           .post(API_PATH)

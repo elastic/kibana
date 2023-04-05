@@ -30,20 +30,20 @@ import {
   createCase,
   createComment,
   updateCase,
-  getCaseUserActions,
   removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromUserAction,
   findCases,
   superUserSpace1Auth,
   delay,
   calculateDuration,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromUserAction,
+} from '../../../../common/lib/api';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   getRuleForSignalTesting,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
   getSignalsByIds,
   createRule,
@@ -506,8 +506,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('400s if the title is too long', async () => {
-        const longTitle =
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla enim, rutrum sit amet euismod venenatis, blandit et massa. Nulla id consectetur enim.';
+        const longTitle = 'a'.repeat(161);
 
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase({
@@ -796,7 +795,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest, log);
-          await deleteAllAlerts(supertest, log);
+          await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
@@ -805,7 +804,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const postedCase = await createCase(supertest, postCaseReq);
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 
@@ -865,7 +864,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 
@@ -918,7 +917,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 
@@ -987,7 +986,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, postCaseReq);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 

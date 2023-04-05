@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { layerTypes } from '../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Visualization, VisualizationMap } from '../types';
 
 export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualization> {
   return {
     id,
-    clearLayer: jest.fn((state, _layerId) => state),
+    clearLayer: jest.fn((state, _layerId, _indexPatternId) => state),
     removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
-    getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
-    getLayerType: jest.fn((_state, _layerId) => layerTypes.DATA),
+    getSupportedLayers: jest.fn(() => [{ type: LayerTypes.DATA, label: 'Data Layer' }]),
+    getLayerType: jest.fn((_state, _layerId) => LayerTypes.DATA),
     visualizationTypes: [
       {
         icon: 'empty',
@@ -49,7 +49,6 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
 
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
-    getErrorMessages: jest.fn((_state) => undefined),
     renderDimensionEditor: jest.fn(),
   };
 }

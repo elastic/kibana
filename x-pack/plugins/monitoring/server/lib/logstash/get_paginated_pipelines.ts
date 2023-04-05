@@ -11,6 +11,7 @@ import { getLogstashPipelineIds } from './get_pipeline_ids';
 import { sortPipelines } from './sort_pipelines';
 import { paginate } from '../pagination/paginate';
 import { getMetrics } from '../details/get_metrics';
+import { getLogstashDataset } from '../cluster/get_index_patterns';
 import {
   LegacyRequest,
   Pipeline,
@@ -143,7 +144,7 @@ async function getPaginatedThroughputData(
                 {
                   bool: {
                     should: [
-                      { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+                      { term: { 'data_stream.dataset': getLogstashDataset(dataset) } },
                       { term: { 'metricset.name': dataset } },
                       {
                         term: {
@@ -203,7 +204,7 @@ async function getPaginatedNodesData(
       {
         bool: {
           should: [
-            { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+            { term: { 'data_stream.dataset': getLogstashDataset(dataset) } },
             { term: { 'metricset.name': dataset } },
             { term: { type: 'logstash_stats' } },
           ],
@@ -276,7 +277,7 @@ async function getThroughputPipelines(
               {
                 bool: {
                   should: [
-                    { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+                    { term: { 'data_stream.dataset': getLogstashDataset(dataset) } },
                     { term: { 'metricset.name': dataset } },
                     {
                       term: {
@@ -316,7 +317,7 @@ async function getNodePipelines(
       {
         bool: {
           should: [
-            { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+            { term: { 'data_stream.dataset': getLogstashDataset(dataset) } },
             { term: { 'metricset.name': dataset } },
             { term: { type: 'logstash_stats' } },
           ],

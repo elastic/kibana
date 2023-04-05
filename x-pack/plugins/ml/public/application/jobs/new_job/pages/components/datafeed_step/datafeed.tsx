@@ -32,6 +32,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
       jobValidator.scrollSize.valid &&
       jobValidator.validating === false;
     setNextActive(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated, isValidQuery]);
 
   return (

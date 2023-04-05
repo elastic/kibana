@@ -90,8 +90,10 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const triggerCallback = useCallback(
     (({ triggerRef }) => {
       // obtain the reference to the trigger setter callback
@@ -103,6 +105,7 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
     []
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const tooltipCallback = useCallback(
     (({ tooltipRef, getTooltipProps }) => {
       return (
@@ -126,11 +129,11 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
         {
           name: 'preventOverflow',
           options: {
-            rootBoundary: 'window',
+            rootBoundary: 'viewport',
           },
         },
       ]}
-      placement="right-start"
+      placement="top-start"
       trigger="none"
       tooltipShown={isTooltipShown}
       tooltip={tooltipCallback}

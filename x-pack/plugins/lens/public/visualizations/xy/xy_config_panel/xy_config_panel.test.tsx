@@ -18,7 +18,7 @@ import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
-import { layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { act } from 'react-dom/test-utils';
 
 jest.mock('lodash', () => {
@@ -41,7 +41,7 @@ describe('XY Config panels', () => {
       layers: [
         {
           seriesType: 'bar',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
@@ -135,6 +135,37 @@ describe('XY Config panels', () => {
       expect(component.find(AxisSettingsPopover).at(1).prop('setEndzoneVisibility')).toBeTruthy();
       expect(component.find(AxisSettingsPopover).at(1).prop('endzonesVisible')).toBe(false);
       expect(component.find(AxisSettingsPopover).at(2).prop('setEndzoneVisibility')).toBeFalsy();
+    });
+
+    it('should pass in current time marker visibility setter and current state for time chart', () => {
+      const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        dataType: 'date',
+      });
+      const mockSetState = jest.fn();
+      const stateForTest = testState();
+      const state = {
+        ...stateForTest,
+        showCurrentTimeMarker: true,
+        layers: [
+          {
+            ...stateForTest.layers[0],
+            yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
+          } as XYDataLayerConfig,
+        ],
+      };
+      const component = shallow(<XyToolbar frame={frame} state={state} setState={mockSetState} />);
+
+      expect(
+        component.find(AxisSettingsPopover).at(0).prop('setCurrentTimeMarkerVisibility')
+      ).toBeFalsy();
+      expect(
+        component.find(AxisSettingsPopover).at(1).prop('setCurrentTimeMarkerVisibility')
+      ).toBeTruthy();
+      expect(component.find(AxisSettingsPopover).at(1).prop('currentTimeMarkerVisible')).toBe(true);
+      expect(
+        component.find(AxisSettingsPopover).at(2).prop('setCurrentTimeMarkerVisibility')
+      ).toBeFalsy();
     });
 
     it('should pass in information about current data bounds', () => {
@@ -242,6 +273,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -267,6 +301,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -284,7 +321,7 @@ describe('XY Config panels', () => {
         layers: [
           {
             seriesType: 'bar',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             layerId: 'first',
             splitAccessor: undefined,
             xAccessor: 'foo',
@@ -313,6 +350,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -325,7 +365,7 @@ describe('XY Config panels', () => {
         layers: [
           {
             seriesType: 'bar',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             layerId: 'first',
             splitAccessor: undefined,
             xAccessor: 'foo',
@@ -356,6 +396,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -368,7 +411,7 @@ describe('XY Config panels', () => {
         layers: [
           {
             seriesType: 'bar',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             layerId: 'first',
             splitAccessor: undefined,
             xAccessor: 'foo',
@@ -399,6 +442,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 

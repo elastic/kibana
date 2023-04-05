@@ -14,9 +14,9 @@ import {
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import { LayoutDirection } from '@elastic/charts';
-import { visType } from '../types';
+import { MetricVisRenderConfig, visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
-import { EXPRESSION_METRIC_NAME } from '../constants';
+import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
@@ -51,6 +51,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The dimension containing the labels for sub-categories.',
       }),
     },
+    trendline: {
+      types: [EXPRESSION_METRIC_TRENDLINE_NAME],
+      help: i18n.translate('expressionMetricVis.function.trendline.help', {
+        defaultMessage: 'An optional trendline configuration',
+      }),
+    },
     subtitle: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.subtitle.help', {
@@ -78,6 +84,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Provides a static visualization color. Overridden by palette.',
       }),
     },
+    icon: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.icon.help', {
+        defaultMessage: 'Provides a static visualization icon.',
+      }),
+    },
     palette: {
       types: ['palette'],
       help: i18n.translate('expressionMetricVis.function.palette.help', {
@@ -97,6 +109,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage:
           'Specifies the minimum number of tiles in the metric grid regardless of the input data.',
       }),
+    },
+    inspectorTableId: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.inspectorTableId.help', {
+        defaultMessage: 'An ID for the inspector table',
+      }),
+      multi: false,
+      default: 'default',
     },
   },
   fn(input, args, handlers) {
@@ -146,7 +166,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }
 
       const logTable = prepareLogTable(input, argsTable, true);
-      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+      handlers.inspectorAdapters.tables.logDatatable(args.inspectorTableId, logTable);
+
+      if (args.trendline?.inspectorTable && args.trendline.inspectorTableId) {
+        handlers.inspectorAdapters.tables.logDatatable(
+          args.trendline?.inspectorTableId,
+          args.trendline?.inspectorTable
+        );
+      }
     }
 
     return {
@@ -160,10 +187,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             subtitle: args.subtitle,
             secondaryPrefix: args.secondaryPrefix,
             color: args.color,
+            icon: args.icon,
             palette: args.palette?.params,
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
+            trends: args.trendline?.trends,
           },
           dimensions: {
             metric: args.metric,
@@ -172,6 +201,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             breakdownBy: args.breakdownBy,
           },
         },
+        overrides: handlers.variables?.overrides as MetricVisRenderConfig['overrides'],
       },
     };
   },

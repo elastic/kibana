@@ -6,7 +6,7 @@
  */
 
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
-import { Buckets, CasesTelemetry, CollectTelemetryDataParams } from '../types';
+import type { Buckets, CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import { findValueInBuckets } from './utils';
 
 export const getConfigurationTelemetryData = async ({

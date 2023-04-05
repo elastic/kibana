@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { isPendingBlock } from '../../../../common/runtime_types';
 import {
   fetchBlocksAction,
-  isPendingBlock,
   pruneCacheAction,
   setBlockLoadingAction,
   putBlocksAction,

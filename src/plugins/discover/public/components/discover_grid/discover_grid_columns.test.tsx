@@ -23,7 +23,12 @@ describe('Discover grid columns', function () {
       isSortEnabled: true,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
-      services: discoverServiceMock,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -70,8 +75,9 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
-          "display": "extension",
+          "displayAsText": "extension",
           "id": "extension",
           "isSortable": false,
           "schema": "string",
@@ -115,8 +121,10 @@ describe('Discover grid columns', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
-          "display": "message",
+          "cellActions": Array [
+            [Function],
+          ],
+          "displayAsText": "message",
           "id": "message",
           "isSortable": false,
           "schema": "string",
@@ -134,7 +142,12 @@ describe('Discover grid columns', function () {
       isSortEnabled: true,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
-      services: discoverServiceMock,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -178,8 +191,9 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
-          "display": undefined,
+          "displayAsText": "extension",
           "id": "extension",
           "isSortable": false,
           "schema": "string",
@@ -220,8 +234,10 @@ describe('Discover grid columns', function () {
             "showMoveLeft": false,
             "showMoveRight": false,
           },
-          "cellActions": undefined,
-          "display": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
+          "displayAsText": "message",
           "id": "message",
           "isSortable": false,
           "schema": "string",
@@ -239,7 +255,12 @@ describe('Discover grid columns', function () {
       isSortEnabled: true,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
-      services: discoverServiceMock,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -281,6 +302,7 @@ describe('Discover grid columns', function () {
             "showMoveRight": true,
           },
           "cellActions": Array [
+            [Function],
             [Function],
             [Function],
           ],
@@ -302,6 +324,7 @@ describe('Discover grid columns', function () {
               </React.Fragment>
             </EuiToolTip>
           </div>,
+          "displayAsText": "timestamp",
           "id": "timestamp",
           "initialWidth": 210,
           "isSortable": true,
@@ -349,8 +372,9 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
-          "display": undefined,
+          "displayAsText": "extension",
           "id": "extension",
           "isSortable": false,
           "schema": "string",
@@ -394,8 +418,10 @@ describe('Discover grid columns', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
-          "display": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
+          "displayAsText": "message",
           "id": "message",
           "isSortable": false,
           "schema": "string",

@@ -78,6 +78,7 @@ exports[`ChecklistFlyout renders 1`] = `
           fill={true}
           isLoading={false}
           onClick={[MockFunction]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Start reindexing"

@@ -6,29 +6,31 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+
+const getId = (object: { type: string; id: string }) => `${object.type}:${object.id}`;
 
 export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
-  const path = new Set<SavedObject>();
+  const traversed = new Set<string>();
   const sorted = new Set<SavedObject>();
   const objectsByTypeId = new Map(
-    savedObjects.map((object) => [`${object.type}:${object.id}`, object] as [string, SavedObject])
+    savedObjects.map((object) => [getId(object), object] as [string, SavedObject])
   );
 
   function includeObjects(objects: SavedObject[]) {
     for (const object of objects) {
-      if (path.has(object)) {
+      const objectId = getId(object);
+      if (traversed.has(objectId)) {
         continue;
       }
 
-      const refdObjects = object.references
-        .map((ref) => objectsByTypeId.get(`${ref.type}:${ref.id}`))
+      const objectRefs = object.references
+        .map((ref) => objectsByTypeId.get(getId(ref)))
         .filter((ref): ref is SavedObject => !!ref);
 
-      if (refdObjects.length) {
-        path.add(object);
-        includeObjects(refdObjects);
-        path.delete(object);
+      traversed.add(objectId);
+      if (objectRefs.length) {
+        includeObjects(objectRefs);
       }
 
       sorted.add(object);
@@ -36,5 +38,6 @@ export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
   }
 
   includeObjects(savedObjects);
+
   return [...sorted];
 }

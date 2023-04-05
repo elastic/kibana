@@ -11,8 +11,8 @@
  *
  */
 export const mlModules: string[] = [
-  'siem_cloudtrail',
-  'siem_packetbeat',
+  'security_cloudtrail',
+  'security_packetbeat',
   'security_auth',
   'security_linux_v3',
   'security_network',

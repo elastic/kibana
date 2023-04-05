@@ -7,93 +7,81 @@
 
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import {
-  EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiButtonEmpty,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { useQueryClient } from '@tanstack/react-query';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';
-import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 const OsqueryActionWrapper = styled.div`
   padding: 8px;
 `;
 
 export interface OsqueryFlyoutProps {
-  agentId: string;
+  agentId?: string;
+  defaultValues?: {
+    alertIds?: string[];
+    query?: string;
+    ecs_mapping?: { [key: string]: {} };
+    queryField?: boolean;
+  };
   onClose: () => void;
+  ecsData?: Ecs;
 }
 
-const TimelineComponent = React.memo((props) => {
-  return <EuiButtonEmpty {...props} size="xs" />;
-});
-TimelineComponent.displayName = 'TimelineComponent';
+// Make sure we keep this and ACTIONS_QUERY_KEY in use_all_live_queries.ts in sync.
+const ACTIONS_QUERY_KEY = 'actions';
 
-export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, onClose }) => {
+const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
+  agentId,
+  defaultValues,
+  onClose,
+  ecsData,
+}) => {
   const {
-    services: { osquery, timelines },
+    services: { osquery },
   } = useKibana();
+  const queryClient = useQueryClient();
 
-  const { getAddToTimelineButton } = timelines.getHoverActions();
+  const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: [ACTIONS_QUERY_KEY, { alertId: defaultValues?.alertIds?.[0] }],
+    });
+  }, [defaultValues?.alertIds, queryClient]);
 
-  const handleAddToTimeline = useCallback(
-    (payload: { query: [string, string]; isIcon?: true }) => {
-      const {
-        query: [field, value],
-        isIcon,
-      } = payload;
-      const providerA: DataProvider = {
-        and: [],
-        enabled: true,
-        excluded: false,
-        id: value,
-        kqlQuery: '',
-        name: value,
-        queryMatch: {
-          field,
-          value,
-          operator: ':',
-        },
-      };
+  if (osquery?.OsqueryAction) {
+    return (
+      <EuiFlyout
+        ownFocus
+        maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
+        size="m"
+        onClose={onClose}
+      >
+        <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
+          <EuiTitle>
+            <h2>{ACTION_OSQUERY}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
+            <osquery.OsqueryAction
+              agentId={agentId}
+              formType="steps"
+              defaultValues={defaultValues}
+              ecsData={ecsData}
+              onSuccess={invalidateQueries}
+            />
+          </OsqueryActionWrapper>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <OsqueryEventDetailsFooter handleClick={onClose} data-test-subj="flyout-footer-osquery" />
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    );
+  }
 
-      return getAddToTimelineButton({
-        dataProvider: providerA,
-        field: value,
-        ownFocus: false,
-        ...(isIcon ? { showTooltip: true } : { Component: TimelineComponent }),
-      });
-    },
-    [getAddToTimelineButton]
-  );
-  // @ts-expect-error
-  const { OsqueryAction } = osquery;
-  return (
-    <EuiFlyout
-      ownFocus
-      maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
-      size="m"
-      onClose={onClose}
-    >
-      <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
-        <EuiTitle>
-          <h2>{ACTION_OSQUERY}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
-          <OsqueryAction agentId={agentId} formType="steps" addToTimeline={handleAddToTimeline} />
-        </OsqueryActionWrapper>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <OsqueryEventDetailsFooter handleClick={onClose} data-test-subj="flyout-footer-osquery" />
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
+  return null;
 };
 
 export const OsqueryFlyout = React.memo(OsqueryFlyoutComponent);

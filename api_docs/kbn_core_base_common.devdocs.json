@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.DiscoveredPlugin",
+        "id": "def-common.DiscoveredPlugin",
         "type": "Interface",
         "tags": [],
         "label": "DiscoveredPlugin",
@@ -23,10 +31,11 @@
         ],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.id",
+            "id": "def-common.DiscoveredPlugin.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -34,11 +43,12 @@
               "\nIdentifier of the plugin."
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.configPath",
+            "id": "def-common.DiscoveredPlugin.configPath",
             "type": "CompoundType",
             "tags": [],
             "label": "configPath",
@@ -49,11 +59,12 @@
               "string | string[]"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.type",
+            "id": "def-common.DiscoveredPlugin.type",
             "type": "Enum",
             "tags": [],
             "label": "type",
@@ -63,18 +74,19 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-base-common",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreBaseCommonPluginApi",
-                "section": "def-server.PluginType",
+                "section": "def-common.PluginType",
                 "text": "PluginType"
               }
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.requiredPlugins",
+            "id": "def-common.DiscoveredPlugin.requiredPlugins",
             "type": "Object",
             "tags": [],
             "label": "requiredPlugins",
@@ -85,11 +97,12 @@
               "readonly string[]"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.optionalPlugins",
+            "id": "def-common.DiscoveredPlugin.optionalPlugins",
             "type": "Object",
             "tags": [],
             "label": "optionalPlugins",
@@ -100,11 +113,12 @@
               "readonly string[]"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.requiredBundles",
+            "id": "def-common.DiscoveredPlugin.requiredBundles",
             "type": "Object",
             "tags": [],
             "label": "requiredBundles",
@@ -115,11 +129,12 @@
               "readonly string[]"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.enabledOnAnonymousPages",
+            "id": "def-common.DiscoveredPlugin.enabledOnAnonymousPages",
             "type": "CompoundType",
             "tags": [],
             "label": "enabledOnAnonymousPages",
@@ -130,104 +145,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.ServiceStatus",
-        "type": "Interface",
-        "tags": [],
-        "label": "ServiceStatus",
-        "description": [
-          "\nThe current status of a service at a point in time.\n"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-base-common",
-            "scope": "server",
-            "docId": "kibKbnCoreBaseCommonPluginApi",
-            "section": "def-server.ServiceStatus",
-            "text": "ServiceStatus"
-          },
-          "<Meta>"
-        ],
-        "path": "packages/core/base/core-base-common/src/service_status.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.ServiceStatus.level",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "level",
-            "description": [
-              "\nThe current availability level of the service."
-            ],
-            "signature": [
-              "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
-            ],
-            "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.ServiceStatus.summary",
-            "type": "string",
-            "tags": [],
-            "label": "summary",
-            "description": [
-              "\nA high-level summary of the service status."
-            ],
-            "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.ServiceStatus.detail",
-            "type": "string",
-            "tags": [],
-            "label": "detail",
-            "description": [
-              "\nA more detailed description of the service status."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.ServiceStatus.documentationUrl",
-            "type": "string",
-            "tags": [],
-            "label": "documentationUrl",
-            "description": [
-              "\nA URL to open in a new tab about how to resolve or troubleshoot the problem."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.ServiceStatus.meta",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "meta",
-            "description": [
-              "\nAny JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained,\nmachine-readable information about the service status. May include status information for underlying features."
-            ],
-            "signature": [
-              "Meta | undefined"
-            ],
-            "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -236,20 +155,21 @@
     "enums": [
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.PluginType",
+        "id": "def-common.PluginType",
         "type": "Enum",
         "tags": [],
         "label": "PluginType",
         "description": [],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.EUI_STYLES_GLOBAL",
+        "id": "def-common.EUI_STYLES_GLOBAL",
         "type": "string",
         "tags": [],
         "label": "EUI_STYLES_GLOBAL",
@@ -259,11 +179,12 @@
         ],
         "path": "packages/core/base/core-base-common/src/eui.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.PluginName",
+        "id": "def-common.PluginName",
         "type": "Type",
         "tags": [],
         "label": "PluginName",
@@ -275,11 +196,12 @@
         ],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.PluginOpaqueId",
+        "id": "def-common.PluginOpaqueId",
         "type": "Type",
         "tags": [],
         "label": "PluginOpaqueId",
@@ -289,50 +211,10 @@
         ],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.ServiceStatusLevel",
-        "type": "Type",
-        "tags": [],
-        "label": "ServiceStatusLevel",
-        "description": [
-          "\nA convenience type that represents the union of each value in {@link ServiceStatusLevels}."
-        ],
-        "signature": [
-          "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
-        ],
-        "path": "packages/core/base/core-base-common/src/service_status.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.ServiceStatusLevels",
-        "type": "Object",
-        "tags": [],
-        "label": "ServiceStatusLevels",
-        "description": [
-          "\nThe current \"level\" of availability of a service.\n"
-        ],
-        "signature": [
-          "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
-        ],
-        "path": "packages/core/base/core-base-common/src/service_status.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

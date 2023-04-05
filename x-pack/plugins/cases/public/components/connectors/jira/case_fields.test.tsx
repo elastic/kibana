@@ -8,16 +8,20 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { omit } from 'lodash/fp';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector, issues } from '../mock';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import Fields from './case_fields';
-import { waitFor } from '@testing-library/dom';
 import { useGetSingleIssue } from './use_get_single_issue';
 import { useGetIssues } from './use_get_issues';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
@@ -84,8 +88,10 @@ describe('Jira Fields', () => {
   };
 
   const onChange = jest.fn();
+  let mockedContext: AppMockRenderer;
 
   beforeEach(() => {
+    mockedContext = createAppMockRenderer();
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetSingleIssueMock.mockReturnValue(useGetSingleIssueResponse);
@@ -116,15 +122,12 @@ describe('Jira Fields', () => {
         connector={connector}
       />
     );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
-      'Issue type: Task'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
-      'Parent issue: Parent Task'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
-      'Priority: High'
-    );
+
+    const nodes = wrapper.find('[data-test-subj="card-list-item"]').hostNodes();
+
+    expect(nodes.at(0).text()).toEqual('Issue type: Task');
+    expect(nodes.at(1).text()).toEqual('Parent issue: Parent Task');
+    expect(nodes.at(2).text()).toEqual('Priority: High');
   });
 
   test('it sets parent correctly', async () => {
@@ -269,5 +272,38 @@ describe('Jira Fields', () => {
       });
 
     expect(onChange).toBeCalledWith({ issueType: '10007', parent: null, priority: null });
+  });
+
+  it('should submit Jira connector', async () => {
+    const { rerender } = mockedContext.render(
+      <Fields fields={fields} onChange={onChange} connector={connector} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Bug' }));
+      expect(screen.getByRole('option', { name: 'Low' }));
+    });
+
+    userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), ['10007']);
+
+    rerender(
+      <Fields
+        fields={{ ...fields, issueType: '10007' }}
+        onChange={onChange}
+        connector={connector}
+      />
+    );
+
+    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['Low']);
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    expect(onChange).toBeCalledWith({
+      issueType: '10007',
+      parent: null,
+      priority: 'Low',
+    });
   });
 });

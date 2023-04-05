@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import copy from 'copy-to-clipboard';
 
 import { useKibana } from '../../common/lib/kibana';

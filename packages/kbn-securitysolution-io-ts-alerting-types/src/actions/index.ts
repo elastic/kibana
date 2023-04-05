@@ -5,43 +5,58 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-/* eslint-disable @typescript-eslint/naming-convention */
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 import * as t from 'io-ts';
 import { saved_object_attributes } from '../saved_object_attributes';
+
+export type RuleActionGroup = t.TypeOf<typeof RuleActionGroup>;
+export const RuleActionGroup = t.string;
+
+export type RuleActionId = t.TypeOf<typeof RuleActionId>;
+export const RuleActionId = t.string;
+
+export type RuleActionTypeId = t.TypeOf<typeof RuleActionTypeId>;
+export const RuleActionTypeId = t.string;
+
+export type RuleActionUuid = t.TypeOf<typeof RuleActionUuid>;
+export const RuleActionUuid = NonEmptyString;
 
 /**
  * Params is an "object", since it is a type of RuleActionParams which is action templates.
  * @see x-pack/plugins/alerting/common/rule.ts
  */
-export const action_group = t.string;
-export const action_id = t.string;
-export const action_action_type_id = t.string;
-export const action_params = saved_object_attributes;
+export type RuleActionParams = t.TypeOf<typeof RuleActionParams>;
+export const RuleActionParams = saved_object_attributes;
 
-export const action = t.exact(
-  t.type({
-    group: action_group,
-    id: action_id,
-    action_type_id: action_action_type_id,
-    params: action_params,
-  })
-);
-
-export type Action = t.TypeOf<typeof action>;
-
-export const actions = t.array(action);
-export type Actions = t.TypeOf<typeof actions>;
-
-export const actionsCamel = t.array(
-  t.exact(
+export type RuleAction = t.TypeOf<typeof RuleAction>;
+export const RuleAction = t.exact(
+  t.intersection([
     t.type({
-      group: action_group,
-      id: action_id,
-      actionTypeId: action_action_type_id,
-      params: action_params,
-    })
-  )
+      group: RuleActionGroup,
+      id: RuleActionId,
+      action_type_id: RuleActionTypeId,
+      params: RuleActionParams,
+    }),
+    t.partial({ uuid: RuleActionUuid }),
+  ])
 );
-export type ActionsCamel = t.TypeOf<typeof actions>;
+
+export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
+export const RuleActionArray = t.array(RuleAction);
+
+export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
+export const RuleActionCamel = t.exact(
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      actionTypeId: RuleActionTypeId,
+      params: RuleActionParams,
+    }),
+    t.partial({ uuid: RuleActionUuid }),
+  ])
+);
+
+export type RuleActionArrayCamel = t.TypeOf<typeof RuleActionArrayCamel>;
+export const RuleActionArrayCamel = t.array(RuleActionCamel);

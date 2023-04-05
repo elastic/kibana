@@ -22,7 +22,7 @@ describe('Processor: URI parts', () => {
   const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

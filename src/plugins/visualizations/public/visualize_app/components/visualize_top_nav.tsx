@@ -7,7 +7,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-
+import { EventEmitter } from 'events';
 import { AppMountParameters, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -21,7 +21,6 @@ import type {
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../utils';
-import type { NavigateToLensContext } from '../..';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
@@ -40,6 +39,7 @@ interface VisualizeTopNavProps {
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
+  eventEmitter?: EventEmitter;
 }
 
 const TopNav = ({
@@ -57,14 +57,15 @@ const TopNav = ({
   visualizationIdFromUrl,
   embeddableId,
   onAppLeave,
+  eventEmitter,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
-  const [editInLensConfig, setEditInLensConfig] = useState<NavigateToLensContext | null>();
   const [navigateToLens, setNavigateToLens] = useState(false);
+  const [displayEditInLensItem, setDisplayEditInLensItem] = useState(false);
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
@@ -97,19 +98,18 @@ const TopNav = ({
   );
 
   useEffect(() => {
-    const asyncGetTriggerContext = async () => {
-      if (vis.type.navigateToLens) {
-        const triggerConfig = await vis.type.navigateToLens(
-          vis.params,
-          services.data.query.timefilter.timefilter.getAbsoluteTime()
+    const subscription = embeddableHandler
+      .getExpressionVariables$()
+      .subscribe((expressionVariables) => {
+        setDisplayEditInLensItem(
+          Boolean(vis.type.navigateToLens && expressionVariables?.canNavigateToLens)
         );
-        setEditInLensConfig(triggerConfig);
-      }
+      });
+    return () => {
+      subscription.unsubscribe();
     };
-    asyncGetTriggerContext();
-  }, [services.data.query.timefilter.timefilter, vis.params, vis.type]);
+  }, [embeddableHandler, vis]);
 
-  const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
       return getTopNavConfig(
@@ -126,11 +126,11 @@ const TopNav = ({
           visualizationIdFromUrl,
           stateTransfer: services.stateTransferService,
           embeddableId,
-          editInLensConfig,
           displayEditInLensItem,
           hideLensBadge,
           setNavigateToLens,
           showBadge: !hideTryInLensBadge && displayEditInLensItem,
+          eventEmitter,
         },
         services
       );
@@ -149,10 +149,10 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
-    editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
     hideTryInLensBadge,
+    eventEmitter,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {
@@ -162,8 +162,7 @@ const TopNav = ({
     return vis.type.options.showTimePicker && hasTimeField;
   };
   const showFilterBar = vis.type.options.showFilterBar;
-  const showQueryInput =
-    vis.type.requiresSearch && vis.type.options.showQueryBar && vis.type.options.showQueryInput;
+  const showQueryInput = vis.type.requiresSearch && vis.type.options.showQueryInput;
 
   useEffect(() => {
     return () => {

@@ -238,7 +238,20 @@ export class AnalyticsClient implements IAnalyticsClient {
     this.shipperRegistered$.next();
   };
 
-  public shutdown = () => {
+  public flush = async () => {
+    await Promise.all(
+      [...this.shippersRegistry.allShippers.entries()].map(async ([shipperName, shipper]) => {
+        try {
+          await shipper.flush();
+        } catch (err) {
+          this.initContext.logger.warn(`Failed to flush shipper "${shipperName}"`, err);
+        }
+      })
+    );
+  };
+
+  public shutdown = async () => {
+    await this.flush();
     this.shippersRegistry.allShippers.forEach((shipper, shipperName) => {
       try {
         shipper.shutdown();

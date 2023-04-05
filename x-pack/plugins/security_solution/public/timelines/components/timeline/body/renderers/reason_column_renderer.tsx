@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { TimelineId } from '../../../../../../common/types';
-import type { Ecs } from '../../../../../../common/ecs';
-import { eventRendererNames } from '../../../row_renderers_browser/catalog/constants';
+import { TableId } from '../../../../../../common/types';
 import type { ColumnRenderer } from './column_renderer';
 import { REASON_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
-import * as i18n from './translations';
 
 export const reasonColumnRenderer: ColumnRenderer = {
   isInstance: isEqual(REASON_FIELD_NAME),
@@ -31,7 +29,7 @@ export const reasonColumnRenderer: ColumnRenderer = {
     isDraggable = true,
     linkValues,
     rowRenderers = [],
-    timelineId,
+    scopeId,
     truncate,
     values,
   }: {
@@ -43,7 +41,7 @@ export const reasonColumnRenderer: ColumnRenderer = {
     isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];
-    timelineId: string;
+    scopeId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
   }) => {
@@ -51,9 +49,9 @@ export const reasonColumnRenderer: ColumnRenderer = {
       return values.map((value, i) => (
         <ReasonCell
           ecsData={ecsData}
-          key={`reason-column-renderer-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+          key={`reason-column-renderer-value-${scopeId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
           rowRenderers={rowRenderers}
-          timelineId={timelineId}
+          scopeId={scopeId}
           value={value}
         />
       ));
@@ -65,7 +63,7 @@ export const reasonColumnRenderer: ColumnRenderer = {
         isDetails,
         isDraggable,
         linkValues,
-        timelineId,
+        scopeId,
         truncate,
         values,
       });
@@ -75,11 +73,14 @@ export const reasonColumnRenderer: ColumnRenderer = {
 
 const ReasonCell: React.FC<{
   value: string | number | undefined | null;
-  timelineId: string;
+  scopeId: string;
   ecsData: Ecs;
   rowRenderers: RowRenderer[];
-}> = ({ ecsData, rowRenderers, timelineId, value }) => {
-  const rowRenderer = useMemo(() => getRowRenderer(ecsData, rowRenderers), [ecsData, rowRenderers]);
+}> = ({ ecsData, rowRenderers, scopeId, value }) => {
+  const rowRenderer = useMemo(
+    () => getRowRenderer({ data: ecsData, rowRenderers }),
+    [ecsData, rowRenderers]
+  );
 
   const rowRender = useMemo(() => {
     return (
@@ -87,25 +88,22 @@ const ReasonCell: React.FC<{
       rowRenderer.renderRow({
         data: ecsData,
         isDraggable: false,
-        timelineId,
+        scopeId,
       })
     );
-  }, [rowRenderer, ecsData, timelineId]);
+  }, [rowRenderer, ecsData, scopeId]);
 
   // We don't currently show enriched renders for rule preview table
-  const isPlainText = useMemo(() => timelineId === TimelineId.rulePreview, [timelineId]);
+  const isPlainText = useMemo(() => scopeId === TableId.rulePreview, [scopeId]);
 
   return (
     <>
       {rowRenderer && rowRender && !isPlainText ? (
-        <>
-          {value}
-          <h4>{i18n.REASON_RENDERER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>
-          <EuiSpacer size="xs" />
-          <EuiPanel color="subdued" className="eui-xScroll" data-test-subj="reason-cell-renderer">
+        <EuiPanel color="subdued" className="eui-xScroll" data-test-subj="reason-cell-renderer">
+          <EuiText size="xs">
             <div className="eui-displayInlineBlock">{rowRender}</div>
-          </EuiPanel>
-        </>
+          </EuiText>
+        </EuiPanel>
       ) : (
         value
       )}

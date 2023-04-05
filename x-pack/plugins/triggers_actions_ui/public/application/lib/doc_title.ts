@@ -11,6 +11,11 @@ export const getCurrentDocTitle = (page: string): string => {
   let updatedTitle: string;
 
   switch (page) {
+    case 'logs':
+      updatedTitle = i18n.translate('xpack.triggersActionsUI.logs.breadcrumbTitle', {
+        defaultMessage: 'Logs',
+      });
+      break;
     case 'connectors':
       updatedTitle = i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
         defaultMessage: 'Connectors',
@@ -23,7 +28,7 @@ export const getCurrentDocTitle = (page: string): string => {
       break;
     default:
       updatedTitle = i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-        defaultMessage: 'Rules and Connectors',
+        defaultMessage: 'Rules',
       });
   }
   return updatedTitle;

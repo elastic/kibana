@@ -49,6 +49,31 @@ describe('useSecurityJobsHelpers', () => {
         memory_status: '',
         moduleId: 'security_linux_v3',
         processed_record_count: 0,
+        customSettings: {
+          created_by: 'ml-module-siem-auditbeat',
+          custom_urls: [
+            {
+              url_name: 'Host Details by process name',
+              url_value:
+                "siem#/ml-hosts/$host.name$?kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+            },
+            {
+              url_name: 'Host Details by user name',
+              url_value:
+                "siem#/ml-hosts/$host.name$?kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+            },
+            {
+              url_name: 'Hosts Overview by process name',
+              url_value:
+                "siem#/ml-hosts?kqlQuery=(filterQuery:(expression:'process.name%20:%20%22$process.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+            },
+            {
+              url_name: 'Hosts Overview by user name',
+              url_value:
+                "siem#/ml-hosts?kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+            },
+          ],
+        },
       });
     });
 

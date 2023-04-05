@@ -8,13 +8,16 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
-import { RuleNotifyWhenType } from '../../common';
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
   RewriteResponseCase,
   RewriteRequestCase,
   handleDisabledApiKeysError,
+  rewriteActionsReq,
+  rewriteActionsRes,
+  actionsSchema,
+  rewriteRuleLastRun,
 } from './lib';
 import {
   RuleTypeParams,
@@ -34,26 +37,31 @@ const bodySchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
   }),
-  throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
+  throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  actions: schema.arrayOf(
-    schema.object({
-      group: schema.string(),
-      id: schema.string(),
-      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    }),
-    { defaultValue: [] }
+  actions: actionsSchema,
+  notify_when: schema.maybe(
+    schema.nullable(
+      schema.oneOf(
+        [
+          schema.literal('onActionGroupChange'),
+          schema.literal('onActiveAlert'),
+          schema.literal('onThrottleInterval'),
+        ],
+        { validate: validateNotifyWhenType }
+      )
+    )
   ),
-  notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
-  const { notify_when: notifyWhen, ...rest } = result.data;
+  const { notify_when: notifyWhen, actions, ...rest } = result.data;
   return {
     ...result,
     data: {
       ...rest,
       notifyWhen,
+      actions: rewriteActionsReq(actions),
     },
   };
 };
@@ -72,6 +80,8 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   executionStatus,
   snoozeSchedule,
   isSnoozedUntil,
+  lastRun,
+  nextRun,
   ...rest
 }) => ({
   ...rest,
@@ -98,14 +108,11 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: actions.map(({ group, id, actionTypeId, params }) => ({
-          group,
-          id,
-          params,
-          connector_type_id: actionTypeId,
-        })),
+        actions: rewriteActionsRes(actions),
       }
     : {}),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const updateRuleRoute = (
@@ -127,15 +134,7 @@ export const updateRuleRoute = (
           const { id } = req.params;
           const rule = req.body;
           try {
-            const alertRes = await rulesClient.update(
-              rewriteBodyReq({
-                id,
-                data: {
-                  ...rule,
-                  notify_when: rule.notify_when as RuleNotifyWhenType,
-                },
-              })
-            );
+            const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
             return res.ok({
               body: rewriteBodyRes(alertRes),
             });

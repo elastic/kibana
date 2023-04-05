@@ -436,7 +436,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('interval errors', () => {
         before(async () => {
           // to trigger displaying of error messages
-          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          await testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');
           // this will avoid issues with the play tooltip covering the interval field
           await testSubjects.scrollIntoView('advancedParams-2');
         });
@@ -520,7 +520,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.visEditor.setInterval('Millisecond');
 
           // Apply interval
-          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          await testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');
 
           const isHelperScaledLabelExists = await find.existsByCssSelector(
             '[data-test-subj="currentlyScaledText"]'
@@ -537,7 +537,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should update scaled label text after custom interval is set and time range is changed', async () => {
           await PageObjects.visEditor.setInterval('10s', { type: 'custom' });
-          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          await testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');
           const isHelperScaledLabelExists = await find.existsByCssSelector(
             '[data-test-subj="currentlyScaledText"]'
           );

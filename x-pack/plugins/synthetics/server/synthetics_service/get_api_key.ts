@@ -10,26 +10,24 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import {
-  deleteSyntheticsServiceApiKey,
-  getSyntheticsServiceAPIKey,
-  setSyntheticsServiceApiKey,
-  syntheticsServiceApiKey,
-} from '../legacy_uptime/lib/saved_objects/service_api_key';
+import { syntheticsServiceAPIKeySavedObject } from '../legacy_uptime/lib/saved_objects/service_api_key';
 import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
+import { checkHasPrivileges } from './authentication/check_has_privilege';
+
+export const syntheticsIndex = 'synthetics-*';
 
 export const serviceApiKeyPrivileges = {
   cluster: ['monitor', 'read_ilm', 'read_pipeline'] as SecurityClusterPrivilege[],
   indices: [
     {
-      names: ['synthetics-*'],
+      names: [syntheticsIndex],
       privileges: [
         'view_index_metadata',
         'create_doc',
         'auto_configure',
+        'read',
       ] as SecurityIndexPrivilege[],
     },
   ],
@@ -40,47 +38,62 @@ export const getAPIKeyForSyntheticsService = async ({
   server,
 }: {
   server: UptimeServerSetup;
-}): Promise<SyntheticsServiceApiKey | undefined> => {
-  const { encryptedSavedObjects } = server;
-
-  const encryptedClient = encryptedSavedObjects.getClient({
-    includedHiddenTypes: [syntheticsServiceApiKey.name],
-  });
-
+}): Promise<{ apiKey?: SyntheticsServiceApiKey; isValid: boolean }> => {
   try {
-    const apiKey = await getSyntheticsServiceAPIKey(encryptedClient);
+    const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
+
     if (apiKey) {
-      return apiKey;
+      const [isValid, { index }] = await Promise.all([
+        server.security.authc.apiKeys.validate({
+          id: apiKey.id,
+          api_key: apiKey.apiKey,
+        }),
+        checkHasPrivileges(server, apiKey),
+      ]);
+
+      const indexPermissions = index[syntheticsIndex];
+
+      const hasPermissions =
+        indexPermissions.auto_configure &&
+        indexPermissions.create_doc &&
+        indexPermissions.view_index_metadata;
+
+      if (!hasPermissions) {
+        return { isValid: false, apiKey };
+      }
+
+      if (!isValid) {
+        server.logger.info('Synthetics api is no longer valid');
+      }
+
+      return { apiKey, isValid };
     }
   } catch (err) {
-    // TODO: figure out how to handle decryption errors
+    server.logger.error(err);
   }
+
+  return { isValid: false };
 };
 
 export const generateAPIKey = async ({
   server,
-  security,
   request,
   uptimePrivileges = false,
 }: {
   server: UptimeServerSetup;
-  request?: KibanaRequest;
-  security: SecurityPluginStart;
+  request: KibanaRequest;
   uptimePrivileges?: boolean;
 }) => {
+  const { security } = server;
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
   if (!isApiKeysEnabled) {
     throw new Error('Please enable API keys in kibana to use synthetics service.');
   }
 
-  if (!request) {
-    throw new Error('User authorization is needed for api key generation');
-  }
-
   if (uptimePrivileges) {
     return security.authc.apiKeys?.create(request, {
-      name: 'uptime-api-key',
+      name: 'synthetics-api-key (required for project monitors)',
       kibana_role_descriptors: {
         uptime_save: {
           elasticsearch: {},
@@ -104,13 +117,13 @@ export const generateAPIKey = async ({
     });
   }
 
-  const { canEnable } = await getSyntheticsEnablement({ request, server });
+  const { canEnable } = await hasEnablePermissions(server);
   if (!canEnable) {
     throw new SyntheticsForbiddenError();
   }
 
   return security.authc.apiKeys?.create(request, {
-    name: 'synthetics-api-key',
+    name: 'synthetics-api-key (required for monitor management)',
     role_descriptors: {
       synthetics_writer: serviceApiKeyPrivileges,
     },
@@ -123,67 +136,58 @@ export const generateAPIKey = async ({
 
 export const generateAndSaveServiceAPIKey = async ({
   server,
-  security,
   request,
   authSavedObjectsClient,
 }: {
   server: UptimeServerSetup;
-  request?: KibanaRequest;
-  security: SecurityPluginStart;
+  request: KibanaRequest;
   // authSavedObject is needed for write operations
   authSavedObjectsClient?: SavedObjectsClientContract;
 }) => {
-  const apiKeyResult = await generateAPIKey({ server, request, security });
+  const apiKeyResult = await generateAPIKey({ server, request });
 
   if (apiKeyResult) {
     const { id, name, api_key: apiKey } = apiKeyResult;
     const apiKeyObject = { id, name, apiKey };
     if (authSavedObjectsClient) {
       // discard decoded key and rest of the keys
-      await setSyntheticsServiceApiKey(authSavedObjectsClient, apiKeyObject);
+      await syntheticsServiceAPIKeySavedObject.set(authSavedObjectsClient, apiKeyObject);
     }
     return apiKeyObject;
   }
 };
 
-export const deleteServiceApiKey = async ({
-  request,
-  server,
-  savedObjectsClient,
-}: {
-  server: UptimeServerSetup;
-  request?: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract;
-}) => {
-  await deleteSyntheticsServiceApiKey(savedObjectsClient);
-};
-
-export const getSyntheticsEnablement = async ({
-  request,
-  server: { uptimeEsClient, security, encryptedSavedObjects },
-}: {
-  server: UptimeServerSetup;
-  request?: KibanaRequest;
-}) => {
-  const encryptedClient = encryptedSavedObjects.getClient({
-    includedHiddenTypes: [syntheticsServiceApiKey.name],
-  });
+export const getSyntheticsEnablement = async ({ server }: { server: UptimeServerSetup }) => {
+  const { security } = server;
 
   const [apiKey, hasPrivileges, areApiKeysEnabled] = await Promise.all([
-    getSyntheticsServiceAPIKey(encryptedClient),
-    uptimeEsClient.baseESClient.security.hasPrivileges({
-      body: {
-        cluster: [
-          'manage_security',
-          'manage_api_key',
-          'manage_own_api_key',
-          ...serviceApiKeyPrivileges.cluster,
-        ],
-        index: serviceApiKeyPrivileges.indices,
-      },
-    }),
+    getAPIKeyForSyntheticsService({ server }),
+    hasEnablePermissions(server),
     security.authc.apiKeys.areAPIKeysEnabled(),
   ]);
+
+  const { canEnable, canManageApiKeys } = hasPrivileges;
+  return {
+    canEnable,
+    canManageApiKeys,
+    isEnabled: Boolean(apiKey?.apiKey),
+    isValidApiKey: apiKey?.isValid,
+    areApiKeysEnabled,
+  };
+};
+
+const hasEnablePermissions = async ({ uptimeEsClient }: UptimeServerSetup) => {
+  const hasPrivileges = await uptimeEsClient.baseESClient.security.hasPrivileges({
+    body: {
+      cluster: [
+        'manage_security',
+        'manage_api_key',
+        'manage_own_api_key',
+        ...serviceApiKeyPrivileges.cluster,
+      ],
+      index: serviceApiKeyPrivileges.indices,
+    },
+  });
 
   const { cluster } = hasPrivileges;
   const {
@@ -202,10 +206,8 @@ export const getSyntheticsEnablement = async ({
   );
 
   return {
-    canEnable: canManageApiKeys && hasClusterPermissions && hasIndexPermissions,
     canManageApiKeys,
-    isEnabled: Boolean(apiKey),
-    areApiKeysEnabled,
+    canEnable: canManageApiKeys && hasClusterPermissions && hasIndexPermissions,
   };
 };
 

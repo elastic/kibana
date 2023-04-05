@@ -155,12 +155,16 @@ function getJoinKey(layerDescriptor: LayerDescriptor): JOIN_KEYS | null {
 }
 
 function getLayerKey(layerDescriptor: LayerDescriptor): LAYER_KEYS | null {
-  if (!layerDescriptor.sourceDescriptor) {
-    return null;
-  }
-
   if (layerDescriptor.type === LAYER_TYPE.HEATMAP) {
     return LAYER_KEYS.ES_AGG_HEATMAP;
+  }
+
+  if (layerDescriptor.type === LAYER_TYPE.LAYER_GROUP) {
+    return LAYER_KEYS.LAYER_GROUP;
+  }
+
+  if (!layerDescriptor.sourceDescriptor) {
+    return null;
   }
 
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE) {

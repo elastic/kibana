@@ -67,9 +67,41 @@ export const SUCCESS_CHART_LABEL = i18n.translate(
   }
 );
 
+export const AUTHENCICATION_SUCCESS_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.userAuthentications.authentication.successChartLabel',
+  {
+    defaultMessage: 'Success',
+  }
+);
+
 export const FAIL_CHART_LABEL = i18n.translate(
   'xpack.securitySolution.visualizationActions.userAuthentications.failChartLabel',
   {
     defaultMessage: 'Fail',
   }
 );
+
+export const AUTHENCICATION_FAILURE_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.visualizationActions.userAuthentications.authentication.failureChartLabel',
+  {
+    defaultMessage: 'Failure',
+  }
+);
+
+export const UNIQUE_COUNT = (field: string) =>
+  i18n.translate('xpack.securitySolution.visualizationActions.uniqueCountLabel', {
+    values: { field },
+
+    defaultMessage: 'Unique count of {field}',
+  });
+
+export const TOP_VALUE = (field: string) =>
+  i18n.translate('xpack.securitySolution.visualizationActions.topValueLabel', {
+    values: { field },
+
+    defaultMessage: 'Top values of {field}',
+  });
+
+export const COUNT = i18n.translate('xpack.securitySolution.visualizationActions.countLabel', {
+  defaultMessage: 'Count of records',
+});

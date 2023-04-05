@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { MemoryProtection } from './policy_forms/protections/memory';
 import { BehaviorProtection } from './policy_forms/protections/behavior';
@@ -54,6 +55,11 @@ export const PolicyDetailsForm = memo(() => {
     setShowAdvancedPolicy(!showAdvancedPolicy);
   }, [showAdvancedPolicy]);
   const isPlatinumPlus = useLicense().isPlatinumPlus();
+  const { loading: authzLoading } = useUserPrivileges().endpointPrivileges;
+
+  if (authzLoading) {
+    return <EuiLoadingContent lines={5} />;
+  }
 
   return (
     <>

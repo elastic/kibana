@@ -53,6 +53,7 @@ const createPackage = ({
 describe('isPackageUnverified', () => {
   describe('When experimental feature is disabled', () => {
     beforeEach(() => {
+      // @ts-ignore don't want to define all experimental features here
       mockGet.mockReturnValue({
         packageVerification: false,
       } as ReturnType<typeof ExperimentalFeaturesService['get']>);

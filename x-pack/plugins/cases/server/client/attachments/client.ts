@@ -5,26 +5,38 @@
  * 2.0.
  */
 
-import { AlertResponse, CommentResponse } from '../../../common/api';
-import { CasesClient } from '../client';
+import type {
+  AlertResponse,
+  AllCommentsResponse,
+  BulkGetAttachmentsResponse,
+  CaseResponse,
+  CommentResponse,
+  CommentsResponse,
+} from '../../../common/api';
+import type { CasesClient } from '../client';
 
-import { CasesClientInternal } from '../client_internal';
-import { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';
-import { CasesClientArgs } from '../types';
-import { AddArgs, addComment } from './add';
-import { bulkCreate, BulkCreateArgs } from './bulk_create';
-import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
-import {
-  find,
+import type { CasesClientInternal } from '../client_internal';
+import type { CasesClientArgs } from '../types';
+import { addComment } from './add';
+import type {
+  BulkCreateArgs,
+  AddArgs,
+  DeleteAllArgs,
+  DeleteArgs,
   FindArgs,
-  get,
-  getAll,
-  getAllAlertsAttachToCase,
   GetAllAlertsAttachToCase,
   GetAllArgs,
   GetArgs,
-} from './get';
-import { update, UpdateArgs } from './update';
+  UpdateArgs,
+  BulkGetArgs,
+  BulkDeleteFileArgs,
+} from './types';
+import { bulkCreate } from './bulk_create';
+import { deleteAll, deleteComment } from './delete';
+import { find, get, getAll, getAllAlertsAttachToCase } from './get';
+import { bulkGet } from './bulk_get';
+import { update } from './update';
+import { bulkDeleteFileAttachments } from './bulk_delete';
 
 /**
  * API for interacting with the attachments to a case.
@@ -33,8 +45,9 @@ export interface AttachmentsSubClient {
   /**
    * Adds an attachment to a case.
    */
-  add(params: AddArgs): Promise<ICaseResponse>;
-  bulkCreate(params: BulkCreateArgs): Promise<ICaseResponse>;
+  add(params: AddArgs): Promise<CaseResponse>;
+  bulkCreate(params: BulkCreateArgs): Promise<CaseResponse>;
+  bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponse>;
   /**
    * Deletes all attachments associated with a single case.
    */
@@ -43,10 +56,11 @@ export interface AttachmentsSubClient {
    * Deletes a single attachment for a specific case.
    */
   delete(deleteArgs: DeleteArgs): Promise<void>;
+  bulkDeleteFileAttachments(deleteArgs: BulkDeleteFileArgs): Promise<void>;
   /**
    * Retrieves all comments matching the search criteria.
    */
-  find(findArgs: FindArgs): Promise<ICommentsResponse>;
+  find(findArgs: FindArgs): Promise<CommentsResponse>;
   /**
    * Retrieves all alerts attach to a case given a single case ID
    */
@@ -54,7 +68,7 @@ export interface AttachmentsSubClient {
   /**
    * Gets all attachments for a single case.
    */
-  getAll(getAllArgs: GetAllArgs): Promise<IAllCommentsResponse>;
+  getAll(getAllArgs: GetAllArgs): Promise<AllCommentsResponse>;
   /**
    * Retrieves a single attachment for a case.
    */
@@ -64,7 +78,7 @@ export interface AttachmentsSubClient {
    *
    * The request must include all fields for the attachment. Even the fields that are not changing.
    */
-  update(updateArgs: UpdateArgs): Promise<ICaseResponse>;
+  update(updateArgs: UpdateArgs): Promise<CaseResponse>;
 }
 
 /**
@@ -80,14 +94,16 @@ export const createAttachmentsSubClient = (
   const attachmentSubClient: AttachmentsSubClient = {
     add: (params: AddArgs) => addComment(params, clientArgs),
     bulkCreate: (params: BulkCreateArgs) => bulkCreate(params, clientArgs),
-    deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, clientArgs),
-    delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, clientArgs),
-    find: (findArgs: FindArgs) => find(findArgs, clientArgs),
-    getAllAlertsAttachToCase: (params: GetAllAlertsAttachToCase) =>
-      getAllAlertsAttachToCase(params, clientArgs, casesClient),
-    getAll: (getAllArgs: GetAllArgs) => getAll(getAllArgs, clientArgs),
-    get: (getArgs: GetArgs) => get(getArgs, clientArgs),
-    update: (updateArgs: UpdateArgs) => update(updateArgs, clientArgs),
+    bulkGet: (params) => bulkGet(params, clientArgs, casesClient),
+    delete: (params) => deleteComment(params, clientArgs),
+    deleteAll: (params) => deleteAll(params, clientArgs),
+    bulkDeleteFileAttachments: (params) =>
+      bulkDeleteFileAttachments(params, clientArgs, casesClient),
+    find: (params) => find(params, clientArgs),
+    getAllAlertsAttachToCase: (params) => getAllAlertsAttachToCase(params, clientArgs, casesClient),
+    getAll: (params) => getAll(params, clientArgs),
+    get: (params) => get(params, clientArgs),
+    update: (params) => update(params, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

@@ -6,25 +6,31 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { CSSInterpolation } from '@emotion/serialize';
 import type { BenchmarkId } from '../../common/types';
-import cisK8sVanillaIcon from '../assets/icons/k8s_logo.svg';
 import cisEksIcon from '../assets/icons/cis_eks_logo.svg';
 
 interface Props {
   type: BenchmarkId;
+  name?: string;
+  style?: CSSInterpolation;
 }
 
 const getBenchmarkIdIconType = (props: Props): string => {
   switch (props.type) {
     case 'cis_eks':
       return cisEksIcon;
+    case 'cis_aws':
+      return 'logoAWS';
     case 'cis_k8s':
     default:
-      return cisK8sVanillaIcon;
+      return 'logoKubernetes';
   }
 };
 
 export const CISBenchmarkIcon = (props: Props) => (
-  <EuiIcon type={getBenchmarkIdIconType(props)} size="xxl" />
+  <EuiToolTip content={props.name}>
+    <EuiIcon type={getBenchmarkIdIconType(props)} size="xl" css={props.style} />
+  </EuiToolTip>
 );

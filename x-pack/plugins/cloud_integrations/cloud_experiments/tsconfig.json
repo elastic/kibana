@@ -1,0 +1,28 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    ".storybook/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/crypto-browser",
+    "@kbn/config-schema",
+    "@kbn/crypto",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/utility-types",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

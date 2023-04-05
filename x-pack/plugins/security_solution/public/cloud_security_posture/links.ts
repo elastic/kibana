@@ -14,7 +14,6 @@ import { IconExceptionLists } from '../management/icons/exception_lists';
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,
   capabilities: [`${SERVER_APP_ID}.show`],
-  isBeta: true,
 };
 
 export const rootLinks: LinkItem = {
@@ -40,26 +39,21 @@ export const manageLinks: LinkItem = {
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
     {
-      defaultMessage: 'View, enable, and or disable benchmark rules.',
+      defaultMessage: 'View benchmark rules.',
     }
   ),
   landingIcon: IconExceptionLists,
   ...commonLinkProperties,
-  links: [
-    {
-      ...getSecuritySolutionLink<SecurityPageName>('rules'),
-      sideNavDisabled: true,
-      globalSearchDisabled: true,
-      ...commonLinkProperties,
-    },
-  ],
 };
 
 export const manageCategories: LinkCategories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurityPosture', {
-      defaultMessage: 'CLOUD SECURITY POSTURE',
+      defaultMessage: 'CLOUD SECURITY',
     }),
-    linkIds: [SecurityPageName.cloudSecurityPostureBenchmarks],
+    linkIds: [
+      SecurityPageName.cloudSecurityPostureBenchmarks,
+      SecurityPageName.cloudDefendPolicies,
+    ],
   },
 ];

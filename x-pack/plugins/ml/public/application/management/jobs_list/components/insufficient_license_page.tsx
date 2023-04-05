@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 
-import { EuiEmptyPrompt, EuiLink, EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 
 interface Props {
   basePath: CoreStart['http']['basePath'];
@@ -25,7 +25,7 @@ export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
       data-test-subj="mlPageInsufficientLicense"
     >
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         title={
           <h2>
             <FormattedMessage

@@ -7,37 +7,36 @@
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Setup } from '../../lib/helpers/setup_request';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
   CONTAINER_ID,
   HOST_HOSTNAME,
-  POD_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+  KUBERNETES_POD_NAME,
+} from '../../../common/es_fields/apm';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const getInfrastructureData = async ({
   kuery,
   serviceName,
   environment,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
   kuery: string;
   serviceName: string;
   environment: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) => {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search('get_service_infrastructure', {
     apm: {
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -64,7 +63,7 @@ export const getInfrastructureData = async ({
         },
         podNames: {
           terms: {
-            field: POD_NAME,
+            field: KUBERNETES_POD_NAME,
             size: 500,
           },
         },

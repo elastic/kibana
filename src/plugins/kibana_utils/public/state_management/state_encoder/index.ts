@@ -7,7 +7,6 @@
  */
 
 export {
-  encodeState,
   decodeState,
   expandedStateToHashedState,
   hashedStateToExpandedState,

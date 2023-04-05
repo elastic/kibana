@@ -40,7 +40,6 @@ export async function getApmPackagePolicyDefinition({
     namespace: 'default',
     enabled: true,
     policy_id: POLICY_ELASTIC_AGENT_ON_CLOUD,
-    output_id: '',
     inputs: [
       {
         type: 'apm',

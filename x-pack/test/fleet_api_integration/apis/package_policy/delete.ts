@@ -11,14 +11,16 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Package Policy - delete', () => {
     skipIfNoDockerRegistry(providerContext);
+
     describe('Delete one', () => {
       let agentPolicy: any;
       let packagePolicy: any;
       before(async () => {
-        await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').load(
           'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
         );
@@ -84,7 +86,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ force: true, packagePolicyIds: [packagePolicy.id] });
       });
       after(async () => {
-        await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').unload(
           'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
         );
@@ -151,7 +153,7 @@ export default function (providerContext: FtrProviderContext) {
       let agentPolicy: any;
       let packagePolicy: any;
       before(async () => {
-        await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').load(
           'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
         );
@@ -215,7 +217,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ force: true, packagePolicyIds: [packagePolicy.id] });
       });
       after(async () => {
-        await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').unload(
           'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
         );

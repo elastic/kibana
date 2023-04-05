@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 
-import type { Agent, AgentAction, CurrentUpgrade, NewAgentAction } from '../models';
+import type {
+  Agent,
+  AgentAction,
+  ActionStatus,
+  CurrentUpgrade,
+  NewAgentAction,
+  AgentDiagnostics,
+  AgentStatus,
+} from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
 
@@ -15,13 +23,14 @@ export interface GetAgentsRequest {
   query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
+    withMetrics?: boolean;
   };
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
-  totalInactive: number;
   // deprecated in 8.x
   list?: Agent[];
+  statusSummary?: Record<AgentStatus, number>;
 }
 
 export interface GetAgentTagsResponse {
@@ -32,10 +41,17 @@ export interface GetOneAgentRequest {
   params: {
     agentId: string;
   };
+  query: {
+    withMetrics?: boolean;
+  };
 }
 
 export interface GetOneAgentResponse {
   item: Agent;
+}
+
+export interface GetAgentUploadsResponse {
+  items: AgentDiagnostics[];
 }
 
 export interface PostNewAgentActionRequest {
@@ -72,13 +88,11 @@ export interface PostBulkAgentUnenrollRequest {
   };
 }
 
-export type PostBulkAgentUnenrollResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export interface BulkAgentAction {
+  actionId: string;
+}
+
+export type PostBulkAgentUnenrollResponse = BulkAgentAction;
 
 export interface PostAgentUpgradeRequest {
   params: {
@@ -100,18 +114,22 @@ export interface PostBulkAgentUpgradeRequest {
   };
 }
 
-export type PostBulkAgentUpgradeResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export type PostBulkAgentUpgradeResponse = BulkAgentAction;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
 
+// deprecated
 export interface PutAgentReassignRequest {
+  params: {
+    agentId: string;
+  };
+  body: { policy_id: string };
+}
+// deprecated
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PutAgentReassignResponse {}
+export interface PostAgentReassignRequest {
   params: {
     agentId: string;
   };
@@ -119,30 +137,29 @@ export interface PutAgentReassignRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PutAgentReassignResponse {}
+export interface PostAgentReassignResponse {}
 
 export interface PostBulkAgentReassignRequest {
   body: {
     policy_id: string;
     agents: string[] | string;
+    batchSize?: number;
   };
 }
 
-export type PostBulkAgentReassignResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export type PostRequestDiagnosticsResponse = BulkAgentAction;
+export type PostBulkRequestDiagnosticsResponse = BulkAgentAction;
 
-export type PostBulkUpdateAgentTagsResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export interface PostRequestBulkDiagnosticsRequest {
+  body: {
+    agents: string[] | string;
+    batchSize?: number;
+  };
+}
+
+export type PostBulkAgentReassignResponse = BulkAgentAction;
+
+export type PostBulkUpdateAgentTagsResponse = BulkAgentAction;
 
 export interface DeleteAgentRequest {
   params: {
@@ -178,12 +195,17 @@ export interface GetAgentStatusRequest {
 export interface GetAgentStatusResponse {
   results: {
     events: number;
+    // deprecated
     total: number;
     online: number;
     error: number;
     offline: number;
     other: number;
     updating: number;
+    inactive: number;
+    unenrolled: number;
+    all: number;
+    active: number;
   };
 }
 
@@ -205,6 +227,19 @@ export interface GetAgentIncomingDataResponse {
 export interface GetCurrentUpgradesResponse {
   items: CurrentUpgrade[];
 }
+export interface GetActionStatusResponse {
+  items: ActionStatus[];
+}
 export interface GetAvailableVersionsResponse {
+  items: string[];
+}
+
+export interface PostRetrieveAgentsByActionsRequest {
+  body: {
+    actionIds: string[];
+  };
+}
+
+export interface PostRetrieveAgentsByActionsResponse {
   items: string[];
 }

@@ -9,9 +9,12 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import AddToTimelineButton, { ADD_TO_TIMELINE_KEYBOARD_SHORTCUT } from './add_to_timeline';
+import AddToTimelineButton, {
+  ADD_TO_TIMELINE_KEYBOARD_SHORTCUT,
+  SuccessMessageProps,
+  AddSuccessMessage,
+} from './add_to_timeline';
 import { DataProvider, IS_OPERATOR } from '../../../../common/types';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { TestProviders } from '../../../mock';
 import * as i18n from './translations';
 
@@ -82,7 +85,6 @@ const providerB: DataProvider = {
 describe('add to timeline', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({ timelineType: 'default' });
   });
 
   const field = 'user.name';
@@ -194,7 +196,7 @@ describe('add to timeline', () => {
           },
           id: 'timeline-1',
         },
-        type: 'x-pack/timelines/t-grid/ADD_PROVIDER_TO_TIMELINE',
+        type: 'x-pack/timelines/timeline/ADD_PROVIDER_TO_TIMELINE',
       });
     });
 
@@ -229,7 +231,7 @@ describe('add to timeline', () => {
             },
             id: 'timeline-1',
           },
-          type: 'x-pack/timelines/t-grid/ADD_PROVIDER_TO_TIMELINE',
+          type: 'x-pack/timelines/timeline/ADD_PROVIDER_TO_TIMELINE',
         })
       );
     });
@@ -391,21 +393,32 @@ describe('add to timeline', () => {
 
       fireEvent.click(screen.getByRole('button'));
 
-      expect(mockAddSuccess).toBeCalledWith('Added a to timeline');
+      const message: SuccessMessageProps = {
+        children: i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, true),
+      };
+      const wrapper = render(<AddSuccessMessage {...message} />);
+      expect(wrapper.container.textContent).toBe('Added a to timeline');
     });
 
     test('Add success is called with "template" if timeline type is template', () => {
-      (useDeepEqualSelector as jest.Mock).mockReturnValue({ timelineType: 'template' });
-
       render(
         <TestProviders>
-          <AddToTimelineButton dataProvider={providerA} field={field} ownFocus={false} />
+          <AddToTimelineButton
+            dataProvider={providerA}
+            field={field}
+            ownFocus={false}
+            timelineType={'template'}
+          />
         </TestProviders>
       );
 
       fireEvent.click(screen.getByRole('button'));
 
-      expect(mockAddSuccess).toBeCalledWith('Added a to template');
+      const message: SuccessMessageProps = {
+        children: i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, false),
+      };
+      const wrapper = render(<AddSuccessMessage {...message} />);
+      expect(wrapper.container.textContent).toBe('Added a to template');
     });
   });
 });

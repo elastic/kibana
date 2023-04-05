@@ -24,21 +24,13 @@ export { getVisSchemas } from './vis_schemas';
 /** @public types */
 export type { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types/vis_groups_enum';
-export type {
-  BaseVisType,
-  VisTypeAlias,
-  VisTypeDefinition,
-  Schema,
-  ISchemas,
-  NavigateToLensContext,
-  VisualizeEditorLayersContext,
-} from './vis_types';
+export type { BaseVisType, VisTypeAlias, VisTypeDefinition, Schema, ISchemas } from './vis_types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export type { VisualizeInput } from './embeddable';
 export type { VisualizeEmbeddable } from './embeddable';
-export type { SchemaConfig } from './vis_schemas';
+export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
 export type { PersistedState } from './persisted_state';
 export type {
@@ -74,4 +66,14 @@ export { urlFor, getFullPath } from './utils/saved_visualize_utils';
 
 export type { IEditorController, EditorRenderProps } from './visualize_app/types';
 
-export { VISUALIZE_EDITOR_TRIGGER, ACTION_CONVERT_TO_LENS } from './triggers';
+export {
+  VISUALIZE_EDITOR_TRIGGER,
+  AGG_BASED_VISUALIZATION_TRIGGER,
+  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
+  ACTION_CONVERT_TO_LENS,
+  ACTION_CONVERT_AGG_BASED_TO_LENS,
+  ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+} from './triggers';
+
+export const convertToLensModule = import('./convert_to_lens');
+export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';

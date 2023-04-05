@@ -21,6 +21,7 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
   isOpen={true}
   ownFocus={true}
   panelPaddingSize="m"
+  repositionOnScroll={true}
   style={
     Object {
       "pointerEvents": "none",
@@ -80,6 +81,7 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
   isOpen={true}
   ownFocus={true}
   panelPaddingSize="m"
+  repositionOnScroll={true}
   style={
     Object {
       "pointerEvents": "none",

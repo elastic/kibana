@@ -6,8 +6,13 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { epmRouteService } from '../../services';
+import { useState } from 'react';
+
+import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+
+import { epmRouteService, isVerificationError } from '../../services';
 import type {
   GetCategoriesRequest,
   GetCategoriesResponse,
@@ -19,12 +24,16 @@ import type {
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  GetVerificationKeyIdResponse,
 } from '../../types';
 import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 
 import { getCustomIntegrations } from '../../services/custom_integrations';
 
-import { useRequest, sendRequest } from './use_request';
+import { useConfirmOpenUnverified } from '../../applications/integrations/hooks/use_confirm_open_unverified';
+
+import type { RequestError } from './use_request';
+import { useRequest, sendRequest, sendRequestForRq } from './use_request';
 
 export function useGetAppendCustomIntegrations() {
   const customIntegrations = getCustomIntegrations();
@@ -36,11 +45,21 @@ export function useGetReplacementCustomIntegrations() {
   return useAsync(customIntegrations.getReplacementCustomIntegrations, []);
 }
 
-export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
-  return useRequest<GetCategoriesResponse>({
+export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {
+  return useQuery<GetCategoriesResponse, RequestError>(['categories', query], () =>
+    sendRequestForRq<GetCategoriesResponse>({
+      path: epmRouteService.getCategoriesPath(),
+      method: 'get',
+      query,
+    })
+  );
+}
+
+export const sendGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
+  return sendRequest<GetCategoriesResponse>({
     path: epmRouteService.getCategoriesPath(),
     method: 'get',
-    query: { experimental: true, ...query },
+    query,
   });
 };
 
@@ -48,15 +67,25 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   return useRequest<GetPackagesResponse>({
     path: epmRouteService.getListPath(),
     method: 'get',
-    query: { experimental: true, ...query },
+    query,
   });
+};
+
+export const useGetPackagesQuery = (query: GetPackagesRequest['query']) => {
+  return useQuery<GetPackagesResponse, RequestError>(['get-packages', query], () =>
+    sendRequestForRq<GetPackagesResponse>({
+      path: epmRouteService.getListPath(),
+      method: 'get',
+      query,
+    })
+  );
 };
 
 export const sendGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   return sendRequest<GetPackagesResponse>({
     path: epmRouteService.getListPath(),
     method: 'get',
-    query: { experimental: true, ...query },
+    query,
   });
 };
 
@@ -67,11 +96,44 @@ export const useGetLimitedPackages = () => {
   });
 };
 
-export const useGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
-  return useRequest<GetInfoResponse>({
-    path: epmRouteService.getInfoPath(pkgName, pkgVersion),
-    method: 'get',
-  });
+export const useGetPackageInfoByKeyQuery = (
+  pkgName: string,
+  pkgVersion?: string,
+  options?: {
+    ignoreUnverified?: boolean;
+    prerelease?: boolean;
+    full?: boolean;
+  }
+) => {
+  const confirmOpenUnverified = useConfirmOpenUnverified();
+  const [ignoreUnverifiedQueryParam, setIgnoreUnverifiedQueryParam] = useState(
+    options?.ignoreUnverified
+  );
+
+  const response = useQuery<GetInfoResponse, RequestError>([pkgName, pkgVersion, options], () =>
+    sendRequestForRq<GetInfoResponse>({
+      path: epmRouteService.getInfoPath(pkgName, pkgVersion),
+      method: 'get',
+      query: {
+        ...options,
+        ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
+      },
+    })
+  );
+
+  const confirm = async () => {
+    const forceInstall = await confirmOpenUnverified(pkgName);
+
+    if (forceInstall) {
+      setIgnoreUnverifiedQueryParam(true);
+    }
+  };
+
+  if (response?.error && isVerificationError(response?.error)) {
+    confirm();
+  }
+
+  return response;
 };
 
 export const useGetPackageStats = (pkgName: string) => {
@@ -81,10 +143,35 @@ export const useGetPackageStats = (pkgName: string) => {
   });
 };
 
-export const sendGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
+export const useGetPackageVerificationKeyId = () => {
+  const { data, ...rest } = useQuery<GetVerificationKeyIdResponse, RequestError>(
+    ['verification_key_id'],
+    () =>
+      sendRequestForRq<GetVerificationKeyIdResponse>({
+        path: epmRouteService.getVerificationKeyIdPath(),
+        method: 'get',
+      })
+  );
+
+  return {
+    packageVerificationKeyId: data?.id || undefined,
+    ...rest,
+  };
+};
+
+export const sendGetPackageInfoByKey = (
+  pkgName: string,
+  pkgVersion?: string,
+  options?: {
+    ignoreUnverified?: boolean;
+    prerelease?: boolean;
+    full?: boolean;
+  }
+) => {
   return sendRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
+    query: options,
   });
 };
 
@@ -93,6 +180,12 @@ export const useGetFileByPath = (filePath: string) => {
     path: epmRouteService.getFilePath(filePath),
     method: 'get',
   });
+};
+
+export const useGetFileByPathQuery = (filePath: string) => {
+  return useQuery<SendRequestResponse<string>, RequestError>(['get-file', filePath], () =>
+    sendRequest<string>({ path: epmRouteService.getFilePath(filePath), method: 'get' })
+  );
 };
 
 export const sendGetFileByPath = (filePath: string) => {
@@ -111,6 +204,16 @@ export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: b
   });
 };
 
+export const sendBulkInstallPackages = (packages: string[]) => {
+  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getBulkInstallPath(),
+    method: 'post',
+    body: {
+      packages,
+    },
+  });
+};
+
 export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgName, pkgVersion),
@@ -119,6 +222,23 @@ export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: bo
       force,
     },
   });
+};
+
+interface UpdatePackageArgs {
+  pkgName: string;
+  pkgVersion: string;
+  body: UpdatePackageRequest['body'];
+}
+
+export const useUpdatePackageMutation = () => {
+  return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>(
+    ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
+      sendRequestForRq<UpdatePackageResponse>({
+        path: epmRouteService.getUpdatePath(pkgName, pkgVersion),
+        method: 'put',
+        body,
+      })
+  );
 };
 
 export const sendUpdatePackage = (

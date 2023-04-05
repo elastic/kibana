@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
+import moment from 'moment';
 import {
   fieldValidators,
   ValidationFunc,
@@ -16,7 +17,7 @@ import {
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
 import { i18nTexts } from '../i18n_texts';
-import { PhaseWithTiming, PolicyFromES } from '../../../../../common/types';
+import { PhaseWithDownsample, PhaseWithTiming, PolicyFromES } from '../../../../../common/types';
 import { FormInternal } from '../types';
 
 const { numberGreaterThanField, containsCharsField, emptyField, startsWithField } = fieldValidators;
@@ -269,6 +270,106 @@ export const minAgeGreaterThanPreviousPhase =
         return {
           message: i18nErrors.greaterThanWarmPhase,
         };
+      }
+    }
+  };
+
+export const downsampleIntervalMultipleOfPreviousOne =
+  (phase: PhaseWithDownsample) =>
+  ({ formData }: { formData: Record<string, any> }) => {
+    if (phase === 'hot') return;
+
+    const getValueFor = (_phase: PhaseWithDownsample) => {
+      const intervalSize = formData[`_meta.${_phase}.downsample.fixedIntervalSize`];
+      const intervalUnits = formData[`_meta.${_phase}.downsample.fixedIntervalUnits`];
+
+      if (!intervalSize || !intervalUnits) {
+        return null;
+      }
+
+      const milliseconds = moment.duration(intervalSize, intervalUnits).asMilliseconds();
+      const esFormat = intervalSize + intervalUnits;
+
+      return {
+        milliseconds,
+        esFormat,
+      };
+    };
+
+    const intervalValues = {
+      hot: getValueFor('hot'),
+      warm: getValueFor('warm'),
+      cold: getValueFor('cold'),
+    };
+
+    const checkIfGreaterAndMultiple = (nextInterval: number, previousInterval: number): boolean =>
+      nextInterval > previousInterval && nextInterval % previousInterval === 0;
+
+    if (phase === 'warm' && intervalValues.warm) {
+      if (intervalValues.hot) {
+        if (
+          !checkIfGreaterAndMultiple(
+            intervalValues.warm.milliseconds,
+            intervalValues.hot.milliseconds
+          )
+        ) {
+          return {
+            message: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalWarmPhaseError',
+              {
+                defaultMessage:
+                  'Must be greater than and a multiple of the hot phase value ({value})',
+                values: {
+                  value: intervalValues.hot.esFormat,
+                },
+              }
+            ),
+          };
+        }
+      }
+    }
+
+    if (phase === 'cold' && intervalValues.cold) {
+      if (intervalValues.warm) {
+        if (
+          !checkIfGreaterAndMultiple(
+            intervalValues.cold.milliseconds,
+            intervalValues.warm.milliseconds
+          )
+        ) {
+          return {
+            message: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseWarmError',
+              {
+                defaultMessage:
+                  'Must be greater than and a multiple of the warm phase value ({value})',
+                values: {
+                  value: intervalValues.warm.esFormat,
+                },
+              }
+            ),
+          };
+        }
+      } else if (intervalValues.hot) {
+        if (
+          !checkIfGreaterAndMultiple(
+            intervalValues.cold.milliseconds,
+            intervalValues.hot.milliseconds
+          )
+        ) {
+          return {
+            message: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseHotError',
+              {
+                defaultMessage:
+                  'Must be greater than and a multiple of the hot phase value ({value})',
+                values: {
+                  value: intervalValues.hot.esFormat,
+                },
+              }
+            ),
+          };
+        }
       }
     }
   };

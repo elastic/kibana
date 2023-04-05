@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 6, 2015 @ 06:31:44.000',
         'Sep 18, 2025 @ 06:31:44.000'
       );
-      await filterBar.addFilter('ip', 'is', '97.220.3.248');
+      await filterBar.addFilter({ field: 'ip', operation: 'is', value: '97.220.3.248' });
       await filterBar.toggleFilterPinned('ip');
       await PageObjects.header.clickDiscover();
       const timeRange = await PageObjects.timePicker.getTimeConfig();

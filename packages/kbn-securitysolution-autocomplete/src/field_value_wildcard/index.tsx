@@ -25,6 +25,7 @@ import {
   GetGenericComboBoxPropsReturn,
 } from '../get_generic_combo_box_props';
 import { paramIsValid } from '../param_is_valid';
+import { paramContainsSpace } from '../param_contains_space';
 
 const SINGLE_SELECTION = { asPlainText: true };
 
@@ -68,6 +69,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
     const [searchQuery, setSearchQuery] = useState('');
     const [touched, setIsTouched] = useState(false);
     const [error, setError] = useState<string | undefined>(undefined);
+    const [showSpacesWarning, setShowSpacesWarning] = useState<boolean>(false);
     const [isLoadingSuggestions, , suggestions] = useFieldValueAutocomplete({
       autocompleteService,
       fieldValue: selectedValue,
@@ -88,6 +90,13 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
       return selectedValue ? [valueAsStr] : [];
     }, [selectedValue]);
 
+    const handleSpacesWarning = useCallback(
+      (param: string | undefined) => {
+        if (!param) return setShowSpacesWarning(false);
+        setShowSpacesWarning(!!paramContainsSpace(param));
+      },
+      [setShowSpacesWarning]
+    );
     const handleError = useCallback(
       (err: string | undefined): void => {
         setError((existingErr): string | undefined => {
@@ -124,10 +133,12 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
       (newOptions: EuiComboBoxOptionOption[]): void => {
         const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
         handleError(undefined);
-        handleWarning(undefined);
+        handleSpacesWarning(newValue);
+        setShowSpacesWarning(false);
+
         onChange(newValue ?? '');
       },
-      [handleError, handleWarning, labels, onChange, optionsMemo]
+      [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
     );
 
     const handleSearchChange = useCallback(
@@ -136,10 +147,12 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
           const err = paramIsValid(searchVal, selectedField, isRequired, touched);
           handleError(err);
           handleWarning(warning);
+          if (!err) handleSpacesWarning(searchVal);
+
           setSearchQuery(searchVal);
         }
       },
-      [handleError, isRequired, selectedField, touched, warning, handleWarning]
+      [handleError, handleSpacesWarning, isRequired, selectedField, touched, warning, handleWarning]
     );
 
     const handleCreateOption = useCallback(
@@ -150,13 +163,24 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
         if (err != null) {
           // Explicitly reject the user's input
+          setShowSpacesWarning(false);
           return false;
-        } else {
-          onChange(option);
-          return undefined;
         }
+
+        handleSpacesWarning(option);
+        onChange(option);
+        return undefined;
       },
-      [isRequired, onChange, selectedField, touched, handleError, handleWarning, warning]
+      [
+        isRequired,
+        handleSpacesWarning,
+        onChange,
+        selectedField,
+        touched,
+        handleError,
+        handleWarning,
+        warning,
+      ]
     );
 
     const setIsTouchedValue = useCallback((): void => {
@@ -195,15 +219,17 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
       if (onError != null) {
         onError(false);
       }
+      handleSpacesWarning(selectedValue);
+
       onWarning(false);
-    }, [selectedField, onError, onWarning]);
+    }, [selectedField, selectedValue, onError, onWarning, handleSpacesWarning]);
 
     const defaultInput = useMemo((): JSX.Element => {
       return (
         <EuiFormRow
           label={rowLabel}
           error={error}
-          helpText={warning}
+          helpText={warning || (showSpacesWarning && i18n.FIELD_SPACE_WARNING)}
           isInvalid={selectedField != null && error != null}
           data-test-subj="valuesAutocompleteWildcardLabel"
           fullWidth
@@ -245,6 +271,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
       selectedField,
       setIsTouchedValue,
       warning,
+      showSpacesWarning,
     ]);
 
     return defaultInput;

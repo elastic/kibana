@@ -5,22 +5,7 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-
-// TODO Temporary type definition until we can import from `@kbn/core`.
-// Copied from src/core/server/elasticsearch/client/types.ts
-// as these types aren't part of any package yet. Once they are, remove this completely
-
-/**
- * Client used to query the elasticsearch cluster.
- * @deprecated At some point use the one from src/core/server/elasticsearch/client/types.ts when it is made into a package. If it never is, then keep using this one.
- * @public
- */
-export type ElasticsearchClient = Omit<
-  Client,
-  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
->;
 
 interface FieldAggCardinality {
   field: string;
@@ -72,30 +57,58 @@ export interface HistogramField {
 }
 
 /**
- * Change point meta data for a field/value pair.
+ * Significant term meta data for a field/value pair.
  */
-export interface ChangePoint extends FieldValuePair {
+export interface SignificantTerm extends FieldValuePair {
   doc_count: number;
   bg_count: number;
+  total_doc_count: number;
+  total_bg_count: number;
   score: number;
   pValue: number | null;
   normalizedScore: number;
-  histogram?: ChangePointHistogramItem[];
+  histogram?: SignificantTermHistogramItem[];
+  unique?: boolean;
 }
 
 /**
- * Change point histogram data item.
+ * Significant term histogram data item.
  */
-export interface ChangePointHistogramItem {
+export interface SignificantTermHistogramItem {
   doc_count_overall: number;
-  doc_count_change_point: number;
+  doc_count_significant_term: number;
   key: number;
   key_as_string: string;
 }
 
 /**
- * Change point histogram data for a field/value pair.
+ * Histogram data for a field/value pair.
  */
-export interface ChangePointHistogram extends FieldValuePair {
-  histogram: ChangePointHistogramItem[];
+export interface SignificantTermHistogram extends FieldValuePair {
+  histogram: SignificantTermHistogramItem[];
+}
+
+/**
+ * Histogram data for a group of field/value pairs.
+ */
+export interface SignificantTermGroupHistogram {
+  id: string;
+  histogram: SignificantTermHistogramItem[];
+}
+
+export interface SignificantTermGroupItem extends FieldValuePair {
+  docCount: number;
+  pValue: number | null;
+  duplicate?: number;
+}
+
+/**
+ * Tree leaves
+ */
+export interface SignificantTermGroup {
+  id: string;
+  group: SignificantTermGroupItem[];
+  docCount: number;
+  pValue: number | null;
+  histogram?: SignificantTermHistogramItem[];
 }

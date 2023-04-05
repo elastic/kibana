@@ -6,9 +6,12 @@ exports[`LayerTOC is rendered 1`] = `
 >
   <EuiDragDropContext
     onDragEnd={[Function]}
+    onDragStart={[Function]}
+    onDragUpdate={[Function]}
   >
     <EuiDroppable
       droppableId="mapLayerTOC"
+      isCombineEnabled={true}
       spacing="none"
     >
       <Component />
@@ -22,19 +25,23 @@ exports[`LayerTOC props isReadOnly 1`] = `
   data-test-subj="mapLayerTOC"
 >
   <TOCEntry
+    depth={0}
     key="2"
     layer={
       Object {
         "getId": [Function],
+        "getParent": [Function],
         "supportsFitToBounds": [Function],
       }
     }
   />
   <TOCEntry
+    depth={0}
     key="1"
     layer={
       Object {
         "getId": [Function],
+        "getParent": [Function],
         "supportsFitToBounds": [Function],
       }
     }

@@ -39,6 +39,7 @@ describe('JobsTableComponent', () => {
         isLoading={true}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -51,6 +52,7 @@ describe('JobsTableComponent', () => {
           isLoading={true}
           jobs={securityJobs}
           onJobStateChange={onJobStateChangeMock}
+          mlNodesAvailable={true}
         />
       ),
       '[data-test-subj="jobs-table-link"]'
@@ -58,6 +60,23 @@ describe('JobsTableComponent', () => {
     await waitFor(() =>
       expect(href).toEqual(
         "/app/ml/jobs?_a=(jobs:(queryText:'id:linux_anomalous_network_activity_ecs'))"
+      )
+    );
+  });
+
+  test('should display the job friendly name', async () => {
+    const wrapper = mount(
+      <JobsTableComponent
+        isLoading={true}
+        jobs={securityJobs}
+        onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
+      />
+    );
+
+    await waitFor(() =>
+      expect(wrapper.find('[data-test-subj="jobs-table-link"]').first().text()).toContain(
+        'Unusual Network Activity'
       )
     );
   });
@@ -70,6 +89,7 @@ describe('JobsTableComponent', () => {
           isLoading={true}
           jobs={securityJobs}
           onJobStateChange={onJobStateChangeMock}
+          mlNodesAvailable={true}
         />
       ),
       '[data-test-subj="jobs-table-link"]'
@@ -85,6 +105,7 @@ describe('JobsTableComponent', () => {
         isLoading={false}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
 
@@ -105,6 +126,7 @@ describe('JobsTableComponent', () => {
         isLoading={false}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
     await waitFor(() => {
@@ -118,6 +140,7 @@ describe('JobsTableComponent', () => {
         isLoading={true}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
     await waitFor(() => {

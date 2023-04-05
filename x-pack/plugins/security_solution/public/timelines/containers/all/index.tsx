@@ -10,6 +10,8 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { getTimelineQueryTypes } from '../helpers';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { OpenTimelineResult } from '../../components/open_timeline/types';
 import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
 import { inputsActions } from '../../../common/store/inputs';
@@ -92,6 +94,7 @@ export const getAllTimeline = memoizeOne(
       updatedBy: timeline.updatedBy,
       timelineType: timeline.timelineType ?? TimelineType.default,
       templateTimelineId: timeline.templateTimelineId,
+      queryType: getTimelineQueryTypes(timeline),
     }))
 );
 
@@ -149,7 +152,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
           if (!didCancel) {
             dispatch(
               inputsActions.setQuery({
-                inputId: 'global',
+                inputId: InputsModelId.global,
                 id: ALL_TIMELINE_QUERY_ID,
                 loading: false,
                 refetch: fetchData,
@@ -198,7 +201,9 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
 
   useEffect(
     () => () => {
-      dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: ALL_TIMELINE_QUERY_ID }));
+      dispatch(
+        inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id: ALL_TIMELINE_QUERY_ID })
+      );
     },
     [dispatch]
   );

@@ -24,6 +24,11 @@ location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/in
 
 ## Build Script Usage
 
+The system OS requires a few setup steps:
+1. Required packages: `bzip2`, `git`, `lsb_release`, `python3`
+2. The `python` command needs to launch Python 3.
+3. Recommended: `tmux`, as your ssh session may get interrupted
+
 These commands show how to set up an environment to build:
 ```sh
 # Allow our scripts to use depot_tools commands
@@ -36,7 +41,7 @@ mkdir ~/chromium && cd ~/chromium
 gsutil cp -r gs://headless_shell_staging/build_chromium .
 
 # Install the OS packages, configure the environment, download the chromium source (25GB)
-python ./build_chromium/init.py [arch_name]
+python ./build_chromium/init.py
 
 # Run the build script with the path to the chromium src directory, the git commit hash
 python ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 x64
@@ -67,7 +72,7 @@ A good how-to on building Chromium from source is
 We have an `linux/args.gn` file that is automatically copied to the build target directory.
 
 To get a list of the build arguments that are enabled, install `depot_tools` and run
-`gn args out/headless --list`. It prints out all of the flags and their
+`gn args out/headless --list` from the `chromium/src` directory. It prints out all of the flags and their
 settings, including the defaults. Some build flags are documented
 [here](https://www.chromium.org/developers/gn-build-configuration).
 
@@ -86,10 +91,6 @@ are created in x64 using cross-compiling. CentOS is not supported for building C
    - 8 CPU
    - 30GB memory
    - 80GB free space on disk (Try `ncdu /home` to see where space is used.)
-   - git
-   - python2 (`python` must link to `python2`)
-   - lsb_release
-   - tmux is recommended in case your ssh session is interrupted
    - "Cloud API access scopes": must have **read / write** scope for the Storage API
 4. Install [Google Cloud SDK](https://cloud.google.com/sdk) locally to ssh into the GCP instance
 
@@ -117,6 +118,48 @@ Here's the steps on how to test a Puppeteer upgrade, run these tests on Mac, Win
 - Make sure there are no errors when using the **Reporting diagnostic tool**
 - All functional and API tests that generate PDF and PNG files should pass.
 - Use a VM to run Kibana in a low-memory environment and try to generate a PNG of a dashboard that outputs as a 4MB file. Document the minimum requirements in the PR.
+
+## Testing Chromium upgrades on a Windows Machine
+
+Directions on creating a build of Kibana off an existing PR can be found here: 
+https://www.elastic.co/guide/en/kibana/current/building-kibana.html 
+You will need this build to install on your windows device to test the in progress PR. 
+
+The default extractor for Windows might give `Path too long errors`. 
+- Install the zipped file onto your C:\ directory in case the path actually is too long. 
+- Use 7Zip or WinZip to extract the contents of the kibana build.
+Reference: This article can be helpful:
+https://www.partitionwizard.com/disk-recovery/error-0x80010135-path-too-long.html  
+
+For an elasticsearch cluster to base the latest kibana build with, you can use a snapshot.sh bash script to generate the latest build. Create a file called snapshot.sh and put the following into the file: 
+
+```
+runQuery() {
+  curl --silent -XGET https://artifacts-api.elastic.co${1}
+}
+BUILD_HASH=$(runQuery /v1/versions/${VERSION}-SNAPSHOT/builds | jq -r '.builds[0]')
+echo "Latest build hash :: $BUILD_HASH"
+KBN_DOWNLOAD=$(runQuery /v1/versions/${VERSION}-SNAPSHOT/builds/$BUILD_HASH/projects/elasticsearch/packages/elasticsearch-${VERSION}-SNAPSHOT-windows-x86_64.zip)
+echo $KBN_DOWNLOAD | jq -r '.package.url'
+```
+
+In the terminal once you have the snapshot.sh file written run: 
+chmod a+x snapshot.sh to make the file executable
+Then set the version variable within the script to what you need by typing the following (in this example 8.8.0):
+VERSION=8.8.0 ./snapshot.sh
+
+In the terminal you should see a web address that will give you a download of elasticsearch. 
+
+You may need to disable xpack security in the elasticsearch.yml 
+xpack.security.enabled: false
+
+Make sure nothing is set in the kibana.yml
+
+Run `.\bin\elasticsearch.bat` in the elasticsearch directory first and then once it's up run `.\bin\kibana.bat`
+
+Navigate to localhost:5601 and there shouldn't be any prompts to set up security etc. To test PNG reporting, you may need to upload a license. Navigate to https://wiki.elastic.co/display/PM/Internal+License+-+X-Pack+and+Endgame and download the license.json from Internal Licenses. 
+
+Navigate to Stack Management in Kibana and you can upload the license.json from internal licenses. You won't need to restart the cluster and should be able to test the Kibana feature as needed at this point. 
 
 ## Resources
 

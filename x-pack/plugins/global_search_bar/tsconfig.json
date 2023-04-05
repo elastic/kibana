@@ -1,17 +1,21 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../global_search/tsconfig.json" },
-    { "path": "../saved_objects_tagging/tsconfig.json" },
-    { "path": "../security/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/global-search-plugin",
+    "@kbn/saved-objects-tagging-plugin",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/saved-objects-tagging-oss-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -7,6 +7,7 @@
  */
 
 import type { Duration } from 'moment';
+import type { ElasticsearchApiToRedactInLogs } from './client';
 
 /**
  * @public
@@ -31,6 +32,16 @@ export interface IElasticsearchConfig {
    * The maximum number of sockets that can be used for communications with elasticsearch.
    */
   readonly maxSockets: number;
+
+  /**
+   * The maximum number of idle sockets to keep open between Kibana and Elasticsearch. If more sockets become idle, they will be closed.
+   */
+  readonly maxIdleSockets: number;
+
+  /**
+   * The timeout for idle sockets kept open between Kibana and Elasticsearch. If the socket is idle for longer than this timeout, it will be closed.
+   */
+  readonly idleSocketTimeout: Duration;
 
   /**
    * Whether to use compression for communications with elasticsearch.
@@ -129,6 +140,11 @@ export interface IElasticsearchConfig {
    * either `certificate` or `full`.
    */
   readonly ssl: ElasticsearchSslConfig;
+
+  /**
+   * Extends the list of APIs that should be redacted in logs.
+   */
+  readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 }
 
 /**

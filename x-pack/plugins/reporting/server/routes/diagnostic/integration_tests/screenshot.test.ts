@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { setupServer } from '@kbn/core/server/test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
 import { generatePngObservable } from '../../../export_types/common';

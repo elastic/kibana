@@ -9,7 +9,7 @@ import React, { useEffect, useState, FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiHorizontalRule, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
@@ -110,12 +110,12 @@ export const ExpandableSectionAnalytics: FC<ExpandableSectionAnalyticsProps> = (
 
   useEffect(() => {
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   const analyticsSectionHeaderItems = getAnalyticsSectionHeaderItems(expandedRowItem);
   const analyticsSectionContent = (
     <>
-      <EuiHorizontalRule size="full" margin="none" />
       {expandedRowItem === undefined && (
         <EuiText textAlign="center">
           <EuiSpacer size="l" />

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SearchHit } from '@kbn/core/types/elasticsearch';
+import type { SearchHit } from '@kbn/es-types';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
 // needed for backwards compatability
 // All settings except `transaction_sample_rate` and `transaction_max_spans` are stored as strings (they are stored as float and integer respectively)
 export function convertConfigSettingsToString(
   hit: SearchHit<AgentConfiguration>
-) {
+): SearchHit<AgentConfiguration> {
   const { settings } = hit._source;
 
   const convertedConfigSettings = {

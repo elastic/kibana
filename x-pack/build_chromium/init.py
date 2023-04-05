@@ -6,12 +6,8 @@ from build_util import runcmd, mkdir
 # once per environment.
 
 # Set to "arm" to build for ARM
-arch_name = sys.argv[1] if len(sys.argv) >= 2 else 'undefined'
 build_path = path.abspath(os.curdir)
 src_path = path.abspath(path.join(build_path, 'chromium', 'src'))
-
-if arch_name != 'x64' and arch_name != 'arm64':
-  raise Exception('Unexpected architecture: ' + arch_name + '. `x64` and `arm64` are supported.')
 
 # Configure git
 print('Configuring git globals...')
@@ -29,8 +25,8 @@ else:
   print('Updating depot_tools...')
   original_dir = os.curdir
   os.chdir(path.join(build_path, 'depot_tools'))
-  runcmd('git checkout master')
-  runcmd('git pull origin master')
+  runcmd('git checkout main')
+  runcmd('git pull origin main')
   os.chdir(original_dir)
 
 # Fetch the Chromium source code

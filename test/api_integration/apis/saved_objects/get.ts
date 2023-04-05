@@ -8,17 +8,13 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
   describe('get', () => {
-    let KIBANA_VERSION: string;
-
     before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
@@ -38,9 +34,10 @@ export default function ({ getService }: FtrProviderContext) {
             id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
             type: 'visualization',
             updated_at: resp.body.updated_at,
+            created_at: resp.body.created_at,
             version: resp.body.version,
-            migrationVersion: resp.body.migrationVersion,
-            coreMigrationVersion: KIBANA_VERSION,
+            coreMigrationVersion: '8.8.0',
+            typeMigrationVersion: resp.body.typeMigrationVersion,
             attributes: {
               title: 'Count of requests',
               description: '',
@@ -59,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             namespaces: ['default'],
           });
-          expect(resp.body.migrationVersion).to.be.ok();
+          expect(resp.body.typeMigrationVersion).to.be.ok();
         }));
 
     describe('doc does not exist', () => {

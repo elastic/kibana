@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/managed-vscode-config",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

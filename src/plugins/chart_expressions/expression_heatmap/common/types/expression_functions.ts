@@ -14,7 +14,7 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { AllowedSettingsOverrides, CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -92,6 +92,10 @@ export type HeatmapInput = Datatable;
 export interface HeatmapExpressionProps {
   data: Datatable;
   args: HeatmapArguments;
+  syncTooltips: boolean;
+  syncCursor: boolean;
+  canNavigateToLens?: boolean;
+  overrides?: AllowedSettingsOverrides;
 }
 
 export interface HeatmapRender {
@@ -105,4 +109,18 @@ export type HeatmapExpressionFunctionDefinition = ExpressionFunctionDefinition<
   HeatmapInput,
   HeatmapArguments,
   ExpressionValueRender<HeatmapExpressionProps>
+>;
+
+export type HeatmapLegendExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_HEATMAP_LEGEND_NAME,
+  null,
+  HeatmapLegendConfig,
+  HeatmapLegendConfigResult
+>;
+
+export type HeatmapGridExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_HEATMAP_GRID_NAME,
+  null,
+  HeatmapGridConfig,
+  HeatmapGridConfigResult
 >;

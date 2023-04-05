@@ -23,12 +23,6 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
-        "cleanupFailedExecutionsTask": Object {
-          "cleanupInterval": "PT5M",
-          "enabled": true,
-          "idleInterval": "PT1H",
-          "pageSize": 100,
-        },
         "enabledActionTypes": Array [
           "*",
         ],
@@ -63,12 +57,6 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
-        "cleanupFailedExecutionsTask": Object {
-          "cleanupInterval": "PT5M",
-          "enabled": true,
-          "idleInterval": "PT1H",
-          "pageSize": 100,
-        },
         "enabledActionTypes": Array [
           "*",
         ],
@@ -163,6 +151,28 @@ describe('config validation', () => {
     `);
   });
 
+  test('validates proxyUrl', () => {
+    const proxyUrl = 'https://test.com';
+    const badProxyUrl = 'bad url';
+    let validated: ActionsConfig;
+
+    validated = configSchema.validate({ proxyUrl });
+    expect(validated.proxyUrl).toEqual(proxyUrl);
+    expect(getValidatedConfig(mockLogger, validated).proxyUrl).toEqual(proxyUrl);
+    expect(mockLogger.warn.mock.calls).toMatchInlineSnapshot(`Array []`);
+
+    validated = configSchema.validate({ proxyUrl: badProxyUrl });
+    expect(validated.proxyUrl).toEqual(badProxyUrl);
+    expect(getValidatedConfig(mockLogger, validated).proxyUrl).toEqual(badProxyUrl);
+    expect(mockLogger.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "The confguration xpack.actions.proxyUrl: bad url is invalid.",
+        ],
+      ]
+    `);
+  });
+
   // Most of the customHostSettings tests are in ./lib/custom_host_settings.test.ts
   // but this one seemed more relevant for this test suite, since url is the one
   // required property.
@@ -188,12 +198,6 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
-        "cleanupFailedExecutionsTask": Object {
-          "cleanupInterval": "PT5M",
-          "enabled": true,
-          "idleInterval": "PT1H",
-          "pageSize": 100,
-        },
         "enabledActionTypes": Array [
           "*",
         ],

@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { switchFn } from './switch';
 
 describe('switch', () => {
@@ -93,49 +93,34 @@ describe('switch', () => {
       it('should support partial results', () => {
         testScheduler.run(({ cold, expectObservable }) => {
           const context = 'foo';
-          const case1 = cold('--ab-c-', {
-            a: {
-              type: 'case',
-              matches: false,
-              result: 1,
-            },
-            b: {
-              type: 'case',
-              matches: true,
-              result: 2,
-            },
-            c: {
-              type: 'case',
-              matches: false,
-              result: 3,
-            },
-          });
-          const case2 = cold('-a--bc-', {
-            a: {
-              type: 'case',
-              matches: true,
-              result: 4,
-            },
-            b: {
-              type: 'case',
-              matches: true,
-              result: 5,
-            },
-            c: {
-              type: 'case',
-              matches: true,
-              result: 6,
-            },
-          });
-          const expected = ' --abc(de)-';
-          const args = { case: [() => case1, () => case2] };
-          expectObservable(fn(context, args)).toBe(expected, {
-            a: 4,
-            b: 2,
-            c: 2,
-            d: 5,
-            e: 6,
-          });
+          const a = { type: 'case', matches: false, result: 'a' };
+          const b = { type: 'case', matches: true, result: 'b' };
+          const c = { type: 'case', matches: false, result: 'c' };
+          const d = { type: 'case', matches: true, result: 'd' };
+          const e = { type: 'case', matches: false, result: 'e' };
+          const f = { type: 'case', matches: true, result: 'f' };
+
+          const case1 = cold('--a---b-c-', { a, b, c });
+          const case2 = cold('  d-e-f-', { d, e, f });
+          const expected = '  --d-g-b-d-g-f';
+          const args = { case: [() => case1, () => case2], default: () => cold('g') };
+          expectObservable(fn(context, args)).toBe(expected);
+        });
+      });
+
+      it('should not resolve the next case if the current one matches', () => {
+        testScheduler.run(({ cold, expectObservable }) => {
+          const context = 'foo';
+          const a = { type: 'case', matches: true, result: 'a' };
+          const b = { type: 'case', matches: true, result: 'b' };
+          const c = { type: 'case', matches: false, result: 'c' };
+
+          const case1 = cold('--a-b', { a, b });
+          const case2 = cold('c', { c });
+          const expected = '  --a-b';
+          const args = { case: [() => case1, jest.fn(() => case2)] };
+          expectObservable(fn(context, args)).toBe(expected);
+          expect(args.case[1]).not.toHaveBeenCalled();
         });
       });
     });

@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import type { FieldBrowserProps, BrowserFields } from './types';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { FieldBrowserProps } from './types';
 import { Search } from './components/search';
 
 import { CLOSE_BUTTON_CLASS_NAME, FIELD_BROWSER_WIDTH, RESET_FIELDS_CLASS_NAME } from './helpers';
@@ -132,9 +133,7 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
     <EuiModal onClose={closeAndRestoreFocus} style={{ width, maxWidth: width }}>
       <div data-test-subj="fields-browser-container" className="eui-yScroll">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <h1>{i18n.FIELDS_BROWSER}</h1>
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{i18n.FIELDS_BROWSER}</EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>

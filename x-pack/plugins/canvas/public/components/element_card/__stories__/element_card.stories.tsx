@@ -9,7 +9,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getElasticLogo } from '@kbn/presentation-util-plugin/public';
+import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { ElementCard } from '../element_card';
 
 storiesOf('components/Elements/ElementCard', module)

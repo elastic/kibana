@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsService } from '.';
+import { DataViewsService, MatchedItem } from '.';
 
 import { DataViewsServiceDeps } from '../common/data_views/data_views';
 import { HasDataService } from '../common';
@@ -24,6 +24,11 @@ export interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
    * Has data service
    */
   hasData: HasDataService;
+  getIndices: (props: {
+    pattern: string;
+    showAllIndices?: boolean;
+    isRollupIndex: (indexName: string) => boolean;
+  }) => Promise<MatchedItem[]>;
 }
 
 /**
@@ -32,6 +37,12 @@ export interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
  */
 export class DataViewsServicePublic extends DataViewsService {
   public getCanSaveSync: () => boolean;
+
+  public getIndices: (props: {
+    pattern: string;
+    showAllIndices?: boolean;
+    isRollupIndex: (indexName: string) => boolean;
+  }) => Promise<MatchedItem[]>;
   public hasData: HasDataService;
 
   /**
@@ -43,5 +54,6 @@ export class DataViewsServicePublic extends DataViewsService {
     super(deps);
     this.getCanSaveSync = deps.getCanSaveSync;
     this.hasData = deps.hasData;
+    this.getIndices = deps.getIndices;
   }
 }

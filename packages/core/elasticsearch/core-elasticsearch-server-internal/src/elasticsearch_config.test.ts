@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
+
 import {
   mockReadFileSync,
   mockReadPkcs12Keystore,
@@ -13,7 +15,6 @@ import {
 } from './elasticsearch_config.test.mocks';
 
 import { ElasticsearchConfig, config } from './elasticsearch_config';
-import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
 
 const CONFIG_PATH = 'elasticsearch';
 
@@ -29,13 +30,16 @@ test('set correct defaults', () => {
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
       "apiVersion": "master",
+      "apisToRedactInLogs": Array [],
       "compression": false,
       "customHeaders": Object {},
       "healthCheckDelay": "PT2.5S",
       "hosts": Array [
         "http://localhost:9200",
       ],
+      "idleSocketTimeout": "PT1M",
       "ignoreVersionMismatch": false,
+      "maxIdleSockets": 256,
       "maxSockets": Infinity,
       "password": undefined,
       "pingTimeout": "PT30S",

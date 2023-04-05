@@ -16,9 +16,12 @@ import {
   createOptionsListExtract,
   createOptionsListInject,
 } from '../../../common/options_list/options_list_persistable_state';
-import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
+import {
+  OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
+} from '../../../common/options_list/types';
 import { OptionsListEditorOptions } from '../components/options_list_editor_options';
-import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../types';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>
@@ -45,16 +48,21 @@ export class OptionsListEmbeddableFactory
       ((newInput.fieldName && !deepEqual(newInput.fieldName, embeddable.getInput().fieldName)) ||
         (newInput.dataViewId && !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId)))
     ) {
-      // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
-      newInput.selectedOptions = [];
+      // if the field name or data view id has changed in this editing session, reset all selections
+      newInput.selectedOptions = undefined;
+      newInput.existsSelected = undefined;
+      newInput.exclude = undefined;
+      newInput.sort = undefined;
     }
     return newInput;
   };
 
   public isFieldCompatible = (dataControlField: DataControlField) => {
     if (
-      (dataControlField.field.aggregatable && dataControlField.field.type === 'string') ||
-      dataControlField.field.type === 'boolean'
+      !dataControlField.field.spec.scripted &&
+      ((dataControlField.field.aggregatable && dataControlField.field.type === 'string') ||
+        dataControlField.field.type === 'boolean' ||
+        dataControlField.field.type === 'ip')
     ) {
       dataControlField.compatibleControlTypes.push(this.type);
     }
@@ -62,7 +70,7 @@ export class OptionsListEmbeddableFactory
 
   public controlEditorOptionsComponent = OptionsListEditorOptions;
 
-  public isEditable = () => Promise.resolve(false);
+  public isEditable = () => Promise.resolve(true);
 
   public getDisplayName = () =>
     i18n.translate('controls.optionsList.displayName', {

@@ -7,9 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
-import { MlCustomUrls } from './custom_urls';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
+import type { MlCustomUrls } from './custom_urls';
+import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 
 export interface SectionOptions {
   withAdvancedSection: boolean;
@@ -18,7 +19,8 @@ export interface SectionOptions {
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
-  customUrls: MlCustomUrls
+  customUrls: MlCustomUrls,
+  mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
 ) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -32,7 +34,7 @@ export function MachineLearningJobWizardCommonProvider(
   return {
     async clickNextButton() {
       await testSubjects.existOrFail('mlJobWizardNavButtonNext');
-      await testSubjects.clickWhenNotDisabled('mlJobWizardNavButtonNext');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardNavButtonNext');
     },
 
     async assertTimeRangeSectionExists() {
@@ -97,6 +99,19 @@ export function MachineLearningJobWizardCommonProvider(
 
     async assertAggAndFieldInputExists() {
       await testSubjects.existOrFail('mlJobWizardAggSelection > comboBoxInput');
+    },
+
+    async assertFieldStatFlyoutContentFromAggSelectionInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValuesContent: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlJobWizardAggSelection',
+        fieldName,
+        fieldType,
+        expectedTopValuesContent
+      );
     },
 
     async assertAggAndFieldSelection(expectedIdentifier: string[]) {
@@ -329,7 +344,7 @@ export function MachineLearningJobWizardCommonProvider(
         })) === false
       ) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertDedicatedIndexSwitchCheckedState(true, {
             withAdvancedSection: sectionOptions.withAdvancedSection,
           });
@@ -362,7 +377,7 @@ export function MachineLearningJobWizardCommonProvider(
       const subj = 'mlJobWizardStartDatafeedCheckbox';
       if ((await this.getStartDatafeedSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertStartDatafeedSwitchCheckedState(toggle);
         });
       }
@@ -414,6 +429,19 @@ export function MachineLearningJobWizardCommonProvider(
 
     async assertInfluencerInputExists() {
       await testSubjects.existOrFail('mlInfluencerSelect > comboBoxInput');
+    },
+
+    async assertFieldStatFlyoutContentFromInfluencerInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValuesContent?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlInfluencerSelect',
+        fieldName,
+        fieldType,
+        expectedTopValuesContent
+      );
     },
 
     async getSelectedInfluencers(): Promise<string[]> {
@@ -492,7 +520,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
-      await testSubjects.clickWhenNotDisabled('mlButtonUseFullData');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
     },
 
@@ -540,12 +568,12 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async createJobAndWaitForCompletion() {
-      await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime', { timeout: 2 * 60 * 1000 });
     },
 
     async createJobWithoutDatafeedStart() {
-      await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlPageJobManagement');
     },
   };

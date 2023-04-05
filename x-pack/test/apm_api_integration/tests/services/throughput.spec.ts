@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { first, last, meanBy } from 'lodash';
 import moment from 'moment';
@@ -15,6 +15,8 @@ import {
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -32,7 +34,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   async function callApi(
     overrides?: RecursivePartial<
       APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/throughput'>['params']
-    >
+    >,
+    processorEvent: 'transaction' | 'metric' = 'metric'
   ) {
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
@@ -48,6 +51,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
           ...overrides?.query,
+          ...(processorEvent === 'metric'
+            ? {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+                bucketSizeInSeconds: 60,
+              }
+            : {
+                documentType: ApmDocumentType.TransactionEvent,
+                rollupInterval: RollupInterval.None,
+                bucketSizeInSeconds: 30,
+              }),
         },
       },
     });
@@ -71,14 +85,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
         const serviceGoDevInstance = apm
-          .service(serviceName, 'development', 'go')
+          .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
         const serviceJavaInstance = apm
-          .service('synth-java', 'development', 'java')
+          .service({ name: 'synth-java', environment: 'development', agentName: 'java' })
           .instance('instance-c');
 
         await synthtraceEsClient.index([
@@ -87,7 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .duration(1000)
                 .timestamp(timestamp)
             ),
@@ -96,7 +110,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_DEV_RATE)
             .generator((timestamp) =>
               serviceGoDevInstance
-                .transaction('GET /api/product/:id')
+                .transaction({ transactionName: 'GET /api/product/:id' })
                 .duration(1000)
                 .timestamp(timestamp)
             ),
@@ -105,7 +119,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(JAVA_PROD_RATE)
             .generator((timestamp) =>
               serviceJavaInstance
-                .transaction('POST /api/product/buy')
+                .transaction({ transactionName: 'POST /api/product/buy' })
                 .duration(1000)
                 .timestamp(timestamp)
             ),
@@ -120,8 +134,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const [throughputMetricsResponse, throughputTransactionsResponse] = await Promise.all([
-            callApi({ query: { kuery: 'processor.event : "metric"' } }),
-            callApi({ query: { kuery: 'processor.event : "transaction"' } }),
+            callApi({}, 'metric'),
+            callApi({}, 'transaction'),
           ]);
           throughputMetrics = throughputMetricsResponse.body;
           throughputTransactions = throughputTransactionsResponse.body;

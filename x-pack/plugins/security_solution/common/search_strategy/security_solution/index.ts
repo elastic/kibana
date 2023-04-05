@@ -67,11 +67,12 @@ import type {
 } from './cti';
 
 import type {
-  RiskScoreStrategyResponse,
   RiskQueries,
-  RiskScoreRequestOptions,
   KpiRiskScoreStrategyResponse,
   KpiRiskScoreRequestOptions,
+  HostsRiskScoreStrategyResponse,
+  UsersRiskScoreStrategyResponse,
+  RiskScoreRequestOptions,
 } from './risk_score';
 import type { UsersQueries } from './users';
 import type { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
@@ -185,8 +186,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? CtiEventEnrichmentStrategyResponse
   : T extends CtiQueries.dataSource
   ? CtiDataSourceStrategyResponse
-  : T extends RiskQueries.riskScore
-  ? RiskScoreStrategyResponse
+  : T extends RiskQueries.hostsRiskScore
+  ? HostsRiskScoreStrategyResponse
+  : T extends RiskQueries.usersRiskScore
+  ? UsersRiskScoreStrategyResponse
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreStrategyResponse
   : never;
@@ -247,7 +250,9 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? CtiEventEnrichmentRequestOptions
   : T extends CtiQueries.dataSource
   ? CtiDataSourceRequestOptions
-  : T extends RiskQueries.riskScore
+  : T extends RiskQueries.hostsRiskScore
+  ? RiskScoreRequestOptions
+  : T extends RiskQueries.usersRiskScore
   ? RiskScoreRequestOptions
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreRequestOptions

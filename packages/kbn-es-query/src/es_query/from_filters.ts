@@ -12,7 +12,8 @@ import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
 import { BoolQuery, DataViewBase } from './types';
-import { handleNestedFilter } from './handle_nested_filter';
+import { fromNestedFilter } from './from_nested_filter';
+import { fromCombinedFilter } from './from_combined_filter';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -64,29 +65,24 @@ export interface EsQueryFiltersConfig {
  * @public
  */
 export const buildQueryFromFilters = (
-  filters: Filter[] = [],
-  indexPattern: DataViewBase | undefined,
-  { ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped }: EsQueryFiltersConfig = {
+  inputFilters: Filter[] = [],
+  inputDataViews: DataViewBase | DataViewBase[] | undefined,
+  options: EsQueryFiltersConfig = {
     ignoreFilterIfFieldNotInIndex: false,
   }
 ): BoolQuery => {
-  filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
+  const { ignoreFilterIfFieldNotInIndex = false } = options;
+  const filters = inputFilters.filter((filter) => filter && !isFilterDisabled(filter));
 
   const filtersToESQueries = (negate: boolean) => {
     return filters
       .filter((f) => !!f)
       .filter(filterNegate(negate))
-      .filter(
-        (filter) => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
-      )
-      .map((filter) => {
-        return migrateFilter(filter, indexPattern);
+      .filter((filter) => {
+        const indexPattern = findIndexPattern(inputDataViews, filter.meta?.index);
+        return !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern);
       })
-      .map((filter) =>
-        handleNestedFilter(filter, indexPattern, { ignoreUnmapped: nestedIgnoreUnmapped })
-      )
-      .map(cleanFilter)
-      .map(translateToQuery);
+      .map((filter) => filterToQueryDsl(filter, inputDataViews, options));
   };
 
   return {
@@ -96,3 +92,24 @@ export const buildQueryFromFilters = (
     must_not: filtersToESQueries(true),
   };
 };
+
+function findIndexPattern(
+  inputDataViews: DataViewBase | DataViewBase[] | undefined,
+  id: string | undefined
+) {
+  const dataViews = Array.isArray(inputDataViews) ? inputDataViews : [inputDataViews];
+  return dataViews.find((index) => index?.id === id) ?? dataViews[0];
+}
+
+export function filterToQueryDsl(
+  filter: Filter,
+  inputDataViews: DataViewBase | DataViewBase[] | undefined,
+  options: EsQueryFiltersConfig = {}
+) {
+  const indexPattern = findIndexPattern(inputDataViews, filter.meta?.index);
+  const migratedFilter = migrateFilter(filter, indexPattern);
+  const nestedFilter = fromNestedFilter(migratedFilter, indexPattern, options);
+  const combinedFilter = fromCombinedFilter(nestedFilter, inputDataViews, options);
+  const cleanedFilter = cleanFilter(combinedFilter);
+  return translateToQuery(cleanedFilter);
+}

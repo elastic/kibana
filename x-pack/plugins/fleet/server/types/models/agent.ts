@@ -22,7 +22,6 @@ export const AgentTypeSchema = schema.oneOf([
 export const NewAgentActionSchema = schema.oneOf([
   schema.object({
     type: schema.oneOf([
-      schema.literal('POLICY_CHANGE'),
       schema.literal('UNENROLL'),
       schema.literal('UPGRADE'),
       schema.literal('POLICY_REASSIGN'),

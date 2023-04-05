@@ -7,18 +7,19 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import {
   ControlGroupContainerFactory,
   CONTROL_GROUP_TYPE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '.';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
-import { pluginServices } from './services';
-import { controlsService } from './services/kibana/controls';
+import { TimeSliderEmbeddableFactory, TimeSliderControlEmbeddableInput } from './time_slider';
+import { controlsService } from './services/controls/controls_service';
 import {
   ControlsPluginSetup,
   ControlsPluginStart,
@@ -27,7 +28,6 @@ import {
   IEditableControlFactory,
   ControlInput,
 } from './types';
-
 export class ControlsPlugin
   implements
     Plugin<
@@ -41,7 +41,7 @@ export class ControlsPlugin
     coreStart: CoreStart,
     startPlugins: ControlsPluginStartDeps
   ) {
-    const { registry } = await import('./services/kibana');
+    const { registry, pluginServices } = await import('./services/plugin_services');
     pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
   }
 
@@ -93,6 +93,17 @@ export class ControlsPlugin
         rangeSliderFactory
       );
       registerControlType(rangeSliderFactory);
+
+      const timeSliderFactoryDef = new TimeSliderEmbeddableFactory();
+      const timeSliderFactory = embeddable.registerEmbeddableFactory(
+        TIME_SLIDER_CONTROL,
+        timeSliderFactoryDef
+      )();
+      this.transferEditorFunctions<TimeSliderControlEmbeddableInput>(
+        timeSliderFactoryDef,
+        timeSliderFactory
+      );
+      registerControlType(timeSliderFactory);
     });
 
     return {
@@ -101,10 +112,21 @@ export class ControlsPlugin
   }
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps): ControlsPluginStart {
-    this.startControlsKibanaServices(coreStart, startPlugins);
+    this.startControlsKibanaServices(coreStart, startPlugins).then(async () => {
+      const { uiActions } = startPlugins;
+
+      const { DeleteControlAction } = await import('./control_group/actions/delete_control_action');
+      const deleteControlAction = new DeleteControlAction();
+      uiActions.registerAction(deleteControlAction);
+      uiActions.attachAction(PANEL_HOVER_TRIGGER, deleteControlAction.id);
+
+      const { EditControlAction } = await import('./control_group/actions/edit_control_action');
+      const editControlAction = new EditControlAction(deleteControlAction);
+      uiActions.registerAction(editControlAction);
+      uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
+    });
 
     const { getControlFactory, getControlTypes } = controlsService;
-
     return {
       getControlFactory,
       getControlTypes,

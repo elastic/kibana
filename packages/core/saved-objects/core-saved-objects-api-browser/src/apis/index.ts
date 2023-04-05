@@ -19,3 +19,8 @@ export type {
 } from './find';
 export type { ResolvedSimpleSavedObject } from './resolve';
 export type { SavedObjectsUpdateOptions } from './update';
+export type {
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponseItem,
+  SavedObjectsBulkDeleteResponse,
+} from './bulk_delete';

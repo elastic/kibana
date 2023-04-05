@@ -329,4 +329,12 @@ export const strings = {
     i18n.translate('expressionXY.referenceLine.Value.help', {
       defaultMessage: 'Reference line value',
     }),
+  getTimeLabel: () =>
+    i18n.translate('expressionXY.annotation.time', {
+      defaultMessage: 'Time',
+    }),
+  getLabelLabel: () =>
+    i18n.translate('expressionXY.annotation.label', {
+      defaultMessage: 'Label',
+    }),
 };

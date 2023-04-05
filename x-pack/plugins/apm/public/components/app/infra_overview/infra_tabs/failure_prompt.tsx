@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -19,7 +22,7 @@ export function FailurePrompt() {
     >
       <EuiEmptyPrompt
         color="danger"
-        iconType="alert"
+        iconType="warning"
         layout="vertical"
         title={
           <h2>

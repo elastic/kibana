@@ -27,6 +27,11 @@ export interface Props {
    * Applies extra styles necessary when coupled with the query bar
    */
   afterQueryBar?: boolean;
+
+  /**
+   * Disable all interactive actions
+   */
+  isDisabled?: boolean;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -50,6 +55,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         indexPatterns={props.indexPatterns!}
         timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
         hiddenPanelOptions={props.hiddenPanelOptions}
+        readOnly={props.isDisabled}
       />
     </EuiFlexGroup>
   );

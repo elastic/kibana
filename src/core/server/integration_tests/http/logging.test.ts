@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('request logging', () => {
   let mockConsoleLog: jest.SpyInstance;
@@ -27,7 +27,7 @@ describe('request logging', () => {
   describe('http server response logging', () => {
     describe('configuration', () => {
       it('does not log with a default config', async () => {
-        const root = kbnTestServer.createRoot({
+        const root = createRoot({
           plugins: { initialize: false },
           elasticsearch: { skipStartupConnectionCheck: true },
         });
@@ -42,14 +42,14 @@ describe('request logging', () => {
           );
         await root.start();
 
-        await kbnTestServer.request.get(root, '/ping').expect(200, 'pong');
+        await request.get(root, '/ping').expect(200, 'pong');
         expect(mockConsoleLog).not.toHaveBeenCalled();
 
         await root.shutdown();
       });
 
       it('logs at the correct level and with the correct context', async () => {
-        const root = kbnTestServer.createRoot({
+        const root = createRoot({
           logging: {
             appenders: {
               'test-console': {
@@ -84,7 +84,7 @@ describe('request logging', () => {
           );
         await root.start();
 
-        await kbnTestServer.request.get(root, '/ping').expect(200, 'pong');
+        await request.get(root, '/ping').expect(200, 'pong');
         expect(mockConsoleLog).toHaveBeenCalledTimes(1);
         const [level, logger] = mockConsoleLog.mock.calls[0][0].split('|');
         expect(level).toBe('DEBUG');
@@ -95,7 +95,7 @@ describe('request logging', () => {
     });
 
     describe('content', () => {
-      let root: ReturnType<typeof kbnTestServer.createRoot>;
+      let root: ReturnType<typeof createRoot>;
       const config = {
         logging: {
           appenders: {
@@ -122,7 +122,7 @@ describe('request logging', () => {
       };
 
       beforeEach(() => {
-        root = kbnTestServer.createRoot(config);
+        root = createRoot(config);
       });
 
       afterEach(async () => {
@@ -141,7 +141,7 @@ describe('request logging', () => {
           );
         await root.start();
 
-        await kbnTestServer.request.get(root, '/ping').expect(200, 'pong');
+        await request.get(root, '/ping').expect(200, 'pong');
         expect(mockConsoleLog).toHaveBeenCalledTimes(1);
         const [, , message, meta] = mockConsoleLog.mock.calls[0][0].split('|');
         // some of the contents of the message are variable based on environment, such as
@@ -174,7 +174,7 @@ describe('request logging', () => {
         );
         await root.start();
 
-        await kbnTestServer.request
+        await request
           .post(root, '/ping')
           .set('Content-Type', 'application/json')
           .send({ message: 'hi' })
@@ -196,7 +196,7 @@ describe('request logging', () => {
           );
         await root.start();
 
-        await kbnTestServer.request.get(root, '/b').expect(404);
+        await request.get(root, '/b').expect(404);
         expect(mockConsoleLog).toHaveBeenCalledTimes(1);
         const [, , message, meta] = mockConsoleLog.mock.calls[0][0].split('|');
         // some of the contents of the message are variable based on environment, such as
@@ -217,7 +217,7 @@ describe('request logging', () => {
           );
         await root.start();
 
-        await kbnTestServer.request.get(root, '/ping').query({ hey: 'ya' }).expect(200, 'pong');
+        await request.get(root, '/ping').query({ hey: 'ya' }).expect(200, 'pong');
         expect(mockConsoleLog).toHaveBeenCalledTimes(1);
         const [, , message, meta] = mockConsoleLog.mock.calls[0][0].split('|');
         expect(message.includes('GET /ping?hey=ya 200')).toBe(true);
@@ -236,7 +236,7 @@ describe('request logging', () => {
           );
         await root.start();
 
-        const response = await kbnTestServer.request.get(root, '/ping').expect(200, 'pong');
+        const response = await request.get(root, '/ping').expect(200, 'pong');
         expect(mockConsoleLog).toHaveBeenCalledTimes(1);
         const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
         expect(JSON.parse(meta).http.response.body.bytes).toBe(response.text.length);
@@ -255,7 +255,7 @@ describe('request logging', () => {
             );
           await root.start();
 
-          await kbnTestServer.request.get(root, '/ping').set('foo', 'hello').expect(200);
+          await request.get(root, '/ping').set('foo', 'hello').expect(200);
           expect(mockConsoleLog).toHaveBeenCalledTimes(1);
           const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
           expect(JSON.parse(meta).http.request.headers.foo).toBe('hello');
@@ -284,7 +284,7 @@ describe('request logging', () => {
           );
           await root.start();
 
-          await kbnTestServer.request
+          await request
             .post(root, '/ping')
             .set('content-type', 'application/json')
             .set('authorization', 'abc')
@@ -296,7 +296,7 @@ describe('request logging', () => {
         });
 
         it('filters sensitive request headers when RewriteAppender is configured', async () => {
-          root = kbnTestServer.createRoot({
+          root = createRoot({
             logging: {
               appenders: {
                 'test-console': {
@@ -352,7 +352,7 @@ describe('request logging', () => {
           );
           await root.start();
 
-          await kbnTestServer.request
+          await request
             .post(root, '/ping')
             .set('content-type', 'application/json')
             .set('authorization', 'abc')
@@ -386,7 +386,7 @@ describe('request logging', () => {
           );
           await root.start();
 
-          await kbnTestServer.request
+          await request
             .post(root, '/ping')
             .set('Content-Type', 'application/json')
             .send({ message: 'hi' })
@@ -397,7 +397,7 @@ describe('request logging', () => {
         });
 
         it('filters sensitive response headers when RewriteAppender is configured', async () => {
-          root = kbnTestServer.createRoot({
+          root = createRoot({
             logging: {
               appenders: {
                 'test-console': {
@@ -452,7 +452,7 @@ describe('request logging', () => {
           );
           await root.start();
 
-          await kbnTestServer.request
+          await request
             .post(root, '/ping')
             .set('Content-Type', 'application/json')
             .send({ message: 'hi' })
@@ -475,7 +475,7 @@ describe('request logging', () => {
           );
         await root.start();
 
-        await kbnTestServer.request.get(root, '/ping').set('user-agent', 'world').expect(200);
+        await request.get(root, '/ping').set('user-agent', 'world').expect(200);
         expect(mockConsoleLog).toHaveBeenCalledTimes(1);
         const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
         expect(JSON.parse(meta).http.request.headers['user-agent']).toBe('world');

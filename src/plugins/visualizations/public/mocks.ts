@@ -23,6 +23,8 @@ import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public
 import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import { VisualizationsPlugin } from './plugin';
 import { Schemas } from './vis_types';
 import { Schema, VisualizationsSetup, VisualizationsStart } from '.';
@@ -75,6 +77,11 @@ const createInstance = async () => {
       urlForwarding: urlForwardingPluginMock.createStartContract(),
       screenshotMode: screenshotModePluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      usageCollection: {
+        reportUiCounter: jest.fn(),
+      },
+      savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
     });
 
   return {

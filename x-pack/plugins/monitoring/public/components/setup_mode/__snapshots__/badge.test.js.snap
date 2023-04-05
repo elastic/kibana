@@ -50,7 +50,6 @@ exports[`setupMode SetupModeBadge should use a text status if internal collectio
    
   <EuiTextColor
     color="warning"
-    size="xs"
   >
     Some nodes use only self monitoring
   </EuiTextColor>

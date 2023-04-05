@@ -54,5 +54,6 @@ export const register = <Config extends ActionTypeConfig, Secrets extends Action
     supportedFeatureIds: connector.supportedFeatureIds,
     validate: validators,
     executor,
+    renderParameterTemplates: connector.renderParameterTemplates,
   });
 };

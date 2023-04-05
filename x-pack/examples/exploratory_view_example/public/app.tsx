@@ -12,8 +12,8 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
@@ -48,7 +48,7 @@ export const App = (props: {
     },
   ];
 
-  const hrefLink = props.plugins.observability.createExploratoryViewUrl(
+  const hrefLink = props.plugins.exploratoryView.createExploratoryViewUrl(
     { reportType: 'kpi-over-time', allSeries: seriesList },
     props.core.http.basePath.get()
   );

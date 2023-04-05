@@ -6,51 +6,43 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { decodeCloudId, normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents } from '../../common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID } from '../../common/constants';
 import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common/types';
 
 import { appContextService } from './app_context';
+import { listFleetServerHosts } from './fleet_server_host';
+import { auditLoggingService } from './audit_logging';
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
   const res = await soClient.find<SettingsSOAttributes>({
     type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  });
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'get',
+    id: GLOBAL_SETTINGS_ID,
+    savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   });
 
   if (res.total === 0) {
     throw Boom.notFound('Global settings not found');
   }
   const settingsSo = res.saved_objects[0];
+  const fleetServerHosts = await listFleetServerHosts(soClient);
+
   return {
     id: settingsSo.id,
     ...settingsSo.attributes,
-    fleet_server_hosts: settingsSo.attributes.fleet_server_hosts || [],
+    fleet_server_hosts: fleetServerHosts.items.flatMap((item) => item.host_urls),
     preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
   };
 }
 
 export async function settingsSetup(soClient: SavedObjectsClientContract) {
   try {
-    const settings = await getSettings(soClient);
-    const defaultSettings = createDefaultSettings();
-
-    const fleetServerHostsIsPreconfigured = getConfigFleetServerHosts()?.length ?? 0 > 0;
-
-    const fleetServerHostsShouldBeUpdated =
-      !settings.fleet_server_hosts ||
-      settings.fleet_server_hosts.length === 0 ||
-      (fleetServerHostsIsPreconfigured &&
-        !isEqual(settings.fleet_server_hosts, defaultSettings.fleet_server_hosts));
-
-    // Migration for < 7.13 Kibana
-    if (defaultSettings.fleet_server_hosts.length > 0 && fleetServerHostsShouldBeUpdated) {
-      return saveSettings(soClient, {
-        fleet_server_hosts: defaultSettings.fleet_server_hosts,
-      });
-    }
+    await getSettings(soClient);
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
@@ -73,6 +65,12 @@ export async function saveSettings(
   try {
     const settings = await getSettings(soClient);
 
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: settings.id,
+      savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+    });
+
     const res = await soClient.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
@@ -86,6 +84,13 @@ export async function saveSettings(
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
+
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'create',
+        id: GLOBAL_SETTINGS_ID,
+        savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      });
+
       const res = await soClient.create<SettingsSOAttributes>(
         GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         {
@@ -116,29 +121,5 @@ function getConfigFleetServerHosts() {
 }
 
 export function createDefaultSettings(): BaseSettings {
-  const configFleetServerHosts = getConfigFleetServerHosts();
-  const cloudFleetServerHosts = getCloudFleetServersHosts();
-
-  const fleetServerHosts = configFleetServerHosts ?? cloudFleetServerHosts ?? [];
-
-  return {
-    fleet_server_hosts: fleetServerHosts,
-  };
-}
-
-export function getCloudFleetServersHosts() {
-  const cloudSetup = appContextService.getCloud();
-  if (cloudSetup && cloudSetup.isCloudEnabled && cloudSetup.cloudId && cloudSetup.deploymentId) {
-    const res = decodeCloudId(cloudSetup.cloudId);
-    if (!res) {
-      return;
-    }
-
-    // Fleet Server url are formed like this `https://<deploymentId>.fleet.<host>
-    return [
-      `https://${cloudSetup.deploymentId}.fleet.${res.host}${
-        res.defaultPort !== '443' ? `:${res.defaultPort}` : ''
-      }`,
-    ];
-  }
+  return { prerelease_integrations_enabled: false };
 }

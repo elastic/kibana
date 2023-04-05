@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
   const panelActions = getService('dashboardPanelActions');
-  const panelActionsTimeRange = getService('dashboardPanelTimeRange');
+  const dashboardCustomizePanel = getService('dashboardCustomizePanel');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
@@ -44,9 +44,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean-up custom time range on panel', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
-      await panelActions.openContextMenuMorePanel();
-      await panelActionsTimeRange.clickTimeRangeActionInContextMenu();
-      await panelActionsTimeRange.clickRemovePerPanelTimeRangeButton();
+
+      await panelActions.customizePanel();
+      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+      await dashboardCustomizePanel.clickSaveButton();
       await dashboard.saveDashboard('Dashboard with Pie Chart');
     });
 
@@ -64,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('navigates to Discover app to index pattern of the panel on action click', async () => {
-      await testSubjects.clickWhenNotDisabled(ACTION_TEST_SUBJ);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);
       await discover.waitForDiscoverAppOnScreen();
 
       const el = await testSubjects.find('discover-dataView-switch-link');
@@ -78,16 +79,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
-      await panelActions.openContextMenuMorePanel();
-      await panelActionsTimeRange.clickTimeRangeActionInContextMenu();
-      await panelActionsTimeRange.clickToggleQuickMenuButton();
-      await panelActionsTimeRange.clickCommonlyUsedTimeRange('Last_90 days');
-      await panelActionsTimeRange.clickModalPrimaryButton();
+      await panelActions.customizePanel();
+      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
+      await dashboardCustomizePanel.clickSaveButton();
 
       await dashboard.saveDashboard('Dashboard with Pie Chart');
 
       await panelActions.openContextMenu();
-      await testSubjects.clickWhenNotDisabled(ACTION_TEST_SUBJ);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);
       await discover.waitForDiscoverAppOnScreen();
 
       const text = await timePicker.getShowDatesButtonText();

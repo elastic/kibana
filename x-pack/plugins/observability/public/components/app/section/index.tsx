@@ -49,6 +49,7 @@ export function SectionContainer({
         initialIsOpen={initialIsOpen}
         id={title}
         buttonContentClassName="accordion-button"
+        data-test-subj={`accordion-${title}`}
         buttonContent={
           <>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -69,6 +70,7 @@ export function SectionContainer({
         extraAction={
           appLink?.href && (
             <EuiButtonEmpty
+              data-test-subj="o11ySectionContainerButton"
               iconType={'sortRight'}
               size="xs"
               color="text"

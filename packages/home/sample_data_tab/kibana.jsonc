@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/home-sample-data-tab",
+  "owner": "@elastic/appex-sharedux"
+}

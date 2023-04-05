@@ -51,14 +51,14 @@ To use the exposed plugin start and setup contracts:
 
 import { TelemetryPluginsStart } from '../telemetry/server`;
 
-interface MyPlyginStartDeps {
+interface MyPluginStartDeps {
   telemetry?: TelemetryPluginsStart;
 }
 
 class MyPlugin {
   public async start(
     core: CoreStart,
-    { telemetry }: MyPlyginStartDeps
+    { telemetry }: MyPluginStartDeps
   ) {
     const isOptedIn = await telemetry?.getIsOptedIn();
     ...

@@ -29,6 +29,7 @@ import {
   isClassificationAnalysis,
   isRegressionAnalysis,
 } from '../../../../common/util/analytics_utils';
+import { getDestinationIndex } from './get_destination_index';
 
 export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
@@ -95,9 +96,7 @@ export const useResultsViewConfig = (jobId: string) => {
           }
 
           try {
-            const destIndex = Array.isArray(jobConfigUpdate.dest.index)
-              ? jobConfigUpdate.dest.index[0]
-              : jobConfigUpdate.dest.index;
+            const destIndex = getDestinationIndex(jobConfigUpdate);
             const destDataViewId = (await getDataViewIdFromName(destIndex)) ?? destIndex;
             let dataView: DataView | undefined;
 
@@ -148,6 +147,7 @@ export const useResultsViewConfig = (jobId: string) => {
         setIsLoadingJobConfig(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

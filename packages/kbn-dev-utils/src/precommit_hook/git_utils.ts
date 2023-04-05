@@ -8,7 +8,7 @@
 
 import execa from 'execa';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 // Retrieves the correct location for the .git dir for
 // every git setup (including git worktree)

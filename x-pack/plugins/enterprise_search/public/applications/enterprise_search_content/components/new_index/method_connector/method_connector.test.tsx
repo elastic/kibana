@@ -27,7 +27,7 @@ describe('MethodConnector', () => {
   });
 
   it('renders connector ingestion method tab', () => {
-    const wrapper = shallow(<MethodConnector />);
+    const wrapper = shallow(<MethodConnector isNative={false} />);
     const template = wrapper.find(NewSearchIndexTemplate);
 
     expect(template.prop('type')).toEqual('connector');

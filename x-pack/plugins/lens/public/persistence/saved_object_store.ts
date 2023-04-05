@@ -7,13 +7,12 @@
 
 import { Filter, Query } from '@kbn/es-query';
 import {
-  SavedObjectAttributes,
   SavedObjectsClientContract,
   SavedObjectReference,
   ResolvedSimpleSavedObject,
 } from '@kbn/core/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 import { LensSavedObjectAttributes } from '../async_services';
 
 export interface Document {
@@ -56,9 +55,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
 
   save = async (vis: Document) => {
     const { savedObjectId, type, references, ...rest } = vis;
-    // TODO: SavedObjectAttributes should support this kind of object,
-    // remove this workaround when SavedObjectAttributes is updated.
-    const attributes = rest as unknown as SavedObjectAttributes;
+    const attributes = rest;
 
     const result = await this.client.create(
       DOC_TYPE,

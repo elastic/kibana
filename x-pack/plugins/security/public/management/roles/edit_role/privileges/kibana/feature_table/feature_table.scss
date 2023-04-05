@@ -1,5 +1,11 @@
-.subFeaturePrivilegeExpandedRegion {
-  background-color: $euiColorLightestShade;
-  padding-left: $euiSizeXXL;
-  padding-top: $euiSizeS;
+.euiAccordionWithDescription:hover, .euiAccordionWithDescription:focus {
+  text-decoration: none;
+}
+
+.subFeaturePanel {
+  margin-left: $euiSizeL + $euiSizeXS;
+}
+
+.noSubFeaturePrivileges {
+  margin-left: $euiSizeL + $euiSizeXS;
 }

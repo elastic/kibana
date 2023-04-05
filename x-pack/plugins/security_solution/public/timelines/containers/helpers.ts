@@ -5,15 +5,26 @@
  * 2.0.
  */
 
+import type { TimelineResult } from '../../../common/types';
+import { TableId } from '../../../common/types';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
-import { TimelineId } from '../../../common/types/timeline';
 
-export const detectionsTimelineIds = [
-  TimelineId.detectionsPage,
-  TimelineId.detectionsRulesDetailsPage,
-];
+export const getTimelineQueryTypes = (timeline: TimelineResult) => ({
+  hasQuery:
+    (timeline.kqlQuery != null &&
+      timeline.kqlQuery.filterQuery != null &&
+      timeline.kqlQuery.filterQuery.kuery != null &&
+      timeline.kqlQuery.filterQuery.kuery.expression !== '') ||
+    (timeline.dataProviders != null && timeline.dataProviders.length > 0) ||
+    (timeline.filters != null && timeline.filters.length > 0),
+  hasEql:
+    timeline.eqlOptions != null &&
+    timeline.eqlOptions.query != null &&
+    timeline.eqlOptions.query.length > 0,
+});
 
-// TODO: Once we are past experimental phase `useRuleRegistry` should be removed
+export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
+
 export const skipQueryForDetectionsPage = (
   id: string,
   defaultIndex: string[],

@@ -39,9 +39,21 @@
   font-family: $euiCodeFontFamily;
 }
 
+.dscDiscoverGrid__cellPopover {
+  // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
+  .lines-content.monaco-editor-background {
+    overflow: unset !important;
+    contain: unset !important;
+  }
+}
+
 .dscDiscoverGrid__cellPopoverValue {
   font-family: $euiCodeFontFamily;
   font-size: $euiFontSizeS;
+}
+
+.euiDataGridRowCell__definedHeight {
+  white-space: pre-wrap;
 }
 
 .dscDiscoverGrid__inner {
@@ -75,13 +87,11 @@
 
 // We only truncate if the cell is not a control column.
 .euiDataGridHeader {
-  // This display property is temporary until https://github.com/elastic/eui/issues/4729 is resolved.
-  display: flex;
 
   .euiDataGridHeaderCell__content {
     @include euiTextTruncate;
     overflow: hidden;
-    white-space: nowrap;
+    white-space: pre-wrap;
     flex-grow: 1;
   }
 
@@ -114,6 +124,7 @@
 
 .dscDiscoverGrid__descriptionListDescription {
   word-break: normal !important;
+  white-space: nowrap;
 
   // Special handling for images coming from the image field formatter
   img {

@@ -7,11 +7,16 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_BULK_CREATE } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_CREATE,
+  DETECTION_ENGINE_RULES_URL,
+} from '@kbn/security-solution-plugin/common/constants';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getRuleForSignalTesting,
   getSimpleRule,
@@ -20,7 +25,7 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -32,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('create_rules_bulk', () => {
     describe('deprecations', () => {
       afterEach(async () => {
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should return a warning header', async () => {
@@ -63,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -104,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send([simpleRule])
           .expect(200);
 
-        await waitForRuleSuccessOrStatus(supertest, log, body[0].id);
+        await waitForRuleSuccess({ supertest, log, id: body[0].id });
       });
 
       it('should create a single rule without a rule_id', async () => {
@@ -156,6 +161,118 @@ export default ({ getService }: FtrProviderContext): void => {
               status_code: 409,
             },
             rule_id: 'rule-1',
+          },
+        ]);
+      });
+
+      it('should return a 200 ok but have a 409 conflict if we attempt to create the rule, which use existing attached rule defult list', async () => {
+        const { body: ruleWithException } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...getSimpleRuleWithoutRuleId(),
+            exceptions_list: [
+              {
+                id: '2',
+                list_id: '123',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.RULE_DEFAULT,
+              },
+            ],
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
+          .set('kbn-xsrf', 'true')
+          .send([
+            {
+              ...getSimpleRule(),
+              exceptions_list: [
+                {
+                  id: '2',
+                  list_id: '123',
+                  namespace_type: 'single',
+                  type: ExceptionListTypeEnum.RULE_DEFAULT,
+                },
+              ],
+            },
+          ])
+          .expect(200);
+
+        expect(body).to.eql([
+          {
+            error: {
+              message: `default exception list for rule: rule-1 already exists in rule(s): ${ruleWithException.id}`,
+              status_code: 409,
+            },
+            rule_id: 'rule-1',
+          },
+        ]);
+      });
+
+      it('should return a 409 if several rules has the same exception rule default list', async () => {
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
+          .set('kbn-xsrf', 'true')
+          .send([
+            {
+              ...getSimpleRule(),
+              exceptions_list: [
+                {
+                  id: '2',
+                  list_id: '123',
+                  namespace_type: 'single',
+                  type: ExceptionListTypeEnum.RULE_DEFAULT,
+                },
+              ],
+            },
+            {
+              ...getSimpleRule('rule-2'),
+              exceptions_list: [
+                {
+                  id: '2',
+                  list_id: '123',
+                  namespace_type: 'single',
+                  type: ExceptionListTypeEnum.RULE_DEFAULT,
+                },
+              ],
+            },
+            {
+              ...getSimpleRuleWithoutRuleId(),
+              exceptions_list: [
+                {
+                  id: '2',
+                  list_id: '123',
+                  namespace_type: 'single',
+                  type: ExceptionListTypeEnum.RULE_DEFAULT,
+                },
+              ],
+            },
+          ])
+          .expect(200);
+
+        expect(body).to.eql([
+          {
+            error: {
+              message: 'default exceptions list 2 for rule rule-1 is duplicated',
+              status_code: 409,
+            },
+            rule_id: 'rule-1',
+          },
+          {
+            error: {
+              message: 'default exceptions list 2 for rule rule-2 is duplicated',
+              status_code: 409,
+            },
+            rule_id: 'rule-2',
+          },
+          {
+            error: {
+              message: 'default exceptions list 2 is duplicated',
+              status_code: 409,
+            },
+            rule_id: '(unknown id)',
           },
         ]);
       });

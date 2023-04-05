@@ -17,14 +17,14 @@ import {
   StackMode,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
-import { CommonXYDataLayerConfig, XScaleType } from '../../common';
+import { isDataLayer } from '../../common/utils/layer_types_guards';
+import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
 import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
@@ -46,6 +46,7 @@ type GetSeriesPropsFn = (config: {
   paletteService: PaletteRegistry;
   syncColors?: boolean;
   yAxis?: GroupsConfiguration[number];
+  xAxis?: GroupsConfiguration[number];
   timeZone?: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
@@ -55,6 +56,7 @@ type GetSeriesPropsFn = (config: {
   uiState?: PersistedState;
   allYAccessors: Array<string | ExpressionValueVisDimension>;
   singleTable?: boolean;
+  multipleLayersWithSplits: boolean;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -66,6 +68,7 @@ type GetSeriesNameFn = (
     splitAccessorsFormats: LayerFieldFormats['splitSeriesAccessors'];
     alreadyFormattedColumns: Record<string, boolean>;
     columnToLabelMap: Record<string, string>;
+    multipleLayersWithSplits: boolean;
   },
   titles: LayerAccessorsTitles
 ) => SeriesName;
@@ -254,6 +257,7 @@ export const getSeriesName: GetSeriesNameFn = (
     splitAccessorsFormats,
     alreadyFormattedColumns,
     columnToLabelMap,
+    multipleLayersWithSplits,
   },
   titles
 ) => {
@@ -272,7 +276,7 @@ export const getSeriesName: GetSeriesNameFn = (
   const key = data.seriesKeys[data.seriesKeys.length - 1];
   const yAccessorTitle = columnToLabelMap[key] ?? titles?.yTitles?.[key] ?? null;
 
-  if (accessorsCount > 1) {
+  if (accessorsCount > 1 || multipleLayersWithSplits) {
     if (splitValues.length === 0) {
       return yAccessorTitle;
     }
@@ -369,6 +373,10 @@ export const getMetaFromSeriesId = (seriesId: string) => {
   };
 };
 
+export function hasMultipleLayersWithSplits(layers: CommonXYLayerConfig[]) {
+  return layers.filter((l) => isDataLayer(l) && (l.splitAccessors?.length || 0) > 0).length > 1;
+}
+
 export const getSeriesProps: GetSeriesPropsFn = ({
   layer,
   titles = {},
@@ -380,6 +388,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   paletteService,
   syncColors,
   yAxis,
+  xAxis,
   timeZone,
   emphasizeFitting,
   fillOpacity,
@@ -389,6 +398,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   uiState,
   allYAccessors,
   singleTable,
+  multipleLayersWithSplits,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
   const isPercentage = layer.isPercentage;
@@ -442,9 +452,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   );
 
   const emptyX: Record<string, string> = {
-    unifiedX: i18n.translate('expressionXY.xyChart.emptyXLabel', {
-      defaultMessage: '(empty)',
-    }),
+    unifiedX: '',
   };
 
   if (!xColumnId) {
@@ -464,6 +472,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         columns: formattedTable.columns,
         splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
         columnToLabelMap,
+        multipleLayersWithSplits,
       },
       titles
     );
@@ -471,7 +480,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
 
   return {
     splitSeriesAccessors: splitColumnIds.length ? splitColumnIds : [],
-    stackAccessors: isStacked && xColumnId ? [xColumnId] : [],
+    stackAccessors: isStacked ? [xColumnId || 'unifiedX'] : [],
     id: generateSeriesId(
       layer,
       splitColumnIds.length ? splitColumnIds : [EMPTY_ACCESSOR],
@@ -536,5 +545,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     name(d) {
       return getSeriesNameFn(d);
     },
+    yNice: Boolean(yAxis?.extent?.niceValues),
+    xNice: Boolean(xAxis?.extent?.niceValues),
   };
 };

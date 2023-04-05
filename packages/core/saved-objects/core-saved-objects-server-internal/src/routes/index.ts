@@ -23,6 +23,7 @@ import { registerUpdateRoute } from './update';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
+import { registerBulkDeleteRoute } from './bulk_delete';
 import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
@@ -51,17 +52,17 @@ export function registerRoutes({
 }) {
   const router =
     http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
-
-  registerGetRoute(router, { coreUsageData });
-  registerResolveRoute(router, { coreUsageData });
-  registerCreateRoute(router, { coreUsageData });
-  registerDeleteRoute(router, { coreUsageData });
-  registerFindRoute(router, { coreUsageData });
-  registerUpdateRoute(router, { coreUsageData });
-  registerBulkGetRoute(router, { coreUsageData });
-  registerBulkCreateRoute(router, { coreUsageData });
-  registerBulkResolveRoute(router, { coreUsageData });
-  registerBulkUpdateRoute(router, { coreUsageData });
+  registerGetRoute(router, { config, coreUsageData, logger });
+  registerResolveRoute(router, { config, coreUsageData, logger });
+  registerCreateRoute(router, { config, coreUsageData, logger });
+  registerDeleteRoute(router, { config, coreUsageData, logger });
+  registerFindRoute(router, { config, coreUsageData, logger });
+  registerUpdateRoute(router, { config, coreUsageData, logger });
+  registerBulkGetRoute(router, { config, coreUsageData, logger });
+  registerBulkCreateRoute(router, { config, coreUsageData, logger });
+  registerBulkResolveRoute(router, { config, coreUsageData, logger });
+  registerBulkUpdateRoute(router, { config, coreUsageData, logger });
+  registerBulkDeleteRoute(router, { config, coreUsageData, logger });
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });

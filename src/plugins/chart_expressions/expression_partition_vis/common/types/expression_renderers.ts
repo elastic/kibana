@@ -7,12 +7,17 @@
  */
 
 import { Position } from '@elastic/charts';
+import type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
-import { ChartTypes, ExpressionValuePartitionLabels } from './expression_functions';
+import {
+  type AllowedPartitionOverrides,
+  ChartTypes,
+  type ExpressionValuePartitionLabels,
+} from './expression_functions';
 
 export enum EmptySizeRatios {
   SMALL = 0.3,
@@ -29,7 +34,7 @@ export interface Dimension {
 }
 
 export interface Dimensions {
-  metric?: ExpressionValueVisDimension | string;
+  metrics: Array<ExpressionValueVisDimension | string>;
   buckets?: Array<ExpressionValueVisDimension | string>;
   splitRow?: Array<ExpressionValueVisDimension | string>;
   splitColumn?: Array<ExpressionValueVisDimension | string>;
@@ -41,6 +46,7 @@ export interface LabelsParams {
   values: boolean;
   valuesFormat: ValueFormats;
   percentDecimals: number;
+  colorOverrides: Record<string, string>;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   truncate?: number | null;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
@@ -58,7 +64,9 @@ interface VisCommonParams {
 }
 
 interface VisCommonConfig extends VisCommonParams {
-  metric: ExpressionValueVisDimension | string;
+  metrics: Array<ExpressionValueVisDimension | string>;
+  metricsToLabels?: string;
+  buckets?: Array<ExpressionValueVisDimension | string>;
   splitColumn?: Array<ExpressionValueVisDimension | string>;
   splitRow?: Array<ExpressionValueVisDimension | string>;
   labels: ExpressionValuePartitionLabels;
@@ -67,6 +75,7 @@ interface VisCommonConfig extends VisCommonParams {
 
 export interface PartitionVisParams extends VisCommonParams {
   dimensions: Dimensions;
+  metricsToLabels: Record<string, string>;
   labels: LabelsParams;
   palette: PaletteOutput;
   isDonut?: boolean;
@@ -79,7 +88,7 @@ export interface PartitionVisParams extends VisCommonParams {
 }
 
 export interface PieVisConfig extends VisCommonConfig {
-  buckets?: Array<ExpressionValueVisDimension | string>;
+  partitionByColumn?: boolean;
   isDonut: boolean;
   emptySizeRatio?: EmptySizeRatios;
   respectSourceOrder?: boolean;
@@ -89,25 +98,27 @@ export interface PieVisConfig extends VisCommonConfig {
 }
 
 export interface TreemapVisConfig extends VisCommonConfig {
-  buckets?: Array<ExpressionValueVisDimension | string>;
   nestedLegend: boolean;
 }
 
-export interface MosaicVisConfig extends VisCommonConfig {
-  buckets?: Array<ExpressionValueVisDimension | string>;
+export interface MosaicVisConfig
+  extends Omit<VisCommonConfig, 'metrics' | 'metricsToLabels' | 'colorOverrides'> {
+  metric: ExpressionValueVisDimension | string;
   nestedLegend: boolean;
 }
 
-export interface WaffleVisConfig extends VisCommonConfig {
+export interface WaffleVisConfig extends Omit<VisCommonConfig, 'buckets'> {
   bucket?: ExpressionValueVisDimension | string;
   showValuesInLegend: boolean;
 }
 
-export interface RenderValue {
+export interface PartitionChartProps {
   visData: Datatable;
   visType: ChartTypes;
   visConfig: PartitionVisParams;
   syncColors: boolean;
+  canNavigateToLens?: boolean;
+  overrides?: AllowedPartitionOverrides & AllowedSettingsOverrides;
 }
 
 export enum LabelPositions {

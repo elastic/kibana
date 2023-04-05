@@ -23,8 +23,14 @@ jest.mock('./get');
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 
+import { installIndexTemplatesAndPipelines } from './install';
+
 import { _installPackage } from './_install_package';
 
+const mockedInstallIndexTemplatesAndPipelines =
+  installIndexTemplatesAndPipelines as jest.MockedFunction<
+    typeof installIndexTemplatesAndPipelines
+  >;
 const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
   typeof updateCurrentWriteIndices
 >;
@@ -57,7 +63,10 @@ describe('_installPackage', () => {
     // and force it to take long enough for the errors to occur
     // @ts-expect-error about call signature
     mockedUpdateCurrentWriteIndices.mockImplementation(async () => await sleep(1000));
-
+    mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+      installedTemplates: [],
+      esReferences: [],
+    });
     const installationPromise = _installPackage({
       savedObjectsClient: soClient,
       // @ts-ignore

@@ -129,4 +129,5 @@ export const mockState: AppState = {
   },
   testNowRuns: {},
   agentPolicies: { loading: false, data: null, error: null },
+  deleteMonitor: {},
 };

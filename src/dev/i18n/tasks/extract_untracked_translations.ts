@@ -7,13 +7,9 @@
  */
 
 import { createFailError } from '@kbn/dev-cli-errors';
-import {
-  I18nConfig,
-  matchEntriesWithExctractors,
-  normalizePath,
-  readFileAsync,
-  ErrorReporter,
-} from '..';
+import { matchEntriesWithExctractors } from '../extract_default_translations';
+import { I18nConfig } from '../config';
+import { normalizePath, readFileAsync, ErrorReporter } from '../utils';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>
@@ -45,35 +41,33 @@ export async function extractUntrackedMessagesTask({
     '**/dist/**',
   ]);
   for (const inputPath of inputPaths) {
-    const categorizedEntries = await matchEntriesWithExctractors(inputPath, {
+    const { entries, extractFunction } = await matchEntriesWithExctractors(inputPath, {
       additionalIgnore: ignore,
       mark: true,
       absolute: true,
     });
 
-    for (const [entries, extractFunction] of categorizedEntries) {
-      const files = await Promise.all(
-        filterEntries(entries, config.exclude)
-          .filter((entry) => {
-            const normalizedEntry = normalizePath(entry);
-            return !availablePaths.some(
-              (availablePath) =>
-                normalizedEntry.startsWith(`${normalizePath(availablePath)}/`) ||
-                normalizePath(availablePath) === normalizedEntry
-            );
-          })
-          .map(async (entry: any) => ({
-            name: entry,
-            content: await readFileAsync(entry),
-          }))
-      );
+    const files = await Promise.all(
+      filterEntries(entries, config.exclude)
+        .filter((entry) => {
+          const normalizedEntry = normalizePath(entry);
+          return !availablePaths.some(
+            (availablePath) =>
+              normalizedEntry.startsWith(`${normalizePath(availablePath)}/`) ||
+              normalizePath(availablePath) === normalizedEntry
+          );
+        })
+        .map(async (entry: any) => ({
+          name: entry,
+          content: await readFileAsync(entry),
+        }))
+    );
 
-      for (const { name, content } of files) {
-        const reporterWithContext = reporter.withContext({ name });
-        for (const [id] of extractFunction(content, reporterWithContext)) {
-          const errorMessage = `Untracked file contains i18n label (${id}).`;
-          reporterWithContext.report(createFailError(errorMessage));
-        }
+    for (const { name, content } of files) {
+      const reporterWithContext = reporter.withContext({ name });
+      for (const [id] of extractFunction(content, reporterWithContext)) {
+        const errorMessage = `Untracked file contains i18n label (${id}).`;
+        reporterWithContext.report(createFailError(errorMessage));
       }
     }
   }

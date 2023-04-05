@@ -42,7 +42,8 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     username: client.username,
     password: client.password,
   };
-  const { journeyName, scalabilitySetup, buildId, withoutStaticResources } = param;
+  const { journeyName, configPath, scalabilitySetup, testData, buildId, withoutStaticResources } =
+    param;
   log.info(
     `Searching transactions with 'labels.testBuildId=${buildId}' and 'labels.journeyName=${journeyName}'`
   );
@@ -87,8 +88,10 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     await saveFile(
       {
         journeyName,
+        configPath,
         kibanaVersion,
         scalabilitySetup,
+        testData,
         streams: kibanaStreams,
       },
       path.resolve(outputDir, 'server'),
@@ -100,7 +103,9 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   await saveFile(
     {
       journeyName,
+      configPath,
       kibanaVersion,
+      testData,
       streams: esStreams,
     },
     path.resolve(outputDir, 'es'),

@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { i18n } from '@kbn/i18n';
 import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import {
@@ -31,7 +30,6 @@ export const renderApp = async (
   coreStart: CoreStart,
   history: ScopedHistory
 ) => {
-  const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
   const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
 
   // all the directories could be get in "start" phase of plugin after all of the legacy plugins will be moved to a NP
@@ -56,8 +54,6 @@ export const renderApp = async (
       element
     );
   });
-
-  chrome.setBreadcrumbs([{ text: homeTitle }]);
 
   // dispatch synthetic hash change event to update hash history objects
   // this is necessary because hash updates triggered by using popState won't trigger this event naturally.

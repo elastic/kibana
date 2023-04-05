@@ -99,7 +99,6 @@ describe('createAlertEventLogRecordObject', () => {
         group: 'group 1',
         message: 'message text here',
         namespace: 'default',
-        subgroup: 'subgroup value',
         state: {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:05:00.000Z',
@@ -136,7 +135,6 @@ describe('createAlertEventLogRecordObject', () => {
         },
         alerting: {
           action_group_id: 'group 1',
-          action_subgroup: 'subgroup value',
           instance_id: 'test1',
         },
         saved_objects: [
@@ -174,7 +172,6 @@ describe('createAlertEventLogRecordObject', () => {
         group: 'group 1',
         message: 'action execution start',
         namespace: 'default',
-        subgroup: 'subgroup value',
         state: {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:05:00.000Z',
@@ -194,6 +191,11 @@ describe('createAlertEventLogRecordObject', () => {
           },
         ],
         spaceId: 'default',
+        alertSummary: {
+          new: 2,
+          ongoing: 3,
+          recovered: 1,
+        },
       })
     ).toStrictEqual({
       event: {
@@ -216,8 +218,18 @@ describe('createAlertEventLogRecordObject', () => {
         },
         alerting: {
           action_group_id: 'group 1',
-          action_subgroup: 'subgroup value',
           instance_id: 'test1',
+          summary: {
+            new: {
+              count: 2,
+            },
+            ongoing: {
+              count: 3,
+            },
+            recovered: {
+              count: 1,
+            },
+          },
         },
         saved_objects: [
           {

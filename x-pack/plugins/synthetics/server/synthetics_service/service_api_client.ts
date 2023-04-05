@@ -35,14 +35,14 @@ export class ServiceAPIClient {
   public locations: PublicLocations;
   private logger: Logger;
   private readonly config?: ServiceConfig;
-  private readonly kibanaVersion: string;
+  private readonly stackVersion: string;
   private readonly server: UptimeServerSetup;
 
   constructor(logger: Logger, config: ServiceConfig, server: UptimeServerSetup) {
     this.config = config;
     const { username, password } = config ?? {};
     this.username = username;
-    this.kibanaVersion = server.kibanaVersion;
+    this.stackVersion = server.stackVersion;
 
     if (username && password) {
       this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
@@ -80,7 +80,7 @@ export class ServiceAPIClient {
   }
 
   async post(data: ServiceData) {
-    return this.callAPI('POST', data);
+    return this.callAPI('PUT', data);
   }
 
   async put(data: ServiceData) {
@@ -96,7 +96,7 @@ export class ServiceAPIClient {
   }
 
   addVersionHeader(req: AxiosRequestConfig) {
-    req.headers = { ...req.headers, 'x-kibana-version': this.kibanaVersion };
+    req.headers = { ...req.headers, 'x-kibana-version': this.stackVersion };
     return req;
   }
 
@@ -144,33 +144,6 @@ export class ServiceAPIClient {
       return;
     }
 
-    const callServiceEndpoint = (monitors: ServiceData['monitors'], url: string) => {
-      // don't need to pass locations to heartbeat
-      const monitorsStreams = monitors.map(({ locations, ...rest }) =>
-        convertToDataStreamFormat(rest)
-      );
-
-      return axios(
-        this.addVersionHeader({
-          method,
-          url: url + (runOnce ? '/run' : '/monitors'),
-          data: {
-            monitors: monitorsStreams,
-            output,
-            stack_version: this.kibanaVersion,
-            is_edit: isEdit,
-          },
-          headers:
-            process.env.NODE_ENV !== 'production' && this.authorization
-              ? {
-                  Authorization: this.authorization,
-                }
-              : undefined,
-          httpsAgent: this.getHttpsAgent(url),
-        })
-      );
-    };
-
     const pushErrors: ServiceLocationErrors = [];
 
     const promises: Array<Observable<unknown>> = [];
@@ -181,15 +154,24 @@ export class ServiceAPIClient {
       );
       if (locMonitors.length > 0) {
         promises.push(
-          rxjsFrom(callServiceEndpoint(locMonitors, url)).pipe(
+          rxjsFrom(
+            this.callServiceEndpoint(
+              { monitors: locMonitors, isEdit, runOnce, output },
+              method,
+              url
+            )
+          ).pipe(
             tap((result) => {
               this.logger.debug(result.data);
               this.logger.debug(
-                `Successfully called service with method ${method} with ${allMonitors.length} monitors `
+                `Successfully called service location ${url} with method ${method} with ${locMonitors.length} monitors `
               );
             }),
             catchError((err: AxiosError<{ reason: string; status: number }>) => {
               pushErrors.push({ locationId: id, error: err.response?.data! });
+              const reason = err.response?.data?.reason ?? '';
+
+              err.message = `Failed to call service location ${url} with method ${method} with ${locMonitors.length} monitors:  ${err.message}, ${reason}`;
               this.logger.error(err);
               sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
                 reason: err.response?.data?.reason,
@@ -198,11 +180,8 @@ export class ServiceAPIClient {
                 code: err.code,
                 status: err.response?.data?.status,
                 url,
-                kibanaVersion: this.server.kibanaVersion,
+                stackVersion: this.server.stackVersion,
               });
-              if (err.response?.data?.reason) {
-                this.logger.error(err.response?.data?.reason);
-              }
               // we don't want to throw an unhandled exception here
               return of(true);
             })
@@ -214,5 +193,35 @@ export class ServiceAPIClient {
     await forkJoin(promises).toPromise();
 
     return pushErrors;
+  }
+
+  async callServiceEndpoint(
+    { monitors, output, runOnce, isEdit }: ServiceData,
+    method: 'POST' | 'PUT' | 'DELETE',
+    url: string
+  ) {
+    // don't need to pass locations to heartbeat
+    const monitorsStreams = monitors.map(({ locations, ...rest }) =>
+      convertToDataStreamFormat(rest)
+    );
+
+    return axios(
+      this.addVersionHeader({
+        method,
+        url: url + (runOnce ? '/run' : '/monitors'),
+        data: {
+          monitors: monitorsStreams,
+          output,
+          stack_version: this.stackVersion,
+          is_edit: isEdit,
+        },
+        headers: this.authorization
+          ? {
+              Authorization: this.authorization,
+            }
+          : undefined,
+        httpsAgent: this.getHttpsAgent(url),
+      })
+    );
   }
 }

@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
@@ -35,8 +35,16 @@ import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  AuditLogger,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
@@ -44,12 +52,23 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
-import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, INTEGRATIONS_PLUGIN_ID } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+
+import type { MessageSigningServiceInterface } from './services/security';
+import {
+  getRouteRequiredAuthz,
+  makeRouterWithFleetAuthz,
+  calculateRouteAuthz,
+  getAuthzFromRequest,
+  MessageSigningService,
+} from './services/security';
 
 import {
   PLUGIN_ID,
@@ -60,23 +79,10 @@ import {
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
-import {
-  registerEPMRoutes,
-  registerPackagePolicyRoutes,
-  registerDataStreamRoutes,
-  registerAgentPolicyRoutes,
-  registerSetupRoutes,
-  registerAgentAPIRoutes,
-  registerEnrollmentApiKeyRoutes,
-  registerOutputRoutes,
-  registerSettingsRoutes,
-  registerAppRoutes,
-  registerPreconfigurationRoutes,
-  registerDownloadSourcesRoutes,
-  registerHealthCheckRoutes,
-} from './routes';
+import { registerRoutes } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
@@ -85,6 +91,7 @@ import type {
   AgentPolicyServiceInterface,
   PackageService,
 } from './services';
+import { FleetUsageSender } from './services';
 import {
   appContextService,
   licenseService,
@@ -94,12 +101,21 @@ import {
   AgentServiceImpl,
   PackageServiceImpl,
 } from './services';
-import { registerFleetUsageCollector } from './collectors/register';
-import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
+import {
+  registerFleetUsageCollector,
+  fetchAgentsUsage,
+  fetchFleetUsage,
+} from './collectors/register';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
+import { BulkActionsResolver } from './services/agents';
+import type { PackagePolicyService } from './services/package_policy_service';
+import { PackagePolicyServiceImpl } from './services/package_policy';
+import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
+import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { getRequestStore } from './services/request_store';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -107,8 +123,9 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface FleetStartDeps {
@@ -118,6 +135,7 @@ export interface FleetStartDeps {
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
   savedObjectsTagging: SavedObjectTaggingStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface FleetAppContext {
@@ -139,6 +157,9 @@ export interface FleetAppContext {
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
   telemetryEventsSender: TelemetryEventsSender;
+  bulkActionsResolver: BulkActionsResolver;
+  messageSigningService: MessageSigningServiceInterface;
+  auditLogger?: AuditLogger;
 }
 
 export type FleetSetupContract = void;
@@ -151,6 +172,7 @@ const allSavedObjectTypes = [
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -185,6 +207,8 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
+
+  messageSigningService: MessageSigningServiceInterface;
 }
 
 export class FleetPlugin
@@ -203,9 +227,13 @@ export class FleetPlugin
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
+  private bulkActionsResolver?: BulkActionsResolver;
+  private fleetUsageSender?: FleetUsageSender;
+  private checkDeletedFilesTask?: CheckDeletedFilesTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
+  private packagePolicyService?: PackagePolicyService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -231,7 +259,7 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
+    registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
@@ -318,6 +346,7 @@ export class FleetPlugin
             ui: ['read'],
           },
         },
+        subFeatures: [],
       });
     }
 
@@ -325,72 +354,94 @@ export class FleetPlugin
       PLUGIN_ID,
       async (context, request) => {
         const plugin = this;
-        const esClient = (await context.core).elasticsearch.client;
+        const coreContext = await context.core;
+        const authz = await getAuthzFromRequest(request);
+        const esClient = coreContext.elasticsearch.client;
+        const soClient = coreContext.savedObjects.getClient();
+        const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path);
+        const routeAuthz = routeRequiredAuthz
+          ? calculateRouteAuthz(authz, routeRequiredAuthz)
+          : undefined;
 
-        return {
-          get agentClient() {
-            const agentService = plugin.setupAgentService(esClient.asInternalUser);
+        const getInternalSoClient = (): SavedObjectsClientContract =>
+          appContextService
+            .getSavedObjects()
+            .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
-            return {
-              asCurrentUser: agentService.asScoped(request),
-              asInternalUser: agentService.asInternalUser,
-            };
-          },
-          authz: await getAuthzFromRequest(request),
-          epm: {
-            // Use a lazy getter to avoid constructing this client when not used by a request handler
-            get internalSoClient() {
-              return appContextService
-                .getSavedObjects()
-                .getScopedClient(request, { excludedWrappers: ['security'] });
+        const requestStore = getRequestStore();
+
+        return requestStore.run(request, () => {
+          return {
+            get agentClient() {
+              const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
+
+              return {
+                asCurrentUser: agentService.asScoped(request),
+                asInternalUser: agentService.asInternalUser,
+              };
             },
-          },
-          get spaceId() {
-            return deps.spaces.spacesService.getSpaceId(request);
-          },
-        };
+            get packagePolicyService() {
+              const service = plugin.setupPackagePolicyService();
+
+              return {
+                asCurrentUser: service.asScoped(request),
+                asInternalUser: service.asInternalUser,
+              };
+            },
+            authz,
+            get internalSoClient() {
+              // Use a lazy getter to avoid constructing this client when not used by a request handler
+              return getInternalSoClient();
+            },
+            get spaceId() {
+              return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+            },
+
+            get limitedToPackages() {
+              if (routeAuthz && routeAuthz.granted) {
+                return routeAuthz.scopeDataToPackages;
+              }
+            },
+          };
+        });
       }
     );
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
+    const fetch = async (abortController: AbortController) =>
+      await fetchFleetUsage(core, config, abortController);
+    this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, fetch);
+    registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
     // Only some endpoints require superuser so we pass a raw IRouter here
 
     // For all the routes we enforce the user to have role superuser
-    const { router: fleetAuthzRouter, onPostAuthHandler: fleetAuthzOnPostAuthHandler } =
-      makeRouterWithFleetAuthz(router);
+    const fleetAuthzRouter = makeRouterWithFleetAuthz(
+      router,
+      this.initializerContext.logger.get('fleet_authz_router')
+    );
 
-    core.http.registerOnPostAuth(fleetAuthzOnPostAuthHandler);
-
-    // Always register app routes for permissions checking
-    registerAppRoutes(fleetAuthzRouter);
-
-    // The upload package route is only authorized for the superuser
-    registerEPMRoutes(fleetAuthzRouter);
-
-    registerSetupRoutes(fleetAuthzRouter, config);
-    registerAgentPolicyRoutes(fleetAuthzRouter);
-    registerPackagePolicyRoutes(fleetAuthzRouter);
-    registerOutputRoutes(fleetAuthzRouter);
-    registerSettingsRoutes(fleetAuthzRouter);
-    registerDataStreamRoutes(fleetAuthzRouter);
-    registerPreconfigurationRoutes(fleetAuthzRouter);
-    registerDownloadSourcesRoutes(fleetAuthzRouter);
-    registerHealthCheckRoutes(fleetAuthzRouter);
-
-    // Conditional config routes
-    if (config.agents.enabled) {
-      registerAgentAPIRoutes(fleetAuthzRouter, config);
-      registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
-    }
+    registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
+    this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
+    this.checkDeletedFilesTask = new CheckDeletedFilesTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    const messageSigningService = new MessageSigningService(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
+      })
+    );
+
     appContextService.start({
       elasticsearch: core.elasticsearch,
       data: plugins.data,
@@ -412,10 +463,16 @@ export class FleetPlugin
       cloud: this.cloud,
       logger: this.logger,
       telemetryEventsSender: this.telemetryEventsSender,
+      bulkActionsResolver: this.bulkActionsResolver!,
+      messageSigningService,
     });
     licenseService.start(plugins.licensing.license$);
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
+    this.bulkActionsResolver?.start(plugins.taskManager);
+    this.fleetUsageSender?.start(plugins.taskManager);
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
+    startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
 
@@ -466,6 +523,7 @@ export class FleetPlugin
       }
     })();
 
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
@@ -474,9 +532,12 @@ export class FleetPlugin
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
-        new SavedObjectsClient(core.savedObjects.createInternalRepository())
+        internalSoClient
       ),
-      agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
+      agentService: this.setupAgentService(
+        core.elasticsearch.client.asInternalUser,
+        internalSoClient
+      ),
       agentPolicyService: {
         get: agentPolicyService.get,
         list: agentPolicyService.list,
@@ -490,6 +551,7 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      messageSigningService,
     };
   }
 
@@ -500,13 +562,24 @@ export class FleetPlugin
     this.fleetStatus$.complete();
   }
 
-  private setupAgentService(internalEsClient: ElasticsearchClient): AgentService {
+  private setupAgentService(
+    internalEsClient: ElasticsearchClient,
+    internalSoClient: SavedObjectsClientContract
+  ): AgentService {
     if (this.agentService) {
       return this.agentService;
     }
 
-    this.agentService = new AgentServiceImpl(internalEsClient);
+    this.agentService = new AgentServiceImpl(internalEsClient, internalSoClient);
     return this.agentService;
+  }
+
+  private setupPackagePolicyService(): PackagePolicyService {
+    if (this.packagePolicyService) {
+      return this.packagePolicyService;
+    }
+    this.packagePolicyService = new PackagePolicyServiceImpl();
+    return this.packagePolicyService;
   }
 
   private setupPackageService(
@@ -522,7 +595,7 @@ export class FleetPlugin
       internalSoClient,
       this.getLogger()
     );
-    return this.packageService;
+    return this.packageService!;
   }
 
   private getLogger(): Logger {

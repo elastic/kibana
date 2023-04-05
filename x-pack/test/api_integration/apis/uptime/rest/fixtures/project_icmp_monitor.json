@@ -1,0 +1,47 @@
+
+
+
+{
+  "project": "test-suite",
+  "keep_stale": true,
+  "monitors": [
+    {
+      "locations": [ "localhost" ],
+      "type": "icmp",
+      "id": "Cloudflare-DNS",
+      "name": "Cloudflare DNS",
+      "hosts": [ "1.1.1.1" ],
+      "schedule": 1,
+      "tags": [ "service:smtp", "org:google" ],
+      "privateLocations": [ "Test private location 0" ],
+      "wait": "30s",
+      "hash": "ekrjelkjrelkjre"
+    },
+    {
+      "locations": [ "localhost" ],
+      "type": "icmp",
+      "id": "Cloudflare-DNS-2",
+      "name": "Cloudflare DNS 2",
+      "hosts": "1.1.1.1",
+      "schedule": 1,
+      "tags": "tag1,tag2",
+      "privateLocations": [ "Test private location 0" ],
+      "wait": "1m",
+      "hash": "ekrjelkjrelkjre"
+    },
+    {
+      "locations": [ "localhost" ],
+      "type": "icmp",
+      "id": "Cloudflare-DNS-3",
+      "name": "Cloudflare DNS 3",
+      "hosts": "1.1.1.1,2.2.2.2",
+      "schedule": 1,
+      "tags": "tag1,tag2",
+      "privateLocations": [ "Test private location 0" ],
+      "unsupportedKey": {
+        "nestedUnsupportedKey": "unnsuportedValue"
+      },
+      "hash": "ekrjelkjrelkjre"
+    }
+  ]
+}

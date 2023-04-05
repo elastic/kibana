@@ -22,6 +22,7 @@ import {
 
 import {
   KibanaContextProvider,
+  KibanaThemeProvider,
   RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
@@ -43,6 +44,7 @@ import { UrlParamsProvider } from '../context/url_params_context/url_params_cont
 import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { useKibanaServices } from '../hooks/use_kibana_services';
+import { PluginContext } from '../context/plugin_context';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -90,11 +92,7 @@ function UxApp() {
         darkMode,
       })}
     >
-      <div
-        className={APP_WRAPPER_CLASS}
-        data-test-subj="csmMainContainer"
-        role="main"
-      >
+      <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
         <RumHome />
       </div>
     </ThemeProvider>
@@ -112,6 +110,7 @@ export function UXAppRoot({
     inspector,
     maps,
     observability,
+    exploratoryView,
     data,
     dataViews,
     lens,
@@ -140,27 +139,45 @@ export function UXAppRoot({
           inspector,
           observability,
           embeddable,
+          exploratoryView,
           data,
           dataViews,
           lens,
         }}
       >
-        <i18nCore.Context>
-          <RouterProvider history={history} router={uxRouter}>
-            <DatePickerContextProvider>
-              <InspectorContextProvider>
-                <UrlParamsProvider>
-                  <EuiErrorBoundary>
-                    <CsmSharedContextProvider>
-                      <UxApp />
-                    </CsmSharedContextProvider>
-                  </EuiErrorBoundary>
-                  <UXActionMenu appMountParameters={appMountParameters} />
-                </UrlParamsProvider>
-              </InspectorContextProvider>
-            </DatePickerContextProvider>
-          </RouterProvider>
-        </i18nCore.Context>
+        <KibanaThemeProvider
+          theme$={appMountParameters.theme$}
+          modify={{
+            breakpoint: {
+              xxl: 1600,
+              xxxl: 2000,
+            },
+          }}
+        >
+          <PluginContext.Provider
+            value={{
+              appMountParameters,
+              exploratoryView,
+            }}
+          >
+            <i18nCore.Context>
+              <RouterProvider history={history} router={uxRouter}>
+                <DatePickerContextProvider>
+                  <InspectorContextProvider>
+                    <UrlParamsProvider>
+                      <EuiErrorBoundary>
+                        <CsmSharedContextProvider>
+                          <UxApp />
+                        </CsmSharedContextProvider>
+                      </EuiErrorBoundary>
+                      <UXActionMenu appMountParameters={appMountParameters} />
+                    </UrlParamsProvider>
+                  </InspectorContextProvider>
+                </DatePickerContextProvider>
+              </RouterProvider>
+            </i18nCore.Context>
+          </PluginContext.Provider>
+        </KibanaThemeProvider>
       </KibanaContextProvider>
     </RedirectAppLinks>
   );
@@ -201,6 +218,7 @@ export const renderApp = ({
     element
   );
   return () => {
+    corePlugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

@@ -122,7 +122,6 @@ function TutorialConfigAgent({
   }
 
   const hasFleetAgents = !!data.fleetAgents.length;
-
   return (
     <>
       <PolicySelector

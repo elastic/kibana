@@ -6,10 +6,11 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useUpdateCase, UseUpdateCase } from './use_update_case';
+import type { UseUpdateCase } from './use_update_case';
+import { useUpdateCase } from './use_update_case';
 import { basicCase } from './mock';
 import * as api from './api';
-import { UpdateKey } from './types';
+import type { UpdateKey } from './types';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 jest.mock('./api');

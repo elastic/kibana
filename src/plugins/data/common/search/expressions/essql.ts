@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { buildEsQuery } from '@kbn/es-query';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   Datatable,
   DatatableColumnType,
   ExpressionFunctionDefinition,

@@ -20,13 +20,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField, RuntimeField } from '@kbn/data-views-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   SavedObjectRelation,
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
+import { pickBy } from 'lodash';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -61,11 +62,17 @@ const securityDataView = i18n.translate(
 
 const securitySolution = 'security-solution';
 
+const getCompositeRuntimeFields = (dataView: DataView) =>
+  pickBy(dataView.getAllRuntimeFields(), (fld) => fld.type === 'composite');
+
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
     const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor, savedObjectsManagement } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
+    const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
+      Record<string, RuntimeField>
+    >(() => getCompositeRuntimeFields(indexPattern));
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
     );
@@ -121,7 +128,10 @@ export const EditIndexPattern = withRouter(
     const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
-        onSave={() => setShowEditDialog(false)}
+        onSave={() => {
+          setFields(indexPattern.getNonScriptedFields());
+          setShowEditDialog(false);
+        }}
         onCancel={() => setShowEditDialog(false)}
         defaultTypeIsRollup={isRollup}
         editData={indexPattern}
@@ -203,7 +213,9 @@ export const EditIndexPattern = withRouter(
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiText size="s">{indexPatternHeading}</EuiText>
-                  <EuiCode style={codeStyle}>{indexPattern.title}</EuiCode>
+                  <EuiCode data-test-subj="currentIndexPatternTitle" style={codeStyle}>
+                    {indexPattern.title}
+                  </EuiCode>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
@@ -211,7 +223,9 @@ export const EditIndexPattern = withRouter(
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiText size="s">{timeFilterHeading}</EuiText>
-                  <EuiCode style={codeStyle}>{indexPattern.timeFieldName}</EuiCode>
+                  <EuiCode data-test-subj="currentIndexPatternTimeField" style={codeStyle}>
+                    {indexPattern.timeFieldName}
+                  </EuiCode>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
@@ -235,7 +249,7 @@ export const EditIndexPattern = withRouter(
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />
-              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="alert">
+              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="warning">
                 <p>{mappingConflictLabel}</p>
               </EuiCallOut>
             </>
@@ -250,8 +264,10 @@ export const EditIndexPattern = withRouter(
           allowedTypes={allowedTypes}
           history={history}
           location={location}
+          compositeRuntimeFields={compositeRuntimeFields}
           refreshFields={() => {
             setFields(indexPattern.getNonScriptedFields());
+            setCompositeRuntimeFields(getCompositeRuntimeFields(indexPattern));
           }}
         />
         {displayIndexPatternEditor}

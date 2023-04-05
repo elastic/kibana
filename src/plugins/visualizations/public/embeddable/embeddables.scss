@@ -19,6 +19,13 @@
   }
 }
 
+.visPanel__warnings {
+  position: absolute;
+  z-index: 2;
+  right: $euiSizeM;
+  bottom: $euiSizeM;
+}
+
 // OPTIONS MENU
 
 /**

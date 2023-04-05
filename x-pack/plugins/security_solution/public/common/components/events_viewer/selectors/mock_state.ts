@@ -8,6 +8,7 @@
 import { set } from '@kbn/safer-lodash-set';
 import { pipe } from 'lodash/fp';
 
+import { InputsModelId } from '../../../store/inputs/constants';
 import { mockGlobalState } from '../../../mock';
 
 const filters = [
@@ -43,7 +44,7 @@ const input = {
     },
   ],
   policy: { kind: 'manual', duration: 300000 },
-  linkTo: ['global'],
+  linkTo: [InputsModelId.global],
   query: { query: '', language: 'kuery' },
   filters: [],
   fullScreen: false,
@@ -53,7 +54,7 @@ const query = { query: 'host.ip: *', language: 'kuery' };
 
 const globalQueries = [
   {
-    id: 'detections-page',
+    id: 'alerts-page',
     inspect: {
       dsl: ['{\n  "allow_no_indices": ...}'],
     },
@@ -85,7 +86,7 @@ const globalQueries = [
 
 const timelineQueries = [
   {
-    id: 'detections-page',
+    id: 'alerts-page',
     inspect: {
       dsl: ['{\n  "allow_no_indices": ...}'],
     },
@@ -96,7 +97,7 @@ const timelineQueries = [
 ];
 
 const timeline = {
-  id: 'detections-page',
+  id: 'alerts-page',
   columns: [
     { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
     {
@@ -200,7 +201,6 @@ const timeline = {
   sort: [{ columnId: '@timestamp', columnType: 'date', sortDirection: 'desc' }],
   savedObjectId: null,
   version: null,
-  footerText: 'alerts',
   title: '',
   initialized: true,
   activeTab: 'query',
@@ -243,5 +243,5 @@ export const mockState = pipe(
   (state) => set(state, 'inputs.global.query', query),
   (state) => set(state, 'inputs.global.queries', globalQueries),
   (state) => set(state, 'inputs.timeline.queries', timelineQueries),
-  (state) => set(state, 'timeline.timelineById.detections-page', timeline)
+  (state) => set(state, 'timeline.timelineById.alerts-page', timeline)
 )(mockGlobalState);

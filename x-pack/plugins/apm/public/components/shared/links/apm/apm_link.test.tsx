@@ -8,12 +8,14 @@
 import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/test_helpers';
-import { APMLink } from './apm_link';
+import { LegacyAPMLink } from './apm_link';
 
-describe('APMLink', () => {
-  test('APMLink should produce the correct URL', async () => {
+describe('LegacyAPMLink', () => {
+  test('LegacyAPMLink should produce the correct URL', async () => {
     const href = await getRenderedHref(
-      () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
+      () => (
+        <LegacyAPMLink path="/some/path" query={{ transactionId: 'blah' }} />
+      ),
       {
         search:
           '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
@@ -25,9 +27,11 @@ describe('APMLink', () => {
     );
   });
 
-  test('APMLink should retain current kuery value if it exists', async () => {
+  test('LegacyAPMLink should retain current kuery value if it exists', async () => {
     const href = await getRenderedHref(
-      () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
+      () => (
+        <LegacyAPMLink path="/some/path" query={{ transactionId: 'blah' }} />
+      ),
       {
         search:
           '?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
@@ -39,10 +43,10 @@ describe('APMLink', () => {
     );
   });
 
-  test('APMLink should overwrite current kuery value if new kuery value is provided', async () => {
+  test('LegacyAPMLink should overwrite current kuery value if new kuery value is provided', async () => {
     const href = await getRenderedHref(
       () => (
-        <APMLink
+        <LegacyAPMLink
           path="/some/path"
           query={{ kuery: 'host.os~20~3A~20~22linux~22' }}
         />

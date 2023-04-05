@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EqlCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getRuleForSignalTesting } from './get_rule_for_signal_testing';
 
 /**
@@ -19,7 +19,7 @@ export const getEqlRuleForSignalTesting = (
   index: string[],
   ruleId = 'eql-rule',
   enabled = true
-): EqlCreateSchema => ({
+): EqlRuleCreateProps => ({
   ...getRuleForSignalTesting(index, ruleId, enabled),
   type: 'eql',
   language: 'eql',

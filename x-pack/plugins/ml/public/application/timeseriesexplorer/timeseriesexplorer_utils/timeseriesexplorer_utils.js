@@ -14,6 +14,7 @@
 import { each, get, find } from 'lodash';
 import moment from 'moment-timezone';
 
+import { isMultiBucketAnomaly } from '../../../../common/util/anomaly_utils';
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 
@@ -165,11 +166,7 @@ export function processDataForFocusAnomalies(
         if (record.actual !== undefined) {
           // If cannot match chart point for anomaly time
           // substitute the value with the record's actual so it won't plot as null/0
-          if (chartPoint.value === null) {
-            chartPoint.value = record.actual;
-          }
-
-          if (record.function === ML_JOB_AGGREGATION.METRIC) {
+          if (chartPoint.value === null || record.function === ML_JOB_AGGREGATION.METRIC) {
             chartPoint.value = Array.isArray(record.actual) ? record.actual[0] : record.actual;
           }
 
@@ -193,9 +190,14 @@ export function processDataForFocusAnomalies(
           }
         }
 
-        if (record.multi_bucket_impact !== undefined) {
-          chartPoint.multiBucketImpact = record.multi_bucket_impact;
+        if (
+          record.anomaly_score_explanation !== undefined &&
+          record.anomaly_score_explanation.multi_bucket_impact !== undefined
+        ) {
+          chartPoint.multiBucketImpact = record.anomaly_score_explanation.multi_bucket_impact;
         }
+
+        chartPoint.isMultiBucketAnomaly = isMultiBucketAnomaly(record);
       }
     }
   });

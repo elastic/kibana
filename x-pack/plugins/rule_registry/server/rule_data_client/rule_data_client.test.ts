@@ -100,7 +100,30 @@ describe('RuleDataClient', () => {
 
       expect(scopedClusterClient.search).toHaveBeenCalledWith({
         body: query,
+        ignore_unavailable: true,
         index: `.alerts-observability.apm.alerts*`,
+      });
+    });
+
+    test('getReader searchs an index pattern without a wildcard when the namespace is provided', async () => {
+      const ruleDataClient = new RuleDataClient(
+        getRuleDataClientOptions({
+          waitUntilReadyForReading: new Promise((resolve) =>
+            setTimeout(resolve, 3000, right(scopedClusterClient))
+          ),
+        })
+      );
+
+      const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
+      const reader = ruleDataClient.getReader({ namespace: 'test' });
+      await reader.search({
+        body: query,
+      });
+
+      expect(scopedClusterClient.search).toHaveBeenCalledWith({
+        body: query,
+        ignore_unavailable: true,
+        index: `.alerts-observability.apm.alerts-test`,
       });
     });
 
@@ -235,7 +258,7 @@ describe('RuleDataClient', () => {
 
       // getting the writer again at this point should throw another error
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Rule registry writing is disabled due to an error during Rule Data Client initialization."`
+        `"There has been a catastrophic error trying to install index level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: could not get cluster client"`
       );
       expect(logger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`
@@ -267,7 +290,7 @@ describe('RuleDataClient', () => {
 
       // getting the writer again at this point should throw another error
       await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Rule registry writing is disabled due to an error during Rule Data Client initialization."`
+        `"There has been a catastrophic error trying to install namespace level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: bad resource installation"`
       );
       expect(logger.debug).toHaveBeenCalledWith(
         `Writing is disabled, bulk() will not write any data.`

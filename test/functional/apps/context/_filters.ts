@@ -18,11 +18,11 @@ const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const filterBar = getService('filterBar');
-  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const browser = getService('browser');
 
   const PageObjects = getPageObjects(['common', 'context']);
+  const testSubjects = getService('testSubjects');
 
   describe('context filters', function contextSize() {
     beforeEach(async function () {
@@ -34,12 +34,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('inclusive filter should be addable via expanded data grid rows', async function () {
       await retry.waitFor(`filter ${TEST_ANCHOR_FILTER_FIELD} in filterbar`, async () => {
         await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
-        await testSubjects.click(`openFieldActionsButton-${TEST_ANCHOR_FILTER_FIELD}`);
-        await testSubjects.click(`addFilterForValueButton-${TEST_ANCHOR_FILTER_FIELD}`);
+        await dataGrid.clickFieldActionInFlyout(
+          TEST_ANCHOR_FILTER_FIELD,
+          'addFilterForValueButton'
+        );
         await PageObjects.context.waitUntilContextLoadingHasFinished();
 
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true);
       });
+
+      await dataGrid.closeFlyout();
+
       await retry.waitFor(`filter matching docs in data grid`, async () => {
         const fields = await dataGrid.getFields();
         return fields
@@ -49,7 +54,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('inclusive filter should be toggleable via the filter bar', async function () {
-      await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
+      await filterBar.addFilter({
+        field: TEST_ANCHOR_FILTER_FIELD,
+        operation: 'is',
+        value: TEST_ANCHOR_FILTER_VALUE,
+      });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       // disable filter
       await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
@@ -71,15 +80,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('filter for presence should be addable via expanded data grid rows', async function () {
       await retry.waitFor('an exists filter in the filterbar', async () => {
         await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
-        await testSubjects.click(`openFieldActionsButton-${TEST_ANCHOR_FILTER_FIELD}`);
-        await testSubjects.click(`addExistsFilterButton-${TEST_ANCHOR_FILTER_FIELD}`);
+        await dataGrid.clickFieldActionInFlyout(TEST_ANCHOR_FILTER_FIELD, 'addExistsFilterButton');
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, 'exists', true);
       });
     });
 
     const addPinnedFilter = async () => {
-      await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
+      await filterBar.addFilter({
+        field: TEST_ANCHOR_FILTER_FIELD,
+        operation: 'is',
+        value: TEST_ANCHOR_FILTER_VALUE,
+      });
       await filterBar.toggleFilterPinned(TEST_ANCHOR_FILTER_FIELD);
     };
 
@@ -114,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should preserve filters when the page is refreshed', async function () {
       await addPinnedFilter();
-      await filterBar.addFilter('extension', 'IS', 'png');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       await expectFiltersToExist();
       await browser.refresh();
@@ -123,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should update filters when navigating forward and backward in history', async () => {
-      await filterBar.addFilter('extension', 'IS', 'png');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       expect(await filterBar.getFilterCount()).to.be(1);
       expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
@@ -137,6 +149,101 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBar.getFilterCount()).to.be(1);
       expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
       expect(await everyFieldMatches((field) => field[1] === 'png')).to.be(true);
+    });
+
+    it('should add or filter', async () => {
+      await filterBar.addFilter({
+        condition: 'OR',
+        filters: [
+          { field: 'extension', operation: 'is', value: 'png' },
+          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+        ],
+      });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal(
+        'extension: png OR bytes: 1,000B to 2KB'
+      );
+    });
+
+    it('should add and filter', async () => {
+      await filterBar.addFilter({
+        condition: 'AND',
+        filters: [
+          { field: 'extension', operation: 'is one of', value: ['png', 'jpeg'] },
+          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+        ],
+      });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal(
+        'extension: is one of png, jpeg AND bytes: 1,000B to 2KB'
+      );
+    });
+
+    it('should add nested filters', async () => {
+      await filterBar.addFilter({
+        condition: 'AND',
+        filters: [
+          {
+            condition: 'OR',
+            filters: [
+              { field: 'clientip', operation: 'does not exist' },
+              { field: 'extension', operation: 'is one of', value: ['png', 'jpeg'] },
+            ],
+          },
+          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+        ],
+      });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal(
+        '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
+      );
+    });
+
+    it('should add comma delimiter values', async () => {
+      await filterBar.addFilter({ field: 'extension', operation: 'is one of', value: 'png, jpeg' });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal('extension: is one of png, jpeg');
+    });
+
+    it('should display the negated values correctly', async () => {
+      await filterBar.addFilter({ field: 'extension', operation: 'is not', value: 'png' });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      const filterLabel = await filterBar.getFiltersLabel();
+      expect(filterLabel[0]).to.be('NOT extension: png');
+
+      await filterBar.clickEditFilterById('0');
+      await filterBar.addAndFilter('0');
+      await filterBar.createFilter({ field: 'extension', operation: 'is', value: 'jpeg' }, '0.1');
+      await testSubjects.clickWhenNotDisabled('saveFilter');
+
+      const filterLabelUpdated = await filterBar.getFiltersLabel();
+      expect(filterLabelUpdated[0]).to.be('NOT extension: png AND extension: jpeg');
     });
   });
 }

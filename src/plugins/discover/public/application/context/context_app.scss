@@ -1,4 +1,4 @@
-@import 'src/core/public/mixins';
+@import '../../../../../core/public/mixins';
 
 .dscDocsPage {
   @include kibanaFullBodyHeight(54px); // action bar height

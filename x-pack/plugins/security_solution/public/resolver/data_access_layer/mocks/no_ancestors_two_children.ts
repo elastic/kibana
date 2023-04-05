@@ -59,7 +59,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         indexPatterns,
       }: {
         entityID: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<ResolverRelatedEvents> {
         return Promise.resolve({
@@ -83,7 +83,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         entityID: string;
         category: string;
         after?: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<{
         events: SafeResolverEvent[];
@@ -110,7 +110,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         eventTimestamp: string;
         eventID?: string | number;
         winlogRecordID: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
         return null;

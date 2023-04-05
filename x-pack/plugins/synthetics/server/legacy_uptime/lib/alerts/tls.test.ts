@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import { tlsAlertFactory, getCertSummary } from './tls';
-import { TLS } from '../../../../common/constants/alerts';
+import { TLS } from '../../../../common/constants/uptime_alerts';
 import { CertResult } from '../../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
@@ -154,6 +154,68 @@ describe('tls alert', () => {
         );
       });
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(4);
+    });
+
+    it('does not trigger when cert is not considered aging or expiring', async () => {
+      toISOStringSpy.mockImplementation(() => mockDate);
+      const mockGetter: jest.Mock<CertResult> = jest.fn();
+
+      mockGetter.mockReturnValue({
+        certs: [
+          {
+            not_after: '2021-07-16T03:15:39.000Z',
+            not_before: '2019-07-24T03:15:39.000Z',
+            issuer: 'Sample issuer',
+            common_name: 'Common-One',
+            monitors: [{ name: 'monitor-one', id: 'monitor1' }],
+            sha256: 'abc',
+          },
+          {
+            not_after: '2021-07-18T03:15:39.000Z',
+            not_before: '2019-07-20T03:15:39.000Z',
+            issuer: 'Sample issuer',
+            common_name: 'Common-Two',
+            monitors: [{ name: 'monitor-two', id: 'monitor2' }],
+            sha256: 'bcd',
+          },
+          {
+            not_after: '2021-07-19T03:15:39.000Z',
+            not_before: '2019-07-22T03:15:39.000Z',
+            issuer: 'Sample issuer',
+            common_name: 'Common-Three',
+            monitors: [{ name: 'monitor-three', id: 'monitor3' }],
+            sha256: 'cde',
+          },
+          {
+            not_after: '2021-07-25T03:15:39.000Z',
+            not_before: '2019-07-25T03:15:39.000Z',
+            issuer: 'Sample issuer',
+            common_name: 'Common-Four',
+            monitors: [{ name: 'monitor-four', id: 'monitor4' }],
+            sha256: 'def',
+          },
+        ],
+        total: 4,
+      });
+      const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
+      const alert = tlsAlertFactory(server, libs, plugins);
+      const options = mockOptions();
+      const {
+        services: { alertWithLifecycle },
+      } = options;
+      await alert.executor(options);
+      expect(mockGetter).toHaveBeenCalledTimes(1);
+      expect(alertWithLifecycle).toHaveBeenCalledTimes(0);
+      expect(mockGetter).toBeCalledWith(
+        expect.objectContaining({
+          pageIndex: 0,
+          size: 1000,
+          notValidAfter: `now+${DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
+          notValidBefore: `now-${DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold}d`,
+          sortBy: 'common_name',
+          direction: 'desc',
+        })
+      );
     });
 
     it('handles dynamic settings for aging or expiration threshold', async () => {

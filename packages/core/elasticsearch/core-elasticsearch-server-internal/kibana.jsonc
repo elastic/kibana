@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-elasticsearch-server-internal",
+  "owner": "@elastic/kibana-core"
+}

@@ -90,54 +90,54 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfNewAlerts(newAlertIds.length);
     ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
-
     for (const id of recoveredAlertIds) {
-      const { group: actionGroup, subgroup: actionSubgroup } =
-        recoveredAlerts[id].getLastScheduledActions() ?? {};
+      const alert = recoveredAlerts[id];
+      const { group: actionGroup } = alert.getLastScheduledActions() ?? {};
+      const uuid = alert.getUuid();
       const state = recoveredAlerts[id].getState();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
-
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id,
+        uuid,
         group: actionGroup,
-        subgroup: actionSubgroup,
         message,
         state,
+        flapping: recoveredAlerts[id].getFlapping(),
       });
     }
 
     for (const id of newAlertIds) {
-      const { actionGroup, subgroup: actionSubgroup } =
-        activeAlerts[id].getScheduledActionOptions() ?? {};
-      const state = activeAlerts[id].getState();
+      const alert = activeAlerts[id];
+      const { actionGroup } = alert.getScheduledActionOptions() ?? {};
+      const state = alert.getState();
+      const uuid = alert.getUuid();
       const message = `${ruleLogPrefix} created new alert: '${id}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.newInstance,
         id,
+        uuid,
         group: actionGroup,
-        subgroup: actionSubgroup,
         message,
         state,
+        flapping: activeAlerts[id].getFlapping(),
       });
     }
 
     for (const id of activeAlertIds) {
-      const { actionGroup, subgroup: actionSubgroup } =
-        activeAlerts[id].getScheduledActionOptions() ?? {};
-      const state = activeAlerts[id].getState();
-      const message = `${ruleLogPrefix} active alert: '${id}' in ${
-        actionSubgroup
-          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-          : `actionGroup: '${actionGroup}'`
-      }`;
+      const alert = activeAlerts[id];
+      const { actionGroup } = alert.getScheduledActionOptions() ?? {};
+      const state = alert.getState();
+      const uuid = alert.getUuid();
+      const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
         id,
+        uuid,
         group: actionGroup,
-        subgroup: actionSubgroup,
         message,
         state,
+        flapping: activeAlerts[id].getFlapping(),
       });
     }
   }

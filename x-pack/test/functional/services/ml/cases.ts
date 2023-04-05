@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
-import { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlAnomalySwimLane } from './swim_lane';
+import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
+import type { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
+import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlAnomalySwimLane } from './swim_lane';
+import type { MlAnomalyCharts } from './anomaly_charts';
 
 export interface CaseParams {
   title: string;
@@ -23,7 +25,8 @@ export interface Attachment {
 
 export function MachineLearningCasesProvider(
   { getPageObject, getService }: FtrProviderContext,
-  mlAnomalySwimLane: MlAnomalySwimLane
+  mlAnomalySwimLane: MlAnomalySwimLane,
+  mlAnomalyCharts: MlAnomalyCharts
 ) {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
@@ -38,6 +41,15 @@ export function MachineLearningCasesProvider(
       await cases.casesTable.goToFirstListedCase();
     },
 
+    async assertBasicCaseProps(params: CaseParams) {
+      await this.openCaseInCasesApp(params.tag);
+      await elasticChart.setNewChartUiDebugFlag(true);
+
+      // Assert case details
+      await cases.singleCase.assertCaseTitle(params.title);
+      await cases.singleCase.assertCaseDescription(params.description);
+    },
+
     async assertCaseWithAnomalySwimLaneAttachment(
       params: CaseParams,
       attachment: AnomalySwimlaneEmbeddableInput,
@@ -45,12 +57,7 @@ export function MachineLearningCasesProvider(
         yAxisLabelCount: number;
       }
     ) {
-      await this.openCaseInCasesApp(params.tag);
-      await elasticChart.setNewChartUiDebugFlag(true);
-
-      // Assert case details
-      await cases.singleCase.assertCaseTitle(params.title);
-      await cases.singleCase.assertCaseDescription(params.description);
+      await this.assertBasicCaseProps(params);
 
       await testSubjects.existOrFail('comment-persistableState-ml_anomaly_swimlane');
 
@@ -59,6 +66,20 @@ export function MachineLearningCasesProvider(
         `mlSwimLaneEmbeddable_${attachment.id}`,
         'y',
         expectedSwimLaneState.yAxisLabelCount
+      );
+    },
+
+    async assertCaseWithAnomalyChartsAttachment(
+      params: CaseParams,
+      attachment: AnomalyChartsEmbeddableInput,
+      expectedChartsCount: number
+    ) {
+      await this.assertBasicCaseProps(params);
+      await testSubjects.existOrFail('comment-persistableState-ml_anomaly_charts');
+
+      await mlAnomalyCharts.assertAnomalyExplorerChartsCount(
+        attachment.id !== undefined ? `mlExplorerEmbeddable_${attachment.id}` : undefined,
+        expectedChartsCount
       );
     },
   };

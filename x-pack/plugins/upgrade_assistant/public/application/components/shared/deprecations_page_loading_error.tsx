@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DeprecationSource } from '../../../../common/types';
@@ -27,7 +27,7 @@ export const DeprecationsPageLoadingError: FunctionComponent<Props> = ({
     data-test-subj="deprecationsPageLoadingError"
   >
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       title={
         <h2>
           {i18n.translate('xpack.upgradeAssistant.deprecationsPageLoadingError.title', {

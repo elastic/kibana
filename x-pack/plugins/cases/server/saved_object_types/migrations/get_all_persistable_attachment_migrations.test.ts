@@ -6,7 +6,7 @@
  */
 
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { PersistableStateAttachmentTypeSetup } from '../../attachment_framework/types';
+import type { PersistableStateAttachmentTypeSetup } from '../../attachment_framework/types';
 import { getAllPersistableAttachmentMigrations } from './get_all_persistable_attachment_migrations';
 
 describe('getAllPersistableAttachmentMigrations', () => {

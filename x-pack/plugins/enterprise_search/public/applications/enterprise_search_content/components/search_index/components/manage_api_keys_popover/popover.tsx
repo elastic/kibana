@@ -21,10 +21,12 @@ import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../../shared/kibana';
 
+import { IndexViewLogic } from '../../index_view_logic';
 import { OverviewLogic } from '../../overview.logic';
 
 export const ManageKeysPopover: React.FC = () => {
   const { isManageKeysPopoverOpen } = useValues(OverviewLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const { toggleManageApiKeyPopover, openGenerateModal } = useActions(OverviewLogic);
 
   return (
@@ -44,6 +46,8 @@ export const ManageKeysPopover: React.FC = () => {
         size="s"
         items={[
           <EuiContextMenuItem
+            key="viewApiKeys"
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKeys-viewApiKeys`}
             icon="eye"
             onClick={() =>
               KibanaLogic.values.navigateToUrl('/app/management/security/api_keys', {
@@ -60,7 +64,12 @@ export const ManageKeysPopover: React.FC = () => {
               </p>
             </EuiText>
           </EuiContextMenuItem>,
-          <EuiContextMenuItem icon="plusInCircle" onClick={openGenerateModal}>
+          <EuiContextMenuItem
+            key="createNewApiKey"
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKeys-createNewApiKey`}
+            icon="plusInCircle"
+            onClick={openGenerateModal}
+          >
             <EuiText>
               <p>
                 {i18n.translate(

@@ -14,7 +14,9 @@ import {
   LayoutDirection,
   Metric,
   MetricElementEvent,
+  MetricWNumber,
   MetricWProgress,
+  MetricWTrend,
   Settings,
 } from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -24,6 +26,8 @@ import { HtmlAttributes } from 'csstype';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
 import { DimensionsVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import faker from 'faker';
 
 const mockDeserialize = jest.fn((params) => {
   const converter =
@@ -66,14 +70,16 @@ jest.mock('@kbn/field-formats-plugin/common', () => ({
   },
 }));
 
-jest.mock('@elastic/numeral', () => ({
-  language: jest.fn(() => 'en'),
-  languageData: jest.fn(() => ({
+jest.mock('@elastic/numeral', () => {
+  const actualNumeral = jest.requireActual('@elastic/numeral');
+  actualNumeral.language = jest.fn(() => 'en');
+  actualNumeral.languageData = jest.fn(() => ({
     currency: {
       symbol: '$',
     },
-  })),
-}));
+  }));
+  return actualNumeral;
+});
 
 type Props = MetricVisComponentProps;
 
@@ -226,6 +232,7 @@ describe('MetricVisComponent', function () {
       metric: {
         progressDirection: 'vertical',
         maxCols: 5,
+        icon: 'empty',
       },
       dimensions: {
         metric: basePriceColumnId,
@@ -246,6 +253,7 @@ describe('MetricVisComponent', function () {
         Object {
           "color": "#f5f7fa",
           "extra": <span />,
+          "icon": [Function],
           "subtitle": undefined,
           "title": "Median products.base_price",
           "value": 28.984375,
@@ -308,6 +316,7 @@ describe('MetricVisComponent', function () {
             secondary prefix
              13.63
           </span>,
+          "icon": [Function],
           "subtitle": "subtitle",
           "title": "Median products.base_price",
           "value": 28.984375,
@@ -354,6 +363,7 @@ describe('MetricVisComponent', function () {
           "color": "#f5f7fa",
           "domainMax": 28.984375,
           "extra": <span />,
+          "icon": [Function],
           "progressBarDirection": "vertical",
           "subtitle": undefined,
           "title": "Median products.base_price",
@@ -365,6 +375,40 @@ describe('MetricVisComponent', function () {
       expect(
         (getConfig(basePriceColumnId, 'horizontal') as MetricWProgress).progressBarDirection
       ).toBe('horizontal');
+    });
+
+    it('should configure trendline if provided', () => {
+      const trends = {
+        [DEFAULT_TRENDLINE_NAME]: [
+          { x: 1, y: 2 },
+          { x: 3, y: 4 },
+          { x: 5, y: 6 },
+          { x: 7, y: 8 },
+        ],
+      };
+
+      const tileConfig = shallow(
+        <MetricVis
+          config={{
+            ...config,
+            metric: {
+              ...config.metric,
+              trends,
+            },
+            dimensions: {
+              ...config.dimensions,
+              breakdownBy: undefined,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+        />
+      )
+        .find(Metric)
+        .props().data![0][0]! as MetricWTrend;
+
+      expect(tileConfig.trend).toEqual(trends[DEFAULT_TRENDLINE_NAME]);
+      expect(tileConfig.trendShape).toEqual('area');
     });
   });
 
@@ -395,6 +439,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Friday",
             "value": 28.984375,
@@ -403,6 +448,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Wednesday",
             "value": 28.984375,
@@ -411,6 +457,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Saturday",
             "value": 25.984375,
@@ -419,6 +466,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Sunday",
             "value": 25.784375,
@@ -427,6 +475,7 @@ describe('MetricVisComponent', function () {
           Object {
             "color": "#f5f7fa",
             "extra": <span />,
+            "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "Thursday",
             "value": 25.348011363636363,
@@ -555,6 +604,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Friday",
               "value": 28.984375,
@@ -563,6 +613,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Wednesday",
               "value": 28.984375,
@@ -571,6 +622,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Saturday",
               "value": 25.984375,
@@ -579,6 +631,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Sunday",
               "value": 25.784375,
@@ -587,6 +640,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Thursday",
               "value": 25.348011363636363,
@@ -597,6 +651,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#f5f7fa",
               "extra": <span />,
+              "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "Other",
               "value": 24.984375,
@@ -638,6 +693,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 28.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Friday",
@@ -648,6 +704,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 28.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Wednesday",
@@ -658,6 +715,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 25.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Saturday",
@@ -668,6 +726,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 25.784375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Sunday",
@@ -678,6 +737,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 25.348011363636363,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Thursday",
@@ -690,6 +750,7 @@ describe('MetricVisComponent', function () {
               "color": "#f5f7fa",
               "domainMax": 24.984375,
               "extra": <span />,
+              "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
               "title": "Other",
@@ -699,6 +760,74 @@ describe('MetricVisComponent', function () {
           ],
         ]
       `);
+    });
+    it('should configure trendlines if provided', () => {
+      const trends: Record<string, MetricWTrend['trend']> = {
+        Friday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Wednesday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Saturday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Sunday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Thursday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Other: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        // this one shouldn't show up!
+        [DEFAULT_TRENDLINE_NAME]: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+      };
+
+      const data = shallow(
+        <MetricVis
+          config={{
+            ...config,
+            metric: {
+              ...config.metric,
+              trends,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+        />
+      )
+        .find(Metric)
+        .props().data![0] as MetricWTrend[];
+
+      data?.forEach((tileConfig) => {
+        expect(tileConfig.trend).toEqual(trends[tileConfig.title!]);
+        expect(tileConfig.trendShape).toEqual('area');
+      });
     });
 
     it('renders with no data', () => {
@@ -764,6 +893,27 @@ describe('MetricVisComponent', function () {
               max-height: 100%;
               max-width: 100%;
               overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
             "
     `);
 
@@ -774,6 +924,27 @@ describe('MetricVisComponent', function () {
               max-height: 100%;
               max-width: 100%;
               overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
             "
     `);
 
@@ -784,6 +955,27 @@ describe('MetricVisComponent', function () {
               max-height: 100%;
               max-width: 100%;
               overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
             "
     `);
   });
@@ -813,6 +1005,44 @@ describe('MetricVisComponent', function () {
     component.find(Settings).props().onRenderChange!(true);
 
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should convert null values to NaN', () => {
+    const metricId = faker.random.word();
+
+    const tableWNull: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: metricId,
+          name: metricId,
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [{ [metricId]: null }],
+    };
+
+    const metricConfig = shallow(
+      <MetricVis
+        config={{
+          metric: {
+            progressDirection: 'vertical',
+            maxCols: 5,
+          },
+          dimensions: {
+            metric: metricId,
+          },
+        }}
+        data={tableWNull}
+        {...defaultProps}
+      />
+    )
+      .find(Metric)
+      .props().data![0][0]! as MetricWNumber;
+
+    expect(metricConfig.value).toBeNaN();
   });
 
   describe('filter events', () => {
@@ -861,6 +1091,7 @@ describe('MetricVisComponent', function () {
               table,
               column: 1,
               row: 0,
+              value: 28.984375,
             },
           ],
         },
@@ -885,6 +1116,7 @@ describe('MetricVisComponent', function () {
               table,
               column: 0,
               row: 5,
+              value: '__other__',
             },
           ],
         },
@@ -892,15 +1124,27 @@ describe('MetricVisComponent', function () {
     });
 
     it('should do nothing if primary metric is not filterable', () => {
-      const event: MetricElementEvent = {
-        type: 'metricElementEvent',
-        rowIndex: 1,
-        columnIndex: 0,
+      const props = {
+        ...defaultProps,
+        filterable: false,
       };
+      const metricComponent = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+          }}
+          data={table}
+          {...props}
+        />
+      );
 
-      fireFilter(event, false, true);
-
-      expect(fireEventSpy).not.toHaveBeenCalled();
+      expect(metricComponent.find(Settings).props().onElementClick).toBeUndefined();
     });
   });
 
@@ -954,7 +1198,7 @@ describe('MetricVisComponent', function () {
                 "stops": Array [],
               },
               Object {
-                "max": 28.984375,
+                "max": 57.96875,
                 "min": 0,
               },
             ],
@@ -1124,7 +1368,7 @@ describe('MetricVisComponent', function () {
         value: primaryMetric,
         valueFormatter,
         extra,
-      } = component.find(Metric).props().data?.[0][0]!;
+      } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
 
       return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
     };
@@ -1172,12 +1416,12 @@ describe('MetricVisComponent', function () {
       const base = 1024;
 
       const { primary: bytesValue } = getFormattedMetrics(base - 1, 0, { id: 'bytes' });
-      expect(bytesValue).toBe('1,023 byte');
+      expect(bytesValue).toBe('1,023 B');
 
       const { primary: kiloBytesValue } = getFormattedMetrics(Math.pow(base, 1), 0, {
         id: 'bytes',
       });
-      expect(kiloBytesValue).toBe('1 kB');
+      expect(kiloBytesValue).toBe('1 KB');
 
       const { primary: megaBytesValue } = getFormattedMetrics(Math.pow(base, 2), 0, {
         id: 'bytes',
@@ -1187,7 +1431,27 @@ describe('MetricVisComponent', function () {
       const { primary: moreThanPetaValue } = getFormattedMetrics(Math.pow(base, 6), 0, {
         id: 'bytes',
       });
-      expect(moreThanPetaValue).toBe('1,024 PB');
+      expect(moreThanPetaValue).toBe('1 EB');
+    });
+
+    it('correctly formats bits (decimal)', () => {
+      const base = 1000;
+      const bitFormat = {
+        id: 'number',
+        params: { pattern: '0.0bitd' },
+      };
+
+      const { primary: bytesValue } = getFormattedMetrics(base - 1, 0, bitFormat);
+      expect(bytesValue).toBe('999 bit');
+
+      const { primary: kiloBytesValue } = getFormattedMetrics(Math.pow(base, 1), 0, bitFormat);
+      expect(kiloBytesValue).toBe('1 kbit');
+
+      const { primary: megaBytesValue } = getFormattedMetrics(Math.pow(base, 2), 0, bitFormat);
+      expect(megaBytesValue).toBe('1 Mbit');
+
+      const { primary: moreThanPetaValue } = getFormattedMetrics(Math.pow(base, 6), 0, bitFormat);
+      expect(moreThanPetaValue).toBe('1 Ebit');
     });
 
     it('correctly formats durations', () => {
@@ -1226,6 +1490,31 @@ describe('MetricVisComponent', function () {
       });
       expect(primary).toBe('23.94%');
       expect(secondary).toBe('1.12K%');
+    });
+  });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
     });
   });
 });

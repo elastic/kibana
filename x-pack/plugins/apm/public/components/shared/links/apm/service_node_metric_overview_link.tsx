@@ -30,9 +30,9 @@ export function useServiceNodeMetricOverviewHref({
   serviceNodeName: string;
 }) {
   return useAPMHref({
-    path: `/services/${serviceName}/nodes/${encodeURIComponent(
+    path: `/services/${serviceName}/metrics/${encodeURIComponent(
       serviceNodeName
-    )}/metrics`,
+    )}`,
     persistedFilters,
   });
 }
@@ -46,5 +46,11 @@ export function ServiceNodeMetricOverviewLink({
     serviceName,
     serviceNodeName,
   });
-  return <EuiLink href={href} {...rest} />;
+  return (
+    <EuiLink
+      data-test-subj="apmServiceNodeMetricOverviewLinkLink"
+      href={href}
+      {...rest}
+    />
+  );
 }

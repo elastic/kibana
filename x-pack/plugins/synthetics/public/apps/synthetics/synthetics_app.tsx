@@ -30,8 +30,8 @@ import { PageRouter } from './routes';
 import { store, storage, setBasePath } from './state';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
+import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
 
-// added a comment to trigger test
 const Application = (props: SyntheticsAppProps) => {
   const {
     basePath,
@@ -64,6 +64,7 @@ const Application = (props: SyntheticsAppProps) => {
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
   kibanaService.core = core;
+  kibanaService.startPlugins = startPlugins;
   kibanaService.theme = props.appMountParameters.theme$;
 
   store.dispatch(setBasePath(basePath));
@@ -71,7 +72,15 @@ const Application = (props: SyntheticsAppProps) => {
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
-        <KibanaThemeProvider theme$={props.appMountParameters.theme$}>
+        <KibanaThemeProvider
+          theme$={props.appMountParameters.theme$}
+          modify={{
+            breakpoint: {
+              xxl: 1600,
+              xxxl: 2000,
+            },
+          }}
+        >
           <ReduxProvider store={store}>
             <KibanaContextProvider
               services={{
@@ -82,8 +91,10 @@ const Application = (props: SyntheticsAppProps) => {
                 inspector: startPlugins.inspector,
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
+                exploratoryView: startPlugins.exploratoryView,
                 cases: startPlugins.cases,
                 spaces: startPlugins.spaces,
+                fleet: startPlugins.fleet,
               }}
             >
               <Router history={appMountParameters.history}>
@@ -100,6 +111,7 @@ const Application = (props: SyntheticsAppProps) => {
                               <InspectorContextProvider>
                                 <PageRouter />
                                 <ActionMenu appMountParameters={appMountParameters} />
+                                <TestNowModeFlyoutContainer />
                               </InspectorContextProvider>
                             </RedirectAppLinks>
                           </div>

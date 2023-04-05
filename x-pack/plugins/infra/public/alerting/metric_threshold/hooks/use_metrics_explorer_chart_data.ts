@@ -5,21 +5,31 @@
  * 2.0.
  */
 
+import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
+import { MetricExpressionCustomMetric } from '../../../../common/alerting/metrics';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
-import { MetricExpression } from '../types';
-import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricExpression, TimeRange } from '../types';
+import {
+  MetricsExplorerOptions,
+  MetricsExplorerTimestampsRT,
+} from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';
+import { MetricExplorerCustomMetricAggregations } from '../../../../common/http_api/metrics_explorer';
+
+const DEFAULT_TIME_RANGE = {};
 
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
   derivedIndexPattern: DataViewBase,
-  source: MetricsSourceConfiguration | null,
+  source?: MetricsSourceConfiguration,
   filterQuery?: string,
-  groupBy?: string | string[]
+  groupBy?: string | string[],
+  timeRange: TimeRange = DEFAULT_TIME_RANGE
 ) => {
   const { timeSize, timeUnit } = expression || { timeSize: 1, timeUnit: 'm' };
+
   const options: MetricsExplorerOptions = useMemo(
     () => ({
       limit: 1,
@@ -28,30 +38,54 @@ export const useMetricsExplorerChartData = (
       groupBy,
       filterQuery,
       metrics: [
-        {
-          field: expression.metric,
-          aggregation: expression.aggType,
-        },
+        expression.aggType === 'custom'
+          ? {
+              aggregation: 'custom',
+              custom_metrics:
+                expression?.customMetrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ??
+                [],
+              equation: expression.equation,
+            }
+          : { field: expression.metric, aggregation: expression.aggType },
       ],
       aggregation: expression.aggType || 'avg',
     }),
-    [expression.aggType, expression.metric, filterQuery, groupBy]
+    [
+      expression.aggType,
+      expression.equation,
+      expression.metric,
+      expression.customMetrics,
+      filterQuery,
+      groupBy,
+    ]
   );
-  const timerange = useMemo(
-    () => ({
+  const timestamps: MetricsExplorerTimestampsRT = useMemo(() => {
+    const from = timeRange.from ?? `now-${(timeSize || 1) * 20}${timeUnit}`;
+    const to = timeRange.to ?? 'now';
+    const fromTimestamp = DateMath.parse(from)!.valueOf();
+    const toTimestamp = DateMath.parse(to, { roundUp: true })!.valueOf();
+    return {
       interval: `>=${timeSize || 1}${timeUnit}`,
-      from: `now-${(timeSize || 1) * 20}${timeUnit}`,
-      to: 'now',
-    }),
-    [timeSize, timeUnit]
-  );
+      fromTimestamp,
+      toTimestamp,
+    };
+  }, [timeRange, timeSize, timeUnit]);
 
-  return useMetricsExplorerData(
-    options,
-    source?.configuration,
-    derivedIndexPattern,
-    timerange,
-    null,
-    null
-  );
+  return useMetricsExplorerData(options, source?.configuration, derivedIndexPattern, timestamps);
+};
+
+const mapMetricThresholdMetricToMetricsExplorerMetric = (metric: MetricExpressionCustomMetric) => {
+  if (metric.aggType === 'count') {
+    return {
+      name: metric.name,
+      aggregation: 'count' as MetricExplorerCustomMetricAggregations,
+      filter: metric.filter,
+    };
+  }
+
+  return {
+    name: metric.name,
+    aggregation: metric.aggType as MetricExplorerCustomMetricAggregations,
+    field: metric.field,
+  };
 };

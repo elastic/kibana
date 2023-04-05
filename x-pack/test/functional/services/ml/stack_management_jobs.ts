@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import path from 'path';
 
@@ -84,7 +85,9 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async executeSync() {
-      await testSubjects.clickWhenNotDisabled('mlJobMgmtSyncFlyoutSyncButton', { timeout: 5000 });
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobMgmtSyncFlyoutSyncButton', {
+        timeout: 5000,
+      });
 
       // check and close success toast
       const resultToast = await toasts.getToastElement(1);
@@ -136,7 +139,7 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async saveAndCloseSpacesFlyout() {
-      await testSubjects.clickWhenNotDisabled('sts-save-button', { timeout: 2000 });
+      await testSubjects.clickWhenNotDisabledWithoutRetry('sts-save-button', { timeout: 2000 });
       await testSubjects.missingOrFail('share-to-space-flyout', { timeout: 2000 });
     },
 
@@ -276,7 +279,9 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async importJobs() {
-      await testSubjects.clickWhenNotDisabled('mlJobMgmtImportImportButton', { timeout: 5000 });
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobMgmtImportImportButton', {
+        timeout: 5000,
+      });
 
       // check and close success toast
       const resultToast = await toasts.getToastElement(1);
@@ -342,7 +347,9 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async selectExportJobs() {
-      await testSubjects.clickWhenNotDisabled('mlJobMgmtExportExportButton', { timeout: 5000 });
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobMgmtExportExportButton', {
+        timeout: 5000,
+      });
 
       // check and close success toast
       const resultToast = await toasts.getToastElement(1);

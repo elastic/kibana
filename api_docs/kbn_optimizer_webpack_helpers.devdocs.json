@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.failedStatsToErrorMessage",
+        "id": "def-common.failedStatsToErrorMessage",
         "type": "Function",
         "tags": [],
         "label": "failedStatsToErrorMessage",
@@ -25,10 +33,11 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.failedStatsToErrorMessage.$1",
+            "id": "def-common.failedStatsToErrorMessage.$1",
             "type": "Object",
             "tags": [],
             "label": "stats",
@@ -38,6 +47,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -46,7 +56,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.getModulePath",
+        "id": "def-common.getModulePath",
         "type": "Function",
         "tags": [],
         "label": "getModulePath",
@@ -55,19 +65,20 @@
           "(module: ",
           {
             "pluginId": "@kbn/optimizer-webpack-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnOptimizerWebpackHelpersPluginApi",
-            "section": "def-server.WebpackNormalModule",
+            "section": "def-common.WebpackNormalModule",
             "text": "WebpackNormalModule"
           },
           ") => string"
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.getModulePath.$1",
+            "id": "def-common.getModulePath.$1",
             "type": "Object",
             "tags": [],
             "label": "module",
@@ -75,14 +86,15 @@
             "signature": [
               {
                 "pluginId": "@kbn/optimizer-webpack-helpers",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnOptimizerWebpackHelpersPluginApi",
-                "section": "def-server.WebpackNormalModule",
+                "section": "def-common.WebpackNormalModule",
                 "text": "WebpackNormalModule"
               }
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -91,7 +103,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.isConcatenatedModule",
+        "id": "def-common.isConcatenatedModule",
         "type": "Function",
         "tags": [],
         "label": "isConcatenatedModule",
@@ -101,10 +113,11 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.isConcatenatedModule.$1",
+            "id": "def-common.isConcatenatedModule.$1",
             "type": "Any",
             "tags": [],
             "label": "module",
@@ -114,6 +127,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -122,7 +136,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.isDelegatedModule",
+        "id": "def-common.isDelegatedModule",
         "type": "Function",
         "tags": [],
         "label": "isDelegatedModule",
@@ -132,10 +146,11 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.isDelegatedModule.$1",
+            "id": "def-common.isDelegatedModule.$1",
             "type": "Any",
             "tags": [],
             "label": "module",
@@ -145,6 +160,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -153,7 +169,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.isExternalModule",
+        "id": "def-common.isExternalModule",
         "type": "Function",
         "tags": [],
         "label": "isExternalModule",
@@ -163,10 +179,11 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.isExternalModule.$1",
+            "id": "def-common.isExternalModule.$1",
             "type": "Any",
             "tags": [],
             "label": "module",
@@ -176,6 +193,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -184,7 +202,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.isFailureStats",
+        "id": "def-common.isFailureStats",
         "type": "Function",
         "tags": [],
         "label": "isFailureStats",
@@ -196,10 +214,11 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.isFailureStats.$1",
+            "id": "def-common.isFailureStats.$1",
             "type": "Object",
             "tags": [],
             "label": "stats",
@@ -209,6 +228,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -217,7 +237,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.isIgnoredModule",
+        "id": "def-common.isIgnoredModule",
         "type": "Function",
         "tags": [],
         "label": "isIgnoredModule",
@@ -227,10 +247,11 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.isIgnoredModule.$1",
+            "id": "def-common.isIgnoredModule.$1",
             "type": "Any",
             "tags": [],
             "label": "module",
@@ -240,6 +261,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -248,7 +270,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.isNormalModule",
+        "id": "def-common.isNormalModule",
         "type": "Function",
         "tags": [],
         "label": "isNormalModule",
@@ -258,10 +280,11 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.isNormalModule.$1",
+            "id": "def-common.isNormalModule.$1",
             "type": "Any",
             "tags": [],
             "label": "module",
@@ -271,6 +294,7 @@
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -281,7 +305,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.WebpackConcatenatedModule",
+        "id": "def-common.WebpackConcatenatedModule",
         "type": "Interface",
         "tags": [],
         "label": "WebpackConcatenatedModule",
@@ -290,30 +314,33 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackConcatenatedModule.type",
+            "id": "def-common.WebpackConcatenatedModule.type",
             "type": "string",
             "tags": [],
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackConcatenatedModule.id",
+            "id": "def-common.WebpackConcatenatedModule.id",
             "type": "number",
             "tags": [],
             "label": "id",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackConcatenatedModule.dependencies",
+            "id": "def-common.WebpackConcatenatedModule.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -322,11 +349,12 @@
               "Dependency[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackConcatenatedModule.usedExports",
+            "id": "def-common.WebpackConcatenatedModule.usedExports",
             "type": "Array",
             "tags": [],
             "label": "usedExports",
@@ -335,11 +363,12 @@
               "string[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackConcatenatedModule.modules",
+            "id": "def-common.WebpackConcatenatedModule.modules",
             "type": "Array",
             "tags": [],
             "label": "modules",
@@ -348,14 +377,15 @@
               "unknown[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.WebpackDelegatedModule",
+        "id": "def-common.WebpackDelegatedModule",
         "type": "Interface",
         "tags": [],
         "label": "WebpackDelegatedModule",
@@ -364,30 +394,33 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackDelegatedModule.type",
+            "id": "def-common.WebpackDelegatedModule.type",
             "type": "string",
             "tags": [],
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackDelegatedModule.id",
+            "id": "def-common.WebpackDelegatedModule.id",
             "type": "number",
             "tags": [],
             "label": "id",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackDelegatedModule.dependencies",
+            "id": "def-common.WebpackDelegatedModule.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -396,11 +429,12 @@
               "unknown[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackDelegatedModule.userRequest",
+            "id": "def-common.WebpackDelegatedModule.userRequest",
             "type": "string",
             "tags": [],
             "label": "userRequest",
@@ -408,14 +442,15 @@
               "The ID of the module in the DLL manifest"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.WebpackExternalModule",
+        "id": "def-common.WebpackExternalModule",
         "type": "Interface",
         "tags": [],
         "label": "WebpackExternalModule",
@@ -424,30 +459,33 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackExternalModule.type",
+            "id": "def-common.WebpackExternalModule.type",
             "type": "string",
             "tags": [],
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackExternalModule.id",
+            "id": "def-common.WebpackExternalModule.id",
             "type": "string",
             "tags": [],
             "label": "id",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackExternalModule.request",
+            "id": "def-common.WebpackExternalModule.request",
             "type": "string",
             "tags": [],
             "label": "request",
@@ -455,11 +493,12 @@
               "JS used to get instance of External"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackExternalModule.userRequest",
+            "id": "def-common.WebpackExternalModule.userRequest",
             "type": "string",
             "tags": [],
             "label": "userRequest",
@@ -467,14 +506,15 @@
               "module name that is handled by externals"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.WebpackIgnoredModule",
+        "id": "def-common.WebpackIgnoredModule",
         "type": "Interface",
         "tags": [],
         "label": "WebpackIgnoredModule",
@@ -483,20 +523,22 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackIgnoredModule.type",
+            "id": "def-common.WebpackIgnoredModule.type",
             "type": "string",
             "tags": [],
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackIgnoredModule.identifierStr",
+            "id": "def-common.WebpackIgnoredModule.identifierStr",
             "type": "string",
             "tags": [],
             "label": "identifierStr",
@@ -504,11 +546,12 @@
               "unique string to identify this module with (starts with `ignored`)"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackIgnoredModule.readableIdentifierStr",
+            "id": "def-common.WebpackIgnoredModule.readableIdentifierStr",
             "type": "string",
             "tags": [],
             "label": "readableIdentifierStr",
@@ -516,14 +559,15 @@
               "human readable identifier"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.WebpackNormalModule",
+        "id": "def-common.WebpackNormalModule",
         "type": "Interface",
         "tags": [],
         "label": "WebpackNormalModule",
@@ -532,20 +576,22 @@
         ],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackNormalModule.type",
+            "id": "def-common.WebpackNormalModule.type",
             "type": "string",
             "tags": [],
             "label": "type",
             "description": [],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackNormalModule.resource",
+            "id": "def-common.WebpackNormalModule.resource",
             "type": "string",
             "tags": [],
             "label": "resource",
@@ -553,11 +599,12 @@
               "absolute path to file on disk"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackNormalModule.buildInfo",
+            "id": "def-common.WebpackNormalModule.buildInfo",
             "type": "Object",
             "tags": [],
             "label": "buildInfo",
@@ -566,11 +613,12 @@
               "{ cacheable: boolean; fileDependencies: Set<string>; }"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackNormalModule.dependencies",
+            "id": "def-common.WebpackNormalModule.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -579,24 +627,26 @@
               "Dependency[]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/optimizer-webpack-helpers",
-        "id": "def-server.WebpackResolveData",
+        "id": "def-common.WebpackResolveData",
         "type": "Interface",
         "tags": [],
         "label": "WebpackResolveData",
         "description": [],
         "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackResolveData.context",
+            "id": "def-common.WebpackResolveData.context",
             "type": "string",
             "tags": [],
             "label": "context",
@@ -604,11 +654,12 @@
               "compilation context"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackResolveData.request",
+            "id": "def-common.WebpackResolveData.request",
             "type": "string",
             "tags": [],
             "label": "request",
@@ -616,11 +667,12 @@
               "full request (with loaders)"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackResolveData.dependencies",
+            "id": "def-common.WebpackResolveData.dependencies",
             "type": "Object",
             "tags": [],
             "label": "dependencies",
@@ -629,11 +681,12 @@
               "[{ module: unknown; weak: boolean; optional: boolean; loc: unknown; request: string; userRequest: string; }]"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackResolveData.userRequest",
+            "id": "def-common.WebpackResolveData.userRequest",
             "type": "string",
             "tags": [],
             "label": "userRequest",
@@ -641,11 +694,12 @@
               "absolute path, but probably includes loaders in some cases"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackResolveData.rawRequest",
+            "id": "def-common.WebpackResolveData.rawRequest",
             "type": "string",
             "tags": [],
             "label": "rawRequest",
@@ -653,11 +707,12 @@
               "string from source code"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackResolveData.loaders",
+            "id": "def-common.WebpackResolveData.loaders",
             "type": "Unknown",
             "tags": [],
             "label": "loaders",
@@ -666,11 +721,12 @@
               "unknown"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackResolveData.resource",
+            "id": "def-common.WebpackResolveData.resource",
             "type": "string",
             "tags": [],
             "label": "resource",
@@ -678,11 +734,12 @@
               "absolute path to file, but probablt includes loaders in some cases"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackResolveData.type",
+            "id": "def-common.WebpackResolveData.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -690,11 +747,12 @@
               "module type"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/optimizer-webpack-helpers",
-            "id": "def-server.WebpackResolveData.resourceResolveData",
+            "id": "def-common.WebpackResolveData.resourceResolveData",
             "type": "Object",
             "tags": [],
             "label": "resourceResolveData",
@@ -703,20 +761,13 @@
               "{ context: { issuer: string; }; path: string; }"
             ],
             "path": "packages/kbn-optimizer-webpack-helpers/src/webpack_helpers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

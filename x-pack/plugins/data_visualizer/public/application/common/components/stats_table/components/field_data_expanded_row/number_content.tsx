@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, useEffect, useState } from 'react';
+import React, { FC, ReactNode, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiFlexItem,
@@ -17,13 +17,10 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { kibanaFieldFormat, numberAsOrdinal } from '../../../utils';
-import {
-  MetricDistributionChart,
-  MetricDistributionChartData,
-  buildChartDataFromStats,
-} from '../metric_distribution_chart';
+import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
 import { TopValues } from '../../../top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
@@ -42,14 +39,10 @@ interface SummaryTableItem {
 export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const { stats } = config;
 
-  useEffect(() => {
-    const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);
-    setDistributionChartData(chartData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const defaultChartData: MetricDistributionChartData[] = [];
-  const [distributionChartData, setDistributionChartData] = useState(defaultChartData);
+  const distributionChartData = useMemo(
+    () => buildChartDataFromStats(stats?.distribution, METRIC_DISTRIBUTION_CHART_WIDTH),
+    [stats?.distribution]
+  );
 
   if (stats === undefined) return null;
   const { min, median, max, distribution } = stats;
@@ -66,16 +59,20 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
       ),
       value: kibanaFieldFormat(min, fieldFormat),
     },
-    {
-      function: 'median',
-      display: (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.medianLabel"
-          defaultMessage="median"
-        />
-      ),
-      value: kibanaFieldFormat(median, fieldFormat),
-    },
+    ...(isDefined(median)
+      ? [
+          {
+            function: 'median',
+            display: (
+              <FormattedMessage
+                id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.medianLabel"
+                defaultMessage="median"
+              />
+            ),
+            value: kibanaFieldFormat(median, fieldFormat),
+          },
+        ]
+      : []),
     {
       function: 'max',
       display: (

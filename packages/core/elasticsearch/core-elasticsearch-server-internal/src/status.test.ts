@@ -9,7 +9,7 @@
 import { take } from 'rxjs/operators';
 import { Subject, of } from 'rxjs';
 
-import { ServiceStatusLevels, ServiceStatusLevel, ServiceStatus } from '@kbn/core-base-common';
+import { ServiceStatusLevels, ServiceStatusLevel, ServiceStatus } from '@kbn/core-status-common';
 import { calculateStatus$ } from './status';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 

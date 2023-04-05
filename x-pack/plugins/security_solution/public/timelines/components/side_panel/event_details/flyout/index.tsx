@@ -5,13 +5,11 @@
  * 2.0.
  */
 import type { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
+import { EntityType } from '@kbn/timelines-plugin/common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { buildHostNamesFilter } from '../../../../../../common/search_strategy';
-import type { HostRisk } from '../../../../../risk_score/containers';
-import { useHostRiskScore } from '../../../../../risk_score/containers';
+import { TimelineId } from '../../../../../../common/types';
 import { useHostIsolationTools } from '../use_host_isolation_tools';
 import { FlyoutHeaderContent } from './header';
 import { FlyoutBody } from './body';
@@ -45,26 +43,6 @@ export const useToGetInternalFlyout = () => {
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
 
-  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
-    pagination: {
-      cursorStart: 0,
-      querySize: 1,
-    },
-  });
-
-  const hostRisk: HostRisk | null = useMemo(
-    () =>
-      data
-        ? {
-            loading: hostRiskLoading,
-            isModuleEnabled,
-            result: data,
-          }
-        : null,
-    [data, hostRiskLoading, isModuleEnabled]
-  );
-
   const {
     isolateAction,
     isHostIsolationPanelOpen,
@@ -88,9 +66,9 @@ export const useToGetInternalFlyout = () => {
           alertId={alertId}
           browserFields={browserFields}
           detailsData={detailsData}
+          detailsEcsData={ecsData}
           event={{ eventId: localAlert._id, indexName: localAlert._index }}
           hostName={hostName ?? ''}
-          hostRisk={hostRisk}
           handleIsolationActionSuccess={handleIsolationActionSuccess}
           handleOnEventClosed={noop}
           isAlert={isAlert}
@@ -101,7 +79,7 @@ export const useToGetInternalFlyout = () => {
           loading={isLoading || loading}
           rawEventData={rawEventData}
           showAlertDetails={showAlertDetails}
-          timelineId={TimelineId.casePage}
+          scopeId={TimelineId.casePage}
           isReadOnly={false}
         />
       );
@@ -110,9 +88,9 @@ export const useToGetInternalFlyout = () => {
       alertId,
       browserFields,
       detailsData,
+      ecsData,
       handleIsolationActionSuccess,
       hostName,
-      hostRisk,
       isAlert,
       isHostIsolationPanelOpen,
       isIsolateActionSuccessBannerVisible,
@@ -129,6 +107,7 @@ export const useToGetInternalFlyout = () => {
         <FlyoutHeaderContent
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           isAlert={isAlert}
+          eventId={alertId}
           isolateAction={isolateAction}
           loading={isLoading || loading}
           ruleName={ruleName}
@@ -139,6 +118,7 @@ export const useToGetInternalFlyout = () => {
     },
     [
       isAlert,
+      alertId,
       isHostIsolationPanelOpen,
       isolateAction,
       loading,
@@ -161,7 +141,7 @@ export const useToGetInternalFlyout = () => {
           isReadOnly={false}
           loadingEventDetails={isLoading || loading}
           onAddIsolationStatusClick={showHostIsolationPanel}
-          timelineId={TimelineId.casePage}
+          scopeId={TimelineId.casePage}
         />
       );
     },

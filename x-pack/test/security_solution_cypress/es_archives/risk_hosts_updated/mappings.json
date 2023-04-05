@@ -1,0 +1,102 @@
+{
+  "type": "index",
+  "value": {
+    "index": "ml_host_risk_score_latest_default",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "risk": {
+              "properties": {
+                "calculated_level": {
+                  "type": "keyword"
+                },
+                "calculated_score_norm": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "ingest_timestamp": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": "ml_host_risk_score_latest_default",
+          "rollover_alias": "ml_host_risk_score_latest_default"
+        },
+        "mapping": {
+          "total_fields": {
+            "limit": "10000"
+          }
+        },
+        "max_docvalue_fields_search": "200",
+        "number_of_replicas": "1",
+        "number_of_shards": "1",
+        "refresh_interval": "5s"
+      }
+    }
+  }
+}
+
+
+{
+  "type": "index",
+  "value": {
+    "index": "ml_host_risk_score_default",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "risk": {
+              "properties": {
+                "calculated_level": {
+                  "type": "keyword"
+                },
+                "calculated_score_norm": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "ingest_timestamp": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": "ml_host_risk_score_default",
+          "rollover_alias": "ml_host_risk_score_default"
+        },
+        "mapping": {
+          "total_fields": {
+            "limit": "10000"
+          }
+        },
+        "max_docvalue_fields_search": "200",
+        "number_of_replicas": "1",
+        "number_of_shards": "1",
+        "refresh_interval": "5s"
+      }
+    }
+  }
+}

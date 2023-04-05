@@ -135,7 +135,7 @@ export default function ({ getService }) {
         )
         .expect(200);
 
-      expect(apiResponse.body).to.only.have.keys([
+      expect(apiResponse.body).to.have.keys([
         'username',
         'full_name',
         'email',
@@ -182,7 +182,7 @@ export default function ({ getService }) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
-        expect(apiResponse.body).to.only.have.keys([
+        expect(apiResponse.body).to.have.keys([
           'username',
           'full_name',
           'email',

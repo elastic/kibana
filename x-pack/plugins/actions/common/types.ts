@@ -7,6 +7,12 @@
 
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
+export {
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from './connector_feature_config';
 export interface ActionType {
   id: string;
   name: string;
@@ -26,16 +32,6 @@ export interface ValidatedEmail {
   address: string;
   valid: boolean;
   reason?: InvalidEmailReason;
-}
-
-export interface ActionResult {
-  id: string;
-  actionTypeId: string;
-  name: string;
-  // This will have to remain `any` until we can extend Action Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: Record<string, any>;
-  isPreconfigured: boolean;
 }
 
 // the result returned from an action type executor function

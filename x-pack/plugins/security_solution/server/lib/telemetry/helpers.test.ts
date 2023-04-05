@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { createMockPackagePolicy } from './__mocks__';
+import { createMockPackagePolicy, stubClusterInfo, stubLicenseInfo } from './__mocks__';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
@@ -21,11 +21,16 @@ import {
   isPackagePolicyList,
   templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
-  metricsResponseToValueListMetaData,
+  formatValueListMetaData,
+  tlog,
+  setIsElasticCloudDeployment,
+  createTaskMetric,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
-import { cloneDeep, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep } from 'lodash';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -801,10 +806,11 @@ describe('test advanced policy config overlap ', () => {
 
 describe('test metrics response to value list meta data', () => {
   test('can succeed when metrics response is fully populated', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-01-30'));
     const stubMetricResponses = {
       listMetricsResponse: {
         aggregations: {
-          total_value_list_count: 5,
+          total_value_list_count: { value: 5 },
           type_breakdown: {
             buckets: [
               {
@@ -854,8 +860,12 @@ describe('test metrics response to value list meta data', () => {
         },
       },
     };
-    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    const response = formatValueListMetaData(stubMetricResponses, stubClusterInfo, stubLicenseInfo);
     expect(response).toEqual({
+      '@timestamp': '2023-01-30T00:00:00.000Z',
+      cluster_uuid: '5Pr5PXRQQpGJUTn0czAvKQ',
+      cluster_name: 'elasticsearch',
+      license_id: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
       total_list_count: 5,
       types: [
         {
@@ -897,13 +907,78 @@ describe('test metrics response to value list meta data', () => {
       indicatorMatchMetricsResponse: {},
     };
     // @ts-ignore
-    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    const response = formatValueListMetaData(stubMetricResponses, stubClusterInfo, stubLicenseInfo);
     expect(response).toEqual({
+      '@timestamp': '2023-01-30T00:00:00.000Z',
+      cluster_uuid: '5Pr5PXRQQpGJUTn0czAvKQ',
+      cluster_name: 'elasticsearch',
+      license_id: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
       total_list_count: 0,
       types: [],
       lists: [],
       included_in_exception_lists_count: 0,
       used_in_indicator_match_rule_count: 0,
+    });
+  });
+});
+
+describe('test tlog', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
+  test('should log when cloud', () => {
+    setIsElasticCloudDeployment(true);
+    tlog(logger, 'test');
+    expect(logger.info).toHaveBeenCalled();
+    setIsElasticCloudDeployment(false);
+  });
+
+  test('should NOT log when on prem', () => {
+    tlog(logger, 'test');
+    expect(logger.info).toHaveBeenCalledTimes(0);
+    expect(logger.debug).toHaveBeenCalled();
+  });
+});
+
+// FLAKY: https://github.com/elastic/kibana/issues/141356
+describe.skip('test create task metrics', () => {
+  test('can succeed when all parameters are given', async () => {
+    const stubTaskName = 'test';
+    const stubPassed = true;
+    const stubStartTime = Date.now();
+    await new Promise((r) => setTimeout(r, 11));
+    const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime);
+    const {
+      time_executed_in_ms: timeExecutedInMs,
+      start_time: startTime,
+      end_time: endTime,
+      ...rest
+    } = response;
+    expect(timeExecutedInMs).toBeGreaterThan(10);
+    expect(rest).toEqual({
+      name: 'test',
+      passed: true,
+    });
+  });
+  test('can succeed when error given', async () => {
+    const stubTaskName = 'test';
+    const stubPassed = false;
+    const stubStartTime = Date.now();
+    const errorMessage = 'failed';
+    const response = createTaskMetric(stubTaskName, stubPassed, stubStartTime, errorMessage);
+    const {
+      time_executed_in_ms: timeExecutedInMs,
+      start_time: startTime,
+      end_time: endTime,
+      ...rest
+    } = response;
+    expect(rest).toEqual({
+      name: 'test',
+      passed: false,
+      error_message: 'failed',
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { asFn } from './as';
 
 describe('as', () => {

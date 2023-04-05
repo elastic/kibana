@@ -9,6 +9,8 @@
 import { LegendDisplay } from '@kbn/expression-partition-vis-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 
+const mockUiStateGet = jest.fn().mockReturnValue(() => false);
+
 export const samplePieVis = {
   type: {
     name: 'pie',
@@ -18,7 +20,6 @@ export const samplePieVis = {
     stage: 'production',
     options: {
       showTimePicker: true,
-      showQueryBar: true,
       showFilterBar: true,
       showIndexSelection: true,
       hierarchicalData: false,
@@ -92,7 +93,6 @@ export const samplePieVis = {
             min: 0,
             max: null,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
@@ -112,7 +112,6 @@ export const samplePieVis = {
             min: 0,
             max: 1,
             aggFilter: [
-              '!geohash_grid',
               '!geotile_grid',
               '!filter',
               '!sampler',
@@ -1308,7 +1307,7 @@ export const samplePieVis = {
         {
           id: '1',
           enabled: true,
-          type: 'count',
+          type: { name: 'count' },
           params: {},
           schema: 'metric',
           toSerializedFieldFormat: () => ({
@@ -1318,7 +1317,7 @@ export const samplePieVis = {
         {
           id: '2',
           enabled: true,
-          type: 'terms',
+          type: { name: 'terms' },
           params: {
             field: 'Carrier',
             orderBy: '1',
@@ -1353,5 +1352,6 @@ export const samplePieVis = {
     vis: {
       legendOpen: false,
     },
+    get: mockUiStateGet,
   },
 };

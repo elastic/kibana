@@ -18,7 +18,6 @@ export const getTimeScale = (
     dateColumnId: {
       types: ['string'],
       help: '',
-      required: true,
     },
     inputColumnId: {
       types: ['string'],
@@ -39,6 +38,10 @@ export const getTimeScale = (
       options: ['s', 'm', 'h', 'd'],
       help: '',
       required: true,
+    },
+    reducedTimeRange: {
+      types: ['string'],
+      help: '',
     },
   },
   inputTypes: ['datatable'],

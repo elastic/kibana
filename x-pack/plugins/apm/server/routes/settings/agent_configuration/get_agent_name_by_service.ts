@@ -6,19 +6,17 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Setup } from '../../../lib/helpers/setup_request';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { AGENT_NAME } from '../../../../common/es_fields/apm';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getAgentNameByService({
   serviceName,
-  setup,
+  apmEventClient,
 }: {
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
 }) {
-  const { apmEventClient } = setup;
-
   const params = {
     terminate_after: 1,
     apm: {
@@ -29,6 +27,7 @@ export async function getAgentNameByService({
       ],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

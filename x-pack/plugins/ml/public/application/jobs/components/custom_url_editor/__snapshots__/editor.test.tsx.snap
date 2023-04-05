@@ -21,11 +21,9 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={Array []}
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
@@ -50,7 +48,6 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -88,7 +85,6 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -122,7 +118,6 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     <EuiFormRow
       describedByIds={Array []}
       display="row"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -165,7 +160,6 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
           className="url-time-range"
           describedByIds={Array []}
           display="rowCompressed"
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
@@ -223,11 +217,9 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={Array []}
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
@@ -252,7 +244,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -290,7 +281,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -324,7 +314,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     <EuiFormRow
       describedByIds={Array []}
       display="row"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -373,7 +362,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           className="url-time-range"
           describedByIds={Array []}
           display="rowCompressed"
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
@@ -415,7 +403,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
               "Invalid interval format",
             ]
           }
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           isInvalid={true}
@@ -463,11 +450,9 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={Array []}
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
@@ -492,7 +477,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -530,7 +514,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -564,7 +547,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     <EuiFormRow
       describedByIds={Array []}
       display="row"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -613,7 +595,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           className="url-time-range"
           describedByIds={Array []}
           display="rowCompressed"
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
@@ -651,7 +632,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           describedByIds={Array []}
           display="rowCompressed"
           error={Array []}
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           isInvalid={false}
@@ -699,7 +679,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={
@@ -707,7 +686,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
           "A unique label must be supplied",
         ]
       }
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={true}
@@ -732,7 +710,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -770,7 +747,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -804,7 +780,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     <EuiFormRow
       describedByIds={Array []}
       display="row"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -847,7 +822,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
           className="url-time-range"
           describedByIds={Array []}
           display="rowCompressed"
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label={
@@ -905,7 +879,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={
@@ -913,7 +886,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
           "A unique label must be supplied",
         ]
       }
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={true}
@@ -938,7 +910,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
@@ -1022,11 +993,9 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={Array []}
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
@@ -1051,7 +1020,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
     <EuiFormRow
       describedByIds={Array []}
       display="rowCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={

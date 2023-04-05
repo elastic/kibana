@@ -12,9 +12,10 @@ import {
   GaugeTicksPositions,
   GaugeLabelMajorModes,
 } from '@kbn/expression-gauge-plugin/common';
+import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization } from '../../types';
-import { layerTypes } from '../../../common';
-import { GaugeVisualizationState } from './constants';
+import type { GaugeVisualizationState } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||
@@ -41,7 +42,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
   if (
     hasLayerMismatch(keptLayerIds, table) ||
     isNotNumericMetric(table) ||
-    (!isGauge && table.columns.length > 1) ||
+    (state && !isGauge && table.columns.length > 1) ||
     (isGauge && (numberOfAccessors !== table.columns.length || table.changeType === 'initial'))
   ) {
     return [];
@@ -57,22 +58,28 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
       ...state,
       shape,
       layerId: table.layerId,
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       ticksPosition: GaugeTicksPositions.AUTO,
       labelMajorMode: GaugeLabelMajorModes.AUTO,
     },
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',
     }),
-    previewIcon: 'empty',
+    previewIcon:
+      shape === GaugeShapes.VERTICAL_BULLET ? IconChartVerticalBullet : IconChartHorizontalBullet,
     score: 0.5,
     hide: !isGauge || state?.metricAccessor === undefined, // only display for gauges for beta
+    incomplete: state?.metricAccessor === undefined,
   };
 
   const suggestions = isGauge
     ? [
         {
           ...baseSuggestion,
+          previewIcon:
+            state?.shape === GaugeShapes.VERTICAL_BULLET
+              ? IconChartHorizontalBullet
+              : IconChartVerticalBullet,
           state: {
             ...baseSuggestion.state,
             ...state,
@@ -93,6 +100,10 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
         },
         {
           ...baseSuggestion,
+          previewIcon:
+            state?.shape === GaugeShapes.VERTICAL_BULLET
+              ? IconChartHorizontalBullet
+              : IconChartVerticalBullet,
           state: {
             ...baseSuggestion.state,
             metricAccessor: table.columns[0].columnId,

@@ -32,11 +32,19 @@ describe('Condition entry input', () => {
     onVisitedMock = jest.fn();
   });
 
+  interface GetElementProps {
+    os?: OperatingSystem;
+    isRemoveDisabled?: boolean;
+    entry?: TrustedAppConditionEntry;
+  }
+
   const getElement = (
     subject: string,
-    os: OperatingSystem = OperatingSystem.WINDOWS,
-    isRemoveDisabled: boolean = false,
-    entry: TrustedAppConditionEntry = baseEntry
+    {
+      os = OperatingSystem.WINDOWS,
+      isRemoveDisabled = false,
+      entry = baseEntry,
+    }: GetElementProps = {}
   ) => (
     <ConditionEntryInput
       os={os}
@@ -80,7 +88,7 @@ describe('Condition entry input', () => {
   });
 
   it('should not be able to call on remove for field input because disabled', () => {
-    const element = mount(getElement('testOnRemove', OperatingSystem.WINDOWS, true));
+    const element = mount(getElement('testOnRemove', { isRemoveDisabled: true }));
     expect(onRemoveMock).toHaveBeenCalledTimes(0);
     element.find('[data-test-subj="testOnRemove-remove"]').first().simulate('click');
     expect(onRemoveMock).toHaveBeenCalledTimes(0);
@@ -92,6 +100,21 @@ describe('Condition entry input', () => {
     element.find('[data-test-subj="testOnVisited-value"]').first().simulate('blur');
     expect(onVisitedMock).toHaveBeenCalledTimes(1);
     expect(onVisitedMock).toHaveBeenCalledWith(baseEntry);
+  });
+
+  it('should not call on visited for field change if value is empty', () => {
+    const emptyEntry = { ...baseEntry, value: '' };
+    const element = shallow(getElement('testOnVisited', { entry: emptyEntry }));
+    expect(onVisitedMock).toHaveBeenCalledTimes(0);
+    element.find('[data-test-subj="testOnVisited-field"]').first().simulate('change');
+    expect(onVisitedMock).toHaveBeenCalledTimes(0);
+  });
+
+  it('should call on visited for field change if value is not empty', () => {
+    const element = shallow(getElement('testOnVisited'));
+    expect(onVisitedMock).toHaveBeenCalledTimes(0);
+    element.find('[data-test-subj="testOnVisited-field"]').first().simulate('change');
+    expect(onVisitedMock).toHaveBeenCalledTimes(1);
   });
 
   it('should change value for field input', () => {
@@ -121,7 +144,7 @@ describe('Condition entry input', () => {
   });
 
   it('should be able to select two options when LINUX OS', () => {
-    const element = mount(getElement('testCheckSignatureOption', OperatingSystem.LINUX));
+    const element = mount(getElement('testCheckSignatureOption', { os: OperatingSystem.LINUX }));
     const superSelectProps = element
       .find('[data-test-subj="testCheckSignatureOption-field"]')
       .first()
@@ -130,7 +153,7 @@ describe('Condition entry input', () => {
   });
 
   it('should be able to select two options when MAC OS', () => {
-    const element = mount(getElement('testCheckSignatureOption', OperatingSystem.MAC));
+    const element = mount(getElement('testCheckSignatureOption', { os: OperatingSystem.MAC }));
     const superSelectProps = element
       .find('[data-test-subj="testCheckSignatureOption-field"]')
       .first()
@@ -144,11 +167,10 @@ describe('Condition entry input', () => {
     expect(inputField.contains('is'));
   });
 
-  it('should show operator dorpdown with two values when field is PATH', () => {
+  it('should show operator dropdown with two values when field is PATH', () => {
     const element = shallow(
-      getElement('testOperatorOptions', undefined, undefined, {
-        ...baseEntry,
-        field: ConditionEntryField.PATH,
+      getElement('testOperatorOptions', {
+        entry: { ...baseEntry, field: ConditionEntryField.PATH },
       })
     );
     const superSelectProps = element

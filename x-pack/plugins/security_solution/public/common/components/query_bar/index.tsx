@@ -33,6 +33,7 @@ export interface QueryBarComponentProps {
   savedQuery?: SavedQuery;
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
   displayStyle?: SearchBarProps['displayStyle'];
+  isDisabled?: boolean;
 }
 
 export const QueryBar = memo<QueryBarComponentProps>(
@@ -53,6 +54,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     onSavedQuery,
     dataTestSubj,
     displayStyle,
+    isDisabled,
   }) => {
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -123,13 +125,13 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showAutoRefreshOnly={false}
         showFilterBar={!hideSavedQuery}
         showDatePicker={false}
-        showQueryBar={true}
         showQueryInput={true}
         showSaveQuery={true}
         timeHistory={timeHistory}
         dataTestSubj={dataTestSubj}
         savedQuery={savedQuery}
         displayStyle={displayStyle}
+        isDisabled={isDisabled}
       />
     );
   }

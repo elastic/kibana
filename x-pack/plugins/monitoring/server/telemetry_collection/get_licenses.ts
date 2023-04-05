@@ -40,10 +40,10 @@ export async function fetchLicenses(
 ) {
   const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
-    size: maxBucketSize,
     ignore_unavailable: true,
     filter_path: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
     body: {
+      size: maxBucketSize,
       query: {
         bool: {
           filter: [

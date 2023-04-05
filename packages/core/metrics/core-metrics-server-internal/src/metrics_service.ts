@@ -10,6 +10,7 @@ import { firstValueFrom, ReplaySubject } from 'rxjs';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type {
   OpsMetrics,
   MetricsServiceSetup,
@@ -21,6 +22,7 @@ import { getEcsOpsMetricsLog } from './logging';
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
+  elasticsearchService: InternalElasticsearchServiceSetup;
 }
 
 /** @internal */
@@ -45,15 +47,22 @@ export class MetricsService
     this.opsMetricsLogger = coreContext.logger.get('metrics', 'ops');
   }
 
-  public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
+  public async setup({
+    http,
+    elasticsearchService,
+  }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
     const config = await firstValueFrom(
       this.coreContext.configService.atPath<OpsConfigType>(OPS_CONFIG_PATH)
     );
 
-    this.metricsCollector = new OpsMetricsCollector(http.server, {
-      logger: this.logger,
-      ...config.cGroupOverrides,
-    });
+    this.metricsCollector = new OpsMetricsCollector(
+      http.server,
+      elasticsearchService.agentStatsProvider,
+      {
+        logger: this.logger,
+        ...config.cGroupOverrides,
+      }
+    );
 
     await this.refreshMetrics();
 

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { HeaderPage } from '../header_page';
 import * as i18n from './translations';
-import { ErrorMessage } from '../use_push_to_service/callout/types';
+import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import { NavButtons } from './nav_buttons';
 
 interface OwnProps {

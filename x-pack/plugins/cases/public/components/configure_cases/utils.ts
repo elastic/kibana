@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { ConnectorTypeFields, ConnectorTypes } from '../../../common/api';
-import {
+import type { ConnectorTypeFields } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/api';
+import type {
   CaseField,
   ActionType,
   ThirdPartyField,
   CaseConnector,
   CaseConnectorMapping,
 } from '../../containers/configure/types';
-import { CaseActionConnector } from '../types';
+import type { CaseActionConnector } from '../types';
 
 export const setActionTypeToMapping = (
   caseField: CaseField,

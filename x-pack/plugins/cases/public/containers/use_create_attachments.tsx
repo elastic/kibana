@@ -9,9 +9,9 @@ import { useReducer, useCallback, useRef, useEffect } from 'react';
 
 import { createAttachments } from './api';
 import * as i18n from './translations';
-import { Case } from './types';
+import type { Case } from './types';
 import { useToasts } from '../common/lib/kibana';
-import { CaseAttachmentsWithoutOwner } from '../types';
+import type { CaseAttachmentsWithoutOwner } from '../types';
 
 interface NewCommentState {
   isLoading: boolean;

@@ -7,16 +7,24 @@
 
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useCapabilities } from '../../../components/use_capabilities';
 import { UserForm } from './user_form';
 
 export const CreateUserPage: FunctionComponent = () => {
   const history = useHistory();
+  const readOnly = !useCapabilities('users').save;
   const backToUsers = () => history.push('/');
+
+  useEffect(() => {
+    if (readOnly) {
+      backToUsers();
+    }
+  }, [readOnly]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>

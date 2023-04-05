@@ -10,7 +10,14 @@ import Path from 'path';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
+
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import { upgradePackageInstallVersion } from '../services/setup/upgrade_package_install_version';
 import {
@@ -42,13 +49,13 @@ const fakeRequest = {
 const PACKAGES = ['fleet_server', 'system', 'nginx', 'apache'];
 
 describe('Uprade package install version', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kbnServer: kbnTestServer.TestKibanaUtils;
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -60,7 +67,7 @@ describe('Uprade package install version', () => {
 
     esServer = await startES();
     const startKibana = async () => {
-      const root = kbnTestServer.createRootWithCorePlugins(
+      const root = createRootWithCorePlugins(
         {
           xpack: {
             fleet: {
@@ -154,7 +161,7 @@ describe('Uprade package install version', () => {
 
     beforeAll(async () => {
       soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-        excludedWrappers: ['security'],
+        excludedExtensions: [SECURITY_EXTENSION_ID],
       });
 
       const res = await soClient.find<Installation>({

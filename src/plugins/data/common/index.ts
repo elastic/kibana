@@ -21,7 +21,8 @@ export {
   getTime,
   isQuery,
   isTimeRange,
-  queryStateToExpressionAst,
+  textBasedQueryStateToAstWithValidation,
+  textBasedQueryStateToExpressionAst,
 } from './query';
 export type { QueryState } from './query';
 export * from './search';
@@ -33,7 +34,6 @@ export type {
   SavedQuery,
   SavedQueryAttributes,
   SavedQueryTimeFilter,
-  FilterValueFormatter,
   KbnFieldTypeOptions,
   Query,
 } from './types';

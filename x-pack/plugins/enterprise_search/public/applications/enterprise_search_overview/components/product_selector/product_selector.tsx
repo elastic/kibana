@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { Chat } from '@kbn/cloud-plugin/public';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -56,12 +56,14 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
   const { config } = useValues(KibanaLogic);
 
   // If Enterprise Search hasn't been set up yet, show all products. Otherwise, only show products the user has access to
-  const shouldShowAppSearchCard = !config.host || hasAppSearchAccess;
-  const shouldShowWorkplaceSearchCard = !config.host || hasWorkplaceSearchAccess;
+  const shouldShowAppSearchCard = (!config.host && config.canDeployEntSearch) || hasAppSearchAccess;
+  const shouldShowWorkplaceSearchCard =
+    (!config.host && config.canDeployEntSearch) || hasWorkplaceSearchAccess;
 
   // If Enterprise Search has been set up and the user does not have access to either product, show a message saying they
   // need to contact an administrator to get access to one of the products.
-  const shouldShowEnterpriseSearchCards = shouldShowAppSearchCard || shouldShowWorkplaceSearchCard;
+  const shouldShowEnterpriseSearchCards =
+    shouldShowAppSearchCard || shouldShowWorkplaceSearchCard || !config.canDeployEntSearch;
 
   const WORKPLACE_SEARCH_URL = isWorkplaceSearchAdmin
     ? WORKPLACE_SEARCH_PLUGIN.URL
@@ -71,7 +73,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     <>
       <AddContentEmptyPrompt
         title={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptTitle', {
-          defaultMessage: 'A new start for search',
+          defaultMessage: 'Add data and start searching',
         })}
         buttonLabel={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptButtonLabel', {
           defaultMessage: 'Create an Elasticsearch index',
@@ -145,7 +147,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     defaultMessage: 'Set up a language client',
                   }
                 ),
-                to: docLinks.start,
+                to: docLinks.languageClients,
               },
               {
                 label: i18n.translate(
@@ -297,8 +299,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
             />
           </EuiFlexItem>
         )}
+        {!config.host && config.canDeployEntSearch && (
+          <EuiFlexItem>
+            <SetupGuideCta />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-      {!config.host && <SetupGuideCta />}
     </>
   );
 

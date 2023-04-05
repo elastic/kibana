@@ -1,0 +1,33 @@
+---
+id: sharedUX/Components/Markdown
+slug: /shared-ux/components/markdown
+title: Markdown
+description: A wrapper around EuiMarkdownEditor and EuiMarkdownFormat.
+tags: ['shared-ux', 'component']
+date: 2022-10-03
+---
+
+## Description
+
+This markdown component uses the **EuiMarkdownEditor** and **EuiMarkdownFormat** managed by `@elastic/eui`. If `readOnly` is set to true, and `markdownContent` or `children` are set, then the component renders **EuiMarkdownFormat** text. Otherwise the component will render the **EuiMarkdownEditor**. The height of the component can be set, but in order the control the width of the component, you can place the `<Markdown />` component in another component.
+Markdown extends all the EuiMarkdownEditorProps except for the `editorId`, `uiPlugins`, and `MarkdownFormatProps`.
+
+## Component Properties 
+
+| Prop Name | Type | Description |
+|---|---|---|
+| `readOnly` | `boolean` | Needed to differentiate where markdown is used as a presentation of error messages. This was previous the MarkdownSimple component |
+| `openLinksInNewTab` | `boolean` | An optional property needed to replace the Markdown component from kibana-react |
+|`markdownContent` | `string` | This prop can be set along with `readOnly` to display error.message etc text to the kibana user. This property is optional. |
+| `ariaLabelContent` | `string` | An optional property to be set for the markdown component. It will be `markdown component` if not set explicitly. |
+| `height` | `number` or `'full'` | The height of the markdown component can be set to a number. By default, height is set to `'full'`. To set the width, include a container for the markdown component to be within with set width. |
+| `placeholder` | `string` or `undefined` | This prop can be set to a string to display the placeholder content of the markdown component. |
+| `defaultValue` | `string` | The default value for the markdown editor. If not set it will default to an empty string. |
+
+## API
+
+| Export | Description |
+|---|---|
+| `Markdown` | This component provides a markdown editor or text to be supported with Markdown formatting (must have static content set for the `markdownContent`) prop and be `readOnly` |
+| `MarkdownProps` | Exported by `@kbn/shared-ux-markdown-types` |
+

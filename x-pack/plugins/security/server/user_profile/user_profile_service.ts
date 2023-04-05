@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type {
-  SecurityActivateUserProfileRequest,
-  SecurityUserProfileWithMetadata,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityActivateUserProfileRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type {
+  SecurityLicense,
   UserProfile,
   UserProfileData,
   UserProfileLabels,
@@ -23,8 +21,7 @@ import type {
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { CheckUserProfilesPrivilegesResponse } from '../authorization/types';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import type { Session } from '../session_management';
-import { getPrintableSessionId } from '../session_management';
+import { getPrintableSessionId, type Session } from '../session_management';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
@@ -91,6 +88,7 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
 
 export interface UserProfileServiceSetupParams {
   authz: AuthorizationServiceSetupInternal;
+  license: SecurityLicense;
 }
 
 export interface UserProfileServiceStartParams {
@@ -153,7 +151,19 @@ export interface UserProfileSuggestParams {
    * Query string used to match name-related fields in user profiles. The following fields are treated as
    * name-related: username, full_name and email.
    */
-  name: string;
+  name?: string;
+
+  /**
+   * Extra search criteria to improve relevance of the suggestion result. A profile matching the
+   * specified hint is ranked higher in the response. But not-matching the hint does not exclude a
+   * profile from the response as long as it matches the `name` field query.
+   */
+  hint?: {
+    /**
+     * A list of Profile UIDs to match against.
+     */
+    uids: string[];
+  };
 
   /**
    * Desired number of suggestion to return. The default value is 10.
@@ -204,9 +214,7 @@ function parseUserProfileWithSecurity<D extends UserProfileData>(
     user: {
       ...userProfile.user,
       roles: rawUserProfile.user.roles,
-      // @ts-expect-error @elastic/elasticsearch SecurityUserProfileUser.realm_name: string
       realm_name: rawUserProfile.user.realm_name,
-      // @ts-expect-error @elastic/elasticsearch SecurityUserProfileUser.realm_domain?: string
       realm_domain: rawUserProfile.user.realm_domain,
     },
   };
@@ -214,10 +222,12 @@ function parseUserProfileWithSecurity<D extends UserProfileData>(
 
 export class UserProfileService {
   private authz?: AuthorizationServiceSetupInternal;
+  private license?: SecurityLicense;
   constructor(private readonly logger: Logger) {}
 
-  setup({ authz }: UserProfileServiceSetupParams) {
+  setup({ authz, license }: UserProfileServiceSetupParams) {
     this.authz = authz;
+    this.license = license;
   }
 
   start({ clusterClient, session }: UserProfileServiceStartParams) {
@@ -302,14 +312,14 @@ export class UserProfileService {
       throw error;
     }
 
-    if (!userSession) {
+    if (userSession.error) {
       return null;
     }
 
-    if (!userSession.userProfileId) {
+    if (!userSession.value.userProfileId) {
       this.logger.debug(
         `User profile missing from the current session [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}].`
       );
       return null;
@@ -317,15 +327,14 @@ export class UserProfileService {
 
     let body;
     try {
-      // @ts-expect-error Invalid response format.
-      body = (await clusterClient.asInternalUser.security.getUserProfile({
-        uid: userSession.userProfileId,
-        data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
-      })) as { profiles: SecurityUserProfileWithMetadata[] };
+      body = await clusterClient.asInternalUser.security.getUserProfile({
+        uid: userSession.value.userProfileId,
+        data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
+      });
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}]: ${getDetailedErrorMessage(error)}`
       );
       throw error;
@@ -334,7 +343,7 @@ export class UserProfileService {
     if (body.profiles.length === 0) {
       this.logger.error(
         `The user profile for the current user [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}] is not found.`
       );
       throw new Error(`User profile is not found.`);
@@ -355,11 +364,10 @@ export class UserProfileService {
     }
 
     try {
-      // @ts-expect-error Invalid response format.
-      const body = (await clusterClient.asInternalUser.security.getUserProfile({
+      const body = await clusterClient.asInternalUser.security.getUserProfile({
         uid: [...uids].join(','),
-        data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
-      })) as { profiles: SecurityUserProfileWithMetadata[] };
+        data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
+      });
 
       return body.profiles.map((rawUserProfile) => parseUserProfile<D>(rawUserProfile));
     } catch (error) {
@@ -396,7 +404,11 @@ export class UserProfileService {
     clusterClient: IClusterClient,
     params: UserProfileSuggestParams
   ): Promise<Array<UserProfile<D>>> {
-    const { name, size = DEFAULT_SUGGESTIONS_COUNT, dataPath, requiredPrivileges } = params;
+    if (!this.license?.getFeatures().allowUserProfileCollaboration) {
+      throw Error("Current license doesn't support user profile collaboration APIs.");
+    }
+
+    const { name, hint, size = DEFAULT_SUGGESTIONS_COUNT, dataPath, requiredPrivileges } = params;
     if (size > MAX_SUGGESTIONS_COUNT) {
       throw Error(
         `Can return up to ${MAX_SUGGESTIONS_COUNT} suggestions, but ${size} suggestions were requested.`
@@ -416,9 +428,10 @@ export class UserProfileService {
       const body = await clusterClient.asInternalUser.security.suggestUserProfiles({
         name,
         size: numberOfResultsToRequest,
+        hint,
         // If fetching data turns out to be a performance bottleneck, we can try to fetch data
         // only for the profiles that pass privileges check as a separate bulkGet request.
-        data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
+        data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });
 
       const filteredProfiles =
@@ -487,14 +500,36 @@ export class UserProfileService {
         this.logger.error(`Privileges check API returned unknown profile UIDs: ${unknownUids}.`);
       }
 
-      // Log profile UIDs for which an error was encountered.
-      if (response.errorUids.length > 0) {
-        this.logger.error(
-          `Privileges check API failed for the following user profiles: ${response.errorUids}.`
-        );
+      // Log profile UIDs and reason for which an error was encountered.
+      if (response.errors?.count) {
+        const uids = Object.keys(response.errors.details);
+
+        for (const uid of uids) {
+          this.logger.error(
+            `Privileges check API failed for UID ${uid} because ${response.errors.details[uid].reason}.`
+          );
+        }
       }
     }
 
     return filteredProfiles;
   }
+}
+
+/**
+ * Returns string of comma separated values prefixed with `prefix`.
+ * @param str String of comma separated values
+ * @param prefix Prefix to use prepend to each value
+ */
+export function prefixCommaSeparatedValues(str: string, prefix: string) {
+  return str
+    .split(',')
+    .reduce<string[]>((accumulator, value) => {
+      const trimmedValue = value.trim();
+      if (trimmedValue) {
+        accumulator.push(`${prefix}.${trimmedValue}`);
+      }
+      return accumulator;
+    }, [])
+    .join(',');
 }

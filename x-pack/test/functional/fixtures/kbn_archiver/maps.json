@@ -991,6 +991,28 @@
 }
 
 {
+  "id": "68f85360-3913-11ed-aa60-654006132508",
+  "type": "map",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2022-09-20T18:39:40.421Z",
+  "version": "WzM0OSwxXQ==",
+  "attributes": {
+    "title": "adhoc data view",
+    "description": "",
+    "layerListJSON": "[{\"id\":\"e5b830e4-d939-4b82-b3df-ccb4c3fce478\",\"sourceDescriptor\":{\"geoField\":\"geo.coordinates\",\"id\":\"5883a356-bef3-4e87-89f4-6dfd95a5794d\",\"indexPatternId\":\"1a9589c7-c919-4d35-bd4c-fbe1bcf8dfe4\",\"label\":\"logstash-*\",\"scalingType\":\"MVT\",\"tooltipProperties\":[],\"type\":\"ES_SEARCH\"},\"type\":\"MVT_VECTOR\",\"visible\":true,\"style\":{},\"label\":\"adhocDataView\"}]",
+    "mapStateJSON": "{\"adHocDataViews\":[{\"id\":\"1a9589c7-c919-4d35-bd4c-fbe1bcf8dfe4\",\"title\":\"logstash-*\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"fieldFormats\":{},\"runtimeFieldMap\":{},\"fieldAttrs\":{},\"allowNoIndex\":false,\"name\":\"logstash adhoc data view\"}],\"zoom\":2.36,\"center\":{\"lon\":-116.75537,\"lat\":55.05932},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-22T00:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[{\"meta\":{\"index\":\"1a9589c7-c919-4d35-bd4c-fbe1bcf8dfe4\",\"params\":{\"lt\":1000,\"gte\":0},\"field\":\"bytes\",\"alias\":null,\"negate\":false,\"disabled\":false,\"type\":\"range\",\"key\":\"bytes\",\"value\":{\"lt\":1000,\"gte\":0}},\"query\":{\"range\":{\"bytes\":{\"lt\":1000,\"gte\":0}}},\"$state\":{\"store\":\"appState\"}}],\"settings\":{\"autoFitToDataBounds\":false,\"backgroundColor\":\"#ffffff\",\"customIcons\":[],\"disableInteractive\":false,\"disableTooltipControl\":false,\"hideToolbarOverlay\":false,\"hideLayerControl\":false,\"hideViewControl\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"keydownScrollZoom\":false,\"maxZoom\":24,\"minZoom\":0,\"showScaleControl\":false,\"showSpatialFilters\":true,\"showTimesliderToggleButton\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+    "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
+  },
+  "references": [],
+  "migrationVersion": {
+    "map": "8.4.0"
+  },
+  "coreMigrationVersion": "8.5.0"
+}
+
+{
   "attributes": {
     "description": "",
     "layerListJSON": "[{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"indexPatternRefName\":\"layer_1_source_index_pattern\",\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Blues\",\"field\":{\"label\":\"hour_of_day\",\"name\":\"hour_of_day\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"minSize\":4,\"maxSize\":24,\"field\":{\"label\":\"bytes\",\"name\":\"bytes\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"airfield\"}}}},\"type\":\"VECTOR\"}]",

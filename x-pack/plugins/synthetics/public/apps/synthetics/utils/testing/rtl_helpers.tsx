@@ -13,12 +13,14 @@ import {
   MatcherFunction,
   RenderOptions,
 } from '@testing-library/react';
-import { Router, Route } from 'react-router-dom';
-import { merge } from 'lodash';
+import { Router } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
+import { merge, mergeWith } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
@@ -95,6 +97,7 @@ const createMockStore = () => {
 
 const mockAppUrls: Record<string, string> = {
   uptime: '/app/uptime',
+  synthetics: '/app/synthetics',
   observability: '/app/observability',
   '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
 };
@@ -138,6 +141,10 @@ export const mockCore: () => Partial<CoreStart> = () => {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
       },
+    },
+    exploratoryView: {
+      createExploratoryViewUrl: jest.fn(),
+      getAppDataView: jest.fn(),
       ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
     },
   };
@@ -161,6 +168,7 @@ export function MockKibanaProvider<ExtraCore>({
         <SyntheticsStartupPluginsContextProvider
           data={(coreOptions as any).data}
           observability={(coreOptions as any).observability}
+          exploratoryView={(coreOptions as any).exploratoryView}
         >
           <EuiThemeProvider darkMode={false}>
             <I18nProvider>{children}</I18nProvider>
@@ -224,7 +232,15 @@ export function WrappedHelper<ExtraCore>({
   path,
   history = createMemoryHistory(),
 }: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
-  const testState: AppState = merge({}, mockState, state);
+  const testState: AppState = mergeWith({}, mockState, state, (objValue, srcValue) => {
+    if (Array.isArray(objValue)) {
+      return srcValue;
+    }
+  });
+
+  if (url) {
+    history = getHistoryFromUrl(url);
+  }
 
   return (
     <MountWithReduxProvider state={testState} useRealStore={useRealStore}>
@@ -248,7 +264,7 @@ export function render<ExtraCore>(
     path,
     useRealStore,
   }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
-) {
+): any {
   if (url) {
     history = getHistoryFromUrl(url);
   }
@@ -361,3 +377,26 @@ const wrappedInClass = (element: HTMLElement | Element, classWrapper: string): b
 
 export const forMobileOnly = finderWithClassWrapper('hideForDesktop');
 export const forDesktopOnly = finderWithClassWrapper('hideForMobile');
+
+export const makeUptimePermissionsCore = (
+  permissions: Partial<{
+    'alerting:save': boolean;
+    configureSettings: boolean;
+    save: boolean;
+    show: boolean;
+  }>
+) => {
+  return {
+    application: {
+      capabilities: {
+        uptime: {
+          'alerting:save': true,
+          configureSettings: true,
+          save: true,
+          show: true,
+          ...permissions,
+        },
+      },
+    },
+  };
+};

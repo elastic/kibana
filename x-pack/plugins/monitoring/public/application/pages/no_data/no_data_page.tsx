@@ -9,7 +9,6 @@ import React, { useCallback, useContext, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoData } from '../../../components/no_data';
 import { PageTemplate } from '../page_template';

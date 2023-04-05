@@ -10,8 +10,9 @@ import React from 'react';
 import { TestProviders } from '../../mock';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
+import type { ModalInspectProps } from './modal';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
-import type { InputsModelId } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -36,9 +37,9 @@ const response =
 
 describe('Modal Inspect', () => {
   const closeModal = jest.fn();
-  const defaultProps = {
+  const defaultProps: ModalInspectProps = {
     closeModal,
-    inputId: 'timeline' as InputsModelId,
+    inputId: InputsModelId.timeline,
     request,
     response,
     title: 'My title',
@@ -52,7 +53,7 @@ describe('Modal Inspect', () => {
         </TestProviders>
       );
 
-      wrapper.find('.euiTab').first().simulate('click');
+      wrapper.find('button.euiTab').first().simulate('click');
       wrapper.update();
 
       expect(
@@ -85,10 +86,10 @@ describe('Modal Inspect', () => {
         </TestProviders>
       );
 
-      wrapper.find('.euiTab').at(2).simulate('click');
+      wrapper.find('button.euiTab').at(2).simulate('click');
       wrapper.update();
 
-      expect(JSON.parse(wrapper.find('EuiCodeBlock').first().text())).toEqual({
+      expect(JSON.parse(wrapper.find('EuiCodeBlock').text())).toEqual({
         took: 880,
         timed_out: false,
         _shards: {
@@ -146,10 +147,10 @@ describe('Modal Inspect', () => {
         </TestProviders>
       );
 
-      wrapper.find('.euiTab').at(1).simulate('click');
+      wrapper.find('button.euiTab').at(1).simulate('click');
       wrapper.update();
 
-      expect(JSON.parse(wrapper.find('EuiCodeBlock').first().text())).toEqual({
+      expect(JSON.parse(wrapper.find('EuiCodeBlock').text())).toEqual({
         aggregations: {
           hosts: { cardinality: { field: 'host.name' } },
           hosts_histogram: {

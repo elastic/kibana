@@ -16,6 +16,7 @@ import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../type
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
 import { SplitTooltip } from './split_tooltip';
+import { convertToLens } from '../convert_to_lens';
 
 export const getHeatmapVisTypeDefinition = ({
   showElasticChartsOptions = false,
@@ -100,7 +101,6 @@ export const getHeatmapVisTypeDefinition = ({
         min: 0,
         max: 1,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',
@@ -117,7 +117,6 @@ export const getHeatmapVisTypeDefinition = ({
         min: 0,
         max: 1,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',
@@ -141,7 +140,6 @@ export const getHeatmapVisTypeDefinition = ({
         min: 0,
         max: 1,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',
@@ -154,4 +152,10 @@ export const getHeatmapVisTypeDefinition = ({
     ],
   },
   requiresSearch: true,
+  navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+    };
+  },
 });

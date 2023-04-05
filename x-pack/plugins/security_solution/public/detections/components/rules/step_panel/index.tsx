@@ -14,7 +14,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 interface StepPanelProps {
   children: React.ReactNode;
   loading: boolean;
-  title: string;
+  title?: string;
 }
 
 const MyPanel = styled(EuiPanel)`
@@ -25,8 +25,15 @@ MyPanel.displayName = 'MyPanel';
 
 const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title }) => (
   <MyPanel hasBorder>
-    {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
-    <HeaderSection title={title} />
+    {loading && (
+      <EuiProgress
+        size="xs"
+        color="accent"
+        position="absolute"
+        data-test-subj="stepPanelProgress"
+      />
+    )}
+    {title && <HeaderSection title={title} />}
     {children}
   </MyPanel>
 );

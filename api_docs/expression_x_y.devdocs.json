@@ -18,6 +18,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -32,10 +33,27 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-public.LayerTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "LayerTypes",
+        "description": [],
+        "signature": [
+          "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -56,6 +74,7 @@
       ],
       "path": "src/plugins/chart_expressions/expression_xy/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -73,7 +92,19 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.AnnotationLayerArgs.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "expressionXY",
             "id": "def-common.AnnotationLayerArgs.annotations",
@@ -92,7 +123,8 @@
               "[]"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -105,7 +137,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -119,6 +152,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -128,7 +162,8 @@
             "label": "yLeft",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -138,7 +173,8 @@
             "label": "yRight",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -152,6 +188,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -164,7 +201,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -177,7 +215,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -190,7 +229,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -204,7 +244,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -217,7 +258,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -230,7 +272,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -243,7 +286,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -256,7 +300,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -269,7 +314,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -282,7 +328,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -295,7 +342,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -308,7 +356,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -328,7 +377,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -342,6 +392,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -351,10 +402,11 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"custom\" | \"full\" | \"dataBounds\""
+              "\"full\" | \"custom\" | \"dataBounds\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -367,7 +419,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -380,7 +433,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -393,88 +447,22 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressionXY",
-        "id": "def-common.CollectiveConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "CollectiveConfig",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "expressionXY",
-            "scope": "common",
-            "docId": "kibExpressionXYPluginApi",
-            "section": "def-common.CollectiveConfig",
-            "text": "CollectiveConfig"
-          },
-          " extends Omit<",
-          {
-            "pluginId": "eventAnnotation",
-            "scope": "common",
-            "docId": "kibEventAnnotationPluginApi",
-            "section": "def-common.ManualPointEventAnnotationArgs",
-            "text": "ManualPointEventAnnotationArgs"
-          },
-          ", \"icon\">"
-        ],
-        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressionXY",
-            "id": "def-common.CollectiveConfig.roundedTimestamp",
-            "type": "number",
-            "tags": [],
-            "label": "roundedTimestamp",
-            "description": [],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
-            "id": "def-common.CollectiveConfig.position",
-            "type": "string",
+            "id": "def-common.AxisExtentConfig.niceValues",
+            "type": "CompoundType",
             "tags": [],
-            "label": "position",
+            "label": "niceValues",
             "description": [],
             "signature": [
-              "\"bottom\""
+              "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressionXY",
-            "id": "def-common.CollectiveConfig.icon",
-            "type": "string",
-            "tags": [],
-            "label": "icon",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressionXY",
-            "id": "def-common.CollectiveConfig.customTooltipDetails",
-            "type": "Function",
-            "tags": [],
-            "label": "customTooltipDetails",
-            "description": [],
-            "signature": [
-              "AnnotationTooltipFormatter",
-              " | undefined"
-            ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -488,6 +476,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -497,7 +486,8 @@
             "label": "forAccessor",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -510,7 +500,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -523,7 +514,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -537,6 +529,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -557,7 +550,8 @@
               ")[]"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -567,10 +561,11 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"bar\" | \"line\" | \"area\""
+              "\"area\" | \"line\" | \"bar\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -591,7 +586,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -604,7 +600,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -625,7 +622,8 @@
               ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -646,7 +644,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -659,7 +658,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -672,7 +672,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -685,7 +686,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -698,7 +700,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -711,7 +714,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -721,10 +725,11 @@
             "label": "xScaleType",
             "description": [],
             "signature": [
-              "\"linear\" | \"time\" | \"ordinal\""
+              "\"time\" | \"linear\" | \"ordinal\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -734,7 +739,8 @@
             "label": "isHistogram",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -744,7 +750,8 @@
             "label": "isPercentage",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -754,7 +761,8 @@
             "label": "isStacked",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -764,7 +772,8 @@
             "label": "isHorizontal",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -774,11 +783,18 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<{ [key: string]: unknown; }>"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -798,7 +814,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -818,7 +835,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -832,6 +850,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -843,7 +862,8 @@
               "\nFlag whether the legend should be shown. If there is just a single series, it will be hidden"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -855,10 +875,11 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -873,7 +894,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -888,7 +910,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -900,10 +923,11 @@
               "\nHorizontal Alignment of the legend when it is set inside chart"
             ],
             "signature": [
-              "\"left\" | \"right\" | undefined"
+              "\"right\" | \"left\" | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -918,7 +942,8 @@
               "\"top\" | \"bottom\" | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -933,7 +958,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -948,7 +974,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -963,7 +990,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -985,7 +1013,108 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.MergedAnnotation",
+        "type": "Interface",
+        "tags": [],
+        "label": "MergedAnnotation",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.MergedAnnotation",
+            "text": "MergedAnnotation"
+          },
+          " extends Omit<",
+          {
+            "pluginId": "eventAnnotation",
+            "scope": "common",
+            "docId": "kibEventAnnotationPluginApi",
+            "section": "def-common.ManualPointEventAnnotationArgs",
+            "text": "ManualPointEventAnnotationArgs"
+          },
+          ", \"icon\">"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.timebucket",
+            "type": "number",
+            "tags": [],
+            "label": "timebucket",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.position",
+            "type": "string",
+            "tags": [],
+            "label": "position",
+            "description": [],
+            "signature": [
+              "\"bottom\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.customTooltip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "customTooltip",
+            "description": [],
+            "signature": [
+              "React.ComponentType<{ header?: string | undefined; details?: string | undefined; datum: ",
+              "LineAnnotationDatum",
+              "<any> | ",
+              "RectAnnotationDatum",
+              "; }> | null"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.MergedAnnotation.isGrouped",
+            "type": "boolean",
+            "tags": [],
+            "label": "isGrouped",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1016,6 +1145,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -1035,7 +1165,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1048,7 +1179,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1068,7 +1200,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1088,7 +1221,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1108,7 +1242,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1121,7 +1256,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1135,7 +1271,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1149,6 +1286,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -1161,7 +1299,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1174,7 +1313,8 @@
               "string[]"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1187,7 +1327,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1207,7 +1348,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1227,7 +1369,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1258,6 +1401,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -1277,7 +1421,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1308,6 +1453,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -1327,7 +1473,8 @@
               " & { type: \"legendConfig\"; }"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1347,7 +1494,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1360,7 +1508,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1373,7 +1522,8 @@
               "\"hide\" | \"show\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1387,21 +1537,8 @@
               "[]"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressionXY",
-            "id": "def-common.XYArgs.annotationLayers",
-            "type": "Array",
-            "tags": [],
-            "label": "annotationLayers",
-            "description": [],
-            "signature": [
-              "AnnotationLayerConfigResult",
-              "[]"
-            ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1421,7 +1558,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1434,7 +1572,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1447,7 +1586,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1460,7 +1600,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1473,7 +1614,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1493,7 +1635,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1513,7 +1656,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1526,7 +1670,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1539,7 +1684,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1552,7 +1698,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1573,7 +1720,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1594,7 +1742,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1607,7 +1756,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1620,7 +1770,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1630,7 +1781,8 @@
             "label": "showTooltip",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1644,6 +1796,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -1656,7 +1809,139 @@
               "XYProps"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.syncTooltips",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncTooltips",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.syncCursor",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncCursor",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.syncColors",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncColors",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.canNavigateToLens",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canNavigateToLens",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.overrides",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; title?: string | undefined; style?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<",
+              "RecursivePartial",
+              "<Omit<",
+              "AxisStyle",
+              ", \"gridLine\">> | undefined>; gridLine?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<Partial<",
+              "GridLineStyle",
+              "> | undefined>; ticks?: number | undefined; domain?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<",
+              "YDomainRange",
+              " | undefined>; position?: ",
+              "Position",
+              " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { tooltip?: ",
+              "TooltipSettings",
+              " | undefined; debug?: boolean | undefined; theme?: ",
+              "MakeOverridesSerializable",
+              "<",
+              "RecursivePartial",
+              "<",
+              "Theme",
+              "> | ",
+              "RecursivePartial",
+              "<",
+              "Theme",
+              ">[] | undefined>; showLegend?: boolean | undefined; legendPosition?: ",
+              "Position",
+              " | ",
+              "LegendPositionConfig",
+              " | undefined; rotation?: ",
+              "Rotation",
+              " | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+              "Rendering",
+              " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
+              "MakeOverridesSerializable",
+              "<",
+              "ExternalPointerEventsSettings",
+              " | undefined>; pointBuffer?: ",
+              "MarkBuffer",
+              " | undefined; resizeDebounce?: number | undefined; pointerUpdateTrigger?: ",
+              "PointerUpdateTrigger",
+              " | undefined; brushAxis?: ",
+              "BrushAxis",
+              " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabel?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
+              "LegendStrategy",
+              " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; xDomain?: ",
+              "MakeOverridesSerializable",
+              "<",
+              "CustomXDomain",
+              " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>>) | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1670,6 +1955,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -1682,7 +1968,8 @@
               "\"render\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1695,7 +1982,8 @@
               "\"xyVis\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1714,7 +2002,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1745,6 +2034,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionXY",
@@ -1764,7 +2054,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1777,7 +2068,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionXY",
@@ -1797,7 +2089,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1807,16 +2100,134 @@
     "misc": [
       {
         "parentPluginId": "expressionXY",
+        "id": "def-common.AllowedXYOverrides",
+        "type": "Type",
+        "tags": [],
+        "label": "AllowedXYOverrides",
+        "description": [],
+        "signature": [
+          "{ axisX?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; title?: string | undefined; style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; ticks?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; title?: string | undefined; style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; ticks?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; title?: string | undefined; style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; ticks?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-common.AvailableReferenceLineIcon",
         "type": "Type",
         "tags": [],
         "label": "AvailableReferenceLineIcon",
         "description": [],
         "signature": [
-          "\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\" | \"empty\""
+          "\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1838,6 +2249,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1848,10 +2260,11 @@
         "label": "AxisExtentMode",
         "description": [],
         "signature": [
-          "\"custom\" | \"full\" | \"dataBounds\""
+          "\"full\" | \"custom\" | \"dataBounds\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1866,6 +2279,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1882,6 +2296,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1904,6 +2319,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1932,6 +2348,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1968,6 +2385,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1990,6 +2408,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2012,6 +2431,69 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.DataDecorationConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "DataDecorationConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"dataDecorationConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.DataDecorationConfig",
+            "text": "DataDecorationConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.DataDecorationConfigResult",
+            "text": "DataDecorationConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2033,6 +2515,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2052,7 +2535,13 @@
             "text": "DataLayerArgs"
           },
           ", \"palette\"> & { type: \"dataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",
@@ -2066,6 +2555,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2085,7 +2575,13 @@
             "text": "DataLayerArgs"
           },
           ", \"palette\"> & { type: \"dataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",
@@ -2098,6 +2594,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2112,6 +2609,135 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.EventAnnotationResultFn",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationResultFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"event_annotations_result\", null, ",
+          "EventAnnotationResultArgs",
+          ", ",
+          "EventAnnotationResultResult",
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.ExtendedAnnotationLayerConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ExtendedAnnotationLayerConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.AnnotationLayerArgs",
+            "text": "AnnotationLayerArgs"
+          },
+          " & { layerId: string; } & { type: \"extendedAnnotationLayer\"; layerType: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.ExtendedAnnotationLayerFn",
+        "type": "Type",
+        "tags": [],
+        "label": "ExtendedAnnotationLayerFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"extendedAnnotationLayer\", null, ",
+          "ExtendedAnnotationLayerArgs",
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ExtendedAnnotationLayerConfigResult",
+            "text": "ExtendedAnnotationLayerConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2125,7 +2751,13 @@
           "Omit<",
           "ExtendedDataLayerArgs",
           ", \"palette\"> & { type: \"extendedDataLayer\"; layerType: \"data\"; palette: ",
-          "PaletteOutput",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
           "<{ [key: string]: unknown; }>; table: ",
           {
             "pluginId": "expressions",
@@ -2138,6 +2770,71 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.ExtendedDataLayerFn",
+        "type": "Type",
+        "tags": [],
+        "label": "ExtendedDataLayerFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"extendedDataLayer\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          "ExtendedDataLayerArgs",
+          ", Promise<",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ExtendedDataLayerConfigResult",
+            "text": "ExtendedDataLayerConfigResult"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2148,10 +2845,11 @@
         "label": "FillStyle",
         "description": [],
         "signature": [
-          "\"above\" | \"below\" | \"none\""
+          "\"none\" | \"above\" | \"below\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2162,10 +2860,11 @@
         "label": "FittingFunction",
         "description": [],
         "signature": [
-          "\"None\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Average\""
+          "\"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2176,10 +2875,75 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"above\" | \"below\" | \"auto\" | \"left\" | \"right\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.LayeredXyVisFn",
+        "type": "Type",
+        "tags": [],
+        "label": "LayeredXyVisFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"layeredXyVis\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          "LayeredXYArgs",
+          ", Promise<",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.XYRender",
+            "text": "XYRender"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2190,10 +2954,73 @@
         "label": "LayerType",
         "description": [],
         "signature": [
-          "\"data\" | \"referenceLine\" | \"annotations\""
+          "\"data\" | \"annotations\" | \"referenceLine\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.LegendConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "LegendConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"legendConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.LegendConfig",
+            "text": "LegendConfig"
+          },
+          ", Promise<",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.LegendConfigResult",
+            "text": "LegendConfigResult"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2215,6 +3042,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2229,6 +3057,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2243,6 +3072,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2257,6 +3087,69 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.ReferenceLineDecorationConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "ReferenceLineDecorationConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"referenceLineDecorationConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ReferenceLineDecorationConfig",
+            "text": "ReferenceLineDecorationConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ReferenceLineDecorationConfigResult",
+            "text": "ReferenceLineDecorationConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2278,6 +3171,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2308,6 +3202,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2337,6 +3232,77 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.ReferenceLineLayerFn",
+        "type": "Type",
+        "tags": [],
+        "label": "ReferenceLineLayerFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"referenceLineLayer\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ReferenceLineLayerArgs",
+            "text": "ReferenceLineLayerArgs"
+          },
+          ", Promise<",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ReferenceLineLayerConfigResult",
+            "text": "ReferenceLineLayerConfigResult"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2347,10 +3313,11 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"bar\" | \"line\" | \"area\""
+          "\"area\" | \"line\" | \"bar\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2365,6 +3332,69 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.XAxisConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "XAxisConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"xAxisConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.AxisConfig",
+            "text": "AxisConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.XAxisConfigResult",
+            "text": "XAxisConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2386,6 +3416,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2396,10 +3427,11 @@
         "label": "XScaleType",
         "description": [],
         "signature": [
-          "\"linear\" | \"time\" | \"ordinal\""
+          "\"time\" | \"linear\" | \"ordinal\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2414,6 +3446,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2440,12 +3473,11 @@
             "docId": "kibExpressionXYPluginApi",
             "section": "def-common.ReferenceLineLayerConfigResult",
             "text": "ReferenceLineLayerConfigResult"
-          },
-          " | ",
-          "ExtendedAnnotationLayerConfigResult"
+          }
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2464,18 +3496,81 @@
             "text": "DataLayerArgs"
           },
           " | ",
+          "ReferenceLineArgs",
+          " | ",
           {
             "pluginId": "expressionXY",
             "scope": "common",
             "docId": "kibExpressionXYPluginApi",
             "section": "def-common.AnnotationLayerArgs",
             "text": "AnnotationLayerArgs"
-          },
-          " | ",
-          "ReferenceLineArgs"
+          }
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.YAxisConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "YAxisConfigFn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"yAxisConfig\", null, ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.YAxisConfig",
+            "text": "YAxisConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.YAxisConfigResult",
+            "text": "YAxisConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2497,6 +3592,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2507,13 +3603,30 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"linear\" | \"log\" | \"time\" | \"sqrt\""
+          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.LayerTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "LayerTypes",
+        "description": [],
+        "signature": [
+          "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

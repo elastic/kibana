@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CasesMetricsResponse } from '../../../common/api';
+import type { CasesMetricsResponse } from '../../../common/api';
 import { AggregationHandler } from './aggregation_handler';
-import { AggregationBuilder, AllCasesBaseHandlerCommonOptions } from './types';
+import type { AggregationBuilder, AllCasesBaseHandlerCommonOptions } from './types';
 
 export abstract class AllCasesAggregationHandler extends AggregationHandler<CasesMetricsResponse> {
   protected readonly from?: string;

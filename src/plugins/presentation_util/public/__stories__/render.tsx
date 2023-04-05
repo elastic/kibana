@@ -16,6 +16,7 @@ import {
 export const defaultHandlers: IInterpreterRenderHandlers = {
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isSyncCursorEnabled: () => true,
   isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
   getExecutionContext: () => undefined,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -19,15 +19,17 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
-import { ITEMS_PER_PAGE, LastUpdatedAt, SEVERITY_COLOR } from '../utils';
+import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
 import type { UserAlertsItem } from './use_user_alerts_items';
 import { useUserAlertsItems } from './use_user_alerts_items';
 
@@ -42,7 +44,30 @@ type GetTableColumns = (
 const DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID = 'vulnerableUsersBySeverityQuery';
 
 export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableProps) => {
-  const { openUserInTimeline } = useNavigateToTimeline();
+  const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
+
+  const openUserInAlerts = useCallback(
+    ({ userName, severity }: { userName: string; severity?: string }) =>
+      openAlertsPageWithFilters([
+        {
+          title: i18n.OPEN_IN_ALERTS_TITLE_USERNAME,
+          selectedOptions: [userName],
+          fieldName: 'user.name',
+        },
+
+        ...(severity
+          ? [
+              {
+                title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
+                selectedOptions: [severity],
+                fieldName: ALERT_SEVERITY,
+              },
+            ]
+          : []),
+      ]),
+    [openAlertsPageWithFilters]
+  );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID
   );
@@ -52,7 +77,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
     signalIndexName,
   });
 
-  const columns = useMemo(() => getTableColumns(openUserInTimeline), [openUserInTimeline]);
+  const columns = useMemo(() => getTableColumns(openUserInAlerts), [openUserInAlerts]);
 
   return (
     <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
@@ -117,7 +142,11 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { userName }) => (
-      <EuiLink disabled={totalAlerts === 0} onClick={() => handleClick({ userName })}>
+      <EuiLink
+        data-test-subj="userSeverityAlertsTable-totalAlertsLink"
+        disabled={totalAlerts === 0}
+        onClick={() => handleClick({ userName })}
+      >
         <FormattedCount count={totalAlerts} />
       </EuiLink>
     ),
@@ -128,6 +157,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         <EuiLink
+          data-test-subj="userSeverityAlertsTable-criticalLink"
           disabled={count === 0}
           onClick={() => handleClick({ userName, severity: 'critical' })}
         >

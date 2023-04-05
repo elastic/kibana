@@ -34,15 +34,18 @@ export const SummaryCountField: FC = () => {
   const [validation, setValidation] = useState(jobValidator.summaryCountField);
   useEffect(() => {
     setValidation(jobValidator.summaryCountField);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   useEffect(() => {
     jobCreator.summaryCountFieldName = summaryCountFieldName;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [summaryCountFieldName]);
 
   useEffect(() => {
     setSummaryCountFieldName(jobCreator.summaryCountFieldName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (

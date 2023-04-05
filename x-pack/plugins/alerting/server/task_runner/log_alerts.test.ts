@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+jest.mock('uuid', () => {
+  let counter = 1;
+  return {
+    v4: () => `uuid-module-v4-called-${counter++}`,
+  };
+});
+
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Alert } from '../alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
@@ -124,6 +131,8 @@ describe('logAlerts', () => {
   });
 
   test('should correctly set values in ruleRunMetricsStore and call alertingEventLogger.logAlert if shouldPersistAlerts is true', () => {
+    jest.clearAllMocks();
+
     logAlerts({
       logger,
       alertingEventLogger,
@@ -131,15 +140,15 @@ describe('logAlerts', () => {
         '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       activeAlerts: {
-        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
-        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1', { meta: { uuid: 'uuid-1' } }),
+        '2': new Alert<{}, {}, DefaultActionGroupId>('2', { meta: { uuid: 'uuid-2' } }),
         '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
       },
       recoveredAlerts: {
-        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
-        '8': new Alert<{}, {}, DefaultActionGroupId>('8'),
-        '9': new Alert<{}, {}, DefaultActionGroupId>('9'),
-        '10': new Alert<{}, {}, DefaultActionGroupId>('10'),
+        '7': new Alert<{}, {}, DefaultActionGroupId>('7', { meta: { uuid: 'uuid-7' } }),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8', { meta: { uuid: 'uuid-8' } }),
+        '9': new Alert<{}, {}, DefaultActionGroupId>('9', { meta: { uuid: 'uuid-9' } }),
+        '10': new Alert<{}, {}, DefaultActionGroupId>('10', { meta: { uuid: 'uuid-10' } }),
       },
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
@@ -158,49 +167,71 @@ describe('logAlerts', () => {
       id: '7',
       message: "test-rule-type-id:123: 'test rule' alert '7' has recovered",
       state: {},
+      flapping: false,
+      uuid: 'uuid-7',
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
       action: 'recovered-instance',
       id: '8',
       message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
       state: {},
+      flapping: false,
+      uuid: 'uuid-8',
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
       action: 'recovered-instance',
       id: '9',
       message: "test-rule-type-id:123: 'test rule' alert '9' has recovered",
       state: {},
+      flapping: false,
+      uuid: 'uuid-9',
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
       action: 'recovered-instance',
       id: '10',
       message: "test-rule-type-id:123: 'test rule' alert '10' has recovered",
       state: {},
+      flapping: false,
+      uuid: 'uuid-10',
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
       action: 'new-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' created new alert: '4'",
       state: {},
+      flapping: false,
+      uuid: expect.any(String),
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(6, {
       action: 'active-instance',
       id: '1',
       message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
       state: {},
+      flapping: false,
+      uuid: 'uuid-1',
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
       action: 'active-instance',
       id: '2',
       message: "test-rule-type-id:123: 'test rule' active alert: '2' in actionGroup: 'undefined'",
       state: {},
+      flapping: false,
+      uuid: 'uuid-2',
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
       action: 'active-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",
       state: {},
+      flapping: false,
+      uuid: expect.any(String),
     });
+
+    // check the two calls for alert 4 used the same UUID
+    const actualUuid1 = alertingEventLogger.logAlert.mock.calls[4][0].uuid;
+    const actualUuid2 = alertingEventLogger.logAlert.mock.calls[7][0].uuid;
+    expect(actualUuid1).toEqual(actualUuid2);
+    expect(actualUuid1).toMatch(/^uuid-module-v4-called-\d+$/);
   });
 
   test('should not call alertingEventLogger.logAlert or update ruleRunMetricsStore if shouldPersistAlerts is false', () => {
@@ -232,5 +263,103 @@ describe('logAlerts', () => {
     expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toEqual(0);
 
     expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
+  });
+
+  test('should correctly set flapping values', () => {
+    logAlerts({
+      logger,
+      alertingEventLogger,
+      newAlerts: {
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      activeAlerts: {
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1', { meta: { flapping: true } }),
+        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      recoveredAlerts: {
+        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8', { meta: { flapping: true } }),
+        '9': new Alert<{}, {}, DefaultActionGroupId>('9'),
+        '10': new Alert<{}, {}, DefaultActionGroupId>('10'),
+      },
+      ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
+      ruleRunMetricsStore,
+      canSetRecoveryContext: false,
+      shouldPersistAlerts: true,
+    });
+
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
+      action: 'recovered-instance',
+      id: '7',
+      message: "test-rule-type-id:123: 'test rule' alert '7' has recovered",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
+      action: 'recovered-instance',
+      id: '8',
+      message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
+      state: {},
+      flapping: true,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
+      action: 'recovered-instance',
+      id: '9',
+      message: "test-rule-type-id:123: 'test rule' alert '9' has recovered",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
+      action: 'recovered-instance',
+      id: '10',
+      message: "test-rule-type-id:123: 'test rule' alert '10' has recovered",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
+      action: 'new-instance',
+      id: '4',
+      message: "test-rule-type-id:123: 'test rule' created new alert: '4'",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(6, {
+      action: 'active-instance',
+      id: '1',
+      message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
+      state: {},
+      flapping: true,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
+      action: 'active-instance',
+      id: '2',
+      message: "test-rule-type-id:123: 'test rule' active alert: '2' in actionGroup: 'undefined'",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
+      action: 'active-instance',
+      id: '4',
+      message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+    });
   });
 });

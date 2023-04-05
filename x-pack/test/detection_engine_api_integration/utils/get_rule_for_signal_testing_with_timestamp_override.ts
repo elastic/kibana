@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 export const getRuleForSignalTestingWithTimestampOverride = (
   index: string[],
   ruleId = 'rule-1',
   enabled = true,
   timestampOverride = 'event.ingested'
-): QueryCreateSchema => ({
+): QueryRuleCreateProps => ({
   name: 'Signal Testing Query',
   description: 'Tests a simple query',
   enabled,

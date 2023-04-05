@@ -11,7 +11,7 @@ import {
   SavedObjectsType,
 } from '@kbn/core/server';
 import { privateLocationsSavedObjectName } from '../../../../common/saved_objects/private_locations';
-import { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
+import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 export const privateLocationsSavedObjectId = 'synthetics-privates-locations-singleton';
 
 export const privateLocationsSavedObject: SavedObjectsType = {
@@ -32,7 +32,9 @@ export const privateLocationsSavedObject: SavedObjectsType = {
   },
 };
 
-export const getSyntheticsPrivateLocations = async (client: SavedObjectsClientContract) => {
+export const getSyntheticsPrivateLocations = async (
+  client: SavedObjectsClientContract
+): Promise<PrivateLocation[]> => {
   try {
     const obj = await client.get<SyntheticsPrivateLocations>(
       privateLocationsSavedObject.name,

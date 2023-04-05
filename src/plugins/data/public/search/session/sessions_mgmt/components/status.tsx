@@ -104,7 +104,7 @@ const getStatusAttributes = ({
 
     case SearchSessionStatus.CANCELLED:
       return {
-        icon: <EuiIcon color="#9AA" type="crossInACircleFilled" />,
+        icon: <EuiIcon color="#9AA" type="error" />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
         toolTipContent: i18n.translate('data.mgmt.searchSessions.status.message.cancelled', {
           defaultMessage: 'Cancelled by user',
@@ -114,12 +114,17 @@ const getStatusAttributes = ({
     case SearchSessionStatus.ERROR:
       return {
         textColor: 'danger',
-        icon: <EuiIcon color="danger" type="crossInACircleFilled" />,
+        icon: <EuiIcon color="danger" type="error" />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
-        toolTipContent: i18n.translate('data.mgmt.searchSessions.status.message.error', {
-          defaultMessage: 'Error: {error}',
-          values: { error: (session as any).error || 'unknown' },
-        }),
+        toolTipContent:
+          session.errors && session.errors.length > 0
+            ? i18n.translate('data.mgmt.searchSessions.status.message.error', {
+                defaultMessage:
+                  'One or more searches failed to complete. Use the "Inspect" action to see the underlying errors.',
+              })
+            : i18n.translate('data.mgmt.searchSessions.status.message.unknownError', {
+                defaultMessage: 'Unknown error',
+              }),
       };
 
     case SearchSessionStatus.COMPLETE:

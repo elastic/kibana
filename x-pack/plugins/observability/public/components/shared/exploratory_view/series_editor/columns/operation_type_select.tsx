@@ -83,6 +83,12 @@ export function OperationTypeComponent({
       }),
     },
     {
+      value: 'unique_count' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.uniqueCount', {
+        defaultMessage: 'Unique count',
+      }),
+    },
+    {
       value: '25th' as OperationType,
       inputDisplay: i18n.translate('xpack.observability.expView.operationType.25thPercentile', {
         defaultMessage: '25th Percentile',

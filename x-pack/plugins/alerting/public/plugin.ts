@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
+import { Plugin, CoreStart } from '@kbn/core/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './alert_api';
-import { Rule, RuleNavigation } from '../common';
+import { Rule } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -26,6 +26,8 @@ export interface PluginSetupContract {
    * @param handler The navigation handler should return either a relative URL, or a state object. This information can be used,
    * in conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details.
    * @throws an error if the given applicationId and ruleType combination has already been registered.
+   *
+   * @deprecated use "getViewInAppRelativeUrl" on the server side rule type instead.
    */
   registerNavigation: (
     applicationId: string,
@@ -42,16 +44,18 @@ export interface PluginSetupContract {
    * @param applicationId The application id that the user should be navigated to, to view a particular rule in a custom way.
    * @param handler The navigation handler should return either a relative URL, or a state object. This information can be used,
    * in conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details.
+   *
+   * @deprecated use "getViewInAppRelativeUrl" on the server side rule type instead.
    */
   registerDefaultNavigation: (applicationId: string, handler: AlertNavigationHandler) => void;
 }
 export interface PluginStartContract {
-  getNavigation: (ruleId: Rule['id']) => Promise<RuleNavigation | undefined>;
+  getNavigation: (ruleId: Rule['id']) => Promise<string | undefined>;
 }
 
 export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
   private alertNavigationRegistry?: AlertNavigationRegistry;
-  public setup(core: CoreSetup) {
+  public setup() {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
 
     const registerNavigation = async (
@@ -89,8 +93,11 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
 
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
-          const state = navigationHandler(rule);
-          return typeof state === 'string' ? { path: state } : { state };
+          return navigationHandler(rule);
+        }
+
+        if (rule.viewInAppRelativeUrl) {
+          return rule.viewInAppRelativeUrl;
         }
       },
     };

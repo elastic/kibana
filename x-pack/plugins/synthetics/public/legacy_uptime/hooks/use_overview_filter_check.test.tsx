@@ -45,7 +45,7 @@ describe('useOverviewFilterCheck', () => {
     } = renderHook(() => useOverviewFilterCheck(), { wrapper: getWrapper() });
 
     const fn = jest.fn();
-    current(fn);
+    current.filterCheck(fn);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -57,7 +57,7 @@ describe('useOverviewFilterCheck', () => {
     });
 
     const fn = jest.fn();
-    current(fn);
+    current.filterCheck(fn);
     expect(fn).not.toHaveBeenCalled();
   });
 
@@ -70,7 +70,7 @@ describe('useOverviewFilterCheck', () => {
     });
 
     const fn = jest.fn();
-    current(fn);
+    current.filterCheck(fn);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -83,7 +83,7 @@ describe('useOverviewFilterCheck', () => {
     });
 
     const fn = jest.fn();
-    current(fn);
+    current.filterCheck(fn);
     expect(fn).not.toHaveBeenCalledTimes(1);
   });
 
@@ -96,7 +96,7 @@ describe('useOverviewFilterCheck', () => {
     });
 
     const fn = jest.fn();
-    current(fn);
+    current.filterCheck(fn);
     expect(fn).toHaveBeenCalledTimes(1);
   });
 });

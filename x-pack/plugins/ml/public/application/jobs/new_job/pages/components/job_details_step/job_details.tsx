@@ -45,6 +45,7 @@ export const JobDetailsStep: FC<Props> = ({
       jobValidator.latestValidationResult.groupIdsExist?.valid === true &&
       jobValidator.validating === false;
     setNextActive(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return (

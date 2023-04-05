@@ -18,6 +18,7 @@ export type {
   EphemeralTask,
   TaskRunCreatorFunction,
   RunContext,
+  IntervalSchedule,
 } from './task';
 
 export { TaskStatus } from './task';
@@ -30,7 +31,7 @@ export {
   throwUnrecoverableError,
   isEphemeralTaskRejectedDueToCapacityError,
 } from './task_running';
-export type { RunNowResult, BulkUpdateSchedulesResult } from './task_scheduling';
+export type { RunNowResult, BulkUpdateTaskResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 export {
   IdleTaskWithExpiredRunAt,

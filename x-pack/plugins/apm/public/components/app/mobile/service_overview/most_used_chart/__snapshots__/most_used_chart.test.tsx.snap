@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Most used chart with Lens gets lens attributes 1`] = `
+Object {
+  "references": Array [
+    Object {
+      "id": "apm_static_index_pattern_id",
+      "name": "indexpattern-datasource-layer-host-os-version",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "host-os-version": Object {
+            "columnOrder": Array [
+              "termsColumn",
+              "countColumn",
+            ],
+            "columns": Object {
+              "countColumn": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "termsColumn": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top 5 values of host.os.version",
+                "operationType": "terms",
+                "params": Object {
+                  "orderBy": Object {
+                    "columnId": "countColumn",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "size": 5,
+                },
+                "scale": "ordinal",
+                "sourceField": "host.os.version",
+              },
+            },
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {},
+        "query": Object {
+          "term": Object {
+            "processor.event": "transaction",
+          },
+        },
+      },
+      Object {
+        "meta": Object {},
+        "query": Object {
+          "term": Object {
+            "service.name": "opbeans-swift",
+          },
+        },
+      },
+      Object {
+        "meta": Object {},
+        "query": Object {
+          "term": Object {
+            "transaction.type": "request",
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kuery",
+      "query": "",
+    },
+    "visualization": Object {
+      "layers": Array [
+        Object {
+          "categoryDisplay": "default",
+          "layerId": "host-os-version",
+          "layerType": "data",
+          "legendDisplay": "hide",
+          "legendPosition": "bottom",
+          "metrics": Array [
+            "countColumn",
+          ],
+          "nestedLegend": false,
+          "numberDisplay": "percent",
+          "primaryGroups": Array [
+            "termsColumn",
+          ],
+        },
+      ],
+      "shape": "donut",
+    },
+  },
+  "title": "most-used-host-os-version",
+  "visualizationType": "lnsPie",
+}
+`;

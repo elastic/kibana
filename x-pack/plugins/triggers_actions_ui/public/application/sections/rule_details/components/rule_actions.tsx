@@ -15,19 +15,31 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import { ActionTypeRegistryContract, RuleAction, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
+import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
 
 export interface RuleActionsProps {
   ruleActions: RuleAction[];
   actionTypeRegistry: ActionTypeRegistryContract;
+  legacyNotifyWhen?: RuleNotifyWhenType | null;
 }
-export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProps) {
+
+export function RuleActions({
+  ruleActions,
+  actionTypeRegistry,
+  legacyNotifyWhen,
+}: RuleActionsProps) {
   const { isLoadingActionConnectors, actionConnectors } = useFetchRuleActionConnectors({
     ruleActions,
   });
 
-  if (!actionConnectors || actionConnectors.length <= 0)
+  const hasConnectors = actionConnectors && actionConnectors.length > 0;
+
+  const hasActions = ruleActions && ruleActions.length > 0;
+
+  if (!hasConnectors || !hasActions) {
     return (
       <EuiFlexItem>
         <EuiText size="s">
@@ -37,31 +49,66 @@ export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProp
         </EuiText>
       </EuiFlexItem>
     );
+  }
 
-  function getActionIconClass(actionGroupId?: string): IconType | undefined {
+  const getNotifyText = (action: RuleAction) =>
+    (NOTIFY_WHEN_OPTIONS.find((options) => options.value === action.frequency?.notifyWhen)
+      ?.inputDisplay ||
+      action.frequency?.notifyWhen) ??
+    legacyNotifyWhen;
+
+  const getActionIconClass = (actionGroupId?: string): IconType | undefined => {
     const actionGroup = actionTypeRegistry.list().find((group) => group.id === actionGroupId);
     return typeof actionGroup?.iconClass === 'string'
       ? actionGroup?.iconClass
       : suspendedComponentWithProps(actionGroup?.iconClass as React.ComponentType);
-  }
+  };
+
+  const getActionName = (actionTypeId?: string) => {
+    const actionConnector = actionConnectors.find((connector) => connector.id === actionTypeId);
+    return actionConnector?.name;
+  };
+
   if (isLoadingActionConnectors) return <EuiLoadingSpinner size="s" />;
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      {actionConnectors.map(({ actionTypeId, name }) => (
-        <EuiFlexItem key={actionTypeId}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
-            <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText data-test-subj={`actionConnectorName-${name}`} size="s">
-                {name}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
-      ))}
+      {ruleActions.map((action, index) => {
+        const { actionTypeId, id } = action;
+        const actionName = getActionName(id);
+        return (
+          <EuiFlexItem key={index}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  data-test-subj={`actionConnectorName-${index}-${actionName || actionTypeId}`}
+                  size="s"
+                >
+                  {actionName}
+                </EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="xs" component="span">
+                  <EuiSpacer size="xs" />
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon size="s" type="bell" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText
+                      data-test-subj={`actionConnectorName-${index}-${actionName || actionTypeId}`}
+                      size="xs"
+                    >
+                      {String(getNotifyText(action))}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 }

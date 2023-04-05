@@ -7,10 +7,8 @@
 
 import { isUndefined } from 'lodash';
 import { getNodeIds } from './get_node_ids';
-// @ts-ignore
 import { filter } from '../../../pagination/filter';
 import { sortNodes } from './sort_nodes';
-// @ts-ignore
 import { paginate } from '../../../pagination/paginate';
 import { getMetrics } from '../../../details/get_metrics';
 import { LegacyRequest } from '../../../../types';

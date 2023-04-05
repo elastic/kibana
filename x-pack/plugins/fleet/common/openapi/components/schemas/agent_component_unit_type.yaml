@@ -1,0 +1,5 @@
+title: Agent component unit type
+type: string
+enum:
+  - input
+  - output

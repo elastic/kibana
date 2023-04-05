@@ -2,8 +2,10 @@
 [[managing-tags]]
 == Tags
 
-Tags enable you to categorize your saved objects.
-You can then filter for related objects based on shared tags.
+Use tags to categorize your saved objects,
+then filter for related objects based on shared tags.
+
+To get started, open the main menu, and then click *Stack Management > Tags*.
 
 [role="screenshot"]
 image::images/tags/tag-management-section.png[Tags management]
@@ -29,7 +31,6 @@ from the global search.
 
 Create a tag to assign to your saved objects.
 
-. Open the main menu, and then click *Stack Management > Tags*.
 . Click *Create tag*.
 
 . Enter a name and select a color for the new tag.
@@ -41,23 +42,21 @@ The name cannot be longer than 50 characters.
 [[settings-assign-tag]]
 === Assign a tag to an object
 
-To assign and remove tags from saved objects, you must have `write` permission
+To assign and remove tags, you must have `write` permission
 on the objects to which you assign the tags.
 
-. In the *Tags* view, find the tag you want to assign.
-. Click the action menu (...) in the tag row,
-and then select the *Manage assignments* action.
+. Find the tag you want to assign.
+. Click the actions icon
+image:images/actions_icon.png[Actions icon],
+and then select *Manage assignments*.
 
 . Select the objects to which you want to assign or remove tags.
 +
 [role="screenshot"]
-image::images/tags/manage-assignments-flyout.png[Assign flyout]
+image::images/tags/manage-assignments-flyout.png[Assign flyout, width=75%]
 
 . Click *Save tag assignments*.
 
-TIP: To assign, delete, or clear multiple tags at once,
-select their checkboxes in the *Tags* view, and then select
-the desired action from the *selected tags* menu.
 
 [float]
 [[settings-delete-tag]]
@@ -65,6 +64,11 @@ the desired action from the *selected tags* menu.
 
 When you delete a tag, you remove it from all saved objects that use it.
 
-. Click the action menu (...) in the tag row, and then select the *Delete* action.
+. Click the actions icon
+image:images/actions_icon.png[Actions icon], and then select *Delete*.
 
 . Click *Delete tag*.
+
+TIP: To assign, delete, or clear multiple tags,
+select them in the *Tags* view, and then select
+the action from the *selected tags* menu.

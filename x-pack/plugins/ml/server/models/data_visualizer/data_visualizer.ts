@@ -15,9 +15,8 @@ import {
 } from '@kbn/ml-agg-utils';
 import type { AggCardinality, FieldsForHistograms } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
-import { getSafeAggregationName } from '../../../common/util/job_utils';
-import { buildBaseFilterCriteria } from '../../lib/query_utils';
 import { RuntimeMappings } from '../../../common/types/fields';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
@@ -656,20 +655,7 @@ export class DataVisualizer {
         },
       };
 
-      // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-      // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-      if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-        aggs[`${safeFieldName}_top`] = {
-          sampler: {
-            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-          },
-          aggs: {
-            top,
-          },
-        };
-      } else {
-        aggs[`${safeFieldName}_top`] = top;
-      }
+      aggs[`${safeFieldName}_top`] = top;
     });
 
     const searchBody = {
@@ -782,20 +768,7 @@ export class DataVisualizer {
         },
       };
 
-      // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-      // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-      if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-        aggs[`${safeFieldName}_top`] = {
-          sampler: {
-            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-          },
-          aggs: {
-            top,
-          },
-        };
-      } else {
-        aggs[`${safeFieldName}_top`] = top;
-      }
+      aggs[`${safeFieldName}_top`] = top;
     });
 
     const searchBody = {

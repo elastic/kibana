@@ -1,4 +1,7 @@
+title: Case response properties for user comments
 type: object
+required:
+  - type
 properties:
   comment:
     type: string
@@ -8,9 +11,7 @@ properties:
     format: date-time
     example: 2022-05-13T09:16:17.416Z
   created_by:
-    type: object
-    properties:
-      $ref: 'user_properties.yaml'
+    $ref: 'case_response_created_by_properties.yaml'
   id:
     type: string
     example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
@@ -22,25 +23,19 @@ properties:
     nullable: true
     example: null
   pushed_by:
-    type: object
-    properties:
-      $ref: 'user_properties.yaml'
-    nullable: true
-    example: null 
+    $ref: 'case_response_pushed_by_properties.yaml'
   type: 
     type: string
     example: user
+    enum:
+      - user
   updated_at:
     type: string
     format: date-time
     nullable: true
     example: null
   updated_by:
-    type: object
-    properties:
-      $ref: 'user_properties.yaml'
-    nullable: true
-    example: null
+    $ref: 'case_response_updated_by_properties.yaml'
   version:
     type: string
     example: WzIwNDMxLDFd

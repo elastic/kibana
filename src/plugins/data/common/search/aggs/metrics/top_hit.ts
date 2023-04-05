@@ -8,18 +8,30 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { aggTopHitFnName } from './top_hit_fn';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { flattenHit, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
 
-export interface AggParamsTopHit extends BaseAggParams {
+export interface BaseAggParamsTopHit extends BaseAggParams {
   field: string;
   aggregate: 'min' | 'max' | 'sum' | 'average' | 'concat';
-  sortField?: string;
   size?: number;
+}
+
+export interface AggParamsTopHitSerialized extends BaseAggParamsTopHit {
   sortOrder?: 'desc' | 'asc';
+  sortField?: string;
+}
+
+export interface AggParamsTopHit extends BaseAggParamsTopHit {
+  sortOrder?: {
+    value: 'desc' | 'asc';
+    text: string;
+  };
+  sortField?: DataViewField;
 }
 
 const isNumericFieldSelected = (agg: IMetricAggConfig) => {

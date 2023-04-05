@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Windows - Looks for anomalous access to the metadata service by an unusual user. The metadata service may be targeted in order to harvest credentials or user data scripts containing secrets.",
   "groups": [
     "endpoint",
@@ -34,13 +33,14 @@
     "time_format": "epoch_ms"
   },
   "custom_settings": {
-          "job_tags": {
+    "job_tags": {
       "euid": "8012",
       "maturity": "release",
       "author": "@randomuserid/Elastic",
       "version": "3",
       "updated_date": "5/16/2022"
-  },
-    "created_by": "ml-module-security-windows"
+    },
+    "created_by": "ml-module-security-windows-v3",
+    "security_app_display_name": "Unusual Windows User Calling the Metadata Service"
   }
 }

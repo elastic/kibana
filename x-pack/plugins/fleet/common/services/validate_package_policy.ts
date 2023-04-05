@@ -19,7 +19,13 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
-import { isValidNamespace, doesPackageHaveIntegrations } from '.';
+import {
+  isValidNamespace,
+  doesPackageHaveIntegrations,
+  isInputOnlyPolicyTemplate,
+  getNormalizedInputs,
+  getNormalizedDataStreams,
+} from '.';
 
 type Errors = string[] | null;
 
@@ -90,7 +96,9 @@ export const validatePackagePolicy = (
     !packageInfo.policy_templates ||
     packageInfo.policy_templates.length === 0 ||
     !packageInfo.policy_templates.find(
-      (policyTemplate) => policyTemplate.inputs && policyTemplate.inputs.length > 0
+      (policyTemplate) =>
+        isInputOnlyPolicyTemplate(policyTemplate) ||
+        (policyTemplate.inputs && policyTemplate.inputs.length > 0)
     )
   ) {
     validationResults.inputs = null;
@@ -101,7 +109,8 @@ export const validatePackagePolicy = (
   const inputVarDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, policyTemplate) => {
-    (policyTemplate.inputs || []).forEach((input) => {
+    const inputs = getNormalizedInputs(policyTemplate);
+    inputs.forEach((input) => {
       const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
 
       if ((input.vars || []).length) {
@@ -111,14 +120,16 @@ export const validatePackagePolicy = (
     return varDefs;
   }, {});
 
-  const streamsByDatasetAndInput = (packageInfo.data_streams || []).reduce<
-    Record<string, RegistryStream>
-  >((streams, dataStream) => {
-    dataStream.streams?.forEach((stream) => {
-      streams[`${dataStream.dataset}-${stream.input}`] = stream;
-    });
-    return streams;
-  }, {});
+  const dataStreams = getNormalizedDataStreams(packageInfo);
+  const streamsByDatasetAndInput = dataStreams.reduce<Record<string, RegistryStream>>(
+    (streams, dataStream) => {
+      dataStream.streams?.forEach((stream) => {
+        streams[`${dataStream.dataset}-${stream.input}`] = stream;
+      });
+      return streams;
+    },
+    {}
+  );
   const streamVarDefsByDatasetAndInput = Object.entries(streamsByDatasetAndInput).reduce<
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, [path, stream]) => {
@@ -247,7 +258,10 @@ export const validatePackagePolicyConfig = (
     if (parsedValue && !Array.isArray(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage', {
-          defaultMessage: 'Invalid format',
+          defaultMessage: 'Invalid format for {fieldName}: expected array',
+          values: {
+            fieldName: varDef.title || varDef.name,
+          },
         })
       );
       return errors;
@@ -318,6 +332,16 @@ export const validatePackagePolicyConfig = (
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage', {
           defaultMessage: 'Invalid integer',
+        })
+      );
+    }
+  }
+
+  if (varDef.type === 'select' && parsedValue) {
+    if (!varDef.options?.map((o) => o.value).includes(parsedValue)) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {
+          defaultMessage: 'Invalid value for select type',
         })
       );
     }

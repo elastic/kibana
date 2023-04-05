@@ -7,6 +7,8 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
+  EuiCallOut,
+  EuiText,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -26,6 +28,7 @@ import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../../classes/layers/vector_layer';
 import { AttributionFormRow } from './attribution_form_row';
+import { isLayerGroup } from '../../../classes/layers/layer_group';
 
 export interface Props {
   layer: ILayer;
@@ -87,7 +90,7 @@ export function LayerSettings(props: Props) {
   };
 
   const renderIncludeInFitToBounds = () => {
-    if (!props.supportsFitToBounds) {
+    if (!props.supportsFitToBounds || isLayerGroup(props.layer)) {
       return null;
     }
     return (
@@ -113,7 +116,7 @@ export function LayerSettings(props: Props) {
   };
 
   const renderZoomSliders = () => {
-    return (
+    return isLayerGroup(props.layer) ? null : (
       <ValidatedDualRange
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
           defaultMessage: 'Visibility',
@@ -241,8 +244,44 @@ export function LayerSettings(props: Props) {
     );
   };
 
+  const renderLayerGroupInstructions = () => {
+    return isLayerGroup(props.layer) ? (
+      <>
+        <EuiCallOut
+          title={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupCalloutTitle', {
+            defaultMessage: 'Drag layers in and out of the group',
+          })}
+          iconType="layers"
+        >
+          <EuiText>
+            <ul>
+              <li>
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToFront', {
+                  defaultMessage: 'To add your first layer, drag it onto the group name.',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToPosition', {
+                  defaultMessage:
+                    'To add another layer, drag it anywhere above the last layer in the group.',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemove', {
+                  defaultMessage: 'To remove a layer, drag it above or below the group.',
+                })}
+              </li>
+            </ul>
+          </EuiText>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    ) : null;
+  };
+
   return (
     <Fragment>
+      {renderLayerGroupInstructions()}
       <EuiPanel>
         <EuiTitle size="xs">
           <h5>
@@ -256,10 +295,14 @@ export function LayerSettings(props: Props) {
         <EuiSpacer size="m" />
         {renderLabel()}
         {renderZoomSliders()}
-        <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
+        {isLayerGroup(props.layer) ? null : (
+          <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
+        )}
         {renderShowLabelsOnTop()}
         {renderShowLocaleSelector()}
-        <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
+        {isLayerGroup(props.layer) ? null : (
+          <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
+        )}
         {renderIncludeInFitToBounds()}
         {renderDisableTooltips()}
       </EuiPanel>

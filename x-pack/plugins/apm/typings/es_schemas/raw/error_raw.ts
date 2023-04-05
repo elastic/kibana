@@ -35,7 +35,7 @@ export interface Exception {
   stacktrace?: Stackframe[];
 }
 
-interface Log {
+export interface Log {
   message: string;
   stacktrace?: Stackframe[];
 }

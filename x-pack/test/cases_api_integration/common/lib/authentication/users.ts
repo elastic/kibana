@@ -13,13 +13,14 @@ import {
   globalRead as globalReadRole,
   noKibanaPrivileges as noKibanaPrivilegesRole,
   noCasesPrivilegesSpace1 as noCasesPrivilegesSpace1Role,
-  securitySolutionOnlyAllSpacesAll,
-  securitySolutionOnlyReadSpacesAll,
-  observabilityOnlyAllSpacesAll,
-  observabilityOnlyReadSpacesAll,
+  securitySolutionOnlyAllSpacesRole,
   testDisabledPluginAll,
   securitySolutionOnlyDelete,
   securitySolutionOnlyNoDelete,
+  observabilityOnlyReadAlerts,
+  securitySolutionOnlyReadAlerts,
+  securitySolutionOnlyReadNoIndexAlerts,
+  securitySolutionOnlyReadDelete,
 } from './roles';
 import { User } from './types';
 
@@ -47,6 +48,12 @@ export const secOnlyDelete: User = {
   roles: [securitySolutionOnlyDelete.name],
 };
 
+export const secOnlyReadDelete: User = {
+  username: 'sec_only_read_delete',
+  password: 'sec_only_read_delete',
+  roles: [securitySolutionOnlyReadDelete.name],
+};
+
 export const secOnlyNoDelete: User = {
   username: 'sec_only_no_delete',
   password: 'sec_only_no_delete',
@@ -59,6 +66,18 @@ export const secOnlyRead: User = {
   roles: [securitySolutionOnlyRead.name],
 };
 
+export const secOnlyReadAlerts: User = {
+  username: 'sec_only_read_alerts',
+  password: 'sec_only_read_alerts',
+  roles: [securitySolutionOnlyReadAlerts.name],
+};
+
+export const secSolutionOnlyReadNoIndexAlerts: User = {
+  username: 'sec_only_read_no_index_alerts',
+  password: 'sec_only_read_no_index_alerts',
+  roles: [securitySolutionOnlyReadNoIndexAlerts.name],
+};
+
 export const obsOnly: User = {
   username: 'obs_only',
   password: 'obs_only',
@@ -69,6 +88,12 @@ export const obsOnlyRead: User = {
   username: 'obs_only_read',
   password: 'obs_only_read',
   roles: [observabilityOnlyRead.name],
+};
+
+export const obsOnlyReadAlerts: User = {
+  username: 'obs_only_read_alerts',
+  password: 'obs_only_read_alerts',
+  roles: [observabilityOnlyReadAlerts.name],
 };
 
 export const obsSec: User = {
@@ -101,14 +126,28 @@ export const noCasesPrivilegesSpace1: User = {
   roles: [noCasesPrivilegesSpace1Role.name],
 };
 
+/**
+ * These users will have access to all spaces.
+ */
+
+export const secOnlySpacesAll: User = {
+  username: 'sec_only_all_spaces',
+  password: 'sec_only_all_spaces',
+  roles: [securitySolutionOnlyAllSpacesRole.name],
+};
+
 export const users = [
   superUser,
   secOnly,
   secOnlyRead,
+  secOnlyReadAlerts,
+  secSolutionOnlyReadNoIndexAlerts,
   secOnlyDelete,
+  secOnlyReadDelete,
   secOnlyNoDelete,
   obsOnly,
   obsOnlyRead,
+  obsOnlyReadAlerts,
   obsSec,
   obsSecRead,
   globalRead,
@@ -116,43 +155,3 @@ export const users = [
   noCasesPrivilegesSpace1,
   testDisabled,
 ];
-
-/**
- * These users will have access to all spaces.
- */
-
-export const secOnlySpacesAll: User = {
-  username: 'sec_only',
-  password: 'sec_only',
-  roles: [securitySolutionOnlyAllSpacesAll.name],
-};
-
-export const secOnlyReadSpacesAll: User = {
-  username: 'sec_only_read',
-  password: 'sec_only_read',
-  roles: [securitySolutionOnlyReadSpacesAll.name],
-};
-
-export const obsOnlySpacesAll: User = {
-  username: 'obs_only',
-  password: 'obs_only',
-  roles: [observabilityOnlyAllSpacesAll.name],
-};
-
-export const obsOnlyReadSpacesAll: User = {
-  username: 'obs_only_read',
-  password: 'obs_only_read',
-  roles: [observabilityOnlyReadSpacesAll.name],
-};
-
-export const obsSecSpacesAll: User = {
-  username: 'obs_sec',
-  password: 'obs_sec',
-  roles: [securitySolutionOnlyAllSpacesAll.name, observabilityOnlyAllSpacesAll.name],
-};
-
-export const obsSecReadSpacesAll: User = {
-  username: 'obs_sec_read',
-  password: 'obs_sec_read',
-  roles: [securitySolutionOnlyReadSpacesAll.name, observabilityOnlyReadSpacesAll.name],
-};

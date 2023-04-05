@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SerializableRecord, Serializable } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SerializableRecord, Serializable } from '@kbn/utility-types';
+import type { SavedObjectReference } from '@kbn/core/types';
 import type {
   EmbeddableStateWithType,
   EmbeddableRegistryDefinition,

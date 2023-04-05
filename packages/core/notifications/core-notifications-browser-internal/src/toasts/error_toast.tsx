@@ -48,7 +48,7 @@ const isRequestError = (e: Error | RequestError): e is RequestError => {
  * does not disappear. NOTE: this should use a global modal in the overlay service
  * in the future.
  */
-function showErrorDialog({
+export function showErrorDialog({
   title,
   error,
   openModal,
@@ -73,8 +73,8 @@ function showErrorDialog({
           <EuiModalHeader>
             <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
           </EuiModalHeader>
-          <EuiModalBody>
-            <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
+          <EuiModalBody data-test-subj="errorModalBody">
+            <EuiCallOut size="s" color="danger" iconType="error" title={error.message} />
             {text && (
               <React.Fragment>
                 <EuiSpacer size="s" />
@@ -112,6 +112,7 @@ export function ErrorToast({
         <EuiButton
           size="s"
           color="danger"
+          data-test-subj="errorToastBtn"
           onClick={() => showErrorDialog({ title, error, openModal, i18nContext })}
         >
           <FormattedMessage

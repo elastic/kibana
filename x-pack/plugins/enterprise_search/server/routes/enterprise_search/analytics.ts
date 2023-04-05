@@ -8,15 +8,15 @@
 import { schema } from '@kbn/config-schema';
 
 import { KibanaResponseFactory } from '@kbn/core-http-server';
+import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addAnalyticsCollection } from '../../lib/analytics/add_analytics_collection';
-import { deleteAnalyticsCollectionByName } from '../../lib/analytics/delete_analytics_collection';
-import {
-  fetchAnalyticsCollectionByName,
-  fetchAnalyticsCollections,
-} from '../../lib/analytics/fetch_analytics_collection';
+import { analyticsEventsIndexExists } from '../../lib/analytics/analytics_events_index_exists';
+import { deleteAnalyticsCollectionById } from '../../lib/analytics/delete_analytics_collection';
+import { fetchAnalyticsCollections } from '../../lib/analytics/fetch_analytics_collection';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
@@ -35,7 +35,17 @@ const createIndexNotFoundError = (error: Error, response: KibanaResponseFactory)
   });
 };
 
-export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
+interface AnalyticsRouteDependencies extends RouteDependencies {
+  data: DataPluginStart;
+  savedObjects: SavedObjectsServiceStart;
+}
+
+export function registerAnalyticsRoutes({
+  router,
+  log,
+  data,
+  savedObjects,
+}: AnalyticsRouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/analytics/collections',
@@ -50,10 +60,10 @@ export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
 
   router.get(
     {
-      path: '/internal/enterprise_search/analytics/collections/{collection_name}',
+      path: '/internal/enterprise_search/analytics/collections/{name}',
       validate: {
         params: schema.object({
-          collection_name: schema.string(),
+          name: schema.string(),
         }),
       },
     },
@@ -61,16 +71,9 @@ export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const collection = await fetchAnalyticsCollectionByName(
-          client,
-          request.params.collection_name
-        );
+        const collections = await fetchAnalyticsCollections(client, request.params.name);
 
-        if (!collection) {
-          throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
-        }
-
-        return response.ok({ body: collection });
+        return response.ok({ body: collections[0] });
       } catch (error) {
         if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND) {
           return createIndexNotFoundError(error, response);
@@ -91,9 +94,20 @@ export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
+      const { client: elasticsearchClient } = (await context.core).elasticsearch;
+
+      const dataViewsService = await data.indexPatterns.dataViewsServiceFactory(
+        savedObjects.getScopedClient(request),
+        elasticsearchClient.asCurrentUser,
+        request
+      );
+
       try {
-        const body = await addAnalyticsCollection(client, request.body);
+        const body = await addAnalyticsCollection(
+          elasticsearchClient,
+          dataViewsService,
+          request.body.name
+        );
         return response.ok({ body });
       } catch (error) {
         if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS) {
@@ -102,13 +116,14 @@ export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
             message: i18n.translate(
               'xpack.enterpriseSearch.server.routes.addAnalyticsCollection.analyticsCollectionExistsError',
               {
-                defaultMessage: 'Analytics collection already exists',
+                defaultMessage: 'Collection name already exists. Choose another name.',
               }
             ),
             response,
             statusCode: 409,
           });
         }
+
         throw error;
       }
     })
@@ -116,17 +131,17 @@ export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
 
   router.delete(
     {
-      path: '/internal/enterprise_search/analytics/collections/{collection_name}',
+      path: '/internal/enterprise_search/analytics/collections/{name}',
       validate: {
         params: schema.object({
-          collection_name: schema.string(),
+          name: schema.string(),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        await deleteAnalyticsCollectionByName(client, request.params.collection_name);
+        await deleteAnalyticsCollectionById(client, request.params.name);
         return response.ok();
       } catch (error) {
         if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND) {
@@ -134,6 +149,28 @@ export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
         }
         throw error;
       }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/analytics/events/{name}/exists',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+
+      const eventsIndexExists = await analyticsEventsIndexExists(client, request.params.name);
+
+      if (!eventsIndexExists) {
+        return response.ok({ body: { exists: false } });
+      }
+
+      return response.ok({ body: { exists: true } });
     })
   );
 }

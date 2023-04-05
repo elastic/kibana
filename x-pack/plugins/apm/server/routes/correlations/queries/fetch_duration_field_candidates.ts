@@ -16,9 +16,8 @@ import {
   POPULATED_DOC_COUNT_SAMPLE_SIZE,
 } from '../../../../common/correlations/constants';
 import { hasPrefixToInclude } from '../../../../common/correlations/utils';
-
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -35,8 +34,12 @@ export const shouldBeExcluded = (fieldName: string) => {
   );
 };
 
-export const fetchDurationFieldCandidates = async ({
-  setup,
+export interface DurationFieldCandidatesResponse {
+  fieldCandidates: string[];
+}
+
+export async function fetchDurationFieldCandidates({
+  apmEventClient,
   eventType,
   query,
   start,
@@ -45,13 +48,9 @@ export const fetchDurationFieldCandidates = async ({
   kuery,
 }: CommonCorrelationsQueryParams & {
   query: estypes.QueryDslQueryContainer;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   eventType: ProcessorEvent.transaction | ProcessorEvent.span;
-}): Promise<{
-  fieldCandidates: string[];
-}> => {
-  const { apmEventClient } = setup;
-
+}): Promise<DurationFieldCandidatesResponse> {
   // Get all supported fields
   const [respMapping, respRandomDoc] = await Promise.all([
     apmEventClient.fieldCaps('get_field_caps', {
@@ -65,6 +64,7 @@ export const fetchDurationFieldCandidates = async ({
         events: [eventType],
       },
       body: {
+        track_total_hits: false,
         fields: ['*'],
         _source: false,
         query: getCommonCorrelationsQuery({
@@ -112,4 +112,4 @@ export const fetchDurationFieldCandidates = async ({
   return {
     fieldCandidates: [...finalFieldCandidates],
   };
-};
+}

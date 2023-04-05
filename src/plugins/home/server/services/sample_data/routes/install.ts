@@ -7,17 +7,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { IRouter, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
-import { getSampleDataInstaller } from './utils';
+import { getSampleDataInstaller, SAMPLE_DATA_INSTALLED_EVENT } from './utils';
 import { SampleDataInstallError } from '../errors';
 
 export function createInstallRoute(
   router: IRouter,
   sampleDatasets: SampleDatasetSchema[],
   logger: Logger,
-  usageTracker: SampleDataUsageTracker
+  usageTracker: SampleDataUsageTracker,
+  analytics: AnalyticsServiceSetup
 ): void {
   router.post(
     {
@@ -29,6 +32,7 @@ export function createInstallRoute(
       },
     },
     async (context, req, res) => {
+      const routeStartTime = performance.now();
       const { params, query } = req;
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {
@@ -49,6 +53,12 @@ export function createInstallRoute(
         const installResult = await sampleDataInstaller.install(params.id, now);
         // track the usage operation in a non-blocking way
         usageTracker.addInstall(params.id);
+
+        reportPerformanceMetricEvent(analytics, {
+          eventName: SAMPLE_DATA_INSTALLED_EVENT,
+          duration: performance.now() - routeStartTime,
+          key1: params.id,
+        });
         return res.ok({
           body: {
             elasticsearchIndicesCreated: installResult.createdDocsPerIndex,

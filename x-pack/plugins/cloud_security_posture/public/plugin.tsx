@@ -17,11 +17,12 @@ import type {
   CspClientPluginStartDeps,
 } from './types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import { SetupContext } from './application/setup_context';
 
-const LazyCspEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
-const LazyCspCreatePolicy = lazy(
-  () => import('./components/fleet_extensions/policy_extension_create')
+const LazyCspPolicyTemplateForm = lazy(
+  () => import('./components/fleet_extensions/policy_template_form')
 );
+
 const LazyCspCustomAssets = lazy(
   () => import('./components/fleet_extensions/custom_assets_extension')
 );
@@ -42,10 +43,13 @@ export class CspPlugin
       CspClientPluginStartDeps
     >
 {
+  private isCloudEnabled?: boolean;
+
   public setup(
     core: CoreSetup<CspClientPluginStartDeps, CspClientPluginStart>,
     plugins: CspClientPluginSetupDeps
   ): CspClientPluginSetup {
+    this.isCloudEnabled = plugins.cloud.isCloudEnabled;
     // Return methods that should be available to other plugins
     return {};
   }
@@ -53,14 +57,8 @@ export class CspPlugin
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
     plugins.fleet.registerExtension({
       package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-      view: 'package-policy-create',
-      Component: LazyCspCreatePolicy,
-    });
-
-    plugins.fleet.registerExtension({
-      package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-      view: 'package-policy-edit',
-      Component: LazyCspEditPolicy,
+      view: 'package-policy-replace-define-step',
+      Component: LazyCspPolicyTemplateForm,
     });
 
     plugins.fleet.registerExtension({
@@ -69,15 +67,21 @@ export class CspPlugin
       Component: LazyCspCustomAssets,
     });
 
-    return {
-      getCloudSecurityPostureRouter: () => (props: CspRouterProps) =>
-        (
-          <KibanaContextProvider services={{ ...core, ...plugins }}>
-            <RedirectAppLinks coreStart={core}>
+    // Keep as constant to prevent remounts https://github.com/elastic/kibana/issues/146773
+    const App = (props: CspRouterProps) => (
+      <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <RedirectAppLinks coreStart={core}>
+          <div style={{ width: '100%', height: '100%' }}>
+            <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
               <CspRouter {...props} />
-            </RedirectAppLinks>
-          </KibanaContextProvider>
-        ),
+            </SetupContext.Provider>
+          </div>
+        </RedirectAppLinks>
+      </KibanaContextProvider>
+    );
+
+    return {
+      getCloudSecurityPostureRouter: () => App,
     };
   }
 

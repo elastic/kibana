@@ -242,8 +242,10 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
 
     const body = await mlClient.anomalySearch(
       {
-        size: 0,
-        body: requestBody,
+        body: {
+          ...requestBody,
+          size: 0,
+        },
       },
       [jobId]
     );

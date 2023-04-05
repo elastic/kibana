@@ -106,13 +106,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.waitUntilTableIsLoaded();
 
       // open the filter dropdown
-      const filterButton = await find.byCssSelector('.euiFilterGroup .euiFilterButton');
+      const filterButton = await find.byCssSelector(
+        '.euiFilterGroup .euiPopover:nth-child(2) .euiFilterButton'
+      );
       await filterButton.click();
       await testSubjects.click(
         `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(lensTag)}`
       );
       // click elsewhere to close the filter dropdown
-      const searchFilter = await find.byCssSelector('.euiPageBody .euiFieldSearch');
+      const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
       await searchFilter.click();
       // wait until the table refreshes
       await listingTable.waitUntilTableIsLoaded();

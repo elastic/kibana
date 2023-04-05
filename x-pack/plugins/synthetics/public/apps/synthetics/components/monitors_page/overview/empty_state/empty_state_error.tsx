@@ -8,15 +8,15 @@
 import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { IHttpSerializedFetchError } from '../../../../state';
 
 interface EmptyStateErrorProps {
-  errors: Array<IHttpFetchError<ResponseErrorBody>>;
+  errors: IHttpSerializedFetchError[];
 }
 
 export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
   const unauthorized = errors.find(
-    (error) => error.message && error.message.includes('unauthorized')
+    (error) => error?.body?.message && error.body.message.includes('unauthorized')
   );
 
   return (
@@ -47,11 +47,7 @@ export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
             body={
               <Fragment>
                 {!unauthorized &&
-                  errors.map((error) => (
-                    <p key={error.body?.message || error.message}>
-                      {error.body?.message || error.message}
-                    </p>
-                  ))}
+                  errors.map((error) => <p key={error.body?.message}>{error.body?.message}</p>)}
               </Fragment>
             }
           />

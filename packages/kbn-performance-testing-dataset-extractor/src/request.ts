@@ -62,6 +62,7 @@ export const getKibanaRequests = (
         http: {
           method: hit.http.request.method,
           path: hit.url.path,
+          query: hit.url?.query,
           headers: combineHeaderFieldValues(hit.http.request.headers),
           body: payload ? JSON.stringify(strToJSON(payload)) : undefined,
           statusCode: hit.http.response.status_code,

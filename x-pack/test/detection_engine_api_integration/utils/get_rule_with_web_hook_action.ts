@@ -6,16 +6,16 @@
  */
 
 import type {
-  CreateRulesSchema,
-  UpdateRulesSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  RuleCreateProps,
+  RuleUpdateProps,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getSimpleRule } from './get_simple_rule';
 
 export const getRuleWithWebHookAction = (
   id: string,
   enabled = false,
-  rule?: CreateRulesSchema
-): CreateRulesSchema | UpdateRulesSchema => {
+  rule?: RuleCreateProps
+): RuleCreateProps | RuleUpdateProps => {
   const finalRule = rule != null ? { ...rule, enabled } : getSimpleRule('rule-1', enabled);
   return {
     ...finalRule,

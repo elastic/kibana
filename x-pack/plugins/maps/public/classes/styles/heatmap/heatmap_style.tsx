@@ -96,7 +96,8 @@ export class HeatmapStyle implements IStyle {
     const colorStops = getOrdinalMbColorRampStops(
       this._descriptor.colorRampName,
       MIN_RANGE,
-      MAX_RANGE
+      MAX_RANGE,
+      false
     );
     if (colorStops) {
       mbMap.setPaintProperty(layerId, 'heatmap-color', [

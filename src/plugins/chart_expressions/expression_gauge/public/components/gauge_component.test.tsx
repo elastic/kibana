@@ -21,7 +21,7 @@ import {
   GaugeColorModes,
 } from '../../common';
 import GaugeComponent from './gauge_component';
-import { Chart, Goal } from '@elastic/charts';
+import { Chart, Goal, Settings } from '@elastic/charts';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -94,6 +94,7 @@ describe('GaugeComponent', function () {
 
   beforeAll(async () => {
     wrapperProps = {
+      canNavigateToLens: false,
       data: createData(),
       chartsThemeService,
       args,
@@ -211,7 +212,7 @@ describe('GaugeComponent', function () {
   });
 
   describe('ticks and color bands', () => {
-    it('sets proper color bands for values smaller than maximum', () => {
+    it('sets proper color bands and ticks on color bands for values smaller than maximum', () => {
       const palette = {
         type: 'palette' as const,
         name: 'custom',
@@ -236,6 +237,7 @@ describe('GaugeComponent', function () {
         },
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
+      expect(goal.prop('ticks')).toEqual([0, 1, 2, 3, 4, 10]);
       expect(goal.prop('bands')).toEqual([0, 1, 2, 3, 4, 10]);
     });
     it('sets proper color bands if palette steps are smaller than minimum', () => {
@@ -401,6 +403,21 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const goal = shallowWithIntl(<GaugeComponent {...customProps} />).find(Goal);
       expect(goal.prop('bands')).toEqual([0, 2, 6, 8, 10]);
+    });
+  });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallowWithIntl(
+        <GaugeComponent
+          {...wrapperProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
     });
   });
 });

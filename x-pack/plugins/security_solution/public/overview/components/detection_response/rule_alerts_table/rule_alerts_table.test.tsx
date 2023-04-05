@@ -8,7 +8,7 @@
 import moment from 'moment';
 import React from 'react';
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
 import { SecurityPageName } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
@@ -24,6 +24,13 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
     useNavigation: () => ({
       getAppUrl: mockGetAppUrl,
     }),
+  };
+});
+
+const mockNavigateToAlertsPageWithFilters = jest.fn();
+jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
+  return {
+    useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
   };
 });
 
@@ -44,10 +51,11 @@ jest.mock('./use_rule_alerts_items', () => ({
 const defaultProps: RuleAlertsTableProps = {
   signalIndexName: '',
 };
+const ruleName = 'ruleName';
 const items: RuleAlertsItem[] = [
   {
     id: 'ruleId',
-    name: 'ruleName',
+    name: ruleName,
     last_alert_at: moment().subtract(1, 'day').format(),
     alert_count: 10,
     severity: 'high',
@@ -143,5 +151,22 @@ describe('RuleAlertsTable', () => {
     });
 
     expect(result.getByTestId('severityRuleAlertsTable-name')).toHaveAttribute('href', linkUrl);
+  });
+
+  it('should open timeline with filters when total alerts is clicked', () => {
+    mockUseRuleAlertsItemsReturn({ items });
+    const { getByTestId } = render(
+      <TestProviders>
+        <RuleAlertsTable {...defaultProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('severityRuleAlertsTable-alertCountLink'));
+
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith({
+      fieldName: 'kibana.alert.rule.name',
+      selectedOptions: ['ruleName'],
+      title: 'Rule name',
+    });
   });
 });

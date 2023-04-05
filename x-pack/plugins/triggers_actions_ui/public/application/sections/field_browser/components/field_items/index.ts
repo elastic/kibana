@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getFieldItems, getFieldColumns, isActionsColumn } from './field_items';
+export { getFieldItemsData, getFieldColumns, isActionsColumn } from './field_items';

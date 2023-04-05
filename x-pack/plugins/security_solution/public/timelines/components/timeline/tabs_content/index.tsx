@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBetaBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
 import {
@@ -23,7 +24,6 @@ import {
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';
-import type { SessionViewConfig } from '../session_tab_content/use_session_view';
 import {
   getActiveTabSelector,
   getNoteIdsSelector,
@@ -33,7 +33,7 @@ import {
   getEventIdToNoteIdsSelector,
 } from './selectors';
 import * as i18n from './translations';
-import { BETA } from '../../../../common/translations';
+import { useLicense } from '../../../../common/hooks/use_license';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -261,6 +261,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   );
   const appNotes = useDeepEqualSelector((state) => getAppNotes(state));
 
+  const isEnterprisePlus = useLicense().isEnterprise();
+
   const allTimelineNoteIds = useMemo(() => {
     const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
       (acc, v) => [...acc, ...v],
@@ -348,25 +350,26 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           >
             {i18n.ANALYZER_TAB}
           </EuiTab>
-          <EuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.session}`}
-            onClick={setSessionAsActiveTab}
-            isSelected={activeTab === TimelineTabs.session}
-            disabled={sessionViewConfig === null}
-            key={TimelineTabs.session}
-            append={<EuiBetaBadge label={BETA} size="s" />}
-          >
-            {i18n.SESSION_TAB}
-          </EuiTab>
+          {isEnterprisePlus && (
+            <EuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.session}`}
+              onClick={setSessionAsActiveTab}
+              isSelected={activeTab === TimelineTabs.session}
+              disabled={sessionViewConfig === null}
+              key={TimelineTabs.session}
+            >
+              {i18n.SESSION_TAB}
+            </EuiTab>
+          )}
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={false}
+            disabled={timelineType === TimelineType.template}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
-            {showTimeline && numberOfNotes > 0 && (
+            {showTimeline && numberOfNotes > 0 && timelineType === TimelineType.default && (
               <div>
                 <CountBadge>{numberOfNotes}</CountBadge>
               </div>
@@ -375,11 +378,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
+            disabled={timelineType === TimelineType.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >
             <span>{i18n.PINNED_TAB}</span>
-            {showTimeline && numberOfPinnedEvents > 0 && (
+            {showTimeline && numberOfPinnedEvents > 0 && timelineType === TimelineType.default && (
               <div>
                 <CountBadge>{numberOfPinnedEvents}</CountBadge>
               </div>

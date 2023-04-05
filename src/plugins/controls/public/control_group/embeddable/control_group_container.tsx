@@ -6,34 +6,22 @@
  * Side Public License, v 1.
  */
 
-import {
-  map,
-  skip,
-  switchMap,
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-} from 'rxjs/operators';
+import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import deepEqual from 'fast-deep-equal';
-import { Filter, uniqFilters } from '@kbn/es-query';
-import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
-import { EuiContextMenuPanel } from '@elastic/eui';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import _ from 'lodash';
 
-import {
-  ReduxEmbeddablePackage,
-  ReduxEmbeddableTools,
-  SolutionToolbarPopover,
-} from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-
 import {
   ControlGroupInput,
   ControlGroupOutput,
   ControlGroupReduxState,
+  ControlGroupSettings,
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
@@ -44,12 +32,23 @@ import {
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
 import { pluginServices } from '../../services';
-import { ControlGroupStrings } from '../control_group_strings';
-import { EditControlGroup } from '../editor/edit_control_group';
+import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
-import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
+import { getNextPanelOrder } from './control_group_helpers';
+import type {
+  AddDataControlProps,
+  AddOptionsListControlProps,
+  AddRangeSliderControlProps,
+} from '../control_group_input_builder';
+import {
+  getDataControlPanelState,
+  getOptionsListPanelState,
+  getRangeSliderPanelState,
+  getTimeSliderPanelState,
+} from '../control_group_input_builder';
+import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -62,11 +61,13 @@ export class ControlGroupContainer extends Container<
   ControlGroupOutput
 > {
   public readonly type = CONTROL_GROUP_TYPE;
+  public readonly anyControlOutputConsumerLoading$: Subject<boolean> = new Subject();
+
+  private initialized$ = new BehaviorSubject(false);
 
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
   private recalculateFilters$: Subject<null>;
-
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
 
@@ -74,6 +75,9 @@ export class ControlGroupContainer extends Container<
     ControlGroupReduxState,
     typeof controlGroupReducers
   >;
+
+  public onFiltersPublished$: Subject<Filter[]>;
+  public onControlRemoved$: Subject<string>;
 
   public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
     this.lastUsedDataViewId = lastUsedDataViewId;
@@ -84,7 +88,13 @@ export class ControlGroupContainer extends Container<
   };
 
   public getMostRelevantDataViewId = () => {
-    return this.lastUsedDataViewId ?? this.relevantDataViewId;
+    const staticDataViewId =
+      this.getReduxEmbeddableTools().getState().componentState.staticDataViewId;
+    return staticDataViewId ?? this.lastUsedDataViewId ?? this.relevantDataViewId;
+  };
+
+  public getReduxEmbeddableTools = () => {
+    return this.reduxEmbeddableTools;
   };
 
   public closeAllFlyouts() {
@@ -92,78 +102,35 @@ export class ControlGroupContainer extends Container<
     flyoutRef = undefined;
   }
 
-  /**
-   * Returns a button that allows controls to be created externally using the embeddable
-   * @param buttonType Controls the button styling
-   * @param closePopover Closes the create control menu popover when flyout opens - only necessary if `buttonType === 'toolbar'`
-   * @return If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.
-   *         Otherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types.
-   */
-  public getCreateControlButton = (
-    buttonType: CreateControlButtonTypes,
-    closePopover?: () => void
-  ) => {
-    const ControlsServicesProvider = pluginServices.getContextProvider();
+  public async addDataControlFromField(controlProps: AddDataControlProps) {
+    const panelState = await getDataControlPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
 
-    return (
-      <ControlsServicesProvider>
-        <CreateControlButton
-          buttonType={buttonType}
-          defaultControlWidth={this.getInput().defaultControlWidth}
-          defaultControlGrow={this.getInput().defaultControlGrow}
-          updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-          updateDefaultGrow={(defaultControlGrow: boolean) =>
-            this.updateInput({ defaultControlGrow })
-          }
-          addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
-          closePopover={closePopover}
-          getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
-          setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
-        />
-      </ControlsServicesProvider>
-    );
-  };
+  public addOptionsListControl(controlProps: AddOptionsListControlProps) {
+    const panelState = getOptionsListPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
 
-  private getEditControlGroupButton = (closePopover: () => void) => {
-    const ControlsServicesProvider = pluginServices.getContextProvider();
+  public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
+    const panelState = getRangeSliderPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
 
-    return (
-      <ControlsServicesProvider>
-        <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
-      </ControlsServicesProvider>
-    );
-  };
+  public addTimeSliderControl() {
+    const panelState = getTimeSliderPanelState(this.getInput());
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
 
-  /**
-   * Returns the toolbar button that is used for creating controls and managing control settings
-   * @return `SolutionToolbarPopover` button for input controls
-   */
-  public getToolbarButtons = () => {
-    return (
-      <SolutionToolbarPopover
-        ownFocus
-        label={ControlGroupStrings.getControlButtonTitle()}
-        iconType="arrowDown"
-        iconSide="right"
-        panelPaddingSize="none"
-        data-test-subj="dashboard-controls-menu-button"
-      >
-        {({ closePopover }: { closePopover: () => void }) => (
-          <EuiContextMenuPanel
-            items={[
-              this.getCreateControlButton('toolbar', closePopover),
-              this.getEditControlGroupButton(closePopover),
-            ]}
-          />
-        )}
-      </SolutionToolbarPopover>
-    );
-  };
+  public openAddDataControlFlyout = openAddDataControlFlyout;
+
+  public openEditControlGroupFlyout = openEditControlGroupFlyout;
 
   constructor(
     reduxEmbeddablePackage: ReduxEmbeddablePackage,
     initialInput: ControlGroupInput,
-    parent?: Container
+    parent?: Container,
+    settings?: ControlGroupSettings
   ) {
     super(
       initialInput,
@@ -174,6 +141,8 @@ export class ControlGroupContainer extends Container<
     );
 
     this.recalculateFilters$ = new Subject();
+    this.onFiltersPublished$ = new Subject<Filter[]>();
+    this.onControlRemoved$ = new Subject<string>();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -182,13 +151,15 @@ export class ControlGroupContainer extends Container<
     >({
       embeddable: this,
       reducers: controlGroupReducers,
+      initialComponentState: settings,
     });
 
     // when all children are ready setup subscriptions
-    this.untilReady().then(() => {
+    this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
       this.recalculateFilters();
       this.setupSubscriptions();
+      this.initialized$.next(true);
     });
   }
 
@@ -211,43 +182,18 @@ export class ControlGroupContainer extends Container<
     );
 
     /**
-     * Create a pipe that outputs the child's ID, any time any child's output changes.
-     */
-    const anyChildChangePipe = pipe(
-      map(() => this.getChildIds()),
-      distinctUntilChanged(deepEqual),
-
-      // children may change, so make sure we subscribe/unsubscribe with switchMap
-      switchMap((newChildIds: string[]) =>
-        merge(
-          ...newChildIds.map((childId) =>
-            this.getChild(childId)
-              .getOutput$()
-              .pipe(
-                // Embeddables often throw errors into their output streams.
-                catchError(() => EMPTY),
-                map(() => childId)
-              )
-          )
-        )
-      )
-    );
-
-    /**
      * run OnChildOutputChanged when any child's output has changed
      */
     this.subscriptions.add(
-      this.getOutput$()
-        .pipe(anyChildChangePipe)
-        .subscribe((childOutputChangedId) => {
-          this.recalculateDataViews();
-          ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
-            childOutputChangedId,
-            childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
-            getChild: (id) => this.getChild(id),
-            recalculateFilters$: this.recalculateFilters$,
-          });
-        })
+      this.getAnyChildOutputChange$().subscribe((childOutputChangedId) => {
+        this.recalculateDataViews();
+        ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
+          childOutputChangedId,
+          childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
+          getChild: (id) => this.getChild(id),
+          recalculateFilters$: this.recalculateFilters$,
+        });
+      })
     );
 
     /**
@@ -262,13 +208,28 @@ export class ControlGroupContainer extends Container<
     return Object.keys(this.getInput().panels).length;
   };
 
+  public updateFilterContext = (filters: Filter[]) => {
+    this.updateInput({ filters });
+  };
+
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
+    let timeslice;
     Object.values(this.children).map((child) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
+      if (childOutput.timeslice) {
+        timeslice = childOutput.timeslice;
+      }
     });
-    this.updateOutput({ filters: uniqFilters(allFilters) });
+    // if filters are different, publish them
+    if (
+      !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||
+      !_.isEqual(this.output.timeslice, timeslice)
+    ) {
+      this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
+      this.onFiltersPublished$.next(allFilters);
+    }
   };
 
   private recalculateDataViews = () => {
@@ -285,16 +246,8 @@ export class ControlGroupContainer extends Container<
     partial: Partial<TEmbeddableInput> = {}
   ): ControlPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
-    let nextOrder = 0;
-    if (Object.keys(this.getInput().panels).length > 0) {
-      nextOrder =
-        Object.values(this.getInput().panels).reduce((highestSoFar, panel) => {
-          if (panel.order > highestSoFar) highestSoFar = panel.order;
-          return highestSoFar;
-        }, 0) + 1;
-    }
     return {
-      order: nextOrder,
+      order: getNextPanelOrder(this.getInput().panels),
       width: this.getInput().defaultControlWidth,
       grow: this.getInput().defaultControlGrow,
       ...panelState,
@@ -312,6 +265,7 @@ export class ControlGroupContainer extends Container<
         order: currentOrder - 1,
       };
     }
+    this.onControlRemoved$.next(idToRemove);
     return newPanels;
   }
 
@@ -326,18 +280,19 @@ export class ControlGroupContainer extends Container<
     });
     const allFilters = [
       ...(ignoreParentSettings?.ignoreFilters ? [] : filters ?? []),
-      ...(precedingFilters ?? []),
+      ...(precedingFilters?.filters ?? []),
     ];
     return {
       ignoreParentSettings,
       filters: allFilters,
       query: ignoreParentSettings?.ignoreQuery ? undefined : query,
       timeRange: ignoreParentSettings?.ignoreTimerange ? undefined : timeRange,
+      timeslice: ignoreParentSettings?.ignoreTimerange ? undefined : precedingFilters?.timeslice,
       id,
     };
   }
 
-  public untilReady = () => {
+  public untilAllChildrenReady = () => {
     const panelsLoading = () =>
       Object.keys(this.getInput().panels).some(
         (panelId) => !this.getOutput().embeddableLoaded[panelId]
@@ -350,6 +305,24 @@ export class ControlGroupContainer extends Container<
             reject();
           }
           if (!panelsLoading()) {
+            subscription.unsubscribe();
+            resolve();
+          }
+        });
+      });
+    }
+    return Promise.resolve();
+  };
+
+  public untilInitialized = () => {
+    if (this.initialized$.value === false) {
+      return new Promise<void>((resolve, reject) => {
+        const subscription = this.initialized$.subscribe((isInitialized) => {
+          if (this.destroyed) {
+            subscription.unsubscribe();
+            reject();
+          }
+          if (isInitialized) {
             subscription.unsubscribe();
             resolve();
           }

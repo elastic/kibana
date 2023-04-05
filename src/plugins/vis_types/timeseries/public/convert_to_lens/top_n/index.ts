@@ -6,110 +6,106 @@
  * Side Public License, v 1.
  */
 
-import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../common/enums';
+import { v4 as uuidv4 } from 'uuid';
+import { parseTimeShift } from '@kbn/data-plugin/common';
+import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
-import { getDataSourceInfo } from '../lib/datasource';
-import { getSeries } from '../lib/series';
-import { getFieldsForTerms } from '../../../common/fields_utils';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
+import { getMetricsColumns, getBucketsColumns } from '../lib/series';
+import { getConfigurationForTopN as getConfiguration, getLayers } from '../lib/configurations/xy';
+import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
 import { ConvertTsvbToLensVisualization } from '../types';
-import { isSplitWithDateHistogram } from '../lib/split_chart';
-import { getLayerConfiguration } from '../lib/layers';
-import { getWindow, isValidMetrics } from '../lib/metrics';
+import { Layer as ExtendedLayer, excludeMetaFromColumn } from '../lib/convert';
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
-  const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
+const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {
+  const newLayers: Record<string, Layer> = {};
+  Object.entries(layers).forEach(([layerId, layer]) => {
+    const columns = layer.columns.map(excludeMetaFromColumn);
+    newLayers[layerId] = { ...layer, columns };
+  });
 
-  // get the active series number
-  const seriesNum = model.series.filter((series) => !series.hidden).length;
+  return newLayers;
+};
+
+const invalidModelError = () => new Error('Invalid model');
+
+export const convertToLens: ConvertTsvbToLensVisualization = async (
+  { params: model },
+  timeRange
+) => {
   const dataViews = getDataViewsStart();
+  try {
+    const extendedLayers: Record<number, ExtendedLayer> = {};
+    const seriesNum = model.series.filter((series) => !series.hidden).length;
 
-  // handle multiple layers/series
-  for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
-    const layer = model.series[layerIdx];
-    if (layer.hidden) {
-      continue;
+    // handle multiple layers/series
+    for (const [layerIdx, series] of model.series.entries()) {
+      if (series.hidden) {
+        continue;
+      }
+
+      // not valid time shift
+      if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
+        throw invalidModelError();
+      }
+
+      if (!isValidMetrics(series.metrics, PANEL_TYPES.TOP_N, series.time_range_mode)) {
+        throw invalidModelError();
+      }
+
+      const datasourceInfo = await extractOrGenerateDatasourceInfo(
+        model.index_pattern,
+        model.time_field,
+        Boolean(series.override_index_pattern),
+        series.series_index_pattern,
+        series.series_time_field,
+        dataViews
+      );
+
+      if (!datasourceInfo) {
+        throw invalidModelError();
+      }
+
+      const { indexPatternId, indexPattern } = datasourceInfo;
+      const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
+
+      // handle multiple metrics
+      const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
+        reducedTimeRange,
+      });
+      if (!metricsColumns) {
+        throw invalidModelError();
+      }
+
+      const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, false);
+      if (bucketsColumns === null) {
+        throw invalidModelError();
+      }
+
+      const layerId = uuidv4();
+      extendedLayers[layerIdx] = {
+        indexPatternId,
+        layerId,
+        columns: [...metricsColumns, ...bucketsColumns],
+        columnOrder: [],
+      };
     }
 
-    if (!isValidMetrics(layer.metrics, PANEL_TYPES.TOP_N, layer.time_range_mode)) {
-      return null;
+    const configLayers = await getLayers(extendedLayers, model, dataViews, true);
+    if (configLayers === null) {
+      throw invalidModelError();
     }
 
-    const { indexPatternId } = await getDataSourceInfo(
-      model.index_pattern,
-      model.time_field,
-      Boolean(layer.override_index_pattern),
-      layer.series_index_pattern,
-      dataViews
-    );
+    const layers = Object.values(excludeMetaFromLayers(extendedLayers));
 
-    const window =
-      model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
-        ? getWindow(model.interval, timeRange)
-        : undefined;
-
-    // handle multiple metrics
-    const series = getSeries(layer.metrics, seriesNum, layer.split_mode, layer.color, window);
-    if (!series || !series.metrics) {
-      return null;
-    }
-
-    const splitFields = getFieldsForTerms(layer.terms_field);
-
-    // in case of terms in a date field, we want to apply the date_histogram
-    const splitWithDateHistogram = await isSplitWithDateHistogram(
-      layer,
-      splitFields,
-      indexPatternId,
-      dataViews
-    );
-
-    if (splitWithDateHistogram === null) {
-      return null;
-    }
-
-    layersConfiguration[layerIdx] = getLayerConfiguration(
-      indexPatternId,
-      layerIdx,
-      'bar_horizontal',
-      model,
-      series,
-      splitFields,
-      undefined,
-      undefined,
-      splitWithDateHistogram,
-      window
-    );
+    return {
+      type: 'lnsXY',
+      layers,
+      configuration: getConfiguration(model, configLayers),
+      indexPatternIds: getIndexPatternIds(layers),
+    };
+  } catch (e) {
+    return null;
   }
-
-  return {
-    layers: layersConfiguration,
-    type: 'lnsXY',
-    configuration: {
-      fill: model.series[0].fill ?? 0.3,
-      legend: {
-        isVisible: Boolean(model.show_legend),
-        showSingleSeries: Boolean(model.show_legend),
-        position: model.legend_position ?? 'right',
-        shouldTruncate: Boolean(model.truncate_legend),
-        maxLines: model.max_lines_legend ?? 1,
-      },
-      gridLinesVisibility: {
-        x: false,
-        yLeft: false,
-        yRight: false,
-      },
-      tickLabelsVisibility: {
-        x: true,
-        yLeft: false,
-        yRight: false,
-      },
-      axisTitlesVisibility: {
-        x: false,
-        yLeft: false,
-        yRight: false,
-      },
-      valueLabels: true,
-    },
-  };
 };

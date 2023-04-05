@@ -35,6 +35,7 @@ export {
   Form,
   UseField,
   getFieldValidityAndErrorMessage,
+  useBehaviorSubject,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';

@@ -20,8 +20,12 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
   return {
     async deleteCase() {
-      await common.clickAndValidate('property-actions-ellipses', 'property-actions-trash');
-      await common.clickAndValidate('property-actions-trash', 'confirmModalConfirmButton');
+      await retry.try(async () => {
+        await testSubjects.click('property-actions-case-ellipses');
+        await testSubjects.existOrFail('property-actions-case-trash', { timeout: 100 });
+      });
+
+      await common.clickAndValidate('property-actions-case-trash', 'confirmModalConfirmButton');
       await testSubjects.click('confirmModalConfirmButton');
       await header.waitUntilLoadingHasFinished();
     },
@@ -61,7 +65,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
         '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
       );
       await addVisualizationButton.click();
-      await testSubjects.existOrFail('savedObjectFinderItemList', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('savedObjectsFinderTable', { timeout: 10 * 1000 });
 
       // select visualization
       await testSubjects.setValue('savedObjectFinderSearchInput', visName, {
@@ -106,6 +110,20 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
         actualDescription,
         `Expected case description to be '${expectedDescription}' (got '${actualDescription}')`
       );
+    },
+
+    async openAssigneesPopover() {
+      await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async closeAssigneesPopover() {
+      await retry.try(async () => {
+        // Click somewhere outside the popover
+        await testSubjects.click('header-page-title');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('euiSelectableList');
+      });
     },
   };
 }

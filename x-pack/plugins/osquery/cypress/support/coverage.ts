@@ -10,6 +10,10 @@
 // / <reference types="cypress" />
 // @ts-check
 
+// TODO: we should be able to remove this ts-ignore while using isolatedModules
+// this is a skip for the errors created when typechecking with isolatedModules
+// @ts-ignore
+
 const dayjs = require('dayjs');
 const duration = require('dayjs/plugin/duration');
 // const { filterSpecsFromCoverage } = require('./support-utils');
@@ -47,7 +51,8 @@ const logMessage = (s: string) => {
  * If there are more files loaded from support folder, also removes them
  */
 const filterSupportFilesFromCoverage = (totalCoverage: any) => {
-  const integrationFolder = Cypress.config('integrationFolder');
+  // @ts-expect-error update types
+  const integrationFolder = Cypress.config('e2eFolder');
   const supportFile = Cypress.config('supportFile');
 
   /** @type {string} Cypress run-time config has the support folder string */
@@ -64,6 +69,7 @@ const filterSupportFilesFromCoverage = (totalCoverage: any) => {
   //   if we have files from support folder AND the support folder is not same
   //   as the integration, or its prefix (this might remove all app source files)
   //   then remove all files from the support folder
+  // @ts-expect-error update types
   if (!integrationFolder.startsWith(supportFolder)) {
     // remove all covered files from support folder
     coverage = Cypress._.omitBy(totalCoverage, (fileCoverage, filename) =>

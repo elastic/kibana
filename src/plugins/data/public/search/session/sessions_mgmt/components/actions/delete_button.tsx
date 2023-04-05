@@ -49,7 +49,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
       onCancel={onActionDismiss}
       onConfirm={async () => {
         setIsLoading(true);
-        await api.sendCancel(id);
+        await api.sendDelete(id);
         onActionDismiss();
       }}
       confirmButtonText={confirm}
@@ -68,7 +68,7 @@ export const createDeleteActionDescriptor = (
   uiSession: UISession,
   core: CoreStart
 ): IClickActionDescriptor => ({
-  iconType: 'crossInACircleFilled',
+  iconType: 'trash',
   label: <FormattedMessage id="data.mgmt.searchSessions.actionDelete" defaultMessage="Delete" />,
   onClick: async () => {
     const ref = core.overlays.openModal(

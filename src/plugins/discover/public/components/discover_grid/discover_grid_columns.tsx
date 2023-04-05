@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
@@ -19,8 +20,6 @@ import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
-import { DiscoverServices } from '../../build_services';
-import { DataTableRecord } from '../../types';
 import { buildEditFieldButton } from './build_edit_field_button';
 
 const openDetails = {
@@ -53,8 +52,8 @@ const select = {
   ),
 };
 
-export function getLeadControlColumns(setExpandedDoc?: (doc?: DataTableRecord) => void) {
-  if (!setExpandedDoc) {
+export function getLeadControlColumns(canSetExpandedDoc: boolean) {
+  if (!canSetExpandedDoc) {
     return [select];
   }
   return [openDetails, select];
@@ -66,7 +65,8 @@ function buildEuiGridColumn({
   dataView,
   defaultColumns,
   isSortEnabled,
-  services,
+  toastNotifications,
+  hasEditDataViewPermission,
   valueToStringConverter,
   rowsCount,
   onFilter,
@@ -77,7 +77,8 @@ function buildEuiGridColumn({
   dataView: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
-  services: DiscoverServices;
+  toastNotifications: ToastsStart;
+  hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
   onFilter?: DocViewFilterFn;
@@ -87,17 +88,19 @@ function buildEuiGridColumn({
   const editFieldButton =
     editField &&
     dataViewField &&
-    buildEditFieldButton({ services, dataView, field: dataViewField, editField });
+    buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
+  const columnDisplayName =
+    columnName === '_source'
+      ? i18n.translate('discover.grid.documentHeader', {
+          defaultMessage: 'Document',
+        })
+      : dataViewField?.displayName || columnName;
+
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(dataViewField?.type),
     isSortable: isSortEnabled && dataViewField?.sortable === true,
-    display:
-      columnName === '_source'
-        ? i18n.translate('discover.grid.documentHeader', {
-            defaultMessage: 'Document',
-          })
-        : dataViewField?.displayName,
+    displayAsText: columnDisplayName,
     actions: {
       showHide:
         defaultColumns || columnName === dataView.timeFieldName
@@ -113,10 +116,16 @@ function buildEuiGridColumn({
       additional: [
         ...(columnName === '__source'
           ? []
-          : [buildCopyColumnNameButton({ columnId: columnName, services })]),
+          : [
+              buildCopyColumnNameButton({
+                columnDisplayName,
+                toastNotifications,
+              }),
+            ]),
         buildCopyColumnValuesButton({
           columnId: columnName,
-          services,
+          columnDisplayName,
+          toastNotifications,
           rowsCount,
           valueToStringConverter,
         }),
@@ -168,6 +177,7 @@ export function getEuiGridColumns({
   defaultColumns,
   isSortEnabled,
   services,
+  hasEditDataViewPermission,
   valueToStringConverter,
   onFilter,
   editField,
@@ -179,7 +189,11 @@ export function getEuiGridColumns({
   showTimeCol: boolean;
   defaultColumns: boolean;
   isSortEnabled: boolean;
-  services: DiscoverServices;
+  services: {
+    uiSettings: IUiSettingsClient;
+    toastNotifications: ToastsStart;
+  };
+  hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;
@@ -199,7 +213,8 @@ export function getEuiGridColumns({
       dataView,
       defaultColumns,
       isSortEnabled,
-      services,
+      toastNotifications: services.toastNotifications,
+      hasEditDataViewPermission,
       valueToStringConverter,
       rowsCount,
       onFilter,

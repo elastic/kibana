@@ -1291,6 +1291,14 @@ describe('event log telemetry', () => {
           avg_total_search_duration: {
             value: 28.630434782608695,
           },
+          by_execution_status: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              { key: 'success', doc_count: 21 },
+              { key: 'failure', doc_count: 22 },
+            ],
+          },
         },
       });
 
@@ -1377,7 +1385,6 @@ describe('event log telemetry', () => {
             logs__alert__document__count: 0,
           },
         },
-
         alertsPercentilesByType: {
           p50: {
             '__index-threshold': 1,
@@ -1397,6 +1404,10 @@ describe('event log telemetry', () => {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 0,
           },
+        },
+        countRulesByExecutionStatus: {
+          failure: 22,
+          success: 21,
         },
         hasErrors: false,
       });
@@ -1437,6 +1448,7 @@ describe('event log telemetry', () => {
         generatedActionsPercentilesByType: {},
         alertsPercentiles: {},
         alertsPercentilesByType: {},
+        countRulesByExecutionStatus: {},
       });
     });
   });

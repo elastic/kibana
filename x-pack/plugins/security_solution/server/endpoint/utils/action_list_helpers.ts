@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 import type {
@@ -34,11 +35,13 @@ export const getActions = async ({
   size,
   startDate,
   userIds,
+  unExpiredOnly,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
   actionRequests: TransportResult<estypes.SearchResponse<LogsEndpointAction>, unknown>;
 }> => {
   const additionalFilters = [];
+
   if (commands?.length) {
     additionalFilters.push({
       terms: {
@@ -46,19 +49,37 @@ export const getActions = async ({
       },
     });
   }
-  if (userIds?.length) {
-    additionalFilters.push({ terms: { user_id: userIds } });
-  }
+
   if (elasticAgentIds?.length) {
     additionalFilters.push({ terms: { agents: elasticAgentIds } });
   }
 
+  if (unExpiredOnly) {
+    additionalFilters.push({ range: { expiration: { gte: 'now' } } });
+  }
+
   const dateFilters = getDateFilters({ startDate, endDate });
-  const baseActionFilters = [
+
+  const actionsFilters = [
     { term: { input_type: 'endpoint' } },
     { term: { type: 'INPUT_ACTION' } },
+    ...dateFilters,
+    ...additionalFilters,
   ];
-  const actionsFilters = [...baseActionFilters, ...dateFilters];
+
+  const must: SearchRequest = [
+    {
+      bool: {
+        filter: actionsFilters,
+      },
+    },
+  ];
+
+  if (userIds?.length) {
+    const userIdsKql = userIds.map((userId) => `user_id:${userId}`).join(' or ');
+    const mustClause = toElasticsearchQuery(fromKueryExpression(userIdsKql));
+    must.push(mustClause);
+  }
 
   const actionsSearchQuery: SearchRequest = {
     index: ENDPOINT_ACTIONS_INDEX,
@@ -66,11 +87,7 @@ export const getActions = async ({
     from,
     body: {
       query: {
-        bool: {
-          filter: additionalFilters.length
-            ? [...actionsFilters, ...additionalFilters]
-            : actionsFilters,
-        },
+        bool: { must },
       },
       sort: [
         {

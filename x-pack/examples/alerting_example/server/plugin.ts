@@ -8,12 +8,13 @@
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 // import directly to support examples functional tests (@kbn-test/src/functional_tests/lib/babel_register_for_test_plugins.js)
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/utils/default_app_categories';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
 import { alertType as peopleInSpaceAlert } from './alert_types/astros';
+import { alertType as patternAlert } from './alert_types/pattern';
 // can't import static code from another plugin to support examples functional test
 const INDEX_THRESHOLD_ID = '.index-threshold';
 import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
@@ -28,6 +29,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
   public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
     alerting.registerType(alwaysFiringAlert);
     alerting.registerType(peopleInSpaceAlert);
+    alerting.registerType(patternAlert);
 
     features.registerKibanaFeature({
       id: ALERTING_EXAMPLE_APP_ID,

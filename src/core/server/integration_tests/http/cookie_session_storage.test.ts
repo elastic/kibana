@@ -10,7 +10,7 @@ import { parse as parseCookie } from 'tough-cookie';
 import supertest from 'supertest';
 import { BehaviorSubject } from 'rxjs';
 import { duration as momentDuration } from 'moment';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
@@ -53,7 +53,7 @@ configService.atPath.mockImplementation((path) => {
       ssl: {
         verificationMode: 'none',
       },
-      compression: { enabled: true },
+      compression: { enabled: true, brotli: { enabled: false } },
       xsrf: {
         disableProtection: true,
         allowlist: [],

@@ -14,6 +14,7 @@ import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import axios, { AxiosResponse } from 'axios';
 import times from 'lodash/times';
 import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
+import { mockEncryptedSO } from './utils/mocks';
 
 const taskManagerSetup = taskManagerMock.createSetup();
 
@@ -37,6 +38,7 @@ describe('SyntheticsService', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const getMockedService = (locationsNum: number = 1) => {
@@ -59,7 +61,6 @@ describe('SyntheticsService', () => {
 
     service.apiClient.locations = locations;
 
-    jest.spyOn(service, 'getApiKey').mockResolvedValue({ name: 'example', id: 'i', apiKey: 'k' });
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
 
     return { service, locations };
@@ -145,7 +146,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfig(payload as HeartbeatConfig);
+      await service.addConfig({ monitor: payload } as any);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -157,23 +158,6 @@ describe('SyntheticsService', () => {
   });
 
   describe('pushConfigs', () => {
-    it('does not include the isEdit flag on normal push requests', async () => {
-      const { service, locations } = getMockedService();
-
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
-
-      const payload = getFakePayload([locations[0]]);
-
-      await service.pushConfigs([payload] as HeartbeatConfig[]);
-
-      expect(axios).toHaveBeenCalledTimes(1);
-      expect(axios).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ is_edit: false }),
-        })
-      );
-    });
-
     it('includes the isEdit flag on edit requests', async () => {
       const { service, locations } = getMockedService();
 
@@ -181,7 +165,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.pushConfigs([payload] as HeartbeatConfig[], true);
+      await service.editConfig({ monitor: payload } as any);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -189,6 +173,51 @@ describe('SyntheticsService', () => {
           data: expect.objectContaining({ is_edit: true }),
         })
       );
+    });
+  });
+
+  describe('getSyntheticsParams', () => {
+    it('returns the params for all spaces', async () => {
+      const { service } = getMockedService();
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      const params = await service.getSyntheticsParams();
+
+      expect(params).toEqual({
+        '*': {
+          username: 'elastic',
+        },
+      });
+    });
+    it('returns the params for specific space', async () => {
+      const { service } = getMockedService();
+
+      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+
+      expect(params).toEqual({
+        '*': {
+          username: 'elastic',
+        },
+        default: {
+          username: 'elastic',
+        },
+      });
+    });
+    it('returns the space limited params', async () => {
+      const { service } = getMockedService();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO([
+        { attributes: { key: 'username', value: 'elastic' }, namespaces: ['default'] },
+      ]) as any;
+
+      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+
+      expect(params).toEqual({
+        default: {
+          username: 'elastic',
+        },
+      });
     });
   });
 });

@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-browser-mocks",
@@ -45,6 +46,7 @@
             ],
             "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -57,11 +59,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "AnalyticsServiceSetup",
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-common.AnalyticsServiceSetup",
+                "text": "AnalyticsServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -74,11 +83,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "AnalyticsServiceStart",
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-common.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              },
               ">"
             ],
             "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

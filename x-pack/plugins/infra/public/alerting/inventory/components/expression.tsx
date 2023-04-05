@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -21,15 +20,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce, omit } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParamsExpressionProps,
   ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { debounce, omit } from 'lodash';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import {
   Comparator,
   FilterQuery,
@@ -41,22 +42,24 @@ import {
   SnapshotCustomMetricInputRT,
 } from '../../../../common/http_api/snapshot_api';
 import { findInventoryModel } from '../../../../common/inventory_models';
-import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
-import { rdsMetricTypes } from '../../../../common/inventory_models/aws_rds/toolbar_items';
-import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
-import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
-import { containerMetricTypes } from '../../../../common/inventory_models/container/toolbar_items';
-import { hostMetricTypes } from '../../../../common/inventory_models/host/toolbar_items';
-import { podMetricTypes } from '../../../../common/inventory_models/pod/toolbar_items';
+import { awsEC2SnapshotMetricTypes } from '../../../../common/inventory_models/aws_ec2';
+import { awsRDSSnapshotMetricTypes } from '../../../../common/inventory_models/aws_rds';
+import { awsS3SnapshotMetricTypes } from '../../../../common/inventory_models/aws_s3';
+import { awsSQSSnapshotMetricTypes } from '../../../../common/inventory_models/aws_sqs';
+import { containerSnapshotMetricTypes } from '../../../../common/inventory_models/container';
+import { hostSnapshotMetricTypes } from '../../../../common/inventory_models/host';
+import { podSnapshotMetricTypes } from '../../../../common/inventory_models/pod';
 import {
   InventoryItemType,
   SnapshotMetricType,
   SnapshotMetricTypeRT,
 } from '../../../../common/inventory_models/types';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import {
+  DerivedIndexPattern,
+  useSourceContext,
+  withSourceProvider,
+} from '../../../containers/metrics_source';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
@@ -86,7 +89,7 @@ type Props = Omit<
     },
     AlertContextMeta
   >,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch' | 'onChangeMetaData'
 >;
 
 export const defaultExpression = {
@@ -104,13 +107,9 @@ export const defaultExpression = {
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { http, notifications } = useKibanaContextForPlugin().services;
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
-    sourceId: 'default',
-    fetch: http.fetch,
-    toastWarning: notifications.toasts.addWarning,
-  });
+  const { source, createDerivedIndexPattern } = useSourceContext();
+
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
@@ -328,6 +327,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
       <div>
         <EuiButtonEmpty
+          data-test-subj="infraExpressionsAddConditionButton"
           color={'primary'}
           iconSide={'left'}
           flush={'left'}
@@ -384,6 +384,7 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         )) || (
           <EuiFieldSearch
+            data-test-subj="infraExpressionsFieldSearch"
             onChange={handleFieldSearchChange}
             value={ruleParams.filterQueryText}
             fullWidth
@@ -398,7 +399,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Expressions;
+export default withSourceProvider<Props>(Expressions)('default');
 
 interface ExpressionRowProps {
   nodeType: InventoryItemType;
@@ -433,8 +434,7 @@ const StyledHealth = euiStyled(EuiHealth)`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const [isExpanded, setRowState] = useState(true);
-  const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
+  const [isExpanded, toggle] = useToggle(true);
 
   const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, fields } =
     props;
@@ -545,30 +545,29 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const ofFields = useMemo(() => {
-    let myMetrics = hostMetricTypes;
+    let myMetrics: SnapshotMetricType[] = hostSnapshotMetricTypes;
 
     switch (props.nodeType) {
       case 'awsEC2':
-        myMetrics = ec2MetricTypes;
+        myMetrics = awsEC2SnapshotMetricTypes;
         break;
       case 'awsRDS':
-        myMetrics = rdsMetricTypes;
+        myMetrics = awsRDSSnapshotMetricTypes;
         break;
       case 'awsS3':
-        myMetrics = s3MetricTypes;
+        myMetrics = awsS3SnapshotMetricTypes;
         break;
       case 'awsSQS':
-        myMetrics = sqsMetricTypes;
+        myMetrics = awsSQSSnapshotMetricTypes;
         break;
       case 'host':
-        myMetrics = hostMetricTypes;
-
+        myMetrics = hostSnapshotMetricTypes;
         break;
       case 'pod':
-        myMetrics = podMetricTypes;
+        myMetrics = podSnapshotMetricTypes;
         break;
       case 'container':
-        myMetrics = containerMetricTypes;
+        myMetrics = containerSnapshotMetricTypes;
         break;
     }
     return myMetrics.map(toMetricOpt);
@@ -580,7 +579,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggleRowState}
+            onClick={toggle}
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}
@@ -638,7 +637,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType={'crossInACircleFilled'}
+                  iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
               </StyledExpressionRow>
@@ -650,6 +649,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               <EuiSpacer size={'xs'} />
               <StyledExpressionRow>
                 <EuiButtonEmpty
+                  data-test-subj="infraExpressionRowAddWarningThresholdButton"
                   color={'primary'}
                   flush={'left'}
                   size="xs"

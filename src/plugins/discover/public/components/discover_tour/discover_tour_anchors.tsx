@@ -14,7 +14,7 @@ export const DISCOVER_TOUR_STEP_ANCHOR_IDS = {
 };
 
 export const DISCOVER_TOUR_STEP_ANCHORS = {
-  addFields: `#${DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields}`,
+  addFields: `[data-test-subj="fieldListGroupedAvailableFields-count"], #${DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields}`,
   reorderColumns: '[data-test-subj="dataGridColumnSelectorButton"]',
   sort: '[data-test-subj="dataGridColumnSortingButton"]',
   changeRowHeight: '[data-test-subj="dataGridDisplaySelectorButton"]',

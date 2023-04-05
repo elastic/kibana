@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHealth,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
-} from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import { CaseSeverity } from '../../../common/api';
+import type { CaseSeverity } from '../../../common/api';
 import { severities } from './config';
 
 interface Props {

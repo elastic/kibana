@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/import-resolver",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

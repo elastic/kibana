@@ -9,7 +9,19 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import type { Search } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { useSecurityDashboardsTable } from '../../containers/dashboards/use_security_dashboards_table';
+import { i18n } from '@kbn/i18n';
+import {
+  useSecurityDashboardsTableItems,
+  useSecurityDashboardsTableColumns,
+} from '../../containers/dashboards/use_security_dashboards_table';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+
+export const DASHBOARDS_QUERY_ERROR = i18n.translate(
+  'xpack.securitySolution.dashboards.queryError',
+  {
+    defaultMessage: 'Error retrieving security dashboards',
+  }
+);
 
 /** wait this many ms after the user completes typing before applying the filter input */
 const INPUT_TIMEOUT = 250;
@@ -22,7 +34,10 @@ const DASHBOARDS_TABLE_SORTING = {
 } as const;
 
 export const DashboardsTable: React.FC = () => {
-  const { items, columns } = useSecurityDashboardsTable();
+  const { items, isLoading, error } = useSecurityDashboardsTableItems();
+  const columns = useSecurityDashboardsTableColumns();
+  const { addError } = useAppToasts();
+
   const [filteredItems, setFilteredItems] = useState(items);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -52,6 +67,12 @@ export const DashboardsTable: React.FC = () => {
     }
   }, [items, searchQuery]);
 
+  useEffect(() => {
+    if (error) {
+      addError(error, { title: DASHBOARDS_QUERY_ERROR });
+    }
+  }, [error, addError]);
+
   return (
     <EuiInMemoryTable
       data-test-subj="dashboardsTable"
@@ -60,6 +81,7 @@ export const DashboardsTable: React.FC = () => {
       search={search}
       pagination={true}
       sorting={DASHBOARDS_TABLE_SORTING}
+      loading={isLoading}
     />
   );
 };

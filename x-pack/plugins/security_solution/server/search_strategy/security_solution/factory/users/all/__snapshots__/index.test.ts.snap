@@ -7,17 +7,24 @@ Array [
       "ENDPOINT-W-8-03",
     ],
     "lastSeen": "2022-02-14T11:18:52.000Z",
-    "name": "vagrant",
+    "name": "jose52",
+  },
+  Object {
+    "domain": Array [
+      "ENDPOINT-W-8-04",
+    ],
+    "lastSeen": "2022-02-14T11:18:52.000Z",
+    "name": "danny",
   },
 ]
 `;
 
-exports[`allHosts search strategy parse should parse data correctly 2`] = `1`;
+exports[`allHosts search strategy parse should parse data correctly 2`] = `2`;
 
 exports[`allHosts search strategy parse should parse data correctly 3`] = `
 Object {
   "activePage": 0,
-  "fakeTotalCount": 1,
+  "fakeTotalCount": 2,
   "showMorePagesIndicator": false,
 }
 `;

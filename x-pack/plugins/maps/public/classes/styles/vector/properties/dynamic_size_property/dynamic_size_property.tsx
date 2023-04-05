@@ -14,6 +14,7 @@ import { makeMbClampedNumberExpression } from '../../style_util';
 import {
   FieldFormatter,
   HALF_MAKI_ICON_SIZE,
+  MB_LOOKUP_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../../common/constants';
 import type { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
@@ -76,9 +77,13 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   /*
    * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [minSize, maxSize]
    */
-  getMbSizeExpression() {
+  getMbSizeExpression(options?: {
+    forceFeatureProperties?: boolean;
+    maxStopOutput?: unknown;
+    minStopOutput?: unknown;
+  }) {
     const rangeFieldMeta = this.getRangeFieldMeta();
-    if (!this._isSizeDynamicConfigComplete() || !rangeFieldMeta) {
+    if (!this.isSizeDynamicConfigComplete() || !rangeFieldMeta) {
       // return min of size to avoid flashing
       // returning minimum allows "growing" of the symbols when the meta comes in
       // A grow effect us less visually jarring as shrinking.
@@ -98,31 +103,30 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     // shift values to be positive integers >= 1
     const valueShift = rangeFieldMeta.min < 1 ? Math.abs(rangeFieldMeta.min) + 1 : 0;
 
-    const maxValueStopInput = isArea
-      ? Math.sqrt(rangeFieldMeta.max + valueShift)
-      : rangeFieldMeta.max;
-    const minValueStopInput = isArea
-      ? Math.sqrt(rangeFieldMeta.min + valueShift)
-      : rangeFieldMeta.min;
-    const maxRangeStopOutput =
-      this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
-        ? this._options.maxSize / HALF_MAKI_ICON_SIZE
-        : this._options.maxSize;
-    const minRangeStopOutput =
-      this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
-        ? this._options.minSize / HALF_MAKI_ICON_SIZE
-        : this._options.minSize;
-    const stops =
-      rangeFieldMeta.min === rangeFieldMeta.max
-        ? [maxValueStopInput, maxRangeStopOutput]
-        : [minValueStopInput, minRangeStopOutput, maxValueStopInput, maxRangeStopOutput];
+    const maxStopInput = isArea ? Math.sqrt(rangeFieldMeta.max + valueShift) : rangeFieldMeta.max;
+    const minStopInput = isArea ? Math.sqrt(rangeFieldMeta.min + valueShift) : rangeFieldMeta.min;
+
+    const maxStopOutput = options?.maxStopOutput ? options.maxStopOutput : this.getMaxStopOutput();
+    const minStopOutput = options?.minStopOutput ? options.minStopOutput : this.getMinStopOutput();
+    const invert = this._options.invert === undefined ? false : this._options.invert;
+    function getStopsWithoutRange() {
+      return invert ? [maxStopInput, minStopOutput] : [maxStopInput, maxStopOutput];
+    }
+    function getStops() {
+      return invert
+        ? [minStopInput, maxStopOutput, maxStopInput, minStopOutput]
+        : [minStopInput, minStopOutput, maxStopInput, maxStopOutput];
+    }
+    const stops = rangeFieldMeta.min === rangeFieldMeta.max ? getStopsWithoutRange() : getStops();
 
     const valueExpression = makeMbClampedNumberExpression({
-      lookupFunction: this.getMbLookupFunction(),
+      lookupFunction: options?.forceFeatureProperties
+        ? MB_LOOKUP_FUNCTION.GET
+        : this.getMbLookupFunction(),
       maxValue: rangeFieldMeta.max,
       minValue: rangeFieldMeta.min,
       fieldName: this.getMbFieldName(),
-      fallback: rangeFieldMeta.min,
+      fallback: invert ? rangeFieldMeta.max : rangeFieldMeta.min,
     });
     const valueShiftExpression =
       rangeFieldMeta.min < 1 ? ['+', valueExpression, valueShift] : valueExpression;
@@ -132,7 +136,19 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     return ['interpolate', ['linear'], inputExpression, ...stops];
   }
 
-  _isSizeDynamicConfigComplete() {
+  getMaxStopOutput() {
+    return this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
+      ? this._options.maxSize / HALF_MAKI_ICON_SIZE
+      : this._options.maxSize;
+  }
+
+  getMinStopOutput() {
+    return this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
+      ? this._options.minSize / HALF_MAKI_ICON_SIZE
+      : this._options.minSize;
+  }
+
+  isSizeDynamicConfigComplete() {
     return (
       this._field &&
       this._field.isValid() &&

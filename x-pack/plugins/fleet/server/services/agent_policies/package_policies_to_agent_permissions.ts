@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+
+import { getNormalizedDataStreams } from '../../../common/services';
 
 import type {
   FullAgentPolicyOutputPermissions,
+  PackageInfo,
   RegistryDataStreamPrivileges,
 } from '../../../common/types';
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 
 import type { PackagePolicy } from '../../types';
-
-import { getPackageInfo } from '../epm/packages';
+import { pkgToPkgKey } from '../epm/registry';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
 export async function storedPackagePoliciesToAgentPermissions(
-  soClient: SavedObjectsClientContract,
+  packageInfoCache: Map<string, PackageInfo>,
   packagePolicies?: PackagePolicy[]
 ): Promise<FullAgentPolicyOutputPermissions | undefined> {
   // I'm not sure what permissions to return for this case, so let's return the defaults
@@ -36,16 +37,13 @@ export async function storedPackagePoliciesToAgentPermissions(
   const permissionEntries = (packagePolicies as PackagePolicy[]).map<Promise<[string, any]>>(
     async (packagePolicy) => {
       if (!packagePolicy.package) {
-        throw new Error(`No package for package policy ${packagePolicy.name}`);
+        throw new Error(`No package for package policy ${packagePolicy.name ?? packagePolicy.id}`);
       }
 
-      const pkg = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: packagePolicy.package.version,
-      });
+      const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
 
-      if (!pkg.data_streams || pkg.data_streams.length === 0) {
+      const dataStreams = getNormalizedDataStreams(pkg);
+      if (!dataStreams || dataStreams.length === 0) {
         return [packagePolicy.name, undefined];
       }
 
@@ -56,21 +54,21 @@ export async function storedPackagePoliciesToAgentPermissions(
           // - Endpoint doesn't store the `data_stream` metadata in
           // `packagePolicy.inputs`, so we will use _all_ data_streams from the
           // package.
-          dataStreamsForPermissions = pkg.data_streams;
+          dataStreamsForPermissions = dataStreams;
           break;
 
         case 'apm':
           // - APM doesn't store the `data_stream` metadata in
           //   `packagePolicy.inputs`, so we will use _all_ data_streams from
           //   the package.
-          dataStreamsForPermissions = pkg.data_streams;
+          dataStreamsForPermissions = dataStreams;
           break;
 
         case 'osquery_manager':
           // - Osquery manager doesn't store the `data_stream` metadata in
           //   `packagePolicy.inputs`, so we will use _all_ data_streams from
           //   the package.
-          dataStreamsForPermissions = pkg.data_streams;
+          dataStreamsForPermissions = dataStreams;
           break;
 
         default:
@@ -78,7 +76,7 @@ export async function storedPackagePoliciesToAgentPermissions(
           //   `packagePolicy.inputs[].streams[].data_stream`
           // - The rest of the metadata needs to be fetched from the
           //   `data_stream` object in the package. The link is
-          //   `packagePolicy.inputs[].type == pkg.data_streams.streams[].input`
+          //   `packagePolicy.inputs[].type == dataStreams.streams[].input`
           // - Some packages (custom logs) have a compiled dataset, stored in
           //   `input.streams.compiled_stream.data_stream.dataset`
           dataStreamsForPermissions = packagePolicy.inputs

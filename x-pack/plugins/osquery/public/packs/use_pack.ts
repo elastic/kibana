@@ -10,7 +10,7 @@ import { useKibana } from '../common/lib/kibana';
 import type { PackItem } from './types';
 
 interface UsePack {
-  packId: string;
+  packId?: string;
   skip?: boolean;
 }
 
@@ -23,7 +23,7 @@ export const usePack = ({ packId, skip = false }: UsePack) => {
     {
       select: (response) => response?.data,
       keepPreviousData: true,
-      enabled: !skip || !packId,
+      enabled: !!(!skip && packId),
     }
   );
 };

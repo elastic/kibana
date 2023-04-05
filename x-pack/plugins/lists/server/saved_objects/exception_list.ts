@@ -159,6 +159,9 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
         },
       },
     },
+    expire_time: {
+      type: 'date',
+    },
     item_id: {
       type: 'keyword',
     },

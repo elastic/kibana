@@ -9,8 +9,8 @@ import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { Details } from '../helpers';
-import type { Ecs } from '../../../../../../../common/ecs';
 import { NetflowRenderer } from '../netflow';
 
 import { DnsRequestEventDetailsLine } from './dns_request_event_details_line';

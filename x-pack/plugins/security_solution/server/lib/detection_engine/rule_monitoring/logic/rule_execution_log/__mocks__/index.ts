@@ -8,7 +8,6 @@
 import {
   getRuleExecutionEventsResponseMock,
   getRuleExecutionResultsResponseMock,
-  ruleExecutionSummaryMock,
 } from '../../../../../../../common/detection_engine/rule_monitoring/mocks';
 
 import type { IRuleExecutionLogForRoutes } from '../client_for_routes/client_interface';
@@ -17,29 +16,11 @@ import type {
   RuleExecutionContext,
 } from '../client_for_executors/client_interface';
 
-type GetExecutionSummariesBulk = IRuleExecutionLogForRoutes['getExecutionSummariesBulk'];
-type GetExecutionSummary = IRuleExecutionLogForRoutes['getExecutionSummary'];
-type ClearExecutionSummary = IRuleExecutionLogForRoutes['clearExecutionSummary'];
 type GetExecutionEvents = IRuleExecutionLogForRoutes['getExecutionEvents'];
 type GetExecutionResults = IRuleExecutionLogForRoutes['getExecutionResults'];
 
 const ruleExecutionLogForRoutesMock = {
   create: (): jest.Mocked<IRuleExecutionLogForRoutes> => ({
-    getExecutionSummariesBulk: jest
-      .fn<ReturnType<GetExecutionSummariesBulk>, Parameters<GetExecutionSummariesBulk>>()
-      .mockResolvedValue({
-        '04128c15-0d1b-4716-a4c5-46997ac7f3bd': ruleExecutionSummaryMock.getSummarySucceeded(),
-        '1ea5a820-4da1-4e82-92a1-2b43a7bece08': ruleExecutionSummaryMock.getSummaryFailed(),
-      }),
-
-    getExecutionSummary: jest
-      .fn<ReturnType<GetExecutionSummary>, Parameters<GetExecutionSummary>>()
-      .mockResolvedValue(ruleExecutionSummaryMock.getSummarySucceeded()),
-
-    clearExecutionSummary: jest
-      .fn<ReturnType<ClearExecutionSummary>, Parameters<ClearExecutionSummary>>()
-      .mockResolvedValue(),
-
     getExecutionEvents: jest
       .fn<ReturnType<GetExecutionEvents>, Parameters<GetExecutionEvents>>()
       .mockResolvedValue(getRuleExecutionEventsResponseMock.getSomeResponse()),

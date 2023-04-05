@@ -87,7 +87,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiSwitch"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
           aria-checked="false"
@@ -172,7 +172,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         <a
           class="euiLink emotion-euiLink-primary"
           href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
-          rel="noopener"
+          rel="noopener noreferrer"
           target="_blank"
         >
           <span>
@@ -237,7 +237,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         <a
           class="euiLink emotion-euiLink-primary"
           href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
-          rel="noopener"
+          rel="noopener noreferrer"
           target="_blank"
         >
           <span>
@@ -287,18 +287,18 @@ exports[`UrlFormatEditor should render normally 1`] = `
             class="euiTableHeaderMobile"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+              class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               />
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               />
             </div>
           </div>
           <table
-            class="euiTable euiTable--compressed euiTable--responsive"
+            class="euiTable css-0 euiTable--compressed euiTable--responsive"
             id="__table_generated-id"
             tabindex="-1"
           >
@@ -343,7 +343,9 @@ exports[`UrlFormatEditor should render normally 1`] = `
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody
+              class="css-0"
+            >
               <tr
                 class="euiTableRow"
               >

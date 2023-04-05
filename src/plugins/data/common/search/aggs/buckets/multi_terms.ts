@@ -13,7 +13,7 @@ import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterMultiTerms } from './create_filter/multi_terms';
 import { aggMultiTermsFnName } from './multi_terms_fn';
-import { AggConfigSerialized, BaseAggParams } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 import { MultiFieldKey } from './multi_field_key';
 import {
@@ -26,16 +26,23 @@ const termsTitle = i18n.translate('data.search.aggs.buckets.multiTermsTitle', {
   defaultMessage: 'Multi-Terms',
 });
 
-export interface AggParamsMultiTerms extends BaseAggParams {
+interface CommonAggParamsMultiTerms extends BaseAggParams {
   fields: string[];
   orderBy: string;
-  orderAgg?: AggConfigSerialized;
   order?: 'asc' | 'desc';
   size?: number;
   shardSize?: number;
   otherBucket?: boolean;
   otherBucketLabel?: string;
   separatorLabel?: string;
+}
+
+export interface AggParamsMultiTermsSerialized extends CommonAggParamsMultiTerms {
+  orderAgg?: AggConfigSerialized;
+}
+
+export interface AggParamsMultiTerms extends CommonAggParamsMultiTerms {
+  orderAgg?: IAggConfig;
 }
 
 export const getMultiTermsBucketAgg = () => {

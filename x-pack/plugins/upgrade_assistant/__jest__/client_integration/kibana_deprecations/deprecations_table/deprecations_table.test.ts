@@ -69,10 +69,10 @@ describe('Kibana deprecations - Deprecations table', () => {
     const { find } = testBed;
 
     expect(find('criticalDeprecationsCount').text()).toContain(
-      mockedCriticalKibanaDeprecations.length
+      String(mockedCriticalKibanaDeprecations.length)
     );
     expect(find('warningDeprecationsCount').text()).toContain(
-      mockedWarningKibanaDeprecations.length
+      String(mockedWarningKibanaDeprecations.length)
     );
   });
 
@@ -106,7 +106,7 @@ describe('Kibana deprecations - Deprecations table', () => {
   describe('No deprecations', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setupKibanaPage(httpSetup, { isReadOnlyMode: false });
+        testBed = await setupKibanaPage(httpSetup);
       });
 
       const { component } = testBed;

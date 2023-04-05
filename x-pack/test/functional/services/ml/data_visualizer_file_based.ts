@@ -122,7 +122,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async startImportAndWaitForProcessing() {
-      await testSubjects.clickWhenNotDisabled('dataVisualizerFileImportButton');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerFileImportButton');
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('dataVisualizerFileImportSuccessCallout');
       });

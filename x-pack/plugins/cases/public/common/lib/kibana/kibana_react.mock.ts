@@ -8,21 +8,29 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-import { PublicAppInfo } from '@kbn/core/public';
-import { RecursivePartial } from '@elastic/eui/src/components/common';
+import type { PublicAppInfo } from '@kbn/core/public';
+import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { StartServices } from '../../../types';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { StartServices } from '../../../types';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { BehaviorSubject } from 'rxjs';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
 import { connectorsMock } from '../../mock/connectors';
 
-export const createStartServicesMock = (): StartServices => {
+interface StartServiceArgs {
+  license?: ILicense | null;
+}
+
+export const createStartServicesMock = ({ license }: StartServiceArgs = {}): StartServices => {
+  const licensingPluginMock = licensingMock.createStart();
+
   const services = {
     ...coreMock.createStart(),
     storage: { ...coreMock.createStorage(), get: jest.fn(), set: jest.fn(), remove: jest.fn() },
@@ -33,6 +41,10 @@ export const createStartServicesMock = (): StartServices => {
     security: securityMock.createStart(),
     triggersActionsUi: triggersActionsUiMock.createStart(),
     spaces: spacesPluginMock.createStartContract(),
+    licensing:
+      license != null
+        ? { ...licensingPluginMock, license$: new BehaviorSubject(license) }
+        : licensingPluginMock,
   } as unknown as StartServices;
 
   services.application.currentAppId$ = new BehaviorSubject<string>('testAppId');

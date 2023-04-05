@@ -28,6 +28,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,6 +59,7 @@ export interface FlyoutProps {
   basePath: IBasePath;
   search: ISearchStart;
   allowedTypes: SavedObjectManagementTypeInfo[];
+  showPlainSpinner?: boolean;
 }
 
 export interface FlyoutState {
@@ -413,7 +415,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderBody() {
-    const { allowedTypes } = this.props;
+    const { allowedTypes, showPlainSpinner } = this.props;
     const {
       status,
       loadingMessage,
@@ -427,7 +429,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            <EuiLoadingElastic size="xl" />
+            {showPlainSpinner ? <EuiLoadingSpinner size="xl" /> : <EuiLoadingElastic size="xl" />}
             <EuiSpacer size="m" />
             <EuiText>
               <p>{loadingMessage}</p>
@@ -618,7 +620,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   render() {
-    const { close } = this.props;
+    const { close, allowedTypes } = this.props;
 
     let confirmOverwriteModal: ReactNode;
     const { conflictingRecord } = this.state;
@@ -626,7 +628,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       const { conflict } = conflictingRecord;
       const onFinish = (overwrite: boolean, destinationId?: string) =>
         conflictingRecord.done([overwrite, destinationId]);
-      confirmOverwriteModal = <OverwriteModal {...{ conflict, onFinish }} />;
+      confirmOverwriteModal = <OverwriteModal {...{ conflict, onFinish, allowedTypes }} />;
     }
 
     return (

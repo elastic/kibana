@@ -6,41 +6,57 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { routeToHome, routeToConnectors, routeToRules, routeToRuleDetails } from '../constants';
+import { routeToHome, routeToConnectors, routeToRules, routeToLogs } from '../constants';
 
-export const getAlertingSectionBreadcrumb = (type: string): { text: string; href: string } => {
+export const getAlertingSectionBreadcrumb = (
+  type: string,
+  returnHref: boolean = false
+): { text: string; href?: string } => {
   // Home and sections
   switch (type) {
+    case 'logs':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.logs.breadcrumbTitle', {
+          defaultMessage: 'Logs',
+        }),
+        ...(returnHref
+          ? {
+              href: `${routeToLogs}`,
+            }
+          : {}),
+      };
     case 'connectors':
       return {
         text: i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
           defaultMessage: 'Connectors',
         }),
-        href: `${routeToConnectors}`,
+        ...(returnHref
+          ? {
+              href: `${routeToConnectors}`,
+            }
+          : {}),
       };
     case 'rules':
       return {
         text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
           defaultMessage: 'Rules',
         }),
-        href: `${routeToRules}`,
+        ...(returnHref
+          ? {
+              href: `${routeToRules}`,
+            }
+          : {}),
       };
     default:
       return {
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-          defaultMessage: 'Rules and Connectors',
+          defaultMessage: 'Rules',
         }),
-        href: `${routeToHome}`,
+        ...(returnHref
+          ? {
+              href: `${routeToHome}`,
+            }
+          : {}),
       };
   }
-};
-
-export const getRuleDetailsBreadcrumb = (
-  id: string,
-  name: string
-): { text: string; href: string } => {
-  return {
-    text: name,
-    href: `${routeToRuleDetails.replace(':ruleId', id)}`,
-  };
 };

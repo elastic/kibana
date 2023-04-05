@@ -10,11 +10,12 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverSearchSessionManager } from '../application/main/services/discover_search_session';
 
-export function createSearchSessionMock() {
-  const history = createMemoryHistory();
-  const session = dataPluginMock.createStartContract().search.session as jest.Mocked<
+export function createSearchSessionMock(
+  session = dataPluginMock.createStartContract().search.session as jest.Mocked<
     DataPublicPluginStart['search']['session']
-  >;
+  >
+) {
+  const history = createMemoryHistory();
   const searchSessionManager = new DiscoverSearchSessionManager({
     history,
     session,

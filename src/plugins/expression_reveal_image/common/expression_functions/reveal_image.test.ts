@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  functionWrapper,
-  getElasticOutline,
-  getElasticLogo,
-} from '@kbn/presentation-util-plugin/common/lib';
+import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { revealImageFunction, errors } from './reveal_image_function';
 import { Origin } from '../types';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';

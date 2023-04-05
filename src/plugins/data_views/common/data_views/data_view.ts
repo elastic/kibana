@@ -15,7 +15,7 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import _, { cloneDeep, each, reject } from 'lodash';
+import { cloneDeep, each, reject } from 'lodash';
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
@@ -75,6 +75,7 @@ export class DataView implements DataViewBase {
   public id?: string;
   /**
    * Title of data view
+   * @deprecated use getIndexPattern instead
    */
   public title: string = '';
   /**
@@ -194,6 +195,22 @@ export class DataView implements DataViewBase {
   getName = () => (this.name ? this.name : this.title);
 
   /**
+   * Get index pattern
+   * @returns index pattern string
+   */
+
+  getIndexPattern = () => this.title;
+
+  /**
+   * Set index pattern
+   * @param string index pattern string
+   */
+
+  setIndexPattern = (indexPattern: string) => {
+    this.title = indexPattern;
+  };
+
+  /**
    * Get last saved saved object fields
    */
   getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
@@ -298,7 +315,7 @@ export class DataView implements DataViewBase {
     const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
-      title: this.title,
+      title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: [...(this.sourceFilters || [])],
       fields,
@@ -407,19 +424,16 @@ export class DataView implements DataViewBase {
    * Returns index pattern as saved object body for saving
    */
   getAsSavedObjectBody(): DataViewAttributes {
-    const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
-      ? undefined
-      : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
 
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
-      title: this.title,
+      title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
-      fieldFormatMap,
+      fieldFormatMap: this.fieldFormatMap ? JSON.stringify(this.fieldFormatMap) : undefined,
       type: this.type!,
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,

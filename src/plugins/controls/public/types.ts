@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
+import { ReactNode } from 'react';
 
+import { Filter } from '@kbn/es-query';
 import {
   EmbeddableFactory,
   EmbeddableOutput,
@@ -15,15 +16,18 @@ import {
   EmbeddableStart,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import { ControlInput } from '../common/types';
-import { ControlsService } from './services/controls';
+import { ControlsServiceType } from './services/controls/types';
 
 export interface CommonControlOutput {
   filters?: Filter[];
   dataViewId?: string;
+  timeslice?: [number, number];
 }
 
 export type ControlOutput = EmbeddableOutput & CommonControlOutput;
@@ -37,7 +41,10 @@ export type ControlFactory<T extends ControlInput = ControlInput> = EmbeddableFa
 export type ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
   TControlEmbeddableOutput extends ControlOutput = ControlOutput
-> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput>;
+> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
+  isChained?: () => boolean;
+  renderPrepend?: () => ReactNode | undefined;
+};
 
 /**
  * Control embeddable editor types
@@ -53,13 +60,12 @@ export interface IEditableControlFactory<T extends ControlInput = ControlInput> 
 
 export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   initialInput?: Partial<T>;
+  fieldType: string;
   onChange: (partial: Partial<T>) => void;
 }
 
 export interface DataControlField {
   field: DataViewField;
-  parentFieldName?: string;
-  childFieldName?: string;
   compatibleControlTypes: string[];
 }
 
@@ -71,22 +77,23 @@ export interface DataControlFieldRegistry {
  * Plugin types
  */
 export interface ControlsPluginSetup {
-  registerControlType: ControlsService['registerControlType'];
+  registerControlType: ControlsServiceType['registerControlType'];
 }
 
 export interface ControlsPluginStart {
-  getControlFactory: ControlsService['getControlFactory'];
-  getControlTypes: ControlsService['getControlTypes'];
+  getControlFactory: ControlsServiceType['getControlFactory'];
+  getControlTypes: ControlsServiceType['getControlTypes'];
 }
 
 export interface ControlsPluginSetupDeps {
   embeddable: EmbeddableSetup;
 }
 export interface ControlsPluginStartDeps {
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 // re-export from common

@@ -29,7 +29,9 @@ const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFl
 function renderFlyout(output?: Output) {
   const renderer = createFleetTestRendererMock();
 
-  const utils = renderer.render(<EditOutputFlyout output={output} onClose={() => {}} />);
+  const utils = renderer.render(
+    <EditOutputFlyout proxies={[]} output={output} onClose={() => {}} />
+  );
 
   return { utils };
 }

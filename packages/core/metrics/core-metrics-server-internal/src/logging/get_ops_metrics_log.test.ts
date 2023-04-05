@@ -7,8 +7,15 @@
  */
 
 import type { OpsMetrics } from '@kbn/core-metrics-server';
+import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
 import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
+
+export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
+  totalActiveSockets: 25,
+  totalIdleSockets: 2,
+  totalQueuedRequests: 0,
+};
 
 function createBaseOpsMetrics(): OpsMetrics {
   const mockProcess = collectorMock.createOpsProcessMetrics();
@@ -24,6 +31,7 @@ function createBaseOpsMetrics(): OpsMetrics {
       memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
       uptime_in_millis: 1,
     },
+    elasticsearch_client: sampleEsClientMetrics,
     response_times: { avg_in_millis: 1, max_in_millis: 1 },
     requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },
     concurrent_connections: 1,
@@ -43,6 +51,11 @@ const testMetrics = {
     uptime_in_millis: 1500,
     event_loop_delay: 50,
     event_loop_delay_histogram: { percentiles: { '50': 50, '75': 75, '95': 95, '99': 99 } },
+    event_loop_utilization: {
+      active: 629.1224170000005,
+      idle: 359.23554199999995,
+      utilization: 0.6365329598160299,
+    },
   },
   os: {
     load: {
@@ -57,7 +70,7 @@ describe('getEcsOpsMetricsLog', () => {
   it('provides correctly formatted message', () => {
     const result = getEcsOpsMetricsLog(createMockOpsMetrics(testMetrics));
     expect(result.message).toMatchInlineSnapshot(
-      `"memory: 100.0B uptime: 0:00:01 load: [10.00,20.00,30.00] mean delay: 50.000 delay histogram: { 50: 50.000; 95: 95.000; 99: 99.000 }"`
+      `"memory: 100.0B uptime: 0:00:01 load: [10.00,20.00,30.00] mean delay: 50.000 delay histogram: { 50: 50.000; 95: 95.000; 99: 99.000 } utilization: 0.63653"`
     );
   });
 
@@ -107,6 +120,11 @@ describe('getEcsOpsMetricsLog', () => {
             "50": 50,
             "95": 95,
             "99": 99,
+          },
+          "eventLoopUtilization": Object {
+            "active": 629.1224170000005,
+            "idle": 359.23554199999995,
+            "utilization": 0.6365329598160299,
           },
           "memory": Object {
             "heap": Object {

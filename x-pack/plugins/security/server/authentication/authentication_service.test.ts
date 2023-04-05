@@ -12,9 +12,11 @@ import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import type {
   AuthenticationHandler,
   AuthToolkit,
+  CustomBrandingSetup,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
@@ -62,6 +64,7 @@ describe('AuthenticationService', () => {
     config: ConfigType;
     license: jest.Mocked<SecurityLicense>;
     buildNumber: number;
+    customBranding: jest.Mocked<CustomBrandingSetup>;
   };
   let mockStartAuthenticationParams: {
     audit: jest.Mocked<AuditServiceSetup>;
@@ -93,6 +96,7 @@ describe('AuthenticationService', () => {
       }),
       license: licenseMock.create(),
       buildNumber: 100500,
+      customBranding: customBrandingServiceMock.createSetupContract(),
     };
     mockCanRedirectRequest.mockReturnValue(false);
 
@@ -271,6 +275,33 @@ describe('AuthenticationService', () => {
 
         expect(authenticate).toHaveBeenCalledTimes(1);
         expect(authenticate).toHaveBeenCalledWith(mockRequest);
+      });
+
+      it('sets authenticated state correctly with user profile id', async () => {
+        const mockRequest = httpServerMock.createKibanaRequest();
+        const mockResponse = httpServerMock.createLifecycleResponseFactory();
+        const mockUser = mockAuthenticatedUser();
+        const mockAuthHeaders = { authorization: 'Basic xxx' };
+        const mockAuthResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
+
+        authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(
+            { ...mockUser, profile_uid: 'USER_PROFILE_ID' },
+            {
+              authHeaders: mockAuthHeaders,
+              authResponseHeaders: mockAuthResponseHeaders,
+            }
+          )
+        );
+
+        await authHandler(mockRequest, mockResponse, mockAuthToolkit);
+
+        expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
+        expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith({
+          state: { ...mockUser, profile_uid: 'USER_PROFILE_ID' },
+          requestHeaders: mockAuthHeaders,
+          responseHeaders: mockAuthResponseHeaders,
+        });
       });
 
       it('redirects user if redirection is requested by the authenticator preserving authentication response headers if any', async () => {

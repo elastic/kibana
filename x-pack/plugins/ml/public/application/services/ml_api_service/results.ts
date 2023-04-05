@@ -7,7 +7,7 @@
 
 // Service for obtaining data for the ML Results dashboards.
 import { useMemo } from 'react';
-import type { ESSearchRequest, ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
@@ -25,6 +25,13 @@ import type { AnomalyRecordDoc, MLAnomalyDoc } from '../../../../common/types/an
 import type { EntityField } from '../../../../common/util/anomaly_utils';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { ExplorerChartsData } from '../../../../common/types/results';
+
+export interface CategoryDefinition {
+  categoryId: number;
+  terms: string;
+  regex: string;
+  examples: string[];
+}
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
@@ -78,7 +85,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   getCategoryDefinition(jobId: string, categoryId: string) {
     const body = JSON.stringify({ jobId, categoryId });
-    return httpService.http<any>({
+    return httpService.http<CategoryDefinition>({
       path: `${basePath()}/results/category_definition`,
       method: 'POST',
       body,

@@ -36,12 +36,12 @@ export class ProcRunner {
   private procs: Proc[] = [];
   private signalUnsubscribe: () => void;
 
-  constructor(private log: ToolingLog) {
+  constructor(private readonly log: ToolingLog) {
     this.log = log.withType('ProcRunner');
 
     this.signalUnsubscribe = exitHook(() => {
       this.teardown().catch((error) => {
-        log.error(`ProcRunner teardown error: ${error.stack}`);
+        this.log.error(`ProcRunner teardown error: ${error.stack}`);
       });
     });
   }
@@ -58,6 +58,7 @@ export class ProcRunner {
       waitTimeout = 15 * MINUTE,
       env = process.env,
       onEarlyExit,
+      writeLogsToPath,
     } = options;
     const cmd = options.cmd === 'node' ? process.execPath : options.cmd;
 
@@ -79,6 +80,7 @@ export class ProcRunner {
       cwd,
       env,
       stdin,
+      writeLogsToPath,
     });
 
     if (onEarlyExit) {

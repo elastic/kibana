@@ -6,53 +6,56 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  serviceNameHint,
+  serverUrlHint,
+  serviceEnvironmentHint,
+} from './shared_hints';
+
+export const rumVariables = {
+  apmServiceName: 'serviceName',
+  apmServerUrl: 'serverUrl',
+  apmServiceVersion: 'serviceVersion',
+  apmEnvironment: 'environment',
+};
+
+export const rumHighlightLang = 'js';
+
+const rumServiceVersionHint = i18n.translate(
+  'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
+  {
+    defaultMessage: 'Set the service version (required for source map feature)',
+  }
+);
+
+export const rumLineNumbers = {
+  start: 1,
+  highlight: '3, 5, 7, 9',
+  annotations: {
+    3: serviceNameHint,
+    5: serverUrlHint,
+    7: rumServiceVersionHint,
+    9: serviceEnvironmentHint,
+  },
+};
 
 export const rum = `import { init as initApm } from '@elastic/apm-rum'
 var apm = initApm({
+  ${rumVariables.apmServiceName}: '{{{apmServiceName}}}',
 
-  // ${i18n.translate(
-    'xpack.apm.tutorial.jsClient.installDependency.commands.setRequiredServiceNameComment',
-    {
-      defaultMessage:
-        'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
-    }
-  )}
-  serviceName: 'your-app-name',
+  ${rumVariables.apmServerUrl}: '{{{apmServerUrl}}}',
 
-  // ${i18n.translate(
-    'xpack.apm.tutorial.jsClient.installDependency.commands.setCustomApmServerUrlComment',
-    {
-      defaultMessage:
-        'Set custom APM Server URL (default: {defaultApmServerUrl})',
-      values: { defaultApmServerUrl: 'http://localhost:8200' },
-    }
-  )}
-  serverUrl: '{{{apmServerUrl}}}',
-
-  // ${i18n.translate(
-    'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
-    {
-      defaultMessage:
-        'Set the service version (required for source map feature)',
-    }
-  )}
   serviceVersion: '',
 
-  // ${i18n.translate(
-    'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceEnvironmentComment',
-    {
-      defaultMessage: 'Set the service environment',
-    }
-  )}
-  environment: 'production'
+  ${rumVariables.apmEnvironment}: '{{{apmEnvironment}}}'
 })`;
 
 export const rumScript = `\
 <script src="https://your-cdn-host.com/path/to/elastic-apm-rum.umd.min.js" crossorigin></script>
 <script>
   elasticApm.init({
-    serviceName: 'your-app-name',
-    serverUrl: '{{{apmServerUrl}}}',
+    ${rumVariables.apmServiceName}: '{{{apmServiceName}}}',
+    ${rumVariables.apmServerUrl}: '{{{apmServerUrl}}}',
   })
 </script>
 `;

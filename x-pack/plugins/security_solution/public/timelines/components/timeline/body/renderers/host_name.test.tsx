@@ -11,9 +11,12 @@ import { waitFor } from '@testing-library/react';
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
-import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { timelineActions } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
+
+const mockedTelemetry = createTelemetryServiceMock();
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -25,12 +28,13 @@ jest.mock('react-redux', () => {
 
 jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
   return {
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: () => ({
       services: {
         application: {
           getUrlForApp: jest.fn(),
           navigateToApp: jest.fn(),
         },
+        telemetry: mockedTelemetry,
       },
     }),
   };
@@ -129,12 +133,12 @@ describe('HostName', () => {
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+        id: context.timelineID,
         panelView: 'hostDetail',
         params: {
           hostName: props.value,
         },
         tabType: context.tabType,
-        timelineId: context.timelineID,
       });
     });
   });
@@ -169,7 +173,7 @@ describe('HostName', () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
-      timelineID: 'detection',
+      timelineID: TimelineId.test,
       tabType: TimelineTabs.query,
     };
     const wrapper = mount(
@@ -183,12 +187,12 @@ describe('HostName', () => {
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+        id: context.timelineID,
         panelView: 'hostDetail',
         params: {
           hostName: props.value,
         },
         tabType: context.tabType,
-        timelineId: context.timelineID,
       });
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });

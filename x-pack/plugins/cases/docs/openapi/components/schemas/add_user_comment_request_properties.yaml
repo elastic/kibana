@@ -1,3 +1,5 @@
+title: Add case comment request properties for user comments
+description: Defines properties for case comment requests when type is user.
 type: object
 properties:
   comment:
@@ -9,9 +11,9 @@ properties:
   type: 
     type: string
     description: The type of comment.
+    example: user
     enum:
       - user
-    example: user
 required:
   - comment
   - owner

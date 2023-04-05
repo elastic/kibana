@@ -17,7 +17,9 @@ import type {
 
 export interface GetCategoriesRequest {
   query: {
+    // deprecated in 8.6
     experimental?: boolean;
+    prerelease?: boolean;
     include_policy_templates?: boolean;
   };
 }
@@ -31,7 +33,9 @@ export interface GetCategoriesResponse {
 export interface GetPackagesRequest {
   query: {
     category?: string;
+    // deprecated in 8.6
     experimental?: boolean;
+    prerelease?: boolean;
     excludeInstallStatus?: boolean;
   };
 }
@@ -166,4 +170,7 @@ export interface DeletePackageResponse {
   // deprecated in 8.0
   response?: AssetReference[];
   items: AssetReference[];
+}
+export interface GetVerificationKeyIdResponse {
+  id: string | null;
 }

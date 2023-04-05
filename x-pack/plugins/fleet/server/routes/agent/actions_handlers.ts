@@ -16,7 +16,7 @@ import type {
 } from '../../types/rest_spec';
 import type { ActionsService } from '../../services/agents';
 import type { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 
 export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService
@@ -27,9 +27,11 @@ export const postNewAgentActionHandlerBuilder = function (
 > {
   return async (context, request, response) => {
     try {
-      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const core = await context.core;
+      const esClient = core.elasticsearch.client.asInternalUser;
+      const soClient = core.savedObjects.client;
 
-      const agent = await actionsService.getAgent(esClient, request.params.agentId);
+      const agent = await actionsService.getAgent(esClient, soClient, request.params.agentId);
 
       const newAgentAction = request.body.action;
 
@@ -45,7 +47,7 @@ export const postNewAgentActionHandlerBuilder = function (
 
       return response.ok({ body });
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   };
 };
@@ -65,7 +67,7 @@ export const postCancelActionHandlerBuilder = function (
 
       return response.ok({ body });
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   };
 };

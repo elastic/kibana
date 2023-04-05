@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/logging-mocks",
+  "owner": "@elastic/kibana-core"
+}

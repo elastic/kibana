@@ -11,7 +11,8 @@ import { Stats, createReadStream, createWriteStream } from 'fs';
 import { stat, rename } from 'fs/promises';
 import { Readable, Writable } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
-import { createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
+import { createPromiseFromStreams } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   prioritizeMappings,
   readDirectory,

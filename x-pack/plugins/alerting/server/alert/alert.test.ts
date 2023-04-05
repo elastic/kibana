@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import { alertWithAnyUUID } from '../test_utils';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -49,7 +50,26 @@ describe('isThrottled', () => {
     });
     clock.tick(30000);
     alert.scheduleActions('default');
-    expect(alert.isThrottled('1m')).toEqual(true);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(true);
+  });
+
+  test(`should use actionHash if it was used in a legacy action`, () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            'slack:alert:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(30000);
+    alert.scheduleActions('default');
+    expect(
+      alert.isThrottled({ throttle: '1m', actionHash: 'slack:alert:1h', uuid: '111-222' })
+    ).toEqual(true);
   });
 
   test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
@@ -63,7 +83,7 @@ describe('isThrottled', () => {
     });
     clock.tick(30000);
     alert.scheduleActions('default');
-    expect(alert.isThrottled('15s')).toEqual(false);
+    expect(alert.isThrottled({ throttle: '15s' })).toEqual(false);
   });
 
   test(`shouldn't throttle when group changes`, () => {
@@ -77,14 +97,67 @@ describe('isThrottled', () => {
     });
     clock.tick(5000);
     alert.scheduleActions('other-group');
-    expect(alert.isThrottled('1m')).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(false);
+  });
+
+  test(`throttle a specific action`, () => {
+    const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(5000);
+    alert.scheduleActions('other-group');
+    expect(alert.isThrottled({ throttle: '1m', uuid: '111-111' })).toEqual(false);
+  });
+
+  test(`shouldn't throttle a specific action when group didn't change and throttle period expired`, () => {
+    const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date('2020-01-01'),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(30000);
+    alert.scheduleActions('default');
+    expect(alert.isThrottled({ throttle: '15s', uuid: '111-111', actionHash: 'slack:1h' })).toEqual(
+      false
+    );
+  });
+
+  test(`shouldn't throttle a specific action when group changes`, () => {
+    const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(5000);
+    alert.scheduleActions('other-group');
+    expect(alert.isThrottled({ throttle: '1m', uuid: '111-111' })).toEqual(false);
   });
 });
 
-describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
+describe('scheduledActionGroupHasChanged()', () => {
   test('should be false if no last scheduled and nothing scheduled', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
-    expect(alert.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
+    expect(alert.scheduledActionGroupHasChanged()).toEqual(false);
   });
 
   test('should be false if group does not change', () => {
@@ -97,54 +170,13 @@ describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
       },
     });
     alert.scheduleActions('default');
-    expect(alert.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
-  });
-
-  test('should be false if group and subgroup does not change', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-          subgroup: 'subgroup',
-        },
-      },
-    });
-    alert.scheduleActionsWithSubGroup('default', 'subgroup');
-    expect(alert.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
-  });
-
-  test('should be false if group does not change and subgroup goes from undefined to defined', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-        },
-      },
-    });
-    alert.scheduleActionsWithSubGroup('default', 'subgroup');
-    expect(alert.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
-  });
-
-  test('should be false if group does not change and subgroup goes from defined to undefined', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-          subgroup: 'subgroup',
-        },
-      },
-    });
-    alert.scheduleActions('default');
-    expect(alert.scheduledActionGroupOrSubgroupHasChanged()).toEqual(false);
+    expect(alert.scheduledActionGroupHasChanged()).toEqual(false);
   });
 
   test('should be true if no last scheduled and has scheduled action', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
     alert.scheduleActions('default');
-    expect(alert.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
+    expect(alert.scheduledActionGroupHasChanged()).toEqual(true);
   });
 
   test('should be true if group does change', () => {
@@ -157,35 +189,7 @@ describe('scheduledActionGroupOrSubgroupHasChanged()', () => {
       },
     });
     alert.scheduleActions('penguin');
-    expect(alert.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
-  });
-
-  test('should be true if group does change and subgroup does change', () => {
-    const alert = new Alert<never, never, 'default' | 'penguin'>('1', {
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-          subgroup: 'subgroup',
-        },
-      },
-    });
-    alert.scheduleActionsWithSubGroup('penguin', 'fish');
-    expect(alert.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
-  });
-
-  test('should be true if group does not change and subgroup does change', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-          subgroup: 'subgroup',
-        },
-      },
-    });
-    alert.scheduleActionsWithSubGroup('default', 'fish');
-    expect(alert.scheduledActionGroupOrSubgroupHasChanged()).toEqual(true);
+    expect(alert.scheduledActionGroupHasChanged()).toEqual(true);
   });
 });
 
@@ -228,6 +232,23 @@ describe('getState()', () => {
   });
 });
 
+describe('getUUID()', () => {
+  test('returns a UUID for a new alert', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const uuid = alert.getUuid();
+    expect(uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  test('returns same uuid from previous run of alert', () => {
+    const uuid = 'previous-uuid';
+    const meta = { uuid };
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta,
+    });
+    expect(alert.getUuid()).toEqual(uuid);
+  });
+});
+
 describe('scheduleActions()', () => {
   test('makes hasScheduledActions() return true', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
@@ -254,7 +275,7 @@ describe('scheduleActions()', () => {
       },
     });
     alert.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(true);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(true);
   });
 
   test('make isThrottled() return false when throttled expired', () => {
@@ -269,7 +290,7 @@ describe('scheduleActions()', () => {
     });
     clock.tick(120000);
     alert.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(false);
   });
 
   test('makes getScheduledActionOptions() return given options', () => {
@@ -290,137 +311,6 @@ describe('scheduleActions()', () => {
     alert.scheduleActions('default', { field: true });
     expect(() =>
       alert.scheduleActions('default', { field: false })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert instance execution has already been scheduled, cannot schedule twice"`
-    );
-  });
-});
-
-describe('scheduleActionsWithSubGroup()', () => {
-  test('makes hasScheduledActions() return true', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      state: { foo: true },
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-        },
-      },
-    });
-    alert
-      .replaceState({ otherField: true })
-      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
-    expect(alert.hasScheduledActions()).toEqual(true);
-  });
-
-  test('makes isThrottled() return true when throttled and subgroup is the same', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      state: { foo: true },
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-          subgroup: 'subgroup',
-        },
-      },
-    });
-    alert
-      .replaceState({ otherField: true })
-      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(true);
-  });
-
-  test('makes isThrottled() return true when throttled and last schedule had no subgroup', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      state: { foo: true },
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-        },
-      },
-    });
-    alert
-      .replaceState({ otherField: true })
-      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(true);
-  });
-
-  test('makes isThrottled() return false when throttled and subgroup is the different', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      state: { foo: true },
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-          subgroup: 'prev-subgroup',
-        },
-      },
-    });
-    alert
-      .replaceState({ otherField: true })
-      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(false);
-  });
-
-  test('make isThrottled() return false when throttled expired', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      state: { foo: true },
-      meta: {
-        lastScheduledActions: {
-          date: new Date(),
-          group: 'default',
-        },
-      },
-    });
-    clock.tick(120000);
-    alert
-      .replaceState({ otherField: true })
-      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(false);
-  });
-
-  test('makes getScheduledActionOptions() return given options', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      state: { foo: true },
-      meta: {},
-    });
-    alert
-      .replaceState({ otherField: true })
-      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
-    expect(alert.getScheduledActionOptions()).toEqual({
-      actionGroup: 'default',
-      subgroup: 'subgroup',
-      context: { field: true },
-      state: { otherField: true },
-    });
-  });
-
-  test('cannot schdule for execution twice', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
-    alert.scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
-    expect(() =>
-      alert.scheduleActionsWithSubGroup('default', 'subgroup', { field: false })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert instance execution has already been scheduled, cannot schedule twice"`
-    );
-  });
-
-  test('cannot schdule for execution twice with different subgroups', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
-    alert.scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
-    expect(() =>
-      alert.scheduleActionsWithSubGroup('default', 'subgroup', { field: false })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert instance execution has already been scheduled, cannot schedule twice"`
-    );
-  });
-
-  test('cannot schdule for execution twice whether there are subgroups', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
-    alert.scheduleActions('default', { field: true });
-    expect(() =>
-      alert.scheduleActionsWithSubGroup('default', 'subgroup', { field: false })
     ).toThrowErrorMatchingInlineSnapshot(
       `"Alert instance execution has already been scheduled, cannot schedule twice"`
     );
@@ -448,9 +338,62 @@ describe('updateLastScheduledActions()', () => {
     expect(alert.toJSON()).toEqual({
       state: {},
       meta: {
+        uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
+        },
+        flappingHistory: [],
+      },
+    });
+  });
+
+  test('replaces previous lastScheduledActions with a scheduled action', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {},
+    });
+    alert.updateLastScheduledActions('default', 'actionId1', '111-111');
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+  });
+
+  test('removes the objects with an old actionHash', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        flappingHistory: [],
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            'slack:alert:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    alert.updateLastScheduledActions('default', 'slack:alert:1h', '111-111');
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+          },
         },
       },
     });
@@ -540,12 +483,28 @@ describe('toJSON', () => {
             date: new Date(),
             group: 'default',
           },
+          flappingHistory: [false, true],
+          flapping: false,
+          pendingRecoveredCount: 2,
         },
       }
     );
-    expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
-    );
+
+    expect(alertInstance).toMatchObject({
+      state: {
+        foo: true,
+      },
+      meta: {
+        lastScheduledActions: {
+          date: expect.any(Date),
+          group: 'default',
+        },
+        uuid: expect.any(String),
+        flappingHistory: [false, true],
+        flapping: false,
+        pendingRecoveredCount: 2,
+      },
+    });
   });
 });
 
@@ -558,6 +517,8 @@ describe('toRaw', () => {
           date: new Date(),
           group: 'default',
         },
+        flappingHistory: [false, true, true],
+        pendingRecoveredCount: 2,
       },
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
@@ -565,5 +526,163 @@ describe('toRaw', () => {
       raw
     );
     expect(alertInstance.toRaw()).toEqual(raw);
+  });
+
+  test('returns unserialised underlying partial meta if recovered is true', () => {
+    const raw = {
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+        flappingHistory: [false, true, true],
+        flapping: false,
+      },
+    };
+    const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
+      '1',
+      raw
+    );
+    expect(alertInstance.toRaw(true)).toEqual({
+      meta: {
+        flappingHistory: [false, true, true],
+        flapping: false,
+        uuid: expect.any(String),
+      },
+    });
+  });
+});
+
+describe('setFlappingHistory', () => {
+  test('sets flappingHistory', () => {
+    const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
+      '1',
+      {
+        meta: { flappingHistory: [false, true, true] },
+      }
+    );
+    alertInstance.setFlappingHistory([false]);
+    expect(alertInstance.getFlappingHistory()).toEqual([false]);
+    expect(alertWithAnyUUID(alertInstance.toRaw())).toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "flappingHistory": Array [
+            false,
+          ],
+          "uuid": Any<String>,
+        },
+        "state": Object {},
+      }
+    `);
+  });
+});
+
+describe('getFlappingHistory', () => {
+  test('correctly sets flappingHistory', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { flappingHistory: [false, false] },
+    });
+    expect(alert.getFlappingHistory()).toEqual([false, false]);
+  });
+});
+
+describe('setFlapping', () => {
+  test('sets flapping', () => {
+    const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
+      '1',
+      {
+        meta: { flapping: true },
+      }
+    );
+    alertInstance.setFlapping(false);
+    expect(alertInstance.getFlapping()).toEqual(false);
+    expect(alertWithAnyUUID(alertInstance.toRaw())).toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "flapping": false,
+          "flappingHistory": Array [],
+          "uuid": Any<String>,
+        },
+        "state": Object {},
+      }
+    `);
+  });
+});
+
+describe('getFlapping', () => {
+  test('correctly sets flapping', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { flapping: true },
+    });
+    expect(alert.getFlapping()).toEqual(true);
+  });
+});
+
+describe('incrementPendingRecoveredCount', () => {
+  test('correctly increments pendingRecoveredCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    alert.incrementPendingRecoveredCount();
+    expect(alert.getPendingRecoveredCount()).toEqual(4);
+  });
+
+  test('correctly increments pendingRecoveredCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.incrementPendingRecoveredCount();
+    expect(alert.getPendingRecoveredCount()).toEqual(1);
+  });
+});
+
+describe('getPendingRecoveredCount', () => {
+  test('returns pendingRecoveredCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    expect(alert.getPendingRecoveredCount()).toEqual(3);
+  });
+
+  test('defines and returns pendingRecoveredCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getPendingRecoveredCount()).toEqual(0);
+  });
+});
+
+describe('resetPendingRecoveredCount', () => {
+  test('resets pendingRecoveredCount to 0', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    alert.resetPendingRecoveredCount();
+    expect(alert.getPendingRecoveredCount()).toEqual(0);
+  });
+});
+
+describe('isFilteredOut', () => {
+  const summarizedAlerts = {
+    all: { count: 1, data: [{ kibana: { alert: { instance: { id: 1 } } } }] },
+    new: { count: 0, data: [] },
+    ongoing: { count: 0, data: [] },
+    recovered: { count: 0, data: [] },
+  };
+
+  test('returns false if summarizedAlerts is null', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    expect(alert.isFilteredOut(null)).toBe(false);
+  });
+  test('returns false if the alert is in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    expect(alert.isFilteredOut(null)).toBe(false);
+  });
+  test('returns true if the alert is not in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(true);
   });
 });

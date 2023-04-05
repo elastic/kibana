@@ -29,7 +29,7 @@ export function getImportWarnings(
     {
       type: 'action_required',
       message,
-      actionPath: '/app/management/insightsAndAlerting/triggersActions/connectors',
+      actionPath: '/app/management/insightsAndAlerting/triggersActionsConnectors',
       buttonLabel: GO_TO_CONNECTORS_BUTTON_LABLE,
     } as SavedObjectsImportWarning,
   ];

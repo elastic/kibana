@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Plugin } from 'unified';
-import { RemarkTokenizer } from '@elastic/eui';
+import type { Plugin } from 'unified';
+import type { RemarkTokenizer } from '@elastic/eui';
 import * as i18n from './translations';
 
 export const ID = 'timeline';

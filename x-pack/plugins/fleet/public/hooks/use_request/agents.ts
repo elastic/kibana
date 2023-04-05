@@ -4,10 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useQuery } from '@tanstack/react-query';
 
 import type {
+  GetActionStatusResponse,
   GetAgentTagsResponse,
+  GetAgentUploadsResponse,
+  GetOneAgentRequest,
+  PostBulkRequestDiagnosticsResponse,
   PostBulkUpdateAgentTagsRequest,
+  PostRequestBulkDiagnosticsRequest,
+  PostRequestDiagnosticsResponse,
   UpdateAgentRequest,
 } from '../../../common/types';
 
@@ -19,8 +26,8 @@ import type {
   PostBulkAgentUnenrollRequest,
   PostBulkAgentUnenrollResponse,
   PostAgentUnenrollResponse,
-  PutAgentReassignRequest,
-  PutAgentReassignResponse,
+  PostAgentReassignRequest,
+  PostAgentReassignResponse,
   PostBulkAgentReassignRequest,
   PostBulkAgentReassignResponse,
   GetAgentsRequest,
@@ -37,6 +44,8 @@ import type {
   PostNewAgentActionResponse,
   GetCurrentUpgradesResponse,
   GetAvailableVersionsResponse,
+  PostRetrieveAgentsByActionsRequest,
+  PostRetrieveAgentsByActionsResponse,
 } from '../../types';
 
 import { useRequest, sendRequest } from './use_request';
@@ -44,7 +53,12 @@ import type { UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 
-export function useGetOneAgent(agentId: string, options?: RequestOptions) {
+export function useGetOneAgent(
+  agentId: string,
+  options?: RequestOptions & {
+    query?: GetOneAgentRequest['query'];
+  }
+) {
   return useRequest<GetOneAgentResponse>({
     path: agentRouteService.getInfoPath(agentId),
     method: 'get',
@@ -59,6 +73,13 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
     query,
     ...options,
   });
+}
+
+export function useGetAgentsQuery(
+  query: GetAgentsRequest['query'],
+  options: Partial<{ enabled: boolean }> = {}
+) {
+  return useQuery(['agents', query], () => sendGetAgents(query), { enabled: options.enabled });
 }
 
 export function sendGetAgents(query: GetAgentsRequest['query'], options?: RequestOptions) {
@@ -107,13 +128,13 @@ export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: Req
   });
 }
 
-export function sendPutAgentReassign(
+export function sendPostAgentReassign(
   agentId: string,
-  body: PutAgentReassignRequest['body'],
+  body: PostAgentReassignRequest['body'],
   options?: RequestOptions
 ) {
-  return sendRequest<PutAgentReassignResponse>({
-    method: 'put',
+  return sendRequest<PostAgentReassignResponse>({
+    method: 'post',
     path: agentRouteService.getReassignPath(agentId),
     body,
     ...options,
@@ -170,6 +191,42 @@ export function sendPostAgentUpgrade(
   });
 }
 
+export function sendPostRequestDiagnostics(agentId: string, options?: RequestOptions) {
+  return sendRequest<PostRequestDiagnosticsResponse>({
+    path: agentRouteService.getRequestDiagnosticsPath(agentId),
+    method: 'post',
+    ...options,
+  });
+}
+
+export function sendPostBulkRequestDiagnostics(
+  body: PostRequestBulkDiagnosticsRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostBulkRequestDiagnosticsResponse>({
+    path: agentRouteService.getBulkRequestDiagnosticsPath(),
+    method: 'post',
+    body,
+    ...options,
+  });
+}
+
+export function sendGetAgentUploads(agentId: string, options?: RequestOptions) {
+  return sendRequest<GetAgentUploadsResponse>({
+    path: agentRouteService.getListAgentUploads(agentId),
+    method: 'get',
+    ...options,
+  });
+}
+
+export const useGetAgentUploads = (agentId: string, options?: RequestOptions) => {
+  return useRequest<GetAgentUploadsResponse>({
+    path: agentRouteService.getListAgentUploads(agentId),
+    method: 'get',
+    ...options,
+  });
+};
+
 export function sendPostAgentAction(
   agentId: string,
   body: PostNewAgentActionRequest['body'],
@@ -195,9 +252,9 @@ export function sendPostBulkAgentUpgrade(
   });
 }
 
-export function sendGetCurrentUpgrades() {
-  return sendRequest<GetCurrentUpgradesResponse>({
-    path: agentRouteService.getCurrentUpgradesPath(),
+export function sendGetActionStatus() {
+  return sendRequest<GetActionStatusResponse>({
+    path: agentRouteService.getActionStatusPath(),
     method: 'get',
   });
 }
@@ -206,6 +263,14 @@ export function sendPostCancelAction(actionId: string) {
   return sendRequest<GetCurrentUpgradesResponse>({
     path: agentRouteService.getCancelActionPath(actionId),
     method: 'post',
+  });
+}
+
+export function sendPostRetrieveAgentsByActions(body: PostRetrieveAgentsByActionsRequest['body']) {
+  return sendRequest<PostRetrieveAgentsByActionsResponse>({
+    path: agentRouteService.getAgentsByActionsPath(),
+    method: 'post',
+    body,
   });
 }
 

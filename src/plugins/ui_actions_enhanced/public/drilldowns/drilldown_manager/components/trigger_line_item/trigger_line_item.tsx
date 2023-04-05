@@ -31,7 +31,7 @@ export const TriggerLineItem: React.FC<TriggerLineItemProps> = ({
     <TextWithIcon
       color={'subdued'}
       tooltip={tooltip}
-      icon={incompatible ? 'alert' : undefined}
+      icon={incompatible ? 'warning' : undefined}
       iconColor={incompatible ? 'danger' : undefined}
       iconTooltip={incompatible ? txtIncompatibleTooltip : undefined}
     >

@@ -6,12 +6,11 @@
  */
 
 import type { SecuritySolutionTabNavigationProps } from '../types';
-import type { SiemRouteType } from '../../../utils/route/types';
 
 export interface TabNavigationProps extends SecuritySolutionTabNavigationProps {
   pathName: string;
   pageName: string;
-  tabName: SiemRouteType | undefined;
+  tabName?: string;
 }
 
 export interface TabNavigationItemProps {
@@ -21,4 +20,7 @@ export interface TabNavigationItemProps {
   name: string;
   isSelected: boolean;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }

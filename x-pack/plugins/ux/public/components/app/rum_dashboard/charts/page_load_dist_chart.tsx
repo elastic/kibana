@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { AllSeries } from '@kbn/observability-plugin/public';
+import React, { useCallback } from 'react';
+import { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
 import { useExpViewAttributes } from './use_exp_view_attrs';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
@@ -26,15 +26,18 @@ export function PageLoadDistChart({ onPercentileChange, breakdown }: Props) {
   const { uxUiFilters, urlParams } = useLegacyUrlParams();
 
   const kibana = useKibanaServices();
-  const { ExploratoryViewEmbeddable } = kibana.observability!;
+  const { ExploratoryViewEmbeddable } = kibana.exploratoryView!;
 
-  const onBrushEnd = ({ range }: { range: number[] }) => {
-    if (!range) {
-      return;
-    }
-    const [minX, maxX] = range;
-    onPercentileChange(minX, maxX);
-  };
+  const onBrushEnd = useCallback(
+    ({ range }: { range: number[] }) => {
+      if (!range) {
+        return;
+      }
+      const [minX, maxX] = range;
+      onPercentileChange(minX, maxX);
+    },
+    [onPercentileChange]
+  );
 
   const { reportDefinitions, time } = useExpViewAttributes();
 

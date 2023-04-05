@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
+import { hostFieldsMap } from '@kbn/securitysolution-ecs';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import type {
   AggregationRequest,
@@ -24,7 +24,7 @@ import type {
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import type { EndpointAppContext } from '../../../../../endpoint/types';
-import { getPendingActionCounts } from '../../../../../endpoint/services';
+import { getPendingActionsSummary } from '../../../../../endpoint/services';
 
 export const HOST_DETAILS_FIELDS = [
   '_id',
@@ -182,9 +182,10 @@ export const getHostEndpoint = async (
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
 
     const pendingActions = fleetAgentId
-      ? getPendingActionCounts(
+      ? getPendingActionsSummary(
           esClient.asInternalUser,
           endpointMetadataService,
+          logger,
           [fleetAgentId],
           endpointContext.experimentalFeatures.pendingActionResponsesWithAck
         )
@@ -205,6 +206,7 @@ export const getHostEndpoint = async (
       sensorVersion: endpointData.metadata.agent.version,
       elasticAgentStatus: endpointData.host_status,
       isolation: endpointData.metadata.Endpoint.state?.isolation ?? false,
+      fleetAgentId: endpointData.metadata.elastic.agent.id,
       pendingActions,
     };
   } catch (err) {

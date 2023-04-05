@@ -269,8 +269,10 @@ describe('policy details: ', () => {
               },
               policy: {
                 value: {
+                  meta: { license: '' },
                   windows: {
                     events: {
+                      credential_access: true,
                       dll_and_driver_load: true,
                       dns: false,
                       file: true,
@@ -331,9 +333,19 @@ describe('policy details: ', () => {
                       },
                     },
                     logging: { file: 'info' },
+                    advanced: {
+                      capture_env_vars:
+                        'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
+                    },
                   },
                   linux: {
-                    events: { process: true, file: true, network: true, session_data: false },
+                    events: {
+                      process: true,
+                      file: true,
+                      network: true,
+                      session_data: false,
+                      tty_io: false,
+                    },
                     logging: { file: 'info' },
                     malware: { mode: 'prevent', blocklist: true },
                     behavior_protection: { mode: 'off', supported: false },
@@ -351,6 +363,9 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                    },
+                    advanced: {
+                      capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
                     },
                   },
                 },

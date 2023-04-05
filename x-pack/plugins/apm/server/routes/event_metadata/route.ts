@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getEventMetadata } from './get_event_metadata';
 import { processorEventRt } from '../../../common/processor_event';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const eventMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
@@ -23,14 +23,14 @@ const eventMetadataRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{ metadata: Partial<Record<string, unknown[]>> }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       path: { processorEvent, id },
     } = resources.params;
 
     const metadata = await getEventMetadata({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       processorEvent,
       id,
     });

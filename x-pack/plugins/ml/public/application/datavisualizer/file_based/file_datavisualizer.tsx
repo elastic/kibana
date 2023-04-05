@@ -13,7 +13,7 @@ import type {
   GetAdditionalLinksParams,
   GetAdditionalLinks,
 } from '@kbn/data-visualizer-plugin/public';
-import { useTimefilter } from '../../contexts/kibana';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 
@@ -94,6 +94,7 @@ export const FileDataVisualizerPage: FC = () => {
         },
       ],
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator]
   );
 
@@ -103,6 +104,7 @@ export const FileDataVisualizerPage: FC = () => {
       const { getFileDataVisualizerComponent } = dataVisualizer;
       getFileDataVisualizerComponent().then(setFileDataVisualizer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

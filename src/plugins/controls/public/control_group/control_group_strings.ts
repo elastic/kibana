@@ -9,14 +9,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const ControlGroupStrings = {
-  getEmbeddableTitle: () =>
-    i18n.translate('controls.controlGroup.title', {
-      defaultMessage: 'Control group',
-    }),
-  getControlButtonTitle: () =>
-    i18n.translate('controls.controlGroup.toolbarButtonTitle', {
-      defaultMessage: 'Controls',
-    }),
   emptyState: {
     getBadge: () =>
       i18n.translate('controls.controlGroup.emptyState.badgeText', {
@@ -98,10 +90,6 @@ export const ControlGroupStrings = {
     getAddControlTitle: () =>
       i18n.translate('controls.controlGroup.management.addControl', {
         defaultMessage: 'Add control',
-      }),
-    getManageButtonTitle: () =>
-      i18n.translate('controls.controlGroup.management.buttonTitle', {
-        defaultMessage: 'Settings',
       }),
     getFlyoutTitle: () =>
       i18n.translate('controls.controlGroup.management.flyoutTitle', {

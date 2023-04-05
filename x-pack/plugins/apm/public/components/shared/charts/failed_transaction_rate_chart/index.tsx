@@ -13,17 +13,19 @@ import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_te
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../../common/document_type';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -49,6 +51,10 @@ const INITIAL_STATE: ErrorRate = {
   },
 };
 
+export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
+  defaultMessage:
+    "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+});
 export function FailedTransactionRateChart({
   height,
   showAnnotations = true,
@@ -60,9 +66,20 @@ export function FailedTransactionRateChart({
 
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    numBuckets: 100,
+    kuery,
+    type: ApmDocumentType.ServiceTransactionMetric,
+  });
 
   const { environment } = useEnvironmentsContext();
 
@@ -70,13 +87,18 @@ export function FailedTransactionRateChart({
     ApmMlDetectorType.txFailureRate
   );
 
-  const { serviceName, transactionType } = useApmServiceContext();
+  const { serviceName, transactionType, transactionTypeStatus } =
+    useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (transactionType && serviceName && start && end) {
+      if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
+        return Promise.resolve(INITIAL_STATE);
+      }
+
+      if (transactionType && serviceName && start && end && preferred) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
           {
@@ -95,6 +117,9 @@ export function FailedTransactionRateChart({
                   comparisonEnabled && isTimeComparison(offset)
                     ? offset
                     : undefined,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
           }
@@ -108,9 +133,11 @@ export function FailedTransactionRateChart({
       start,
       end,
       transactionType,
+      transactionTypeStatus,
       transactionName,
       offset,
       comparisonEnabled,
+      preferred,
     ]
   );
 
@@ -121,7 +148,7 @@ export function FailedTransactionRateChart({
   const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
-      data: data.currentPeriod.timeseries,
+      data: data?.currentPeriod?.timeseries ?? [],
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
@@ -131,7 +158,7 @@ export function FailedTransactionRateChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data.previousPeriod.timeseries,
+            data: data?.previousPeriod?.timeseries ?? [],
             type: 'area',
             color: previousPeriodColor,
             title: previousPeriodLabel,
@@ -154,17 +181,11 @@ export function FailedTransactionRateChart({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={i18n.translate('xpack.apm.errorRate.tip', {
-              defaultMessage:
-                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-            })}
-            position="right"
-          />
+          <EuiIconTip content={errorRateI18n} position="right" />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <TimeseriesChart
+      <TimeseriesChartWithContext
         id="errorRate"
         height={height}
         showAnnotations={showAnnotations}

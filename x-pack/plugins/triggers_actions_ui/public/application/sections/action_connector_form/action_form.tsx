@@ -35,9 +35,8 @@ import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { DEFAULT_FREQUENCY, VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { OmitMessageVariablesType } from '../../lib/action_variables';
@@ -56,13 +55,19 @@ export interface ActionAccordionFormProps {
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   featureId: string;
   messageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
-  getDefaultActionParams?: DefaultActionParamsGetter;
+  recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
+  hideActionHeader?: boolean;
+  hideNotifyWhen?: boolean;
+  defaultSummaryMessage?: string;
+  hasSummary?: boolean;
+  minimumThrottleInterval?: [number | undefined, string];
 }
 
 interface ActiveActionConnectorState {
@@ -77,6 +82,7 @@ export const ActionForm = ({
   setActionGroupIdByIndex,
   setActions,
   setActionParamsProperty,
+  setActionFrequencyProperty,
   featureId,
   messageVariables,
   actionGroups,
@@ -84,8 +90,13 @@ export const ActionForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
-  getDefaultActionParams,
+  recoveryActionGroup,
   isActionGroupDisabledForActionType,
+  hideActionHeader,
+  hideNotifyWhen,
+  defaultSummaryMessage,
+  hasSummary,
+  minimumThrottleInterval,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -209,6 +220,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
+        frequency: DEFAULT_FREQUENCY,
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
@@ -220,6 +232,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
+        frequency: DEFAULT_FREQUENCY,
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
@@ -296,15 +309,19 @@ export const ActionForm = ({
     </SectionLoading>
   ) : (
     <>
-      <EuiTitle size="s">
-        <h4>
-          <FormattedMessage
-            defaultMessage="Actions"
-            id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="m" />
+      {!hideActionHeader && (
+        <>
+          <EuiTitle size="s">
+            <h4>
+              <FormattedMessage
+                defaultMessage="Actions"
+                id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {actionTypesIndex &&
         actions.map((actionItem: RuleAction, index: number) => {
           const actionConnector = connectors.find((field) => field.id === actionItem.id);
@@ -355,13 +372,14 @@ export const ActionForm = ({
               index={index}
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
+              setActionFrequencyProperty={setActionFrequencyProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
               messageVariables={messageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
-              defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
+              recoveryActionGroup={recoveryActionGroup}
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
@@ -377,16 +395,16 @@ export const ActionForm = ({
                   (_item: RuleAction, i: number) => i !== index
                 );
                 setActions(updatedActions);
-                setIsAddActionPanelOpen(
-                  updatedActions.filter((item: RuleAction) => item.id !== actionItem.id).length ===
-                    0
-                );
+                setIsAddActionPanelOpen(updatedActions.length === 0);
                 setActiveActionItem(undefined);
               }}
+              hideNotifyWhen={hideNotifyWhen}
+              defaultSummaryMessage={defaultSummaryMessage}
+              hasSummary={hasSummary}
+              minimumThrottleInterval={minimumThrottleInterval}
             />
           );
         })}
-      <EuiSpacer size="m" />
       {isAddActionPanelOpen ? (
         <>
           <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
@@ -436,9 +454,11 @@ export const ActionForm = ({
         </>
       ) : (
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow>
             <EuiButton
-              size="s"
+              size="m"
+              fullWidth
+              iconType="plusInCircle"
               data-test-subj="addAlertActionButton"
               onClick={() => setIsAddActionPanelOpen(true)}
             >

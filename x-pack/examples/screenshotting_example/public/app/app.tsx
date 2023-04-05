@@ -15,8 +15,8 @@ import {
   EuiImage,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -88,7 +88,7 @@ export function App() {
                 <EuiCallOut
                   title="Sorry, there was an error"
                   color="danger"
-                  iconType="alert"
+                  iconType="warning"
                   data-test-subj="error"
                 >
                   <p>{response.errors.join('\n')}</p>

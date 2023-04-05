@@ -22,30 +22,45 @@ export type {
   ControlStyle,
   ParentIgnoreSettings,
   ControlInput,
+  DataControlInput,
 } from '../common/types';
 
-export { CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../common';
+export {
+  CONTROL_GROUP_TYPE,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from '../common';
 
 export {
-  ControlGroupContainer,
+  type AddDataControlProps,
+  type AddOptionsListControlProps,
+  type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
+  controlGroupInputBuilder,
   type ControlGroupOutput,
 } from './control_group';
 
 export {
   OptionsListEmbeddableFactory,
-  OptionsListEmbeddable,
+  type OptionsListEmbeddable,
   type OptionsListEmbeddableInput,
 } from './options_list';
 
 export {
   RangeSliderEmbeddableFactory,
-  RangeSliderEmbeddable,
+  type RangeSliderEmbeddable,
   type RangeSliderEmbeddableInput,
 } from './range_slider';
 
-export { LazyControlsCallout, type CalloutProps } from './controls_callout';
+export {
+  LazyControlGroupRenderer,
+  useControlGroupContainerContext,
+  type ControlGroupRendererProps,
+  ACTION_DELETE_CONTROL,
+  ACTION_EDIT_CONTROL,
+} from './control_group';
 
 export function plugin() {
   return new ControlsPlugin();

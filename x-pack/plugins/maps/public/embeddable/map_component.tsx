@@ -6,7 +6,8 @@
  */
 
 import React, { Component, RefObject } from 'react';
-import uuid from 'uuid/v4';
+import { first } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
@@ -80,7 +81,7 @@ export class MapComponent extends Component<Props, State> {
         editable: false,
       },
       {
-        id: uuid(),
+        id: uuidv4(),
         attributes: {
           title: this.props.title,
           layerListJSON: JSON.stringify([
@@ -94,7 +95,18 @@ export class MapComponent extends Component<Props, State> {
         mapCenter: this.props.mapCenter,
       }
     );
-    this._mapEmbeddable.setOnInitialRenderComplete(this.props.onInitialRenderComplete);
+
+    if (this.props.onInitialRenderComplete) {
+      this._mapEmbeddable
+        .getOnRenderComplete$()
+        .pipe(first())
+        .subscribe(() => {
+          if (this._isMounted && this.props.onInitialRenderComplete) {
+            this.props.onInitialRenderComplete();
+          }
+        });
+    }
+
     if (this.props.isSharable !== undefined) {
       this._mapEmbeddable.setIsSharable(this.props.isSharable);
     }

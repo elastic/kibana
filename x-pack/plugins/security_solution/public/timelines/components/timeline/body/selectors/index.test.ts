@@ -7,26 +7,15 @@
 
 import { mockGlobalState } from '../../../../../common/mock/global_state';
 import { timelineBodySelector } from '.';
+import { TimelineId } from '../../../../../../common/types';
 
 describe('selectors', () => {
   describe('timelineBodySelector', () => {
     it('returns the expected results', () => {
-      const expected = mockGlobalState.timeline.timelineById.test;
-      const { dataViewId, documentType, defaultColumns, isLoading, queryFields, selectAll, title } =
-        expected;
-
-      const id = 'test';
+      const expected = mockGlobalState.timeline.timelineById[TimelineId.test];
+      const id = TimelineId.test;
 
       expect(timelineBodySelector(mockGlobalState, id)).toEqual({
-        manageTimelineById: {
-          dataViewId,
-          documentType,
-          defaultColumns,
-          isLoading,
-          queryFields,
-          selectAll,
-          title,
-        },
         timeline: expected,
       });
     });

@@ -1,0 +1,220 @@
+{
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-14T05:00:01.000Z",
+        "id": "first_doc",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.1"
+        },
+        "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2"],
+        "large_array_10": ["value-of-10-0","value-of-10-1","value-of-10-2","value-of-10-3","value-of-10-4","value-of-10-5","value-of-10-6","value-of-10-7","value-of-10-8","value-of-10-9"],
+        "large_array_5": ["value-of-5-0","value-of-5-1","value-of-5-2","value-of-5-3","value-of-5-4"],
+        "large_array_20": ["value-of-20-0","value-of-20-1","value-of-20-2","value-of-20-3","value-of-20-4","value-of-20-5","value-of-20-6","value-of-20-7","value-of-20-8","value-of-20-9","value-of-20-10","value-of-20-11","value-of-20-12","value-of-20-13","value-of-20-14","value-of-20-15","value-of-20-16","value-of-20-17","value-of-20-18","value-of-20-19"]
+       }
+        ,
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-14T05:00:01.000Z",
+        "id": "doc_without_large_arrays",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.1"
+        },
+        "user.name": "user-1",
+        "user.id": 1,
+        "user.enabled": false,
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2"]
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-14T05:00:01.000Z",
+        "id": "doc_with_duplicated_tags",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.1"
+        },
+        "user.name": "user-1",
+        "user.id": 1,
+        "user.enabled": false,
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2", "tag-2", "tag-1", "tag-1"]
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-14T05:00:02.000Z",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-1",
+          "ip": "127.0.0.1"
+        },
+        "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "source.ip": "192.168.1.1"
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-14T05:00:02.000Z",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-1"
+        },
+        "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2"]
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-14T05:00:03.000Z",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-1",
+          "ip": "127.0.0.2"
+        },
+        "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2"]
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-14T05:00:04.000Z",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.1"
+        },
+        "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2"]
+      },
+      "type": "_doc"
+    }
+  }
+
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-20T05:00:04.000Z",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.2"
+        },
+        "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2"]
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-20T05:00:04.000Z",
+        "id": "doc_with_source_ip_as_array",
+        "possibly_null_field": "test-value",
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.2"
+        },
+        "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "source.ip": ["192.168.1.1", "192.168.1.2"],
+        "tags": ["tag-new-1", "tag-2", "tag-new-3"]
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-20T05:00:04.000Z",
+        "id": "doc_with_null_field",
+        "possibly_null_field": null,
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.2"
+        },
+        "user.name": "user-0",
+        "user.id": 1,
+        "user.enabled": false,
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2"],
+        "large_array_10": ["a-new-value-of-10-0","a-new-value-of-10-1","a-new-value-of-10-2","a-new-value-of-10-3","a-new-value-of-10-4","a-new-value-of-10-5","a-new-value-of-10-6","a-new-value-of-10-7","a-new-value-of-10-8","a-new-value-of-10-9"], 
+        "large_array_5":  ["another-new-value-of-10-0","another-new-value-of-10-1","another-new-value-of-10-2","another-new-value-of-10-3","another-new-value-of-10-4","another-new-value-of-10-5","another-new-value-of-10-6","another-new-value-of-10-7","another-new-value-of-10-8","another-new-value-of-10-9"],
+        "large_array_20": ["a-new-value-of-20-0","a-new-value-of-20-1","a-new-value-of-20-2","a-new-value-of-20-3","a-new-value-of-20-4","a-new-value-of-20-5","a-new-value-of-20-6","a-new-value-of-20-7","a-new-value-of-20-8","a-new-value-of-20-9","a-new-value-of-20-10","a-new-value-of-20-11","a-new-value-of-20-12","a-new-value-of-20-13","a-new-value-of-20-14","a-new-value-of-20-15","a-new-value-of-20-16","a-new-value-of-20-17","a-new-value-of-20-18","a-new-value-of-20-19"]
+      },
+      "type": "_doc"
+    }
+  }

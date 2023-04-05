@@ -213,10 +213,18 @@ export class BlocklistValidator extends BaseValidator {
     return item.listId === ENDPOINT_BLOCKLISTS_LIST_ID;
   }
 
+  protected async validateHasWritePrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canWriteBlocklist');
+  }
+
+  protected async validateHasReadPrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canReadBlocklist');
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
 
     item.entries = removeDuplicateEntryValues(item.entries as BlocklistConditionEntry[]);
 
@@ -228,27 +236,27 @@ export class BlocklistValidator extends BaseValidator {
   }
 
   async validatePreDeleteItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
   }
 
   async validatePreGetOneItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreMultiListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreExport(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreSingleListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreGetListSummary(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreUpdateItem(
@@ -257,7 +265,7 @@ export class BlocklistValidator extends BaseValidator {
   ): Promise<UpdateExceptionListItemOptions> {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
 
     _updatedItem.entries = removeDuplicateEntryValues(
       _updatedItem.entries as BlocklistConditionEntry[]

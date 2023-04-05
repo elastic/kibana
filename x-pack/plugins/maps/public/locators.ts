@@ -7,7 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import rison from 'rison-node';
+import rison from '@kbn/rison';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { type Filter, isFilterPinned, type TimeRange, type Query } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
@@ -55,6 +56,11 @@ export interface MapsAppLocatorParams extends SerializableRecord {
    * whether to hash the data in the url to avoid url length issues.
    */
   hash?: boolean;
+
+  /**
+   * Optionally pass adhoc data view spec.
+   */
+  dataViewSpec?: DataViewSpec;
 }
 
 export const MAPS_APP_LOCATOR = 'MAPS_APP_LOCATOR' as const;
@@ -91,20 +97,18 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (initialLayers && initialLayers.length) {
-      const risonEncodedInitialLayers = (
-        rison as unknown as {
-          encode_array: (
-            initialLayers: (LayerDescriptor[] & SerializableRecord) | undefined
-          ) => string;
-        }
-      ).encode_array(initialLayers);
+      const risonEncodedInitialLayers = rison.encodeArray(initialLayers);
       path = `${path}&${INITIAL_LAYERS_KEY}=${encodeURIComponent(risonEncodedInitialLayers)}`;
     }
 
     return {
       app: APP_ID,
       path,
-      state: {},
+      state: params.dataViewSpec
+        ? {
+            dataViewSpec: params.dataViewSpec,
+          }
+        : {},
     };
   };
 }

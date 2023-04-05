@@ -22,7 +22,7 @@ import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../..
 
 interface Props {
   rule: RuleGroup;
-  readonly?: boolean;
+  readOnly?: boolean;
   parentRule?: RuleGroup;
   onChange: (rule: RuleGroup) => void;
 }
@@ -31,6 +31,8 @@ const rules = [new AllRule(), new AnyRule()];
 const exceptRules = [new ExceptAllRule(), new ExceptAnyRule()];
 
 export const RuleGroupTitle = (props: Props) => {
+  if (props.readOnly === undefined) props.readOnly = false;
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const [showConfirmChangeModal, setShowConfirmChangeModal] = useState(false);
@@ -67,8 +69,13 @@ export const RuleGroupTitle = (props: Props) => {
   };
 
   const ruleButton = (
-    <EuiLink onClick={() => setIsMenuOpen(!isMenuOpen)} data-test-subj="ruleGroupTitle">
-      {props.rule.getDisplayTitle()} <EuiIcon type="arrowDown" />
+    <EuiLink
+      disabled={props.readOnly}
+      onClick={() => setIsMenuOpen(!isMenuOpen)}
+      data-test-subj="ruleGroupTitle"
+    >
+      {props.rule.getDisplayTitle()}
+      {props.readOnly === false && <EuiIcon type="arrowDown" />}
     </EuiLink>
   );
 

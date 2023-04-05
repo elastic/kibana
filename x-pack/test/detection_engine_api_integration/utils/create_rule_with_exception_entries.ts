@@ -9,9 +9,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import type {
-  CreateRulesSchema,
-  FullResponseSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  RuleCreateProps,
+  RuleResponse,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { createContainerWithEntries } from './create_container_with_entries';
@@ -31,13 +31,13 @@ import { createRule } from './create_rule';
 export const createRuleWithExceptionEntries = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
-  rule: CreateRulesSchema,
+  rule: RuleCreateProps,
   entries: NonEmptyEntriesArray[],
   endpointEntries?: Array<{
     entries: NonEmptyEntriesArray;
     osTypes: OsTypeArray | undefined;
   }>
-): Promise<FullResponseSchema> => {
+): Promise<RuleResponse> => {
   const maybeExceptionList = await createContainerWithEntries(supertest, log, entries);
   const maybeEndpointList = await createContainerWithEndpointEntries(
     supertest,
@@ -49,7 +49,7 @@ export const createRuleWithExceptionEntries = async (
   // the rule to sometimes not filter correctly the first time with an exception list
   // or other timing issues. Then afterwards wait for the rule to have succeeded before
   // returning.
-  const ruleWithException: CreateRulesSchema = {
+  const ruleWithException: RuleCreateProps = {
     ...rule,
     enabled: false,
     exceptions_list: [...maybeExceptionList, ...maybeEndpointList],

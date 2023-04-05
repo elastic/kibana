@@ -270,7 +270,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
           >
             <button
               aria-pressed={false}
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               data-test-subj="bold"
               disabled={false}
               id="generated-id"
@@ -302,7 +302,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             </button>
             <button
               aria-pressed={false}
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               data-test-subj="italic"
               disabled={false}
               id="generated-id"
@@ -334,7 +334,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             </button>
             <button
               aria-pressed={false}
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               data-test-subj="underline"
               disabled={false}
               id="generated-id"
@@ -383,7 +383,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             className="euiButtonGroup__buttons"
           >
             <label
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly css-qmwmig-fill-text-EuiButtonGroupButton"
               disabled={false}
               htmlFor="generated-id"
               style={
@@ -421,7 +421,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               </span>
             </label>
             <label
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               disabled={false}
               htmlFor="generated-id"
               style={
@@ -459,7 +459,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               </span>
             </label>
             <label
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               disabled={false}
               htmlFor="generated-id"
               style={
@@ -774,7 +774,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
           >
             <button
               aria-pressed={false}
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               data-test-subj="bold"
               disabled={false}
               id="generated-id"
@@ -806,7 +806,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             </button>
             <button
               aria-pressed={false}
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               data-test-subj="italic"
               disabled={false}
               id="generated-id"
@@ -838,7 +838,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             </button>
             <button
               aria-pressed={false}
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               data-test-subj="underline"
               disabled={false}
               id="generated-id"
@@ -887,7 +887,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             className="euiButtonGroup__buttons"
           >
             <label
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly css-qmwmig-fill-text-EuiButtonGroupButton"
               disabled={false}
               htmlFor="generated-id"
               style={
@@ -925,7 +925,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               </span>
             </label>
             <label
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               disabled={false}
               htmlFor="generated-id"
               style={
@@ -963,7 +963,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               </span>
             </label>
             <label
-              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              className="euiButtonGroupButton euiButtonGroupButton--small euiButtonGroupButton-isIconOnly css-dbzl5z-empty-text-EuiButtonGroupButton"
               disabled={false}
               htmlFor="generated-id"
               style={

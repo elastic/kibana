@@ -61,7 +61,6 @@ export enum ViewResultsActionButtonType {
 
 interface ViewResultsInDiscoverActionProps {
   actionId: string;
-  agentIds?: string[];
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
@@ -70,8 +69,7 @@ interface ViewResultsInDiscoverActionProps {
 
 function getLensAttributes(
   logsDataView: LogsDataView,
-  actionId: string,
-  agentIds?: string[]
+  actionId: string
 ): TypedLensByValueInput['attributes'] {
   const dataLayer: PersistedIndexPatternLayer = {
     columnOrder: ['8690befd-fd69-4246-af4a-dd485d2a3b38', 'ed999e9d-204c-465b-897f-fe1a125b39ed'],
@@ -114,19 +112,12 @@ function getLensAttributes(
         legendDisplay: 'default',
         nestedLegend: false,
         layerId: 'layer1',
-        metric: 'ed999e9d-204c-465b-897f-fe1a125b39ed',
+        metrics: ['ed999e9d-204c-465b-897f-fe1a125b39ed'],
         numberDisplay: 'percent',
-        groups: ['8690befd-fd69-4246-af4a-dd485d2a3b38'],
+        primaryGroups: ['8690befd-fd69-4246-af4a-dd485d2a3b38'],
         categoryDisplay: 'default',
       },
     ],
-  };
-
-  const agentIdsQuery = {
-    bool: {
-      minimum_should_match: 1,
-      should: agentIds?.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
-    },
   };
 
   return {
@@ -151,7 +142,7 @@ function getLensAttributes(
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },
@@ -177,23 +168,6 @@ function getLensAttributes(
             },
           },
         },
-        ...(agentIdsQuery
-          ? [
-              {
-                $state: { store: FilterStateStore.APP_STATE },
-                meta: {
-                  alias: 'agent IDs',
-                  disabled: false,
-                  index: 'filter-index-pattern-0',
-                  key: 'query',
-                  negate: false,
-                  type: 'custom',
-                  value: JSON.stringify(agentIdsQuery),
-                },
-                query: agentIdsQuery,
-              },
-            ]
-          : []),
       ],
       query: { language: 'kuery', query: '' },
       visualization: xyConfig,
@@ -203,7 +177,6 @@ function getLensAttributes(
 
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
   actionId,
-  agentIds,
   buttonType,
   endDate,
   startDate,
@@ -211,7 +184,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
     (event) => {
@@ -226,7 +199,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
               to: endDate ?? 'now',
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
             },
-            attributes: getLensAttributes(logsDataView, actionId, agentIds),
+            attributes: getLensAttributes(logsDataView, actionId),
           },
           {
             openInNewTab: true,
@@ -235,7 +208,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         );
       }
     },
-    [actionId, agentIds, endDate, lensService, logsDataView, mode, startDate]
+    [actionId, endDate, lensService, logsDataView, mode, startDate]
   );
 
   if (!isLensAvailable) {
@@ -266,7 +239,6 @@ export const ViewResultsInLensAction = React.memo(ViewResultsInLensActionCompone
 
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
   actionId,
-  agentIds,
   buttonType,
   endDate,
   startDate,
@@ -274,22 +246,13 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
     const getDiscoverUrl = async () => {
       if (!locator || !logsDataView) return;
-
-      const agentIdsQuery = agentIds?.length
-        ? {
-            bool: {
-              minimum_should_match: 1,
-              should: agentIds.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
-            },
-          }
-        : null;
 
       const newUrl = await locator.getUrl({
         indexPatternId: logsDataView.id,
@@ -307,23 +270,6 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             query: { match_phrase: { action_id: actionId } },
             $state: { store: FilterStateStore.APP_STATE },
           },
-          ...(agentIdsQuery
-            ? [
-                {
-                  $state: { store: FilterStateStore.APP_STATE },
-                  meta: {
-                    alias: 'agent IDs',
-                    disabled: false,
-                    index: logsDataView.id,
-                    key: 'query',
-                    negate: false,
-                    type: 'custom',
-                    value: JSON.stringify(agentIdsQuery),
-                  },
-                  query: agentIdsQuery,
-                },
-              ]
-            : []),
         ],
         refreshInterval: {
           pause: true,
@@ -346,7 +292,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, agentIds, endDate, startDate, locator, logsDataView]);
+  }, [actionId, endDate, startDate, locator, logsDataView]);
 
   if (!discoverPermissions.show) {
     return null;
@@ -563,14 +509,9 @@ interface PackViewInActionProps {
     interval: number;
   };
   packName: string;
-  agentIds?: string[];
 }
 
-const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
-  item,
-  packName,
-  agentIds,
-}) => {
+const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ item, packName }) => {
   const { id, interval } = item;
   const actionId = getPackActionId(id, packName);
   const { data: lastResultsData } = usePackQueryLastResults({
@@ -588,7 +529,6 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   return (
     <ViewResultsInDiscoverAction
       actionId={actionId}
-      agentIds={agentIds}
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
@@ -599,11 +539,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
 
 const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
-const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
-  item,
-  packName,
-  agentIds,
-}) => {
+const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item, packName }) => {
   const { id, interval } = item;
   const actionId = getPackActionId(id, packName);
   const { data: lastResultsData } = usePackQueryLastResults({
@@ -621,7 +557,6 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   return (
     <ViewResultsInLensAction
       actionId={actionId}
-      agentIds={agentIds}
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
@@ -715,13 +650,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item) => <PackViewInDiscoverAction item={item} agentIds={agentIds} packName={packName} />,
-    [agentIds, packName]
+    (item) => <PackViewInDiscoverAction item={item} packName={packName} />,
+    [packName]
   );
 
   const renderLensResultsAction = useCallback(
-    (item) => <PackViewInLensAction item={item} agentIds={agentIds} packName={packName} />,
-    [agentIds, packName]
+    (item) => <PackViewInLensAction item={item} packName={packName} />,
+    [packName]
   );
 
   const getItemId = useCallback((item: PackQueryFormData) => item.id ?? '', []);

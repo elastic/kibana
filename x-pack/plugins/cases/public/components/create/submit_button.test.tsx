@@ -9,9 +9,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { useForm, Form } from '../../common/shared_imports';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SubmitCaseButton } from './submit_button';
-import { schema, FormProps } from './schema';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 
 describe('SubmitCaseButton', () => {
   const onSubmit = jest.fn();
@@ -48,7 +49,7 @@ describe('SubmitCaseButton', () => {
         <SubmitCaseButton />
       </MockHookWrapperComponent>
     );
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() => expect(onSubmit).toBeCalled());
   });
 
@@ -59,7 +60,7 @@ describe('SubmitCaseButton', () => {
       </MockHookWrapperComponent>
     );
 
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() =>
       expect(
         wrapper.find(`[data-test-subj="create-case-submit"]`).first().prop('isDisabled')
@@ -74,7 +75,7 @@ describe('SubmitCaseButton', () => {
       </MockHookWrapperComponent>
     );
 
-    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() =>
       expect(
         wrapper.find(`[data-test-subj="create-case-submit"]`).first().prop('isLoading')

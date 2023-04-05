@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
 import { getSimpleRuleOutput } from './get_simple_rule_output';
+import { RuleWithoutServerGeneratedProperties } from './remove_server_generated_properties';
 
-export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<RulesSchema> => ({
+export const getSimpleRuleOutputWithWebHookAction = (
+  actionId: string,
+  uuid: string
+): RuleWithoutServerGeneratedProperties => ({
   ...getSimpleRuleOutput(),
   throttle: 'rule',
   actions: [
@@ -19,6 +22,7 @@ export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<
       params: {
         body: '{}',
       },
+      uuid,
     },
   ],
 });

@@ -6,13 +6,18 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useIsWithinMaxBreakpoint,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../components/overview/monitor_list/columns/monitor_status_column';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 interface Props {
   timestamp: string;
@@ -21,14 +26,13 @@ interface Props {
 
 export const ChecksNavigation = ({ timestamp, details }: Props) => {
   const history = useHistory();
-  const { down } = useBreakpoints();
-
-  const isMobile = down('s');
+  const isMobile = useIsWithinMaxBreakpoint('s');
 
   return (
     <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="syntheticsChecksNavigationPreviousCheckButton"
           size={isMobile ? 'xs' : 'm'}
           iconType="arrowLeft"
           isDisabled={!details?.previous}
@@ -49,6 +53,7 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="syntheticsChecksNavigationNextCheckButton"
           size={isMobile ? 'xs' : 'm'}
           iconType="arrowRight"
           iconSide="right"

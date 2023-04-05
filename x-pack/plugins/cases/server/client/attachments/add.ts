@@ -12,32 +12,17 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import {
-  isCommentRequestTypeExternalReference,
-  isCommentRequestTypePersistableState,
-} from '../../../common/utils/attachments';
-import { CaseResponse, CommentRequest, CommentRequestRt, throwErrors } from '../../../common/api';
+import type { CaseResponse } from '../../../common/api';
+import { CommentRequestRt, throwErrors } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
-
-/**
- * The arguments needed for creating a new attachment to a case.
- */
-export interface AddArgs {
-  /**
-   * The case ID that this attachment will be associated with
-   */
-  caseId: string;
-  /**
-   * The attachment values.
-   */
-  comment: CommentRequest;
-}
+import type { AddArgs } from './types';
+import { validateRegisteredAttachments } from './validators';
 
 /**
  * Create an attachment to a case.
@@ -61,7 +46,7 @@ export const addComment = async (
     externalReferenceAttachmentTypeRegistry,
   } = clientArgs;
 
-  decodeCommentRequest(comment);
+  decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry);
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -70,23 +55,11 @@ export const addComment = async (
       entities: [{ owner: comment.owner, id: savedObjectID }],
     });
 
-    if (
-      isCommentRequestTypeExternalReference(query) &&
-      !externalReferenceAttachmentTypeRegistry.has(query.externalReferenceAttachmentTypeId)
-    ) {
-      throw Boom.badRequest(
-        `Attachment type ${query.externalReferenceAttachmentTypeId} is not registered.`
-      );
-    }
-
-    if (
-      isCommentRequestTypePersistableState(query) &&
-      !persistableStateAttachmentTypeRegistry.has(query.persistableStateAttachmentTypeId)
-    ) {
-      throw Boom.badRequest(
-        `Attachment type ${query.persistableStateAttachmentTypeId} is not registered.`
-      );
-    }
+    validateRegisteredAttachments({
+      query,
+      persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry,
+    });
 
     const createdDate = new Date().toISOString();
 

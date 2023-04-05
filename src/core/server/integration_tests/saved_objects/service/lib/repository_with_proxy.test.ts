@@ -9,11 +9,15 @@
 import Hapi from '@hapi/hapi';
 import h2o2 from '@hapi/h2o2';
 import { URL } from 'url';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { InternalCoreSetup, InternalCoreStart } from '../../../../internal_types';
-import { Root } from '../../../../root';
-import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
+import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import { Root } from '@kbn/core-root-server-internal';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import {
   declareGetRoute,
   declareDeleteRoute,
@@ -28,7 +32,7 @@ import {
   setProxyInterrupt,
 } from './repository_with_proxy_utils';
 
-let esServer: kbnTestServer.TestElasticsearchUtils;
+let esServer: TestElasticsearchUtils;
 let hapiServer: Hapi.Server;
 
 const registerSOTypes = (setup: InternalCoreSetup) => {
@@ -54,6 +58,17 @@ const registerSOTypes = (setup: InternalCoreSetup) => {
     },
     namespaceType: 'single',
   });
+  setup.savedObjects.registerType({
+    name: 'my_bulk_delete_type',
+    hidden: false,
+    mappings: {
+      dynamic: false,
+      properties: {
+        title: { type: 'text' },
+      },
+    },
+    namespaceType: 'single',
+  });
 };
 
 describe('404s from proxies', () => {
@@ -63,7 +78,7 @@ describe('404s from proxies', () => {
   beforeAll(async () => {
     setProxyInterrupt(null);
 
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
     });
     esServer = await startES();
@@ -99,7 +114,7 @@ describe('404s from proxies', () => {
     await hapiServer.start();
 
     // Setup kibana configured to use proxy as ES backend
-    root = kbnTestServer.createRootWithCorePlugins({
+    root = createRootWithCorePlugins({
       elasticsearch: {
         hosts: [`http://${esHostname}:${proxyPort}`],
       },
@@ -124,6 +139,7 @@ describe('404s from proxies', () => {
     let repository: ISavedObjectsRepository;
     let myOtherType: SavedObject;
     const myOtherTypeDocs: SavedObject[] = [];
+    const myBulkDeleteTypeDocs: SavedObject[] = [];
 
     beforeAll(async () => {
       repository = start.savedObjects.createInternalRepository();
@@ -142,6 +158,19 @@ describe('404s from proxies', () => {
         });
       }
       await repository.bulkCreate(myOtherTypeDocs, {
+        overwrite: true,
+        namespace: 'default',
+      });
+
+      for (let i = 1; i < 11; i++) {
+        myBulkDeleteTypeDocs.push({
+          type: 'my_bulk_delete_type',
+          id: `myOtherTypeId${i}`,
+          attributes: { title: `MyOtherTypeTitle${i}` },
+          references: [],
+        });
+      }
+      await repository.bulkCreate(myBulkDeleteTypeDocs, {
         overwrite: true,
         namespace: 'default',
       });
@@ -235,6 +264,18 @@ describe('404s from proxies', () => {
       expect(deleteErr?.output?.payload?.message).toBe(
         `Saved object [my_other_type/${docToDelete.id}] not found`
       );
+    });
+
+    it('handles `bulkDelete` requests that are successful when the proxy passes through the product header', async () => {
+      const docsToDelete = myBulkDeleteTypeDocs;
+      const bulkDeleteDocs = docsToDelete.map((doc) => ({
+        id: doc.id,
+        type: 'my_bulk_delete_type',
+      }));
+
+      const docsFound = await repository.bulkDelete(bulkDeleteDocs, { force: false });
+      expect(docsFound.statuses.length).toBeGreaterThan(0);
+      expect(docsFound.statuses[0].success).toBe(true);
     });
 
     it('handles `bulkGet` requests that are successful when the proxy passes through the product header', async () => {

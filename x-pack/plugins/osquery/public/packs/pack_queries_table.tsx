@@ -10,16 +10,15 @@ import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PlatformIcons } from './queries/platforms';
-import type { PackItem } from './types';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
 
 export interface PackQueriesTableProps {
-  data: PackItem['queries'];
+  data: PackQueryFormData[];
   isReadOnly?: boolean;
   onDeleteClick?: (item: PackQueryFormData) => void;
   onEditClick?: (item: PackQueryFormData) => void;
-  selectedItems?: PackItem['queries'];
-  setSelectedItems?: (selection: PackItem['queries']) => void;
+  selectedItems?: PackQueryFormData[];
+  setSelectedItems?: (selection: PackQueryFormData[]) => void;
 }
 
 const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({

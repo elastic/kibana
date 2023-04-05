@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '..';
+import { schema } from '../..';
 
 const { literal } = schema;
 

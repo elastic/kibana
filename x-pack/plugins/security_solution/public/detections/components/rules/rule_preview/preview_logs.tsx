@@ -7,7 +7,7 @@
 
 import React, { Fragment, useMemo } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
-import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
+import type { RulePreviewLogs } from '../../../../../common/detection_engine/rule_schema';
 import * as i18n from './translations';
 
 interface PreviewLogsComponentProps {
@@ -28,7 +28,7 @@ interface LogAccordionProps {
 }
 
 const CustomWarning: React.FC<{ message: string }> = ({ message }) => (
-  <EuiCallOut color={'warning'} iconType="alert" data-test-subj={'preview-abort'}>
+  <EuiCallOut color={'warning'} iconType="warning" data-test-subj={'preview-abort'}>
     <EuiText>
       <p>{message}</p>
     </EuiText>
@@ -125,7 +125,7 @@ export const CalloutGroup: React.FC<{
         <Fragment key={i}>
           <EuiCallOut
             color={isError ? 'danger' : 'warning'}
-            iconType="alert"
+            iconType="warning"
             data-test-subj={isError ? 'preview-error' : 'preview-warning'}
             title={`${startedAt ? `[${startedAt}] ` : ''}[${duration}ms]`}
           >

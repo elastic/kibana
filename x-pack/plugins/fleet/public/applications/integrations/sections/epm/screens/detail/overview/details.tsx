@@ -29,10 +29,13 @@ import type {
   KibanaAssetType,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
-import { useGetCategories } from '../../../../../hooks';
+import { useGetCategoriesQuery } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
 
+import { ChangelogModal } from '../settings/changelog_modal';
+
 import { NoticeModal } from './notice_modal';
+import { LicenseModal } from './license_modal';
 
 const ReplacementCard = withSuspense(LazyReplacementCard);
 
@@ -58,10 +61,10 @@ const Replacements = euiStyled(EuiFlexItem)`
 `;
 
 export const Details: React.FC<Props> = memo(({ packageInfo }) => {
-  const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategories();
+  const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
   const packageCategories: string[] = useMemo(() => {
-    if (!isLoadingCategories && categoriesData && categoriesData.response) {
-      return categoriesData.response
+    if (!isLoadingCategories && categoriesData?.items) {
+      return categoriesData.items
         .filter((category) => packageInfo.categories?.includes(category.id as PackageSpecCategory))
         .map((category) => category.title);
     }
@@ -70,8 +73,18 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
 
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
   const toggleNoticeModal = useCallback(() => {
-    setIsNoticeModalOpen(!isNoticeModalOpen);
-  }, [isNoticeModalOpen]);
+    setIsNoticeModalOpen((currentState) => !currentState);
+  }, []);
+
+  const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
+  const toggleLicenseModal = useCallback(() => {
+    setIsLicenseModalOpen((currentState) => !currentState);
+  }, []);
+
+  const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+  const toggleChangelogModal = useCallback(() => {
+    setIsChangelogModalOpen((currentState) => !currentState);
+  }, []);
 
   const listItems = useMemo(() => {
     // Base details: version and categories
@@ -154,8 +167,20 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
       });
     }
 
+    // Subscription details
+    items.push({
+      title: (
+        <EuiTextColor color="subdued">
+          <FormattedMessage id="xpack.fleet.epm.subscriptionLabel" defaultMessage="Subscription" />
+        </EuiTextColor>
+      ),
+      description: (
+        <p>{packageInfo.conditions?.elastic?.subscription || packageInfo.license || '-'}</p>
+      ),
+    });
+
     // License details
-    if (packageInfo.license || packageInfo.notice) {
+    if (packageInfo.licensePath || packageInfo.source?.license || packageInfo.notice) {
       items.push({
         title: (
           <EuiTextColor color="subdued">
@@ -164,7 +189,15 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
         ),
         description: (
           <>
-            <p>{packageInfo.license}</p>
+            {packageInfo.licensePath ? (
+              <p>
+                <EuiLink onClick={toggleLicenseModal}>
+                  {packageInfo.source?.license || 'LICENSE.txt'}
+                </EuiLink>
+              </p>
+            ) : (
+              <p>{packageInfo.source?.license || '-'}</p>
+            )}
             {packageInfo.notice && (
               <p>
                 <EuiLink onClick={toggleNoticeModal}>NOTICE.txt</EuiLink>
@@ -175,15 +208,35 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
       });
     }
 
+    items.push({
+      title: (
+        <EuiTextColor color="subdued">
+          <FormattedMessage id="xpack.fleet.epm.changelogLabel" defaultMessage="Changelog" />
+        </EuiTextColor>
+      ),
+      description: (
+        <>
+          <p>
+            <EuiLink onClick={toggleChangelogModal}>View Changelog</EuiLink>
+          </p>
+        </>
+      ),
+    });
+
     return items;
   }, [
     packageCategories,
     packageInfo.assets,
+    packageInfo.conditions?.elastic?.subscription,
     packageInfo.data_streams,
     packageInfo.license,
+    packageInfo.licensePath,
     packageInfo.notice,
+    packageInfo.source?.license,
     packageInfo.version,
+    toggleLicenseModal,
     toggleNoticeModal,
+    toggleChangelogModal,
   ]);
 
   return (
@@ -191,6 +244,24 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
       <EuiPortal>
         {isNoticeModalOpen && packageInfo.notice && (
           <NoticeModal noticePath={packageInfo.notice} onClose={toggleNoticeModal} />
+        )}
+      </EuiPortal>
+      <EuiPortal>
+        {isLicenseModalOpen && packageInfo.licensePath && (
+          <LicenseModal
+            licenseName={packageInfo.source?.license}
+            licensePath={packageInfo.licensePath}
+            onClose={toggleLicenseModal}
+          />
+        )}
+      </EuiPortal>
+      <EuiPortal>
+        {isChangelogModalOpen && (
+          <ChangelogModal
+            latestVersion={packageInfo.version}
+            packageName={packageInfo.name}
+            onClose={toggleChangelogModal}
+          />
         )}
       </EuiPortal>
       <EuiFlexGroup direction="column" gutterSize="m">

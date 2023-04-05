@@ -26,16 +26,17 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
-} from '../endpoint_responder/responder_context_menu_item';
+} from '../endpoint_responder/translations';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import {
   isAlertFromEndpointEvent,
   isAlertFromEndpointAlert,
 } from '../../../common/utils/endpoint_alert_check';
-import { HostStatus } from '../../../../common/endpoint/types';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
+import { HostStatus } from '../../../../common/endpoint/types';
+import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -107,7 +108,7 @@ describe('take action dropdown', () => {
       onAddIsolationStatusClick: jest.fn(),
       refetch: jest.fn(),
       refetchFlyoutData: jest.fn(),
-      timelineId: TimelineId.active,
+      scopeId: TimelineId.active,
       onOsqueryClick: jest.fn(),
     };
 
@@ -319,7 +320,11 @@ describe('take action dropdown', () => {
         setAlertDetailsDataMockToEvent();
       });
 
-      test('should enable the "Add Endpoint event filter" button if provided endpoint event', async () => {
+      test('should enable the "Add Endpoint event filter" button if provided endpoint event and has right privileges', async () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...mockInitialUserPrivilegesState(),
+          endpointPrivileges: { loading: false, canWriteEventFilters: true },
+        });
         wrapper = mount(
           <TestProviders>
             <TakeActionDropdown {...defaultProps} />
@@ -333,10 +338,10 @@ describe('take action dropdown', () => {
         });
       });
 
-      test('should disable the "Add Endpoint event filter" button if no endpoint management privileges', async () => {
+      test('should hide the "Add Endpoint event filter" button if no write event filters privileges', async () => {
         (useUserPrivileges as jest.Mock).mockReturnValue({
           ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+          endpointPrivileges: { loading: false, canWriteEventFilters: false },
         });
         wrapper = mount(
           <TestProviders>
@@ -345,9 +350,7 @@ describe('take action dropdown', () => {
         );
         wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
         await waitFor(() => {
-          expect(
-            wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
-          ).toBeDisabled();
+          expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
         });
       });
 
@@ -363,6 +366,50 @@ describe('take action dropdown', () => {
         await waitFor(() => {
           expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
         });
+      });
+    });
+
+    describe('should correctly enable/disable the "Isolate Host" button', () => {
+      let wrapper: ReactWrapper;
+
+      const render = (): ReactWrapper => {
+        wrapper = mount(
+          <TestProviders>
+            <TakeActionDropdown {...defaultProps} />
+          </TestProviders>
+        );
+        wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+
+        return wrapper;
+      };
+
+      const isolateHostButtonExists = (): ReturnType<typeof wrapper.exists> => {
+        return wrapper.exists('[data-test-subj="isolate-host-action-item"]');
+      };
+
+      beforeEach(() => {
+        setTypeOnEcsDataWithAgentType();
+      });
+
+      it('should show Isolate host button if user has "Host isolation" privileges set to all', async () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...mockInitialUserPrivilegesState(),
+          endpointPrivileges: { loading: false, canIsolateHost: true },
+        });
+        render();
+
+        await waitFor(() => {
+          expect(isolateHostButtonExists()).toBeTruthy();
+        });
+      });
+      it('should hide Isolate host button if user has "Host isolation" privileges set to none', () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...mockInitialUserPrivilegesState(),
+          endpointPrivileges: { loading: false, canIsolateHost: false },
+        });
+        render();
+
+        expect(isolateHostButtonExists()).toBeFalsy();
       });
     });
 
@@ -428,10 +475,10 @@ describe('take action dropdown', () => {
         });
       });
 
-      it('should not display the button if user is not allowed to manage endpoints', async () => {
+      it('should not display the button if user is not allowed to write event filters', async () => {
         (useUserPrivileges as jest.Mock).mockReturnValue({
           ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+          endpointPrivileges: { loading: false, canWriteEventFilters: false },
         });
         render();
 
@@ -465,10 +512,17 @@ describe('take action dropdown', () => {
           if (getApiResponse) {
             return {
               ...getApiResponse(),
+              metadata: {
+                ...getApiResponse().metadata,
+                Endpoint: {
+                  ...getApiResponse().metadata.Endpoint,
+                  capabilities: [...ENDPOINT_CAPABILITIES],
+                },
+              },
               host_status: HostStatus.UNENROLLED,
             };
           }
-          throw new Error('mock implementation missing');
+          throw new Error('some error');
         });
         render();
 

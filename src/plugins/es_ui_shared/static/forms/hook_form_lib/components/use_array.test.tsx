@@ -18,7 +18,7 @@ import { UseArray } from './use_array';
 
 describe('<UseArray />', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

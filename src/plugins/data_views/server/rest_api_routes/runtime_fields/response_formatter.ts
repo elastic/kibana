@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { HttpResponseOptions } from '@kbn/core-http-server';
 import { DataView, DataViewField } from '../../../common';
 import { SERVICE_KEY_LEGACY, SERVICE_KEY_TYPE, SERVICE_KEY } from '../../constants';
 
@@ -15,7 +16,11 @@ interface ResponseFormatterArgs {
   dataView: DataView;
 }
 
-export const responseFormatter = ({ serviceKey, fields, dataView }: ResponseFormatterArgs) => {
+export const responseFormatter = ({
+  serviceKey,
+  fields,
+  dataView,
+}: ResponseFormatterArgs): HttpResponseOptions => {
   const response = {
     body: {
       fields: fields.map((field) => field.toSpec()),

@@ -7,7 +7,14 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { encode } from '@kbn/rison';
 
+import {
+  RULE_FROM_EQL_URL_PARAM,
+  RULE_FROM_TIMELINE_URL_PARAM,
+} from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+import { useNavigation } from '../../../common/lib/kibana';
+import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { SortFieldTimeline } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -40,6 +47,7 @@ import type {
   OpenTimelineResult,
   OnToggleShowNotes,
   OnDeleteOneTimeline,
+  OnCreateRuleFromTimeline,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
@@ -48,6 +56,8 @@ import { deleteTimelinesByIds } from '../../containers/api';
 import type { Direction } from '../../../../common/search_strategy';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
+import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -86,6 +96,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     title,
   }) => {
     const dispatch = useDispatch();
+    const { startTransaction } = useStartTransaction();
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
       Record<string, JSX.Element>
@@ -197,6 +208,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const deleteTimelines: DeleteTimelines = useCallback(
       async (timelineIds: string[]) => {
+        startTransaction({
+          name: timelineIds.length > 1 ? TIMELINE_ACTIONS.BULK_DELETE : TIMELINE_ACTIONS.DELETE,
+        });
+
         if (timelineIds.includes(timelineSavedObjectId)) {
           dispatch(
             dispatchCreateNewTimeline({
@@ -212,7 +227,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds);
         refetch();
       },
-      [timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
+      [startTransaction, timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -266,6 +281,24 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       },
       []
     );
+    const { navigateTo } = useNavigation();
+    const onCreateRule: OnCreateRuleFromTimeline = useCallback(
+      (savedObjectId) =>
+        navigateTo({
+          deepLinkId: SecurityPageName.rulesCreate,
+          path: `?${RULE_FROM_TIMELINE_URL_PARAM}=${encode(savedObjectId)}`,
+        }),
+      [navigateTo]
+    );
+
+    const onCreateRuleFromEql: OnCreateRuleFromTimeline = useCallback(
+      (savedObjectId) =>
+        navigateTo({
+          deepLinkId: SecurityPageName.rulesCreate,
+          path: `?${RULE_FROM_EQL_URL_PARAM}=${encode(savedObjectId)}`,
+        }),
+      [navigateTo]
+    );
 
     /** Resets the selection state such that all timelines are unselected */
     const resetSelectionState = useCallback(() => {
@@ -274,6 +307,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const openTimeline: OnOpenTimeline = useCallback(
       ({ duplicate, timelineId, timelineType: timelineTypeToOpen }) => {
+        if (duplicate) {
+          startTransaction({ name: TIMELINE_ACTIONS.DUPLICATE });
+        }
+
         if (isModal && closeModalTimeline != null) {
           closeModalTimeline();
         }
@@ -313,6 +350,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
         importDataModalToggle={importDataModalToggle}
         onAddTimelinesToFavorites={undefined}
+        onCreateRule={onCreateRule}
+        onCreateRuleFromEql={onCreateRuleFromEql}
         onDeleteSelected={onDeleteSelected}
         onlyFavorites={onlyFavorites}
         onOpenTimeline={openTimeline}

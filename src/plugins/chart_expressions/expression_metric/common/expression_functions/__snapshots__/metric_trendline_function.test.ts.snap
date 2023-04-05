@@ -1,0 +1,353 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metric trendline function builds trends with breakdown 1`] = `
+Object {
+  "css": Array [
+    Object {
+      "x": 1664121600000,
+      "y": 3264,
+    },
+    Object {
+      "x": 1664123400000,
+      "y": 7215,
+    },
+    Object {
+      "x": 1664125200000,
+      "y": 9601,
+    },
+    Object {
+      "x": 1664127000000,
+      "y": 8458,
+    },
+  ],
+  "deb": Array [
+    Object {
+      "x": 1664121600000,
+      "y": NaN,
+    },
+    Object {
+      "x": 1664123400000,
+      "y": 9680,
+    },
+    Object {
+      "x": 1664125200000,
+      "y": NaN,
+    },
+    Object {
+      "x": 1664127000000,
+      "y": NaN,
+    },
+  ],
+  "gz": Array [
+    Object {
+      "x": 1664121600000,
+      "y": 3116.5,
+    },
+    Object {
+      "x": 1664123400000,
+      "y": NaN,
+    },
+    Object {
+      "x": 1664125200000,
+      "y": 4148,
+    },
+    Object {
+      "x": 1664127000000,
+      "y": NaN,
+    },
+  ],
+  "rpm": Array [
+    Object {
+      "x": 1664121600000,
+      "y": NaN,
+    },
+    Object {
+      "x": 1664123400000,
+      "y": NaN,
+    },
+    Object {
+      "x": 1664125200000,
+      "y": NaN,
+    },
+    Object {
+      "x": 1664127000000,
+      "y": NaN,
+    },
+  ],
+  "zip": Array [
+    Object {
+      "x": 1664121600000,
+      "y": NaN,
+    },
+    Object {
+      "x": 1664123400000,
+      "y": NaN,
+    },
+    Object {
+      "x": 1664125200000,
+      "y": 5037,
+    },
+    Object {
+      "x": 1664127000000,
+      "y": NaN,
+    },
+    Object {
+      "x": 1664128800000,
+      "y": NaN,
+    },
+  ],
+}
+`;
+
+exports[`metric trendline function builds trends without breakdown 1`] = `
+Object {
+  "default": Array [
+    Object {
+      "x": 1664121600000,
+      "y": null,
+    },
+    Object {
+      "x": 1664123400000,
+      "y": null,
+    },
+    Object {
+      "x": 1664125200000,
+      "y": null,
+    },
+    Object {
+      "x": 1664127000000,
+      "y": null,
+    },
+  ],
+}
+`;
+
+exports[`metric trendline function creates inspector information 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "breakdown",
+      "meta": Object {
+        "dimensionName": "Split group",
+        "field": "extension.keyword",
+        "index": "kibana_sample_data_logs",
+        "params": Object {
+          "id": "terms",
+          "params": Object {
+            "id": "string",
+            "missingBucketLabel": "(missing value)",
+            "otherBucketLabel": "Other",
+          },
+        },
+        "source": "esaggs",
+        "sourceParams": Object {
+          "enabled": true,
+          "hasPrecisionError": false,
+          "id": "0",
+          "indexPatternId": "90943e30-9a47-11e8-b64d-95841ca0b247",
+          "params": Object {
+            "excludeIsRegex": false,
+            "field": "extension.keyword",
+            "includeIsRegex": false,
+            "missingBucket": false,
+            "missingBucketLabel": "(missing value)",
+            "order": "desc",
+            "orderBy": "2",
+            "otherBucket": true,
+            "otherBucketLabel": "Other",
+            "size": 5,
+          },
+          "schema": "segment",
+          "type": "terms",
+        },
+        "type": "string",
+      },
+      "name": "Top 5 values of extension.keyword",
+    },
+    Object {
+      "id": "time",
+      "meta": Object {
+        "dimensionName": "Time field",
+        "field": "timestamp",
+        "index": "kibana_sample_data_logs",
+        "params": Object {
+          "id": "date",
+          "params": Object {
+            "pattern": "HH:mm",
+          },
+        },
+        "source": "esaggs",
+        "sourceParams": Object {
+          "appliedTimeRange": Object {
+            "from": "2022-09-25T16:00:00.000Z",
+            "to": "2022-09-26T16:12:41.742Z",
+          },
+          "enabled": true,
+          "hasPrecisionError": false,
+          "id": "1",
+          "indexPatternId": "90943e30-9a47-11e8-b64d-95841ca0b247",
+          "params": Object {
+            "drop_partials": false,
+            "extendToTimeRange": true,
+            "extended_bounds": Object {},
+            "field": "timestamp",
+            "interval": "auto",
+            "min_doc_count": 0,
+            "scaleMetricValues": false,
+            "timeRange": Object {
+              "from": "2022-09-25T16:00:00.000Z",
+              "to": "2022-09-26T16:12:41.742Z",
+            },
+            "useNormalizedEsInterval": true,
+            "used_interval": "30m",
+          },
+          "schema": "segment",
+          "type": "date_histogram",
+        },
+        "type": "date",
+      },
+      "name": "timestamp per 30 minutes",
+    },
+    Object {
+      "id": "metric",
+      "meta": Object {
+        "dimensionName": "Metric",
+        "field": "bytes",
+        "index": "kibana_sample_data_logs",
+        "params": Object {
+          "id": "number",
+        },
+        "source": "esaggs",
+        "sourceParams": Object {
+          "enabled": true,
+          "hasPrecisionError": false,
+          "id": "2",
+          "indexPatternId": "90943e30-9a47-11e8-b64d-95841ca0b247",
+          "params": Object {
+            "field": "bytes",
+          },
+          "schema": "metric",
+          "type": "median",
+        },
+        "type": "number",
+      },
+      "name": "Median of byts",
+    },
+  ],
+  "meta": Object {
+    "source": "90943e30-9a47-11e8-b64d-95841ca0b247",
+    "statistics": Object {
+      "totalCount": 236,
+    },
+    "type": "esaggs",
+  },
+  "rows": Array [
+    Object {
+      "breakdown": "rpm",
+      "metric": null,
+      "time": 1664121600000,
+    },
+    Object {
+      "breakdown": "rpm",
+      "metric": null,
+      "time": 1664123400000,
+    },
+    Object {
+      "breakdown": "rpm",
+      "metric": null,
+      "time": 1664125200000,
+    },
+    Object {
+      "breakdown": "rpm",
+      "metric": null,
+      "time": 1664127000000,
+    },
+    Object {
+      "breakdown": "deb",
+      "metric": null,
+      "time": 1664121600000,
+    },
+    Object {
+      "breakdown": "deb",
+      "metric": 9680,
+      "time": 1664123400000,
+    },
+    Object {
+      "breakdown": "deb",
+      "metric": null,
+      "time": 1664125200000,
+    },
+    Object {
+      "breakdown": "deb",
+      "metric": null,
+      "time": 1664127000000,
+    },
+    Object {
+      "breakdown": "zip",
+      "metric": null,
+      "time": 1664121600000,
+    },
+    Object {
+      "breakdown": "zip",
+      "metric": null,
+      "time": 1664123400000,
+    },
+    Object {
+      "breakdown": "zip",
+      "metric": 5037,
+      "time": 1664125200000,
+    },
+    Object {
+      "breakdown": "zip",
+      "metric": null,
+      "time": 1664127000000,
+    },
+    Object {
+      "breakdown": "zip",
+      "metric": null,
+      "time": 1664128800000,
+    },
+    Object {
+      "breakdown": "css",
+      "metric": 3264,
+      "time": 1664121600000,
+    },
+    Object {
+      "breakdown": "css",
+      "metric": 7215,
+      "time": 1664123400000,
+    },
+    Object {
+      "breakdown": "css",
+      "metric": 9601,
+      "time": 1664125200000,
+    },
+    Object {
+      "breakdown": "css",
+      "metric": 8458,
+      "time": 1664127000000,
+    },
+    Object {
+      "breakdown": "gz",
+      "metric": 3116.5,
+      "time": 1664121600000,
+    },
+    Object {
+      "breakdown": "gz",
+      "metric": null,
+      "time": 1664123400000,
+    },
+    Object {
+      "breakdown": "gz",
+      "metric": 4148,
+      "time": 1664125200000,
+    },
+    Object {
+      "breakdown": "gz",
+      "metric": null,
+      "time": 1664127000000,
+    },
+  ],
+  "type": "datatable",
+}
+`;

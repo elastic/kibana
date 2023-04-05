@@ -6,14 +6,20 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const BETA = i18n.translate('xpack.sessionView.beta', {
-  defaultMessage: 'Beta',
-});
+export const PROCESS_DATA_LIMIT_EXCEEDED_START = i18n.translate(
+  'xpack.sessionView.processDataLimitExceededStart',
+  {
+    defaultMessage: 'Data limit reached for',
+  }
+);
 
-export const REFRESH_SESSION = i18n.translate('xpack.sessionView.refreshSession', {
-  defaultMessage: 'Refresh session',
-});
+export const PROCESS_DATA_LIMIT_EXCEEDED_END = i18n.translate(
+  'xpack.sessionView.processDataLimitExceededEnd',
+  {
+    defaultMessage: 'See "max_kilobytes_per_process" in advanced policy configuration.',
+  }
+);
 
-export const OPEN_TTY_PLAYER = i18n.translate('xpack.sessionView.openTTYPlayer', {
-  defaultMessage: 'Open TTY player',
+export const VIEW_POLICIES = i18n.translate('xpack.sessionView.viewPoliciesLink', {
+  defaultMessage: 'VIEW POLICIES',
 });

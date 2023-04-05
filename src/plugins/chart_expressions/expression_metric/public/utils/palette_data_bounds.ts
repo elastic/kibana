@@ -19,6 +19,17 @@ export const getDataBoundsForPalette = (
 
   const smallestMetric = Math.min(...data.rows.map((row) => row[accessors.metric]));
   const greatestMetric = Math.max(...data.rows.map((row) => row[accessors.metric]));
+
+  if (
+    !accessors.max &&
+    !accessors.breakdownBy &&
+    (typeof rowNumber !== 'undefined' || data.rows.length === 1)
+  ) {
+    // dealing with a single metric and no max
+    const metricValue = greatestMetric;
+    return metricValue < 0 ? { min: metricValue * 2, max: 0 } : { min: 0, max: metricValue * 2 };
+  }
+
   const greatestMaximum = accessors.max
     ? rowNumber
       ? data.rows[rowNumber][accessors.max]

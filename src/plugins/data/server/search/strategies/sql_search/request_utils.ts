@@ -8,7 +8,7 @@
 
 import { SqlGetAsyncRequest, SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions } from '../../../../common';
-import { SearchSessionsConfigSchema } from '../../../../config';
+import { SearchConfigSchema } from '../../../../config';
 import {
   getCommonDefaultAsyncGetParams,
   getCommonDefaultAsyncSubmitParams,
@@ -18,11 +18,17 @@ import {
  @internal
  */
 export function getDefaultAsyncSubmitParams(
-  searchSessionsConfig: SearchSessionsConfigSchema | null,
+  searchConfig: SearchConfigSchema,
   options: ISearchOptions
 ): Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'> {
   return {
-    ...getCommonDefaultAsyncSubmitParams(searchSessionsConfig, options),
+    ...getCommonDefaultAsyncSubmitParams(searchConfig, options, {
+      /**
+       * force disable search sessions until sessions support SQL
+       * https://github.com/elastic/kibana/issues/127880
+       */
+      disableSearchSessions: true,
+    }),
   };
 }
 
@@ -30,10 +36,16 @@ export function getDefaultAsyncSubmitParams(
  @internal
  */
 export function getDefaultAsyncGetParams(
-  searchSessionsConfig: SearchSessionsConfigSchema | null,
+  searchConfig: SearchConfigSchema,
   options: ISearchOptions
 ): Pick<SqlGetAsyncRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
   return {
-    ...getCommonDefaultAsyncGetParams(searchSessionsConfig, options),
+    ...getCommonDefaultAsyncGetParams(searchConfig, options, {
+      /**
+       * force disable search sessions until sessions support SQL
+       * https://github.com/elastic/kibana/issues/127880
+       */
+      disableSearchSessions: true,
+    }),
   };
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
@@ -97,7 +98,14 @@ export function loadInitial(
   },
   autoApplyDisabled: boolean
 ) {
-  const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
+  const {
+    lensServices,
+    datasourceMap,
+    embeddableEditorIncomingState,
+    initialContext,
+    initialStateFromLocator,
+    visualizationMap,
+  } = storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
@@ -109,14 +117,106 @@ export function loadInitial(
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
   };
 
+  let activeDatasourceId: string | undefined;
+  if (initialContext && 'query' in initialContext) {
+    activeDatasourceId = 'textBased';
+  }
+
+  if (initialStateFromLocator) {
+    const locatorReferences =
+      'references' in initialStateFromLocator ? initialStateFromLocator.references : undefined;
+
+    const newFilters = initialStateFromLocator.filters
+      ? cloneDeep(initialStateFromLocator.filters)
+      : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
+    if (initialStateFromLocator.resolvedDateRange) {
+      const newTimeRange = {
+        from: initialStateFromLocator.resolvedDateRange.fromDate,
+        to: initialStateFromLocator.resolvedDateRange.toDate,
+      };
+      data.query.timefilter.timefilter.setTime(newTimeRange);
+    }
+
+    return initializeSources(
+      {
+        datasourceMap,
+        visualizationMap,
+        visualizationState: emptyState.visualization,
+        datasourceStates: emptyState.datasourceStates,
+        initialContext,
+        adHocDataViews:
+          lens.persistedDoc?.state.adHocDataViews || initialStateFromLocator.dataViewSpecs,
+        references: locatorReferences,
+        ...loaderSharedArgs,
+      },
+      {
+        isFullEditor: true,
+      }
+    )
+      .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
+        const currentSessionId =
+          initialStateFromLocator?.searchSessionId || data.search.session.getSessionId();
+        store.dispatch(
+          setState({
+            isSaveable: true,
+            filters: initialStateFromLocator.filters || data.query.filterManager.getFilters(),
+            query: initialStateFromLocator.query || emptyState.query,
+            searchSessionId: currentSessionId,
+            activeDatasourceId: emptyState.activeDatasourceId,
+            visualization: {
+              activeId: emptyState.visualization.activeId,
+              state: visualizationState,
+            },
+            dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+            datasourceStates: Object.entries(datasourceStates).reduce(
+              (state, [datasourceId, datasourceState]) => ({
+                ...state,
+                [datasourceId]: {
+                  ...datasourceState,
+                  isLoading: false,
+                },
+              }),
+              {}
+            ),
+            isLoading: false,
+          })
+        );
+
+        if (autoApplyDisabled) {
+          store.dispatch(disableAutoApply());
+        }
+      })
+      .catch((e: { message: string }) => {
+        notifications.toasts.addDanger({
+          title: e.message,
+        });
+      });
+  }
+
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
       initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
   ) {
+    const newFilters =
+      initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
+        ? cloneDeep(initialContext.searchFilters)
+        : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
     return initializeSources(
       {
         datasourceMap,
+        visualizationMap,
+        visualizationState: lens.visualization,
         datasourceStates: lens.datasourceStates,
         initialContext,
         adHocDataViews: lens.persistedDoc?.state.adHocDataViews,
@@ -126,14 +226,15 @@ export function loadInitial(
         isFullEditor: true,
       }
     )
-      .then(({ states, indexPatterns, indexPatternRefs }) => {
+      .then(({ datasourceStates, indexPatterns, indexPatternRefs }) => {
         store.dispatch(
           initEmpty({
             newState: {
               ...emptyState,
               dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
               searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
-              datasourceStates: Object.entries(states).reduce(
+              ...(activeDatasourceId && { activeDatasourceId }),
+              datasourceStates: Object.entries(datasourceStates).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,
                   [datasourceId]: {
@@ -187,9 +288,16 @@ export function loadInitial(
           const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
           // Don't overwrite any pinned filters
           data.query.filterManager.setAppFilters(filters);
+
+          const docVisualizationState = {
+            activeId: doc.visualizationType,
+            state: doc.state.visualization,
+          };
           return initializeSources(
             {
               datasourceMap,
+              visualizationMap,
+              visualizationState: docVisualizationState,
               datasourceStates: docDatasourceStates,
               references: [...doc.references, ...(doc.state.internalReferences || [])],
               initialContext,
@@ -200,7 +308,7 @@ export function loadInitial(
             },
             { isFullEditor: true }
           )
-            .then(({ states, indexPatterns, indexPatternRefs }) => {
+            .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
               const currentSessionId = data.search.session.getSessionId();
               store.dispatch(
                 setState({
@@ -219,10 +327,10 @@ export function loadInitial(
                   activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                   visualization: {
                     activeId: doc.visualizationType,
-                    state: doc.state.visualization,
+                    state: visualizationState,
                   },
                   dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
-                  datasourceStates: Object.entries(states).reduce(
+                  datasourceStates: Object.entries(datasourceStates).reduce(
                     (state, [datasourceId, datasourceState]) => ({
                       ...state,
                       [datasourceId]: {

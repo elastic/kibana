@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSuperSelect } from '
 import styled from 'styled-components';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { ActionConnector } from '../../containers/configure/types';
+import type { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon, isDeprecatedConnector } from '../utils';
@@ -96,7 +96,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                     <StyledEuiIconTip
                       aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
                       size={ICON_SIZE}
-                      type="alert"
+                      type="warning"
                       color="warning"
                       content={i18n.DEPRECATED_TOOLTIP_CONTENT}
                     />

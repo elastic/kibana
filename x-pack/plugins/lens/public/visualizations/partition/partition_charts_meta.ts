@@ -16,12 +16,8 @@ import {
   IconChartMosaic,
   IconChartWaffle,
 } from '@kbn/chart-icons';
-import {
-  CategoryDisplay,
-  NumberDisplay,
-  SharedPieLayerState,
-  EmptySizeRatios,
-} from '../../../common';
+import { SharedPieLayerState, EmptySizeRatios } from '../../../common/types';
+import { CategoryDisplay, NumberDisplay } from '../../../common/constants';
 import type { PieChartType } from '../../../common/types';
 
 interface PartitionChartMeta {
@@ -30,7 +26,6 @@ interface PartitionChartMeta {
   groupLabel: string;
   maxBuckets: number;
   isExperimental?: boolean;
-  requiredMinDimensionCount?: number;
   toolbarPopover: {
     isDisabled?: boolean;
     categoryOptions: Array<{
@@ -194,7 +189,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     }),
     groupLabel,
     maxBuckets: 2,
-    isExperimental: true,
     toolbarPopover: {
       categoryOptions: [],
       numberOptions,
@@ -202,7 +196,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     legend: {
       getShowLegendDefault: () => false,
     },
-    requiredMinDimensionCount: 2,
   },
   waffle: {
     icon: IconChartWaffle,
@@ -211,7 +204,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     }),
     groupLabel,
     maxBuckets: 1,
-    isExperimental: true,
     toolbarPopover: {
       isDisabled: true,
       categoryOptions: [],

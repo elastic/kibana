@@ -19,7 +19,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
 } from '@kbn/core/server';
-
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -33,12 +33,12 @@ import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugi
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import {
-  ensureCleanupFailedExecutionsTaskScheduled,
-  registerCleanupFailedExecutionsTaskDefinition,
-} from './cleanup_failed_executions';
+  IEventLogClientService,
+  IEventLogger,
+  IEventLogService,
+} from '@kbn/event-log-plugin/server';
+import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -49,7 +49,6 @@ import {
   createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
-import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 import {
   ActionExecutor,
@@ -92,16 +91,21 @@ import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import {
   isConnectorDeprecated,
   ConnectorWithOptionalDeprecation,
-} from './lib/is_conector_deprecated';
+} from './lib/is_connector_deprecated';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
+import {
+  type IUnsecuredActionsClient,
+  UnsecuredActionsClient,
+} from './unsecured_actions_client/unsecured_actions_client';
+import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 
 export interface PluginSetupContract {
   registerType<
@@ -121,6 +125,7 @@ export interface PluginSetupContract {
   isPreconfiguredConnector(connectorId: string): boolean;
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
 }
 
 export interface PluginStartContract {
@@ -132,11 +137,15 @@ export interface PluginStartContract {
     options?: { notifyUsage: boolean }
   ): boolean;
 
+  getAllTypes: ActionTypeRegistry['getAllTypes'];
+
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
 
   preconfiguredActions: PreConfiguredAction[];
+
+  getUnsecuredActionsClient(): IUnsecuredActionsClient;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -162,6 +171,7 @@ export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
   licensing: LicensingPluginStart;
+  eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
 }
 
@@ -274,13 +284,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       this.preconfiguredActions
     );
 
-    registerBuiltInActionTypes({
-      logger: this.logger,
-      actionTypeRegistry,
-      actionsConfigUtils,
-      publicBaseUrl: core.http.basePath.publicBaseUrl,
-    });
-
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
       registerActionsUsageCollector(
@@ -336,18 +339,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       usageCounter: this.usageCounter,
     });
 
-    // Cleanup failed execution task definition
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      registerCleanupFailedExecutionsTaskDefinition(plugins.taskManager, {
-        actionTypeRegistry,
-        logger: this.logger,
-        coreStartServices: core.getStartServices(),
-        config: this.actionsConfig.cleanupFailedExecutionsTask,
-        kibanaIndex: this.kibanaIndex,
-        taskManagerIndex: plugins.taskManager.index,
-      });
-    }
-
     return {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -375,6 +366,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       getSubActionConnectorClass: () => SubActionConnector,
       getCaseConnectorClass: () => CaseConnector,
+      getActionsHealth: () => {
+        return {
+          hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
+        };
+      },
     };
   }
 
@@ -451,6 +447,24 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           encryptedSavedObjectsClient,
           logger: this.logger,
         }),
+        async getEventLogClient() {
+          return plugins.eventLog.getClient(request);
+        },
+      });
+    };
+
+    const getUnsecuredActionsClient = () => {
+      const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      ]);
+
+      return new UnsecuredActionsClient({
+        internalSavedObjectsRepository,
+        executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          connectorTypeRegistry: actionTypeRegistry!,
+          preconfiguredConnectors: preconfiguredActions,
+        }),
       });
     };
 
@@ -477,7 +491,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       logger,
       eventLogger: this.eventLogger!,
       spaces: plugins.spaces?.spacesService,
-      getActionsClientWithRequest,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,
@@ -495,8 +508,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
-      getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
-        this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
+      savedObjectsRepository: core.savedObjects.createInternalRepository([
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      ]),
     });
 
     this.eventLogService!.isEsContextReady().then(() => {
@@ -510,15 +524,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
-    // Cleanup failed execution task
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      ensureCleanupFailedExecutionsTaskScheduled(
-        plugins.taskManager,
-        this.logger,
-        this.actionsConfig.cleanupFailedExecutionsTask
-      );
-    }
-
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
@@ -530,10 +535,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ) => {
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
+      getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
+      getUnsecuredActionsClient,
       preconfiguredActions,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(actionTypeRegistry, ...args),
@@ -545,7 +552,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     request: KibanaRequest
   ) =>
     savedObjects.getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes,
     });
 
@@ -596,7 +603,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [{ savedObjects }, { taskManager, encryptedSavedObjects }] =
+      const [{ savedObjects }, { taskManager, encryptedSavedObjects, eventLog }] =
         await core.getStartServices();
       const coreContext = await context.core;
 
@@ -608,7 +615,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             );
           }
           const unsecuredSavedObjectsClient = savedObjects.getScopedClient(request, {
-            excludedWrappers: ['security'],
+            excludedExtensions: [SECURITY_EXTENSION_ID],
             includedHiddenTypes,
           });
           return new ActionsClient({
@@ -648,6 +655,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               }),
               logger,
             }),
+            async getEventLogClient() {
+              return eventLog.getClient(request);
+            },
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

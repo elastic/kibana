@@ -12,6 +12,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Common', function () {
     loadTestFile(require.resolve('./client/update_alert_status'));
     loadTestFile(require.resolve('./comments/delete_comment'));
+    loadTestFile(require.resolve('./comments/delete_comments'));
     loadTestFile(require.resolve('./comments/find_comments'));
     loadTestFile(require.resolve('./comments/get_comment'));
     loadTestFile(require.resolve('./comments/get_all_comments'));
@@ -25,12 +26,13 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/get_case'));
     loadTestFile(require.resolve('./cases/patch_cases'));
     loadTestFile(require.resolve('./cases/post_case'));
-    loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/resolve_case'));
     loadTestFile(require.resolve('./cases/reporters/get_reporters'));
     loadTestFile(require.resolve('./cases/status/get_status'));
     loadTestFile(require.resolve('./cases/tags/get_tags'));
     loadTestFile(require.resolve('./user_actions/get_all_user_actions'));
+    loadTestFile(require.resolve('./user_actions/find_user_actions'));
+    loadTestFile(require.resolve('./user_actions/get_user_action_stats'));
     loadTestFile(require.resolve('./configure/get_configure'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
@@ -45,7 +47,11 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
      */
 
     loadTestFile(require.resolve('./internal/bulk_create_attachments'));
-    loadTestFile(require.resolve('./internal/suggest_user_profiles'));
+    loadTestFile(require.resolve('./internal/bulk_get_cases'));
+    loadTestFile(require.resolve('./internal/bulk_get_attachments'));
+    loadTestFile(require.resolve('./internal/get_connectors'));
+    loadTestFile(require.resolve('./internal/user_actions_get_users'));
+    loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
 
     /**
      * Attachments framework

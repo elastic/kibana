@@ -46,6 +46,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
+    it('should let the user choose between fields', async () => {
+      await waitAndClickByTestId('show-field-browser');
+      await waitAndClickByTestId('categories-filter-button');
+      await waitAndClickByTestId('categories-selector-option-name-base');
+      await find.clickByCssSelector('#_id');
+      await waitAndClickByTestId('close');
+
+      const headers = await find.allByCssSelector('.euiDataGridHeaderCell');
+      expect(headers.length).to.be(6);
+    });
+
+    it('should take into account the column type when sorting', async () => {
+      const sortElQuery =
+        '[data-test-subj="dataGridHeaderCellActionGroup-kibana.alert.duration.us"] > li:nth-child(2)';
+
+      await waitAndClickByTestId('dataGridHeaderCell-kibana.alert.duration.us');
+
+      await retry.try(async () => {
+        const exists = await find.byCssSelector(sortElQuery);
+        if (!exists) throw new Error('Still loading...');
+      });
+
+      const sortItem = await find.byCssSelector(sortElQuery);
+      expect(await sortItem.getVisibleText()).to.be('Sort Low-High');
+    });
+
     it('should sort properly', async () => {
       await find.clickDisplayedByCssSelector(
         '[data-test-subj="dataGridHeaderCell-event.action"] .euiDataGridHeaderCell__button'
@@ -161,4 +187,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       return rows;
     }
   });
+
+  const waitAndClickByTestId = async (testId: string) => {
+    retry.try(async () => {
+      const exists = await testSubjects.exists(testId);
+      if (!exists) throw new Error('Still loading...');
+    });
+
+    return find.clickDisplayedByCssSelector(`[data-test-subj="${testId}"]`);
+  };
 }

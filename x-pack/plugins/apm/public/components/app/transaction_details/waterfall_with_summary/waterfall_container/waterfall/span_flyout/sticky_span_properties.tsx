@@ -13,15 +13,15 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
   TRANSACTION_NAME,
-} from '../../../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../../common/es_fields/apm';
 import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../../../../hooks/use_apm_params';
-import { DependencyLink } from '../../../../../../shared/dependency_link';
+import { DependencyLink } from '../../../../../../shared/links/dependency_link';
 import { TransactionDetailLink } from '../../../../../../shared/links/apm/transaction_detail_link';
-import { ServiceLink } from '../../../../../../shared/service_link';
+import { ServiceLink } from '../../../../../../shared/links/apm/service_link';
 import { StickyProperties } from '../../../../../../shared/sticky_properties';
 import { LatencyAggregationType } from '../../../../../../../../common/latency_aggregation_types';
 
@@ -33,7 +33,9 @@ interface Props {
 export function StickySpanProperties({ span, transaction }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/traces/explorer'
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer',
+    '/dependencies/operation'
   );
   const { environment, comparisonEnabled, offset } = query;
 

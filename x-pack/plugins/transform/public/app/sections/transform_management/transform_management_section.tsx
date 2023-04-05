@@ -16,8 +16,8 @@ import {
   EuiFlexItem,
   EuiLoadingContent,
   EuiModal,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
   EuiCallOut,
@@ -143,7 +143,7 @@ export const TransformManagement: FC = () => {
                     color="danger"
                   >
                     <EuiEmptyPrompt
-                      iconType="alert"
+                      iconType="warning"
                       title={
                         <h2>
                           <FormattedMessage

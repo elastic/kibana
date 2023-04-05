@@ -31,14 +31,14 @@ import { selectDynamicSettings } from '../../../state/selectors';
 import { Ping } from '../../../../../common/runtime_types';
 
 export const StdErrorLogs = ({
-  configId,
+  monitorId,
   checkGroup,
   timestamp,
   title,
   summaryMessage,
   hideTitle = false,
 }: {
-  configId?: string;
+  monitorId?: string;
   checkGroup?: string;
   timestamp?: string;
   title?: string;
@@ -65,15 +65,18 @@ export const StdErrorLogs = ({
     },
   ] as Array<EuiBasicTableColumn<Ping>>;
 
-  const { items, loading } = useStdErrorLogs({ configId, checkGroup });
+  const { items, loading } = useStdErrorLogs({ monitorId, checkGroup });
 
-  const { discover, observability } = useKibana<ClientPluginsStart>().services;
+  const { discover, exploratoryView } = useKibana<ClientPluginsStart>().services;
 
   const { settings } = useSelector(selectDynamicSettings);
 
   const { data: discoverLink } = useFetcher(async () => {
     if (settings?.heartbeatIndices) {
-      const dataView = await observability.getAppDataView('synthetics', settings?.heartbeatIndices);
+      const dataView = await exploratoryView.getAppDataView(
+        'synthetics',
+        settings?.heartbeatIndices
+      );
       return discover.locator?.getUrl({
         query: { language: 'kuery', query: `monitor.check_group: ${checkGroup}` },
         indexPatternId: dataView?.id,
@@ -106,8 +109,9 @@ export const StdErrorLogs = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink>
+              <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
                 <EuiButtonEmpty
+                  data-test-subj="syntheticsStdErrorLogsButton"
                   href={discoverLink}
                   iconType="discoverApp"
                   isDisabled={!discoverLink}
@@ -117,7 +121,7 @@ export const StdErrorLogs = ({
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
+          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
             <p>{summaryMessage}</p>
           </EuiCallOut>
         </>

@@ -18,8 +18,12 @@ import type {
   HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
-import type { HostsRiskScore } from '../../../../../../common/search_strategy';
-import { getHostRiskIndex, buildHostNamesFilter } from '../../../../../../common/search_strategy';
+import type { HostRiskScore } from '../../../../../../common/search_strategy';
+import {
+  RiskScoreEntity,
+  getHostRiskIndex,
+  buildHostNamesFilter,
+} from '../../../../../../common/search_strategy';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
@@ -62,10 +66,9 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
 
     const hostNames = edges.map((edge) => getOr('', 'node.host.name[0]', edge));
 
-    const enhancedEdges =
-      deps?.spaceId && deps?.endpointContext.experimentalFeatures.riskyHostsEnabled
-        ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
-        : edges;
+    const enhancedEdges = deps?.spaceId
+      ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
+      : edges;
 
     return {
       ...response,
@@ -88,11 +91,10 @@ async function enhanceEdges(
   esClient: IScopedClusterClient
 ): Promise<HostsEdges[]> {
   const hostRiskData = await getHostRiskData(esClient, spaceId, hostNames);
-
   const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
     (acc, hit) => ({
       ...acc,
-      [hit._source?.host.name ?? '']: hit._source?.risk,
+      [hit._source?.host.name ?? '']: hit._source?.host?.risk?.calculated_level,
     }),
     {}
   );
@@ -114,10 +116,11 @@ async function getHostRiskData(
   hostNames: string[]
 ) {
   try {
-    const hostRiskResponse = await esClient.asCurrentUser.search<HostsRiskScore>(
+    const hostRiskResponse = await esClient.asCurrentUser.search<HostRiskScore>(
       buildRiskScoreQuery({
         defaultIndex: [getHostRiskIndex(spaceId)],
         filterQuery: buildHostNamesFilter(hostNames),
+        riskScoreEntity: RiskScoreEntity.host,
       })
     );
     return hostRiskResponse;

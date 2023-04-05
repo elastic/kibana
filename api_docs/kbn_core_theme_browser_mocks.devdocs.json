@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-theme-browser-mocks",
@@ -45,6 +46,7 @@
             ],
             "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -57,11 +59,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ThemeServiceSetup",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -74,11 +83,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ThemeServiceStart",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.ThemeServiceStart",
+                "text": "ThemeServiceStart"
+              },
               ">"
             ],
             "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -91,10 +107,17 @@
             "description": [],
             "signature": [
               "() => ",
-              "CoreTheme"
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              }
             ],
             "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -109,11 +132,18 @@
               "() => ",
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

@@ -7,12 +7,20 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { DocViewFilterFn } from '../../doc_views_types';
 
 interface TableActionsProps {
+  mode?: 'inline' | 'as_popover';
   field: string;
   pinned: boolean;
   flattenedField: unknown;
@@ -24,6 +32,7 @@ interface TableActionsProps {
 }
 
 export const TableActions = ({
+  mode = 'as_popover',
   pinned,
   field,
   fieldMapping,
@@ -167,6 +176,33 @@ export const TableActions = ({
       ],
     },
   ];
+
+  if (mode === 'inline') {
+    return (
+      <EuiFlexGroup
+        responsive={false}
+        gutterSize="xs"
+        className="kbnDocViewer__buttons"
+        data-test-subj={`fieldActionsGroup-${field}`}
+      >
+        {panels[0].items.map((item) => (
+          <EuiFlexItem key={item.icon} grow={false}>
+            <EuiToolTip content={item.name}>
+              <EuiButtonIcon
+                className="kbnDocViewer__actionButton"
+                data-test-subj={item['data-test-subj']}
+                aria-label={item['aria-label']}
+                iconType={item.icon}
+                iconSize="s"
+                disabled={item.disabled}
+                onClick={item.onClick}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <EuiPopover

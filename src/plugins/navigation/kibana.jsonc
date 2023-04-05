@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/navigation-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "navigation",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "unifiedSearch"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

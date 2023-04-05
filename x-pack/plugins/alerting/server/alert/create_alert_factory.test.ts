@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
-import { createAlertFactory } from './create_alert_factory';
+import { createAlertFactory, getPublicAlertFactory } from './create_alert_factory';
 import { processAlerts } from '../lib';
 
 jest.mock('../lib', () => ({
@@ -30,14 +30,18 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toMatchInlineSnapshot(`
-              Object {
-                "meta": Object {},
-                "state": Object {},
-              }
-        `);
+    expect(result).toMatchObject({
+      meta: {
+        uuid: expect.any(String),
+        flappingHistory: [],
+      },
+      state: {},
+      context: {},
+      id: '1',
+    });
     // @ts-expect-error
     expect(result.getId()).toEqual('1');
   });
@@ -45,7 +49,7 @@ describe('createAlertFactory()', () => {
   test('reuses existing alerts', () => {
     const alert = new Alert('1', {
       state: { foo: true },
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+      meta: { lastScheduledActions: { group: 'default', date: new Date() }, uuid: 'uuid-previous' },
     });
     const alertFactory = createAlertFactory({
       alerts: {
@@ -53,21 +57,22 @@ describe('createAlertFactory()', () => {
       },
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "meta": Object {
-          "lastScheduledActions": Object {
-            "date": "1970-01-01T00:00:00.000Z",
-            "group": "default",
-          },
+    expect(result).toMatchObject({
+      meta: {
+        uuid: 'uuid-previous',
+        flappingHistory: [],
+        lastScheduledActions: {
+          date: expect.any(Date),
+          group: 'default',
         },
-        "state": Object {
-          "foo": true,
-        },
-      }
-    `);
+      },
+      state: { foo: true },
+      context: {},
+      id: '1',
+    });
   });
 
   test('mutates given alerts', () => {
@@ -76,16 +81,20 @@ describe('createAlertFactory()', () => {
       alerts,
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     alertFactory.create('1');
-    expect(alerts).toMatchInlineSnapshot(`
-              Object {
-                "1": Object {
-                  "meta": Object {},
-                  "state": Object {},
-                },
-              }
-        `);
+    expect(alerts).toMatchObject({
+      1: {
+        meta: {
+          uuid: expect.any(String),
+          flappingHistory: [],
+        },
+        state: {},
+        context: {},
+        id: '1',
+      },
+    });
   });
 
   test('throws error and sets flag when more alerts are created than allowed', () => {
@@ -93,6 +102,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       maxAlerts: 3,
+      autoRecoverAlerts: true,
     });
 
     expect(alertFactory.hasReachedAlertLimit()).toBe(false);
@@ -112,10 +122,14 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
-      meta: {},
+    expect(result).toMatchObject({
+      meta: {
+        flappingHistory: [],
+        uuid: expect.any(String),
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,
@@ -133,7 +147,7 @@ describe('createAlertFactory()', () => {
 
   test('returns recovered alerts when setsRecoveryContext is true', () => {
     (processAlerts as jest.Mock).mockReturnValueOnce({
-      recoveredAlerts: {
+      currentRecoveredAlerts: {
         z: {
           id: 'z',
           state: { foo: true },
@@ -151,10 +165,14 @@ describe('createAlertFactory()', () => {
       logger,
       canSetRecoveryContext: true,
       maxAlerts: 1000,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
-      meta: {},
+    expect(result).toMatchObject({
+      meta: {
+        flappingHistory: [],
+        uuid: expect.any(String),
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,
@@ -175,10 +193,14 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: true,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
-      meta: {},
+    expect(result).toMatchObject({
+      meta: {
+        flappingHistory: [],
+        uuid: expect.any(String),
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,
@@ -198,10 +220,14 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: true,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
-      meta: {},
+    expect(result).toMatchObject({
+      meta: {
+        flappingHistory: [],
+        uuid: expect.any(String),
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,
@@ -220,10 +246,14 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: false,
+      autoRecoverAlerts: true,
     });
     const result = alertFactory.create('1');
-    expect(result).toEqual({
-      meta: {},
+    expect(result).toMatchObject({
+      meta: {
+        flappingHistory: [],
+        uuid: expect.any(String),
+      },
       state: {},
       context: {},
       scheduledExecutionOptions: undefined,
@@ -237,5 +267,112 @@ describe('createAlertFactory()', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       `Set doesSetRecoveryContext to true on rule type to get access to recovered alerts.`
     );
+  });
+
+  test('throws error when checking limit usage if alertLimit.getValue is called but alertLimit.setLimitReached is not', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+      autoRecoverAlerts: true,
+    });
+
+    const limit = alertFactory.alertLimit.getValue();
+    expect(limit).toEqual(1000);
+
+    expect(() => {
+      alertFactory.alertLimit.checkLimitUsage();
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Rule has not reported whether alert limit has been reached after requesting limit value!"`
+    );
+  });
+
+  test('does not throw error when checking limit usage if alertLimit.getValue is called and alertLimit.setLimitReached is called with reached = true', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+      autoRecoverAlerts: true,
+    });
+
+    const limit = alertFactory.alertLimit.getValue();
+    expect(limit).toEqual(1000);
+
+    alertFactory.alertLimit.setLimitReached(true);
+    alertFactory.alertLimit.checkLimitUsage();
+  });
+
+  test('does not throw error when checking limit usage if alertLimit.getValue is called and alertLimit.setLimitReached is called with reached = false', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+      autoRecoverAlerts: true,
+    });
+
+    const limit = alertFactory.alertLimit.getValue();
+    expect(limit).toEqual(1000);
+
+    alertFactory.alertLimit.setLimitReached(false);
+    alertFactory.alertLimit.checkLimitUsage();
+  });
+
+  test('returns empty array if recovered alerts exist but autoRecoverAlerts is false', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+      canSetRecoveryContext: true,
+      autoRecoverAlerts: false,
+    });
+    const result = alertFactory.create('1');
+    expect(result).toEqual({
+      meta: {
+        flappingHistory: [],
+        uuid: expect.any(String),
+      },
+      state: {},
+      context: {},
+      scheduledExecutionOptions: undefined,
+      id: '1',
+    });
+
+    const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
+    const recoveredAlerts = getRecoveredAlertsFn!();
+    expect(Array.isArray(recoveredAlerts)).toBe(true);
+    expect(recoveredAlerts.length).toEqual(0);
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Set autoRecoverAlerts to true on rule type to get access to recovered alerts.`
+    );
+  });
+});
+
+describe('getPublicAlertFactory', () => {
+  test('only returns subset of function from given alert factory', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 1000,
+      autoRecoverAlerts: true,
+    });
+
+    expect(alertFactory.create).toBeDefined();
+    expect(alertFactory.alertLimit.getValue).toBeDefined();
+    expect(alertFactory.alertLimit.setLimitReached).toBeDefined();
+    expect(alertFactory.alertLimit.checkLimitUsage).toBeDefined();
+    expect(alertFactory.hasReachedAlertLimit).toBeDefined();
+    expect(alertFactory.done).toBeDefined();
+
+    const publicAlertFactory = getPublicAlertFactory(alertFactory);
+
+    expect(publicAlertFactory.create).toBeDefined();
+    expect(publicAlertFactory.done).toBeDefined();
+    expect(publicAlertFactory.alertLimit.getValue).toBeDefined();
+    expect(publicAlertFactory.alertLimit.setLimitReached).toBeDefined();
+
+    // @ts-expect-error
+    expect(publicAlertFactory.alertLimit.checkLimitUsage).not.toBeDefined();
+    // @ts-expect-error
+    expect(publicAlertFactory.hasReachedAlertLimit).not.toBeDefined();
   });
 });

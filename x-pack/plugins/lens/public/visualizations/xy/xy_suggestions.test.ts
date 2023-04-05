@@ -19,11 +19,12 @@ import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import type { PaletteOutput } from '@kbn/coloring';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 jest.mock('../../id_generator');
 
@@ -36,6 +37,7 @@ const xyVisualization = getXyVisualization({
   core: coreMock.createStart(),
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
@@ -147,6 +149,25 @@ describe('xy_suggestions', () => {
     );
   });
 
+  test('marks incomplete as true when no metric is provided', () => {
+    expect(
+      (
+        [
+          {
+            isMultiRow: true,
+            columns: [strCol('foo')],
+            layerId: 'first',
+            changeType: 'unchanged',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => {
+        const suggestions = getSuggestions({ table, keptLayerIds: [] });
+        expect(suggestions.every((suggestion) => suggestion.incomplete)).toEqual(true);
+        expect(suggestions).toHaveLength(10);
+      })
+    );
+  });
+
   test('rejects the configuration when metric isStaticValue', () => {
     (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({
@@ -200,6 +221,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       keptLayerIds: [],
+      subVisualizationId: 'area',
       state: {
         legend: { isVisible: true, position: 'bottom' },
         valueLabels: 'hide',
@@ -207,14 +229,14 @@ describe('xy_suggestions', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'bar',
             accessors: ['bytes'],
             splitAccessor: undefined,
           },
           {
             layerId: 'second',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'bar',
             accessors: ['bytes'],
             splitAccessor: undefined,
@@ -225,6 +247,7 @@ describe('xy_suggestions', () => {
 
     expect(suggestions).toHaveLength(visualizationTypes.length);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+      'line',
       'bar',
       'bar_horizontal',
       'bar_stacked',
@@ -234,7 +257,6 @@ describe('xy_suggestions', () => {
       'area',
       'area_stacked',
       'area_percentage_stacked',
-      'line',
     ]);
   });
 
@@ -313,7 +335,7 @@ describe('xy_suggestions', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'bar',
             xAccessor: 'date',
             accessors: ['bytes'],
@@ -355,7 +377,7 @@ describe('xy_suggestions', () => {
         layers: [
           {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'bar',
             xAccessor: 'date',
             accessors: ['bytes'],
@@ -363,7 +385,7 @@ describe('xy_suggestions', () => {
           },
           {
             layerId: 'second',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'bar',
             xAccessor: undefined,
             accessors: [],
@@ -545,13 +567,16 @@ describe('xy_suggestions', () => {
     );
   });
 
-  test('passes annotation layer without modifying it', () => {
+  test('passes annotation layer for date histogram data layer', () => {
     const annotationLayer: XYAnnotationLayerConfig = {
       layerId: 'second',
-      layerType: layerTypes.ANNOTATIONS,
+      layerType: LayerTypes.ANNOTATIONS,
+      indexPatternId: 'indexPattern1',
+      ignoreGlobalFilters: true,
       annotations: [
         {
           id: '1',
+          type: 'manual',
           key: {
             type: 'point_in_time',
             timestamp: '2020-20-22',
@@ -569,10 +594,10 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price'],
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: 'date',
-          xAccessor: 'product',
+          splitAccessor: 'product',
+          xAccessor: 'date',
         },
         annotationLayer,
       ],
@@ -592,7 +617,65 @@ describe('xy_suggestions', () => {
       expect(suggestion.state.layers).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            layerType: layerTypes.ANNOTATIONS,
+            layerType: LayerTypes.ANNOTATIONS,
+          }),
+        ])
+      )
+    );
+  });
+
+  test('does not pass annotation layer if x-axis is not date histogram', () => {
+    const annotationLayer: XYAnnotationLayerConfig = {
+      layerId: 'second',
+      layerType: LayerTypes.ANNOTATIONS,
+      indexPatternId: 'indexPattern1',
+      ignoreGlobalFilters: true,
+      annotations: [
+        {
+          id: '1',
+          type: 'manual',
+          key: {
+            type: 'point_in_time',
+            timestamp: '2020-20-22',
+          },
+          label: 'annotation',
+        },
+      ],
+    };
+
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar',
+      fittingFunction: 'None',
+      layers: [
+        {
+          layerId: 'first',
+          accessors: ['price'],
+          seriesType: 'bar',
+          layerType: LayerTypes.DATA,
+          xAccessor: 'date',
+          splitAccessor: 'price2',
+        },
+        annotationLayer,
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date'), numCol('price2')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+    });
+
+    suggestions.every((suggestion) =>
+      expect(suggestion.state.layers).toEqual(
+        expect.arrayContaining([
+          expect.not.objectContaining({
+            layerType: LayerTypes.ANNOTATIONS,
           }),
         ])
       )
@@ -647,7 +730,7 @@ describe('xy_suggestions', () => {
           {
             accessors: ['price', 'quantity'],
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             seriesType: 'bar',
             splitAccessor: 'product',
             xAccessor: 'date',
@@ -702,7 +785,7 @@ describe('xy_suggestions', () => {
         {
           accessors: [],
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'line',
           splitAccessor: undefined,
           xAccessor: '',
@@ -741,7 +824,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price'],
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: undefined,
           xAccessor: 'date',
@@ -784,7 +867,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price', 'quantity'],
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'product',
           xAccessor: 'date',
@@ -828,7 +911,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price', 'quantity'],
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',
@@ -866,7 +949,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price'],
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'date',
           xAccessor: 'product',
@@ -907,7 +990,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price', 'quantity'],
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',
@@ -952,7 +1035,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price'],
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'category',
           xAccessor: 'product',
@@ -998,7 +1081,7 @@ describe('xy_suggestions', () => {
         {
           accessors: ['price', 'quantity'],
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',

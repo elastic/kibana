@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+import type { ParsedCommandInput, ParsedCommandInterface } from './types';
 import type { CommandDefinition } from '..';
 
-export type ParsedArgData = string[];
-
-interface ParsedCommandInput<TArgs extends object = any> {
-  name: string;
-  args: {
-    [key in keyof TArgs]: ParsedArgData;
-  };
-}
 const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
   const response: ParsedCommandInput = {
@@ -58,12 +49,12 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
           response.args[argName] = [];
         }
 
-        // if this argument name as a value, then process that
+        // if this argument name has a value, then process that
         if (argName !== argNameAndValueTrimmedString && firstSpaceOrEqualSign) {
           let newArgValue = argNameAndValueTrimmedString
             .substring(firstSpaceOrEqualSign.index + 1)
             .trim()
-            .replace(/\\/g, '');
+            .replace(/\\-\\-/g, '--');
 
           if (newArgValue.charAt(0) === '"') {
             newArgValue = newArgValue.substring(1);
@@ -74,6 +65,9 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
           }
 
           response.args[argName].push(newArgValue);
+        } else {
+          // Argument has not value (bare), set it to empty string
+          response.args[argName].push(true);
         }
       }
     }
@@ -81,22 +75,6 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 
   return response;
 };
-
-export interface ParsedCommandInterface<TArgs extends object = any>
-  extends ParsedCommandInput<TArgs> {
-  input: string;
-
-  /**
-   * Checks if the given argument name was entered by the user
-   * @param argName
-   */
-  hasArg(argName: string): boolean;
-
-  /**
-   * if any argument was entered
-   */
-  hasArgs: boolean;
-}
 
 class ParsedCommand implements ParsedCommandInterface {
   public readonly name: string;

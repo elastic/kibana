@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type { Store } from 'redux';
 import { applyMiddleware, createStore } from 'redux';
@@ -52,15 +53,16 @@ jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendBulkGetPackagePolicies: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
-  sendGetFleetAgentsWithEndpoint: () => Promise.resolve({ total: 0 }),
 }));
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('rxjs');
 
 type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
 
 describe('endpoint list middleware', () => {
   const getKibanaServicesMock = KibanaServices.get as jest.Mock;
+  const firstValueFromMock = firstValueFrom as jest.Mock;
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
@@ -120,6 +122,7 @@ describe('endpoint list middleware', () => {
   });
 
   it('handles `appRequestedEndpointList`', async () => {
+    firstValueFromMock.mockResolvedValue({ indexFields: [] });
     endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.get.mockResolvedValue(apiResponse);
@@ -137,11 +140,9 @@ describe('endpoint list middleware', () => {
     await Promise.all([
       waitForAction('serverReturnedEndpointList'),
       waitForAction('endpointPendingActionsStateChanged'),
-      waitForAction('serverReturnedEndpointsTotal'),
       waitForAction('serverReturnedMetadataPatterns'),
       waitForAction('serverCancelledPolicyItemsLoading'),
       waitForAction('serverReturnedEndpointExistValue'),
-      waitForAction('serverReturnedAgenstWithEndpointsTotal'),
     ]);
 
     expect(fakeHttpServices.get).toHaveBeenNthCalledWith(1, HOST_METADATA_LIST_ROUTE, {
@@ -255,15 +256,15 @@ describe('endpoint list middleware', () => {
         query: {
           agent_ids: [
             '0dc3661d-6e67-46b0-af39-6f12b025fcb0',
-            'a8e32a61-2685-47f0-83eb-edf157b8e616',
-            '37e219a8-fe16-4da9-bf34-634c5824b484',
-            '2484eb13-967e-4491-bf83-dffefdfe607c',
-            '0bc08ef6-6d6a-4113-92f2-b97811187c63',
-            'f4127d87-b567-4a6e-afa6-9a1c7dc95f01',
-            'f9ab5b8c-a43e-4e80-99d6-11570845a697',
-            '406c4b6a-ca57-4bd1-bc66-d9d999df3e70',
-            '2da1dd51-f7af-4f0e-b64c-e7751c74b0e7',
-            '89a94ea4-073c-4cb6-90a2-500805837027',
+            '34634c58-24b4-4448-80f4-107fb9918494',
+            '5a1298e3-e607-4bc0-8ef6-6d6a811312f2',
+            '78c54b13-596d-4891-95f4-80092d04454b',
+            '445f1fd2-5f81-4ddd-bdb6-f0d1bf2efe90',
+            'd77a3fc6-3096-4852-a6ee-f6b09278fbc6',
+            '892fcccf-1bd8-45a2-a9cc-9a7860a3cb81',
+            '693a3110-5ba0-4284-a264-5d78301db08c',
+            '554db084-64fa-4e4a-ba47-2ba713f9932b',
+            'c217deb6-674d-4f97-bb1d-a3a04238e6d7',
           ],
         },
       });

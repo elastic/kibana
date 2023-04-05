@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -19,8 +19,8 @@ import {
   EuiSwitch,
   EuiTextAlign,
 } from '@elastic/eui';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { ModuleJobUI, SAVE_STATE } from '../page';
-import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { useMlContext } from '../../../../contexts/ml';
 import {
   composeValidators,
@@ -28,7 +28,6 @@ import {
   patternValidator,
 } from '../../../../../../common/util/validators';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
-import { usePartialState } from '../../../../components/custom_hooks';
 import { TimeRange, TimeRangePicker } from '../../common/components';
 
 export interface JobSettingsFormValues {
@@ -41,59 +40,63 @@ export interface JobSettingsFormValues {
 
 interface JobSettingsFormProps {
   saveState: SAVE_STATE;
-  onSubmit: (values: JobSettingsFormValues) => any;
-  onChange: (values: JobSettingsFormValues) => any;
+  onSubmit: (values: JobSettingsFormValues) => void;
+  onJobPrefixChange: (jobPrefix: string) => void;
   jobs: ModuleJobUI[];
 }
 
 export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   onSubmit,
-  onChange,
+  onJobPrefixChange,
   saveState,
   jobs,
 }) => {
-  const { from, to } = getTimeFilterRange();
+  const timefilter = useTimefilter();
+  const { from, to } = getTimeFilterRange(timefilter);
   const { currentDataView: dataView } = useMlContext();
 
-  const jobPrefixValidator = composeValidators(
-    patternValidator(/^([a-z0-9]+[a-z0-9\-_]*)?$/),
-    maxLengthValidator(JOB_ID_MAX_LENGTH - Math.max(...jobs.map(({ id }) => id.length)))
+  const jobPrefixValidator = useMemo(
+    () =>
+      composeValidators(
+        patternValidator(/^([a-z0-9]+[a-z0-9\-_]*)?$/),
+        maxLengthValidator(JOB_ID_MAX_LENGTH - Math.max(...jobs.map(({ id }) => id.length)))
+      ),
+    [jobs]
   );
 
-  const [formState, setFormState] = usePartialState({
-    jobPrefix: '',
-    startDatafeedAfterSave: true,
-    useFullIndexData: true,
-    timeRange: {
-      start: from,
-      end: to,
-    },
-    useDedicatedIndex: false,
+  const [jobPrefix, setJobPrefix] = useState('');
+  const [startDatafeedAfterSave, setStartDatafeedAfterSave] = useState(true);
+  const [useFullIndexData, setUseFullIndexData] = useState(true);
+  const [timeRange, setTimeRange] = useState({
+    start: from,
+    end: to,
   });
+  const [useDedicatedIndex, setUseDedicatedIndex] = useState(false);
   const [validationResult, setValidationResult] = useState<Record<string, any>>({});
 
-  const onJobPrefixChange = (value: string) => {
-    setFormState({
-      jobPrefix: value && value.toLowerCase(),
-    });
+  const createJobSettings = () => {
+    return {
+      jobPrefix,
+      startDatafeedAfterSave,
+      useFullIndexData,
+      timeRange,
+      useDedicatedIndex,
+    };
   };
 
-  const handleValidation = () => {
-    const jobPrefixValidationResult = jobPrefixValidator(formState.jobPrefix);
+  const handleValidation = useCallback(() => {
+    const jobPrefixValidationResult = jobPrefixValidator(jobPrefix);
 
     setValidationResult({
       jobPrefix: jobPrefixValidationResult,
       formValid: !jobPrefixValidationResult,
     });
-  };
+  }, [jobPrefix, jobPrefixValidator]);
 
   useEffect(() => {
     handleValidation();
-  }, [formState.jobPrefix]);
-
-  useEffect(() => {
-    onChange(formState);
-  }, [formState]);
+    onJobPrefixChange(jobPrefix);
+  }, [handleValidation, jobPrefix, onJobPrefixChange]);
 
   return (
     <>
@@ -148,8 +151,8 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           >
             <EuiFieldText
               name="jobPrefix"
-              value={formState.jobPrefix}
-              onChange={({ target: { value } }) => onJobPrefixChange(value)}
+              value={jobPrefix}
+              onChange={({ target: { value } }) => setJobPrefix(value)}
               isInvalid={!!validationResult.jobPrefix}
             />
           </EuiFormRow>
@@ -165,11 +168,9 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
                 defaultMessage="Start datafeed after save"
               />
             }
-            checked={formState.startDatafeedAfterSave}
+            checked={startDatafeedAfterSave}
             onChange={({ target: { checked } }) => {
-              setFormState({
-                startDatafeedAfterSave: checked,
-              });
+              setStartDatafeedAfterSave(checked);
             }}
           />
         </EuiFormRow>
@@ -180,28 +181,24 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.useFullDataLabel"
-                defaultMessage="Use full {indexPatternTitle} data"
-                values={{ indexPatternTitle: dataView.title }}
+                defaultMessage="Use full {dataViewIndexPattern} data"
+                values={{ dataViewIndexPattern: dataView.getIndexPattern() }}
               />
             }
-            checked={formState.useFullIndexData}
+            checked={useFullIndexData}
             onChange={({ target: { checked } }) => {
-              setFormState({
-                useFullIndexData: checked,
-              });
+              setUseFullIndexData(checked);
             }}
           />
         </EuiFormRow>
-        {!formState.useFullIndexData && (
+        {!useFullIndexData && (
           <>
             <EuiSpacer size="m" />
             <TimeRangePicker
               setTimeRange={(value) => {
-                setFormState({
-                  timeRange: value,
-                });
+                setTimeRange(value);
               }}
-              timeRange={formState.timeRange}
+              timeRange={timeRange}
             />
           </>
         )}
@@ -239,11 +236,9 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
               <EuiSwitch
                 id="useDedicatedIndex"
                 name="useDedicatedIndex"
-                checked={formState.useDedicatedIndex}
+                checked={useDedicatedIndex}
                 onChange={({ target: { checked } }) => {
-                  setFormState({
-                    useDedicatedIndex: checked,
-                  });
+                  setUseDedicatedIndex(checked);
                 }}
                 label={i18n.translate('xpack.ml.newJob.recognize.useDedicatedIndexLabel', {
                   defaultMessage: 'Use dedicated index',
@@ -261,7 +256,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           isLoading={saveState === SAVE_STATE.SAVING}
           disabled={!validationResult.formValid || saveState === SAVE_STATE.SAVING}
           onClick={() => {
-            onSubmit(formState);
+            onSubmit(createJobSettings());
           }}
           aria-label={i18n.translate('xpack.ml.newJob.recognize.createJobButtonAriaLabel', {
             defaultMessage: 'Create job',

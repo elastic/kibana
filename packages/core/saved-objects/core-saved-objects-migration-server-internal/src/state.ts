@@ -18,6 +18,8 @@ import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
 import type { MigrationLog, Progress } from './types';
+import type { BulkOperation } from './model/create_batches';
+import type { Aliases } from './model/helpers';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
@@ -149,6 +151,7 @@ export interface BaseState extends ControlState {
    * DocLinks for savedObjects. to reference online documentation
    */
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
+  readonly waitForMigrationCompletion: boolean;
 }
 
 export interface InitState extends BaseState {
@@ -156,6 +159,7 @@ export interface InitState extends BaseState {
 }
 
 export interface PostInitState extends BaseState {
+  readonly aliases: Aliases;
   /**
    * The source index is the index from which the migration reads. If the
    * Option is a none, we didn't do any migration from a source index, either:
@@ -165,15 +169,61 @@ export interface PostInitState extends BaseState {
    *    the MARK_VERSION_INDEX_READY step
    */
   readonly sourceIndex: Option.Option<string>;
+  readonly sourceIndexMappings: Option.Option<IndexMapping>;
   /** The target index is the index to which the migration writes */
   readonly targetIndex: string;
   readonly versionIndexReadyActions: Option.Option<AliasAction[]>;
-  readonly outdatedDocumentsQuery: QueryDslQueryContainer;
+}
+
+export interface SourceExistsState extends PostInitState {
+  readonly sourceIndex: Option.Some<string>;
+  readonly sourceIndexMappings: Option.Some<IndexMapping>;
+}
+
+export interface WaitForMigrationCompletionState extends PostInitState {
+  /** Wait until another instance completes the migration */
+  readonly controlState: 'WAIT_FOR_MIGRATION_COMPLETION';
 }
 
 export interface DoneState extends PostInitState {
   /** Migration completed successfully */
   readonly controlState: 'DONE';
+}
+
+export interface CleanupUnknownAndExcluded extends SourceExistsState {
+  /** Clean the source index, removing SOs with unknown and excluded types */
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED';
+  /** The cleanup operation has deleted one or more documents, we gotta refresh the index */
+  readonly mustRefresh?: boolean;
+}
+
+export interface CleanupUnknownAndExcludedWaitForTaskState extends SourceExistsState {
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK';
+  readonly deleteByQueryTaskId: string;
+  /** The cleanup operation has deleted one or more documents, we gotta refresh the index */
+  readonly mustRefresh?: boolean;
+}
+
+/**
+ * Compatibe migrations do not require migrating to a new index because all
+ * schema changes are compatible with current index mappings.
+ *
+ * Before running the compatible migration we need to prepare. For example, we
+ * need to make sure that no older Kibana versions are still writing to target
+ * index.
+ */
+export interface PrepareCompatibleMigration extends SourceExistsState {
+  /** We have found a schema-compatible migration, this means we can optimise our migration steps */
+  readonly controlState: 'PREPARE_COMPATIBLE_MIGRATION';
+  /** Alias-level actions that prepare for this migration */
+  readonly preTransformDocsActions: AliasAction[];
+  /** Indicates whether we must refresh the index */
+  readonly mustRefresh?: boolean;
+}
+
+export interface RefreshSource extends SourceExistsState {
+  /** Refresh source index before searching for outdated docs */
+  readonly controlState: 'REFRESH_SOURCE';
 }
 
 export interface FatalState extends BaseState {
@@ -183,29 +233,27 @@ export interface FatalState extends BaseState {
   readonly reason: string;
 }
 
-export interface WaitForYellowSourceState extends BaseState {
+export interface WaitForYellowSourceState extends SourceExistsState {
   /** Wait for the source index to be yellow before reading from it. */
   readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
-  readonly sourceIndex: Option.Some<string>;
-  readonly sourceIndexMappings: IndexMapping;
 }
 
-export interface CheckUnknownDocumentsState extends BaseState {
+export interface UpdateSourceMappingsPropertiesState extends SourceExistsState {
+  readonly controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES';
+}
+
+export interface CheckUnknownDocumentsState extends SourceExistsState {
   /** Check if any unknown document is present in the source index */
   readonly controlState: 'CHECK_UNKNOWN_DOCUMENTS';
-  readonly sourceIndex: Option.Some<string>;
-  readonly sourceIndexMappings: IndexMapping;
 }
 
-export interface SetSourceWriteBlockState extends PostInitState {
+export interface SetSourceWriteBlockState extends SourceExistsState {
   /** Set a write block on the source index to prevent any further writes */
   readonly controlState: 'SET_SOURCE_WRITE_BLOCK';
-  readonly sourceIndex: Option.Some<string>;
 }
 
-export interface CalculateExcludeFiltersState extends PostInitState {
+export interface CalculateExcludeFiltersState extends SourceExistsState {
   readonly controlState: 'CALCULATE_EXCLUDE_FILTERS';
-  readonly sourceIndex: Option.Some<string>;
 }
 
 export interface CreateNewTargetState extends PostInitState {
@@ -215,22 +263,20 @@ export interface CreateNewTargetState extends PostInitState {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 }
 
-export interface CreateReindexTempState extends PostInitState {
+export interface CreateReindexTempState extends SourceExistsState {
   /**
    * Create a target index with mappings from the source index and registered
    * plugins
    */
   readonly controlState: 'CREATE_REINDEX_TEMP';
-  readonly sourceIndex: Option.Some<string>;
 }
 
-export interface ReindexSourceToTempOpenPit extends PostInitState {
+export interface ReindexSourceToTempOpenPit extends SourceExistsState {
   /** Open PIT to the source index */
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT';
-  readonly sourceIndex: Option.Some<string>;
 }
 
-interface ReindexSourceToTempBatch extends PostInitState {
+interface ReindexSourceToTempBatch extends SourceExistsState {
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
   readonly corruptDocumentIds: string[];
@@ -242,7 +288,7 @@ export interface ReindexSourceToTempRead extends ReindexSourceToTempBatch {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
 }
 
-export interface ReindexSourceToTempClosePit extends PostInitState {
+export interface ReindexSourceToTempClosePit extends SourceExistsState {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT';
   readonly sourceIndexPitId: string;
 }
@@ -254,24 +300,19 @@ export interface ReindexSourceToTempTransform extends ReindexSourceToTempBatch {
 
 export interface ReindexSourceToTempIndexBulk extends ReindexSourceToTempBatch {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK';
-  readonly transformedDocBatches: [SavedObjectsRawDoc[]];
+  readonly bulkOperationBatches: BulkOperation[][];
   readonly currentBatch: number;
 }
 
-export type SetTempWriteBlock = PostInitState & {
-  /**
-   *
-   */
+export interface SetTempWriteBlock extends PostInitState {
   readonly controlState: 'SET_TEMP_WRITE_BLOCK';
-  readonly sourceIndex: Option.Some<string>;
-};
+}
 
 export interface CloneTempToSource extends PostInitState {
   /**
    * Clone the temporary reindex index into
    */
   readonly controlState: 'CLONE_TEMP_TO_TARGET';
-  readonly sourceIndex: Option.Some<string>;
 }
 
 export interface RefreshTarget extends PostInitState {
@@ -280,15 +321,28 @@ export interface RefreshTarget extends PostInitState {
   readonly targetIndex: string;
 }
 
-export interface UpdateTargetMappingsState extends PostInitState {
-  /** Update the mappings of the target index */
-  readonly controlState: 'UPDATE_TARGET_MAPPINGS';
+export interface CheckTargetMappingsState extends PostInitState {
+  readonly controlState: 'CHECK_TARGET_MAPPINGS';
 }
 
-export interface UpdateTargetMappingsWaitForTaskState extends PostInitState {
+export interface UpdateTargetMappingsPropertiesState extends PostInitState {
   /** Update the mappings of the target index */
-  readonly controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK';
+  readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES';
+}
+
+export interface UpdateTargetMappingsPropertiesWaitForTaskState extends PostInitState {
+  /** Update the mappings of the target index */
+  readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK';
   readonly updateTargetMappingsTaskId: string;
+}
+
+export interface UpdateTargetMappingsMeta extends PostInitState {
+  /** Update the mapping _meta information with the hashes of the mappings for each plugin */
+  readonly controlState: 'UPDATE_TARGET_MAPPINGS_META';
+}
+
+export interface CheckVersionIndexReadyActions extends PostInitState {
+  readonly controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS';
 }
 
 export interface OutdatedDocumentsSearchOpenPit extends PostInitState {
@@ -337,7 +391,7 @@ export interface TransformedDocumentsBulkIndex extends PostInitState {
    * Write the up-to-date transformed documents to the target index
    */
   readonly controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX';
-  readonly transformedDocBatches: SavedObjectsRawDoc[][];
+  readonly bulkOperationBatches: BulkOperation[][];
   readonly currentBatch: number;
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;
@@ -352,7 +406,7 @@ export interface MarkVersionIndexReady extends PostInitState {
    * cloning a source index or creating a new index.
    *
    * To account for newly installed or enabled plugins, Kibana will still
-   * perform the `UPDATE_TARGET_MAPPINGS*` and `OUTDATED_DOCUMENTS_*` steps
+   * perform the `UPDATE_TARGET_MAPPINGS_PROPERTIES*` and `OUTDATED_DOCUMENTS_*` steps
    * every time it is restarted.
    */
   readonly controlState: 'MARK_VERSION_INDEX_READY';
@@ -380,14 +434,8 @@ export interface MarkVersionIndexReadyConflict extends PostInitState {
  * If we're migrating from a legacy index we need to perform some additional
  * steps to prepare this index so that it can be used as a migration 'source'.
  */
-export interface LegacyBaseState extends PostInitState {
-  readonly sourceIndex: Option.Some<string>;
+export interface LegacyBaseState extends SourceExistsState {
   readonly legacyPreMigrationDoneActions: AliasAction[];
-  /**
-   * The mappings read from the legacy index, used to create a new reindex
-   * target index.
-   */
-  readonly legacyReindexTargetMappings: IndexMapping;
 }
 
 export interface LegacySetWriteBlockState extends LegacyBaseState {
@@ -428,38 +476,47 @@ export interface LegacyDeleteState extends LegacyBaseState {
 }
 
 export type State = Readonly<
-  | FatalState
-  | InitState
-  | DoneState
-  | WaitForYellowSourceState
-  | CheckUnknownDocumentsState
-  | SetSourceWriteBlockState
   | CalculateExcludeFiltersState
+  | CheckTargetMappingsState
+  | CheckUnknownDocumentsState
+  | CheckVersionIndexReadyActions
+  | CleanupUnknownAndExcluded
+  | CleanupUnknownAndExcludedWaitForTaskState
+  | CloneTempToSource
   | CreateNewTargetState
   | CreateReindexTempState
-  | ReindexSourceToTempOpenPit
-  | ReindexSourceToTempRead
-  | ReindexSourceToTempClosePit
-  | ReindexSourceToTempTransform
-  | ReindexSourceToTempIndexBulk
-  | SetTempWriteBlock
-  | CloneTempToSource
-  | UpdateTargetMappingsState
-  | UpdateTargetMappingsWaitForTaskState
-  | OutdatedDocumentsSearchOpenPit
-  | OutdatedDocumentsSearchRead
-  | OutdatedDocumentsSearchClosePit
-  | OutdatedDocumentsTransform
-  | RefreshTarget
-  | OutdatedDocumentsRefresh
-  | MarkVersionIndexReady
-  | MarkVersionIndexReadyConflict
-  | TransformedDocumentsBulkIndex
+  | DoneState
+  | FatalState
+  | InitState
   | LegacyCreateReindexTargetState
-  | LegacySetWriteBlockState
+  | LegacyDeleteState
   | LegacyReindexState
   | LegacyReindexWaitForTaskState
-  | LegacyDeleteState
+  | LegacySetWriteBlockState
+  | MarkVersionIndexReady
+  | MarkVersionIndexReadyConflict
+  | OutdatedDocumentsRefresh
+  | OutdatedDocumentsSearchClosePit
+  | OutdatedDocumentsSearchOpenPit
+  | OutdatedDocumentsSearchRead
+  | OutdatedDocumentsTransform
+  | PrepareCompatibleMigration
+  | RefreshSource
+  | RefreshTarget
+  | ReindexSourceToTempClosePit
+  | ReindexSourceToTempIndexBulk
+  | ReindexSourceToTempOpenPit
+  | ReindexSourceToTempRead
+  | ReindexSourceToTempTransform
+  | SetSourceWriteBlockState
+  | SetTempWriteBlock
+  | TransformedDocumentsBulkIndex
+  | UpdateSourceMappingsPropertiesState
+  | UpdateTargetMappingsMeta
+  | UpdateTargetMappingsPropertiesState
+  | UpdateTargetMappingsPropertiesWaitForTaskState
+  | WaitForMigrationCompletionState
+  | WaitForYellowSourceState
 >;
 
 export type AllControlStates = State['controlState'];

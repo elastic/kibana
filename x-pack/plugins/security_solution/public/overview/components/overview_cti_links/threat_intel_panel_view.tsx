@@ -8,6 +8,8 @@
 import React, { useMemo } from 'react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SecurityPageName } from '../../../../common/constants';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
 
 import * as i18n from './translations';
 import type { LinkPanelListItem } from '../link_panel';
@@ -16,7 +18,6 @@ import type { LinkPanelViewProps } from '../link_panel/types';
 import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
 import { Link } from '../link_panel/link';
 import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_ti_data_sources';
-import { LINK_COPY } from '../overview_risky_host_links/translations';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   { name: 'Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
@@ -34,7 +35,7 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     field: 'path',
     truncateText: true,
     width: '80px',
-    render: (path: string) => <Link path={path} copy={LINK_COPY} />,
+    render: (path: string) => <Link path={path} copy={i18n.LINK_COPY} />,
   },
 ];
 
@@ -63,6 +64,20 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
             />
           ),
           [totalCount]
+        ),
+        button: useMemo(
+          () => (
+            <SecuritySolutionLinkButton
+              data-test-subj="cti-view-indicators"
+              deepLinkId={SecurityPageName.threatIntelligenceIndicators}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.overview.threatIndicatorsAction"
+                defaultMessage="View indicators"
+              />
+            </SecuritySolutionLinkButton>
+          ),
+          []
         ),
       }}
     />

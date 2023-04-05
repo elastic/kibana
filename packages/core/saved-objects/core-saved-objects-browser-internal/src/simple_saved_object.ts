@@ -18,17 +18,21 @@ import type {
  * Core internal implementation of {@link SimpleSavedObject}
  *
  * @internal Should use the {@link SimpleSavedObject} interface instead
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> {
   public attributes: T;
   public _version?: SavedObjectType<T>['version'];
   public id: SavedObjectType<T>['id'];
   public type: SavedObjectType<T>['type'];
+  /** @deprecated */
   public migrationVersion: SavedObjectType<T>['migrationVersion'];
   public coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
+  public typeMigrationVersion: SavedObjectType<T>['typeMigrationVersion'];
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
   public updatedAt: SavedObjectType<T>['updated_at'];
+  public createdAt: SavedObjectType<T>['created_at'];
   public namespaces: SavedObjectType<T>['namespaces'];
 
   constructor(
@@ -42,8 +46,10 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
       references,
       migrationVersion,
       coreMigrationVersion,
+      typeMigrationVersion,
       namespaces,
       updated_at: updatedAt,
+      created_at: createdAt,
     }: SavedObjectType<T>
   ) {
     this.id = id;
@@ -53,8 +59,10 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
     this._version = version;
     this.migrationVersion = migrationVersion;
     this.coreMigrationVersion = coreMigrationVersion;
+    this.typeMigrationVersion = typeMigrationVersion;
     this.namespaces = namespaces;
     this.updatedAt = updatedAt;
+    this.createdAt = createdAt;
     if (error) {
       this.error = error;
     }
@@ -87,6 +95,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
         .create(this.type, this.attributes, {
           migrationVersion: this.migrationVersion,
           coreMigrationVersion: this.coreMigrationVersion,
+          typeMigrationVersion: this.typeMigrationVersion,
           references: this.references,
         })
         .then((sso) => {

@@ -1,0 +1,155 @@
+{
+  "type": "index",
+  "value": {
+    "index": "ml_host_risk_score_latest_default",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "ingest_timestamp": {
+          "type": "date"
+        },
+        "risk": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "risk_stats": {
+          "properties": {
+            "risk_score": {
+              "type": "float"
+            },
+            "rule_risks": {
+              "properties": {
+                "rule_id": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "rule_name": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "rule_risk": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "routing": {
+          "allocation": {
+            "include": {
+              "_tier_preference": "data_content"
+            }
+          }
+        },
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "ml_host_risk_score_default",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "ingest_timestamp": {
+          "type": "date"
+        },
+        "risk": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "risk_stats": {
+          "properties": {
+            "risk_score": {
+              "type": "float"
+            },
+            "rule_risks": {
+              "properties": {
+                "rule_id": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "rule_name": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "rule_risk": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "routing": {
+          "allocation": {
+            "include": {
+              "_tier_preference": "data_content"
+            }
+          }
+        },
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    }
+  }
+}
+
+

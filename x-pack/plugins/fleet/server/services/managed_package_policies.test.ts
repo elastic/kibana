@@ -23,6 +23,7 @@ jest.mock('./app_context', () => {
     },
   };
 });
+jest.mock('./audit_logging');
 
 describe('upgradeManagedPackagePolicies', () => {
   afterEach(() => {
@@ -92,7 +93,7 @@ describe('upgradeManagedPackagePolicies', () => {
       soClient,
       esClient,
       ['managed-package-id'],
-      undefined,
+      { force: true },
       packagePolicy,
       '1.0.0'
     );

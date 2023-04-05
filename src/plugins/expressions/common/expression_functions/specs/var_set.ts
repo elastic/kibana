@@ -12,7 +12,7 @@ import { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
   name: string[];
-  value: Serializable[];
+  value?: Serializable[];
 }
 
 export type ExpressionFunctionVarSet = ExpressionFunctionDefinition<
@@ -49,7 +49,7 @@ export const variableSet: ExpressionFunctionVarSet = {
   fn(input, args, context) {
     const { variables } = context;
     args.name.forEach((name, i) => {
-      variables[name] = args.value[i] === undefined ? input : args.value[i];
+      variables[name] = args.value?.[i] === undefined ? input : args.value[i];
     });
 
     return input;

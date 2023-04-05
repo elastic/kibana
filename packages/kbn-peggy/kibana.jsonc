@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/peggy",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

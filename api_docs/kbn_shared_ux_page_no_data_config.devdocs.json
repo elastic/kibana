@@ -33,6 +33,7 @@
         ],
         "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config",
@@ -46,6 +47,7 @@
             ],
             "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -68,6 +70,7 @@
         ],
         "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config",
@@ -83,6 +86,7 @@
             ],
             "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -105,6 +109,7 @@
         ],
         "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config",
@@ -120,6 +125,7 @@
             ],
             "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -134,30 +140,29 @@
         "label": "NoDataConfigPageWithSolutionNavBar",
         "description": [],
         "signature": [
-          "{ (props: ",
-          "Props",
-          "<Omit<",
-          "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
-          "EuiBottomBarProps",
-          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
+          "{ (props: Props<",
+          "_EuiPageOuterProps",
+          " & Omit<",
+          "_EuiPageInnerProps",
+          "<\"main\">, \"border\" | \"component\"> & ",
+          "_EuiPageRestrictWidth",
+          " & ",
+          "_EuiPageBottomBorder",
+          " & { contentBorder?: boolean | undefined; minHeight?: ",
           "Property",
-          ".MinHeight<string | number> | undefined; } & { noDataConfig?: ",
+          ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
+          "CommonProps",
+          " & React.HTMLAttributes<HTMLElement>) | undefined; component?: ",
+          "ComponentTypes",
+          " | undefined; } & { noDataConfig?: ",
           "NoDataPageProps",
+          " | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSidebarProps",
           " | undefined; }>): JSX.Element; displayName: string; }"
         ],
         "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -170,12 +175,19 @@
             "signature": [
               "P & ",
               "TemplateProps",
-              " & { isEmptyState?: boolean | undefined; } & { solutionNav: ",
-              "SolutionNavProps",
+              " & { solutionNav: ",
+              {
+                "pluginId": "@kbn/shared-ux-page-solution-nav",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
+                "section": "def-common.SolutionNavProps",
+                "text": "SolutionNavProps"
+              },
               "; }"
             ],
-            "path": "node_modules/@types/kbn__shared-ux-page-solution-nav/index.d.ts",
-            "deprecated": false
+            "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -196,8 +208,9 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -208,28 +221,28 @@
         "label": "NoDataConfigPageProps",
         "description": [],
         "signature": [
-          "Omit<",
-          "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
-          "EuiBottomBarProps",
-          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
+          "_EuiPageOuterProps",
+          " & Omit<",
+          "_EuiPageInnerProps",
+          "<\"main\">, \"border\" | \"component\"> & ",
+          "_EuiPageRestrictWidth",
+          " & ",
+          "_EuiPageBottomBorder",
+          " & { contentBorder?: boolean | undefined; minHeight?: ",
           "Property",
-          ".MinHeight<string | number> | undefined; } & { noDataConfig?: ",
+          ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
+          "CommonProps",
+          " & React.HTMLAttributes<HTMLElement>) | undefined; component?: ",
+          "ComponentTypes",
+          " | undefined; } & { noDataConfig?: ",
           "NoDataPageProps",
+          " | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSidebarProps",
           " | undefined; }"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -244,8 +257,9 @@
           " & ",
           "RedirectAppLinksServices"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

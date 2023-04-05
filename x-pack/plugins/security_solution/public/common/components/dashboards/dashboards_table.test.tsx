@@ -31,16 +31,15 @@ const DASHBOARD_TABLE_ITEMS = [
   },
 ];
 
-const mockUseSecurityDashboardsTableItems = jest.fn(() => DASHBOARD_TABLE_ITEMS);
+const mockUseSecurityDashboardsTableItems = jest.fn(() => ({
+  items: DASHBOARD_TABLE_ITEMS,
+  isLoading: false,
+}));
 jest.mock('../../containers/dashboards/use_security_dashboards_table', () => {
   const actual = jest.requireActual('../../containers/dashboards/use_security_dashboards_table');
   return {
     ...actual,
-    useSecurityDashboardsTable: () => {
-      const columns = actual.useSecurityDashboardsTableColumns();
-      const items = mockUseSecurityDashboardsTableItems();
-      return { columns, items };
-    },
+    useSecurityDashboardsTableItems: () => mockUseSecurityDashboardsTableItems(),
   };
 });
 

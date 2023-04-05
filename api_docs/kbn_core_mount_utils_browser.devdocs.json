@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-mount-utils-browser",
@@ -45,7 +46,8 @@
               "Promise<void>"
             ],
             "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-mount-utils-browser",
@@ -61,6 +63,7 @@
             ],
             "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -91,6 +94,7 @@
         ],
         "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [
           "a {@link UnmountCallback } that unmount the element on call."
         ],
@@ -108,7 +112,8 @@
               "T"
             ],
             "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -127,6 +132,7 @@
         ],
         "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false

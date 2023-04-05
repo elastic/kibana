@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { columns } from './columns';
+import { getColumns } from './columns';
 import { RenderCellValue } from './render_cell_value';
 
-export { columns, RenderCellValue };
+export { getColumns, RenderCellValue };

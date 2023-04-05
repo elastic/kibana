@@ -10,13 +10,17 @@ import { httpServerMock, savedObjectsClientMock, coreMock } from '@kbn/core/serv
 
 import type { PostFleetSetupResponse } from '../../../common/types';
 import { RegistryError } from '../../errors';
-import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
+import {
+  createAppContextStartContractMock,
+  createPackagePolicyServiceMock,
+  xpackMocks,
+} from '../../mocks';
 import { agentServiceMock } from '../../services/agents/agent_service.mock';
 import { appContextService } from '../../services/app_context';
 import { setupFleet } from '../../services/setup';
 import type { FleetRequestHandlerContext } from '../../types';
 
-import { createFleetAuthzMock } from '../../../common';
+import { createFleetAuthzMock } from '../../../common/mocks';
 
 import { fleetSetupHandler } from './handlers';
 
@@ -43,10 +47,13 @@ describe('FleetSetupHandler', () => {
           asInternalUser: agentServiceMock.createClient(),
         },
         authz: createFleetAuthzMock(),
-        epm: {
-          internalSoClient: savedObjectsClientMock.create(),
+        packagePolicyService: {
+          asCurrentUser: createPackagePolicyServiceMock(),
+          asInternalUser: createPackagePolicyServiceMock(),
         },
+        internalSoClient: savedObjectsClientMock.create(),
         spaceId: 'default',
+        limitedToPackages: undefined,
       },
     };
     response = httpServerMock.createResponseFactory();

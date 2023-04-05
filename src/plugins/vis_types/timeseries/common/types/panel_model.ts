@@ -22,7 +22,7 @@ interface MetricVariable {
   name?: string;
 }
 
-interface Percentile {
+export interface Percentile {
   id: string;
   mode: 'line' | 'band';
   field?: string;
@@ -37,6 +37,7 @@ export type MetricType = METRIC_TYPES | TSVB_METRIC_TYPES;
 export interface Metric {
   field?: string;
   id: string;
+  gap_policy?: string;
   alias?: string;
   metric_agg?: string;
   numerator?: Query;

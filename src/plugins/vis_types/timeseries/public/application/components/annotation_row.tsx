@@ -37,7 +37,6 @@ import {
 } from '../../../common/index_patterns_utils';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
-// @ts-expect-error not typed yet
 import { IconSelect } from './icon_select/icon_select';
 
 import type { Annotation, IndexPatternValue } from '../../../common/types';
@@ -154,7 +153,7 @@ export const AnnotationRow = ({
                 label={
                   <FormattedMessage
                     id="visTypeTimeseries.annotationsEditor.timeFieldLabel"
-                    defaultMessage="Time field (required)"
+                    defaultMessage="Time field"
                   />
                 }
                 restrict={RESTRICT_FIELDS}
@@ -165,6 +164,10 @@ export const AnnotationRow = ({
                   })
                 }
                 indexPattern={model.index_pattern}
+                placeholder={
+                  fetchedIndex?.indexPattern?.timeFieldName ??
+                  fetchedIndex?.defaultIndex?.timeFieldName
+                }
                 fields={fields}
               />
             </EuiFlexItem>

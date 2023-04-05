@@ -23,8 +23,17 @@ import {
   SavedObjectsManagementColumnServiceStart,
 } from './services';
 
-import { SavedObjectManagementTypeInfo, SavedObjectGetRelationshipsResponse } from './types';
-import { getAllowedTypes, getRelationships, getSavedObjectLabel, getDefaultTitle } from './lib';
+import type { v1 } from '../common';
+
+import { SavedObjectManagementTypeInfo } from './types';
+import {
+  getAllowedTypes,
+  getRelationships,
+  getSavedObjectLabel,
+  getDefaultTitle,
+  parseQuery,
+  getTagFindReferences,
+} from './lib';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -39,9 +48,11 @@ export interface SavedObjectsManagementPluginStart {
     type: string,
     id: string,
     savedObjectTypes: string[]
-  ) => Promise<SavedObjectGetRelationshipsResponse>;
+  ) => Promise<v1.RelationshipsResponseHTTP>;
   getSavedObjectLabel: typeof getSavedObjectLabel;
   getDefaultTitle: typeof getDefaultTitle;
+  parseQuery: typeof parseQuery;
+  getTagFindReferences: typeof getTagFindReferences;
 }
 
 export interface SetupDependencies {
@@ -125,6 +136,8 @@ export class SavedObjectsManagementPlugin
         getRelationships(_core.http, type, id, savedObjectTypes),
       getSavedObjectLabel,
       getDefaultTitle,
+      parseQuery,
+      getTagFindReferences,
     };
   }
 }

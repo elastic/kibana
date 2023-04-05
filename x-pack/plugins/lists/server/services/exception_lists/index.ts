@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './build_exception_filter';
 export * from './create_exception_list';
 export * from './create_exception_list_item';
 export * from './delete_exception_list';

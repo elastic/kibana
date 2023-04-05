@@ -10,7 +10,7 @@ import { SavedObjectsClientContract } from '@kbn/core/server';
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { savedObjectsAdapter } from '../../saved_objects/saved_objects';
-import { UptimeESClient, createUptimeESClient } from '../../lib';
+import { UptimeEsClient } from '../../lib';
 import { createEsQuery } from '../../../../../common/utils/es_search';
 
 interface UptimeTelemetryCollector {
@@ -157,7 +157,7 @@ export class KibanaTelemetryAdapter {
       fetch: async ({ esClient }: CollectorFetchContext) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
-          const uptimeEsClient = createUptimeESClient({ esClient, savedObjectsClient });
+          const uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient);
           await this.countNoOfUniqueMonitorAndLocations(uptimeEsClient, savedObjectsClient);
           await this.countNoOfUniqueFleetManagedMonitors(uptimeEsClient);
         }
@@ -212,7 +212,7 @@ export class KibanaTelemetryAdapter {
   }
 
   public static async countNoOfUniqueMonitorAndLocations(
-    callCluster: UptimeESClient,
+    callCluster: UptimeEsClient,
     savedObjectsClient: SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
@@ -309,7 +309,7 @@ export class KibanaTelemetryAdapter {
     return bucket;
   }
 
-  public static async countNoOfUniqueFleetManagedMonitors(callCluster: UptimeESClient) {
+  public static async countNoOfUniqueFleetManagedMonitors(callCluster: UptimeEsClient) {
     const params = {
       index: 'synthetics-*',
       body: {

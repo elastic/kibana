@@ -64,8 +64,12 @@ const getQueryOrder = (sort?: RiskScoreSortField): Sort => {
     ];
   }
 
-  if (sort.field === RiskScoreFields.risk) {
-    return [{ [RiskScoreFields.riskScore]: sort.direction }];
+  if (sort.field === RiskScoreFields.hostRisk) {
+    return [{ [RiskScoreFields.hostRiskScore]: sort.direction }];
+  }
+
+  if (sort.field === RiskScoreFields.userRisk) {
+    return [{ [RiskScoreFields.userRiskScore]: sort.direction }];
   }
 
   return [{ [sort.field]: sort.direction }];

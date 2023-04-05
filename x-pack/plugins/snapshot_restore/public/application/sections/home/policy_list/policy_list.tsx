@@ -8,7 +8,13 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -177,7 +183,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
                 />
               }
               color="warning"
-              iconType="alert"
+              iconType="warning"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.policyScheduleWarningDescription"

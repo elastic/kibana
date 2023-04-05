@@ -199,10 +199,24 @@ export class TelemetryEventsSender {
             optional: true,
           },
         },
+        snapshot: {
+          type: 'boolean',
+          _meta: {
+            description: '',
+          },
+        },
+        removed: {
+          type: 'boolean',
+          _meta: {
+            description: '',
+            optional: true,
+          },
+        },
         prebuilt: {
           type: 'boolean',
           _meta: {
             description: '',
+            optional: true,
           },
         },
         ecs_mapping: {

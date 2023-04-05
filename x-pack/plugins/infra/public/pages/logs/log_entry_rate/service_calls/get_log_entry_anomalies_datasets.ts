@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import { PersistedLogViewReference } from '../../../../../common/log_views';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import {
   getLogEntryAnomaliesDatasetsRequestPayloadRT,
@@ -14,7 +15,7 @@ import {
 } from '../../../../../common/http_api/log_analysis';
 
 interface RequestArgs {
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   startTime: number;
   endTime: number;
 }
@@ -23,13 +24,13 @@ export const callGetLogEntryAnomaliesDatasetsAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { sourceId, startTime, endTime } = requestArgs;
+  const { logViewReference, startTime, endTime } = requestArgs;
   const response = await fetch(LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getLogEntryAnomaliesDatasetsRequestPayloadRT.encode({
         data: {
-          sourceId,
+          logView: logViewReference,
           timeRange: {
             startTime,
             endTime,

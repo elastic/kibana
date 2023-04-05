@@ -21,6 +21,14 @@ import { CustomIcon } from '../../../../../common/descriptor_types';
 import { IStyleProperty } from '../properties/style_property';
 import { StyleField } from '../style_fields_helper';
 
+export const FIXED_LABEL = i18n.translate('xpack.maps.styles.staticDynamicSelect.staticLabel', {
+  defaultMessage: 'Fixed',
+});
+
+export const BY_VALUE_LABEL = i18n.translate('xpack.maps.styles.staticDynamicSelect.dynamicLabel', {
+  defaultMessage: 'By value',
+});
+
 export interface Props<StaticOptions, DynamicOptions> {
   children: ReactElement<any>;
   customStaticOptionLabel?: string;
@@ -74,17 +82,11 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
     const options = [
       {
         value: STYLE_TYPE.STATIC,
-        text: this.props.customStaticOptionLabel
-          ? this.props.customStaticOptionLabel
-          : i18n.translate('xpack.maps.styles.staticDynamicSelect.staticLabel', {
-              defaultMessage: 'Fixed',
-            }),
+        text: this.props.customStaticOptionLabel ? this.props.customStaticOptionLabel : FIXED_LABEL,
       },
       {
         value: STYLE_TYPE.DYNAMIC,
-        text: i18n.translate('xpack.maps.styles.staticDynamicSelect.dynamicLabel', {
-          defaultMessage: 'By value',
-        }),
+        text: BY_VALUE_LABEL,
       },
     ];
 

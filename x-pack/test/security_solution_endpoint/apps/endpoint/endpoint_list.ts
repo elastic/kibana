@@ -18,7 +18,6 @@ import {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
 
   const expectedData = [
@@ -34,28 +33,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Actions',
     ],
     [
-      'Host-ku5jy6j0pw',
+      'Host-dpu1a2r2yi',
       'x',
       'x',
-      'Unsupported',
-      'Windows',
-      '10.12.215.130, 10.130.188.228,10.19.102.141',
-      '7.0.13',
+      'Warning',
+      'Linux',
+      '10.2.17.24, 10.56.215.200,10.254.196.130',
+      'x',
       'x',
       '',
     ],
     [
-      'Host-ntr4rkj24m',
+      'Host-rs9wp4o6l9',
       'x',
       'x',
       'Success',
-      'Windows',
-      '10.36.46.252, 10.222.152.110',
-      '7.4.13',
+      'Linux',
+      '10.138.79.131, 10.170.160.154',
+      'x',
       'x',
       '',
     ],
-    ['Host-q9qenwrl9k', 'x', 'x', 'Warning', 'Windows', '10.206.226.90', '7.11.10', 'x', ''],
+    [
+      'Host-u5jy6j0pwb',
+      'x',
+      'x',
+      'Warning',
+      'Linux',
+      '10.87.11.145, 10.117.106.109,10.242.136.97',
+      'x',
+      'x',
+      '',
+    ],
   ];
 
   const formattedTableData = async () => {
@@ -65,6 +74,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     for (let i = 1; i < tableData.length; i++) {
       tableData[i][1] = 'x';
       tableData[i][2] = 'x';
+      tableData[i][6] = 'x';
       tableData[i][7] = 'x';
     }
 
@@ -110,14 +120,76 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(tableData.sort()).to.eql(expectedData.sort());
       });
 
+      describe('for the search bar', () => {
+        before(async () => {
+          await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
+        });
+        after(async () => {
+          const adminSearchBar = await testSubjects.find('adminSearchBar');
+          const querySubmitButton = await testSubjects.find('querySubmitButton');
+          await adminSearchBar.clearValueWithKeyboard();
+          await querySubmitButton.click();
+        });
+        it('when the kql query is `na`, table shows an empty list', async () => {
+          const adminSearchBar = await testSubjects.find('adminSearchBar');
+          await adminSearchBar.clearValueWithKeyboard();
+          await adminSearchBar.type('na');
+          const querySubmitButton = await testSubjects.find('querySubmitButton');
+          await querySubmitButton.click();
+          const expectedDataFromQuery = [
+            [
+              'Endpoint',
+              'Agent status',
+              'Policy',
+              'Policy status',
+              'OS',
+              'IP address',
+              'Version',
+              'Last active',
+              'Actions',
+            ],
+            ['No items found'],
+          ];
+
+          await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable', 10000);
+          const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+          expect(tableData).to.eql(expectedDataFromQuery);
+        });
+
+        it('when the kql filters for united.endpoint.host.hostname, table shows 1 item', async () => {
+          const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
+          const hostName = expectedDataFromQuery[1][0];
+          const adminSearchBar = await testSubjects.find('adminSearchBar');
+          await adminSearchBar.clearValueWithKeyboard();
+          await adminSearchBar.type(
+            `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
+          );
+          const querySubmitButton = await testSubjects.find('querySubmitButton');
+          await querySubmitButton.click();
+          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+            'endpointListTable',
+            1,
+            90000
+          );
+          const tableData = await formattedTableData();
+          expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
+        });
+      });
       it('does not show the details flyout initially', async () => {
         await testSubjects.missingOrFail('endpointDetailsFlyout');
       });
 
       describe('when the hostname is clicked on,', () => {
+        before(async () => {
+          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+            'endpointListTable',
+            3,
+            90000
+          );
+        });
         it('display the details flyout', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
-          await testSubjects.existOrFail('endpointDetailsList');
+          await testSubjects.existOrFail('endpointDetailsFlyout');
         });
 
         it('updates the details flyout when a new hostname is selected from the list', async () => {
@@ -153,75 +225,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'endpointDetailsFlyoutTitle'
           );
           expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
-        });
-
-        it('for the kql query: na, table shows an empty list', async () => {
-          await pageObjects.endpoint.navigateToEndpointList();
-          await browser.refresh();
-          const adminSearchBar = await testSubjects.find('adminSearchBar');
-          await adminSearchBar.clearValueWithKeyboard();
-          await adminSearchBar.type('na');
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
-          await querySubmitButton.click();
-          const expectedDataFromQuery = [
-            [
-              'Endpoint',
-              'Agent status',
-              'Policy',
-              'Policy status',
-              'OS',
-              'IP address',
-              'Version',
-              'Last active',
-              'Actions',
-            ],
-            ['No items found'],
-          ];
-
-          await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable');
-          const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
-          expect(tableData).to.eql(expectedDataFromQuery);
-        });
-
-        it('for the kql filtering for united.endpoint.host.hostname : "Host-ku5jy6j0pw", table shows 1 item', async () => {
-          const adminSearchBar = await testSubjects.find('adminSearchBar');
-          await adminSearchBar.clearValueWithKeyboard();
-          await adminSearchBar.type(
-            'united.endpoint.host.hostname : "Host-ku5jy6j0pw" or host.hostname : "Host-ku5jy6j0pw" '
-          );
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
-          await querySubmitButton.click();
-          const expectedDataFromQuery = [
-            [
-              'Endpoint',
-              'Agent status',
-              'Policy',
-              'Policy status',
-              'OS',
-              'IP address',
-              'Version',
-              'Last active',
-              'Actions',
-            ],
-            [
-              'Host-ku5jy6j0pw',
-              'x',
-              'x',
-              'Unsupported',
-              'Windows',
-              '10.12.215.130, 10.130.188.228,10.19.102.141',
-              '7.0.13',
-              'x',
-              '',
-            ],
-          ];
-          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
-            'endpointListTable',
-            1,
-            90000
-          );
-          const tableData = await formattedTableData();
-          expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
         });
       });
     });

@@ -6,26 +6,28 @@
  */
 
 import React, { useState, FC } from 'react';
+
+import {
+  EuiCallOut,
+  EuiSpacer,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
-import { EuiCallOut, EuiSpacer, EuiPageBody, EuiPageContent } from '@elastic/eui';
-
-import type { SimpleSavedObject } from '@kbn/core/public';
-
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
-
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-
-import { getNestedProperty } from '../../../../../util/object_utils';
-
 import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
 
 const fixedPageSize: number = 20;
 
 export const SourceSelection: FC = () => {
   const {
-    services: { savedObjects, uiSettings },
+    services: { http, uiSettings, savedObjectsManagement },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
 
@@ -37,7 +39,7 @@ export const SourceSelection: FC = () => {
     id: string,
     type: string,
     fullName: string,
-    savedObject: SimpleSavedObject
+    savedObject: SavedObjectCommon
   ) => {
     // Kibana data views including `:` are cross-cluster search indices
     // and are not supported by Data Frame Analytics yet. For saved searches
@@ -115,7 +117,7 @@ export const SourceSelection: FC = () => {
               <EuiSpacer size="m" />
             </>
           )}
-          <SavedObjectFinderUi
+          <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={onSearchSelected}
             showFilter
@@ -149,8 +151,11 @@ export const SourceSelection: FC = () => {
               },
             ]}
             fixedPageSize={fixedPageSize}
-            uiSettings={uiSettings}
-            savedObjects={savedObjects}
+            services={{
+              uiSettings,
+              http,
+              savedObjectsManagement,
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>

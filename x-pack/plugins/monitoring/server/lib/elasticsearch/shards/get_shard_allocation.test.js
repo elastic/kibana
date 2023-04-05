@@ -37,8 +37,11 @@ describe('get_shard_allocation', () => {
   describe('handleResponse', () => {
     it('deduplicates shards', () => {
       const nextTimestamp = '2018-07-06T00:00:01.259Z';
-      const hits = shards.map((shard) => {
+      const hits = shards.map((shard, index) => {
         return {
+          _id: `STATE_UUID:${shard.node}:${shard.index}:s${shard.shard}:${
+            shard.primary ? 'p' : `r${index}`
+          }`,
           _source: {
             ...exampleShardSource,
             shard,

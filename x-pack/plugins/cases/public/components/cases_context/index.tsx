@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useReducer, Dispatch } from 'react';
+import type { Dispatch } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { merge } from 'lodash';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
-import {
-  CasesContextStoreAction,
-  casesContextReducer,
-  getInitialCasesContextState,
-} from './cases_context_reducer';
-import { CasesFeaturesAllRequired, CasesFeatures, CasesPermissions } from '../../containers/types';
+import type { CasesContextStoreAction } from './cases_context_reducer';
+import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
+import type {
+  CasesFeaturesAllRequired,
+  CasesFeatures,
+  CasesPermissions,
+} from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
-import { ReleasePhase } from '../types';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { ReleasePhase } from '../types';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 

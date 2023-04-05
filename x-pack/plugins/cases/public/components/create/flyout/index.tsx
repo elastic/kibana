@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CreateCaseFlyout, CreateCaseFlyoutProps } from './create_case_flyout';
+import type { CreateCaseFlyoutProps } from './create_case_flyout';
+import { CreateCaseFlyout } from './create_case_flyout';
 
 export type { CreateCaseFlyoutProps };
 export { CreateCaseFlyout };

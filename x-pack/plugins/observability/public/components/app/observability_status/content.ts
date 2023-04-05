@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, DocLinksStart } from '@kbn/core/public';
 import { ObservabilityFetchDataPlugins } from '../../../typings/fetch_overview_data';
+import { paths } from '../../../config/paths';
 
 export interface ObservabilityStatusContent {
   id: ObservabilityFetchDataPlugins | 'alert';
@@ -85,7 +86,7 @@ export const getContent = (
       weight: 2,
     },
     {
-      id: 'synthetics',
+      id: 'uptime',
       title: i18n.translate('xpack.observability.statusVisualization.uptime.title', {
         defaultMessage: 'Uptime',
       }),
@@ -135,7 +136,7 @@ export const getContent = (
       addTitle: i18n.translate('xpack.observability.statusVisualization.alert.link', {
         defaultMessage: 'Create rules',
       }),
-      addLink: http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules'),
+      addLink: http.basePath.prepend(paths.observability.rules),
       learnMoreLink: docLinks.links.observability.createAlerts,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.alert.goToAppTitle', {
         defaultMessage: 'Show alerts',

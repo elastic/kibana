@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AllReportersFindRequest } from '../../../../../common/api';
+import type { AllReportersFindRequest } from '../../../../../common/api';
 import { CASE_REPORTERS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';

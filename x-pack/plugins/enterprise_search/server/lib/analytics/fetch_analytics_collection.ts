@@ -5,51 +5,41 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { AnalyticsCollection } from '../../../common/types/analytics';
+import { ErrorCode } from '../../../common/types/error_codes';
 
-import { isIndexNotFoundException } from '../../utils/identify_exceptions';
-import { fetchAll } from '../fetch_all';
+import { isResourceNotFoundException } from '../../utils/identify_exceptions';
 
-import { setupAnalyticsCollectionIndex } from './setup_indices';
-
-export const fetchAnalyticsCollectionByName = async (
-  client: IScopedClusterClient,
-  name: string
-): Promise<AnalyticsCollection | undefined> => {
-  try {
-    const searchResults = await client.asCurrentUser.search<AnalyticsCollection>({
-      index: ANALYTICS_COLLECTIONS_INDEX,
-      query: { term: { name } },
-    });
-
-    const result = searchResults.hits.hits[0]?._source
-      ? { ...searchResults.hits.hits[0]._source, id: searchResults.hits.hits[0]._id }
-      : undefined;
-
-    return result;
-  } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      await setupAnalyticsCollectionIndex(client.asCurrentUser);
-    }
-    return undefined;
-  }
-};
+interface CollectionsListResponse {
+  [name: string]: {
+    event_data_stream: {
+      name: string;
+    };
+  };
+}
 
 export const fetchAnalyticsCollections = async (
-  client: IScopedClusterClient
+  client: IScopedClusterClient,
+  query: string = ''
 ): Promise<AnalyticsCollection[]> => {
-  const query: QueryDslQueryContainer = { match_all: {} };
-
   try {
-    return await fetchAll<AnalyticsCollection>(client, ANALYTICS_COLLECTIONS_INDEX, query);
+    const collections = await client.asCurrentUser.transport.request<CollectionsListResponse>({
+      method: 'GET',
+      path: `/_application/analytics/${query}`,
+    });
+
+    return Object.keys(collections).map((value) => {
+      const entry = collections[value];
+      return {
+        events_datastream: entry.event_data_stream.name,
+        name: value,
+      };
+    });
   } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      await setupAnalyticsCollectionIndex(client.asCurrentUser);
-      return [];
+    if (isResourceNotFoundException(error)) {
+      throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);
     }
     throw error;
   }

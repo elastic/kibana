@@ -36,6 +36,7 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndicesLogic } from './indices_logic';
+import { IndicesStats } from './indices_stats';
 import { IndicesTable } from './indices_table';
 
 import './search_indices.scss';
@@ -148,6 +149,9 @@ export const SearchIndices: React.FC = () => {
                 </EuiCallOut>
               </EuiFlexItem>
             )}
+            <EuiFlexItem>
+              <IndicesStats />
+            </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>

@@ -7,7 +7,7 @@
 import 'jest-canvas-mock';
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import {
   TCPContextProvider,
@@ -19,7 +19,7 @@ import {
 } from './contexts';
 import { CustomFields } from './custom_fields';
 import { ConfigKey, DataStream, ScheduleUnit } from './types';
-import { validate as centralValidation } from './validation';
+import { validate as centralValidation } from '../monitor_management/validation';
 import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label
@@ -201,7 +201,7 @@ describe('<CustomFields />', () => {
   });
 
   it('handles switching monitor type', () => {
-    const { getByText, queryByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
+    const { getByText, queryByText, getByLabelText, queryByLabelText } = render(
       <WrappedComponent />
     );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
@@ -247,16 +247,13 @@ describe('<CustomFields />', () => {
     fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
 
     // expect browser fields to be in the DOM
-    getAllByLabelText('Zip URL').forEach((node) => {
-      expect(node).toBeInTheDocument();
-    });
+    expect(
+      screen.getByText('Runs Synthetic test scripts that are defined inline.')
+    ).toBeInTheDocument();
+
     expect(
       getByText(/To create a "Browser" monitor, please ensure you are using the/)
     ).toBeInTheDocument();
-
-    // expect tls options to be available for browser
-    expect(queryByLabelText('Proxy Zip URL')).toBeInTheDocument();
-    expect(queryByText(/Enable TLS configuration for Zip URL/)).toBeInTheDocument();
 
     // ensure at least one browser advanced option is present
     advancedOptionsButton = getByText('Advanced Browser options');

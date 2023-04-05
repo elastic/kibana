@@ -1,0 +1,70 @@
+.lnsIndexPatternDimensionEditor {
+  height: 100%;
+}
+
+.lnsIndexPatternDimensionEditor__header {
+  position: sticky;
+  top: 0;
+  background: $euiColorEmptyShade;
+  z-index: $euiZLevel1; // Raise it above the elements that are after it in DOM order
+  padding: 0 $euiSize;
+}
+
+.lnsIndexPatternDimensionEditor-isFullscreen {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.lnsIndexPatternDimensionEditor--padded {
+  padding: $euiSize;
+}
+
+.lnsIndexPatternDimensionEditor--collapseNext {
+  margin-bottom: -$euiSizeL;
+  border-top: $euiBorderThin;
+  margin-top: 0 !important;
+}
+
+.lnsIndexPatternDimensionEditor--shaded {
+  background-color: $euiColorLightestShade;
+  border-bottom: $euiBorderThin;
+}
+
+.lnsIndexPatternDimensionEditor__columns {
+  display: block;
+  column-count: 2;
+  column-gap: $euiSizeM;
+}
+
+.lnsIndexPatternDimensionEditor__operation .euiListGroupItem__label {
+  width: 100%;
+}
+
+.lnsIndexPatternDimensionEditor__operation > button {
+  padding-top: 0;
+  padding-bottom: 0;
+  min-block-size: $euiSizeL;
+}
+
+.lnsIndexPatternDimensionEditor__warning {
+  margin-bottom: $euiSize;
+  margin-top: $euiSizeS;
+}
+
+.lnsIndexPatternDimensionEditor__droppable {
+  padding: $euiSizeXS;
+  border-radius: $euiBorderRadius;
+}
+
+.lnsIndexPatternDimensionEditor__droppableItem {
+  margin-right: $euiSizeS;
+}
+
+.lnsIndexPatternDimensionEditor-advancedOptions button {
+  &:hover, &:focus {
+    text-decoration-color: $euiColorPrimary;
+  }
+}

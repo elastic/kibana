@@ -12,11 +12,11 @@ import { join, resolve } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 
 jest.mock('fs');
-jest.mock('@kbn/utils', () => {
+jest.mock('@kbn/repo-info', () => {
   return { REPO_ROOT: '/dev/null/root' };
 });
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Lifecycle } from './lifecycle';
 import { SuiteTracker } from './suite_tracker';
 import { Suite } from '../fake_mocha_types';

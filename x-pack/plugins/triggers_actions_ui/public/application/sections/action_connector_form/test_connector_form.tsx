@@ -23,7 +23,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import {
+  ActionConnector,
+  ActionConnectorMode,
+  ActionTypeRegistryContract,
+  IErrorObject,
+} from '../../../types';
 
 export interface TestConnectorFormProps {
   connector: ActionConnector;
@@ -90,6 +95,7 @@ export const TestConnectorForm = ({
               }
               messageVariables={[]}
               actionConnector={connector}
+              executionMode={ActionConnectorMode.Test}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -112,7 +118,7 @@ export const TestConnectorForm = ({
         <>
           {executeEnabled ? null : (
             <>
-              <EuiCallOut iconType="alert" color="warning">
+              <EuiCallOut iconType="warning" color="warning">
                 <p>
                   <FormattedMessage
                     defaultMessage="Save your changes before testing the connector."
@@ -241,7 +247,7 @@ const FailedExecussion = ({
       )}
       data-test-subj="executionFailureResult"
       color="danger"
-      iconType="alert"
+      iconType="warning"
     >
       <EuiDescriptionList textStyle="reverse" listItems={items} />
     </EuiCallOut>

@@ -10,28 +10,43 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-        "id": "def-server.createSavedObjectsMigrationLoggerMock",
+        "id": "def-common.createSavedObjectsMigrationLoggerMock",
         "type": "Function",
         "tags": [],
         "label": "createSavedObjectsMigrationLoggerMock",
         "description": [],
         "signature": [
           "() => jest.Mocked<",
-          "SavedObjectsMigrationLogger",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsMigrationLogger",
+            "text": "SavedObjectsMigrationLogger"
+          },
           ">"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-        "id": "def-server.retryAsync",
+        "id": "def-common.retryAsync",
         "type": "Function",
         "tags": [],
         "label": "retryAsync",
@@ -41,10 +56,11 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-            "id": "def-server.retryAsync.$1",
+            "id": "def-common.retryAsync.$1",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -54,37 +70,41 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-            "id": "def-server.retryAsync.$2",
+            "id": "def-common.retryAsync.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-                "id": "def-server.retryAsync.$2.retryAttempts",
+                "id": "def-common.retryAsync.$2.retryAttempts",
                 "type": "number",
                 "tags": [],
                 "label": "retryAttempts",
                 "description": [],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-                "id": "def-server.retryAsync.$2.retryDelayMs",
+                "id": "def-common.retryAsync.$2.retryDelayMs",
                 "type": "number",
                 "tags": [],
                 "label": "retryDelayMs",
                 "description": [],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -99,33 +119,41 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-        "id": "def-server.migrationMocks",
+        "id": "def-common.migrationMocks",
         "type": "Object",
         "tags": [],
         "label": "migrationMocks",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-            "id": "def-server.migrationMocks.createContext",
+            "id": "def-common.migrationMocks.createContext",
             "type": "Function",
             "tags": [],
             "label": "createContext",
             "description": [],
             "signature": [
               "({ migrationVersion, convertToMultiNamespaceTypeVersion, isSingleNamespaceType, }?: { migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }) => jest.Mocked<",
-              "SavedObjectMigrationContext",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigrationContext",
+                "text": "SavedObjectMigrationContext"
+              },
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-                "id": "def-server.migrationMocks.createContext.$1",
+                "id": "def-common.migrationMocks.createContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -134,7 +162,8 @@
                   "{ migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/migration.mocks.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -143,46 +172,61 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-        "id": "def-server.mockKibanaMigrator",
+        "id": "def-common.mockKibanaMigrator",
         "type": "Object",
         "tags": [],
         "label": "mockKibanaMigrator",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-            "id": "def-server.mockKibanaMigrator.create",
+            "id": "def-common.mockKibanaMigrator.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "({ types, }?: { types: ",
-              "SavedObjectsType",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
               "<any>[]; }) => jest.Mocked<",
               "IKibanaMigrator",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-mocks",
-                "id": "def-server.mockKibanaMigrator.create.$1",
+                "id": "def-common.mockKibanaMigrator.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
                 "description": [],
                 "signature": [
                   "{ types: ",
-                  "SavedObjectsType",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectsType",
+                    "text": "SavedObjectsType"
+                  },
                   "<any>[]; }"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -190,13 +234,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

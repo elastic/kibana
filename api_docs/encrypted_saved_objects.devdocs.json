@@ -29,6 +29,7 @@
         ],
         "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -42,6 +43,7 @@
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "encryptedSavedObjects",
@@ -55,6 +57,7 @@
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -69,6 +72,7 @@
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -89,6 +93,7 @@
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -103,6 +108,7 @@
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -120,6 +126,7 @@
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -140,6 +147,7 @@
         ],
         "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -149,7 +157,8 @@
             "label": "key",
             "description": [],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -162,7 +171,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -186,6 +196,7 @@
         ],
         "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -196,15 +207,34 @@
             "description": [],
             "signature": [
               "(encryptedDoc: ",
-              "SavedObjectUnsanitizedDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
               "<InputAttributes> | ",
-              "SavedObjectUnsanitizedDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
               "<MigratedAttributes>) => encryptedDoc is ",
-              "SavedObjectUnsanitizedDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
               "<InputAttributes>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -215,13 +245,26 @@
                 "label": "encryptedDoc",
                 "description": [],
                 "signature": [
-                  "SavedObjectUnsanitizedDoc",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectUnsanitizedDoc",
+                    "text": "SavedObjectUnsanitizedDoc"
+                  },
                   "<InputAttributes> | ",
-                  "SavedObjectUnsanitizedDoc",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectUnsanitizedDoc",
+                    "text": "SavedObjectUnsanitizedDoc"
+                  },
                   "<MigratedAttributes>"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -234,15 +277,34 @@
             "description": [],
             "signature": [
               "(doc: ",
-              "SavedObjectUnsanitizedDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
               "<InputAttributes>, context: ",
-              "SavedObjectMigrationContext",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigrationContext",
+                "text": "SavedObjectMigrationContext"
+              },
               ") => ",
-              "SavedObjectUnsanitizedDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
               "<MigratedAttributes>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -253,13 +315,19 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  "SavedObjectDoc",
-                  "<InputAttributes> & { references?: ",
-                  "SavedObjectReference",
+                  "SavedObjectDoc<InputAttributes> & { references?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
                   "[] | undefined; }"
                 ],
-                "path": "node_modules/@types/kbn__core-saved-objects-server/index.d.ts",
-                "deprecated": false
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "encryptedSavedObjects",
@@ -269,10 +337,17 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "SavedObjectMigrationContext"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectMigrationContext",
+                    "text": "SavedObjectMigrationContext"
+                  }
                 ],
-                "path": "node_modules/@types/kbn__core-saved-objects-server/index.d.ts",
-                "deprecated": false
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -287,7 +362,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -307,7 +383,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -327,7 +404,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -341,6 +419,7 @@
         "description": [],
         "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -351,13 +430,26 @@
             "description": [],
             "signature": [
               "<T = unknown>(type: string, id: string, options?: ",
-              "SavedObjectsBaseOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsBaseOptions",
+                "text": "SavedObjectsBaseOptions"
+              },
               " | undefined) => Promise<",
-              "SavedObject",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
               "<T>>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "encryptedSavedObjects",
@@ -371,6 +463,7 @@
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -385,6 +478,7 @@
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -395,11 +489,18 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "SavedObjectsBaseOptions",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsBaseOptions",
+                    "text": "SavedObjectsBaseOptions"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -416,15 +517,34 @@
             ],
             "signature": [
               "<T = unknown, A = unknown>(findOptions: ",
-              "SavedObjectsCreatePointInTimeFinderOptions",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsCreatePointInTimeFinderOptions",
+                "text": "SavedObjectsCreatePointInTimeFinderOptions"
+              },
               ", dependencies?: ",
-              "SavedObjectsCreatePointInTimeFinderDependencies",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsCreatePointInTimeFinderDependencies",
+                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
+              },
               " | undefined) => Promise<",
-              "ISavedObjectsPointInTimeFinder",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
               "<T, A>>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "encryptedSavedObjects",
@@ -436,10 +556,17 @@
                   "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderOptions }"
                 ],
                 "signature": [
-                  "SavedObjectsCreatePointInTimeFinderOptions"
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsCreatePointInTimeFinderOptions",
+                    "text": "SavedObjectsCreatePointInTimeFinderOptions"
+                  }
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -452,11 +579,18 @@
                   "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies }"
                 ],
                 "signature": [
-                  "SavedObjectsCreatePointInTimeFinderDependencies",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsCreatePointInTimeFinderDependencies",
+                    "text": "SavedObjectsCreatePointInTimeFinderDependencies"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -474,6 +608,7 @@
         "description": [],
         "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -486,7 +621,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -502,6 +638,7 @@
         ],
         "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -511,7 +648,8 @@
             "label": "type",
             "description": [],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -532,7 +670,8 @@
               ">"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "encryptedSavedObjects",
@@ -545,7 +684,8 @@
               "ReadonlySet<string> | undefined"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -563,6 +703,7 @@
         ],
         "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -594,6 +735,7 @@
         ],
         "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -614,7 +756,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -639,6 +782,7 @@
         ],
         "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -659,7 +803,8 @@
               "<InputAttributes, MigratedAttributes>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -673,15 +818,34 @@
         "description": [],
         "signature": [
           "(encryptedDoc: ",
-          "SavedObjectUnsanitizedDoc",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
           "<InputAttributes> | ",
-          "SavedObjectUnsanitizedDoc",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
           "<MigratedAttributes>) => encryptedDoc is ",
-          "SavedObjectUnsanitizedDoc",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
           "<InputAttributes>"
         ],
         "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -692,13 +856,26 @@
             "label": "encryptedDoc",
             "description": [],
             "signature": [
-              "SavedObjectUnsanitizedDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
               "<InputAttributes> | ",
-              "SavedObjectUnsanitizedDoc",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
               "<MigratedAttributes>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -714,6 +891,7 @@
       "description": [],
       "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "encryptedSavedObjects",
@@ -725,7 +903,8 @@
             "\nIndicates if Saved Object encryption is possible. Requires an encryption key to be explicitly set via `xpack.encryptedSavedObjects.encryptionKey`."
           ],
           "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "encryptedSavedObjects",
@@ -747,6 +926,7 @@
           ],
           "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "encryptedSavedObjects",
@@ -766,6 +946,7 @@
               ],
               "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -791,6 +972,7 @@
           ],
           "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -811,7 +993,8 @@
                 "<InputAttributes, MigratedAttributes>"
               ],
               "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
@@ -828,6 +1011,7 @@
       "description": [],
       "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "encryptedSavedObjects",
@@ -841,6 +1025,7 @@
           ],
           "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "encryptedSavedObjects",
@@ -854,6 +1039,7 @@
               ],
               "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -886,6 +1072,7 @@
           ],
           "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -906,7 +1093,8 @@
                 " | undefined"
               ],
               "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }

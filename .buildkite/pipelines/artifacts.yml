@@ -73,13 +73,24 @@ steps:
 
   - command: .buildkite/scripts/steps/artifacts/cloud.sh
     label: 'Cloud Deployment'
-    soft_fail: true
+    soft_fail:
+      - exit_status: 255
+      - exit_status: -1
     agents:
       queue: n2-2
     timeout_in_minutes: 30
     if: "build.env('RELEASE_BUILD') == null || build.env('RELEASE_BUILD') == '' || build.env('RELEASE_BUILD') == 'false'"
     retry:
       automatic:
+        # Timeout and graceful shutdown | ecctl deployment create falure
+        - exit_status: 255
+          limit: 0
+
+        # Timeout and forced shutdown
+        - exit_status: '-1'
+          limit: 0
+
+        # Test failures
         - exit_status: '*'
           limit: 1
 

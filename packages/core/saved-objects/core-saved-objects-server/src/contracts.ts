@@ -7,7 +7,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -15,23 +14,25 @@ import type {
 import type { ISavedObjectsSerializer } from './serialization';
 import type {
   SavedObjectsClientFactoryProvider,
-  SavedObjectsClientWrapperFactory,
   SavedObjectsClientProviderOptions,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
 } from './client_factory';
 import type { SavedObjectsType } from './saved_objects_type';
 import type { ISavedObjectTypeRegistry } from './type_registry';
 import type { ISavedObjectsExporter } from './export';
-import type { ISavedObjectsImporter } from './import';
+import type { ISavedObjectsImporter, SavedObjectsImporterOptions } from './import';
+import type { SavedObjectsExtensions } from './extensions/extensions';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
- * for registering Saved Object types, creating and registering Saved Object client wrappers and factories.
+ * or registering Saved Object types, and creating and registering Saved Object client factories.
  *
  * @remarks
  * When plugins access the Saved Objects client, a new client is created using
- * the factory provided to `setClientFactory` and wrapped by all wrappers
- * registered through `addClientWrapper`.
+ * the factory provided to `setClientFactory`.
  *
  * @example
  * ```ts
@@ -68,13 +69,19 @@ export interface SavedObjectsServiceSetup {
   setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 
   /**
-   * Add a {@link SavedObjectsClientWrapperFactory | client wrapper factory} with the given priority.
+   * Sets the {@link SavedObjectsEncryptionExtensionFactory encryption extension factory}.
    */
-  addClientWrapper: (
-    priority: number,
-    id: string,
-    factory: SavedObjectsClientWrapperFactory
-  ) => void;
+  setEncryptionExtension: (factory: SavedObjectsEncryptionExtensionFactory) => void;
+
+  /**
+   * Sets the {@link SavedObjectsSecurityExtensionFactory security extension factory}.
+   */
+  setSecurityExtension: (factory: SavedObjectsSecurityExtensionFactory) => void;
+
+  /**
+   * Sets the {@link SavedObjectsSpacesExtensionFactory spaces extension factory}.
+   */
+  setSpacesExtension: (factory: SavedObjectsSpacesExtensionFactory) => void;
 
   /**
    * Register a {@link SavedObjectsType | savedObjects type} definition.
@@ -124,9 +131,7 @@ export interface SavedObjectsServiceSetup {
    * }
    * ```
    */
-  registerType: <Attributes extends SavedObjectAttributes = any>(
-    type: SavedObjectsType<Attributes>
-  ) => void;
+  registerType: <Attributes = unknown>(type: SavedObjectsType<Attributes>) => void;
 
   /**
    * Returns the default index used for saved objects.
@@ -146,8 +151,7 @@ export interface SavedObjectsServiceStart {
   /**
    * Creates a {@link SavedObjectsClientContract | Saved Objects client} that
    * uses the credentials from the passed in request to authenticate with
-   * Elasticsearch. If other plugins have registered Saved Objects client
-   * wrappers, these will be applied to extend the functionality of the client.
+   * Elasticsearch.
    *
    * A client that is already scoped to the incoming request is also exposed
    * from the route handler context see {@link RequestHandlerContext}.
@@ -163,6 +167,7 @@ export interface SavedObjectsServiceStart {
    *
    * @param req - The request to create the scoped repository from.
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
+   * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
    *
    * @remarks
    * Prefer using `getScopedClient`. This should only be used when using methods
@@ -170,15 +175,20 @@ export interface SavedObjectsServiceStart {
    */
   createScopedRepository: (
     req: KibanaRequest,
-    includedHiddenTypes?: string[]
+    includedHiddenTypes?: string[],
+    extensions?: SavedObjectsExtensions
   ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
+   * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
    */
-  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (
+    includedHiddenTypes?: string[],
+    extensions?: SavedObjectsExtensions
+  ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsSerializer | serializer} that is aware of all registered types.
    */
@@ -190,7 +200,10 @@ export interface SavedObjectsServiceStart {
   /**
    * Creates an {@link ISavedObjectsImporter | importer} bound to given client.
    */
-  createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+  createImporter: (
+    client: SavedObjectsClientContract,
+    options?: SavedObjectsImporterOptions
+  ) => ISavedObjectsImporter;
   /**
    * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
    * {@link SavedObjectsType | saved object types}

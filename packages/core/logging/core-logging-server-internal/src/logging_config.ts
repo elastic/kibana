@@ -7,27 +7,18 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  ROOT_CONTEXT_NAME,
+  DEFAULT_APPENDER_NAME,
+  getLoggerContext,
+  getParentLoggerContext,
+} from '@kbn/core-logging-common-internal';
 import type { AppenderConfigType, LoggerConfigType } from '@kbn/core-logging-server';
 import { Appenders } from './appenders/appenders';
 
 // We need this helper for the types to be correct
 // (otherwise it assumes an array of A|B instead of a tuple [A,B])
 const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
-
-/**
- * Separator string that used within nested context name (eg. plugins.pid).
- */
-const CONTEXT_SEPARATOR = '.';
-
-/**
- * Name of the `root` context that always exists and sits at the top of logger hierarchy.
- */
-const ROOT_CONTEXT_NAME = 'root';
-
-/**
- * Name of the appender that is always presented and used by `root` logger by default.
- */
-const DEFAULT_APPENDER_NAME = 'default';
 
 const levelSchema = schema.oneOf(
   [
@@ -109,7 +100,7 @@ export class LoggingConfig {
    * @returns {string} Joined context string (e.g. 'parent.child').
    */
   public static getLoggerContext(contextParts: string[]) {
-    return contextParts.join(CONTEXT_SEPARATOR) || ROOT_CONTEXT_NAME;
+    return getLoggerContext(contextParts);
   }
 
   /**
@@ -118,12 +109,7 @@ export class LoggingConfig {
    * @returns Name of the parent context or `root` if the context is the top level one.
    */
   public static getParentLoggerContext(context: string) {
-    const lastIndexOfSeparator = context.lastIndexOf(CONTEXT_SEPARATOR);
-    if (lastIndexOfSeparator === -1) {
-      return ROOT_CONTEXT_NAME;
-    }
-
-    return context.slice(0, lastIndexOfSeparator);
+    return getParentLoggerContext(context);
   }
 
   /**

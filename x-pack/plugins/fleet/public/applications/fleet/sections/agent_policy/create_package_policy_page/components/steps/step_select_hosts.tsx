@@ -64,7 +64,8 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
     perPage: SO_SEARCH_LIMIT,
     sortField: 'name',
     sortOrder: 'asc',
-    full: true,
+    full: false, // package_policies will always be empty
+    noAgentCount: true, // agentPolicy.agents will always be 0
   });
   if (err) {
     // eslint-disable-next-line no-console
@@ -87,6 +88,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   const tabs = [
     {
       id: SelectedPolicyTab.NEW,
+      'data-test-subj': 'newHostsTab',
       name: 'New hosts',
       content: (
         <AgentPolicyIntegrationForm
@@ -100,6 +102,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
     },
     {
       id: SelectedPolicyTab.EXISTING,
+      'data-test-subj': 'existingHostsTab',
       name: 'Existing hosts',
       content: (
         <StepSelectAgentPolicy

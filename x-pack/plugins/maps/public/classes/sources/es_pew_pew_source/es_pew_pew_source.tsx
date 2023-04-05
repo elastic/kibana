@@ -18,19 +18,18 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-// @ts-expect-error
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
 import { registerSource } from '../source_registry';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
-import { makePublicExecutionContext } from '../../../util';
+import { mergeExecutionContext } from '../execution_context_utils';
 import { SourceEditorArgs } from '../source';
 import {
+  DataFilters,
   ESPewPewSourceDescriptor,
   MapExtent,
   VectorSourceRequestMeta,
@@ -87,6 +86,12 @@ export class ESPewPewSource extends AbstractESAggSource {
     return false;
   }
 
+  getSyncMeta(dataFilters: DataFilters) {
+    return {
+      geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
+    };
+  }
+
   isGeoGridPrecisionAware() {
     return true;
   }
@@ -127,13 +132,13 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destSplit: {
@@ -151,7 +156,7 @@ export class ESPewPewSource extends AbstractESAggSource {
           sourceGrid: {
             geotile_grid: {
               field: this._descriptor.sourceGeoField,
-              precision: searchFilters.geogridPrecision,
+              precision: this.getGeoGridPrecision(requestMeta.zoom),
               size: 500,
             },
             aggs: {
@@ -185,8 +190,11 @@ export class ESPewPewSource extends AbstractESAggSource {
       requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
         defaultMessage: 'Source-destination connections request',
       }),
-      searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_pew_pew_source:connections'),
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_pew_pew_source:connections' },
+        requestMeta.executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -231,7 +239,10 @@ export class ESPewPewSource extends AbstractESAggSource {
         searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
-          executionContext: makePublicExecutionContext('es_pew_pew_source:bounds'),
+          executionContext: mergeExecutionContext(
+            { description: 'es_pew_pew_source:bounds' },
+            boundsFilters.executionContext
+          ),
         })
       );
       const destBounds = (esResp.aggregations?.destFitToBounds as AggregationsGeoBoundsAggregate)

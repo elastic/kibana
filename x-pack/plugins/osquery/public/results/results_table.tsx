@@ -6,6 +6,7 @@
  */
 
 import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
+import { css } from '@emotion/react';
 import type {
   EuiDataGridSorting,
   EuiDataGridProps,
@@ -26,9 +27,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
-
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import type { ECSMapping } from '../../common/schemas/common';
+import styled from 'styled-components';
+import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -41,18 +43,29 @@ import {
   ViewResultsActionButtonType,
 } from '../packs/pack_queries_status_table';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
-import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
+import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
 
-interface ResultsTableComponentProps {
+const StyledEuiDataGrid = styled(EuiDataGrid)`
+  :not(.euiDataGrid--fullScreen) {
+    .euiDataGrid__virtualized {
+      height: 100% !important;
+      max-height: 500px;
+    }
+  }
+`;
+
+export interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];
   ecsMapping?: ECSMapping;
   endDate?: string;
   startDate?: string;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  liveQueryActionId?: string;
+  error?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -61,7 +74,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ecsMapping,
   startDate,
   endDate,
-  addToTimeline,
+  liveQueryActionId,
+  error,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -80,7 +94,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     skip: !hasActionResultsPrivileges,
   });
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
-  const { getUrlForApp } = useKibana().services.application;
+  const {
+    application: { getUrlForApp },
+    appName,
+    timelines,
+  } = useKibana().services;
 
   const getFleetAppUrl = useCallback(
     (agentId) =>
@@ -303,7 +321,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const data = allResultsData?.edges;
-    if (addToTimeline && data) {
+    if (timelines && data) {
       return [
         {
           id: 'timeline',
@@ -315,19 +333,19 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             };
             const eventId = data[visibleRowIndex]?._id;
 
-            return addToTimeline({ query: ['_id', eventId], isIcon: true });
+            return <AddToTimelineButton field="_id" value={eventId} isIcon={true} />;
           },
         },
       ];
     }
 
     return [];
-  }, [addToTimeline, allResultsData?.edges]);
+  }, [allResultsData?.edges, timelines]);
 
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
-      showFullScreenSelector: !addToTimeline,
+      showFullScreenSelector: appName === OSQUERY_PLUGIN_NAME,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -342,17 +360,20 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             endDate={endDate}
             startDate={startDate}
           />
-          {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
+          <AddToTimelineButton field="action_id" value={actionId} />
+          {liveQueryActionId && (
+            <AddToCaseWrapper actionId={liveQueryActionId} queryId={actionId} agentIds={agentIds} />
+          )}
         </>
       ),
     }),
-    [actionId, addToTimeline, endDate, startDate]
+    [actionId, agentIds, appName, endDate, liveQueryActionId, startDate]
   );
 
   useEffect(
     () =>
       setIsLive(() => {
-        if (!agentIds?.length || expired) return false;
+        if (!agentIds?.length || expired || error) return false;
 
         return !!(
           aggregations.totalResponded !== agentIds?.length ||
@@ -366,9 +387,14 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       aggregations?.totalRowCount,
       allResultsData?.edges.length,
       allResultsData?.total,
+      error,
       expired,
     ]
   );
+
+  if (isLoading) {
+    return <EuiLoadingContent lines={5} />;
+  }
 
   if (!hasActionResultsPrivileges) {
     return (
@@ -380,7 +406,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage
@@ -397,13 +423,17 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     );
   }
 
-  if (isLoading) {
-    return <EuiLoadingContent lines={5} />;
-  }
-
   return (
     <>
-      {isLive && <EuiProgress color="primary" size="xs" />}
+      {isLive && (
+        <EuiProgress
+          color="primary"
+          size="xs"
+          css={css`
+            margin-top: -2px;
+          `}
+        />
+      )}
 
       {!allResultsData?.edges.length ? (
         <EuiPanel hasShadow={false}>
@@ -411,7 +441,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>
-          <EuiDataGrid
+          <StyledEuiDataGrid
             data-test-subj="osqueryResultsTable"
             aria-label="Osquery results"
             columns={columns}
@@ -421,7 +451,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             leadingControlColumns={leadingControlColumns}
             sorting={tableSorting}
             pagination={tablePagination}
-            height="500px"
             toolbarVisibility={toolbarVisibility}
           />
         </DataContext.Provider>

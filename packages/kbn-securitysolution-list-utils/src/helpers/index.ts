@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
@@ -14,7 +14,6 @@ import {
   EntriesArray,
   Entry,
   EntryNested,
-  ExceptionListItemSchema,
   ExceptionListType,
   ListSchema,
   NamespaceType,
@@ -27,6 +26,8 @@ import {
   entry,
   exceptionListItemSchema,
   nestedEntryItem,
+  CreateRuleExceptionListItemSchema,
+  createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   DataViewBase,
@@ -52,11 +53,14 @@ import {
 import {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
+  DataViewField,
   EmptyEntry,
   EmptyNestedEntry,
   ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
+  SavedObjectType,
 } from '../types';
 
 export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
@@ -65,59 +69,60 @@ export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
 
 export const filterExceptionItems = (
   exceptions: ExceptionsBuilderExceptionItem[]
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
-    (acc, exception) => {
-      const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
-        const strippedSingleEntry = removeIdFromItem(singleEntry);
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptions.reduce<ExceptionsBuilderReturnExceptionItem[]>((acc, exception) => {
+    const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
+      const strippedSingleEntry = removeIdFromItem(singleEntry);
+      if (entriesNested.is(strippedSingleEntry)) {
+        const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
+          const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+          const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
+          return validatedNestedEntry != null;
+        });
+        const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+          removeIdFromItem(singleNestedEntry)
+        );
 
-        if (entriesNested.is(strippedSingleEntry)) {
-          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
-            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
-            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
-            return validatedNestedEntry != null;
-          });
-          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
-            removeIdFromItem(singleNestedEntry)
-          );
+        const [validatedNestedEntry] = validate(
+          { ...strippedSingleEntry, entries: noIdNestedEntries },
+          entriesNested
+        );
 
-          const [validatedNestedEntry] = validate(
-            { ...strippedSingleEntry, entries: noIdNestedEntries },
-            entriesNested
-          );
-
-          if (validatedNestedEntry != null) {
-            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
-          }
-          return nestedAcc;
-        } else {
-          const [validatedEntry] = validate(strippedSingleEntry, entry);
-
-          if (validatedEntry != null) {
-            return [...nestedAcc, singleEntry];
-          }
-          return nestedAcc;
+        if (validatedNestedEntry != null) {
+          return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
         }
-      }, []);
-
-      if (entries.length === 0) {
-        return acc;
-      }
-
-      const item = { ...exception, entries };
-
-      if (exceptionListItemSchema.is(item)) {
-        return [...acc, item];
-      } else if (createExceptionListItemSchema.is(item)) {
-        const { meta, ...rest } = item;
-        const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
-        return [...acc, itemSansMetaId];
+        return nestedAcc;
       } else {
-        return acc;
+        const [validatedEntry] = validate(strippedSingleEntry, entry);
+        if (validatedEntry != null) {
+          return [...nestedAcc, singleEntry];
+        }
+        return nestedAcc;
       }
-    },
-    []
-  );
+    }, []);
+
+    if (entries.length === 0) {
+      return acc;
+    }
+
+    const item = { ...exception, entries };
+
+    if (exceptionListItemSchema.is(item)) {
+      return [...acc, item];
+    } else if (
+      createExceptionListItemSchema.is(item) ||
+      createRuleExceptionListItemSchema.is(item)
+    ) {
+      const { meta, ...rest } = item;
+      const itemSansMetaId: CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema = {
+        ...rest,
+        meta: undefined,
+      };
+      return [...acc, itemSansMetaId];
+    } else {
+      return acc;
+    }
+  }, []);
 };
 
 export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
@@ -136,15 +141,15 @@ export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
 export const getNewExceptionItem = ({
   listId,
   namespaceType,
-  ruleName,
+  name,
 }: {
-  listId: string;
-  namespaceType: NamespaceType;
-  ruleName: string;
+  listId: string | undefined;
+  namespaceType: NamespaceType | undefined;
+  name: string;
 }): CreateExceptionListItemBuilderSchema => {
   return {
     comments: [],
-    description: `${ruleName} - exception list item`,
+    description: `Exception list item`,
     entries: addIdToEntries([
       {
         field: '',
@@ -156,9 +161,9 @@ export const getNewExceptionItem = ({
     item_id: undefined,
     list_id: listId,
     meta: {
-      temporaryUuid: uuid.v4(),
+      temporaryUuid: uuidv4(),
     },
-    name: `${ruleName} - exception list item`,
+    name,
     namespace_type: namespaceType,
     tags: [],
     type: 'simple',
@@ -769,13 +774,15 @@ export const getCorrespondingKeywordField = ({
  * @param parent nested entries hold copy of their parent for use in various logic
  * @param parentIndex corresponds to the entry index, this might seem obvious, but
  * was added to ensure that nested items could be identified with their parent entry
+ * @param allowCustomFieldOptions determines if field must be found to match in indexPattern or not
  */
 export const getFormattedBuilderEntry = (
   indexPattern: DataViewBase,
   item: BuilderEntry,
   itemIndex: number,
   parent: EntryNested | undefined,
-  parentIndex: number | undefined
+  parentIndex: number | undefined,
+  allowCustomFieldOptions: boolean
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
@@ -800,10 +807,14 @@ export const getFormattedBuilderEntry = (
       value: getEntryValue(item),
     };
   } else {
+    const fieldToUse = allowCustomFieldOptions
+      ? foundField ?? { name: item.field, type: 'keyword' }
+      : foundField;
+
     return {
       correspondingKeywordField,
       entryIndex: itemIndex,
-      field: foundField,
+      field: fieldToUse,
       id: item.id != null ? item.id : `${itemIndex}`,
       nested: undefined,
       operator: getExceptionOperatorSelect(item),
@@ -819,8 +830,7 @@ export const getFormattedBuilderEntry = (
  *
  * @param patterns DataViewBase containing available fields on rule index
  * @param entries exception item entries
- * @param addNested boolean noting whether or not UI is currently
- * set to add a nested field
+ * @param allowCustomFieldOptions determines if field must be found to match in indexPattern or not
  * @param parent nested entries hold copy of their parent for use in various logic
  * @param parentIndex corresponds to the entry index, this might seem obvious, but
  * was added to ensure that nested items could be identified with their parent entry
@@ -828,6 +838,7 @@ export const getFormattedBuilderEntry = (
 export const getFormattedBuilderEntries = (
   indexPattern: DataViewBase,
   entries: BuilderEntry[],
+  allowCustomFieldOptions: boolean,
   parent?: EntryNested,
   parentIndex?: number
 ): FormattedBuilderEntry[] => {
@@ -839,7 +850,8 @@ export const getFormattedBuilderEntries = (
         item,
         index,
         parent,
-        parentIndex
+        parentIndex,
+        allowCustomFieldOptions
       );
       return [...acc, newItemEntry];
     } else {
@@ -869,7 +881,13 @@ export const getFormattedBuilderEntries = (
       }
 
       if (isEntryNested(item)) {
-        const nestedItems = getFormattedBuilderEntries(indexPattern, item.entries, item, index);
+        const nestedItems = getFormattedBuilderEntries(
+          indexPattern,
+          item.entries,
+          allowCustomFieldOptions,
+          item,
+          index
+        );
 
         return [...acc, parentEntry, ...nestedItems];
       }
@@ -881,7 +899,7 @@ export const getFormattedBuilderEntries = (
 
 export const getDefaultEmptyEntry = (): EmptyEntry => ({
   field: '',
-  id: uuid.v4(),
+  id: uuidv4(),
   operator: OperatorEnum.INCLUDED,
   type: OperatorTypeEnum.MATCH,
   value: '',
@@ -890,9 +908,108 @@ export const getDefaultEmptyEntry = (): EmptyEntry => ({
 export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
   entries: [],
   field: '',
-  id: uuid.v4(),
+  id: uuidv4(),
   type: OperatorTypeEnum.NESTED,
 });
 
 export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
   items.some((item) => item.entries.some(({ type }) => type === OperatorTypeEnum.LIST));
+
+export const buildShowActiveExceptionsFilter = (savedObjectPrefix: SavedObjectType[]): string => {
+  const now = new Date().toISOString();
+  const filters = savedObjectPrefix.map(
+    (prefix) =>
+      `${prefix}.attributes.expire_time > "${now}" OR NOT ${prefix}.attributes.expire_time: *`
+  );
+  return filters.join(',');
+};
+
+export const buildShowExpiredExceptionsFilter = (savedObjectPrefix: SavedObjectType[]): string => {
+  const now = new Date().toISOString();
+  const filters = savedObjectPrefix.map((prefix) => `${prefix}.attributes.expire_time <= "${now}"`);
+  return filters.join(',');
+};
+
+const getIndexGroupName = (indexName: string): string => {
+  // Check whether it is a Data Stream index
+  const dataStreamExp = /.ds-(.*?)-[0-9]{4}\.[0-9]{2}\.[0-9]{2}-[0-9]{6}/;
+  let result = indexName.match(dataStreamExp);
+  if (result && result.length === 2) {
+    return result[1];
+  }
+
+  // Check whether it is an old '.siem' index group
+  const siemSignalsExp = /.siem-(.*?)-[0-9]{6}/;
+  result = indexName.match(siemSignalsExp);
+  if (result && result.length === 2) {
+    return `.siem-${result[1]}`;
+  }
+
+  // Otherwise return index name
+  return indexName;
+};
+
+export interface FieldConflictsInfo {
+  /**
+   * Kibana field type
+   */
+  type: string;
+  /**
+   * Total count of the indices of this type
+   */
+  totalIndexCount: number;
+  /**
+   * Grouped indices info
+   */
+  groupedIndices: Array<{
+    /**
+     * Index group name (like '.ds-...' or '.siem-signals-...')
+     */
+    name: string;
+    /**
+     * Count of indices in the group
+     */
+    count: number;
+  }>;
+}
+
+export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInfo[] | null => {
+  if (!field.conflictDescriptions) {
+    return null;
+  }
+  const conflicts: FieldConflictsInfo[] = [];
+  for (const [key, value] of Object.entries(field.conflictDescriptions)) {
+    const groupedIndices: Array<{
+      name: string;
+      count: number;
+    }> = [];
+
+    // Group indices and calculate count of indices in each group
+    const groupedInfo: { [key: string]: number } = {};
+    value.forEach((index) => {
+      const groupName = getIndexGroupName(index);
+      if (!groupedInfo[groupName]) {
+        groupedInfo[groupName] = 0;
+      }
+      groupedInfo[groupName]++;
+    });
+    for (const [name, count] of Object.entries(groupedInfo)) {
+      groupedIndices.push({
+        name,
+        count,
+      });
+    }
+
+    // Sort groups by the indices count
+    groupedIndices.sort((group1, group2) => {
+      return group2.count - group1.count;
+    });
+
+    conflicts.push({
+      type: key,
+      totalIndexCount: value.length,
+      groupedIndices,
+    });
+  }
+  return conflicts;
+};

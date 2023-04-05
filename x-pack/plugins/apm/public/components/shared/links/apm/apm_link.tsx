@@ -33,6 +33,7 @@ export const PERSISTENT_APM_PARAMS: Array<keyof APMQueryParams> = [
   'refreshInterval',
   'environment',
   'serviceGroup',
+  'comparisonEnabled',
 ];
 
 /**
@@ -85,7 +86,12 @@ export function getLegacyApmHref({
   });
 }
 
-export function APMLink({ path = '', query, mergeQuery, ...rest }: Props) {
+export function LegacyAPMLink({
+  path = '',
+  query,
+  mergeQuery,
+  ...rest
+}: Props) {
   const { core } = useApmPluginContext();
   const { search } = useLocation();
   const { basePath } = core.http;
@@ -94,5 +100,7 @@ export function APMLink({ path = '', query, mergeQuery, ...rest }: Props) {
 
   const href = getLegacyApmHref({ basePath, path, search, query: mergedQuery });
 
-  return <EuiLink {...rest} href={href} />;
+  return (
+    <EuiLink data-test-subj="apmLegacyAPMLinkLink" {...rest} href={href} />
+  );
 }

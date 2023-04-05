@@ -16,10 +16,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
 
-import { useStartServices } from '../../../hooks';
+import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
+import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
-
-import { CardReleaseBadge } from './release_badge';
 
 export type PackageCardProps = IntegrationCardItem;
 
@@ -41,6 +40,7 @@ export function PackageCard({
   id,
   fromIntegrations,
   isUnverified,
+  isUpdateAvailable,
   showLabels = true,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
@@ -50,7 +50,7 @@ export function PackageCard({
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
-          <CardReleaseBadge release={release} />
+          <InlineReleaseBadge release={release} />
         </span>
       </EuiFlexItem>
     );
@@ -74,7 +74,26 @@ export function PackageCard({
     );
   }
 
+  let updateAvailableBadge: React.ReactNode | null = null;
+
+  if (isUpdateAvailable && showLabels) {
+    updateAvailableBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="warning">
+            <FormattedMessage
+              id="xpack.fleet.packageCard.updateAvailableLabel"
+              defaultMessage="Update available"
+            />
+          </EuiBadge>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
   const { application } = useStartServices();
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(name);
 
   const onCardClick = () => {
     if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
@@ -91,30 +110,38 @@ export function PackageCard({
 
   const testid = `integration-card:${id}`;
   return (
-    <TrackApplicationView viewId={testid}>
-      <Card
-        data-test-subj={testid}
-        layout="horizontal"
-        title={title || ''}
-        titleSize="xs"
-        description={description}
-        hasBorder
-        icon={
-          <CardIcon
-            icons={icons}
-            packageName={name}
-            integrationName={integration}
-            version={version}
-            size="xl"
-          />
-        }
-        onClick={onCardClick}
-      >
-        <EuiFlexGroup gutterSize="xs">
-          {verifiedBadge}
-          {releaseBadge}
-        </EuiFlexGroup>
-      </Card>
-    </TrackApplicationView>
+    <WithGuidedOnboardingTour
+      packageKey={name}
+      isTourVisible={isGuidedOnboardingActive}
+      tourType={'integrationCard'}
+      tourOffset={10}
+    >
+      <TrackApplicationView viewId={testid}>
+        <Card
+          data-test-subj={testid}
+          layout="horizontal"
+          title={title || ''}
+          titleSize="xs"
+          description={description}
+          hasBorder
+          icon={
+            <CardIcon
+              icons={icons}
+              packageName={name}
+              integrationName={integration}
+              version={version}
+              size="xl"
+            />
+          }
+          onClick={onCardClick}
+        >
+          <EuiFlexGroup gutterSize="xs">
+            {verifiedBadge}
+            {updateAvailableBadge}
+            {releaseBadge}
+          </EuiFlexGroup>
+        </Card>
+      </TrackApplicationView>
+    </WithGuidedOnboardingTour>
   );
 }

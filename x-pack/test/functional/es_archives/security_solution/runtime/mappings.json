@@ -7029,7 +7029,12 @@
       "index": {
         "refresh_interval": "1s",
         "number_of_replicas": "1",
-        "number_of_shards": "1"
+        "number_of_shards": "1",
+        "mapping": {
+          "total_fields": {
+            "limit": 10000
+          }
+        }
       }
     }
   }

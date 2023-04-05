@@ -14,7 +14,7 @@ const onChangeHandler = jest.fn();
 
 describe('Mappings editor: mapped fields', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

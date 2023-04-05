@@ -20,9 +20,10 @@ import styled from 'styled-components';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
-import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
+import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { ActionTypeConnector, ConnectorTypes } from '../../../common/api';
+import type { ActionTypeConnector } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/api';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
@@ -66,7 +67,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   const connectorsName = connector?.name ?? 'none';
 
   const actionTypeName = useMemo(
-    () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? 'Unknown',
+    () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? i18n.UNKNOWN,
     [actionTypes, selectedConnector.type]
   );
 

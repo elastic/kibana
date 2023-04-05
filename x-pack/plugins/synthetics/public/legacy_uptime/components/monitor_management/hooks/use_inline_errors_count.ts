@@ -30,7 +30,7 @@ export function useInlineErrorsCount() {
         },
         aggs: {
           total: {
-            cardinality: { field: 'config_id' },
+            cardinality: { field: 'monitor.id' },
           },
         },
       },

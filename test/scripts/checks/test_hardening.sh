@@ -2,5 +2,4 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-checks-reporter-with-killswitch "Test Hardening" \
-  node scripts/test_hardening
+node scripts/test_hardening

@@ -14,7 +14,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useTimeoutFn from 'react-use/lib/useTimeoutFn';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { StatusResponse } from '@kbn/core/types/status';
+import type { StatusResponse } from '@kbn/core-status-common-internal';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from './use_kibana';

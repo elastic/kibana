@@ -7,11 +7,10 @@
 import 'jest-canvas-mock';
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { ConfigKey } from '../../../../../common/runtime_types';
+import { fireEvent, screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { IPolicyConfigContextProvider } from '../contexts/policy_config_context';
-import { SourceField, Props, defaultValues } from './source_field';
+import { SourceField, Props } from './source_field';
 import { BrowserSimpleFieldsContextProvider, PolicyConfigContextProvider } from '../contexts';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -31,14 +30,14 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
     CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        id={props.id}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
+      <>
+        <input
+          data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+          data-currentvalue={props.value}
+          id={props.id}
+          onChange={props.onChange}
+        />
+      </>
     ),
   };
 });
@@ -48,11 +47,10 @@ const onBlur = jest.fn();
 
 describe('<SourceField />', () => {
   const WrappedComponent = ({
-    isZipUrlSourceEnabled,
     defaultConfig,
   }: Omit<IPolicyConfigContextProvider, 'children'> & Partial<Props>) => {
     return (
-      <PolicyConfigContextProvider isZipUrlSourceEnabled={isZipUrlSourceEnabled}>
+      <PolicyConfigContextProvider>
         <BrowserSimpleFieldsContextProvider>
           <SourceField onChange={onChange} onFieldBlur={onBlur} defaultConfig={defaultConfig} />
         </BrowserSimpleFieldsContextProvider>
@@ -64,36 +62,16 @@ describe('<SourceField />', () => {
     jest.clearAllMocks();
   });
 
-  it('calls onChange', async () => {
-    render(<WrappedComponent />);
-    const zipUrl = 'test.zip';
-
-    const zipUrlField = screen.getByTestId('syntheticsBrowserZipUrl');
-    fireEvent.change(zipUrlField, { target: { value: zipUrl } });
-
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith({ ...defaultValues, zipUrl });
-    });
-  });
-
-  it('calls onBlur', () => {
+  it('selects inline script by default', () => {
     render(<WrappedComponent />);
 
-    const zipUrlField = screen.getByTestId('syntheticsBrowserZipUrl');
-    fireEvent.click(zipUrlField);
-    fireEvent.blur(zipUrlField);
-
-    expect(onBlur).toBeCalledWith(ConfigKey.SOURCE_ZIP_URL);
+    expect(
+      screen.getByText('Runs Synthetic test scripts that are defined inline.')
+    ).toBeInTheDocument();
   });
 
-  it('shows ZipUrl source type by default', async () => {
+  it('does not show ZipUrl source type', async () => {
     render(<WrappedComponent />);
-
-    expect(screen.getByTestId('syntheticsSourceTab__zipUrl')).toBeInTheDocument();
-  });
-
-  it('does not show ZipUrl source type when isZipUrlSourceEnabled = false', async () => {
-    render(<WrappedComponent isZipUrlSourceEnabled={false} />);
 
     expect(screen.queryByTestId('syntheticsSourceTab__zipUrl')).not.toBeInTheDocument();
   });
@@ -108,11 +86,6 @@ describe('<SourceField />', () => {
 
     const recorder = getByTestId('syntheticsSourceTab__scriptRecorder');
     fireEvent.click(recorder);
-
-    expect(getByText('Parameters')).toBeInTheDocument();
-
-    const zip = getByTestId('syntheticsSourceTab__zipUrl');
-    fireEvent.click(zip);
 
     expect(getByText('Parameters')).toBeInTheDocument();
   });

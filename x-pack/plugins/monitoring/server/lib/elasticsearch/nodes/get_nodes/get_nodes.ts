@@ -14,7 +14,7 @@ import { handleResponse } from './handle_response';
 import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
 import { LegacyRequest } from '../../../../types';
 import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
-import { getNewIndexPatterns } from '../../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../cluster/get_index_patterns';
 import { Globals } from '../../../../static_globals';
 
 /* Run an aggregation on node_stats to get stat data for the selected time
@@ -67,7 +67,7 @@ export async function getNodes(
 
   const dataset = 'node_stats';
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
@@ -83,7 +83,7 @@ export async function getNodes(
     body: {
       query: createQuery({
         type: dataset,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         start,
         end,

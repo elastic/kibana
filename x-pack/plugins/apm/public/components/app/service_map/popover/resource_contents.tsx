@@ -14,10 +14,7 @@ import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { NodeDataDefinition } from 'cytoscape';
 import type { ContentsProps } from '.';
-import {
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SPAN_SUBTYPE, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 
 const ItemRow = euiStyled.div`
   line-height: 2;

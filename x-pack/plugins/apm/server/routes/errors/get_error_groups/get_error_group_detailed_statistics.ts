@@ -14,19 +14,21 @@ import {
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';
-import {
-  ERROR_GROUP_ID,
-  SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+
+interface ErrorGroupDetailedStat {
+  groupId: string;
+  timeseries: Coordinate[];
+}
 
 export async function getErrorGroupDetailedStatistics({
   kuery,
   serviceName,
-  setup,
+  apmEventClient,
   numBuckets,
   groupIds,
   environment,
@@ -36,16 +38,14 @@ export async function getErrorGroupDetailedStatistics({
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   numBuckets: number;
   groupIds: string[];
   environment: string;
   start: number;
   end: number;
   offset?: string;
-}): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
-  const { apmEventClient } = setup;
-
+}): Promise<ErrorGroupDetailedStat[]> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -65,6 +65,7 @@ export async function getErrorGroupDetailedStatistics({
         events: [ProcessorEvent.error],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -120,10 +121,15 @@ export async function getErrorGroupDetailedStatistics({
   });
 }
 
+export interface ErrorGroupPeriodsResponse {
+  currentPeriod: Record<string, ErrorGroupDetailedStat>;
+  previousPeriod: Record<string, ErrorGroupDetailedStat>;
+}
+
 export async function getErrorGroupPeriods({
   kuery,
   serviceName,
-  setup,
+  apmEventClient,
   numBuckets,
   groupIds,
   environment,
@@ -133,19 +139,19 @@ export async function getErrorGroupPeriods({
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   numBuckets: number;
   groupIds: string[];
   environment: string;
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<ErrorGroupPeriodsResponse> {
   const commonProps = {
     environment,
     kuery,
     serviceName,
-    setup,
+    apmEventClient,
     numBuckets,
     groupIds,
   };

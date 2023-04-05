@@ -38,7 +38,7 @@ export function useEsDocSearch({
       const result = await lastValueFrom(
         data.search.search({
           params: {
-            index: dataView.title,
+            index: dataView.getIndexPattern(),
             body: buildSearchBody(id, index, dataView, useNewFieldsApi, requestSource)?.body,
           },
         })

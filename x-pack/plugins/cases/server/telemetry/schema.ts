@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   CasesTelemetrySchema,
   TypeLong,
   CountSchema,
   StatusSchema,
   LatestDatesSchema,
   TypeString,
+  SolutionTelemetrySchema,
+  AssigneesSchema,
+  AttachmentFrameworkSchema,
+  AttachmentItemsSchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -22,6 +26,44 @@ const countSchema: CountSchema = {
   monthly: long,
   weekly: long,
   daily: long,
+};
+
+interface AttachmentRegistrySchema {
+  type: 'array';
+  items: AttachmentItemsSchema;
+}
+
+const attachmentRegistrySchema: AttachmentRegistrySchema = {
+  type: 'array',
+  items: {
+    average: long,
+    maxOnACase: long,
+    total: long,
+    type: string,
+  },
+};
+
+const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
+  persistableAttachments: attachmentRegistrySchema,
+  externalAttachments: attachmentRegistrySchema,
+  files: {
+    average: long,
+    averageSize: long,
+    maxOnACase: long,
+    total: long,
+  },
+};
+
+const assigneesSchema: AssigneesSchema = {
+  total: long,
+  totalWithZero: long,
+  totalWithAtLeastOne: long,
+};
+
+const solutionTelemetry: SolutionTelemetrySchema = {
+  ...countSchema,
+  assignees: assigneesSchema,
+  attachmentFramework: attachmentFrameworkSchema,
 };
 
 const statusSchema: StatusSchema = {
@@ -40,6 +82,8 @@ export const casesSchema: CasesTelemetrySchema = {
   cases: {
     all: {
       ...countSchema,
+      attachmentFramework: attachmentFrameworkSchema,
+      assignees: assigneesSchema,
       status: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
@@ -50,9 +94,9 @@ export const casesSchema: CasesTelemetrySchema = {
       totalWithConnectors: long,
       latestDates: latestDatesSchema,
     },
-    sec: countSchema,
-    obs: countSchema,
-    main: countSchema,
+    sec: solutionTelemetry,
+    obs: solutionTelemetry,
+    main: solutionTelemetry,
   },
   userActions: { all: { ...countSchema, maxOnACase: long } },
   comments: { all: { ...countSchema, maxOnACase: long } },

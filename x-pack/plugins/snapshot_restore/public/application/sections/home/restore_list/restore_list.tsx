@@ -8,7 +8,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
   EuiPopover,
   EuiButtonEmpty,

@@ -40,6 +40,7 @@ export type {
   RedirectResponseOptions,
   ResponseErrorAttributes,
   ErrorHttpResponseOptions,
+  FileHttpResponseOptions,
 } from './response';
 export type {
   RouteConfigOptions,
@@ -60,7 +61,7 @@ export type {
   RouteValidatorOptions,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
-export type { IRouter, RouteRegistrar, RouterRoute } from './router';
+export type { IRouter, IRouterWithVersion, RouteRegistrar, RouterRoute } from './router';
 export type { IKibanaSocket } from './socket';
 export type {
   KibanaErrorResponseFactory,
@@ -69,3 +70,4 @@ export type {
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from './response_factory';
+export type { RawRequest, FakeRawRequest } from './raw_request';

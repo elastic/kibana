@@ -12,12 +12,15 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import {
   GaugeRenderProps,
   GaugeLabelMajorMode,
   GaugeLabelMajorModes,
   GaugeColorModes,
+  GaugeShapes,
+  GaugeTicksPositions,
 } from '../../common';
 import {
   getAccessorsFromArgs,
@@ -30,7 +33,7 @@ import {
 } from './utils';
 import { getIcons } from './utils/icons';
 import './index.scss';
-import { GaugeCentralMajorMode } from '../../common/types';
+import { GaugeCentralMajorMode, GaugeTicksPosition } from '../../common/types';
 import { isBulletShape, isRoundShape } from '../../common/utils';
 
 import './gauge.scss';
@@ -135,8 +138,46 @@ const getPreviousSectionValue = (value: number, bands: number[]) => {
   return prevSectionValue;
 };
 
+function getTicksLabels(baseStops: number[]) {
+  const tenPercentRange = (Math.max(...baseStops) - Math.min(...baseStops)) * 0.1;
+  const lastIndex = baseStops.length - 1;
+  return baseStops.filter((stop, i) => {
+    if (i === 0 || i === lastIndex) {
+      return true;
+    }
+
+    return !(
+      stop - baseStops[i - 1] < tenPercentRange || baseStops[lastIndex] - stop < tenPercentRange
+    );
+  });
+}
+
+function getTicks(
+  ticksPosition: GaugeTicksPosition,
+  range: [number, number],
+  colorBands?: number[],
+  percentageMode?: boolean
+) {
+  if (ticksPosition === GaugeTicksPositions.HIDDEN) {
+    return [];
+  }
+
+  if (ticksPosition === GaugeTicksPositions.BANDS && colorBands) {
+    return colorBands && getTicksLabels(colorBands);
+  }
+}
+
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
-  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService, renderComplete }) => {
+  ({
+    data,
+    args,
+    uiState,
+    formatFactory,
+    paletteService,
+    chartsThemeService,
+    renderComplete,
+    overrides,
+  }) => {
     const {
       shape: gaugeType,
       palette,
@@ -146,8 +187,11 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       labelMajorMode,
       centralMajor,
       centralMajorMode,
+      ticksPosition,
       commonLabel,
     } = args;
+
+    const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
     const getColor = useCallback(
       (
@@ -294,6 +338,12 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       actualValue = actualValueToPercentsLegacy(palette?.params as CustomPaletteState, actualValue);
     }
 
+    const totalTicks = getTicks(ticksPosition, [min, max], bands, args.percentageMode);
+    const ticks =
+      totalTicks && gaugeType === GaugeShapes.CIRCLE
+        ? totalTicks.slice(0, totalTicks.length - 1)
+        : totalTicks;
+
     const goalConfig = getGoalConfig(gaugeType);
 
     const labelMajorTitle = getTitle(labelMajorMode, labelMajor, metricColumn?.name);
@@ -316,9 +366,11 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
             theme={[{ background: { color: 'transparent' } }, chartTheme]}
+            baseTheme={chartBaseTheme}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             onRenderChange={onRenderChange}
+            {...getOverridesFor(overrides, 'settings')}
           />
           <Goal
             id="goal"
@@ -329,6 +381,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
             tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
             bands={bands}
+            ticks={ticks}
             domain={{ min, max }}
             bandFillColor={
               colorMode === GaugeColorModes.PALETTE
@@ -354,6 +407,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
             {...extraTitles}
             {...goalConfig}
+            {...getOverridesFor(overrides, 'gauge')}
           />
         </Chart>
         {commonLabel && <div className="gauge__label">{commonLabel}</div>}

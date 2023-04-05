@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/injected-metadata/core-injected-metadata-browser-mocks/src/injected_metadata_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-injected-metadata-browser-mocks",
@@ -45,6 +46,7 @@
             ],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser-mocks/src/injected_metadata_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -62,6 +64,7 @@
             ],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser-mocks/src/injected_metadata_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -79,6 +82,7 @@
             ],
             "path": "packages/core/injected-metadata/core-injected-metadata-browser-mocks/src/injected_metadata_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

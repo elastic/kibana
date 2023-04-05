@@ -7,10 +7,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { chain } from 'lodash';
 import { findRelationships } from '../lib';
-import { ISavedObjectsManagement } from '../services';
+import type { ISavedObjectsManagement } from '../services';
+import type { v1 } from '../../common';
 
 export const registerRelationshipsRoute = (
   router: IRouter,
@@ -48,7 +49,7 @@ export const registerRelationshipsRoute = (
 
       const client = getClient({ includedHiddenTypes });
 
-      const findRelationsResponse = await findRelationships({
+      const findRelationsResponse: v1.RelationshipsResponseHTTP = await findRelationships({
         type,
         id,
         client,

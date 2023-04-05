@@ -11,7 +11,7 @@
   Need tests for spacing, etc
 */
 
-import { evaluate, parse } from '@kbn/tinymath';
+import { evaluate, parse } from '../src';
 
 function variableEqual(value) {
   return expect.objectContaining({ type: 'variable', value });
@@ -66,6 +66,91 @@ describe('Parser', () => {
         type: 'function',
         text: 'a + b + c - d',
         location: { min: 0, max: 13 },
+      });
+    });
+
+    describe('Comparison', () => {
+      it('should throw for non valid comparison symbols', () => {
+        const symbols = ['<>', '><', '===', '>>', '<<'];
+        for (const symbol of symbols) {
+          expect(() => parse(`5 ${symbol} 1`)).toThrow();
+        }
+      });
+      describe.each`
+        symbol  | fn
+        ${'<'}  | ${'lt'}
+        ${'>'}  | ${'gt'}
+        ${'=='} | ${'eq'}
+        ${'>='} | ${'gte'}
+        ${'<='} | ${'lte'}
+      `('Symbol "$symbol" ( $fn )', ({ symbol, fn }) => {
+        it(`should parse comparison symbol: "$symbol"`, () => {
+          expect(parse(`5 ${symbol} 1`)).toEqual({
+            name: fn,
+            type: 'function',
+            args: [5, 1],
+            text: `5 ${symbol} 1`,
+            location: { min: 0, max: 4 + symbol.length },
+          });
+          expect(parse(`a ${symbol} b`)).toEqual({
+            name: fn,
+            type: 'function',
+            args: [variableEqual('a'), variableEqual('b')],
+            text: `a ${symbol} b`,
+            location: { min: 0, max: 4 + symbol.length },
+          });
+        });
+
+        it.each`
+          expression
+          ${`1 + (1 ${symbol} 1)`}
+          ${`(1 ${symbol} 1) + 1`}
+          ${`((1 ${symbol} 1) + 1)`}
+          ${`((1 ${symbol} 1) + (1 ${symbol} 1))`}
+          ${`((1 ${symbol} 1) + ( ${symbol} 1))`}
+          ${` ${symbol} 1`}
+          ${`1 ${symbol} `}
+          ${`a + (b ${symbol} c)`}
+          ${`(a ${symbol} b) + c`}
+          ${`((a ${symbol} b) + c)`}
+          ${`((a ${symbol} b) + (c ${symbol} d))`}
+          ${`((a ${symbol} b) + ( ${symbol} c))`}
+          ${` ${symbol} a`}
+          ${`a ${symbol} `}
+        `(
+          'should throw for invalid expression with comparison arguments: $expression',
+          ({ expression }) => {
+            expect(() => parse(expression)).toThrow();
+          }
+        );
+
+        it.each`
+          expression
+          ${`1 ${symbol} 1 ${symbol} 1`}
+          ${`(1 ${symbol} 1) ${symbol} 1`}
+          ${`1 ${symbol} (1 ${symbol} 1)`}
+          ${`a ${symbol} b ${symbol} c`}
+          ${`(a ${symbol} b) ${symbol} c`}
+          ${`a ${symbol} (b ${symbol} c)`}
+        `('should throw for cascading comparison operators: $expression', ({ expression }) => {
+          expect(() => parse(expression)).toThrow();
+        });
+
+        it.each`
+          expression
+          ${`1 ${symbol} 1`}
+          ${`(1 ${symbol} 1)`}
+          ${`((1 ${symbol} 1))`}
+          ${`((1 + 1) ${symbol} 1)`}
+          ${`1 + 1 ${symbol} 1 * 1`}
+          ${`a ${symbol} b`}
+          ${`(a ${symbol} b)`}
+          ${`((a ${symbol} b))`}
+          ${`((a + b) ${symbol} c)`}
+          ${`a + b ${symbol} c * d`}
+        `('should parse comparison expressions: $expression', ({ expression }) => {
+          expect(() => parse(expression)).not.toThrow();
+        });
       });
     });
   });

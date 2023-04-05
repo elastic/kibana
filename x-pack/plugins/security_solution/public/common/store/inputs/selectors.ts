@@ -8,6 +8,7 @@
 import { createSelector } from 'reselect';
 
 import type { Filter, Query } from '@kbn/es-query';
+import type { InputsState } from './reducer';
 import type { State } from '../types';
 
 import type { InputsModel, InputsRange, GlobalQuery } from './model';
@@ -18,9 +19,13 @@ const selectGlobal = (state: State): InputsRange => state.inputs.global;
 
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
 
+// TODO: remove undefined when socTrendsEnabled feature flag removed
+const selectSocTrends = (state: State): InputsState['socTrends'] | undefined =>
+  state.inputs.socTrends;
+
 const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.global.queries.find((q) => q.id === id) || {
-    id: '',
+    id: 'kql',
     inspect: null,
     isInspected: false,
     loading: false,
@@ -31,7 +36,7 @@ const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
 const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.timeline.queries.find((q) => q.id === id) ||
   state.inputs.global.queries.find((q) => q.id === id) || {
-    id: '',
+    id: 'kql',
     inspect: null,
     isInspected: false,
     loading: false,
@@ -44,6 +49,12 @@ export const inputsSelector = () => createSelector(selectInputs, (inputs) => inp
 export const timelineTimeRangeSelector = createSelector(
   selectTimeline,
   (timeline) => timeline.timerange
+);
+
+// TODO: remove ? when socTrendsEnabled feature flag removed
+export const socTrendsTimeRangeSelector = createSelector(
+  selectSocTrends,
+  (socTrends) => socTrends?.timerange
 );
 
 export const globalFullScreenSelector = createSelector(selectGlobal, (global) => global.fullScreen);

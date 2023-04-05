@@ -40,6 +40,9 @@ export const input = createSlice({
     setSyncColors(state, action: PayloadAction<EmbeddableInput['syncColors']>) {
       state.syncColors = action.payload;
     },
+    setSyncCursor(state, action: PayloadAction<EmbeddableInput['syncCursor']>) {
+      state.syncCursor = action.payload;
+    },
     setSyncTooltips(state, action: PayloadAction<EmbeddableInput['syncTooltips']>) {
       state.syncTooltips = action.payload;
     },

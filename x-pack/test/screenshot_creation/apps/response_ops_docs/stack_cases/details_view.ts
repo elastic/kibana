@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const screenshotDirectories = ['response_ops_docs', 'stack_cases'];
   let CASE_ID: string;
 
-  describe('deatils view', function () {
+  describe('details view', function () {
     before(async () => {
       const { id: caseId } = await cases.api.createCase({
         title: 'Web transactions',
@@ -31,7 +31,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('cases visualization screenshot', async () => {
       await cases.navigation.navigateToApp();
       await cases.navigation.navigateToSingleCase('cases', CASE_ID);
-      await cases.singleCase.addVisualization('Transactions per day');
+      await cases.singleCase.addVisualization('[Logs] Bytes distribution');
+
       await cases.singleCase.openVisualizationButtonTooltip();
       await commonScreenshots.takeScreenshot(
         'cases-visualization',

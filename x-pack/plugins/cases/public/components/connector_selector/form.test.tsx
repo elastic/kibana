@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { UseField, Form, useForm, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField, Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorSelector } from './form';
 import { connectorsMock } from '../../containers/mock';
 import { getFormMock } from '../__mock__/form';

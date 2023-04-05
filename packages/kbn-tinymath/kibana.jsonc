@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/tinymath",
+  "owner": "@elastic/kibana-visualizations"
+}

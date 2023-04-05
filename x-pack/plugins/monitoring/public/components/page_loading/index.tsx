@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,

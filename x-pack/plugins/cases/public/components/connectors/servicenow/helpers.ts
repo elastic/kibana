@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiSelectOption } from '@elastic/eui';
-import { Choice } from './types';
+import type { EuiSelectOption } from '@elastic/eui';
+import type { Choice } from './types';
 
 export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
   choices.map((choice) => ({ value: choice.value, text: choice.label }));

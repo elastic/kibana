@@ -2,10 +2,9 @@
 
 source test/scripts/jenkins_test_setup_xpack.sh
 
-checks-reporter-with-killswitch "X-Pack firefox smoke test" \
-  node scripts/functional_tests \
-    --debug --bail \
-    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-    --include-tag "includeFirefox" \
-    --config test/functional/config.firefox.js \
-    --config test/functional_embedded/config.firefox.ts;
+node scripts/functional_tests \
+  --debug --bail \
+  --kibana-install-dir "$KIBANA_INSTALL_DIR" \
+  --include-tag "includeFirefox" \
+  --config test/functional/config.firefox.js \
+  --config test/functional_embedded/config.firefox.ts;

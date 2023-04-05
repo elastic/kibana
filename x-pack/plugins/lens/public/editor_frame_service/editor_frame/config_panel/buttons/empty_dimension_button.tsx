@@ -9,26 +9,25 @@ import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import {
+  DragDrop,
+  DragDropIdentifier,
+  DragContext,
+  DropType,
+  DropTargetSwapDuplicateCombine,
+} from '@kbn/dom-drag-drop';
+import { isDraggedField } from '../../../../utils';
 import { generateId } from '../../../../id_generator';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 
 import {
   Datasource,
   VisualizationDimensionGroupConfig,
-  DropType,
   DatasourceLayers,
   isOperation,
   IndexPatternMap,
+  DragDropOperation,
+  Visualization,
 } from '../../../../types';
-import {
-  getCustomDropTarget,
-  getAdditionalClassesOnDroppable,
-  getDropProps,
-} from './drop_targets_utils';
-
-const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
-  defaultMessage: 'Empty dimension',
-});
 
 interface EmptyButtonProps {
   columnId: string;
@@ -106,91 +105,81 @@ export function EmptyDimensionButton({
   group,
   layerDatasource,
   state,
-  layerId,
-  groupIndex,
-  layerIndex,
   onClick,
   onDrop,
   datasourceLayers,
   indexPatterns,
+  activeVisualization,
+  order,
+  target,
 }: {
-  layerId: string;
-  groupIndex: number;
-  layerIndex: number;
-  onDrop: (source: DragDropIdentifier, dropTarget: DragDropIdentifier, dropType?: DropType) => void;
-  onClick: (id: string) => void;
+  order: [2, number, number, number];
   group: VisualizationDimensionGroupConfig;
   layerDatasource?: Datasource<unknown, unknown>;
   datasourceLayers: DatasourceLayers;
   state: unknown;
+  onDrop: (source: DragDropIdentifier, dropTarget: DragDropIdentifier, dropType?: DropType) => void;
+  onClick: (id: string) => void;
   indexPatterns: IndexPatternMap;
+  activeVisualization: Visualization<unknown, unknown>;
+  target: Omit<DragDropOperation, 'columnId'> & {
+    humanData: {
+      groupLabel: string;
+      position: number;
+      layerNumber: number;
+      label: string;
+    };
+  };
 }) {
   const { dragging } = useContext(DragContext);
-  const sharedDatasource =
-    !isOperation(dragging) ||
-    datasourceLayers?.[dragging.layerId]?.datasourceId === datasourceLayers?.[layerId]?.datasourceId
-      ? layerDatasource
-      : undefined;
 
-  const itemIndex = group.accessors.length;
+  let getDropProps;
+
+  if (dragging) {
+    if (!layerDatasource) {
+      getDropProps = activeVisualization.getDropProps;
+    } else if (
+      isDraggedField(dragging) ||
+      (isOperation(dragging) &&
+        layerDatasource &&
+        datasourceLayers?.[dragging.layerId]?.datasourceId ===
+          datasourceLayers?.[target.layerId]?.datasourceId)
+    ) {
+      getDropProps = layerDatasource.getDropProps;
+    }
+  }
 
   const [newColumnId, setNewColumnId] = useState<string>(generateId());
   useEffect(() => {
     setNewColumnId(generateId());
-  }, [itemIndex]);
+  }, [group.accessors.length]);
 
-  const dropProps = getDropProps(
-    {
-      state,
-      source: dragging,
-      target: {
-        layerId,
-        columnId: newColumnId,
-        groupId: group.groupId,
-        filterOperations: group.filterOperations,
-        prioritizedOperation: group.prioritizedOperation,
-        isNewColumn: true,
-      },
-      indexPatterns,
+  const { dropTypes, nextLabel } = getDropProps?.({
+    state,
+    source: dragging,
+    target: {
+      ...target,
+      columnId: newColumnId,
     },
-    sharedDatasource
-  );
-
-  const dropTypes = dropProps?.dropTypes;
-  const nextLabel = dropProps?.nextLabel;
+    indexPatterns,
+  }) || { dropTypes: [], nextLabel: '' };
 
   const canDuplicate = !!(
-    dropTypes &&
-    (dropTypes.includes('duplicate_compatible') || dropTypes.includes('duplicate_incompatible'))
+    dropTypes.includes('duplicate_compatible') || dropTypes.includes('duplicate_incompatible')
   );
 
   const value = useMemo(
     () => ({
+      ...target,
       columnId: newColumnId,
-      groupId: group.groupId,
-      layerId,
-      filterOperations: group.filterOperations,
       id: newColumnId,
       humanData: {
-        label,
-        groupLabel: group.groupLabel,
-        position: itemIndex + 1,
+        ...target.humanData,
         nextLabel: nextLabel || '',
         canDuplicate,
-        layerNumber: layerIndex + 1,
       },
     }),
-    [
-      newColumnId,
-      group.groupId,
-      layerId,
-      group.groupLabel,
-      group.filterOperations,
-      itemIndex,
-      nextLabel,
-      canDuplicate,
-      layerIndex,
-    ]
+    [newColumnId, target, nextLabel, canDuplicate]
   );
 
   const handleOnDrop = React.useCallback(
@@ -207,12 +196,14 @@ export function EmptyDimensionButton({
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
-        getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
+        getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
+        getAdditionalClassesOnDroppable={
+          DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
+        }
         value={value}
-        order={[2, layerIndex, groupIndex, itemIndex]}
+        order={order}
         onDrop={handleOnDrop}
         dropTypes={dropTypes}
-        getCustomDropTarget={getCustomDropTarget}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
           {typeof group.suggestedValue?.() === 'number' ? (

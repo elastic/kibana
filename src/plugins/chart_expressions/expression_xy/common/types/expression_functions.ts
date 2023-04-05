@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
+import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
+import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
+import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
   AxisExtentModes,
   FillStyles,
@@ -72,6 +73,7 @@ export interface AxisExtentConfig {
   lowerBound?: number;
   upperBound?: number;
   enforce?: boolean;
+  niceValues?: boolean;
 }
 
 export interface AxisConfig {
@@ -215,7 +217,6 @@ export interface XYArgs extends DataLayerArgs {
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   referenceLines: ReferenceLineConfigResult[];
-  annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
@@ -233,12 +234,39 @@ export interface XYArgs extends DataLayerArgs {
   showTooltip: boolean;
 }
 
+export interface ExpressionAnnotationsLayers {
+  layers: AnnotationLayerConfigResult[];
+  datatable: Datatable;
+}
+export type ExpressionAnnotationResult = ExpressionAnnotationsLayers & {
+  type: 'event_annotations_result';
+};
+
+export interface EventAnnotationResultArgs {
+  layers?: ExtendedAnnotationLayerConfigResult[];
+  datatable: Datatable;
+}
+
+export interface EventAnnotationResultResult {
+  type: 'event_annotations_result';
+  layers: ExtendedAnnotationLayerConfigResult[];
+  datatable: Datatable;
+}
+
+export type EventAnnotationResultFn = ExpressionFunctionDefinition<
+  'event_annotations_result',
+  null,
+  EventAnnotationResultArgs,
+  EventAnnotationResultResult
+>;
+
 export interface LayeredXYArgs {
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   layers?: XYExtendedLayerConfigResult[];
+  annotations?: ExpressionAnnotationResult;
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
@@ -279,15 +307,17 @@ export interface XYProps {
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
   singleTable?: boolean;
+  annotations?: ExpressionAnnotationResult;
 }
 
 export interface AnnotationLayerArgs {
+  layerId: string;
   annotations: EventAnnotationOutput[];
   simpleView?: boolean;
 }
 
 export type ExtendedAnnotationLayerArgs = AnnotationLayerArgs & {
-  layerId?: string;
+  layerId: string;
 };
 
 export type AnnotationLayerConfigResult = AnnotationLayerArgs & {
@@ -300,8 +330,7 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
-export interface ReferenceLineArgs
-  extends Omit<ReferenceLineDecorationConfig, 'forAccessor' | 'fill'> {
+export interface ReferenceLineArgs extends Omit<ReferenceLineDecorationConfig, 'fill'> {
   name?: string;
   value: number;
   fill: FillStyle;
@@ -326,7 +355,6 @@ export type XYExtendedLayerConfig =
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ReferenceLineLayerConfigResult
-  | ExtendedAnnotationLayerConfigResult
   | ReferenceLineConfigResult;
 
 export interface ExtendedReferenceLineDecorationConfig extends ReferenceLineArgs {
@@ -337,6 +365,7 @@ export interface ReferenceLineConfigResult {
   type: typeof REFERENCE_LINE;
   layerType: typeof LayerTypes.REFERENCELINE;
   lineLength: number;
+  columnToLabel?: string;
   decorations: [ExtendedReferenceLineDecorationConfig];
 }
 
@@ -461,4 +490,19 @@ export type YAxisConfigFn = ExpressionFunctionDefinition<
   null,
   YAxisConfig,
   YAxisConfigResult
+>;
+
+export type ExtendedAnnotationLayerFn = ExpressionFunctionDefinition<
+  typeof EXTENDED_ANNOTATION_LAYER,
+  null,
+  ExtendedAnnotationLayerArgs,
+  ExtendedAnnotationLayerConfigResult
+>;
+
+export type AllowedXYOverrides = Partial<
+  Record<
+    'axisX' | 'axisLeft' | 'axisRight',
+    // id and groupId should not be overridden
+    Simplify<Omit<MakeOverridesSerializable<AxisProps>, 'id' | 'groupId'>>
+  >
 >;

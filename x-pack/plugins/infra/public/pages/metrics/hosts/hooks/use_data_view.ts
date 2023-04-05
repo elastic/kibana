@@ -5,70 +5,76 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { v5 as uuidv5 } from 'uuid';
+import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { InfraClientStartDeps } from '../../../../types';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
+import type { InfraClientStartDeps } from '../../../../types';
+import { DATA_VIEW_PREFIX, TIMESTAMP_FIELD } from '../constants';
+
+export const generateDataViewId = (indexPattern: string) => {
+  // generates a unique but the same uuid as long as the index pattern doesn't change
+  return `${DATA_VIEW_PREFIX}_${uuidv5(indexPattern, uuidv5.DNS)}`;
+};
 
 export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
-  const [metricsDataView, setMetricsDataView] = useState<DataView>();
   const {
-    services: { dataViews },
+    services: { dataViews, notifications },
   } = useKibana<InfraClientStartDeps>();
 
-  const [createDataViewRequest, createDataView] = useTrackedPromise(
+  const [dataView, setDataView] = useState<DataView>();
+  const [hasError, setHasError] = useState<boolean>(false);
+
+  const [createAdhocDataViewRequest, createAdhocDataView] = useTrackedPromise(
     {
-      createPromise: (config): Promise<DataView> => {
-        return dataViews.createAndSave(config);
+      createPromise: (config: DataViewSpec): Promise<DataView> => {
+        return dataViews.create(config);
       },
       onResolve: (response: DataView) => {
-        setMetricsDataView(response);
+        setDataView(response);
+        setHasError(false);
+      },
+      onReject: () => {
+        setHasError(true);
       },
       cancelPreviousOn: 'creation',
     },
     []
   );
 
-  const [getDataViewRequest, getDataView] = useTrackedPromise(
-    {
-      createPromise: (indexPattern: string): Promise<DataView[]> => {
-        return dataViews.find(metricAlias, 1);
-      },
-      onResolve: (response: DataView[]) => {
-        setMetricsDataView(response[0]);
-      },
-      cancelPreviousOn: 'creation',
-    },
-    []
+  const loading = useMemo(
+    () =>
+      createAdhocDataViewRequest.state === 'pending' ||
+      createAdhocDataViewRequest.state === 'uninitialized',
+    [createAdhocDataViewRequest.state]
   );
-
-  const loadDataView = useCallback(async () => {
-    try {
-      let view = (await getDataView(metricAlias))[0];
-      if (!view) {
-        view = await createDataView({
-          title: metricAlias,
-          timeFieldName: '@timestamp',
-        });
-      }
-    } catch (error) {
-      setMetricsDataView(undefined);
-    }
-  }, [metricAlias, createDataView, getDataView]);
-
-  const hasFailedFetchingDataView = getDataViewRequest.state === 'rejected';
-  const hasFailedCreatingDataView = createDataViewRequest.state === 'rejected';
 
   useEffect(() => {
-    loadDataView();
-  }, [metricAlias, loadDataView]);
+    createAdhocDataView({
+      id: generateDataViewId(metricAlias),
+      title: metricAlias,
+      timeFieldName: TIMESTAMP_FIELD,
+    });
+  }, [createAdhocDataView, metricAlias]);
+
+  useEffect(() => {
+    if (hasError && notifications) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview', {
+          defaultMessage: 'There was an error trying to create a Data View: {metricAlias}',
+          values: { metricAlias },
+        })
+      );
+    }
+  }, [hasError, notifications, metricAlias]);
 
   return {
-    metricsDataView,
-    hasFailedCreatingDataView,
-    hasFailedFetchingDataView,
+    dataView,
+    loading,
+    hasError,
   };
 };
 

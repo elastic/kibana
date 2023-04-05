@@ -11,16 +11,16 @@ import { selectDynamicSettings } from '../../../state/selectors';
 import { Ping } from '../../../../../common/runtime_types';
 
 export const useStdErrorLogs = ({
-  configId,
+  monitorId,
   checkGroup,
 }: {
-  configId?: string;
+  monitorId?: string;
   checkGroup?: string;
 }) => {
   const { settings } = useSelector(selectDynamicSettings);
   const { data, loading } = useEsSearch(
     createEsParams({
-      index: !configId && !checkGroup ? '' : settings?.heartbeatIndices,
+      index: !monitorId && !checkGroup ? '' : settings?.heartbeatIndices,
       body: {
         size: 1000,
         query: {
@@ -31,11 +31,11 @@ export const useStdErrorLogs = ({
                   'synthetics.type': 'stderr',
                 },
               },
-              ...(configId
+              ...(monitorId
                 ? [
                     {
                       term: {
-                        config_id: configId,
+                        'monitor.id': monitorId,
                       },
                     },
                   ]

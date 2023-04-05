@@ -7,10 +7,13 @@
 
 import { CaseSeverity } from '../../../common/api';
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
-import { Form, FormHook, useForm } from '../../common/shared_imports';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Severity } from './severity';
-import { FormProps, schema } from './schema';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/dom';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -51,8 +54,9 @@ describe('Severity form field', () => {
       </MockHookWrapperComponent>
     );
     expect(result.getByTestId('caseSeverity')).toBeTruthy();
-    // two items. one for the popover one for the selected field
-    expect(result.getAllByTestId('case-severity-selection-low').length).toBe(2);
+    // ID removed for options dropdown here:
+    // https://github.com/elastic/eui/pull/6630#discussion_r1123657852
+    expect(result.getAllByTestId('case-severity-selection-low').length).toBe(1);
   });
 
   it('selects the correct value when changed', async () => {

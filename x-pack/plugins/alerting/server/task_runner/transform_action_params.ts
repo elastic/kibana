@@ -11,6 +11,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
+  SanitizedRule,
 } from '../types';
 
 interface TransformActionParamsOptions {
@@ -23,14 +24,35 @@ interface TransformActionParamsOptions {
   spaceId: string;
   tags?: string[];
   alertInstanceId: string;
+  alertUuid: string;
   alertActionGroup: string;
   alertActionGroupName: string;
-  alertActionSubgroup?: string;
   actionParams: RuleActionParams;
   alertParams: RuleTypeParams;
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
+  ruleUrl?: string;
+  flapping: boolean;
+}
+
+interface SummarizedAlertsWithAll {
+  new: {
+    count: number;
+    data: unknown[];
+  };
+  ongoing: {
+    count: number;
+    data: unknown[];
+  };
+  recovered: {
+    count: number;
+    data: unknown[];
+  };
+  all: {
+    count: number;
+    data: unknown[];
+  };
 }
 
 export function transformActionParams({
@@ -43,14 +65,16 @@ export function transformActionParams({
   spaceId,
   tags,
   alertInstanceId,
+  alertUuid,
   alertActionGroup,
-  alertActionSubgroup,
   alertActionGroupName,
   context,
   actionParams,
   state,
   kibanaBaseUrl,
   alertParams,
+  ruleUrl,
+  flapping,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -63,25 +87,72 @@ export function transformActionParams({
     alertInstanceId,
     alertActionGroup,
     alertActionGroupName,
-    alertActionSubgroup,
     context,
     date: new Date().toISOString(),
     state,
     kibanaBaseUrl,
     params: alertParams,
     rule: {
+      params: alertParams,
       id: alertId,
       name: alertName,
       type: alertType,
       spaceId,
       tags,
+      url: ruleUrl,
     },
     alert: {
       id: alertInstanceId,
+      uuid: alertUuid,
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
-      actionSubgroup: alertActionSubgroup,
+      flapping,
     },
+  };
+  return actionsPlugin.renderActionParameterTemplates(
+    actionTypeId,
+    actionId,
+    actionParams,
+    variables
+  );
+}
+
+export function transformSummaryActionParams({
+  alerts,
+  rule,
+  ruleTypeId,
+  actionsPlugin,
+  actionId,
+  actionTypeId,
+  spaceId,
+  actionParams,
+  ruleUrl,
+  kibanaBaseUrl,
+}: {
+  alerts: SummarizedAlertsWithAll;
+  rule: SanitizedRule<RuleTypeParams>;
+  ruleTypeId: string;
+  actionsPlugin: ActionsPluginStartContract;
+  actionId: string;
+  actionTypeId: string;
+  spaceId: string;
+  actionParams: RuleActionParams;
+  kibanaBaseUrl?: string;
+  ruleUrl?: string;
+}): RuleActionParams {
+  const variables = {
+    kibanaBaseUrl,
+    date: new Date().toISOString(),
+    rule: {
+      params: rule.params,
+      id: rule.id,
+      name: rule.name,
+      type: ruleTypeId,
+      url: ruleUrl,
+      tags: rule.tags,
+      spaceId,
+    },
+    alerts,
   };
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,

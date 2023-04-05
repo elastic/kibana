@@ -15,7 +15,7 @@ import { AppSearchPageTemplate } from '../layout';
 
 export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
   return (
-    <AppSearchPageTemplate pageChrome={[...pageChrome, '404']} template="centeredContent">
+    <AppSearchPageTemplate pageChrome={[...pageChrome, '404']} customPageSections>
       <SendAppSearchTelemetry action="error" metric="not_found" />
       <NotFoundPrompt productSupportUrl={APP_SEARCH_PLUGIN.SUPPORT_URL} />
     </AppSearchPageTemplate>

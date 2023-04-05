@@ -24,6 +24,10 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { Filter } from '@kbn/es-query';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
+import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -44,10 +48,9 @@ import {
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { getFieldsToShow } from '../../utils/get_fields_to_show';
+import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
 
@@ -178,6 +181,28 @@ export interface DiscoverGridProps {
    * Callback to execute on edit runtime field
    */
   onFieldEdited?: () => void;
+  /**
+   * Filters applied by saved search embeddable
+   */
+  filters?: Filter[];
+  /**
+   * Saved search id used for links to single doc and surrounding docs in the flyout
+   */
+  savedSearchId?: string;
+  /**
+   * Document detail view component
+   */
+  DocumentView?: typeof DiscoverGridFlyout;
+  /**
+   * Service dependencies
+   */
+  services: {
+    fieldFormats: FieldFormatsStart;
+    addBasePath: HttpStart['basePath']['prepend'];
+    uiSettings: IUiSettingsClient;
+    dataViewFieldEditor: DataViewFieldEditorStart;
+    toastNotifications: ToastsStart;
+  };
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -191,6 +216,8 @@ export const DiscoverGrid = ({
   isLoading,
   expandedDoc,
   onAddColumn,
+  filters,
+  savedSearchId,
   onFilter,
   onRemoveColumn,
   onResize,
@@ -215,9 +242,11 @@ export const DiscoverGrid = ({
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
+  DocumentView,
+  services,
 }: DiscoverGridProps) => {
+  const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
@@ -257,11 +286,11 @@ export const DiscoverGrid = ({
         rows: displayedRows,
         dataView,
         columnId,
-        services,
+        fieldFormats,
         options,
       });
     },
-    [displayedRows, dataView, services]
+    [displayedRows, dataView, fieldFormats]
   );
 
   /**
@@ -330,9 +359,9 @@ export const DiscoverGrid = ({
 
   const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
 
-  const fieldsToShow = useMemo(() => {
+  const shouldShowFieldHandler = useMemo(() => {
     const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
-    return getFieldsToShow(dataViewFields, dataView, showMultiFields);
+    return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
 
   /**
@@ -344,11 +373,11 @@ export const DiscoverGrid = ({
         dataView,
         displayedRows,
         useNewFieldsApi,
-        fieldsToShow,
+        shouldShowFieldHandler,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
         () => dataGridRef.current?.closeCellPopover()
       ),
-    [dataView, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
+    [dataView, displayedRows, useNewFieldsApi, shouldShowFieldHandler, services.uiSettings]
   );
 
   /**
@@ -376,7 +405,7 @@ export const DiscoverGrid = ({
               },
               fieldName,
               onSave: async () => {
-                onFieldEdited();
+                await onFieldEdited();
               },
             });
           }
@@ -394,7 +423,11 @@ export const DiscoverGrid = ({
         showTimeCol,
         defaultColumns,
         isSortEnabled,
-        services,
+        services: {
+          uiSettings,
+          toastNotifications,
+        },
+        hasEditDataViewPermission: () => dataViewFieldEditor.userPermissions.editIndexPattern(),
         valueToStringConverter,
         onFilter,
         editField,
@@ -408,7 +441,9 @@ export const DiscoverGrid = ({
       settings,
       defaultColumns,
       isSortEnabled,
-      services,
+      uiSettings,
+      toastNotifications,
+      dataViewFieldEditor,
       valueToStringConverter,
       editField,
     ]
@@ -434,9 +469,13 @@ export const DiscoverGrid = ({
     }
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
+
+  const canSetExpandedDoc = Boolean(setExpandedDoc && DocumentView);
+
   const lead = useMemo(
-    () => getLeadControlColumns(setExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds, setExpandedDoc]
+    () =>
+      getLeadControlColumns(canSetExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
+    [controlColumnIds, canSetExpandedDoc]
   );
 
   const additionalControls = useMemo(
@@ -614,13 +653,15 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {setExpandedDoc && expandedDoc && (
-          <DiscoverGridFlyout
+        {setExpandedDoc && expandedDoc && DocumentView && (
+          <DocumentView
             dataView={dataView}
             hit={expandedDoc}
             hits={displayedRows}
             // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
             columns={defaultColumns ? [] : displayedColumns}
+            filters={filters}
+            savedSearchId={savedSearchId}
             onFilter={onFilter}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}

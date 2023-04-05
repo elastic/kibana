@@ -10,19 +10,42 @@ import { getServiceLocations } from './get_service_locations';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
 
-export async function getAllLocations(
-  server: UptimeServerSetup,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
-  savedObjectsClient: SavedObjectsClientContract
-) {
+export async function getAllLocations({
+  syntheticsMonitorClient,
+  savedObjectsClient,
+  server,
+}: {
+  server: UptimeServerSetup;
+  syntheticsMonitorClient: SyntheticsMonitorClient;
+  savedObjectsClient: SavedObjectsClientContract;
+}) {
   try {
     const [privateLocations, { locations: publicLocations, throttling }] = await Promise.all([
       getPrivateLocations(syntheticsMonitorClient, savedObjectsClient),
-      getServiceLocations(server),
+      getServicePublicLocations(server, syntheticsMonitorClient),
     ]);
-    return { publicLocations, privateLocations, throttling };
+    return {
+      publicLocations,
+      privateLocations,
+      throttling,
+      allLocations: [...publicLocations, ...privateLocations],
+    };
   } catch (e) {
     server.logger.error(e);
-    return { publicLocations: [], privateLocations: [] };
+    return { publicLocations: [], privateLocations: [], allLocations: [] };
   }
 }
+
+const getServicePublicLocations = async (
+  server: UptimeServerSetup,
+  syntheticsMonitorClient: SyntheticsMonitorClient
+) => {
+  if (syntheticsMonitorClient.syntheticsService.locations.length === 0) {
+    return await getServiceLocations(server);
+  }
+
+  return {
+    locations: syntheticsMonitorClient.syntheticsService.locations,
+    throttling: syntheticsMonitorClient.syntheticsService.throttling,
+  };
+};

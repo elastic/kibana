@@ -55,7 +55,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
     };
 
     if (initialAlert) {
-      return triggersActionsUi.getEditAlertFlyout({
+      return triggersActionsUi.getEditRuleFlyout({
         ...commonProps,
         initialRule: {
           ...initialAlert,
@@ -64,7 +64,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
       });
     }
 
-    return triggersActionsUi.getAddAlertFlyout({
+    return triggersActionsUi.getAddRuleFlyout({
       ...commonProps,
       consumer: PLUGIN_ID,
       canChangeTrigger: false,
@@ -79,6 +79,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
       },
     });
     // deps on id to avoid re-rendering on auto-refresh
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggersActionsUi, initialAlert?.id, jobIds]);
 
   return <>{AlertFlyout}</>;
@@ -114,6 +115,7 @@ export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> =
     return () => {
       unsetShowFunction();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isVisible && jobIds ? (

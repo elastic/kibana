@@ -7,15 +7,19 @@
 
 import styled from 'styled-components';
 import { get } from 'lodash/fp';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { partition } from 'lodash';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
 import * as i18n from './translations';
 import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment } from './helpers';
 
 import type { FieldsData } from '../types';
-import { ActionCell } from '../table/action_cell';
 import type {
   BrowserField,
   BrowserFields,
@@ -30,7 +34,7 @@ export interface ThreatSummaryDescription {
   eventId: string;
   index: number;
   feedName: string | undefined;
-  timelineId: string;
+  scopeId: string;
   value: string | undefined;
   isDraggable?: boolean;
   isReadOnly?: boolean;
@@ -42,16 +46,16 @@ const EnrichmentFieldFeedName = styled.span`
 `;
 
 export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  .hoverActions-active {
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
-      opacity: 1;
-    }
+  .inlineActions {
+    opacity: 0;
+  }
+
+  .inlineActions-popoverOpen {
+    opacity: 1;
   }
 
   &:hover {
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
+    .inlineActions {
       opacity: 1;
     }
   }
@@ -63,19 +67,34 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   eventId,
   index,
   feedName,
-  timelineId,
+  scopeId,
   value,
   isDraggable,
   isReadOnly,
 }) => {
-  if (!data || !value) return null;
-  const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${feedName}`;
+  const metadata = useMemo(() => ({ scopeId }), [scopeId]);
+  const field = useMemo(
+    () =>
+      !data
+        ? null
+        : {
+            name: data.field,
+            value,
+            type: data.type,
+            aggregatable: browserField?.aggregatable,
+          },
+    [browserField, data, value]
+  );
+
+  if (!data || !value || !field) return null;
+  const key = `alert-details-value-formatted-field-value-${scopeId}-${eventId}-${data.field}-${value}-${index}-${feedName}`;
+
   return (
     <StyledEuiFlexGroup key={key} direction="row" gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
         <div>
           <FormattedFieldValue
-            contextId={timelineId}
+            contextId={scopeId}
             eventId={key}
             fieldFormat={data.format}
             fieldName={data.field}
@@ -95,14 +114,12 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         {value && !isReadOnly && (
-          <ActionCell
-            data={data}
-            contextId={timelineId}
-            eventId={key}
-            fieldFromBrowserField={browserField}
-            timelineId={timelineId}
-            values={[value]}
-            applyWidthAndPadding={false}
+          <SecurityCellActions
+            field={field}
+            triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+            mode={CellActionsMode.INLINE}
+            metadata={metadata}
+            visibleCellActions={3}
           />
         )}
       </EuiFlexItem>
@@ -114,11 +131,11 @@ const EnrichmentSummaryComponent: React.FC<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   enrichments: CtiEnrichment[];
-  timelineId: string;
+  scopeId: string;
   eventId: string;
   isDraggable?: boolean;
   isReadOnly?: boolean;
-}> = ({ browserFields, data, enrichments, timelineId, eventId, isDraggable, isReadOnly }) => {
+}> = ({ browserFields, data, enrichments, scopeId, eventId, isDraggable, isReadOnly }) => {
   const parsedEnrichments = enrichments.map((enrichment, index) => {
     const { field, type, feedName, value } = getEnrichmentIdentifiers(enrichment);
     const eventData = data.find((item) => item.field === field);
@@ -166,7 +183,7 @@ const EnrichmentSummaryComponent: React.FC<{
                     eventId={eventId}
                     index={index}
                     feedName={feedName}
-                    timelineId={timelineId}
+                    scopeId={scopeId}
                     value={value}
                     data={fieldsData}
                     browserField={browserField}
@@ -197,7 +214,7 @@ const EnrichmentSummaryComponent: React.FC<{
                     eventId={eventId}
                     index={index}
                     feedName={feedName}
-                    timelineId={timelineId}
+                    scopeId={scopeId}
                     value={value}
                     data={fieldsData}
                     browserField={browserField}

@@ -29,6 +29,7 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowUserProfileCollaboration: false,
     });
   });
 
@@ -51,6 +52,7 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowUserProfileCollaboration: false,
     });
   });
 
@@ -77,6 +79,7 @@ describe('license features', function () {
             "allowRoleDocumentLevelSecurity": false,
             "allowRoleFieldLevelSecurity": false,
             "allowSubFeaturePrivileges": false,
+            "allowUserProfileCollaboration": false,
             "layout": "error-xpack-unavailable",
             "showLinks": false,
             "showLogin": true,
@@ -98,6 +101,7 @@ describe('license features', function () {
             "allowRoleDocumentLevelSecurity": true,
             "allowRoleFieldLevelSecurity": true,
             "allowSubFeaturePrivileges": true,
+            "allowUserProfileCollaboration": true,
             "showLinks": true,
             "showLogin": true,
             "showRoleMappingsManagement": true,
@@ -131,6 +135,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowUserProfileCollaboration: false,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -156,10 +161,36 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowUserProfileCollaboration: false,
     });
   });
 
-  it('should allow role mappings, access agreement, sub-feature privileges and audit logging, but not DLS/FLS if license = gold', () => {
+  it('should user profile collaboration, but not role mappings, access agreement, sub-feature privileges, audit logging, and DLS/FLS if license = standard', () => {
+    const mockRawLicense = licenseMock.createLicense({
+      license: { mode: 'standard', type: 'standard' },
+      features: { security: { isEnabled: true, isAvailable: true } },
+    });
+
+    const serviceSetup = new SecurityLicenseService().setup({
+      license$: of(mockRawLicense),
+    });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
+    expect(serviceSetup.license.getFeatures()).toEqual({
+      showLogin: true,
+      allowLogin: true,
+      showLinks: true,
+      showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
+      allowRoleDocumentLevelSecurity: false,
+      allowRoleFieldLevelSecurity: false,
+      allowRbac: true,
+      allowSubFeaturePrivileges: false,
+      allowAuditLogging: false,
+      allowUserProfileCollaboration: true,
+    });
+  });
+
+  it('should allow role mappings, access agreement, sub-feature privileges, user profile collaboration and audit logging, but not DLS/FLS if license = gold', () => {
     const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'gold', type: 'gold' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -180,10 +211,11 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
+      allowUserProfileCollaboration: true,
     });
   });
 
-  it('should allow to login, allow RBAC, role mappings, access agreement, sub-feature privileges, and DLS if license >= platinum', () => {
+  it('should allow to login, allow RBAC, role mappings, access agreement, sub-feature privileges, user profile collaboration, and DLS if license >= platinum', () => {
     const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'platinum', type: 'platinum' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -204,6 +236,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
+      allowUserProfileCollaboration: true,
     });
   });
 });

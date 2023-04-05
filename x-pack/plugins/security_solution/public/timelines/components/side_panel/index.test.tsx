@@ -19,11 +19,11 @@ import {
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { DetailsPanel } from '.';
-import type { TimelineExpandedDetail } from '../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
+import type { ExpandedDetailTimeline } from '../../../../common/types';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
@@ -36,7 +36,7 @@ describe('Details Panel Component', () => {
       ...mockGlobalState.timeline,
       timelineById: {
         ...mockGlobalState.timeline.timelineById,
-        [TimelineId.active]: mockGlobalState.timeline.timelineById.test,
+        [TimelineId.test]: mockGlobalState.timeline.timelineById[TimelineId.test],
       },
     },
   };
@@ -51,7 +51,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const hostExpandedDetail: TimelineExpandedDetail = {
+  const hostExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'hostDetail',
       params: {
@@ -60,7 +60,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const networkExpandedDetail: TimelineExpandedDetail = {
+  const networkExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'networkDetail',
       params: {
@@ -70,7 +70,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventExpandedDetail: TimelineExpandedDetail = {
+  const eventExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'eventDetail',
       params: {
@@ -80,7 +80,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventPinnedExpandedDetail: TimelineExpandedDetail = {
+  const eventPinnedExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.pinned]: {
       panelView: 'eventDetail',
       params: {
@@ -96,7 +96,7 @@ describe('Details Panel Component', () => {
     isFlyoutView: false,
     runtimeMappings: {},
     tabType: TimelineTabs.query,
-    timelineId: 'test',
+    scopeId: TimelineId.test,
   };
 
   const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
@@ -117,8 +117,8 @@ describe('Details Panel Component', () => {
     });
 
     test('it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set', () => {
-      state.timeline.timelineById.test.expandedDetail =
-        dataLessExpandedDetail as TimelineExpandedDetail; // Casting as the dataless doesn't meet the actual type requirements
+      state.timeline.timelineById[TimelineId.test].expandedDetail =
+        dataLessExpandedDetail as ExpandedDetailTimeline; // Casting as the dataless doesn't meet the actual type requirements
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...mockProps} />
@@ -132,7 +132,7 @@ describe('Details Panel Component', () => {
           isFlyoutView={false}
           runtimeMappings={Object {}}
           tabType="query"
-          timelineId="test"
+          scopeId="timeline-test"
         />
       `);
     });
@@ -140,10 +140,31 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:EventDetails: rendering', () => {
     beforeEach(() => {
-      const mockState = { ...state };
+      const mockState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = eventExpandedDetail;
-      mockState.timeline.timelineById.test.expandedDetail = eventExpandedDetail;
+      mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventExpandedDetail;
       store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+      mockUseSearchStrategy.mockReturnValue({
+        loading: true,
+        result: {
+          data: undefined,
+          totalCount: 0,
+        },
+        error: undefined,
+        search: jest.fn(),
+        refetch: jest.fn(),
+        inspect: {},
+      });
     });
 
     test('it should render the Event Details Panel when the panelView is set and the associated params are set', () => {
@@ -178,7 +199,24 @@ describe('Details Panel Component', () => {
     });
 
     test('it should have the attributes isDraggable to be true when timelineId === "active" and activeTab === "query"', () => {
-      const currentProps = { ...mockProps, timelineId: TimelineId.active };
+      const currentProps = {
+        ...mockProps,
+        scopeId: TimelineId.active,
+        tabType: TimelineTabs.query,
+      };
+      const newState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            ...state.timeline.timelineById,
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
+      newState.timeline.timelineById[TimelineId.active].activeTab = TimelineTabs.query;
+      newState.timeline.timelineById[TimelineId.active].expandedDetail = eventExpandedDetail;
+      store = createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...currentProps} />
@@ -190,11 +228,20 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:EventDetails: rendering in pinned tab', () => {
     beforeEach(() => {
-      const mockState = { ...state };
+      const mockState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
       mockState.timeline.timelineById[TimelineId.active].activeTab = TimelineTabs.pinned;
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = eventPinnedExpandedDetail;
-      mockState.timeline.timelineById.test.expandedDetail = eventPinnedExpandedDetail;
-      mockState.timeline.timelineById.test.activeTab = TimelineTabs.pinned;
+      mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventPinnedExpandedDetail;
+      mockState.timeline.timelineById[TimelineId.test].activeTab = TimelineTabs.pinned;
       store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
@@ -212,7 +259,7 @@ describe('Details Panel Component', () => {
       const currentProps = {
         ...mockProps,
         tabType: TimelineTabs.pinned,
-        timelineId: TimelineId.active,
+        scopeId: TimelineId.active,
       };
       const wrapper = mount(
         <TestProviders store={store}>
@@ -237,9 +284,18 @@ describe('Details Panel Component', () => {
         refetch: jest.fn(),
         inspect: {},
       });
-      const mockState = { ...state };
+      const mockState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
+      mockState.timeline.timelineById[TimelineId.test].expandedDetail = hostExpandedDetail;
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = hostExpandedDetail;
-      mockState.timeline.timelineById.test.expandedDetail = hostExpandedDetail;
       store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
@@ -269,9 +325,18 @@ describe('Details Panel Component', () => {
         refetch: jest.fn(),
         inspect: {},
       });
-      const mockState = { ...state };
+      const mockState = {
+        ...state,
+        timeline: {
+          ...state.timeline,
+          timelineById: {
+            [TimelineId.test]: state.timeline.timelineById[TimelineId.test],
+            [TimelineId.active]: state.timeline.timelineById[TimelineId.test],
+          },
+        },
+      };
+      mockState.timeline.timelineById[TimelineId.test].expandedDetail = networkExpandedDetail;
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = networkExpandedDetail;
-      mockState.timeline.timelineById.test.expandedDetail = networkExpandedDetail;
       store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 

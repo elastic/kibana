@@ -7,21 +7,17 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Environment } from '../../../common/environment_rt';
-
-import { Setup } from '../../lib/helpers/setup_request';
-
 import { withApmSpan } from '../../utils/with_apm_span';
-
 import { fetchDurationRanges } from '../correlations/queries/fetch_duration_ranges';
 import { fetchDurationHistogramRangeSteps } from '../correlations/queries/fetch_duration_histogram_range_steps';
-
 import { getPercentileThresholdValue } from './get_percentile_threshold_value';
 import type { OverallLatencyDistributionResponse } from './types';
 import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getOverallLatencyDistribution({
   chartType,
-  setup,
+  apmEventClient,
   start,
   end,
   environment,
@@ -33,7 +29,7 @@ export async function getOverallLatencyDistribution({
   searchMetrics,
 }: {
   chartType: LatencyDistributionChartType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   environment: Environment;
@@ -51,7 +47,7 @@ export async function getOverallLatencyDistribution({
     overallLatencyDistribution.percentileThresholdValue =
       await getPercentileThresholdValue({
         chartType,
-        setup,
+        apmEventClient,
         start,
         end,
         environment,
@@ -70,7 +66,7 @@ export async function getOverallLatencyDistribution({
     const { durationMin, durationMax, rangeSteps } =
       await fetchDurationHistogramRangeSteps({
         chartType,
-        setup,
+        apmEventClient,
         start,
         end,
         environment,
@@ -88,7 +84,7 @@ export async function getOverallLatencyDistribution({
     // #3: get histogram chart data
     const { totalDocCount, durationRanges } = await fetchDurationRanges({
       chartType,
-      setup,
+      apmEventClient,
       start,
       end,
       environment,

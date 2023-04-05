@@ -14,7 +14,7 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
-import { getPendingActionCounts } from '../../services';
+import { getPendingActionsSummary } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
@@ -32,7 +32,7 @@ export function registerActionStatusRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       endpointContext.logFactory.get('hostIsolationStatus'),
       actionStatusRequestHandler(endpointContext)
     )
@@ -47,15 +47,18 @@ export const actionStatusRequestHandler = function (
   unknown,
   SecuritySolutionRequestHandlerContext
 > {
+  const logger = endpointContext.logFactory.get('actionStatusApi');
+
   return async (context, req, res) => {
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const agentIDs: string[] = Array.isArray(req.query.agent_ids)
       ? [...new Set(req.query.agent_ids)]
       : [req.query.agent_ids];
 
-    const response = await getPendingActionCounts(
+    const response = await getPendingActionsSummary(
       esClient,
       endpointContext.service.getEndpointMetadataService(),
+      logger,
       agentIDs,
       endpointContext.experimentalFeatures.pendingActionResponsesWithAck
     );

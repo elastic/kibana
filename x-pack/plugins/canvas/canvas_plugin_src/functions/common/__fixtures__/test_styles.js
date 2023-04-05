@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common/lib';
+import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
 
 export const fontStyle = {
   type: 'style',

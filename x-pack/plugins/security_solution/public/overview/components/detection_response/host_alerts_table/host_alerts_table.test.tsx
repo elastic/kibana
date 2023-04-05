@@ -14,14 +14,10 @@ import { parsedVulnerableHostsAlertsResult } from './mock_data';
 import type { UseHostAlertsItems } from './use_host_alerts_items';
 import { HostAlertsTable } from './host_alerts_table';
 
-const mockGetAppUrl = jest.fn();
-jest.mock('../../../../common/lib/kibana/hooks', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana/hooks');
+const mockNavigateToAlertsPageWithFilters = jest.fn();
+jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
   return {
-    ...original,
-    useNavigation: () => ({
-      getAppUrl: mockGetAppUrl,
-    }),
+    useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
   };
 });
 
@@ -123,5 +119,36 @@ describe('HostAlertsTable', () => {
 
     fireEvent.click(page3);
     expect(mockSetPage).toHaveBeenCalledWith(2);
+  });
+
+  it('should open timeline with filters when total alerts is clicked', () => {
+    mockUseHostAlertsItemsReturn({ items: [parsedVulnerableHostsAlertsResult[0]] });
+    const { getByTestId } = renderComponent();
+
+    fireEvent.click(getByTestId('hostSeverityAlertsTable-totalAlertsLink'));
+
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      { fieldName: 'host.name', selectedOptions: ['Host-342m5gl1g2'], title: 'Host name' },
+    ]);
+  });
+
+  it('should open timeline with filters when critical alert count is clicked', () => {
+    mockUseHostAlertsItemsReturn({ items: [parsedVulnerableHostsAlertsResult[0]] });
+    const { getByTestId } = renderComponent();
+
+    fireEvent.click(getByTestId('hostSeverityAlertsTable-criticalLink'));
+
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      {
+        fieldName: 'host.name',
+        selectedOptions: ['Host-342m5gl1g2'],
+        title: 'Host name',
+      },
+      {
+        fieldName: 'kibana.alert.severity',
+        selectedOptions: ['critical'],
+        title: 'Severity',
+      },
+    ]);
   });
 });

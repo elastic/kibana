@@ -7,6 +7,8 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { ObserverCodec } from './observer';
+import { ErrorStateCodec } from './error_state';
 
 /**
  * This type has some overlap with the Ping type, but it helps avoid runtime type
@@ -61,6 +63,7 @@ export const SyntheticsDataType = t.partial({
 
 export const JourneyStepType = t.intersection([
   t.partial({
+    config_id: t.string,
     monitor: t.partial({
       duration: t.type({
         us: t.number,
@@ -73,11 +76,7 @@ export const JourneyStepType = t.intersection([
         lt: t.string,
       }),
     }),
-    observer: t.partial({
-      geo: t.type({
-        name: t.string,
-      }),
-    }),
+    observer: ObserverCodec,
     synthetics: SyntheticsDataType,
     error: t.type({
       message: t.string,
@@ -198,8 +197,21 @@ export const ScreenshotBlockDocType = t.type({
 
 export type ScreenshotBlockDoc = t.TypeOf<typeof ScreenshotBlockDocType>;
 
+export interface PendingBlock {
+  status: 'pending' | 'loading';
+}
+
+export type StoreScreenshotBlock = ScreenshotBlockDoc | PendingBlock;
+export interface ScreenshotBlockCache {
+  [hash: string]: StoreScreenshotBlock;
+}
+
 export function isScreenshotBlockDoc(data: unknown): data is ScreenshotBlockDoc {
   return isRight(ScreenshotBlockDocType.decode(data));
+}
+
+export function isPendingBlock(data: unknown): data is PendingBlock {
+  return ['pending', 'loading'].some((s) => s === (data as PendingBlock)?.status);
 }
 
 /**
@@ -239,6 +251,9 @@ export const SyntheticsJourneyApiResponseType = t.intersection([
           previous: t.type({
             timestamp: t.string,
             checkGroup: t.string,
+          }),
+          summary: t.type({
+            state: ErrorStateCodec,
           }),
         }),
       ]),

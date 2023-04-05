@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Filter, isFilters, isFilterPinned, Query, TimeRange } from '@kbn/es-query';
+import { type Filter, isFilterPinned, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import { DashboardAppLocatorParams, cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -13,6 +13,7 @@ import { extractTimeRange } from '@kbn/es-query';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
+import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import {
   AbstractDashboardDrilldown,
   AbstractDashboardDrilldownParams,
@@ -40,7 +41,7 @@ export type Params = AbstractDashboardDrilldownParams;
 export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<Context> {
   public readonly id = EMBEDDABLE_TO_DASHBOARD_DRILLDOWN;
 
-  public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER];
+  public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];
 
   protected async getLocation(
     config: Config,
@@ -62,12 +63,11 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       if (isTimeRange(input.timeRange) && config.useCurrentDateRange)
         params.timeRange = input.timeRange;
 
-      // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
+      // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned, unpinned, and from controls)
       // otherwise preserve only pinned
-      if (isFilters(input.filters))
-        params.filters = config.useCurrentFilters
-          ? input.filters
-          : input.filters?.filter((f) => isFilterPinned(f));
+      params.filters = config.useCurrentFilters
+        ? input.filters
+        : input.filters?.filter((f) => isFilterPinned(f));
     }
 
     const { restOfFilters: filtersFromEvent, timeRange: timeRangeFromEvent } = extractTimeRange(
@@ -98,7 +98,6 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       cleanEmptyKeys({
         query: state.query,
         filters: state.filters?.filter((f) => !isFilterPinned(f)),
-        savedQuery: state.savedQuery,
       }),
       { useHash: false, storeInHashQuery: true },
       location.path

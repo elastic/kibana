@@ -53,6 +53,7 @@ Object {
       "shape": "arc",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -77,6 +78,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -105,6 +107,7 @@ Object {
       "shape": "arc",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -129,6 +132,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -155,6 +159,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -179,6 +184,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -205,6 +211,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -229,6 +236,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -255,6 +263,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "bands",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -279,6 +288,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -307,6 +317,7 @@ Object {
       "shape": "circle",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -331,6 +342,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -359,6 +371,7 @@ Object {
       "shape": "circle",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -383,6 +396,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -409,6 +423,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -433,6 +448,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -459,6 +475,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "hidden",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -483,6 +500,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -509,6 +527,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -533,6 +552,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -559,6 +579,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -583,6 +604,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -609,6 +631,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -633,6 +656,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -659,6 +683,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -683,6 +708,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;
@@ -709,6 +735,7 @@ Object {
       "shape": "verticalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -733,6 +760,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
   },
 }
 `;

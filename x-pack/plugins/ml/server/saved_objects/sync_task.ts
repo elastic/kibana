@@ -41,7 +41,6 @@ export class SavedObjectsSyncService {
         description: "This task periodically syncs ML's saved objects",
         timeout: '1m',
         maxAttempts: 3,
-        maxConcurrency: 1,
 
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
@@ -126,9 +125,13 @@ export class SavedObjectsSyncService {
 
       return taskInstance;
     } catch (e) {
-      this.log.error(`Error running task: ${SAVED_OBJECTS_SYNC_TASK_ID}, `, e?.message() ?? e);
+      this.log.error(`Error running task: ${SAVED_OBJECTS_SYNC_TASK_ID}, `, e?.message ?? e);
       return null;
     }
+  }
+
+  public async unscheduleSyncTask(taskManager: TaskManagerStartContract) {
+    await taskManager.removeIfExists(SAVED_OBJECTS_SYNC_TASK_ID);
   }
 }
 

@@ -1,9 +1,27 @@
+# Build args reference: https://www.chromium.org/developers/gn-build-configuration/
 import("//build/args/headless.gn")
-is_debug = false
-symbol_level = 0
+
+is_official_build = true
 is_component_build = false
+is_debug = false
+
 enable_nacl = false
+enable_stripping = true
+
+chrome_pgo_phase = 0
+dcheck_always_on = false
+blink_symbol_level = 0
+symbol_level = 0
+v8_symbol_level = 0
+
+enable_ink = false
+rtc_build_examples = false
+angle_build_tests = false
+enable_screen_ai_service = false
+enable_vr = false
+
 # Please, consult @elastic/kibana-security before changing/removing this option.
 use_kerberos = false
 
-# target_cpu is appended before build: "x64" or "arm64"
+target_os = "linux"
+# target_cpu is added at build timeure a minimal build

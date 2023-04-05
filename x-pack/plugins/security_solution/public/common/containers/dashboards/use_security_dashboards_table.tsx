@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import type { MouseEventHandler } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -14,6 +14,8 @@ import { getSecurityDashboards } from './utils';
 import { LinkAnchor } from '../../components/links';
 import { useKibana, useNavigateTo } from '../../lib/kibana';
 import * as i18n from './translations';
+import { useFetch, REQUEST_NAMES } from '../../hooks/use_fetch';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 
 export interface DashboardTableItem extends SavedObject<SavedObjectAttributes> {
   title?: string;
@@ -23,37 +25,33 @@ export interface DashboardTableItem extends SavedObject<SavedObjectAttributes> {
 const EMPTY_DESCRIPTION = '-' as const;
 
 export const useSecurityDashboardsTableItems = () => {
-  const [dashboardItems, setDashboardItems] = useState<DashboardTableItem[]>([]);
   const {
     savedObjects: { client: savedObjectsClient },
   } = useKibana().services;
 
+  const { fetch, data, isLoading, error } = useFetch(
+    REQUEST_NAMES.SECURITY_DASHBOARDS,
+    getSecurityDashboards
+  );
+
   useEffect(() => {
-    let ignore = false;
-    const fetchDashboards = async () => {
-      if (savedObjectsClient) {
-        const securityDashboards = await getSecurityDashboards(savedObjectsClient);
+    if (savedObjectsClient) {
+      fetch(savedObjectsClient);
+    }
+  }, [fetch, savedObjectsClient]);
 
-        if (!ignore) {
-          setDashboardItems(
-            securityDashboards.map((securityDashboard) => ({
-              ...securityDashboard,
-              title: securityDashboard.attributes.title?.toString() ?? undefined,
-              description: securityDashboard.attributes.description?.toString() ?? undefined,
-            }))
-          );
-        }
-      }
-    };
+  const items = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+    return data.map((securityDashboard) => ({
+      ...securityDashboard,
+      title: securityDashboard.attributes.title?.toString() ?? undefined,
+      description: securityDashboard.attributes.description?.toString() ?? undefined,
+    }));
+  }, [data]);
 
-    fetchDashboards();
-
-    return () => {
-      ignore = true;
-    };
-  }, [savedObjectsClient]);
-
-  return dashboardItems;
+  return { items, isLoading, error };
 };
 
 export const useSecurityDashboardsTableColumns = (): Array<
@@ -66,6 +64,7 @@ export const useSecurityDashboardsTableColumns = (): Array<
     (href: string): MouseEventHandler =>
       (ev) => {
         ev.preventDefault();
+        track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
         navigateTo({ url: href });
       },
     [navigateTo]
@@ -103,10 +102,4 @@ export const useSecurityDashboardsTableColumns = (): Array<
   );
 
   return columns;
-};
-
-export const useSecurityDashboardsTable = () => {
-  const items = useSecurityDashboardsTableItems();
-  const columns = useSecurityDashboardsTableColumns();
-  return { items, columns };
 };

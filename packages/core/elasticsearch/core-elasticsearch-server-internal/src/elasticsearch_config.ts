@@ -13,7 +13,11 @@ import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
-import type { IElasticsearchConfig, ElasticsearchSslConfig } from '@kbn/core-elasticsearch-server';
+import type {
+  IElasticsearchConfig,
+  ElasticsearchSslConfig,
+  ElasticsearchApiToRedactInLogs,
+} from '@kbn/core-elasticsearch-server';
 import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
@@ -37,6 +41,8 @@ export const configSchema = schema.object({
     defaultValue: 'http://localhost:9200',
   }),
   maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
+  maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
+  idleSocketTimeout: schema.duration({ defaultValue: '60s' }),
   compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
     schema.string({
@@ -166,6 +172,13 @@ export const configSchema = schema.object({
       defaultValue: false,
     }),
     schema.boolean({ defaultValue: false })
+  ),
+  apisToRedactInLogs: schema.arrayOf(
+    schema.object({
+      path: schema.string(),
+      method: schema.maybe(schema.string()),
+    }),
+    { defaultValue: [] }
   ),
 });
 
@@ -305,6 +318,16 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly maxSockets: number;
 
   /**
+   * The maximum number of idle sockets to keep open between Kibana and Elasticsearch. If more sockets become idle, they will be closed.
+   */
+  public readonly maxIdleSockets: number;
+
+  /**
+   * The timeout for idle sockets kept open between Kibana and Elasticsearch. If the socket is idle for longer than this timeout, it will be closed.
+   */
+  public readonly idleSocketTimeout: Duration;
+
+  /**
    * Whether to use compression for communications with elasticsearch.
    */
   public readonly compression: boolean;
@@ -390,6 +413,11 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
+  /**
+   * Extends the list of APIs that should be redacted in logs.
+   */
+  public readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
+
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
@@ -409,8 +437,11 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
     this.maxSockets = rawConfig.maxSockets;
+    this.maxIdleSockets = rawConfig.maxIdleSockets;
+    this.idleSocketTimeout = rawConfig.idleSocketTimeout;
     this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
+    this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

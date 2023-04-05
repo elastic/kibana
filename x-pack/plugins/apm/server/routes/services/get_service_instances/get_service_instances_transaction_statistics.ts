@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
@@ -21,14 +21,14 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;
@@ -54,7 +54,7 @@ export async function getServiceInstancesTransactionStatistics<
   environment,
   kuery,
   latencyAggregationType,
-  setup,
+  apmEventClient,
   transactionType,
   serviceName,
   size,
@@ -67,7 +67,7 @@ export async function getServiceInstancesTransactionStatistics<
   offset,
 }: {
   latencyAggregationType: LatencyAggregationType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;
@@ -81,8 +81,6 @@ export async function getServiceInstancesTransactionStatistics<
   numBuckets?: number;
   offset?: string;
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -160,7 +158,7 @@ export async function getServiceInstancesTransactionStatistics<
           getProcessorEventForTransactions(searchAggregatedTransactions),
         ],
       },
-      body: { size: 0, query, aggs },
+      body: { size: 0, track_total_hits: false, query, aggs },
     }
   );
 
@@ -202,7 +200,7 @@ export async function getServiceInstancesTransactionStatistics<
               aggregation: latency,
               latencyAggregationType,
             }),
-            throughput: calculateThroughput({
+            throughput: calculateThroughputWithRange({
               start: startWithOffset,
               end: endWithOffset,
               value: count,

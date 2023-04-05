@@ -63,6 +63,7 @@ export interface EngineDetails extends Engine {
   includedEngines?: EngineDetails[];
   adaptive_relevance_suggestions?: SearchRelevanceSuggestionDetails;
   adaptive_relevance_suggestions_active: boolean;
+  analytics_enabled?: boolean;
 }
 
 interface ResultField {

@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/find-used-node-modules",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

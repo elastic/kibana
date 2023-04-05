@@ -6,9 +6,9 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { SavedObjectReference } from '@kbn/core/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { LegacyRuleNotificationAlertTypeParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/notifications/legacy_types';
+import { SavedObjectReference } from '@kbn/core/server';
+import { LegacyRuleNotificationAlertTypeParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_actions_legacy';
 
 interface LegacyActionNotificationSO extends LegacyRuleNotificationAlertTypeParams {
   references: SavedObjectReference[];

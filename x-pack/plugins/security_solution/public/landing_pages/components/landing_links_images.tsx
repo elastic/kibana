@@ -13,11 +13,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import styled from 'styled-components';
 import { withSecuritySolutionLink } from '../../common/components/links';
 import { NavItemBetaBadge } from '../../common/components/navigation/nav_item_beta_badge';
 import type { NavLinkItem } from '../../common/components/navigation/types';
+import { TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 interface LandingImagesProps {
   items: NavLinkItem[];
@@ -57,9 +59,15 @@ const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
 export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
-    {items.map(({ title, description, image, id, isBeta }) => (
+    {items.map(({ title, description, image, id, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
-        <SecuritySolutionLink deepLinkId={id} tabIndex={-1}>
+        <SecuritySolutionLink
+          deepLinkId={id}
+          tabIndex={-1}
+          onClick={() => {
+            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
+          }}
+        >
           {/* Empty onClick is to force hover style on `EuiPanel` */}
           <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={() => {}}>
             <EuiFlexGroup>
@@ -78,7 +86,7 @@ export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
                 <PrimaryEuiTitle size="s">
                   <FlexTitle>
                     <TitleText>{title}</TitleText>
-                    {isBeta && <NavItemBetaBadge />}
+                    {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
                   </FlexTitle>
                 </PrimaryEuiTitle>
                 <LandingLinksDescripton size="s" color="text">
@@ -114,7 +122,7 @@ const SecuritySolutionCard = withSecuritySolutionLink(PrimaryTitleCard);
 
 export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ items }) => (
   <EuiFlexGroup direction="row" wrap>
-    {items.map(({ id, image, title, description, isBeta }) => (
+    {items.map(({ id, image, title, description, isBeta, betaOptions }) => (
       <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
         <SecuritySolutionCard
           deepLinkId={id}
@@ -136,11 +144,14 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
             <PrimaryEuiTitle size="xs">
               <FlexTitle>
                 <TitleText>{title}</TitleText>
-                {isBeta && <NavItemBetaBadge />}
+                {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
               </FlexTitle>
             </PrimaryEuiTitle>
           }
           description={<LandingCardDescription>{description}</LandingCardDescription>}
+          onClick={() => {
+            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${id}`);
+          }}
         />
       </LandingImageCardItem>
     ))}

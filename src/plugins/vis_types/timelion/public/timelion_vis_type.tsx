@@ -66,7 +66,6 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     },
     options: {
       showIndexSelection: false,
-      showQueryBar: true,
       showFilterBar: false,
       showQueryInput: false,
     },

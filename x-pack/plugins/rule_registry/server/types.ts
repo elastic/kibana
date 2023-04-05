@@ -30,7 +30,7 @@ export type AlertTypeExecutor<
   options: Parameters<SimpleAlertType<TState, TParams, TAlertInstanceContext>['executor']>[0] & {
     services: TServices;
   }
-) => Promise<TState | void>;
+) => Promise<{ state: TState }>;
 
 export type AlertTypeWithExecutor<
   TState extends RuleTypeState = {},

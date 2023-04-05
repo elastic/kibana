@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -19,7 +20,7 @@ import type { HostItem } from '../../../../../common/search_strategy';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { useHostDetails, ID } from '../../../../hosts/containers/hosts/details';
+import { useHostDetails, ID } from '../../../../explore/hosts/containers/hosts/details';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -79,7 +80,7 @@ export const ExpandableHostDetails = ({
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: fromTo.from,
           to: fromTo.to,
         })
@@ -94,7 +95,7 @@ export const ExpandableHostDetails = ({
       endDate={to}
       skip={isInitializing}
     >
-      {({ isLoadingAnomaliesData, anomaliesData }) => (
+      {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
         <HostOverview
           contextID={contextID}
           id={ID}
@@ -109,6 +110,7 @@ export const ExpandableHostDetails = ({
           endDate={to}
           narrowDateRange={narrowDateRange}
           hostName={hostName}
+          jobNameById={jobNameById}
         />
       )}
     </AnomalyTableProvider>

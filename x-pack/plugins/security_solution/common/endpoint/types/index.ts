@@ -492,9 +492,11 @@ export type HostInfo = Immutable<{
   };
 }>;
 
-// HostMetadataDetails is now just HostMetadata
-// HostDetails is also just HostMetadata
-export type HostMetadata = Immutable<{
+// Host metadata document streamed up to ES by the Endpoint running on host machines.
+// NOTE:  `HostMetadata` type is the original and defined as Immutable. If needing to
+//        work with metadata that is not mutable, use `HostMetadataInterface`
+export type HostMetadata = Immutable<HostMetadataInterface>;
+export interface HostMetadataInterface {
   '@timestamp': number;
   event: {
     created: number;
@@ -542,10 +544,11 @@ export type HostMetadata = Immutable<{
   agent: {
     id: string;
     version: string;
+    type: string;
   };
   host: Host;
   data_stream: DataStream;
-}>;
+}
 
 export type UnitedAgentMetadata = Immutable<{
   agent: {
@@ -917,6 +920,9 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  * Endpoint Policy configuration
  */
 export interface PolicyConfig {
+  meta: {
+    license: string;
+  };
   windows: {
     advanced?: {
       [key: string]: unknown;
@@ -930,6 +936,7 @@ export interface PolicyConfig {
       };
     };
     events: {
+      credential_access: boolean;
       dll_and_driver_load: boolean;
       dns: boolean;
       file: boolean;
@@ -1007,6 +1014,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
       session_data: boolean;
+      tty_io: boolean;
     };
     malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;

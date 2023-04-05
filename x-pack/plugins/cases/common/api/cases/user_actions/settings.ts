@@ -6,7 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { ActionTypes, UserActionWithAttributes } from './common';
+import type { UserActionWithAttributes } from './common';
+import { ActionTypes } from './common';
 import { SettingsRt } from '../case';
 
 export const SettingsUserActionPayloadRt = rt.type({ settings: SettingsRt });

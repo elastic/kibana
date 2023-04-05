@@ -18,6 +18,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiMarkdownFormat } from '@elastic/eui';
 import { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { validateSetting } from '../../../../../../../common/agent_configuration/setting_definitions';
 import {
@@ -40,6 +41,7 @@ function FormRow({
     case 'text': {
       return (
         <EuiFieldText
+          data-test-subj="apmFormRowFieldText"
           placeholder={setting.placeholder}
           value={value || ''}
           onChange={(e) => onChange(setting.key, e.target.value)}
@@ -50,6 +52,7 @@ function FormRow({
     case 'integer': {
       return (
         <EuiFieldNumber
+          data-test-subj="apmFormRowFieldNumber"
           placeholder={setting.placeholder}
           value={(value as any) || ''}
           min={setting.min}
@@ -92,6 +95,7 @@ function FormRow({
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiFieldNumber
+              data-test-subj="apmFormRowFieldNumber"
               placeholder={setting.placeholder}
               value={amount}
               onChange={(e) =>
@@ -163,7 +167,7 @@ export function SettingFormRow({
       }
       description={
         <>
-          {setting.description}
+          <EuiMarkdownFormat>{setting.description}</EuiMarkdownFormat>
 
           {setting.defaultValue && (
             <>

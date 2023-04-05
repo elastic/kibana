@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { DataViewFieldBase } from '@kbn/es-query';
 import { typeMatch } from '../type_match';
+import { AutocompleteListsData } from '../field_value_lists';
 
 /**
  * Given an array of lists and optionally a field this will return all
@@ -21,13 +21,20 @@ import { typeMatch } from '../type_match';
  * @param field The field to check against the list to see if they are compatible
  */
 export const filterFieldToList = (
-  lists: ListSchema[],
+  lists: AutocompleteListsData,
   field?: DataViewFieldBase & { esTypes?: string[] }
-): ListSchema[] => {
+): AutocompleteListsData => {
   if (field != null) {
     const { esTypes = [] } = field;
-    return lists.filter(({ type }) => esTypes.some((esType: string) => typeMatch(type, esType)));
+    return {
+      smallLists: lists.smallLists.filter(({ type }) =>
+        esTypes.some((esType: string) => typeMatch(type, esType))
+      ),
+      largeLists: lists.largeLists.filter(({ type }) =>
+        esTypes.some((esType: string) => typeMatch(type, esType))
+      ),
+    };
   } else {
-    return [];
+    return { smallLists: [], largeLists: [] };
   }
 };

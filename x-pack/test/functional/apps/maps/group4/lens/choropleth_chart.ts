@@ -13,7 +13,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
-  describe('choropleth chart', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/154065
+  // Failing: See https://github.com/elastic/kibana/issues/154064
+  describe.skip('choropleth chart', () => {
     it('should allow creation of choropleth chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -50,7 +52,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.dragFieldToWorkspace('geo.dest', 'xyVisChart');
 
       // add filter to force data fetch to set activeData
-      await filterBar.addFilter('bytes', 'is between', '200', '10000');
+      await filterBar.addFilter({
+        field: 'bytes',
+        operation: 'is between',
+        value: { from: '200', to: '10000' },
+      });
 
       await testSubjects.click('lnsSuggestion-worldCountriesByCountOfRecords > lnsSuggestion');
 

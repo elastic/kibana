@@ -7,11 +7,10 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { DocumentTitle } from '../../../components/document_title';
 import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
@@ -28,11 +27,12 @@ interface MetricsExplorerPageProps {
 }
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
+  const [enabled, setEnabled] = useState(false);
   const {
-    loading,
+    isLoading,
     error,
     data,
-    currentTimerange,
+    timeRange,
     options,
     chartOptions,
     setChartOptions,
@@ -41,11 +41,10 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleFilterQuerySubmit,
     handleGroupByChange,
     handleTimeChange,
-    handleRefresh,
     handleLoadMore,
     onViewStateChange,
-    loadData,
-  } = useMetricsExplorerState(source, derivedIndexPattern, false);
+    refresh,
+  } = useMetricsExplorerState(source, derivedIndexPattern, enabled);
   const { currentView, shouldLoadDefault } = useSavedViewContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
@@ -60,11 +59,10 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
 
   useEffect(() => {
     if (currentView != null || !shouldLoadDefault) {
-      // load metrics explorer data after default view loaded, unless we're not loading a view
-      loadData();
+      // load metrics explorer data after default view loaded, unless we're not isLoading a view
+      setEnabled(true);
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [loadData, shouldLoadDefault]);
+  }, [currentView, shouldLoadDefault]);
 
   useMetricsBreadcrumbs([
     {
@@ -74,16 +72,6 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
 
   return (
     <EuiErrorBoundary>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.infrastructureMetricsExplorerPage.documentTitle', {
-            defaultMessage: '{previousTitle} | Metrics Explorer',
-            values: {
-              previousTitle,
-            },
-          })
-        }
-      />
       <MetricsPageTemplate
         hasData={metricIndicesExist}
         pageHeader={{
@@ -93,7 +81,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
               viewState={{
                 options,
                 chartOptions,
-                currentTimerange,
+                currentTimerange: timeRange,
               }}
             />,
           ],
@@ -101,10 +89,10 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
       >
         <MetricsExplorerToolbar
           derivedIndexPattern={derivedIndexPattern}
-          timeRange={currentTimerange}
+          timeRange={timeRange}
           options={options}
           chartOptions={chartOptions}
-          onRefresh={handleRefresh}
+          onRefresh={refresh}
           onTimeChange={handleTimeChange}
           onGroupByChange={handleGroupByChange}
           onFilterQuerySubmit={handleFilterQuerySubmit}
@@ -119,20 +107,20 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
               defaultMessage: 'It looks like the request failed with "{message}"',
               values: { message: error.message },
             })}
-            onRefetch={handleRefresh}
+            onRefetch={refresh}
             refetchText="Try Again"
           />
         ) : (
           <MetricsExplorerCharts
-            timeRange={currentTimerange}
-            loading={loading}
+            timeRange={timeRange}
+            isLoading={isLoading}
             data={data}
             source={source}
             options={options}
             chartOptions={chartOptions}
             onLoadMore={handleLoadMore}
             onFilter={handleFilterQuerySubmit}
-            onRefetch={handleRefresh}
+            onRefetch={refresh}
             onTimeChange={handleTimeChange}
           />
         )}

@@ -18,7 +18,9 @@ import type { SavedObjectsBaseOptions } from './base';
  * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesObject {
+  /** The ID of the object to collect references for */
   id: string;
+  /** The type of the object to collect references for */
   type: string;
 }
 
@@ -73,5 +75,6 @@ export interface SavedObjectReferenceWithContext {
  * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
+  /** array of {@link SavedObjectReferenceWithContext} */
   objects: SavedObjectReferenceWithContext[];
 }

@@ -83,3 +83,35 @@ export const STATUS_ALERT_COLUMN = i18n.translate(
 export const TEST_NOW_COLUMN = i18n.translate('xpack.synthetics.monitorList.testNow.label', {
   defaultMessage: 'Test now',
 });
+
+export const TEST_NOW_AVAILABLE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.testNow.available',
+  {
+    defaultMessage: 'Test now is only available for monitors added via Monitor Management.',
+  }
+);
+
+export const TEST_SCHEDULED_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.testNow.scheduled',
+  {
+    defaultMessage: 'Test is already scheduled',
+  }
+);
+
+export const PRIVATE_AVAILABLE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.testNow.available.private',
+  {
+    defaultMessage: `You can't currently test monitors running on private locations on demand.`,
+  }
+);
+
+export const TEST_NOW_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.testNow.AriaLabel',
+  {
+    defaultMessage: 'Click to run test now',
+  }
+);
+
+export const TEST_NOW_LABEL = i18n.translate('xpack.synthetics.monitorList.testNow.label', {
+  defaultMessage: 'Test now',
+});

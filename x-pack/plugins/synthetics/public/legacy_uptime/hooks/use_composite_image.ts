@@ -8,13 +8,13 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
 import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
-import { ScreenshotRefImageData } from '../../../common/runtime_types/ping/synthetics';
 import {
-  fetchBlocksAction,
-  isPendingBlock,
+  ScreenshotRefImageData,
   ScreenshotBlockCache,
   StoreScreenshotBlock,
-} from '../state/reducers/synthetics';
+  isPendingBlock,
+} from '../../../common/runtime_types';
+import { fetchBlocksAction } from '../state/reducers/synthetics';
 import { syntheticsSelector } from '../state/selectors';
 
 function allBlocksLoaded(blocks: { [key: string]: StoreScreenshotBlock }, hashes: string[]) {

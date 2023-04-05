@@ -47,9 +47,9 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
     formState: { isSubmitting, errors },
   } = hooksForm;
 
-  const onSubmit = (payload: SavedQueryFormData) => {
+  const onSubmit = async (payload: SavedQueryFormData) => {
     const serializedData = serializer(payload);
-    handleSubmit(serializedData);
+    await handleSubmit(serializedData);
   };
 
   return (

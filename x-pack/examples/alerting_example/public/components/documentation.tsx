@@ -10,10 +10,10 @@ import React from 'react';
 import {
   EuiText,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
@@ -50,7 +50,7 @@ export const DocumentationPage = (
             registration of example the RuleTypes, while the `public` handles creation of, and
             navigation for, these rule types.
           </p>
-          <EuiCallOut title="Transport Layer Security" iconType="alert" color="warning">
+          <EuiCallOut title="Transport Layer Security" iconType="warning" color="warning">
             If you see a message about needing to enable the Transport Layer Security, start ES with{' '}
             <code>yarn es snapshot --ssl --license trial</code> and Kibana with{' '}
             <code>yarn start --run-examples --ssl</code>. If you running chrome on a mac, you may

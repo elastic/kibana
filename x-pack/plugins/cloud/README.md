@@ -53,3 +53,13 @@ This is the path to the Cloud Account and Billing page. The value is already pre
 This value is the same as `baseUrl` on ESS but can be customized on ECE.
 
 **Example:** `cloud.elastic.co` (on ESS)
+
+### `trial_end_date`
+
+The end date for the Elastic Cloud trial. Only available on Elastic Cloud.
+
+**Example:** `2020-10-14T10:40:22Z`
+
+### `is_elastic_staff_owned`
+
+`true` if the deployment is owned by an Elastician. Only available on Elastic Cloud.

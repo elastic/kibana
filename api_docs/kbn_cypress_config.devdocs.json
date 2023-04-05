@@ -1,0 +1,61 @@
+{
+  "id": "@kbn/cypress-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cypress-config",
+        "id": "def-common.defineCypressConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "defineCypressConfig",
+        "description": [],
+        "signature": [
+          "(options: Cypress.ConfigOptions<any> | undefined) => Cypress.ConfigOptions<any>"
+        ],
+        "path": "packages/kbn-cypress-config/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-config",
+            "id": "def-common.defineCypressConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Cypress.ConfigOptions<any> | undefined"
+            ],
+            "path": "packages/kbn-cypress-config/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

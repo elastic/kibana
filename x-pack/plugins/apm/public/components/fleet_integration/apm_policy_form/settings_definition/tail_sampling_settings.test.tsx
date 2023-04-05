@@ -45,6 +45,44 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
     expect(isValid).toBe(false);
   });
 
+  it('return true when tail_sampling_storage_limit is 0GB or more', () => {
+    const settings = getTailSamplingSettings(DOCS_LINK);
+    const isValid = isTailBasedSamplingValid(
+      {
+        tail_sampling_enabled: { value: true, type: 'bool' },
+        tail_sampling_policies: {
+          value: 'testValue',
+          type: 'yaml',
+        },
+        tail_sampling_storage_limit: {
+          value: '2GB',
+          type: 'text',
+        },
+      },
+      settings
+    );
+    expect(isValid).toBe(true);
+  });
+
+  it('return false when tail_sampling_storage_limit is less than 0GB', () => {
+    const settings = getTailSamplingSettings(DOCS_LINK);
+    const isValid = isTailBasedSamplingValid(
+      {
+        tail_sampling_enabled: { value: true, type: 'bool' },
+        tail_sampling_policies: {
+          value: 'testValue',
+          type: 'yaml',
+        },
+        tail_sampling_storage_limit: {
+          value: '-1GB',
+          type: 'text',
+        },
+      },
+      settings
+    );
+    expect(isValid).toBe(false);
+  });
+
   it('returns true when tail_sampling_enabled is disabled', () => {
     const settings = getTailSamplingSettings(DOCS_LINK);
     const isValid = isTailBasedSamplingValid(

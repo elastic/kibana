@@ -37,7 +37,8 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const { data, createVisEmbeddableFromObject, savedObjects, spaces } = visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedObjects, spaces, savedObjectsTagging } =
+    visualizeServices;
 
   let savedSearch: SavedSearch | undefined;
 
@@ -47,6 +48,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
         search: data.search,
         savedObjectsClient: savedObjects.client,
         spaces,
+        savedObjectsTagging,
       });
     } catch (e) {
       // skip this catch block

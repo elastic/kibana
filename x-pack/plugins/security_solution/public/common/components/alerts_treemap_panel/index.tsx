@@ -11,13 +11,14 @@ import { EuiProgress } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useGlobalTime } from '../../containers/use_global_time';
 import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from '../alerts_treemap';
 import { KpiPanel } from '../../../detections/components/alerts_kpis/common/components';
 import { useInspectButton } from '../../../detections/components/alerts_kpis/common/hooks';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { FieldSelection } from '../field_selection';
 import { HeaderSection } from '../header_section';
 import { InspectButtonContainer } from '../inspect';
@@ -82,7 +83,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
   // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuidv4()}`, []);
 
   const additionalFilters = useMemo(() => {
     try {
@@ -117,6 +118,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
     }),
     skip: !isPanelExpanded,
     indexName: signalIndexName,
+    queryName: ALERTS_QUERY_NAMES.TREE_MAP,
   });
 
   useEffect(() => {

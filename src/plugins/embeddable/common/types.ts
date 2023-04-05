@@ -24,6 +24,7 @@ export enum ViewMode {
 export type EmbeddableInput = {
   viewMode?: ViewMode;
   title?: string;
+  description?: string;
   /**
    * Note this is not a saved object id. It is used to uniquely identify this
    * Embeddable instance from others (e.g. inside a container).  It's possible to
@@ -57,6 +58,11 @@ export type EmbeddableInput = {
    * Flag whether colors should be synced with other panels
    */
   syncColors?: boolean;
+
+  /**
+   * Flag whether cursor should be synced with other panels on hover
+   */
+  syncCursor?: boolean;
 
   /**
    * Flag whether tooltips should be synced with other panels on hover

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../rule_schema';
 
 export const createRuleMock = (params: Partial<RuleParams>) => ({
   actions: [],

@@ -9,6 +9,12 @@
   overflow: visible;
   height: 100%;
 
+  .lnsWorkspacePanelWrapper__content {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiBottomShadowMedium;
     @include euiScrollBar;
@@ -41,10 +47,7 @@
 .lnsWorkspacePanel__dragDrop {
   border: $euiBorderWidthThin solid transparent;
 
-  &.lnsDragDrop-isDropTarget {
-    @include lnsDroppable;
-    @include lnsDroppableActive;
-
+  &.domDragDrop-isDropTarget {
     p {
       transition: filter $euiAnimSpeedFast ease-in-out;
       filter: blur(5px);
@@ -57,9 +60,7 @@
     }
   }
 
-  &.lnsDragDrop-isActiveDropTarget {
-    @include lnsDroppableActiveHover;
-
+  &.domDragDrop-isActiveDropTarget {
     .lnsDropIllustration__hand {
       animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
     }

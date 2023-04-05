@@ -21,7 +21,7 @@ export interface FilterableContainerInput extends ContainerInput {
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-export type InheritedChildrenInput = {
+type InheritedChildrenInput = {
   filters: MockFilter[];
   id?: string;
 };

@@ -9,6 +9,7 @@ import type {
   AGENT_TYPE_EPHEMERAL,
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
+  FleetServerAgentComponentStatuses,
 } from '../../constants';
 
 export type AgentType =
@@ -21,21 +22,34 @@ export type AgentStatus =
   | 'error'
   | 'online'
   | 'inactive'
-  | 'warning'
   | 'enrolling'
   | 'unenrolling'
+  | 'unenrolled'
   | 'updating'
   | 'degraded';
 
-export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
+export type SimplifiedAgentStatus =
+  | 'healthy'
+  | 'unhealthy'
+  | 'updating'
+  | 'offline'
+  | 'inactive'
+  | 'unenrolled';
 
 export type AgentActionType =
-  | 'POLICY_CHANGE'
   | 'UNENROLL'
   | 'UPGRADE'
   | 'SETTINGS'
   | 'POLICY_REASSIGN'
-  | 'CANCEL';
+  | 'CANCEL'
+  | 'FORCE_UNENROLL'
+  | 'UPDATE_TAGS'
+  | 'REQUEST_DIAGNOSTICS'
+  | 'POLICY_CHANGE'
+  | 'INPUT_ACTION';
+
+type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
+export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
 
 export interface NewAgentAction {
   type: AgentActionType;
@@ -48,7 +62,9 @@ export interface NewAgentAction {
   expiration?: string;
   start_time?: string;
   minimum_execution_duration?: number;
+  rollout_duration_seconds?: number;
   source_uri?: string;
+  total?: number;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -78,18 +94,34 @@ interface AgentBase {
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_message?: string;
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
   tags?: string[];
+  components?: FleetServerAgentComponent[];
+}
+
+export interface AgentMetrics {
+  cpu_avg?: number;
+  memory_size_byte_avg?: number;
 }
 
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
+  // @deprecated
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
+  outputs?: Record<
+    string,
+    {
+      api_key_id: string;
+      to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
+    }
+  >;
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
+  metrics?: AgentMetrics;
 }
 
 export interface AgentSOAttributes extends AgentBase {
@@ -105,7 +137,66 @@ export interface CurrentUpgrade {
   startTime?: string;
 }
 
+export interface ActionErrorResult {
+  agentId: string;
+  error: string;
+  timestamp: string;
+  hostname?: string;
+}
+
+export interface ActionStatus {
+  actionId: string;
+  // how many agents are successfully included in action documents
+  nbAgentsActionCreated: number;
+  // how many agents acknowledged the action sucessfully (completed)
+  nbAgentsAck: number;
+  // how many agents failed
+  nbAgentsFailed: number;
+  version?: string;
+  startTime?: string;
+  type: AgentActionType;
+  // how many agents were actioned by the user
+  nbAgentsActioned: number;
+  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS' | 'ROLLOUT_PASSED';
+  expiration?: string;
+  completionTime?: string;
+  cancellationTime?: string;
+  newPolicyId?: string;
+  creationTime: string;
+  hasRolloutPeriod?: boolean;
+  latestErrors?: ActionErrorResult[];
+  revision?: number;
+  policyId?: string;
+}
+
+export interface AgentDiagnostics {
+  id: string;
+  name: string;
+  createTime: string;
+  filePath: string;
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS' | 'FAILED';
+  actionId: string;
+  error?: string;
+}
+
 // Generated from FleetServer schema.json
+export interface FleetServerAgentComponentUnit {
+  id: string;
+  type: 'input' | 'output';
+  status: FleetServerAgentComponentStatus;
+  message: string;
+  payload?: {
+    [key: string]: any;
+  };
+}
+
+interface FleetServerAgentComponent {
+  id: string;
+  type: string;
+  status: FleetServerAgentComponentStatus;
+  message: string;
+  units: FleetServerAgentComponentUnit[];
+}
 
 /**
  * An Elastic Agent that has enrolled into Fleet
@@ -181,9 +272,13 @@ export interface FleetServerAgent {
    */
   last_checkin?: string;
   /**
-   * Lst checkin status
+   * Last checkin status
    */
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  /**
+   * Last checkin message
+   */
+  last_checkin_message?: string;
   /**
    * ID of the API key the Elastic Agent uses to authenticate with elasticsearch
    */
@@ -215,6 +310,10 @@ export interface FleetServerAgent {
     id: string;
     retired_at: string;
   }>;
+  /**
+   * Components array
+   */
+  components?: FleetServerAgentComponent[];
 }
 /**
  * An Elastic Agent metadata
@@ -274,9 +373,15 @@ export interface FleetServerAgentAction {
   start_time?: string;
 
   /**
+   * @deprecated
    * Minimun execution duration in seconds, used for progressive rollout of the action.
    */
   minimum_execution_duration?: number;
+
+  /**
+   * Rollout duration in seconds, used for progressive rollout of the action.
+   */
+  rollout_duration_seconds?: number;
 
   /**
    * The opaque payload.
@@ -284,6 +389,7 @@ export interface FleetServerAgentAction {
   data?: {
     [k: string]: unknown;
   };
+  total?: number;
 
   /** Trace id */
   traceparent?: string | null;

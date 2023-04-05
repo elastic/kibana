@@ -14,7 +14,7 @@ import { parse } from 'query-string';
 import {
   EuiPageHeader,
   EuiButtonEmpty,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
   EuiButton,
   EuiSpacer,
@@ -83,7 +83,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h2 data-test-subj="pipelineLoadError">
               <FormattedMessage

@@ -47,7 +47,8 @@ describe('Row formatter', () => {
   };
   const hit = buildDataTableRecord(rawHit, dataView);
 
-  const fieldsToShow = dataView.fields.getAll().map((fld) => fld.name);
+  const shouldShowField = (fieldName: string) =>
+    dataView.fields.getAll().some((fld) => fld.name === fieldName);
 
   beforeEach(() => {
     services = {
@@ -59,7 +60,7 @@ describe('Row formatter', () => {
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, dataView, fieldsToShow, 100, services.fieldFormats))
+    expect(formatRow(hit, dataView, shouldShowField, 100, services.fieldFormats))
       .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
@@ -104,7 +105,7 @@ describe('Row formatter', () => {
         getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
       },
     } as unknown as DiscoverServices;
-    expect(formatRow(hit, dataView, [], 1, services.fieldFormats)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, dataView, () => false, 1, services.fieldFormats)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -144,7 +145,7 @@ describe('Row formatter', () => {
       dataView
     );
 
-    expect(formatRow(highLightHit, dataView, fieldsToShow, 100, services.fieldFormats))
+    expect(formatRow(highLightHit, dataView, shouldShowField, 100, services.fieldFormats))
       .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={

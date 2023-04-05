@@ -1,0 +1,20 @@
+/**
+ * 1. Don't cut off the shadow of the field items
+ */
+
+.unifiedFieldList__fieldListGrouped {
+  @include euiOverflowShadow;
+  @include euiScrollBar;
+  margin-left: -$euiSize; /* 1 */
+  position: relative;
+  flex-grow: 1;
+  overflow: auto;
+}
+
+.unifiedFieldList__fieldListGrouped__container {
+  padding-top: $euiSizeS;
+  position: absolute;
+  top: 0;
+  left: $euiSize; /* 1 */
+  right: $euiSizeXS; /* 1 */
+}

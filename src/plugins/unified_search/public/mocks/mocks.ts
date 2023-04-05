@@ -36,6 +36,7 @@ const createStartContract = (): Start => {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn().mockReturnValue(null),
       AggregateQuerySearchBar: jest.fn().mockReturnValue(null),
+      FiltersBuilderLazy: jest.fn(),
     },
   };
 };

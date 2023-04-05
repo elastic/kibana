@@ -16,8 +16,8 @@ import type {
 } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { getUniqGeoOrStrExamples } from '../../../common/util/example_utils';
-import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 import type {
   Field,
   FieldExamples,

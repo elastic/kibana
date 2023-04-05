@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import type {
@@ -34,6 +34,10 @@ import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
+import type {
+  ScheduleNowTransformsRequestSchema,
+  ScheduleNowTransformsResponseSchema,
+} from '../../../common/api_schemas/schedule_now_transforms';
 import type {
   GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
@@ -189,6 +193,17 @@ export const useApi = () => {
       ): Promise<StopTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}stop_transforms`, {
+            body: JSON.stringify(transformsInfo),
+          });
+        } catch (e) {
+          return e;
+        }
+      },
+      async scheduleNowTransforms(
+        transformsInfo: ScheduleNowTransformsRequestSchema
+      ): Promise<ScheduleNowTransformsResponseSchema | IHttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}schedule_now_transforms`, {
             body: JSON.stringify(transformsInfo),
           });
         } catch (e) {

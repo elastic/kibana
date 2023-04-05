@@ -6,4 +6,4 @@
  */
 
 // See: https://github.com/elastic/kibana/issues/117255, this creates mocks to avoid memory leaks from kibana core.
-module.exports = {};
+export {};

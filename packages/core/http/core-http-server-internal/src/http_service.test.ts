@@ -10,7 +10,7 @@ import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';

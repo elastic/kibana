@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import {
+import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import type {
   CaseConnector,
   CaseResponse,
-  CaseSeverity,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
-  CommentType,
-  ConnectorTypes,
 } from '../../common/api';
-import { mockCaseComments, mockCases } from '../routes/api/__fixtures__/mock_saved_objects';
+import { CaseSeverity, CommentType, ConnectorTypes } from '../../common/api';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -33,8 +30,12 @@ import {
   getOrUpdateLensReferences,
   asArray,
   transformNewCase,
+  getApplicationRoute,
+  getCaseViewPath,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
+import { CASE_VIEW_PAGE_TABS } from '../../common/types';
+import { mockCases, mockCaseComments } from '../mocks';
 
 interface CommentReference {
   ids: string[];
@@ -74,7 +75,7 @@ function createCommentFindResponse(
 describe('common utils', () => {
   describe('transformNewCase', () => {
     beforeAll(() => {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(new Date('2020-04-09T09:43:51.778Z'));
     });
 
@@ -783,6 +784,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": "elastic@elastic.co",
             "full_name": "Elastic",
+            "profile_uid": undefined,
             "username": "elastic",
           },
           "owner": "securitySolution",
@@ -812,6 +814,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": undefined,
             "full_name": undefined,
+            "profile_uid": undefined,
             "username": undefined,
           },
           "owner": "securitySolution",
@@ -844,6 +847,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": null,
             "full_name": null,
+            "profile_uid": undefined,
             "username": null,
           },
           "owner": "securitySolution",
@@ -1179,6 +1183,131 @@ describe('common utils', () => {
 
     it('returns an array of one item when passed a number', () => {
       expect(asArray(100)).toEqual([100]);
+    });
+  });
+
+  describe('getApplicationRoute', () => {
+    const owners = Object.keys(OWNER_INFO) as Array<keyof typeof OWNER_INFO>;
+
+    it.each(owners)('returns the correct appRoute for owner: %s', (owner) => {
+      expect(getApplicationRoute(OWNER_INFO, owner)).toEqual(OWNER_INFO[owner].appRoute);
+    });
+
+    it('return the stack management app route if the owner info is not valid', () => {
+      // @ts-expect-error
+      expect(getApplicationRoute({ test: { appRoute: 'no-slash' } }, 'test')).toEqual(
+        '/app/management/insightsAndAlerting'
+      );
+    });
+
+    it('return the stack management app route if the owner is not valid', () => {
+      expect(getApplicationRoute(OWNER_INFO, 'not-valid')).toEqual(
+        '/app/management/insightsAndAlerting'
+      );
+    });
+  });
+
+  describe('getCaseViewPath', () => {
+    const publicBaseUrl = 'https://example.com';
+    const caseId = 'my-case-id';
+    const commentId = 'my-comment-id';
+
+    it('returns the case view path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id');
+    });
+
+    it('removes the ending slash from the publicBaseUrl correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl: 'https://example.com/',
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id');
+    });
+
+    it('remove the extra trailing slashes from case view path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId: '/my-case-id',
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id');
+    });
+
+    it('returns the case view path correctly with invalid owner', () => {
+      expect(getCaseViewPath({ publicBaseUrl, spaceId: 'default', caseId, owner: 'invalid' })).toBe(
+        'https://example.com/app/management/insightsAndAlerting/cases/my-case-id'
+      );
+    });
+
+    it('returns the case comment path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+          commentId,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/my-comment-id');
+    });
+
+    it('remove the extra trailing slashes from case comment path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId: '/my-case-id',
+          owner: SECURITY_SOLUTION_OWNER,
+          commentId: '/my-comment-id',
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/my-comment-id');
+    });
+
+    it('returns the case tab path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/?tabId=alerts');
+    });
+
+    it('remove the extra trailing slashes from case tab path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId: '/my-case-id',
+          owner: SECURITY_SOLUTION_OWNER,
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/?tabId=alerts');
+    });
+
+    it('adds the space correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'test-space',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/s/test-space/app/security/cases/my-case-id');
     });
   });
 });

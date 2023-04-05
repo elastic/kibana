@@ -7,18 +7,25 @@
 
 import * as t from 'io-ts';
 
-export const PrivateLocationType = t.intersection([
+export const PrivateLocationCodec = t.intersection([
   t.interface({
     label: t.string,
     id: t.string,
     agentPolicyId: t.string,
     concurrentMonitors: t.number,
   }),
-  t.partial({ geo: t.interface({ lat: t.number, lon: t.number }) }),
+  t.partial({
+    isServiceManaged: t.boolean,
+    isInvalid: t.boolean,
+    tags: t.array(t.string),
+    /* Empty Lat lon was accidentally saved as an empty string instead of undefined or null
+     * Need a migration to fix */
+    geo: t.interface({ lat: t.union([t.string, t.number]), lon: t.union([t.string, t.number]) }),
+  }),
 ]);
 
 export const SyntheticsPrivateLocationsType = t.type({
-  locations: t.array(PrivateLocationType),
+  locations: t.array(PrivateLocationCodec),
 });
-export type PrivateLocation = t.TypeOf<typeof PrivateLocationType>;
+export type PrivateLocation = t.TypeOf<typeof PrivateLocationCodec>;
 export type SyntheticsPrivateLocations = t.TypeOf<typeof SyntheticsPrivateLocationsType>;

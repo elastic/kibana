@@ -13,8 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiConfirmModal,
-  EuiPageContentBody,
-  EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
@@ -133,7 +133,7 @@ export class FollowerIndexEdit extends PureComponent {
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h2>
               <FormattedMessage

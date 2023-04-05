@@ -12,7 +12,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
 export type FetchIndexResponse = Record<

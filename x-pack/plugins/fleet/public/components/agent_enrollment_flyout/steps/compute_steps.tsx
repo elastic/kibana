@@ -186,7 +186,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   setSelectedPolicyId,
   selectedApiKeyId,
   setSelectedAPIKeyId,
-  settings,
+  fleetServerHosts,
+  fleetProxy,
   refreshAgentPolicies,
   mode,
   setMode,
@@ -207,10 +208,12 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
   const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '');
 
-  const fleetServerHosts = useMemo(() => {
-    return settings?.fleet_server_hosts || [];
-  }, [settings]);
-  const installManagedCommands = ManualInstructions(enrollToken, fleetServerHosts, kibanaVersion);
+  const installManagedCommands = ManualInstructions({
+    apiKey: enrollToken,
+    fleetServerHosts,
+    fleetProxy,
+    kibanaVersion,
+  });
 
   const instructionsSteps = useMemo(() => {
     const steps: EuiContainedStepProps[] = !agentPolicy

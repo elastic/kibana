@@ -1157,7 +1157,7 @@ In other use cases the message field can be used to concatenate different values
   }
   showExpandedDetails={false}
   start="2018-03-23T18:49:23.132Z"
-  timelineId="test"
+  timelineId="timeline-test"
   timerangeKind="absolute"
 />
 `;

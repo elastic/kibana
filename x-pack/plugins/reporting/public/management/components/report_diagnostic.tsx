@@ -16,6 +16,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiMarkdownFormat,
   EuiSpacer,
   EuiSteps,
   EuiText,
@@ -177,8 +178,10 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
         <Fragment>
           {help.length ? (
             <Fragment>
-              <EuiCallOut color="danger" iconType="alert">
-                <p>{help.join('\n')}</p>
+              <EuiCallOut color="danger" iconType="warning">
+                <p>
+                  <EuiMarkdownFormat>{help.join('\n')}</EuiMarkdownFormat>
+                </p>
               </EuiCallOut>
             </Fragment>
           ) : null}

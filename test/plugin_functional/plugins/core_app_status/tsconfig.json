@@ -1,10 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "index.ts",
@@ -12,8 +9,10 @@
     "public/**/*.tsx",
     "../../../../typings/**/*",
   ],
-  "exclude": [],
-  "references": [
-    { "path": "../../../../src/core/tsconfig.json" },
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
   ],
 }

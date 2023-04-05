@@ -6,6 +6,12 @@
 
 Retrieve a paginated set of rules based on condition.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
+
 [[find-rules-api-request]]
 === {api-request-title}
 
@@ -105,40 +111,49 @@ The API returns the following:
 --------------------------------------------------
 {
   "page": 1,
-  "per_page": 10,
   "total": 1,
-  "data": [
-    {
-      "id": "0a037d60-6b62-11eb-9e0d-85d233e3ee35",
-      "notify_when": "onActionGroupChange",
+  "per_page": 10,
+  "data": [{
+    "id": "b530fed0-74f5-11ed-9801-35303b735aef",
+    "name": "cluster_health_rule",
+    "consumer": "alerts",
+    "enabled": true,
+    "tags": ["cluster","health"],
+    "throttle": null,
+    "schedule": {"interval":"1m"},
+    "params": {},
+    "rule_type_id": "monitoring_alert_cluster_health",
+    "created_by": "elastic",
+    "updated_by": "elastic",
+    "created_at": "2022-12-05T23:36:58.284Z",
+    "updated_at": "2022-12-05T23:36:58.284Z",
+    "api_key_owner": "elastic",
+    "notify_when": "onActiveAlert",
+    "mute_all": false,
+    "muted_alert_ids": [],
+    "scheduled_task_id": "b530fed0-74f5-11ed-9801-35303b735aef",
+    "execution_status": {
+      "status": "ok",
+      "last_execution_date": "2022-12-06T00:09:31.882Z",
+      "last_duration": 42
+    },
+    "actions": [{
+      "group": "default",
+      "id": "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params": {
-        "aggType": "avg",
+        "level": "info",
+        "message": "{{context.internalFullMessage}}"
       },
-      "consumer": "alerts",
-      "rule_type_id": "test.rule.type",
-      "schedule": {
-        "interval": "1m"
-      },
-      "actions": [],
-      "tags": [],
-      "name": "my test rule",
-      "enabled": true,
-      "throttle": null,
-      "api_key_owner": "elastic",
-      "created_by": "elastic",
-      "updated_by": "elastic",
-      "mute_all": false,
-      "muted_alert_ids": [],
-      "updated_at": "2021-02-10T05:37:19.086Z",
-      "created_at": "2021-02-10T05:37:19.086Z",
-      "scheduled_task_id": "0b092d90-6b62-11eb-9e0d-85d233e3ee35",
-      "execution_status": {
-        "last_execution_date": "2021-02-10T17:55:14.262Z",
-        "status": "ok",
-        "last_duration": 384
-      }
-    }
-  ]
+      "connector_type_id": ".server-log"
+    }],
+    "last_run":{
+      "alerts_count": {"new": 0,"ignored": 0,"recovered": 0,"active": 0},
+      "outcome_msg": null,
+      "warning": null,
+      "outcome": "succeeded"
+    },
+    "next_run": "2022-12-06T00:10:31.811Z"
+  }]
 }
 --------------------------------------------------
 

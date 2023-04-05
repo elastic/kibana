@@ -33,6 +33,8 @@ export const createFieldFormatter = (
       ? { id: 'date' }
       : fieldType === 'string'
       ? { id: 'string' }
+      : fieldType === 'boolean'
+      ? { id: 'boolean' }
       : { id: 'number' };
 
   const fieldFormat = getFieldFormats().deserialize(

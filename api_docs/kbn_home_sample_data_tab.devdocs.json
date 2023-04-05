@@ -33,6 +33,7 @@
         ],
         "path": "packages/home/sample_data_tab/src/sample_data_tab.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -53,6 +54,7 @@
         ],
         "path": "packages/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-tab",
@@ -68,6 +70,7 @@
             ],
             "path": "packages/home/sample_data_tab/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -90,6 +93,7 @@
         ],
         "path": "packages/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/home-sample-data-tab",
@@ -105,6 +109,7 @@
             ],
             "path": "packages/home/sample_data_tab/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -129,6 +134,7 @@
         ],
         "path": "packages/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -145,6 +151,7 @@
         ],
         "path": "packages/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -161,6 +168,7 @@
         ],
         "path": "packages/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

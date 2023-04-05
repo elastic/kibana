@@ -14,27 +14,12 @@ import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { RowRendererId, TimelineId } from '../../../../../../common/types';
+import { TableId, RowRendererId } from '../../../../../../common/types';
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
 import { cloneDeep } from 'lodash';
 jest.mock('./plain_column_renderer');
-
-jest.mock('../../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: () => ({
-      services: {
-        timelines: {
-          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
-        },
-      },
-    }),
-  };
-});
 
 jest.mock('../../../../../common/components/link_to', () => {
   const original = jest.requireActual('../../../../../common/components/link_to');
@@ -66,7 +51,7 @@ const defaultProps = {
   columnName: REASON_FIELD_NAME,
   eventId: 'test-event-id',
   field,
-  timelineId: 'test-timeline-id',
+  scopeId: 'test-timeline-id',
   values: ['test-value'],
 };
 
@@ -142,7 +127,7 @@ describe('reasonColumnRenderer', () => {
         isDetails: true,
         ecsData: validEcs,
         rowRenderers,
-        timelineId: TimelineId.rulePreview,
+        scopeId: TableId.rulePreview,
       });
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);

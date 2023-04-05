@@ -68,7 +68,8 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const params = useUrlParams()[0]();
   const kibana = useKibana();
   const setBreadcrumbs = kibana.services.chrome?.setBreadcrumbs;
-  const uptimePath = kibana.services.application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? '';
+  const syntheticsPath =
+    kibana.services.application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? '';
   const observabilityPath =
     kibana.services.application?.getUrlForApp('observability-overview') ?? '';
   const navigate = kibana.services.application?.navigateToUrl;
@@ -77,10 +78,10 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
     if (setBreadcrumbs) {
       setBreadcrumbs(
         handleBreadcrumbClick(
-          makeBaseBreadcrumb(uptimePath, observabilityPath, params).concat(extraCrumbs),
+          makeBaseBreadcrumb(syntheticsPath, observabilityPath, params).concat(extraCrumbs),
           navigate
         )
       );
     }
-  }, [uptimePath, observabilityPath, extraCrumbs, navigate, params, setBreadcrumbs]);
+  }, [syntheticsPath, observabilityPath, extraCrumbs, navigate, params, setBreadcrumbs]);
 };

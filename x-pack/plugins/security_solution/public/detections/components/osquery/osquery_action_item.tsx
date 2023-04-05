@@ -18,6 +18,7 @@ export const OsqueryActionItem = ({ handleClick }: IProps) => (
     key="osquery-action-item"
     data-test-subj="osquery-action-item"
     onClick={handleClick}
+    size={'s'}
   >
     {ACTION_OSQUERY}
   </EuiContextMenuItem>

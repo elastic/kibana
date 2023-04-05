@@ -6,11 +6,17 @@
  */
 
 import React, { MouseEvent, useEffect } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+  useIsWithinMaxBreakpoint,
+} from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
-import { useBreakpoints } from '../../../../../../hooks/use_breakpoints';
 
 import { nextAriaLabel, prevAriaLabel } from './translations';
 
@@ -38,7 +44,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   onVisible,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const breakpoints = useBreakpoints();
+  const isSmall = useIsWithinMaxBreakpoint('m');
 
   useEffect(() => {
     onVisible(true);
@@ -47,8 +53,6 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const isSmall = breakpoints.down('m');
 
   return (
     <CaptionWrapper
@@ -62,6 +66,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
           <EuiFlexGroup alignItems="center" justifyContent="center">
             <EuiFlexItem grow={true}>
               <EuiButtonEmpty
+                data-test-subj="syntheticsStepImageCaptionButton"
                 css={{ marginLeft: isSmall ? 0 : 'auto' }}
                 disabled={stepNumber === 1}
                 onClick={(evt: MouseEvent<HTMLButtonElement>) => {
@@ -80,6 +85,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <EuiButtonEmpty
+                data-test-subj="syntheticsStepImageCaptionButton"
                 css={{ marginRight: isSmall ? 0 : 'auto' }}
                 disabled={stepNumber === maxSteps}
                 onClick={(evt: MouseEvent<HTMLButtonElement>) => {

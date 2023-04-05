@@ -19,8 +19,6 @@
  * multiply([1, 2, 3, 4], [2, 7, 5, 12]) // returns [2, 14, 15, 48]
  */
 
-module.exports = { multiply };
-
 function multiply(...args) {
   return args.reduce((result, current) => {
     if (Array.isArray(result) && Array.isArray(current)) {
@@ -32,3 +30,4 @@ function multiply(...args) {
     return result * current;
   });
 }
+module.exports = { multiply };

@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/axe-config",
+  "devOnly": true,
+  "owner": "@elastic/kibana-qa"
+}

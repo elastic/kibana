@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const dataConfig = {
@@ -33,7 +33,9 @@ export async function generateData({
   warmStartRate: number;
 }) {
   const { coldStartTransaction, warmStartTransaction, serviceName } = dataConfig;
-  const instance = apm.service(serviceName, 'production', 'go').instance('instance-a');
+  const instance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
 
   const traceEvents = [
     timerange(start, end)
@@ -41,7 +43,7 @@ export async function generateData({
       .rate(coldStartRate)
       .generator((timestamp) =>
         instance
-          .transaction(coldStartTransaction.name)
+          .transaction({ transactionName: coldStartTransaction.name })
           .defaults({
             'faas.coldstart': true,
           })
@@ -54,7 +56,7 @@ export async function generateData({
       .rate(warmStartRate)
       .generator((timestamp) =>
         instance
-          .transaction(warmStartTransaction.name)
+          .transaction({ transactionName: warmStartTransaction.name })
           .defaults({
             'faas.coldstart': false,
           })

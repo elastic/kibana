@@ -12,8 +12,31 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
+import { getConfigPath, getConfigDirectory } from '@kbn/utils';
+import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
+
+/** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
+/** @type {ServerlessProjectMode[]} */
+const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
+
+/**
+ * @param {Record<string, unknown>} opts
+ * @returns {ServerlessProjectMode | null}
+ */
+function getServerlessProjectMode(opts) {
+  if (!opts.serverless) {
+    return null;
+  }
+
+  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
+    return opts.serverless;
+  }
+
+  throw new Error(
+    `invalid --serverless value, must be one of ${VALID_SERVERLESS_PROJECT_MODE.join(', ')}`
+  );
+}
 
 function canRequire(path) {
   try {
@@ -53,6 +76,40 @@ const pathCollector = function () {
 
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
+
+/**
+ * @param {string} name
+ * @param {string[]} configs
+ * @param {'push' | 'unshift'} method
+ */
+function maybeAddConfig(name, configs, method) {
+  const path = resolve(getConfigDirectory(), name);
+  try {
+    if (statSync(path).isFile()) {
+      configs[method](path);
+    }
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return;
+    }
+
+    throw err;
+  }
+}
+
+/**
+ * @returns {string[]}
+ */
+function getEnvConfigs() {
+  const val = process.env.KBN_CONFIG_PATHS;
+  if (typeof val === 'string') {
+    return val
+      .split(',')
+      .filter((v) => !!v)
+      .map((p) => resolve(p.trim()));
+  }
+  return [];
+}
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const set = _.partial(lodashSet, rawConfig);
@@ -151,7 +208,7 @@ export default function (program) {
       '-c, --config <path>',
       'Path to the config file, use multiple --config args to include multiple config files',
       configPathCollector,
-      [getConfigPath()]
+      []
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
     .option('-Q, --silent', 'Set the root logger level to off')
@@ -176,7 +233,8 @@ export default function (program) {
       .option(
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
-      );
+      )
+      .option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
   }
 
   if (DEV_MODE_SUPPORTED) {
@@ -199,19 +257,25 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
+    const unknownOptions = this.getUnknownOptions();
+    const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
+    const serverlessMode = getServerlessProjectMode(opts);
+
+    // we "unshift" .serverless. config so that it only overrides defaults
+    if (serverlessMode) {
+      maybeAddConfig(`serverless.yml`, configs, 'push');
+      maybeAddConfig(`serverless.${serverlessMode}.yml`, configs, 'unshift');
+    }
+
+    // .dev. configs are "pushed" so that they override all other config files
     if (opts.dev && opts.devConfig !== false) {
-      try {
-        const kbnDevConfig = fromRoot('config/kibana.dev.yml');
-        if (statSync(kbnDevConfig).isFile()) {
-          opts.config.push(kbnDevConfig);
-        }
-      } catch (err) {
-        // ignore, kibana.dev.yml does not exist
+      maybeAddConfig('kibana.dev.yml', configs, 'push');
+      if (serverlessMode) {
+        maybeAddConfig(`serverless.dev.yml`, configs, 'push');
+        maybeAddConfig(`serverless.${serverlessMode}.dev.yml`, configs, 'push');
       }
     }
 
-    const unknownOptions = this.getUnknownOptions();
-    const configs = [].concat(opts.config || []);
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
@@ -230,6 +294,7 @@ export default function (program) {
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
+      serverless: !!opts.serverless,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode

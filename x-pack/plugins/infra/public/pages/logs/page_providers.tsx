@@ -5,20 +5,43 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
-import { useSourceId } from '../../containers/source_id';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { LogViewProvider } from '../../hooks/use_log_view';
+import {
+  initializeFromUrl as createInitializeFromUrl,
+  updateContextInUrl as createUpdateContextInUrl,
+  listenForUrlChanges as createListenForUrlChanges,
+} from '../../observability_logs/log_view_state/src/url_state_storage_service';
+import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
-  const [sourceId] = useSourceId();
-  const { services } = useKibanaContextForPlugin();
+  const {
+    services: {
+      notifications: { toasts: toastsService },
+      logViews: { client },
+    },
+  } = useKibanaContextForPlugin();
+
+  const urlStateStorage = useKbnUrlStateStorageFromRouterContext();
+
+  const [initializeFromUrl] = useState(() => {
+    return createInitializeFromUrl({ toastsService, urlStateStorage });
+  });
+  const [updateContextInUrl] = useState(() => {
+    return createUpdateContextInUrl({ toastsService, urlStateStorage });
+  });
+  const [listenForUrlChanges] = useState(() => {
+    return createListenForUrlChanges({ urlStateStorage });
+  });
+
   return (
     <LogViewProvider
-      fetch={services.http.fetch}
-      logViewId={sourceId}
-      logViews={services.logViews.client}
+      logViews={client}
+      initializeFromUrl={initializeFromUrl}
+      updateContextInUrl={updateContextInUrl}
+      listenForUrlChanges={listenForUrlChanges}
     >
       <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
     </LogViewProvider>

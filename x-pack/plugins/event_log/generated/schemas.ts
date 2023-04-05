@@ -115,10 +115,32 @@ export const EventSchema = schema.maybe(
             action_group_id: ecsString(),
             action_subgroup: ecsString(),
             status: ecsString(),
+            outcome: ecsString(),
+            summary: schema.maybe(
+              schema.object({
+                new: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+                ongoing: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+                recovered: schema.maybe(
+                  schema.object({
+                    count: ecsStringOrNumber(),
+                  })
+                ),
+              })
+            ),
           })
         ),
         alert: schema.maybe(
           schema.object({
+            flapping: ecsBoolean(),
+            uuid: ecsString(),
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
@@ -150,6 +172,7 @@ export const EventSchema = schema.maybe(
                         claim_to_start_duration_ms: ecsStringOrNumber(),
                         prepare_rule_duration_ms: ecsStringOrNumber(),
                         total_run_duration_ms: ecsStringOrNumber(),
+                        total_enrichment_duration_ms: ecsStringOrNumber(),
                       })
                     ),
                   })
@@ -167,11 +190,24 @@ export const EventSchema = schema.maybe(
               id: ecsString(),
               type: ecsString(),
               type_id: ecsString(),
+              space_agnostic: ecsBoolean(),
             })
           )
         ),
         space_ids: ecsStringMulti(),
         version: ecsVersion(),
+        action: schema.maybe(
+          schema.object({
+            name: ecsString(),
+            id: ecsString(),
+            execution: schema.maybe(
+              schema.object({
+                source: ecsString(),
+                uuid: ecsString(),
+              })
+            ),
+          })
+        ),
       })
     ),
   })
@@ -195,6 +231,10 @@ function ecsStringOrNumber() {
 
 function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
+}
+
+function ecsBoolean() {
+  return schema.maybe(schema.boolean());
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;

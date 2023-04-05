@@ -14,7 +14,7 @@ import {
   EuiPageBody,
   EuiFlexGrid,
   EuiSpacer,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiScreenReaderOnly,
 } from '@elastic/eui';

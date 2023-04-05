@@ -9,9 +9,6 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { PieChartType, PieLayerState } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 
-export const isPartitionShape = (shape: PieChartType | string) =>
-  ['donut', 'pie', 'treemap', 'mosaic', 'waffle'].includes(shape);
-
 export const shouldShowValuesInLegend = (layer: PieLayerState, shape: PieChartType) => {
   if ('showValues' in PartitionChartsMeta[shape]?.legend) {
     return layer.showValuesInLegend ?? PartitionChartsMeta[shape]?.legend?.showValues ?? true;

@@ -7,7 +7,12 @@
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import {
   createNewPackagePolicyMock,
   deletePackagePolicyMock,
@@ -19,6 +24,7 @@ import {
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
   getPackagePolicyCreateCallback,
+  getPackagePolicyPostCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
@@ -40,11 +46,17 @@ import type { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifac
 import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
 import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/mocks';
 import { Manifest } from '../endpoint/lib/artifacts';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import type { DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import type { PostDeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
+
+jest.mock('uuid', () => ({
+  v4: (): string => 'NEW_UUID',
+}));
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
@@ -77,12 +89,16 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('package policy init callback (atifacts manifest initialisation tests)', () => {
-    const createNewEndpointPolicyInput = (manifest: ManifestSchema) => ({
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    const createNewEndpointPolicyInput = (manifest: ManifestSchema, license = 'platinum') => ({
       type: 'endpoint',
       enabled: true,
       streams: [],
       config: {
-        policy: { value: policyFactory() },
+        integration_config: {},
+        policy: { value: disableProtections(policyFactory(license)) },
         artifact_manifest: { value: manifest },
       },
     });
@@ -98,7 +114,13 @@ describe('ingest_integration tests ', () => {
         exceptionListClient
       );
 
-      return callback(createNewPackagePolicyMock(), requestContextMock.convertContext(ctx), req);
+      return callback(
+        createNewPackagePolicyMock(),
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
     };
 
     const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
@@ -249,7 +271,84 @@ describe('ingest_integration tests ', () => {
     });
   });
 
+  describe('package policy post create callback', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const logger = loggingSystemMock.create().get('ingest_integration.test');
+    const callback = getPackagePolicyPostCreateCallback(logger, exceptionListClient);
+    const policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
+
+    it('should create the Endpoint Event Filters List and add the correct Event Filters List Item attached to the policy given nonInteractiveSession parameter on integration config eventFilters', async () => {
+      const integrationConfig = {
+        type: 'cloud',
+        eventFilters: {
+          nonInteractiveSession: true,
+        },
+      };
+
+      policyConfig.inputs[0]!.config!.integration_config = {
+        value: integrationConfig,
+      };
+      const postCreatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+
+      expect(await exceptionListClient.createExceptionList).toHaveBeenCalledWith(
+        expect.objectContaining({ listId: ENDPOINT_EVENT_FILTERS_LIST_ID })
+      );
+
+      expect(await exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          tags: [`policy:${postCreatedPolicyConfig.id}`],
+          osTypes: ['linux'],
+          entries: [
+            {
+              field: 'process.entry_leader.interactive',
+              operator: 'included',
+              type: 'match',
+              value: 'false',
+            },
+          ],
+          itemId: 'NEW_UUID',
+          namespaceType: 'agnostic',
+        })
+      );
+    });
+
+    it('should not call Event Filters List and Event Filters List Item if nonInteractiveSession parameter is not present on integration config eventFilters', async () => {
+      const integrationConfig = {
+        type: 'cloud',
+      };
+
+      policyConfig.inputs[0]!.config!.integration_config = {
+        value: integrationConfig,
+      };
+      const postCreatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+
+      expect(await exceptionListClient.createExceptionList).not.toHaveBeenCalled();
+
+      expect(await exceptionListClient.createExceptionListItem).not.toHaveBeenCalled();
+
+      expect(postCreatedPolicyConfig.inputs[0]!.config!.integration_config.value).toEqual(
+        integrationConfig
+      );
+    });
+  });
   describe('package policy update callback (when the license is below platinum)', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     beforeEach(() => {
       licenseEmitter.next(Gold); // set license level to gold
     });
@@ -265,7 +364,7 @@ describe('ingest_integration tests ', () => {
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       await expect(() =>
-        callback(policyConfig, requestContextMock.convertContext(ctx), req)
+        callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
       ).rejects.toThrow('Requires Platinum license');
     });
     it('updates successfully if no paid features are turned on in the policy', async () => {
@@ -282,6 +381,8 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(
         policyConfig,
+        soClient,
+        esClient,
         requestContextMock.convertContext(ctx),
         req
       );
@@ -290,6 +391,9 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('package policy update callback (when the license is at least platinum)', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     beforeEach(() => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
@@ -307,6 +411,8 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(
         policyConfig,
+        soClient,
+        esClient,
         requestContextMock.convertContext(ctx),
         req
       );
@@ -315,12 +421,15 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('package policy delete callback', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     const invokeDeleteCallback = async (): Promise<void> => {
       const callback = getPackagePolicyDeleteCallback(exceptionListClient);
-      await callback(deletePackagePolicyMock());
+      await callback(deletePackagePolicyMock(), soClient, esClient);
     };
 
-    let removedPolicies: DeletePackagePoliciesResponse;
+    let removedPolicies: PostDeletePackagePoliciesResponse;
     let policyId: string;
     let fakeArtifact: ExceptionListSchema;
 

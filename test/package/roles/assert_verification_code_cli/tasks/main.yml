@@ -1,0 +1,13 @@
+- name: "--help"
+  become: true
+  command:
+    cmd: /usr/share/kibana/bin/kibana-verification-code --help
+  register: kibana_verification_code_help
+
+- debug:
+    msg: "{{ kibana_verification_code_help }}"
+
+- name: assert kibana-verification-code provides help
+  assert:
+    that:
+      - kibana_verification_code_help.failed == false

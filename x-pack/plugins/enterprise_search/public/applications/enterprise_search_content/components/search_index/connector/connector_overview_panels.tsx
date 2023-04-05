@@ -31,6 +31,7 @@ import { SearchIndexTabId } from '../search_index';
 const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestionStatus }) => (
   <EuiPanel color={ingestionStatusToColor(ingestionStatus)} hasShadow={false} paddingSize="l">
     <EuiStat
+      titleSize="m"
       description={i18n.translate('xpack.enterpriseSearch.connector.ingestionStatus.title', {
         defaultMessage: 'Ingestion status',
       })}
@@ -45,33 +46,16 @@ export const ConnectorOverviewPanels: React.FC = () => {
   return isConnectorIndex(index) ? (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
+        <EuiPanel color="primary" hasShadow={false} paddingSize="l">
           <EuiStat
+            titleSize="m"
             description={i18n.translate(
-              'xpack.enterpriseSearch.connector.connectorNamePanel.title',
+              'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',
               {
-                defaultMessage: 'Name',
+                defaultMessage: 'Document count',
               }
             )}
-            title={index.connector.name}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-          <EuiStat
-            description={i18n.translate(
-              'xpack.enterpriseSearch.connector.connectorTypePanel.title',
-              {
-                defaultMessage: 'Connector type',
-              }
-            )}
-            title={
-              index.connector.service_type ??
-              i18n.translate('xpack.enterpriseSearch.connector.connectorTypePanel.unknown.label', {
-                defaultMessage: 'Unknown',
-              })
-            }
+            title={index.count}
           />
         </EuiPanel>
       </EuiFlexItem>

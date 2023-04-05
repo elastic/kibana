@@ -26,11 +26,13 @@ export {
 } from './expression_functions';
 
 export type {
+  AllowedPartitionOverrides,
   ExpressionValuePartitionLabels,
   PieVisExpressionFunctionDefinition,
   TreemapVisExpressionFunctionDefinition,
   MosaicVisExpressionFunctionDefinition,
   WaffleVisExpressionFunctionDefinition,
+  PartitionLabelsExpressionFunctionDefinition,
 } from './types/expression_functions';
 
 export type {

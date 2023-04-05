@@ -6,11 +6,11 @@
  */
 
 import { Logger, CoreSetup } from '@kbn/core/server';
-import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
 
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
@@ -23,6 +23,7 @@ import {
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
 export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
+export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
 export function initializeAlertingTelemetry(
   logger: Logger,
@@ -69,6 +70,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
       taskType: TELEMETRY_TASK_TYPE,
       state: {},
       params: {},
+      schedule: SCHEDULE,
     });
   } catch (e) {
     logger.debug(`Error scheduling task, received ${e.message}`);
@@ -141,6 +143,16 @@ export function telemetryTaskRunner(
                   count_active_by_type: totalInUse.countByType,
                   count_active_total: totalInUse.countTotal,
                   count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+                  count_rules_by_execution_status:
+                    totalCountAggregations.count_rules_by_execution_status,
+                  count_rules_with_tags: totalCountAggregations.count_rules_with_tags,
+                  count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
+                  count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
+                  count_rules_muted: totalCountAggregations.count_rules_muted,
+                  count_rules_with_muted_alerts:
+                    totalCountAggregations.count_rules_with_muted_alerts,
+                  count_connector_types_by_consumers:
+                    totalCountAggregations.count_connector_types_by_consumers,
                   count_rules_namespaces: totalInUse.countNamespaces,
                   count_rules_executions_per_day: dailyExecutionCounts.countTotalRuleExecutions,
                   count_rules_executions_by_type_per_day:
@@ -151,6 +163,8 @@ export function telemetryTaskRunner(
                     dailyExecutionCounts.countFailedExecutionsByReason,
                   count_rules_executions_failured_by_reason_by_type_per_day:
                     dailyExecutionCounts.countFailedExecutionsByReasonByType,
+                  count_rules_by_execution_status_per_day:
+                    dailyExecutionCounts.countRulesByExecutionStatus,
                   count_rules_executions_timeouts_per_day:
                     dailyExecutionTimeoutCounts.countExecutionTimeouts,
                   count_rules_executions_timeouts_by_type_per_day:
@@ -177,7 +191,9 @@ export function telemetryTaskRunner(
                   percentile_num_alerts_by_type_per_day:
                     dailyExecutionCounts.alertsPercentilesByType,
                 },
-                runAt: getNextMidnight(),
+                // Useful for setting a schedule for the old tasks that don't have one
+                // or to update the schedule if ever the frequency changes in code
+                schedule: SCHEDULE,
               };
             }
           )
@@ -185,14 +201,12 @@ export function telemetryTaskRunner(
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
               state: {},
-              runAt: getNextMidnight(),
+              // Useful for setting a schedule for the old tasks that don't have one
+              // or to update the schedule if ever the frequency changes in code
+              schedule: SCHEDULE,
             };
           });
       },
     };
   };
-}
-
-function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
 }

@@ -6,9 +6,9 @@
  */
 
 import { IconChartMetric } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
-import { layerTypes } from '../../../common';
 import { legacyMetricSupportedTypes } from './visualization';
 
 /**
@@ -53,7 +53,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<LegacyMe
     state: {
       layerId: table.layerId,
       accessor: col.columnId,
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
     },
   };
 }

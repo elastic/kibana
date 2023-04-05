@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { merge } from 'lodash';
 
 import { isPackageLimited } from '../../../common/services';
@@ -15,8 +14,7 @@ import type {
   PackageInfo,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
-
-import { getPackageInfo } from '../epm/packages';
+import { pkgToPkgKey } from '../epm/registry';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -104,8 +102,8 @@ export const storedPackagePolicyToAgentInputs = (
 };
 
 export const storedPackagePoliciesToAgentInputs = async (
-  soClient: SavedObjectsClientContract,
   packagePolicies: PackagePolicy[],
+  packageInfoCache: Map<string, PackageInfo>,
   outputId: string = DEFAULT_OUTPUT.name
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
@@ -116,11 +114,7 @@ export const storedPackagePoliciesToAgentInputs = async (
     }
 
     const packageInfo = packagePolicy.package
-      ? await getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package.name,
-          pkgVersion: packagePolicy.package.version,
-        })
+      ? packageInfoCache.get(pkgToPkgKey(packagePolicy.package))
       : undefined;
 
     fullInputs.push(...storedPackagePolicyToAgentInputs(packagePolicy, packageInfo, outputId));

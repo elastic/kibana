@@ -19,6 +19,7 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiText,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -56,13 +57,17 @@ export const AddDomainForm: React.FC = () => {
         >
           <EuiFlexGroup>
             <EuiFlexItem grow>
-              <EuiFieldText
-                autoFocus
-                placeholder="https://"
-                value={addDomainFormInputValue}
-                onChange={(e) => setAddDomainFormInputValue(e.target.value)}
+              <EuiFormControlLayout
+                clear={{ onClick: () => setAddDomainFormInputValue('') }}
                 fullWidth
-              />
+              >
+                <EuiFieldText
+                  autoFocus
+                  value={addDomainFormInputValue}
+                  onChange={(e) => setAddDomainFormInputValue(e.target.value)}
+                  fullWidth
+                />
+              </EuiFormControlLayout>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton type="submit" fill disabled={addDomainFormInputValue.length === 0}>

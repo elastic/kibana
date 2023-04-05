@@ -7,6 +7,7 @@
 
 import { getSecuritySolutionNavTab as getSecuritySolutionCSPNavTab } from '@kbn/cloud-security-posture-plugin/public';
 import { getSecuritySolutionNavTab as getSecuritySolutionTINavTab } from '@kbn/threat-intelligence-plugin/public';
+import { getSecuritySolutionNavTab as getSecuritySolutionCloudDefendNavTab } from '@kbn/cloud-defend-plugin/public';
 import * as i18n from '../translations';
 import type { SecurityNav, SecurityNavGroup } from '../../common/components/navigation/types';
 import { SecurityNavGroupKey } from '../../common/components/navigation/types';
@@ -30,8 +31,9 @@ import {
   APP_USERS_PATH,
   APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
-  APP_RESPONSE_ACTIONS_PATH,
+  APP_RESPONSE_ACTIONS_HISTORY_PATH,
   APP_ENTITY_ANALYTICS_PATH,
+  APP_DATA_QUALITY_PATH,
   APP_PATH,
 } from '../../../common/constants';
 
@@ -162,10 +164,10 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'administration',
   },
-  [SecurityPageName.responseActions]: {
-    id: SecurityPageName.responseActions,
-    name: i18n.RESPONSE_ACTIONS,
-    href: APP_RESPONSE_ACTIONS_PATH,
+  [SecurityPageName.responseActionsHistory]: {
+    id: SecurityPageName.responseActionsHistory,
+    name: i18n.RESPONSE_ACTIONS_HISTORY,
+    href: APP_RESPONSE_ACTIONS_HISTORY_PATH,
     disabled: false,
     urlKey: 'administration',
   },
@@ -185,8 +187,8 @@ export const navTabs: SecurityNav = {
     ...getSecuritySolutionCSPNavTab<SecurityPageName>('benchmarks', APP_PATH),
     urlKey: 'administration',
   },
-  [SecurityPageName.cloudSecurityPostureRules]: {
-    ...getSecuritySolutionCSPNavTab<SecurityPageName>('rules', APP_PATH),
+  [SecurityPageName.cloudDefendPolicies]: {
+    ...getSecuritySolutionCloudDefendNavTab<SecurityPageName>('policies', APP_PATH),
     urlKey: 'administration',
   },
   [SecurityPageName.entityAnalytics]: {
@@ -195,6 +197,13 @@ export const navTabs: SecurityNav = {
     href: APP_ENTITY_ANALYTICS_PATH,
     disabled: false,
     urlKey: 'entity_analytics',
+  },
+  [SecurityPageName.dataQuality]: {
+    id: SecurityPageName.dataQuality,
+    name: i18n.DATA_QUALITY,
+    href: APP_DATA_QUALITY_PATH,
+    disabled: false,
+    urlKey: 'data_quality',
   },
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -22,46 +22,31 @@ import { StatusStats } from '../status/status_stats';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { ATTC_DESCRIPTION, ATTC_STAT } from './translations';
 
-interface CountProps {
-  refresh?: number;
-}
 const MetricsFlexGroup = styled.div`
   ${({ theme }) => css`
-    .euiFlexGroup {
-      border: ${theme.eui.euiBorderThin};
-      border-radius: ${theme.eui.euiBorderRadius};
-      margin: 0 0 ${theme.eui.euiSizeL} 0;
-    }
-    @media only screen and (max-width: ${theme.eui.euiBreakpoints.s}) {
-      .euiFlexGroup {
-        padding: ${theme.eui.euiSizeM};
-      }
-    }
+    border: ${theme.eui.euiBorderThin};
+    border-radius: ${theme.eui.euiBorderRadius};
+    padding: ${theme.eui.euiSizeM};
+    margin-bottom: ${theme.eui.euiSizeL};
   `}
 `;
 
-export const CasesMetrics: FunctionComponent<CountProps> = ({ refresh }) => {
+export const CasesMetrics: React.FC = () => {
   const {
-    countOpenCases,
-    countInProgressCases,
-    countClosedCases,
+    data: { countOpenCases, countInProgressCases, countClosedCases } = {
+      countOpenCases: 0,
+      countInProgressCases: 0,
+      countClosedCases: 0,
+    },
     isLoading: isCasesStatusLoading,
-    fetchCasesStatus,
   } = useGetCasesStatus();
 
-  const { mttr, isLoading: isCasesMetricsLoading, fetchCasesMetrics } = useGetCasesMetrics();
+  const { data: { mttr } = { mttr: 0 }, isLoading: isCasesMetricsLoading } = useGetCasesMetrics();
 
   const mttrValue = useMemo(
     () => (mttr != null ? prettyMilliseconds(mttr * 1000, { compact: true, verbose: false }) : '-'),
     [mttr]
   );
-
-  useEffect(() => {
-    if (refresh != null) {
-      fetchCasesStatus();
-      fetchCasesMetrics();
-    }
-  }, [fetchCasesMetrics, fetchCasesStatus, refresh]);
 
   return (
     <MetricsFlexGroup>

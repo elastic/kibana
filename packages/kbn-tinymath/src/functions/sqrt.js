@@ -17,8 +17,6 @@
  * sqrt([9, 16, 25]) // returns [3, 4, 5]
  */
 
-module.exports = { sqrt };
-
 function sqrt(a) {
   if (Array.isArray(a)) {
     return a.map((a) => {
@@ -30,3 +28,4 @@ function sqrt(a) {
   if (a < 0) throw new Error('Unable find the square root of a negative number');
   return Math.sqrt(a);
 }
+module.exports = { sqrt };

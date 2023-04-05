@@ -9,4 +9,4 @@ export { VersionField } from './version_field';
 export { QueryDescriptionField } from './query_description_field';
 export { IntervalField } from './interval_field';
 export { QueryIdField } from './query_id_field';
-export type { FormField } from './types';
+export { ResultsTypeField } from './results_type_field';

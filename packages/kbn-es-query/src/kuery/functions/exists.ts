@@ -7,7 +7,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataViewFieldBase, DataViewBase, KueryNode, KueryQueryOptions } from '../..';
+import type { DataViewFieldBase, DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import * as literal from '../node_types/literal';
 import type { KqlContext } from '../types';
 

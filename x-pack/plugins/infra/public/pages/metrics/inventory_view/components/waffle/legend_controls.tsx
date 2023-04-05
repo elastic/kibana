@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
 import { InfraWaffleMapBounds, InventoryColorPalette, PALETTES } from '../../../../../lib/lib';
@@ -189,9 +190,10 @@ export const LegendControls = ({
       button={buttonComponent}
       anchorPosition="leftCenter"
       data-test-subj="legendControls"
+      // panelStyle={{ width: '100%', maxWidth: 375 }}
     >
       <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
-      <EuiForm style={{ minWidth: 400 }}>
+      <StyledEuiForm>
         <EuiFormRow
           display="columnCompressed"
           label={i18n.translate('xpack.infra.legendControls.colorPaletteLabel', {
@@ -288,6 +290,7 @@ export const LegendControls = ({
         >
           <div style={{ maxWidth: 150 }}>
             <EuiFieldNumber
+              data-test-subj="infraLegendControlsFieldNumber"
               disabled={draftAuto}
               step={1}
               value={isNaN(draftBounds.min) ? '' : draftBounds.min}
@@ -306,7 +309,7 @@ export const LegendControls = ({
             <SwatchLabel
               color={last(paletteColors)!}
               label={i18n.translate('xpack.infra.legendControls.maxLabel', {
-                defaultMessage: 'Maxium',
+                defaultMessage: 'Maximum',
               })}
             />
           }
@@ -315,6 +318,7 @@ export const LegendControls = ({
         >
           <div style={{ maxWidth: 150 }}>
             <EuiFieldNumber
+              data-test-subj="infraLegendControlsFieldNumber"
               disabled={draftAuto}
               step={1}
               isInvalid={!boundsValidRange}
@@ -329,7 +333,12 @@ export const LegendControls = ({
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty type="submit" size="s" onClick={handleCancelClick}>
+            <EuiButtonEmpty
+              data-test-subj="infraLegendControlsCancelButton"
+              type="submit"
+              size="s"
+              onClick={handleCancelClick}
+            >
               <FormattedMessage
                 id="xpack.infra.legendControls.cancelButton"
                 defaultMessage="Cancel"
@@ -352,7 +361,16 @@ export const LegendControls = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiForm>
+      </StyledEuiForm>
     </EuiPopover>
   );
 };
+
+const StyledEuiForm = euiStyled(EuiForm)`
+  min-width: 400px;
+  @media (max-width: 480px) {
+    min-width: 100%;
+    max-width: 100%;
+    width: 100vw;
+  }
+`;

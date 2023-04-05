@@ -10,8 +10,6 @@ import { HOSTS_URL } from '../urls/navigation';
 import { waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
-import { createCustomRuleEnabled } from './api_calls/rules';
-import { getNewRule } from '../objects/rule';
 
 export const openSourcerer = (sourcererScope?: string) => {
   if (sourcererScope != null && sourcererScope === 'timeline') {
@@ -22,7 +20,14 @@ export const openSourcerer = (sourcererScope?: string) => {
   cy.get(SOURCERER.trigger).click();
   cy.get(SOURCERER.wrapper).should('be.visible');
 };
-export const openTimelineSourcerer = () => {
+
+export const selectDataView = (dataView: string, sourcererScope?: string) => {
+  openSourcerer(sourcererScope);
+  openDataViewSelection();
+  cy.get(SOURCERER.selectListOption).contains(dataView).click();
+};
+
+const openTimelineSourcerer = () => {
   cy.get(SOURCERER.triggerTimeline).should('be.enabled');
   cy.get(SOURCERER.triggerTimeline).should('be.visible');
   cy.get(SOURCERER.triggerTimeline).first().click();
@@ -33,7 +38,7 @@ export const openAdvancedSettings = () => {
   cy.get(SOURCERER.advancedSettings).click();
 };
 
-export const clickOutOfSelector = () => {
+const clickOutOfSelector = () => {
   return cy.get(SOURCERER.popoverTitle).first().click();
 };
 
@@ -101,31 +106,11 @@ export const addIndexToDefault = (index: string) => {
           cy.get('[data-test-subj="toastCloseButton]"').click();
         }
       });
+
       cy.get('button[data-test-subj="advancedSetting-saveButton"]').click();
-      cy.get('.euiToast .euiButton--primary').click();
+      cy.get('button[data-test-subj="windowReloadButton"]').click();
       waitForPage(HOSTS_URL);
     });
-};
-
-export const deleteAlertsIndex = () => {
-  const alertsIndexUrl = `${Cypress.env(
-    'ELASTICSEARCH_URL'
-  )}/.internal.alerts-security.alerts-default-000001`;
-
-  cy.request({
-    url: alertsIndexUrl,
-    method: 'GET',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status === 200) {
-      cy.request({
-        url: alertsIndexUrl,
-        method: 'DELETE',
-        headers: { 'kbn-xsrf': 'cypress-creds' },
-      });
-    }
-  });
 };
 
 export const refreshUntilAlertsIndexExists = async () => {
@@ -145,7 +130,13 @@ export const refreshUntilAlertsIndexExists = async () => {
   );
 };
 
-export const waitForAlertsIndexToExist = () => {
-  createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
-  refreshUntilAlertsIndexExists();
+export const deleteRuntimeField = (dataView: string, fieldName: string) => {
+  const deleteRuntimeFieldPath = `/api/data_views/data_view/${dataView}/runtime_field/${fieldName}`;
+
+  cy.request({
+    url: deleteRuntimeFieldPath,
+    method: 'DELETE',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
 };

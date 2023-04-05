@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { range, omit } from 'lodash';
-import { apm, timerange } from '@kbn/apm-synthtrace';
-import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
 import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
+import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
 import { Environment } from '@kbn/apm-plugin/common/environment_rt';
-import { last } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import expect from '@kbn/expect';
+import { last, omit, range } from 'lodash';
 import { ApmApiError } from '../../common/apm_api_supertest';
-import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const ml = getService('ml');
+  const es = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
 
@@ -101,9 +101,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const NORMAL_RATE = 1;
 
       before(async () => {
-        const serviceA = apm.service('a', 'production', 'java').instance('a');
+        const serviceA = apm
+          .service({ name: 'a', environment: 'production', agentName: 'java' })
+          .instance('a');
 
-        const serviceB = apm.service('b', 'development', 'go').instance('b');
+        const serviceB = apm
+          .service({ name: 'b', environment: 'development', agentName: 'go' })
+          .instance('b');
 
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
@@ -117,13 +121,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             return [
               ...range(0, count).flatMap((_) =>
                 serviceA
-                  .transaction('tx', 'request')
+                  .transaction({ transactionName: 'tx', transactionType: 'request' })
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
               ),
               serviceB
-                .transaction('tx', 'Worker')
+                .transaction({ transactionName: 'tx', transactionType: 'Worker' })
                 .timestamp(timestamp)
                 .duration(duration)
                 .success(),
@@ -172,10 +176,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with ml jobs', () => {
         before(async () => {
-          await Promise.all([
-            createAndRunApmMlJob({ environment: 'production', ml }),
-            createAndRunApmMlJob({ environment: 'development', ml }),
-          ]);
+          await createAndRunApmMlJobs({
+            es,
+            ml,
+            environments: ['production', 'development'],
+          });
         });
 
         after(async () => {

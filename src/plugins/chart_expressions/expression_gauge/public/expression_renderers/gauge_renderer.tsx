@@ -13,11 +13,10 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { ExpressionGaugePluginStart } from '../plugin';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
 import { getFormatService, getPaletteService } from '../services';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 interface ExpressionGaugeRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionGaugePluginStart>;
@@ -57,9 +56,11 @@ export const gaugeRenderer: (
       const visualizationType = extractVisualizationType(executionContext);
 
       if (containerType && visualizationType) {
-        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+        const events = [
           `render_${visualizationType}_${type}`,
-        ]);
+          config.canNavigateToLens ? `render_${visualizationType}_${type}_convertable` : undefined,
+        ].filter<string>((event): event is string => Boolean(event));
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
       }
 
       handlers.done();

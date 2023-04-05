@@ -1,0 +1,97 @@
+{
+  "id": "@kbn/es",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.run",
+        "type": "Function",
+        "tags": [],
+        "label": "run",
+        "description": [],
+        "signature": [
+          "(defaults: {}) => Promise<void>"
+        ],
+        "path": "packages/kbn-es/src/cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.run.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "defaults",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "packages/kbn-es/src/cli.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.SYSTEM_INDICES_SUPERUSER",
+        "type": "string",
+        "tags": [],
+        "label": "SYSTEM_INDICES_SUPERUSER",
+        "description": [],
+        "path": "packages/kbn-es/src/utils/native_realm.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.Cluster",
+        "type": "Object",
+        "tags": [],
+        "label": "Cluster",
+        "description": [],
+        "signature": [
+          "typeof ",
+          {
+            "pluginId": "@kbn/es",
+            "scope": "common",
+            "docId": "kibKbnEsPluginApi",
+            "section": "def-common.Cluster",
+            "text": "Cluster"
+          }
+        ],
+        "path": "packages/kbn-es/src/cluster.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

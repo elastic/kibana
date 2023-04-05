@@ -34,6 +34,7 @@ import './page_template.scss';
  */
 
 export type PageTemplateProps = KibanaPageTemplateProps & {
+  customPageSections?: boolean; // If false, automatically wraps children in an EuiPageSection
   hideFlashMessages?: boolean;
   isLoading?: boolean;
   emptyState?: React.ReactNode;
@@ -46,6 +47,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
   children,
   className,
+  customPageSections,
   hideFlashMessages,
   isLoading,
   isEmptyState,
@@ -63,11 +65,11 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       restrictWidth={false}
       {...pageTemplateProps}
       className={classNames('enterpriseSearchPageTemplate', className)}
-      pageContentProps={{
-        ...pageTemplateProps.pageContentProps,
+      mainProps={{
+        ...pageTemplateProps.mainProps,
         className: classNames(
           'enterpriseSearchPageTemplate__content',
-          pageTemplateProps.pageContentProps?.className
+          pageTemplateProps.mainProps?.className
         ),
       }}
       isEmptyState={isEmptyState && !isLoading}
@@ -88,7 +90,15 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         </>
       )}
       {!hideFlashMessages && <FlashMessages />}
-      {isLoading ? <Loading /> : showCustomEmptyState ? emptyState : children}
+      {isLoading ? (
+        <Loading />
+      ) : showCustomEmptyState ? (
+        emptyState
+      ) : customPageSections ? (
+        children
+      ) : (
+        <KibanaPageTemplate.Section>{children}</KibanaPageTemplate.Section>
+      )}
     </KibanaPageTemplate>
   );
 };

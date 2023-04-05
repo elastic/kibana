@@ -10,9 +10,9 @@ import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EuiComboBox, EuiComboBoxProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FieldIcon } from '@kbn/unified-field-list-plugin/public';
 import classNames from 'classnames';
 import { DataType } from '../../types';
-import { LensFieldIcon } from './lens_field_icon';
 import { TruncatedLabel } from './truncated_label';
 import type { FieldOptionValue, FieldOption } from './types';
 
@@ -101,7 +101,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
         isClearable={false}
         data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
         placeholder={i18n.translate('xpack.lens.fieldPicker.fieldPlaceholder', {
-          defaultMessage: 'Field',
+          defaultMessage: 'Select a field',
         })}
         options={styledOptions}
         isInvalid={fieldIsInvalid}
@@ -118,7 +118,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={null}>
-                <LensFieldIcon
+                <FieldIcon
                   type={(option.value as unknown as { dataType: DataType }).dataType}
                   fill="none"
                 />

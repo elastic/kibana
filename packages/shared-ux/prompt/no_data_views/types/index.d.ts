@@ -26,6 +26,8 @@ type DataView = unknown;
 interface DataViewEditorOptions {
   /** Handler to be invoked when the Data View Editor completes a save operation. */
   onSave: (dataView: DataView) => void;
+  /** if set to true allows creation of an ad-hoc data view from data view editor */
+  allowAdHocDataView?: boolean;
 }
 
 /**
@@ -75,4 +77,6 @@ export interface NoDataViewsPromptComponentProps {
 export interface NoDataViewsPromptProps {
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
+  /** if set to true allows creation of an ad-hoc data view from data view editor */
+  allowAdHocDataView?: boolean;
 }

@@ -66,16 +66,6 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       builtinESPrivileges,
     } = this.props;
 
-    const indexProps = {
-      role,
-      indicesAPIClient,
-      validator,
-      indexPatterns,
-      license,
-      onChange,
-      availableIndexPrivileges: builtinESPrivileges.index,
-    };
-
     return (
       <Fragment>
         <EuiDescribedFormGroup
@@ -102,6 +92,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               role={this.props.role}
               onChange={this.onClusterPrivilegesChange}
               builtinClusterPrivileges={builtinESPrivileges.cluster}
+              editable={editable}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -127,27 +118,28 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             </p>
           }
         >
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiComboBox
-              placeholder={
-                this.props.editable
-                  ? i18n.translate(
-                      'xpack.security.management.editRole.elasticSearchPrivileges.addUserTitle',
-                      { defaultMessage: 'Add a user…' }
-                    )
-                  : undefined
-              }
-              options={this.props.runAsUsers.map((username) => ({
-                id: username,
-                label: username,
-                isGroupLabelOption: false,
-              }))}
-              selectedOptions={this.props.role.elasticsearch.run_as.map((u) => ({ label: u }))}
-              onCreateOption={this.onCreateRunAsOption}
-              onChange={this.onRunAsUserChange}
-              isDisabled={!editable}
-            />
-          </EuiFormRow>
+          <EuiComboBox
+            aria-label={i18n.translate(
+              'xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesAriaLabel',
+              { defaultMessage: 'Run as privileges' }
+            )}
+            placeholder={
+              this.props.editable
+                ? i18n.translate(
+                    'xpack.security.management.editRole.elasticSearchPrivileges.addUserTitle',
+                    { defaultMessage: 'Add a user…' }
+                  )
+                : undefined
+            }
+            options={this.props.runAsUsers.map((username) => ({
+              label: username,
+              isGroupLabelOption: false,
+            }))}
+            selectedOptions={this.props.role.elasticsearch.run_as.map((u) => ({ label: u }))}
+            onCreateOption={this.onCreateRunAsOption}
+            onChange={this.onRunAsUserChange}
+            isDisabled={!editable}
+          />
         </EuiDescribedFormGroup>
 
         <EuiSpacer />
@@ -171,17 +163,27 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           </p>
         </EuiText>
 
-        <IndexPrivileges {...indexProps} />
+        <IndexPrivileges
+          role={role}
+          indicesAPIClient={indicesAPIClient}
+          validator={validator}
+          indexPatterns={indexPatterns}
+          license={license}
+          onChange={onChange}
+          availableIndexPrivileges={builtinESPrivileges.index}
+          editable={editable}
+        />
 
-        <EuiHorizontalRule />
-
-        {this.props.editable && (
-          <EuiButton iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
-            <FormattedMessage
-              id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
-              defaultMessage="Add index privilege"
-            />
-          </EuiButton>
+        {editable && (
+          <>
+            <EuiHorizontalRule />
+            <EuiButton iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
+              <FormattedMessage
+                id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+                defaultMessage="Add index privilege"
+              />
+            </EuiButton>
+          </>
         )}
       </Fragment>
     );

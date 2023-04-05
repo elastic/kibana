@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { act } from '@testing-library/react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText } from '@elastic/eui';
+import { act, waitFor } from '@testing-library/react';
 
 import { AutocompleteFieldMatchAnyComponent } from '.';
 import { getField, fields } from '../fields/index.mock';
@@ -23,6 +23,9 @@ jest.mock('../hooks/use_field_value_autocomplete', () => {
     useFieldValueAutocomplete: jest.fn(),
   };
 });
+jest.mock('../translations', () => ({
+  FIELD_SPACE_WARNING: 'Warning: there is a space',
+}));
 
 describe('AutocompleteFieldMatchAnyComponent', () => {
   let wrapper: ReactWrapper;
@@ -272,5 +275,129 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
       query: 'value 1',
       selectedField: getField('machine.os.raw'),
     });
+  });
+  test('should show the warning helper text if the new value contains spaces when change', async () => {
+    (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
+      false,
+      true,
+      [' value 1 ', 'value 2'],
+      getValueSuggestionsMock,
+    ]);
+    const mockOnChange = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldMatchAnyComponent
+        autocompleteService={{
+          ...autocompleteStartMock,
+        }}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={mockOnChange}
+        placeholder="Placeholder text"
+        rowLabel={'Row Label'}
+        selectedField={getField('machine.os.raw')}
+        selectedValue={[]}
+      />
+    );
+
+    await waitFor(() =>
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: ' value 1 ' }])
+    );
+    wrapper.update();
+    expect(mockOnChange).toHaveBeenCalledWith([' value 1 ']);
+    const euiFormHelptext = wrapper.find(EuiFormHelpText);
+    expect(euiFormHelptext.length).toBeTruthy();
+  });
+  test('should show the warning helper text if the new value contains spaces when searching a new query', () => {
+    wrapper = mount(
+      <AutocompleteFieldMatchAnyComponent
+        autocompleteService={{
+          ...autocompleteStartMock,
+        }}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        placeholder="Placeholder text"
+        rowLabel={'Row Label'}
+        selectedField={getField('machine.os.raw')}
+        selectedValue={[]}
+      />
+    );
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange(' value 1');
+    });
+
+    wrapper.update();
+    const euiFormHelptext = wrapper.find(EuiFormHelpText);
+    expect(euiFormHelptext.length).toBeTruthy();
+    expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
+  });
+  test('should show the warning helper text if selectedValue contains spaces when editing', () => {
+    wrapper = mount(
+      <AutocompleteFieldMatchAnyComponent
+        autocompleteService={{
+          ...autocompleteStartMock,
+        }}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        placeholder="Placeholder text"
+        rowLabel={'Row Label'}
+        selectedField={getField('machine.os.raw')}
+        selectedValue={['value with trailing space ', 'value 1']}
+      />
+    );
+    const euiFormHelptext = wrapper.find(EuiFormHelpText);
+    expect(euiFormHelptext.length).toBeTruthy();
+    expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
+  });
+  test('should not show the warning helper text if selectedValue is falsy', () => {
+    wrapper = mount(
+      <AutocompleteFieldMatchAnyComponent
+        autocompleteService={{
+          ...autocompleteStartMock,
+        }}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        placeholder="Placeholder text"
+        rowLabel={'Row Label'}
+        selectedField={getField('machine.os.raw')}
+        selectedValue={[]}
+      />
+    );
+    const euiFormHelptext = wrapper.find(EuiFormHelpText);
+    expect(euiFormHelptext.length).toBeFalsy();
   });
 });

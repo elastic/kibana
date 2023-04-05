@@ -20,6 +20,7 @@ const initialState: DataState = {
   },
   resolverComponentInstanceID: undefined,
   indices: [],
+  detectedBounds: undefined,
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -101,6 +102,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         // This cannot model multiple in-flight requests
         pendingRequestParameters: undefined,
       },
+      detectedBounds: action.payload.detectedBounds,
     };
     return nextState;
   } else if (action.type === 'serverFailedToReturnResolverData') {

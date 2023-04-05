@@ -11,15 +11,23 @@ import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/co
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map';
 import { notifyFeatureUsage } from '../../feature';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
+import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceMap } from './get_service_map';
-import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
-import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
+import {
+  getServiceMapDependencyNodeInfo,
+  ServiceMapServiceDependencyInfoResponse,
+} from './get_service_map_dependency_node_info';
+import {
+  getServiceMapServiceNodeInfo,
+  ServiceMapServiceNodeInfoResponse,
+} from './get_service_map_service_node_info';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, rangeRt } from '../default_api_types';
+import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { TransformServiceMapResponse } from './transform_service_map_responses';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -28,63 +36,14 @@ const serviceMapRoute = createApmServerRoute({
       t.partial({
         serviceName: t.string,
         serviceGroup: t.string,
+        kuery: kueryRt.props.kuery,
       }),
       environmentRt,
       rangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    elements: Array<
-      | import('./../../../common/service_map').ConnectionElement
-      | {
-          data: {
-            id: string;
-            'span.type': string;
-            label: string;
-            groupedConnections: Array<
-              | {
-                  'service.name': string;
-                  'service.environment': string | null;
-                  'agent.name': string;
-                  serviceAnomalyStats?:
-                    | import('./../../../common/anomaly_detection/index').ServiceAnomalyStats
-                    | undefined;
-                  label: string | undefined;
-                  id?: string | undefined;
-                  parent?: string | undefined;
-                  position?:
-                    | import('./../../../../../../node_modules/@types/cytoscape/index').Position
-                    | undefined;
-                }
-              | {
-                  'span.destination.service.resource': string;
-                  'span.type': string;
-                  'span.subtype': string;
-                  label: string | undefined;
-                  id?: string | undefined;
-                  parent?: string | undefined;
-                  position?:
-                    | import('./../../../../../../node_modules/@types/cytoscape/index').Position
-                    | undefined;
-                }
-              | {
-                  id: string;
-                  source: string | undefined;
-                  target: string | undefined;
-                  label: string | undefined;
-                  bidirectional?: boolean | undefined;
-                  isInverseEdge?: boolean | undefined;
-                }
-              | undefined
-            >;
-          };
-        }
-      | { data: { id: string; source: string; target: string } }
-    >;
-  }> => {
+  handler: async (resources): Promise<TransformServiceMapResponse> => {
     const { config, context, params, logger } = resources;
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
@@ -107,6 +66,7 @@ const serviceMapRoute = createApmServerRoute({
         environment,
         start,
         end,
+        kuery,
       },
     } = params;
 
@@ -114,38 +74,39 @@ const serviceMapRoute = createApmServerRoute({
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [setup, serviceGroup, maxNumberOfServices] = await Promise.all([
-      setupRequest(resources),
-      serviceGroupId
-        ? getServiceGroup({
-            savedObjectsClient,
-            serviceGroupId,
-          })
-        : Promise.resolve(null),
-      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-    ]);
+    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] =
+      await Promise.all([
+        getMlClient(resources),
+        getApmEventClient(resources),
+        serviceGroupId
+          ? getServiceGroup({
+              savedObjectsClient,
+              serviceGroupId,
+            })
+          : Promise.resolve(null),
+        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+      ]);
 
-    const serviceNames = [
-      ...(serviceName ? [serviceName] : []),
-      ...(serviceGroup?.serviceNames ?? []),
-    ];
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
+      config,
       start,
       end,
-      kuery: '',
+      kuery,
     });
     return getServiceMap({
-      setup,
-      serviceNames,
+      mlClient,
+      config,
+      apmEventClient,
+      serviceName,
       environment,
       searchAggregatedTransactions,
       logger,
       start,
       end,
       maxNumberOfServices,
+      serviceGroupKuery: serviceGroup?.kuery,
+      kuery,
     });
   },
 });
@@ -159,14 +120,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     query: t.intersection([environmentRt, rangeRt, offsetRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    currentPeriod: import('./../../../common/service_map').NodeStats;
-    previousPeriod:
-      | import('./../../../common/service_map').NodeStats
-      | undefined;
-  }> => {
+  handler: async (resources): Promise<ServiceMapServiceNodeInfoResponse> => {
     const { config, context, params } = resources;
 
     if (!config.serviceMapEnabled) {
@@ -177,38 +131,29 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       path: { serviceName },
       query: { environment, start, end, offset },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
+      config,
       start,
       end,
-      kuery: '',
     });
 
-    const commonProps = {
+    return getServiceMapServiceNodeInfo({
       environment,
-      setup,
+      apmEventClient,
       serviceName,
       searchAggregatedTransactions,
       start,
       end,
-    };
-
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceMapServiceNodeInfo(commonProps),
-      offset
-        ? getServiceMapServiceNodeInfo({ ...commonProps, offset })
-        : undefined,
-    ]);
-
-    return { currentPeriod, previousPeriod };
+      offset,
+    });
   },
 });
 
@@ -225,12 +170,7 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<{
-    currentPeriod: import('./../../../common/service_map').NodeStats;
-    previousPeriod:
-      | import('./../../../common/service_map').NodeStats
-      | undefined;
-  }> => {
+  ): Promise<ServiceMapServiceDependencyInfoResponse> => {
     const { config, context, params } = resources;
 
     if (!config.serviceMapEnabled) {
@@ -240,22 +180,20 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
     if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       query: { dependencyName, environment, start, end, offset },
     } = params;
 
-    const commonProps = { environment, setup, dependencyName, start, end };
-
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceMapDependencyNodeInfo(commonProps),
-      offset
-        ? getServiceMapDependencyNodeInfo({ ...commonProps, offset })
-        : undefined,
-    ]);
-
-    return { currentPeriod, previousPeriod };
+    return getServiceMapDependencyNodeInfo({
+      apmEventClient,
+      dependencyName,
+      start,
+      end,
+      environment,
+      offset,
+    });
   },
 });
 

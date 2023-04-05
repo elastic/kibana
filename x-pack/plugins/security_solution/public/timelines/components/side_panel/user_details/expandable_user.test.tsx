@@ -15,6 +15,7 @@ import { ExpandableUserDetails } from './expandable_user';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 const mockDispatch = jest.fn();
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 jest.mock('react-redux', () => {
@@ -32,8 +33,9 @@ jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () 
     children: (args: {
       anomaliesData: Anomalies;
       isLoadingAnomaliesData: boolean;
+      jobNameById: Record<string, string | undefined>;
     }) => React.ReactNode;
-  }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false }),
+  }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
 }));
 
 describe('Expandable Host Component', () => {
@@ -88,7 +90,7 @@ describe('Expandable Host Component', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'x-pack/security_solution/local/inputs/SET_ABSOLUTE_RANGE_DATE_PICKER',
         payload: {
-          id: 'global',
+          id: InputsModelId.global,
           from: '2019-06-15T06:00:00.000Z',
           to: '2019-06-17T06:00:00.000Z',
         },

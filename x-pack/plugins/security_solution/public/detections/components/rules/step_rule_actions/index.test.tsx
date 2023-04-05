@@ -31,6 +31,10 @@ jest.mock('../../../../common/lib/kibana', () => ({
   }),
 }));
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 const actionMessageParams = {
   context: [],
   state: [],

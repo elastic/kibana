@@ -9,11 +9,11 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { CoreKibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-import { getDecryptedAttributes, getFakeKibanaRequest, loadRule } from './rule_loader';
+import { getRuleAttributes, getFakeKibanaRequest, loadRule } from './rule_loader';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { rulesClientMock } from '../rules_client.mock';
-import { Rule, RulesClientApi } from '../types';
+import { Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
 import { getReasonFromError } from '../lib/error_with_reason';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
@@ -79,7 +79,7 @@ describe('rule_loader', () => {
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
         expect(result.rule.params).toBe(ruleParams);
-        expect(result.rule.monitoring?.execution.history.length).toBe(MONITORING_HISTORY_LIMIT - 1);
+        expect(result.rule.monitoring?.run.history.length).toBe(MONITORING_HISTORY_LIMIT - 1);
       });
 
       test('without API key, any execution history, or validator', async () => {
@@ -102,7 +102,7 @@ describe('rule_loader', () => {
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
         expect(result.rule.params).toBe(ruleParams);
-        expect(result.rule.monitoring?.execution.history.length).toBe(0);
+        expect(result.rule.monitoring?.run.history.length).toBe(0);
       });
     });
 
@@ -133,25 +133,6 @@ describe('rule_loader', () => {
       } catch (err) {
         outcome = 'failure';
         expect(getReasonFromError(err)).toBe(RuleExecutionStatusErrorReasons.Disabled);
-      }
-      expect(outcome).toBe('failure');
-    });
-
-    test('throws when user cannot read rule', async () => {
-      context.getRulesClientWithRequest = function (fakeRequest: unknown): RulesClientApi {
-        rulesClient.get.mockImplementation(async (args: unknown) => {
-          throw new Error('rule-client-error: 1001');
-        });
-        return rulesClient;
-      };
-
-      let outcome = 'success';
-      try {
-        await loadRule({ ...DefaultLoadRuleParams, context });
-      } catch (err) {
-        outcome = 'failure';
-        expect(err.message).toBe('rule-client-error: 1001');
-        expect(getReasonFromError(err)).toBe(RuleExecutionStatusErrorReasons.Read);
       }
       expect(outcome).toBe('failure');
     });
@@ -196,11 +177,14 @@ describe('rule_loader', () => {
   describe('getDecryptedAttributes()', () => {
     test('succeeds with default space', async () => {
       contextMock.spaceIdToNamespace.mockReturnValue(undefined);
-      const result = await getDecryptedAttributes(context, ruleId, 'default');
+      const result = await getRuleAttributes(context, ruleId, 'default');
 
       expect(result.apiKey).toBe(apiKey);
       expect(result.consumer).toBe(consumer);
       expect(result.enabled).toBe(true);
+      expect(result.fakeRequest).toEqual(expect.any(CoreKibanaRequest));
+      expect(result.rule.alertTypeId).toBe(ruleTypeId);
+      expect(result.rulesClient).toBeTruthy();
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual(['default']);
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
@@ -209,11 +193,14 @@ describe('rule_loader', () => {
 
     test('succeeds with non-default space', async () => {
       contextMock.spaceIdToNamespace.mockReturnValue(spaceId);
-      const result = await getDecryptedAttributes(context, ruleId, spaceId);
+      const result = await getRuleAttributes(context, ruleId, spaceId);
 
       expect(result.apiKey).toBe(apiKey);
       expect(result.consumer).toBe(consumer);
       expect(result.enabled).toBe(true);
+      expect(result.fakeRequest).toEqual(expect.any(CoreKibanaRequest));
+      expect(result.rule.alertTypeId).toBe(ruleTypeId);
+      expect(result.rulesClient).toBeTruthy();
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual([spaceId]);
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
@@ -227,7 +214,7 @@ describe('rule_loader', () => {
         }
       );
 
-      const promise = getDecryptedAttributes(context, ruleId, spaceId);
+      const promise = getRuleAttributes(context, ruleId, spaceId);
       await expect(promise).rejects.toThrow('wops');
     });
   });
@@ -247,17 +234,6 @@ describe('rule_loader', () => {
               "authorization": "ApiKey rule-apikey",
             },
             "path": "/",
-            "raw": Object {
-              "req": Object {
-                "url": "/",
-              },
-            },
-            "route": Object {
-              "settings": Object {},
-            },
-            "url": Object {
-              "href": "/",
-            },
           },
         ]
       `);
@@ -277,17 +253,6 @@ describe('rule_loader', () => {
               "authorization": "ApiKey rule-apikey",
             },
             "path": "/",
-            "raw": Object {
-              "req": Object {
-                "url": "/",
-              },
-            },
-            "route": Object {
-              "settings": Object {},
-            },
-            "url": Object {
-              "href": "/",
-            },
           },
         ]
       `);
@@ -306,17 +271,6 @@ describe('rule_loader', () => {
           Object {
             "headers": Object {},
             "path": "/",
-            "raw": Object {
-              "req": Object {
-                "url": "/",
-              },
-            },
-            "route": Object {
-              "settings": Object {},
-            },
-            "url": Object {
-              "href": "/",
-            },
           },
         ]
       `);
@@ -340,20 +294,18 @@ function getTaskRunnerContext(ruleParameters: unknown, historyElements: number) 
     getRulesClientWithRequest,
   };
 
-  function getRulesClientWithRequest(fakeRequest: unknown) {
+  function getRulesClientWithRequest() {
     // only need get() mocked
-    rulesClient.get.mockImplementation(async (args: unknown) => {
-      return {
-        name: ruleName,
-        alertTypeId: ruleTypeId,
-        params: ruleParameters,
-        monitoring: {
-          execution: {
-            history: new Array(historyElements),
-          },
+    rulesClient.getAlertFromRaw.mockReturnValue({
+      name: ruleName,
+      alertTypeId: ruleTypeId,
+      params: ruleParameters,
+      monitoring: {
+        run: {
+          history: new Array(historyElements),
         },
-      } as Rule;
-    });
+      },
+    } as Rule);
     return rulesClient;
   }
 }

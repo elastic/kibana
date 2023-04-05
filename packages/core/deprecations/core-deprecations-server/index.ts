@@ -11,4 +11,6 @@ export type {
   GetDeprecationsContext,
   DeprecationsServiceSetup,
   DeprecationRegistryProvider,
+  DeprecationsClient,
+  DeprecationsRequestHandlerContext,
 } from './src';

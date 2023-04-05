@@ -11,7 +11,7 @@ import { Logger } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AggregationResultOf } from '@kbn/core/types/elasticsearch';
+import type { AggregationResultOf } from '@kbn/es-types';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { HealthStatus } from './monitoring_stats_stream';
@@ -62,7 +62,7 @@ export interface WorkloadAggregation {
       };
     };
     schedule: {
-      terms: { field: string };
+      terms: { field: string; size: number };
     };
     idleTasks: {
       filter: {
@@ -141,7 +141,7 @@ export function createWorkloadAggregator(
             },
           },
           schedule: {
-            terms: { field: 'task.schedule.interval' },
+            terms: { field: 'task.schedule.interval', size: 100 },
           },
           nonRecurringTasks: {
             missing: { field: 'task.schedule' },

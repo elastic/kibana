@@ -42,6 +42,7 @@ export function useEmbeddableExecutionContext<T extends EmbeddableInput>(
       ...parentExecutionContext,
       child,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentExecutionContext, id]);
 
   useExecutionContext(executionContext, embeddableExecutionContext);

@@ -1,3 +1,5 @@
+title: Update case comment request properties for user comments
+description: Defines properties for case comment requests when type is user.
 type: object
 properties:
   comment:
