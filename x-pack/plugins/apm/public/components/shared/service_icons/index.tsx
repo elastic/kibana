@@ -158,7 +158,7 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
       },
       isVisible:
         !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
-      title: i18n.translate('xpack.apm.serviceIcons.service', {
+      title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {
         defaultMessage: 'OpenTelemetry',
       }),
       component: (

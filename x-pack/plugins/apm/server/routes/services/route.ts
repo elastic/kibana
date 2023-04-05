@@ -240,7 +240,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
   handler: async (resources): Promise<ServiceMetadataDetails> => {
     const apmEventClient = await getApmEventClient(resources);
     const infraMetricsClient = createInfraMetricsClient(resources);
-    const { params, config } = resources;
+    const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
