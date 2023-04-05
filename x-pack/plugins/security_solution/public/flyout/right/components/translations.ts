@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+/* Header */
+
 export const EXPAND_DETAILS_BUTTON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.expandDetailButton',
   { defaultMessage: 'Expand alert details' }
@@ -35,6 +37,8 @@ export const RISK_SCORE_TITLE = i18n.translate(
     defaultMessage: 'Risk score',
   }
 );
+
+/* Description section */
 
 export const DESCRIPTION_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.descriptionTitle',
@@ -80,6 +84,15 @@ export const DOCUMENT_REASON_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.documentReasonTitle',
   {
     defaultMessage: 'Document reason',
+  }
+);
+
+/* Investigation section */
+
+export const INVESTIGATION_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.investigationSectionTitle',
+  {
+    defaultMessage: 'Investigation',
   }
 );
 
