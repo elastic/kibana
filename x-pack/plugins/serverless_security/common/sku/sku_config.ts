@@ -13,11 +13,13 @@ export const SKU_APP_FEATURES: Record<ServerlessSecuritySku, AppFeatureKeys> = {
     cases_base: false,
     rules_load_prepackaged: false,
     rules_response_actions: false,
+    isolate_host: false,
   },
 
   cloudEssentials: {
     cases_base: true,
     rules_load_prepackaged: true,
     rules_response_actions: true,
+    isolate_host: true,
   },
 } as const;

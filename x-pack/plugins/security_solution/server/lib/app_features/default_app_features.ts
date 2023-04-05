@@ -13,4 +13,5 @@ export const DEFAULT_APP_FEATURES: AppFeatureKeys = {
   cases_base: true,
   rules_load_prepackaged: true,
   rules_response_actions: true,
+  isolate_host: true,
 };

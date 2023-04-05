@@ -18,6 +18,10 @@ export interface AppFeatureKeys {
    * Enables the ability to add response actions to rules
    */
   rules_response_actions: boolean;
+  /**
+   * Enables the ability to perform the isolate hosts operation
+   */
+  isolate_host: boolean;
 }
 
 export type AppFeatureKey = keyof AppFeatureKeys;

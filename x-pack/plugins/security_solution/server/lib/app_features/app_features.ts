@@ -18,7 +18,7 @@ import type {
 } from '@kbn/features-plugin/server';
 import type { AppFeatureKey, AppFeatureKeys, ExperimentalFeatures } from '../../../common';
 import { DEFAULT_APP_FEATURES } from './default_app_features';
-import type { AppFeatureKibanaConfig, AppFeaturesConfig } from './types';
+import type { AppFeatureKibanaConfig, AppFeaturesConfig, SubFeaturesPrivileges } from './types';
 import {
   getSecurityAppFeaturesConfig,
   getSecurityBaseKibanaFeature,
@@ -96,17 +96,51 @@ export class AppFeatures {
   }
 }
 
-// Merges the source appFeature config into the kibana feature config destination.
-function mergeFeatureConfig(dest: KibanaFeatureConfig, source: AppFeatureKibanaConfig) {
-  return mergeWith(dest, source, featureConfigMerger);
+/**
+ * Merges the `source` appFeature config into the kibana feature config `dest` object.
+ * This function is not pure, it mutates the destination object.
+ * Consider a deep clone of the `dest` object before calling this function.
+ * */
+function mergeFeatureConfig(dest: KibanaFeatureConfig, source: AppFeatureKibanaConfig): void {
+  const { subFeaturesPrivileges, ...appFeatureConfig } = cloneDeep(source);
+  mergeWith(dest, appFeatureConfig, featureConfigMerger);
+  if (subFeaturesPrivileges) {
+    mergeSubFeaturesPrivileges(dest.subFeatures, subFeaturesPrivileges);
+  }
 }
 
 function featureConfigMerger(objValue: unknown, srcValue: unknown) {
   if (isArray(srcValue)) {
     if (isArray(objValue)) {
-      // uniq is using the reference to compare subFeatures objects
       return uniq(objValue.concat(srcValue));
     }
     return srcValue;
   }
+}
+
+function mergeSubFeaturesPrivileges(
+  subFeatures: KibanaFeatureConfig['subFeatures'],
+  subFeaturesPrivileges: SubFeaturesPrivileges
+) {
+  if (!subFeatures) {
+    // TODO: log "trying to merge subFeaturesPrivileges but no subFeatures found"
+    return;
+  }
+  subFeaturesPrivileges.forEach((subFeaturePrivilege) => {
+    const merged = subFeatures.find(({ privilegeGroups }) =>
+      privilegeGroups.some(({ privileges }) => {
+        const subFeaturePrivilegeToUpdate = privileges.find(
+          ({ id }) => id === subFeaturePrivilege.id
+        );
+        if (subFeaturePrivilegeToUpdate) {
+          mergeWith(subFeaturePrivilegeToUpdate, subFeaturePrivilege, featureConfigMerger);
+          return true;
+        }
+        return false;
+      })
+    );
+    if (!merged) {
+      // TODO: log a "trying to merge subFeaturesPrivileges but the subFeature privilege was not found"
+    }
+  });
 }

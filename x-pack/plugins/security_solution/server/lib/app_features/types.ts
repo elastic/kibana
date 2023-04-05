@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig, SubFeaturePrivilegeConfig } from '@kbn/features-plugin/common';
 import type { AppFeatureKey } from '../../../common';
 import type { RecursivePartial } from '../../../common/utility_types';
 
-export type AppFeatureKibanaConfig = RecursivePartial<KibanaFeatureConfig>;
+export type SubFeaturesPrivileges = RecursivePartial<SubFeaturePrivilegeConfig>;
+export type AppFeatureKibanaConfig = RecursivePartial<KibanaFeatureConfig> & {
+  subFeaturesPrivileges?: SubFeaturesPrivileges[];
+};
 export type AppFeaturesConfig = Partial<Record<AppFeatureKey, AppFeatureKibanaConfig>>;
