@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import {
-  ENTITIES_TEST_ID,
+  ENTITIES_HEADER_TEST_ID,
   ENTITY_PANEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
@@ -32,7 +32,7 @@ describe('<EntitiesOverview />', () => {
         </RightPanelContext.Provider>
       </TestProviders>
     );
-
+    expect(getByTestId(ENTITIES_HEADER_TEST_ID)).toHaveTextContent('Entities');
     expect(getAllByTestId(ENTITY_PANEL_TEST_ID)).toHaveLength(2);
     expect(queryByText('user1')).toBeInTheDocument();
     expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
@@ -94,7 +94,7 @@ describe('<EntitiesOverview />', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId(ENTITIES_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_HEADER_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should not render if eventId is null', () => {
@@ -111,6 +111,6 @@ describe('<EntitiesOverview />', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId(ENTITIES_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_HEADER_TEST_ID)).not.toBeInTheDocument();
   });
 });

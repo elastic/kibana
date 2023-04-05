@@ -169,6 +169,9 @@ export const openPrevalence = () =>
     .should('be.visible')
     .click();
 
+/**
+ * Open the Correlations tab  under the Visuablize tab in the document details expandable flyout left section
+ */
 export const openCorrelations = () =>
   cy
     .get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON)
