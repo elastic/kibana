@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CONTENT_TYPE_CSV } from 'packages/kbn-reporting/common';
 import * as reportTypes from './report_types';
 import * as jobTypes from './job_types';
 
@@ -18,11 +19,6 @@ export const REPORTING_SYSTEM_INDEX = '.reporting';
 
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
-
-export const CONTENT_TYPE_CSV = 'text/csv';
-export const CSV_REPORTING_ACTION = 'downloadCsvReport';
-export const CSV_BOM_CHARS = '\ufeff';
-export const CSV_FORMULA_CHARS = ['=', '+', '-', '@'];
 
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',

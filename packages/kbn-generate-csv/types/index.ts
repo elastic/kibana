@@ -25,3 +25,5 @@ export interface CsvConfig {
     size: number;
   };
 }
+
+export const CSV_BOM_CHARS = '\ufeff';
