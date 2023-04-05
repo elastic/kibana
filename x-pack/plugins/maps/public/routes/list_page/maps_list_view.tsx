@@ -5,36 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import { SavedObjectReference } from '@kbn/core/types';
+import React, { useCallback, memo } from 'react';
 import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
-import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
-import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+
+import type { MapItem } from '../../../common/content_management';
+import { APP_ID, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getCoreChrome,
   getExecutionContextService,
   getNavigateToApp,
-  getSavedObjectsClient,
   getUiSettings,
   getUsageCollection,
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
-import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
+import { mapsClient } from '../../content_management';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
-
-interface MapItem {
-  id: string;
-  title: string;
-  description?: string;
-  references?: SavedObjectReference[];
-}
 
 interface MapUserContent extends UserContentCommonSchema {
   type: string;
@@ -51,59 +43,27 @@ function navigateToNewMap() {
   });
 }
 
-const toTableListViewSavedObject = (
-  savedObject: SimpleSavedObject<MapSavedObjectAttributes>
-): MapUserContent => {
+const toTableListViewSavedObject = (mapItem: MapItem): MapUserContent => {
   return {
-    ...savedObject,
-    updatedAt: savedObject.updatedAt!,
+    ...mapItem,
+    updatedAt: mapItem.updatedAt!,
     attributes: {
-      ...savedObject.attributes,
-      title: savedObject.attributes.title ?? '',
+      ...mapItem.attributes,
+      title: mapItem.attributes.title ?? '',
     },
   };
 };
 
-async function findMaps(
-  searchTerm: string,
-  {
-    references,
-    referencesToExclude,
-  }: {
-    references?: SavedObjectsFindOptionsReference[];
-    referencesToExclude?: SavedObjectsFindOptionsReference[];
-  } = {}
-) {
-  const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
-    type: MAP_SAVED_OBJECT_TYPE,
-    search: searchTerm ? `${searchTerm}*` : undefined,
-    perPage: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
-    page: 1,
-    searchFields: ['title^3', 'description'],
-    defaultSearchOperator: 'AND',
-    fields: ['description', 'title'],
-    hasReference: references,
-    hasNoReference: referencesToExclude,
-  });
-
-  return {
-    total: resp.total,
-    hits: resp.savedObjects.map(toTableListViewSavedObject),
-  };
-}
-
-async function deleteMaps(items: object[]) {
-  const deletions = items.map((item) => {
-    return getSavedObjectsClient().delete(MAP_SAVED_OBJECT_TYPE, (item as MapItem).id);
-  });
-  await Promise.all(deletions);
+async function deleteMaps(items: Array<{ id: string }>) {
+  await Promise.all(items.map(({ id }) => mapsClient.delete(id)));
 }
 
 interface Props {
   history: ScopedHistory;
+  onMapsLoaded: (error: null | any, maps: MapItem[], isFiltered?: boolean) => void;
 }
 
-export function MapsListView(props: Props) {
+function MapsListViewComp({ history, onMapsLoaded }: Props) {
   getExecutionContextService().set({
     type: 'application',
     name: APP_ID,
@@ -116,6 +76,47 @@ export function MapsListView(props: Props) {
 
   getCoreChrome().docTitle.change(getAppTitle());
   getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
+
+  const findMaps = useCallback(
+    async (
+      searchTerm: string,
+      {
+        references = [],
+        referencesToExclude = [],
+      }: {
+        references?: SavedObjectsFindOptionsReference[];
+        referencesToExclude?: SavedObjectsFindOptionsReference[];
+      } = {}
+    ) => {
+      const isFiltered =
+        Boolean(searchTerm) || references.length > 0 || referencesToExclude.length > 0;
+
+      return mapsClient
+        .search({
+          text: searchTerm ? `${searchTerm}*` : undefined,
+          limit: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
+          tags: {
+            included: references.map(({ id }) => id),
+            excluded: referencesToExclude.map(({ id }) => id),
+          },
+        })
+        .then(({ hits, pagination: { total } }) => {
+          onMapsLoaded(null, hits, isFiltered);
+          return {
+            total,
+            hits: hits.map(toTableListViewSavedObject),
+          };
+        })
+        .catch((e) => {
+          onMapsLoaded(e, []);
+          return {
+            total: 0,
+            hits: [],
+          };
+        });
+    },
+    [onMapsLoaded]
+  );
 
   return (
     <TableListView<MapUserContent>
@@ -134,7 +135,9 @@ export function MapsListView(props: Props) {
         defaultMessage: 'maps',
       })}
       tableListTitle={getAppTitle()}
-      onClickTitle={({ id }) => props.history.push(getEditPath(id))}
+      onClickTitle={({ id }) => history.push(getEditPath(id))}
     />
   );
 }
+
+export const MapsListView = memo(MapsListViewComp);
