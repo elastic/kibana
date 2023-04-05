@@ -121,5 +121,6 @@
     "@kbn/shared-ux-file-types",
     "@kbn/securitysolution-io-ts-alerting-types",
     "@kbn/assetManager-plugin",
+    "@kbn/i18n",
   ]
 }
