@@ -29,6 +29,9 @@ export const VALUES_MATCH_ANY_INPUT =
 
 export const ADD_AND_BTN = '[data-test-subj="exceptionsAndButton"]';
 
+export const VALUES_MATCH_INCLUDED_INPUT =
+  '[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] [data-test-subj="comboBoxInput"]';
+
 export const ADD_OR_BTN = '[data-test-subj="exceptionsOrButton"]';
 
 export const ADD_NESTED_BTN = '[data-test-subj="exceptionsNestedButton"]';

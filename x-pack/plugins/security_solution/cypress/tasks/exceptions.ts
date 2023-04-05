@@ -33,6 +33,7 @@ import {
   EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN,
   EXCEPTION_ITEM_COMMENTS_CONTAINER,
   EXCEPTION_ITEM_COMMENT_COPY_BTN,
+  VALUES_MATCH_INCLUDED_INPUT,
 } from '../screens/exceptions';
 
 export const addExceptionEntryFieldValueOfItemX = (
@@ -85,6 +86,10 @@ export const addExceptionEntryFieldValueValue = (value: string, index = 0) => {
 
 export const addExceptionEntryFieldMatchAnyValue = (value: string, index = 0) => {
   cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
+};
+export const addExceptionEntryFieldMatchIncludedValue = (value: string, index = 0) => {
+  cy.get(VALUES_MATCH_INCLUDED_INPUT).eq(index).type(`${value}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 

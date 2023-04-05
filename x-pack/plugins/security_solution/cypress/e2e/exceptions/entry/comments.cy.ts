@@ -157,61 +157,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
         .eq(1)
         .should('have.text', 'User 2 comment @ using unicode');
-
-      // it('Add comment on editing exception has unicode character', () => {
-      //   const NEW_ITEM_NAME = 'Exception item-EDITED';
-
-      //   // open edit exception modal
-      //   openEditException();
-
-      //   // edit exception item name
-      //   editExceptionFlyoutItemName(NEW_ITEM_NAME);
-      //   // add exception comment
-      //   addExceptionComment('new comment @ using unicode');
-
-      //   // submit
-      //   submitEditedExceptionItem();
-
-      //   // new exception item displays
-      //   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-
-      //   cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
-
-      //   // click on show comments
-      //   clickOnShowComments();
-
-      //   cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
-      //     .eq(0)
-      //     .should('have.text', 'new comment @ using unicode');
-      // });
-      // it('Add comment has unicode character', () => {
-      //   cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
-
-      //   // open add exception modal
-      //   addExceptionFlyoutFromViewerHeader();
-
-      //   // add exception item conditions
-      //   addExceptionConditions(getException());
-
-      //   // add exception item name
-      //   addExceptionFlyoutItemName('My item name');
-
-      //   // add exception comment
-      //   addExceptionComment('new comment @ using unicode');
-
-      //   // submit
-      //   submitNewExceptionItem();
-
-      //   // new exception item displays
-      //   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
-
-      //   // click on show comments
-      //   clickOnShowComments();
-
-      //   cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
-      //     .eq(0)
-      //     .should('have.text', 'new comment @ using unicode');
-      // });
     });
   });
 
