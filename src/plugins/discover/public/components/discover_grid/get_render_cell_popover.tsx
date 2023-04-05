@@ -31,13 +31,7 @@ export const getRenderCellPopoverFn =
     }, [setCellPopoverProps, children]);
 
     return (
-      <EuiFlexGroup
-        responsive={false}
-        direction="column"
-        gutterSize="none"
-        css={containerStyles}
-        className="dscDiscoverGrid__cellPopoverContainer"
-      >
+      <EuiFlexGroup responsive={false} direction="column" gutterSize="none" css={containerStyles}>
         <EuiFlexItem grow={true}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>{cellActions}</EuiFlexItem>
       </EuiFlexGroup>
