@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { Position } from '@elastic/charts/dist/utils/common';
@@ -25,10 +25,10 @@ export const StepDurationPanel = ({
   legendPosition?: Position;
   doBreakdown?: boolean;
 }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
   const time = useAbsoluteDate({ from: 'now-24h/h', to: 'now' });
-
-  const { ExploratoryViewEmbeddable } = observability;
 
   const { monitor } = useSelectedMonitor();
 
