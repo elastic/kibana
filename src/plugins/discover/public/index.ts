@@ -27,3 +27,8 @@ export {
   getSavedSearchUrlConflictMessage,
   throwErrorOnSavedSearchUrlConflict,
 } from '@kbn/saved-search-plugin/public';
+
+// todo temp
+export type { DiscoverSingleDocLocator } from './application/doc/locator';
+export type { DiscoverContextAppLocator } from './application/context/services/locator';
+export { getDocViewsRegistry } from './kibana_services';

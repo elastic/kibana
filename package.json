@@ -352,6 +352,8 @@
     "@kbn/discover-enhanced-plugin": "link:x-pack/plugins/discover_enhanced",
     "@kbn/discover-plugin": "link:src/plugins/discover",
     "@kbn/doc-links": "link:packages/kbn-doc-links",
+    "@kbn/doc-table-browser": "link:packages/kbn-doc-table-browser",
+    "@kbn/doc-table-mocks": "link:packages/kbn-doc-table-mocks",
     "@kbn/dom-drag-drop": "link:packages/kbn-dom-drag-drop",
     "@kbn/ebt-tools": "link:packages/kbn-ebt-tools",
     "@kbn/ecs": "link:packages/kbn-ecs",
