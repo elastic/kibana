@@ -10,30 +10,36 @@ import React from 'react';
 import { EuiCopy, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import { isSignificantTerm, type SignificantTerm } from '@kbn/ml-agg-utils';
 
 import { getTableItemAsKuery } from './get_table_item_as_kuery';
 import type { GroupTableItem, TableItemAction } from './types';
 
+const copyToClipboardSignificantTermMessage = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardMessage',
+  {
+    defaultMessage: 'Copy field/value pair as KUERY filter to clipboard',
+  }
+);
+
 const copyToClipboardGroupMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardMessage',
   {
-    defaultMessage: 'Copy as KUERY filter to clipboard',
+    defaultMessage: 'Copy group items as KUERY filter to clipboard',
   }
 );
 
 export const useCopyToClipboardAction = (): TableItemAction => ({
-  render: (tableItem: SignificantTerm | GroupTableItem) => (
-    <EuiToolTip content={copyToClipboardGroupMessage}>
-      <EuiCopy textToCopy={getTableItemAsKuery(tableItem)}>
-        {(copy) => (
-          <EuiButtonIcon
-            iconType="copyClipboard"
-            onClick={copy}
-            aria-label={copyToClipboardGroupMessage}
-          />
-        )}
-      </EuiCopy>
-    </EuiToolTip>
-  ),
+  render: (tableItem: SignificantTerm | GroupTableItem) => {
+    const message = isSignificantTerm(tableItem)
+      ? copyToClipboardSignificantTermMessage
+      : copyToClipboardGroupMessage;
+    return (
+      <EuiToolTip content={message}>
+        <EuiCopy textToCopy={getTableItemAsKuery(tableItem)}>
+          {(copy) => <EuiButtonIcon iconType="copyClipboard" onClick={copy} aria-label={message} />}
+        </EuiCopy>
+      </EuiToolTip>
+    );
+  },
 });
