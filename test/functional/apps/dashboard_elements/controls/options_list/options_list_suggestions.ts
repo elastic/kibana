@@ -55,11 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .reduce((result, key) => {
           return { ...result, [key]: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS[key] };
         }, {});
-      await dashboardControls.ensureAvailableOptionsEqual(
-        controlId,
-        { suggestions: sortedSuggestions, invalidSelections: [] },
-        true
-      );
+      await dashboardControls.ensureAvailableOptionsEqual(controlId, sortedSuggestions, true);
     });
 
     it('sort alphabetically - ascending', async () => {
@@ -69,21 +65,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .reduce((result, key) => {
           return { ...result, [key]: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS[key] };
         }, {});
-      await dashboardControls.ensureAvailableOptionsEqual(
-        controlId,
-        { suggestions: sortedSuggestions, invalidSelections: [] },
-        true
-      );
+      await dashboardControls.ensureAvailableOptionsEqual(controlId, sortedSuggestions, true);
     });
 
     it('sort by document count - descending', async () => {
       await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
       await dashboardControls.ensureAvailableOptionsEqual(
         controlId,
-        {
-          suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, // keys are already sorted descending by doc count
-          invalidSelections: [],
-        },
+        OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, // keys are already sorted descending by doc count
         true
       );
     });
@@ -97,11 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .reduce((result, [key, docCount]) => {
           return { ...result, [key]: docCount };
         }, {});
-      await dashboardControls.ensureAvailableOptionsEqual(
-        controlId,
-        { suggestions: sortedSuggestions, invalidSelections: [] },
-        true
-      );
+      await dashboardControls.ensureAvailableOptionsEqual(controlId, sortedSuggestions, true);
     });
 
     it('non-default sort value should cause unsaved changes', async () => {

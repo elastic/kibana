@@ -58,8 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Options List dashboard validation', async () => {
       before(async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('meow');
-        await dashboardControls.optionsListPopoverSelectOption('bark');
+        await dashboardControls.optionsListPopoverSelectOptions(['meow', 'bark']);
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
       });
 
@@ -84,9 +83,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'grr',
         ]);
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: { ...suggestions, grr: suggestions.grr - 1 },
-          invalidSelections: ['bark'],
+          ...suggestions,
+          grr: suggestions.grr - 1,
         });
+        await dashboardControls.ensureInvalidSelectionsEqual(controlId, ['bark']);
         // only valid selections are applied as filters.
         expect(await pieChart.getPieSliceCount()).to.be(1);
       });
@@ -96,10 +96,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
-          invalidSelections: [],
-        });
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS
+        );
         expect(await pieChart.getPieSliceCount()).to.be(2);
       });
 
@@ -108,11 +108,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: {
-            hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,
-          },
-          invalidSelections: ['meow', 'bark'],
+          hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,
         });
+        await dashboardControls.ensureInvalidSelectionsEqual(controlId, ['meow', 'bark']);
+
         // only valid selections are applied as filters.
         expect(await pieChart.getPieSliceCount()).to.be(1);
       });
@@ -121,8 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Options List dashboard no validation', async () => {
       before(async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('meow');
-        await dashboardControls.optionsListPopoverSelectOption('bark');
+        await dashboardControls.optionsListPopoverSelectOptions(['meow', 'bark']);
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
         await dashboardControls.updateValidationSetting(false);
       });
@@ -140,8 +138,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'grr',
         ]);
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: { ...suggestions, grr: suggestions.grr - 1 },
-          invalidSelections: [],
+          ...suggestions,
+          grr: suggestions.grr - 1,
         });
       });
 
@@ -150,10 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: {
-            hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,
-          },
-          invalidSelections: [],
+          hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,
         });
       });
     });

@@ -63,10 +63,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Shows available options in options list', async () => {
-      await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-        suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
-        invalidSelections: [],
-      });
+      await dashboardControls.ensureAvailableOptionsEqual(
+        controlId,
+        OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS
+      );
     });
 
     it('Can search options list for available options', async () => {
@@ -74,10 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSearchForOption('meo');
       await dashboardControls.ensureAvailableOptionsEqual(
         controlId,
-        {
-          suggestions: { meow: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.meow },
-          invalidSelections: [],
-        },
+        { meow: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.meow },
         true
       );
       await dashboardControls.optionsListPopoverClearSearch();

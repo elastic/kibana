@@ -77,8 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can make selections', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.optionsListOpenPopover(firstId);
-        await dashboardControls.optionsListPopoverSelectOption('win xp');
-        await dashboardControls.optionsListPopoverSelectOption('osx');
+        await dashboardControls.optionsListPopoverSelectOptions(['win xp', 'osx']);
         await dashboardControls.optionsListEnsurePopoverIsClosed(firstId);
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(firstId);
@@ -125,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const secondId = (await dashboardControls.getAllControlIds())[1];
 
         await dashboardControls.optionsListOpenPopover(secondId);
-        await dashboardControls.optionsListPopoverSelectOption('hiss');
+        await dashboardControls.optionsListPopoverSelectOptions('hiss');
         await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
 
         const newTitle = 'wow! Animal sounds?';

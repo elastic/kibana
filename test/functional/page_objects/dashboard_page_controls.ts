@@ -362,50 +362,59 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
-    await this.testSubjects.click(`optionsList-control-${controlId}`);
+    await this.optionsListWaitForLoading(controlId);
     await this.retry.try(async () => {
+      await this.testSubjects.click(`optionsList-control-${controlId}`);
+      await this.retry.waitForWithTimeout('popover to open', 500, async () => {
+        return await this.testSubjects.exists(`optionsList-control-popover`);
+      });
       await this.testSubjects.existOrFail(`optionsList-control-popover`);
     });
   }
 
   public async optionsListEnsurePopoverIsClosed(controlId: string) {
-    this.log.debug(`Opening popover for Options List: ${controlId}`);
+    this.log.debug(`Closing popover for Options List: ${controlId}`);
+
+    await this.optionsListWaitForLoading(controlId);
     await this.testSubjects.click(`optionsList-control-${controlId}`);
-    await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
+    await this.retry.try(async () => {
+      await this.retry.waitForWithTimeout('popover to open', 500, async () => {
+        return !(await this.testSubjects.exists(`optionsList-control-popover`));
+      });
+      await this.testSubjects.missingOrFail(`optionsList-control-popover`);
+    });
   }
 
   public async optionsListPopoverAssertOpen() {
     await this.retry.try(async () => {
       if (!(await this.testSubjects.exists(`optionsList-control-available-options`))) {
-        throw new Error('options list popover must be open before calling selectOption');
+        throw new Error('options list popover must be open');
       }
     });
   }
 
   public async optionsListPopoverGetAvailableOptionsCount() {
-    this.log.debug(`getting available options count from options list`);
+    this.log.debug(`getting available options count from options list popover`);
+    await this.optionsListPopoverAssertOpen();
     await this.optionsListPopoverWaitForLoading();
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
     return +(await availableOptions.getAttribute('data-option-count'));
   }
 
-  public async optionsListPopoverGetAvailableOptions() {
-    this.log.debug(`getting available options from options list`);
+  public async optionsListPopoverGetSelections() {
+    this.log.debug(`getting selections from options list popover`);
+    await this.optionsListPopoverClickShowOnlySelected();
+    const selections = await this.optionsListPopoverGetAvailableOptions();
+    await this.optionsListPopoverClickShowOnlySelected();
+    return selections;
+  }
+
+  public async optionsListPopoverGetInvalidSelections() {
+    this.log.debug(`getting invalid selections from options list`);
+    await this.optionsListPopoverAssertOpen();
     await this.optionsListPopoverWaitForLoading();
+
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
-    const optionsCount = await this.optionsListPopoverGetAvailableOptionsCount();
-
-    const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
-    const suggestions: { [key: string]: number } = {};
-    while (Object.keys(suggestions).length < optionsCount) {
-      await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
-      const currentOption = await selectableListItems.findByCssSelector('[aria-selected="true"]');
-      const [suggestion, docCount] = (await currentOption.getVisibleText()).split('\n');
-      if (suggestion !== 'Exists') {
-        suggestions[suggestion] = Number(docCount);
-      }
-    }
-
     const invalidSelectionElements = await availableOptions.findAllByClassName(
       'optionsList__selectionInvalid'
     );
@@ -414,13 +423,39 @@ export class DashboardPageControls extends FtrService {
         return await option.getVisibleText();
       })
     );
+    return invalidSelections;
+  }
 
-    return { suggestions, invalidSelections };
+  public async optionsListPopoverGetAvailableOptions() {
+    this.log.debug(`getting available options from options list`);
+    await this.optionsListPopoverAssertOpen();
+    await this.optionsListPopoverWaitForLoading();
+
+    const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
+    const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
+    const first = await selectableListItems.findByClassName('euiSelectableListItem');
+    let [suggestion, docCount] = (await first.getVisibleText()).split('\n');
+    const firstOption = suggestion;
+
+    let wrappedAround = false;
+    const suggestions: { [key: string]: number | undefined } = {};
+    while (!wrappedAround) {
+      if (suggestion !== 'Exists') suggestions[suggestion] = Number(docCount); // could be NaN if show only selected is true
+
+      await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
+      const currentOption = await selectableListItems.findByCssSelector('[aria-selected="true"]');
+      [suggestion, docCount] = (await currentOption.getVisibleText()).split('\n');
+      if (suggestion === firstOption) {
+        wrappedAround = true;
+      }
+    }
+
+    return suggestions;
   }
 
   public async ensureAvailableOptionsEqual(
     controlId: string,
-    expectation: { suggestions: { [key: string]: number }; invalidSelections: string[] },
+    expectation: { [key: string]: number },
     skipOpen?: boolean
   ) {
     await this.optionsListWaitForLoading(controlId);
@@ -430,9 +465,22 @@ export class DashboardPageControls extends FtrService {
     });
     if (await this.testSubjects.exists('optionsList-cardinality-label')) {
       expect(await this.optionsListGetCardinalityValue()).to.be(
-        Object.keys(expectation.suggestions).length.toLocaleString()
+        Object.keys(expectation).length.toLocaleString()
       );
     }
+    if (!skipOpen) await this.optionsListEnsurePopoverIsClosed(controlId);
+  }
+
+  public async ensureInvalidSelectionsEqual(
+    controlId: string,
+    expectation: string[],
+    skipOpen?: boolean
+  ) {
+    await this.optionsListWaitForLoading(controlId);
+    if (!skipOpen) await this.optionsListOpenPopover(controlId);
+    await this.retry.try(async () => {
+      expect(await this.optionsListPopoverGetInvalidSelections()).to.eql(expectation);
+    });
     if (!skipOpen) await this.optionsListEnsurePopoverIsClosed(controlId);
   }
 
@@ -475,24 +523,49 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async optionsListPopoverSelectExists() {
+    this.log.debug(`select 'Exists/Does not Exist' option in suggestions`);
+    await this.optionsListPopoverAssertOpen();
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail(`optionsList-control-selection-exists`);
       await this.testSubjects.click(`optionsList-control-selection-exists`);
     });
   }
 
-  public async optionsListPopoverSelectOption(availableOption: string) {
-    this.log.debug(`selecting ${availableOption} from options list`);
-    await this.optionsListPopoverSearchForOption(availableOption);
-    await this.optionsListPopoverWaitForLoading();
-
+  public async optionsListPopoverClickShowOnlySelected() {
+    this.log.debug(`click "show only selected" button in options list popover`);
+    await this.optionsListPopoverAssertOpen();
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
-      await this.testSubjects.click(`optionsList-control-selection-${availableOption}`);
+      await this.testSubjects.existOrFail(`optionsList-control-show-only-selected`);
+      await this.testSubjects.click(`optionsList-control-show-only-selected`);
     });
+  }
 
-    await this.optionsListPopoverClearSearch();
-    await this.optionsListPopoverWaitForLoading();
+  public async optionsListPopoverSelectOptions(availableOptions: string | string[]) {
+    await this.optionsListPopoverAssertOpen();
+
+    if (!Array.isArray(availableOptions)) availableOptions = [availableOptions];
+    for (const availableOption of availableOptions) {
+      this.log.debug(`selecting ${availableOption} from options list`);
+      await this.optionsListPopoverSearchForOption(availableOption);
+      await this.optionsListPopoverWaitForLoading();
+
+      await this.retry.try(async () => {
+        await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
+        const option = await this.testSubjects.find(
+          `optionsList-control-selection-${availableOption}`
+        );
+        await option.click();
+        expect(await option.getAttribute('data-test-selected')).to.be('true');
+      });
+
+      await this.optionsListPopoverClearSearch();
+    }
+
+    const selections = Object.keys(await this.optionsListPopoverGetSelections());
+    for (const availableOption of availableOptions) {
+      expect(selections).to.contain(availableOption);
+    }
+    this.log.debug('selected the following in the options list popover:', selections);
   }
 
   public async optionsListPopoverClearSelections() {
@@ -615,6 +688,7 @@ export class DashboardPageControls extends FtrService {
       attribute
     );
   }
+
   public async rangeSliderGetUpperBoundAttribute(controlId: string, attribute: string) {
     this.log.debug(`Getting range slider upper bound ${attribute} for ${controlId}`);
     return await this.testSubjects.getAttribute(
@@ -622,29 +696,40 @@ export class DashboardPageControls extends FtrService {
       attribute
     );
   }
+
   public async rangeSliderGetDualRangeAttribute(controlId: string, attribute: string) {
     this.log.debug(`Getting range slider dual range ${attribute} for ${controlId}`);
     return await this.testSubjects.getAttribute(`rangeSlider__slider`, attribute);
   }
+
   public async rangeSliderSetLowerBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
     await this.testSubjects.setValue(
       `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
       value
     );
+    await this.rangeSliderWaitForLoading();
+    expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.equal(value);
   }
+
   public async rangeSliderSetUpperBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
     await this.testSubjects.setValue(
       `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
       value
     );
+    await this.rangeSliderWaitForLoading();
+    expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.equal(value);
   }
 
   public async rangeSliderOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
-    await this.testSubjects.click(`range-slider-control-${controlId}`);
+    await this.rangeSliderWaitForLoading();
     await this.retry.try(async () => {
+      await this.testSubjects.click(`range-slider-control-${controlId}`);
+      await this.retry.waitForWithTimeout('popover to open', 500, async () => {
+        return await this.testSubjects.exists(`rangeSlider-control-actions`);
+      });
       await this.testSubjects.existOrFail(`rangeSlider-control-actions`);
     });
   }

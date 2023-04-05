@@ -132,7 +132,7 @@ export const OptionsListControl = ({
   }, [exclude, existsSelected, validSelections, invalidSelections]);
 
   const button = (
-    <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
+    <span className="optionsList--filterBtnWrapper" ref={resizeRef}>
       <EuiFilterButton
         iconType="arrowDown"
         isLoading={debouncedLoading}
@@ -150,7 +150,7 @@ export const OptionsListControl = ({
           ? selectionDisplayNode
           : placeholder ?? OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
-    </div>
+    </span>
   );
 
   return (

@@ -81,8 +81,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'grr',
         ]);
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: { ...suggestions, grr: suggestions.grr - 1 },
-          invalidSelections: [],
+          ...suggestions,
+          grr: suggestions.grr - 1,
         });
         await queryBar.setQuery('');
         await queryBar.clickQuerySubmitButton(); // ensures that the time picker is visible for the next test
@@ -120,20 +120,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'bark',
             'bow ow ow',
           ]);
-          await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-            suggestions,
-            invalidSelections: [],
-          });
+          await dashboardControls.ensureAvailableOptionsEqual(controlId, suggestions);
         });
 
         it('Does not apply disabled dashboard filters to options list control', async () => {
           await filterBar.toggleFilterEnabled('sound.keyword');
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
-          await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-            suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
-            invalidSelections: [],
-          });
+          await dashboardControls.ensureAvailableOptionsEqual(
+            controlId,
+            OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS
+          );
           await filterBar.toggleFilterEnabled('sound.keyword');
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
@@ -151,10 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'growl',
             'grr',
           ]);
-          await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-            suggestions,
-            invalidSelections: [],
-          });
+          await dashboardControls.ensureAvailableOptionsEqual(controlId, suggestions);
         });
 
         after(async () => {
@@ -169,10 +163,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
-        await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
-          invalidSelections: [],
-        });
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS
+        );
       });
 
       it('Can search options list for available options', async () => {
@@ -180,10 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSearchForOption('meo');
         await dashboardControls.ensureAvailableOptionsEqual(
           controlId,
-          {
-            suggestions: { meow: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.meow },
-            invalidSelections: [],
-          },
+          { meow: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.meow },
           true
         );
         await dashboardControls.optionsListPopoverClearSearch();
@@ -195,10 +186,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSearchForOption('MEO');
         await dashboardControls.ensureAvailableOptionsEqual(
           controlId,
-          {
-            suggestions: { meow: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.meow },
-            invalidSelections: [],
-          },
+          { meow: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.meow },
           true
         );
         await dashboardControls.optionsListPopoverClearSearch();
@@ -207,8 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Can select multiple available options', async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('hiss');
-        await dashboardControls.optionsListPopoverSelectOption('grr');
+        await dashboardControls.optionsListPopoverSelectOptions(['hiss', 'grr']);
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
       });
 
@@ -259,7 +246,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('changes to selections can be discarded', async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('bark');
+        await dashboardControls.optionsListPopoverSelectOptions('bark');
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
         let selections = await dashboardControls.optionsListGetSelectionsString(controlId);
         expect(selections).to.equal('hiss, grr, bark');
@@ -314,15 +301,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('new control has expected suggestions', async () => {
         controlId = (await dashboardControls.getAllControlIds())[0];
-        await dashboardControls.ensureAvailableOptionsEqual(controlId, {
-          suggestions: FIELD_VALUES,
-          invalidSelections: [],
-        });
+        await dashboardControls.ensureAvailableOptionsEqual(controlId, FIELD_VALUES);
       });
 
       it('making selection has expected results', async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('B');
+        await dashboardControls.optionsListPopoverSelectOptions('B');
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
         await dashboard.waitForRenderComplete();
 
