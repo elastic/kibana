@@ -586,8 +586,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [dataSourceType]
   );
 
+  const kdv = kibanaDataViews?.();
+
   const DataViewSelectorMemo = useMemo(() => {
-    return kibanaDataViews == null || Object.keys(kibanaDataViews).length === 0 ? (
+    return kibanaDataViews == null || kdv == null || Object.keys(kdv).length === 0 ? (
       <EuiLoadingSpinner size="l" />
     ) : (
       <UseField
@@ -595,11 +597,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         path="dataViewId"
         component={DataViewSelector}
         componentProps={{
-          kibanaDataViews,
+          kibanaDataViews: kdv,
         }}
       />
     );
-  }, [kibanaDataViews]);
+  }, [kdv, kibanaDataViews]);
 
   const DataSource = useMemo(() => {
     return (

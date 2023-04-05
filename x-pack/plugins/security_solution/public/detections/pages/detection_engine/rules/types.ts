@@ -97,7 +97,7 @@ export interface RuleStepProps {
   onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
   setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
-  kibanaDataViews?: { [x: string]: DataViewListItem };
+  kibanaDataViews?: () => { [x: string]: DataViewListItem };
 }
 
 export interface AboutStepRule {

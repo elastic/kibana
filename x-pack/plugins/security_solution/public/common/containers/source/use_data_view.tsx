@@ -33,6 +33,9 @@ type DangerCastForBrowserFieldsMutation = Record<
   Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
 >;
 interface DataViewInfo {
+  /**
+   * @deprecated use fields list on dataview / "indexPattern"
+   */
   browserFields: DangerCastForBrowserFieldsMutation;
   indexFields: FieldSpec[];
 }

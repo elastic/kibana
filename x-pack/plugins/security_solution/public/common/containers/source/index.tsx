@@ -101,6 +101,9 @@ export const getBrowserFields = memoizeOne(
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
 interface FetchIndexReturn {
+  /**
+   * @deprecated use fields list on dataview / "indexPattern"
+   */
   browserFields: BrowserFields;
   indexes: string[];
   indexExists: boolean;
@@ -117,10 +120,8 @@ export const useFetchIndex = (
   strategy: string = 'indexFields',
   includeUnmapped: boolean = false
 ): [boolean, FetchIndexReturn] => {
-  // console.log('indexNames', indexNames);
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
-  const previousIndexesName = useRef<string[]>([]);
   const [isLoading, setLoading] = useState(false);
 
   const [state, setState] = useState<FetchIndexReturn>({
@@ -160,16 +161,20 @@ export const useFetchIndex = (
   );
 
   useEffect(() => {
+    // console.error(
+    //   `indexNames: ${indexNames}, indexFieldsSearch: ${indexFieldsSearch}, previousIndexesName: ${previousIndexesName}`
+    // );
     if (!isEmpty(indexNames)) {
       // && !isEqual(previousIndexesName.current, indexNames)) {
-      // console.log('how many times do we actually call this?');
+      // console.log('about to call indexFieldsSearch');
       indexFieldsSearch(indexNames);
     }
     // return () => {
     //   searchSubscription$.current.unsubscribe();
     //   abortCtrl.current.abort();
     // };
-  }, [indexNames, indexFieldsSearch, previousIndexesName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexNames]);
 
   return [isLoading, state];
 };
