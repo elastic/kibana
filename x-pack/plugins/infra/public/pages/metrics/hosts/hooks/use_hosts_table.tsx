@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { v4 as uuidv4 } from 'uuid';
 
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
@@ -19,6 +18,7 @@ import type {
   SnapshotNodeMetric,
   SnapshotMetricInput,
 } from '../../../../../common/http_api';
+import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
 
 /**
  * Columns and items types
@@ -34,7 +34,7 @@ export interface HostNodeRow extends HostMetrics {
   servicesOnHost?: number | null;
   title: { name: string; cloudProvider?: CloudProvider | null };
   name: string;
-  uuid: string;
+  id: string;
 }
 
 interface HostTableParams {
@@ -49,8 +49,8 @@ const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefin
 };
 
 const buildItemsList = (nodes: SnapshotNode[]) => {
-  return nodes.map(({ metrics, path, name }) => ({
-    uuid: uuidv4(),
+  return nodes.map(({ metrics, path, name }, index) => ({
+    id: `${name}-${index}`,
     name,
     os: path.at(-1)?.os ?? '-',
     title: {
@@ -123,10 +123,9 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [clickedItemUuid, setClickedItemUuid] = useState(() => uuidv4());
+  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
 
-  const closeFlyout = () => setIsFlyoutOpen(false);
+  const closeFlyout = () => setHostFlyoutOpen({ clickedItemId: '' });
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -139,25 +138,35 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   );
 
   const items = useMemo(() => buildItemsList(nodes), [nodes]);
+  const clickedItem = useMemo(
+    () => items.find(({ id }) => id === hostFlyoutOpen.clickedItemId),
+    [hostFlyoutOpen.clickedItemId, items]
+  );
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
       {
         name: '',
         width: '40px',
-        field: 'uuid',
+        field: 'id',
         actions: [
           {
             name: toggleDialogActionLabel,
             description: toggleDialogActionLabel,
-            icon: ({ uuid }) => (isFlyoutOpen && uuid === clickedItemUuid ? 'minimize' : 'expand'),
+            icon: ({ id }) =>
+              hostFlyoutOpen.clickedItemId && id === hostFlyoutOpen.clickedItemId
+                ? 'minimize'
+                : 'expand',
             type: 'icon',
-            onClick: ({ uuid }) => {
-              setClickedItemUuid(uuid);
-              if (isFlyoutOpen && uuid === clickedItemUuid) {
-                setIsFlyoutOpen(false);
+            'data-test-subj': 'hostsView-flyout-button',
+            onClick: ({ id }) => {
+              setHostFlyoutOpen({
+                clickedItemId: id,
+              });
+              if (id === hostFlyoutOpen.clickedItemId) {
+                setHostFlyoutOpen({ clickedItemId: '' });
               } else {
-                setIsFlyoutOpen(true);
+                setHostFlyoutOpen({ clickedItemId: id });
               }
             },
           },
@@ -233,8 +242,14 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         align: 'right',
       },
     ],
-    [clickedItemUuid, isFlyoutOpen, reportHostEntryClick, time]
+    [hostFlyoutOpen.clickedItemId, reportHostEntryClick, setHostFlyoutOpen, time]
   );
 
-  return { columns, items, isFlyoutOpen, closeFlyout, clickedItemUuid };
+  return {
+    columns,
+    items,
+    clickedItem,
+    isFlyoutOpen: !!hostFlyoutOpen.clickedItemId,
+    closeFlyout,
+  };
 };
