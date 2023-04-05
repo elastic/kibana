@@ -13,7 +13,7 @@ import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
 import {
   AlertAnnotation,
-  getAlertPaddedTimeRange,
+  getPaddedAlertTimeRange,
   AlertTimeRangeAnnotation,
 } from '@kbn/observability-alert-details';
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
@@ -50,7 +50,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
   );
-  const timeRange = getAlertPaddedTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
+  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const annotations = [
     <AlertAnnotation

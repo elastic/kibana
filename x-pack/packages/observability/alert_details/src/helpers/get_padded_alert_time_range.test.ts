@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getAlertPaddedTimeRange } from './get_alert_padded_time_range';
+import { getPaddedAlertTimeRange } from './get_padded_alert_time_range';
 
-describe('getAlertPaddedTimeRange', () => {
+describe('getPaddedAlertTimeRange', () => {
   const mockedDate = '2023-03-28T09:22:32.660Z';
   const mockDate = jest
     .spyOn(global.Date, 'now')
@@ -31,7 +31,7 @@ describe('getAlertPaddedTimeRange', () => {
   ];
 
   it.each(testData)('%s', (_, start, end, output) => {
-    expect(getAlertPaddedTimeRange(start, end)).toEqual(output);
+    expect(getPaddedAlertTimeRange(start, end)).toEqual(output);
   });
 
   describe('active alert', () => {
@@ -43,7 +43,7 @@ describe('getAlertPaddedTimeRange', () => {
         from: '2023-03-28T03:45:02.660Z',
         to: mockedDate,
       };
-      expect(getAlertPaddedTimeRange(start)).toEqual(output);
+      expect(getPaddedAlertTimeRange(start)).toEqual(output);
     });
 
     it('with end time than 10 minutes before now', () => {
@@ -55,7 +55,7 @@ describe('getAlertPaddedTimeRange', () => {
         from: '2023-03-28T04:47:32.660Z',
         to: mockedDate,
       };
-      expect(getAlertPaddedTimeRange(start, end)).toEqual(output);
+      expect(getPaddedAlertTimeRange(start, end)).toEqual(output);
     });
   });
 });

@@ -20,7 +20,7 @@ import { ExpressionChart } from './expression_chart';
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
   AlertTimeRangeAnnotation: () => {},
-  getAlertPaddedTimeRange: () => ({
+  getPaddedAlertTimeRange: () => ({
     from: '2023-03-28T10:43:13.802Z',
     to: '2023-03-29T13:14:09.581Z',
   }),
