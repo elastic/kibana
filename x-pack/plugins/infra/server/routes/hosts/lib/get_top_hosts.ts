@@ -24,9 +24,9 @@ import { hasSortByMetric } from './utils';
 
 export const getTopHosts = async (
   { searchClient, source, params }: GetHostsArgs,
-  filteredHostNames: string[] = []
+  hostNamesShortList: string[] = []
 ) => {
-  const query = createQuery(params, source, filteredHostNames);
+  const query = createQuery(params, source, hostNamesShortList);
   return lastValueFrom(
     runQuery(searchClient, query, decodeOrThrow(HostsMetricsSearchAggregationResponseRT))
   );

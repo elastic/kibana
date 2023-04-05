@@ -14,6 +14,7 @@ import { GetHostsArgs } from './types';
 
 export const getHosts = async (args: GetHostsArgs): Promise<GetHostsResponsePayload> => {
   const runFilterQuery = hasFilters(args.params.query);
+  // filter first to prevent filter clauses from impacting the metrics aggregations.
   const hostNamesShortList = runFilterQuery ? await getFilteredHostNames(args) : [];
   if (runFilterQuery && hostNamesShortList.length === 0) {
     return {
