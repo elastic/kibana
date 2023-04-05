@@ -52,7 +52,7 @@ describe('useGetGroupSelector', () => {
       useGetGroupSelector({
         ...defaultArgs,
         groupingState: {
-          groupById: { [groupingId]: { ...defaultGroup, activeGroup: customField } },
+          groupById: { [groupingId]: { ...defaultGroup, activeGroups: [customField] } },
         },
       })
     );
@@ -72,12 +72,12 @@ describe('useGetGroupSelector', () => {
     });
   });
 
-  it('On group change, does nothing when set to prev selected group', () => {
+  it('On group change, removes selected group if already selected', () => {
     const testGroup = {
       [groupingId]: {
         ...defaultGroup,
         options: defaultGroupingOptions,
-        activeGroup: 'host.name',
+        activeGroups: ['host.name'],
       },
     };
     const { result } = renderHook((props) => useGetGroupSelector(props), {
@@ -89,7 +89,14 @@ describe('useGetGroupSelector', () => {
       },
     });
     act(() => result.current.props.onGroupChange('host.name'));
-    expect(dispatch).toHaveBeenCalledTimes(0);
+
+    expect(dispatch).toHaveBeenCalledWith({
+      payload: {
+        id: groupingId,
+        activeGroups: ['none'],
+      },
+      type: ActionType.updateActiveGroups,
+    });
   });
 
   it('On group change, resets active page, sets active group, and leaves options alone', () => {
@@ -97,7 +104,7 @@ describe('useGetGroupSelector', () => {
       [groupingId]: {
         ...defaultGroup,
         options: defaultGroupingOptions,
-        activeGroup: 'host.name',
+        activeGroups: ['host.name'],
       },
     };
     const { result } = renderHook((props) => useGetGroupSelector(props), {
@@ -109,21 +116,15 @@ describe('useGetGroupSelector', () => {
       },
     });
     act(() => result.current.props.onGroupChange('user.name'));
+
     expect(dispatch).toHaveBeenNthCalledWith(1, {
       payload: {
         id: groupingId,
-        activePage: 0,
+        activeGroups: ['host.name', 'user.name'],
       },
-      type: ActionType.updateGroupActivePage,
+      type: ActionType.updateActiveGroups,
     });
-    expect(dispatch).toHaveBeenNthCalledWith(2, {
-      payload: {
-        id: groupingId,
-        activeGroup: 'user.name',
-      },
-      type: ActionType.updateActiveGroup,
-    });
-    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenCalledTimes(1);
   });
 
   it('On group change, sends telemetry', () => {
@@ -131,7 +132,7 @@ describe('useGetGroupSelector', () => {
       [groupingId]: {
         ...defaultGroup,
         options: defaultGroupingOptions,
-        activeGroup: 'host.name',
+        activeGroups: ['host.name'],
       },
     };
     const { result } = renderHook((props) => useGetGroupSelector(props), {
@@ -155,7 +156,7 @@ describe('useGetGroupSelector', () => {
       [groupingId]: {
         ...defaultGroup,
         options: defaultGroupingOptions,
-        activeGroup: 'host.name',
+        activeGroups: ['host.name'],
       },
     };
     const { result } = renderHook((props) => useGetGroupSelector(props), {
@@ -179,7 +180,7 @@ describe('useGetGroupSelector', () => {
       [groupingId]: {
         ...defaultGroup,
         options: defaultGroupingOptions,
-        activeGroup: 'host.name',
+        activeGroups: ['host.name'],
       },
     };
     const { result } = renderHook((props) => useGetGroupSelector(props), {
@@ -191,8 +192,8 @@ describe('useGetGroupSelector', () => {
       },
     });
     act(() => result.current.props.onGroupChange(customField));
-    expect(dispatch).toHaveBeenCalledTimes(3);
-    expect(dispatch).toHaveBeenNthCalledWith(3, {
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenNthCalledWith(2, {
       payload: {
         id: groupingId,
         newOptionList: [

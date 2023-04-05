@@ -47,7 +47,7 @@ export type DynamicGroupingProps<T> = Pick<
   | 'onChangeGroupsItemsPerPage'
   | 'onChangeGroupsPage'
   | 'renderChildComponent'
-  | 'resetGroupChildrenPagination'
+  | 'onGroupClose'
   | 'selectedGroup'
   | 'takeActionItems'
 >;

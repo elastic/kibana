@@ -43,7 +43,7 @@ export interface GroupingProps<T> {
   onChangeGroupsPage?: (index: number) => void;
   onGroupToggle?: OnGroupToggle;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
-  resetGroupChildrenPagination: () => void;
+  onGroupClose: () => void;
   selectedGroup: string;
   takeActionItems: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
   tracker?: (
@@ -67,9 +67,9 @@ const GroupingComponent = <T,>({
   itemsPerPage,
   onChangeGroupsItemsPerPage,
   onChangeGroupsPage,
+  onGroupClose,
   onGroupToggle,
   renderChildComponent,
-  resetGroupChildrenPagination,
   selectedGroup,
   takeActionItems,
   tracker,
@@ -99,7 +99,7 @@ const GroupingComponent = <T,>({
         return (
           <span key={groupKey}>
             <GroupPanel
-              resetGroupChildrenPagination={resetGroupChildrenPagination}
+              onGroupClose={onGroupClose}
               extraAction={
                 <GroupStats
                   bucketKey={groupKey}

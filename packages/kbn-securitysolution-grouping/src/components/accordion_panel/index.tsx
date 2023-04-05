@@ -22,9 +22,9 @@ interface GroupPanelProps<T> {
   groupPanelRenderer?: JSX.Element;
   isLoading: boolean;
   level?: number;
+  onGroupClose: () => void;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
-  resetGroupChildrenPagination: () => void;
   selectedGroup: string;
   groupingLevel?: number;
 }
@@ -50,7 +50,7 @@ const GroupPanelComponent = <T,>({
   groupPanelRenderer,
   isLoading,
   level = 0,
-  resetGroupChildrenPagination,
+  onGroupClose,
   onToggleGroup,
   renderChildComponent,
   selectedGroup,
@@ -60,12 +60,12 @@ const GroupPanelComponent = <T,>({
   useEffect(() => {
     if (lastForceState.current === 'open' && forceState === 'closed') {
       // when parent group closes, reset pagination of any child groups
-      resetGroupChildrenPagination();
+      onGroupClose();
       lastForceState.current = 'closed';
     } else if (lastForceState.current === 'closed' && forceState === 'open') {
       lastForceState.current = 'open';
     }
-  }, [resetGroupChildrenPagination, forceState, selectedGroup]);
+  }, [onGroupClose, forceState, selectedGroup]);
 
   const groupFieldValue = useMemo(() => firstNonNullValue(groupBucket.key), [groupBucket.key]);
 

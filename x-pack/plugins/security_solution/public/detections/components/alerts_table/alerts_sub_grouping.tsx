@@ -51,7 +51,7 @@ interface OwnProps {
   pageSize: number;
   parentGroupingFilter?: string;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  resetGroupChildrenPagination: () => void;
+  onGroupClose: () => void;
   runtimeMappings: MappingRuntimeFields;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
@@ -78,7 +78,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   pageSize,
   parentGroupingFilter,
   renderChildComponent,
-  resetGroupChildrenPagination,
+  onGroupClose,
   runtimeMappings,
   selectedGroup,
   setPageIndex,
@@ -230,7 +230,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
         onChangeGroupsPage: (index) => setPageIndex(index),
         renderChildComponent,
-        resetGroupChildrenPagination,
+        onGroupClose,
         selectedGroup,
         takeActionItems: getTakeActionItems,
       }),
@@ -245,7 +245,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       pageIndex,
       pageSize,
       renderChildComponent,
-      resetGroupChildrenPagination,
+      onGroupClose,
       selectedGroup,
       setPageIndex,
       setPageSize,

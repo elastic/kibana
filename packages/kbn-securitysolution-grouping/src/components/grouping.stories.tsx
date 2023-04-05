@@ -10,10 +10,17 @@ import React from 'react';
 import type { Story } from '@storybook/react';
 import { mockGroupingProps } from './grouping.mock';
 import { Grouping } from './grouping';
+import readme from '../../README.mdx';
 
 export default {
   component: Grouping,
-  title: 'Grouping/Grouping',
+  title: 'Grouping',
+  description: 'A group of accordion components that each renders a given child component',
+  parameters: {
+    docs: {
+      page: readme,
+    },
+  },
 };
 
 export const Emtpy: Story<void> = () => {

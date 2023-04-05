@@ -67,9 +67,10 @@ export const useGetGroupSelector = ({
     (groupSelection: string) => {
       if (selectedGroups.find((selected) => selected === groupSelection)) {
         const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
-        setSelectedGroups(groups);
         if (groups.length === 0) {
           setSelectedGroups(['none']);
+        } else {
+          setSelectedGroups(groups);
         }
         return;
       }

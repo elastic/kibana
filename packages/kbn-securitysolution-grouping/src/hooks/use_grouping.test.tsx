@@ -30,7 +30,6 @@ const defaultArgs = {
     groupStatsRenderer: jest.fn(),
     inspectButton: <></>,
     onGroupToggle: jest.fn(),
-    renderChildComponent: () => <p data-test-subj="innerTable">{'hello'}</p>,
   },
 };
 
@@ -38,6 +37,9 @@ const groupingArgs = {
   data: {},
   isLoading: false,
   takeActionItems: jest.fn(),
+  activePage: 0,
+  itemsPerPage: 25,
+  onGroupClose: () => {},
 };
 
 describe('useGrouping', () => {
@@ -70,8 +72,8 @@ describe('useGrouping', () => {
                 value: 18,
               },
             },
-            renderChildComponent: jest.fn(),
-            selectedGroup: 'test',
+            renderChildComponent: () => <p data-test-subj="innerTable">{'hello'}</p>,
+            selectedGroup: 'none',
           })}
         </IntlProvider>
       );
@@ -97,7 +99,7 @@ describe('useGrouping', () => {
       const { result, waitForNextUpdate } = renderHook(() => useGrouping(defaultArgs));
       await waitForNextUpdate();
       await waitForNextUpdate();
-      const { getByTestId, queryByTestId } = render(
+      const { getByTestId } = render(
         <IntlProvider locale="en">
           {result.current.getGrouping({
             ...groupingArgs,
@@ -128,7 +130,6 @@ describe('useGrouping', () => {
       );
 
       expect(getByTestId('grouping-table')).toBeInTheDocument();
-      expect(queryByTestId('innerTable')).not.toBeInTheDocument();
     });
   });
 });

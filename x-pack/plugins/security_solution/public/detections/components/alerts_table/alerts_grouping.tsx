@@ -210,6 +210,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           {...props}
           getGrouping={getGrouping}
           groupingLevel={level}
+          onGroupClose={() => resetGroupChildrenPagination(level)}
           pageIndex={pageIndex[level] ?? DEFAULT_PAGE_INDEX}
           pageSize={pageSize[level] ?? DEFAULT_PAGE_SIZE}
           parentGroupingFilter={parentGroupingFilter}
@@ -217,7 +218,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           selectedGroup={selectedGroup}
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
-          resetGroupChildrenPagination={() => resetGroupChildrenPagination(level)}
         />
       );
     },

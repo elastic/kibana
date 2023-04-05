@@ -97,7 +97,7 @@ export const mockGroupingProps = {
   isLoading: false,
   itemsPerPage: 25,
   renderChildComponent: () => <p>{'child component'}</p>,
-  resetGroupChildrenPagination: () => {},
+  onGroupClose: () => {},
   selectedGroup: 'kibana.alert.rule.name',
   takeActionItems: () => [
     <EuiContextMenuItem key="acknowledged" onClick={() => {}}>
