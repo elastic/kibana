@@ -17,16 +17,16 @@ import {
 import { css } from '@emotion/react';
 import { MaintenanceWindowResponse } from '../types';
 import * as i18n from '../translations';
+import { Status, STATUS_SORT } from '../constants';
 
-interface MaintenanceWindowsTableProps {
+interface MaintenanceWindowsListProps {
   loading: boolean;
   items: MaintenanceWindowResponse[];
 }
 
-export const MaintenanceWindowsTable = React.memo<MaintenanceWindowsTableProps>(
+export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
   ({ loading, items }) => {
     const [, setSelection] = useState<MaintenanceWindowResponse[]>([]);
-
     const styles = {
       status: css`
         cursor: default;
@@ -62,23 +62,23 @@ export const MaintenanceWindowsTable = React.memo<MaintenanceWindowsTableProps>(
       {
         field: 'status',
         name: i18n.TABLE_STATUS,
-        render: (status: MaintenanceWindowResponse['status']) => {
+        render: (status: string) => {
           const display: Record<
-            MaintenanceWindowResponse['status'],
+            string,
             {
               color: 'warning' | 'success' | 'text';
               label: string;
             }
           > = {
-            running: { color: 'warning', label: i18n.TABLE_STATUS_RUNNING },
-            upcoming: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
-            finished: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
-            archived: { color: 'text', label: i18n.TABLE_STATUS_ARCHIVED },
+            [Status.RUNNING]: { color: 'warning', label: i18n.TABLE_STATUS_RUNNING },
+            [Status.UPCOMING]: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
+            [Status.FINISHED]: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
+            [Status.ARCHIVED]: { color: 'text', label: i18n.TABLE_STATUS_ARCHIVED },
           };
           return (
             <EuiButton
               css={styles.status}
-              fill={status === 'running'}
+              fill={status === Status.RUNNING}
               color={display[status].color}
               size="s"
               onClick={() => {}}
@@ -87,6 +87,7 @@ export const MaintenanceWindowsTable = React.memo<MaintenanceWindowsTableProps>(
             </EuiButton>
           );
         },
+        sortable: ({ status }) => STATUS_SORT[status],
       },
       {
         field: 'eventStartTime',
@@ -108,18 +109,26 @@ export const MaintenanceWindowsTable = React.memo<MaintenanceWindowsTableProps>(
         css={styles.table}
         itemId="id"
         loading={loading}
-        tableCaption="Maintenance Windows Table"
+        tableCaption="Maintenance Windows List"
         items={items}
         columns={columns}
         pagination={true}
-        sorting={true}
+        sorting={{
+          sort: {
+            field: 'status',
+            direction: 'asc',
+          },
+        }}
         selection={{
           onSelectionChange: (selection: MaintenanceWindowResponse[]) => setSelection(selection),
         }}
         isSelectable={true}
-        rowProps={(item: MaintenanceWindowResponse) => ({ className: item.status })}
+        rowProps={(item: MaintenanceWindowResponse) => ({
+          className: item.status,
+          'data-test-subj': 'list-item',
+        })}
       />
     );
   }
 );
-MaintenanceWindowsTable.displayName = 'MaintenanceWindowsTable';
+MaintenanceWindowsList.displayName = 'MaintenanceWindowsList';

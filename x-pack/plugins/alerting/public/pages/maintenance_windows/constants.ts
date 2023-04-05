@@ -104,3 +104,17 @@ export const ISO_WEEKDAYS_TO_RRULE: Record<number, string> = {
 export const RRULE_WEEKDAYS_TO_ISO_WEEKDAYS = mapValues(invert(ISO_WEEKDAYS_TO_RRULE), (v) =>
   Number(v)
 );
+
+export enum Status {
+  RUNNING = 'running',
+  UPCOMING = 'upcoming',
+  FINISHED = 'finished',
+  ARCHIVED = 'archived',
+}
+
+export const STATUS_SORT: Record<Status, number> = {
+  [Status.RUNNING]: 0,
+  [Status.UPCOMING]: 1,
+  [Status.FINISHED]: 2,
+  [Status.ARCHIVED]: 3,
+};
