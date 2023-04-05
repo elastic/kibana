@@ -17,11 +17,11 @@ import {
 } from '@elastic/charts';
 import React from 'react';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import moment from 'moment';
 
 import { ChartData } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
-import { toHighPrecisionPercentage } from '../helpers/number';
 
 type ChartType = 'area' | 'line';
 type State = 'success' | 'error';
@@ -40,12 +40,13 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
   const baseTheme = charts.theme.useChartsBaseTheme();
   const { euiTheme } = useEuiTheme();
   const dateFormat = uiSettings.get('dateFormat');
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono />;
+    return <EuiLoadingChart size="m" mono data-test-subj="wideChartLoading" />;
   }
 
   return (
@@ -67,7 +68,7 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
         id="left"
         ticks={4}
         position={Position.Left}
-        tickFormat={(d) => `${toHighPrecisionPercentage(d)}%`}
+        tickFormat={(d) => numeral(d).format(percentFormat)}
       />
       <ChartComponent
         color={color}

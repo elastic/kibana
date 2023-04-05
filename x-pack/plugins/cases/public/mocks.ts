@@ -10,7 +10,12 @@ import type { CasesUiStart } from './types';
 
 const apiMock: jest.Mocked<CasesUiStart['api']> = {
   getRelatedCases: jest.fn(),
-  cases: { find: jest.fn(), getCasesMetrics: jest.fn(), getCasesStatus: jest.fn() },
+  cases: {
+    find: jest.fn(),
+    getCasesMetrics: jest.fn(),
+    getCasesStatus: jest.fn(),
+    bulkGet: jest.fn(),
+  },
 };
 
 const uiMock: jest.Mocked<CasesUiStart['ui']> = {
@@ -22,10 +27,13 @@ const uiMock: jest.Mocked<CasesUiStart['ui']> = {
 };
 
 export const openAddToExistingCaseModalMock = jest.fn();
+export const openAddToNewCaseFlyoutMock = jest.fn();
 
 const hooksMock: jest.Mocked<CasesUiStart['hooks']> = {
-  getUseCasesAddToNewCaseFlyout: jest.fn(),
-  getUseCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
+  useCasesAddToNewCaseFlyout: jest.fn().mockImplementation(() => ({
+    open: openAddToNewCaseFlyoutMock,
+  })),
+  useCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
     open: openAddToExistingCaseModalMock,
   })),
 };

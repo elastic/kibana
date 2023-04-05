@@ -5,32 +5,80 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect, Switch, useLocation } from 'react-router-dom';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { Redirect, Switch, useHistory, useLocation } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { NoFindingsStates } from '../../components/no_findings_states';
-import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
-import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
-import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
+import { Vulnerabilities } from '../vulnerabilities';
 
 export const Findings = () => {
+  const history = useHistory();
   const location = useLocation();
-  const dataViewQuery = useLatestFindingsDataView();
-  const getSetupStatus = useCspSetupStatusApi();
 
-  const hasFindings = getSetupStatus.data?.status === 'indexed';
-  if (!hasFindings) return <NoFindingsStates />;
-
+  const navigateToVulnerabilitiesTab = () => {
+    history.push({ pathname: findingsNavigation.vulnerabilities.path });
+  };
+  const navigateToConfigurationsTab = () => {
+    history.push({ pathname: findingsNavigation.findings_default.path });
+  };
   return (
-    <CloudPosturePage query={dataViewQuery}>
+    <>
+      <EuiTitle size="l">
+        <h1>
+          <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
+        </h1>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiTabs size="l">
+        <EuiTab
+          key="vuln_mgmt"
+          onClick={navigateToVulnerabilitiesTab}
+          isSelected={location.pathname === findingsNavigation.vulnerabilities.path}
+        >
+          <EuiFlexGroup responsive={false} alignItems="center" direction="row" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.csp.findings.tabs.vulnerabilities"
+                defaultMessage="Vulnerabilities"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                css={css`
+                  display: block;
+                `}
+                label="Beta"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTab>
+        <EuiTab
+          key="configurations"
+          onClick={navigateToConfigurationsTab}
+          isSelected={location.pathname !== findingsNavigation.vulnerabilities.path}
+        >
+          <FormattedMessage
+            id="xpack.csp.findings.tabs.configurations"
+            defaultMessage="Configurations"
+          />
+        </EuiTab>
+      </EuiTabs>
       <Switch>
         <Route
           exact
           path={cloudPosturePages.findings.path}
-          component={() => (
+          render={() => (
             <Redirect
               to={{
                 pathname: findingsNavigation.findings_default.path,
@@ -39,23 +87,12 @@ export const Findings = () => {
             />
           )}
         />
-        <Route
-          path={findingsNavigation.findings_default.path}
-          render={() => (
-            <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
-              <LatestFindingsContainer dataView={dataViewQuery.data!} />
-            </TrackApplicationView>
-          )}
-        />
-        <Route
-          path={findingsNavigation.findings_by_resource.path}
-          render={() => <FindingsByResourceContainer dataView={dataViewQuery.data!} />}
-        />
-        <Route
-          path={'*'}
-          component={() => <Redirect to={findingsNavigation.findings_default.path} />}
-        />
+
+        <Route path={findingsNavigation.findings_default.path} component={Configurations} />
+        <Route path={findingsNavigation.vulnerabilities.path} component={Vulnerabilities} />
+        <Route path={findingsNavigation.findings_by_resource.path} component={Configurations} />
+        <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
       </Switch>
-    </CloudPosturePage>
+    </>
   );
 };

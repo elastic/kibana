@@ -19,6 +19,7 @@ interface EngineSearchPreviewActions {
 export interface EngineSearchPreviewValues {
   engineFieldCapabilitiesData: typeof FetchEngineFieldCapabilitiesApiLogic.values.data;
   engineName: typeof EngineNameLogic.values.engineName;
+  fieldTypesByIndex: Record<string, Record<string, string>>;
   resultFields: Record<string, FieldConfiguration>;
   searchableFields: Record<string, SearchFieldConfiguration>;
   sortableFields: string[];
@@ -50,22 +51,37 @@ export const EngineSearchPreviewLogic = kea<
   }),
   path: ['enterprise_search', 'content', 'engine_search_preview_logic'],
   selectors: ({ selectors }) => ({
+    fieldTypesByIndex: [
+      () => [selectors.engineFieldCapabilitiesData],
+      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
+        if (!data) return {};
+
+        return data.fields.reduce(
+          (out: Record<string, Record<string, string>>, field) =>
+            field.indices.reduce(
+              (acc: Record<string, Record<string, string>>, index) => ({
+                ...acc,
+                [index.name]: {
+                  ...(acc[index.name] || {}),
+                  [field.name]: index.type,
+                },
+              }),
+              out
+            ),
+          {}
+        );
+      },
+    ],
     resultFields: [
       () => [selectors.engineFieldCapabilitiesData],
       (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
         if (!data) return {};
 
-        const resultFields = Object.fromEntries(
-          Object.entries(data.field_capabilities.fields)
-            .filter(([, mappings]) => {
-              return Object.values(mappings).some(({ metadata_field: isMeta }) => !isMeta);
-            })
-            .map(([key]) => {
-              return [key, { raw: {}, snippet: {} }];
-            })
+        return Object.fromEntries(
+          data.fields
+            .filter(({ metadata_field: isMeta }) => !isMeta)
+            .map(({ name }) => [name, { raw: {}, snippet: { fallback: true } }])
         );
-
-        return resultFields;
       },
     ],
     searchableFields: [
@@ -74,14 +90,12 @@ export const EngineSearchPreviewLogic = kea<
         if (!data) return {};
 
         const searchableFields = Object.fromEntries(
-          Object.entries(data.field_capabilities.fields)
-            .filter(([, mappings]) =>
-              Object.entries(mappings).some(
-                ([type, { metadata_field: isMeta, searchable: isSearchable }]) =>
-                  type === 'text' && !isMeta && isSearchable
-              )
+          data.fields
+            .filter(
+              ({ type, metadata_field: isMeta, searchable: isSearchable }) =>
+                type === 'text' && !isMeta && isSearchable
             )
-            .map(([key]) => [key, { weight: 1 }])
+            .map(({ name }) => [name, { weight: 1 }])
         );
 
         return searchableFields;
@@ -92,15 +106,10 @@ export const EngineSearchPreviewLogic = kea<
       (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
         if (!data) return [];
 
-        return Object.entries(data.field_capabilities.fields)
-          .filter(([, mappings]) =>
-            Object.entries(mappings).some(
-              ([, { metadata_field: isMeta, aggregatable }]) =>
-                // Aggregatable are also _sortable_
-                aggregatable && !isMeta
-            )
-          )
-          .map(([field]) => field);
+        return data.fields
+          .filter(({ metadata_field: isMeta, aggregatable }) => aggregatable && !isMeta)
+          .map(({ name }) => name)
+          .sort();
       },
     ],
   }),

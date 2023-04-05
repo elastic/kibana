@@ -30,7 +30,7 @@ import { KibanaLogic } from '../kibana';
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { productAccess } = useValues(KibanaLogic);
+  const { productAccess, productFeatures } = useValues(KibanaLogic);
 
   const enginesSectionEnabled = productAccess.hasSearchEnginesAccess;
 
@@ -59,17 +59,21 @@ export const useEnterpriseSearchNav = () => {
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
           }),
         },
-        {
-          id: 'settings',
-          name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
-            defaultMessage: 'Settings',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
-            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
-          }),
-        },
+        ...(productFeatures.hasDefaultIngestPipeline
+          ? [
+              {
+                id: 'settings',
+                name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
+                  defaultMessage: 'Settings',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  shouldShowActiveForSubroutes: true,
+                  to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
+                }),
+              },
+            ]
+          : []),
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
         defaultMessage: 'Content',
@@ -85,7 +89,6 @@ export const useEnterpriseSearchNav = () => {
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
             to: ANALYTICS_PLUGIN.URL,
           }),
         },
@@ -325,6 +328,64 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
           }),
         },
       ];
+
+  return navItems;
+};
+
+export const useEnterpriseSearchAnalyticsNav = (
+  name?: string,
+  paths?: {
+    explorer: string;
+    integration: string;
+    overview: string;
+  }
+) => {
+  const navItems = useEnterpriseSearchNav();
+  const collectionNav = navItems.find(
+    (item) =>
+      item.id === 'enterpriseSearchAnalytics' && item.items?.[0]?.id === 'analytics_collections'
+  )?.items?.[0];
+
+  if (!name || !paths || !collectionNav) return navItems;
+
+  collectionNav.items = [
+    {
+      id: 'analytics_collections',
+      items: [
+        {
+          id: 'enterpriseSearchEngineOverview',
+          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollections.overviewTitle', {
+            defaultMessage: 'Overview',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ANALYTICS_PLUGIN.URL + paths.overview,
+          }),
+        },
+        {
+          id: 'enterpriseSearchEngineIndices',
+          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollections.explorerTitle', {
+            defaultMessage: 'Explorer',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ANALYTICS_PLUGIN.URL + paths.explorer,
+          }),
+        },
+        {
+          id: 'enterpriseSearchEngineSchema',
+          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollections.integrationTitle', {
+            defaultMessage: 'Integration',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ANALYTICS_PLUGIN.URL + paths.integration,
+          }),
+        },
+      ],
+      name,
+    },
+  ];
 
   return navItems;
 };

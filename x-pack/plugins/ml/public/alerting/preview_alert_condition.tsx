@@ -219,7 +219,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>{previewError.message}</p>
           </EuiCallOut>

@@ -31,7 +31,7 @@ import { useHasData } from '../../../../hooks/use_has_data';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-import { BucketSize } from '../../../../pages/overview';
+import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;

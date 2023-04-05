@@ -21,6 +21,7 @@ import {
   generateAlertMessage,
   getViewInAppUrl,
   setRecoveredAlertsContext,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
 import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
@@ -189,4 +190,5 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
 
     return { state: updateState(state, foundAnomalies) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

@@ -18,7 +18,6 @@ import { ResponseActionsLog } from './response_actions_log';
 import type {
   ActionDetailsApiResponse,
   ActionFileInfoApiResponse,
-  ActionListApiResponse,
 } from '../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { getActionListMock } from './mocks';
@@ -29,19 +28,15 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../common/compone
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { useGetEndpointActionList as _useGetEndpointActionList } from '../../hooks/response_actions/use_get_endpoint_action_list';
 
-let mockUseGetEndpointActionList: {
-  isFetched?: boolean;
-  isFetching?: boolean;
-  error?: Partial<IHttpFetchError> | null;
-  data?: ActionListApiResponse;
-  refetch: () => unknown;
-};
+const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
+
 jest.mock('../../hooks/response_actions/use_get_endpoint_action_list', () => {
   const original = jest.requireActual('../../hooks/response_actions/use_get_endpoint_action_list');
   return {
     ...original,
-    useGetEndpointActionList: () => mockUseGetEndpointActionList,
+    useGetEndpointActionList: jest.fn(original.useGetEndpointActionList),
   };
 });
 
@@ -161,8 +156,10 @@ const getBaseMockedActionList = () => ({
   error: null,
   refetch: jest.fn(),
 });
-describe('Response actions history', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/145635
+describe.skip('Response actions history', () => {
   const testPrefix = 'test';
+  const hostsFilterPrefix = 'hosts-filter';
 
   let render: (
     props?: React.ComponentProps<typeof ResponseActionsLog>
@@ -171,6 +168,23 @@ describe('Response actions history', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
+
+  const filterByHosts = (selectedOptionIndexes: number[]) => {
+    const { getByTestId, getAllByTestId } = renderResult;
+    const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
+
+    userEvent.click(popoverButton);
+
+    if (selectedOptionIndexes.length) {
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
+
+      allFilterOptions.forEach((option, i) => {
+        if (selectedOptionIndexes.includes(i)) {
+          userEvent.click(option, undefined, { skipPointerEventsCheck: true });
+        }
+      });
+    }
+  };
 
   beforeEach(async () => {
     mockedContext = createAppRootMockRenderer();
@@ -183,10 +197,10 @@ describe('Response actions history', () => {
       history.push(`${MANAGEMENT_PATH}/response_actions`);
     });
 
-    mockUseGetEndpointActionList = {
+    useGetEndpointActionListMock.mockReturnValue({
       ...getBaseMockedActionList(),
       data: await getActionListMock({ actionCount: 13 }),
-    };
+    });
 
     mockUseGetEndpointsList.mockReturnValue({
       data: Array.from({ length: 50 }).map(() => {
@@ -206,27 +220,27 @@ describe('Response actions history', () => {
   });
 
   afterEach(() => {
-    mockUseGetEndpointActionList = getBaseMockedActionList();
+    useGetEndpointActionListMock.mockReturnValue(getBaseMockedActionList());
     useUserPrivilegesMock.mockReset();
   });
 
   describe('When index does not exist yet', () => {
     it('should show global loader when waiting for response', () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         isFetched: false,
         isFetching: true,
-      };
+      });
       render();
       expect(renderResult.getByTestId(`${testPrefix}-global-loader`)).toBeTruthy();
     });
     it('should show empty page when there is no index', () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         error: {
           body: { statusCode: 404, message: 'index_not_found_exception' },
         },
-      };
+      });
       render();
       expect(renderResult.getByTestId(`${testPrefix}-empty-state`)).toBeTruthy();
     });
@@ -244,10 +258,10 @@ describe('Response actions history', () => {
     });
 
     it('should show empty state when there is no data', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 0 }),
-      };
+      });
       render();
       expect(renderResult.getByTestId(`${testPrefix}-empty-prompt`)).toBeTruthy();
     });
@@ -263,6 +277,21 @@ describe('Response actions history', () => {
 
       const { getByTestId } = renderResult;
 
+      // Ensure API was called with no filters set aside from the date timeframe
+      expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
+        {
+          agentIds: undefined,
+          commands: [],
+          endDate: 'now',
+          page: 1,
+          pageSize: 10,
+          startDate: 'now-24h/h',
+          statuses: [],
+          userIds: [],
+          withOutputs: [],
+        },
+        expect.anything()
+      );
       expect(getByTestId(`${testPrefix}`)).toBeTruthy();
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 13 response actions'
@@ -301,10 +330,10 @@ describe('Response actions history', () => {
         },
       };
 
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data,
-      };
+      });
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
@@ -322,10 +351,10 @@ describe('Response actions history', () => {
         },
       };
 
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data,
-      };
+      });
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
@@ -345,10 +374,10 @@ describe('Response actions history', () => {
         },
       };
 
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data,
-      };
+      });
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
@@ -373,10 +402,10 @@ describe('Response actions history', () => {
     });
 
     it('should update per page rows on the table', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 33 }),
-      };
+      });
 
       render();
       const { getByTestId } = renderResult;
@@ -404,10 +433,10 @@ describe('Response actions history', () => {
     });
 
     it('should show 1-1 record label when only 1 record', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 1 }),
-      };
+      });
       render();
 
       expect(renderResult.getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
@@ -452,7 +481,8 @@ describe('Response actions history', () => {
     });
 
     it('should refresh data when autoRefresh is toggled on', async () => {
-      mockUseGetEndpointActionList = getBaseMockedActionList();
+      const listHookResponse = getBaseMockedActionList();
+      useGetEndpointActionListMock.mockReturnValue(listHookResponse);
       render();
       const { getByTestId } = renderResult;
 
@@ -467,18 +497,19 @@ describe('Response actions history', () => {
       reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
 
       await reactTestingLibrary.waitFor(() => {
-        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalledTimes(3);
+        expect(listHookResponse.refetch).toHaveBeenCalledTimes(3);
       });
     });
 
     it('should refresh data when super date picker refresh button is clicked', async () => {
-      mockUseGetEndpointActionList = getBaseMockedActionList();
+      const listHookResponse = getBaseMockedActionList();
+      useGetEndpointActionListMock.mockReturnValue(listHookResponse);
       render();
 
       const superRefreshButton = renderResult.getByTestId(`${testPrefix}-super-refresh-button`);
       userEvent.click(superRefreshButton);
       await waitFor(() => {
-        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalled();
+        expect(listHookResponse.refetch).toHaveBeenCalled();
       });
     });
 
@@ -506,10 +537,10 @@ describe('Response actions history', () => {
             canWriteExecuteOperations: false,
           }),
         });
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-        };
+        });
 
         mockUseGetFileInfo = {
           isFetching: false,
@@ -541,10 +572,10 @@ describe('Response actions history', () => {
           }),
         });
 
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-        };
+        });
 
         render();
         const { getByTestId, queryByTestId } = renderResult;
@@ -567,10 +598,10 @@ describe('Response actions history', () => {
           }),
         });
         const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: actionDetails,
-        };
+        });
 
         mockUseGetFileInfo = {
           isFetching: false,
@@ -619,10 +650,10 @@ describe('Response actions history', () => {
 
       it('should contain execute output and error for `execute` action WITH execute operation privilege', async () => {
         const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: actionDetails,
-        };
+        });
 
         mockUseGetFileInfo = {
           isFetching: false,
@@ -661,7 +692,9 @@ describe('Response actions history', () => {
 
         const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
         expect(executeAccordions).toBeTruthy();
-        expect(executeAccordions).toHaveTextContent('Execution outputExecution error');
+        const accordionButtons = Array.from(executeAccordions.querySelectorAll('.euiAccordion'));
+        expect(accordionButtons[0]).toHaveTextContent('Execution output (truncated)');
+        expect(accordionButtons[1]).toHaveTextContent('Execution error (truncated)');
       });
 
       it('should contain execute output for `execute` action WITHOUT execute operation privilege', async () => {
@@ -670,10 +703,10 @@ describe('Response actions history', () => {
             canWriteExecuteOperations: false,
           }),
         });
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
-        };
+        });
 
         render();
 
@@ -685,17 +718,18 @@ describe('Response actions history', () => {
         expect(executeAccordions).toBeTruthy();
       });
 
-      it('should not contain full output download link in expanded row for `execute` action WITHOUT execute operation privilege', async () => {
+      it('should not contain full output download link in expanded row for `execute` action WITHOUT Actions Log privileges', async () => {
         useUserPrivilegesMock.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canWriteExecuteOperations: false,
+            canAccessEndpointActionsLogManagement: false,
+            canReadActionsLogManagement: false,
           }),
         });
 
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
-        };
+        });
 
         render();
         const { getByTestId, queryByTestId } = renderResult;
@@ -708,6 +742,45 @@ describe('Response actions history', () => {
         expect(output).toBeTruthy();
         expect(output.textContent).toContain('execute completed successfully');
       });
+
+      it.each(['canAccessEndpointActionsLogManagement', 'canReadActionsLogManagement'])(
+        'should contain full output download link in expanded row for `execute` action WITH %s ',
+        async (privilege) => {
+          const initialActionsLogPrivileges = {
+            canAccessEndpointActionsLogManagement: false,
+            canReadActionsLogManagement: false,
+          };
+          useUserPrivilegesMock.mockReturnValue({
+            endpointPrivileges: getEndpointAuthzInitialStateMock({
+              ...initialActionsLogPrivileges,
+              [privilege]: true,
+            }),
+          });
+
+          useGetEndpointActionListMock.mockReturnValue({
+            ...getBaseMockedActionList(),
+            data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+          });
+
+          mockUseGetFileInfo = {
+            isFetching: false,
+            error: null,
+            data: apiMocks.responseProvider.fileInfo(),
+          };
+
+          render();
+          const { getByTestId } = renderResult;
+
+          const expandButton = getByTestId(`${testPrefix}-expand-button`);
+          userEvent.click(expandButton);
+
+          const output = getByTestId(`${testPrefix}-getExecuteLink`);
+          expect(output).toBeTruthy();
+          expect(output.textContent).toEqual(
+            'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+          );
+        }
+      );
     });
   });
 
@@ -722,10 +795,10 @@ describe('Response actions history', () => {
     };
 
     it('shows completed status badge for successfully completed actions', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 2 }),
-      };
+      });
       render();
 
       const outputs = expandRows();
@@ -739,10 +812,10 @@ describe('Response actions history', () => {
     });
 
     it('shows Failed status badge for failed actions', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 2, wasSuccessful: false, status: 'failed' }),
-      };
+      });
       render();
 
       const outputs = expandRows();
@@ -753,7 +826,7 @@ describe('Response actions history', () => {
     });
 
     it('shows Failed status badge for expired actions', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({
           actionCount: 2,
@@ -761,7 +834,7 @@ describe('Response actions history', () => {
           isExpired: true,
           status: 'failed',
         }),
-      };
+      });
       render();
 
       const outputs = expandRows();
@@ -775,10 +848,10 @@ describe('Response actions history', () => {
     });
 
     it('shows Pending status badge for pending actions', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 2, isCompleted: false, status: 'pending' }),
-      };
+      });
       render();
 
       const outputs = expandRows();
@@ -865,23 +938,67 @@ describe('Response actions history', () => {
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
+
+    it('should use selected statuses on api call', () => {
+      render();
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const statusOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      statusOptions[0].style.pointerEvents = 'all';
+      userEvent.click(statusOptions[0]);
+
+      statusOptions[1].style.pointerEvents = 'all';
+      userEvent.click(statusOptions[1]);
+
+      expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
+        {
+          agentIds: undefined,
+          commands: [],
+          endDate: 'now',
+          page: 1,
+          pageSize: 10,
+          startDate: 'now-24h/h',
+          statuses: ['failed', 'pending'],
+          userIds: [],
+          withOutputs: [],
+        },
+        expect.anything()
+      );
+    });
   });
 
   describe('Hosts Filter', () => {
-    const filterPrefix = 'hosts-filter';
+    beforeEach(() => {
+      const getEndpointListHookResponse = {
+        data: Array.from({ length: 50 }).map((_, index) => {
+          return {
+            id: `id-${index}`,
+            name: `Host-${index}`,
+          };
+        }),
+        page: 0,
+        pageSize: 50,
+        total: 50,
+      };
+      mockUseGetEndpointsList.mockReturnValue(getEndpointListHookResponse);
+    });
 
     it('should show hosts filter for non-flyout or page', () => {
       render({ showHostNames: true });
 
-      expect(renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`)).toBeTruthy();
+      expect(
+        renderResult.getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`)
+      ).toBeTruthy();
     });
 
     it('should have a search bar ', () => {
       render({ showHostNames: true });
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const searchBar = getByTestId(`${testPrefix}-${filterPrefix}-search`);
+      userEvent.click(getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`));
+      const searchBar = getByTestId(`${testPrefix}-${hostsFilterPrefix}-search`);
       expect(searchBar).toBeTruthy();
       expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual('Search hosts');
     });
@@ -890,13 +1007,13 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      const filterList = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(9);
+      expect(getAllByTestId(`${hostsFilterPrefix}-option`).length).toEqual(9);
       expect(
-        getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`).querySelector(
+        getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`).querySelector(
           '.euiNotificationBadge'
         )?.textContent
       ).toEqual('50');
@@ -906,9 +1023,9 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([1, 3, 5].includes(i)) {
@@ -917,7 +1034,7 @@ describe('Response actions history', () => {
         }
       });
 
-      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+      const selectedFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`).reduce<number[]>(
         (acc, curr, i) => {
           if (curr.getAttribute('aria-checked') === 'true') {
             acc.push(i);
@@ -934,9 +1051,9 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([1, 3, 5].includes(i)) {
@@ -951,7 +1068,7 @@ describe('Response actions history', () => {
       // re-open
       userEvent.click(popoverButton);
 
-      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+      const selectedFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`).reduce<number[]>(
         (acc, curr, i) => {
           if (curr.getAttribute('aria-checked') === 'true') {
             acc.push(i);
@@ -968,9 +1085,9 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([1, 3, 5].includes(i)) {
@@ -985,7 +1102,7 @@ describe('Response actions history', () => {
       // re-open
       userEvent.click(popoverButton);
 
-      const newSetAllFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const newSetAllFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click new options
       newSetAllFilterOptions.forEach((option, i) => {
         if ([4, 6, 8].includes(i)) {
@@ -994,7 +1111,7 @@ describe('Response actions history', () => {
         }
       });
 
-      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+      const selectedFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`).reduce<number[]>(
         (acc, curr, i) => {
           if (curr.getAttribute('aria-checked') === 'true') {
             acc.push(i);
@@ -1007,13 +1124,20 @@ describe('Response actions history', () => {
       expect(selectedFilterOptions).toEqual([0, 1, 2, 4, 6, 8]);
     });
 
-    it('should update the selected options count correctly', () => {
+    it('should update the selected options count correctly', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data,
+      });
+
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([0, 2, 4, 6].includes(i)) {
@@ -1023,6 +1147,26 @@ describe('Response actions history', () => {
       });
 
       expect(popoverButton.textContent).toEqual('Hosts4');
+    });
+
+    it('should call the API with the selected host ids', () => {
+      render({ showHostNames: true });
+      filterByHosts([0, 2, 4, 6]);
+
+      expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
+        {
+          agentIds: ['id-0', 'id-2', 'id-4', 'id-6'],
+          commands: [],
+          endDate: 'now',
+          page: 1,
+          pageSize: 10,
+          startDate: 'now-24h/h',
+          statuses: [],
+          userIds: [],
+          withOutputs: [],
+        },
+        expect.anything()
+      );
     });
   });
 });

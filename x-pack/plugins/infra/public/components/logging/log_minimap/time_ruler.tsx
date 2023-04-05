@@ -9,6 +9,7 @@ import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_time_zone_setting';
 import { getTimeLabelFormat } from './time_label_formatter';
 
 interface TimeRulerProps {
@@ -19,11 +20,24 @@ interface TimeRulerProps {
   width: number;
 }
 
+const useZonedDate = (timestamp: number) => {
+  const timeZone = useKibanaTimeZoneSetting();
+
+  const options = timeZone !== 'local' ? { timeZone } : undefined;
+  return new Date(new Date(timestamp).toLocaleString('en-US', options));
+};
+
 export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCount, width }) => {
-  const yScale = scaleTime().domain([start, end]).range([0, height]);
+  const startWithOffset = useZonedDate(start);
+  const endWithOffset = useZonedDate(end);
+
+  const yScale = scaleTime().domain([startWithOffset, endWithOffset]).range([0, height]);
 
   const ticks = yScale.ticks(tickCount);
-  const formatTick = yScale.tickFormat(tickCount, getTimeLabelFormat(start, end));
+  const formatTick = yScale.tickFormat(
+    tickCount,
+    getTimeLabelFormat(startWithOffset.getTime(), endWithOffset.getTime())
+  );
 
   return (
     <g>

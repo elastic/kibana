@@ -7,3 +7,11 @@
  */
 
 export { createContextMock, type MockedMigratorContext } from './context';
+export {
+  createPostInitState,
+  createPostDocInitState,
+  createOutdatedDocumentSearchState,
+} from './state';
+export { createType } from './saved_object_type';
+export { createDocumentMigrator } from './document_migrator';
+export { createSavedObjectRawDoc } from './saved_object';

@@ -102,6 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
           throttle: 'no_actions',
           exceptions_list: [],
           version: 1,
+          revision: 0,
         };
 
         const { body } = await supertest

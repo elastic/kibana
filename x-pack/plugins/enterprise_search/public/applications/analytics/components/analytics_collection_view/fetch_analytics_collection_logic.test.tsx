@@ -49,12 +49,12 @@ describe('fetchAnalyticsCollectionLogic', () => {
     });
 
     it('calls makeRequest on fetchAnalyticsCollections', async () => {
-      const id = 'name';
+      const name = 'name';
 
       FetchAnalyticsCollectionLogic.actions.makeRequest = jest.fn();
-      FetchAnalyticsCollectionLogic.actions.fetchAnalyticsCollection(id);
+      FetchAnalyticsCollectionLogic.actions.fetchAnalyticsCollection(name);
       expect(FetchAnalyticsCollectionLogic.actions.makeRequest).toHaveBeenCalledWith({
-        id,
+        name,
       });
     });
   });

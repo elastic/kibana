@@ -7,14 +7,21 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiText } from '@elastic/eui';
-import { OVERVIEW_TAB_CONTENT_TEST_ID } from './test_ids';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { InvestigationSection } from '../components/investigation_section';
+import { DescriptionSection } from '../components/description_section';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
  */
 export const OverviewTab: FC = memo(() => {
-  return <EuiText data-test-subj={OVERVIEW_TAB_CONTENT_TEST_ID}>{'Overview tab'}</EuiText>;
+  return (
+    <>
+      <DescriptionSection />
+      <EuiHorizontalRule margin="l" />
+      <InvestigationSection />
+    </>
+  );
 });
 
 OverviewTab.displayName = 'OverviewTab';
