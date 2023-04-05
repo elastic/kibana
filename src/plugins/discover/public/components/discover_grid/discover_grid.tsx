@@ -22,6 +22,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -29,6 +30,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { css } from '@emotion/react';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -53,6 +55,7 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
+import { createCustomControlColumn } from './discover_grid_custom_control_column';
 
 const themeDefault = { darkMode: false };
 
@@ -164,6 +167,10 @@ export interface DiscoverGridProps {
    */
   controlColumnIds?: string[];
   /**
+   * Customize the displayed control columns
+   */
+  customControlColumns?: EuiDataGridControlColumn[];
+  /**
    * Row height from state
    */
   rowHeightState?: number;
@@ -248,6 +255,7 @@ export const DiscoverGrid = ({
   isSortEnabled = true,
   isPaginationEnabled = true,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
+  customControlColumns,
   className,
   rowHeightState,
   onUpdateRowHeight,
@@ -498,8 +506,26 @@ export const DiscoverGrid = ({
 
   const lead = useMemo(
     () =>
-      getLeadControlColumns(canSetExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds, canSetExpandedDoc]
+      getLeadControlColumns(canSetExpandedDoc)
+        .filter(({ id }) => controlColumnIds.includes(id))
+        .concat((customControlColumns ?? []).map(createCustomControlColumn)),
+    [canSetExpandedDoc, customControlColumns, controlColumnIds]
+  );
+
+  const leadControlColumnsCss = useMemo(
+    () =>
+      lead.map(
+        (_, index) => css`
+          .euiDataGridHeaderCell--controlColumn:nth-child(${index + 1}) {
+            ${index === lead.length - 1 ? '' : 'border-right: none;'}
+          }
+
+          .euiDataGridRowCell--controlColumn:nth-child(${index + 1}) {
+            ${index === lead.length - 1 ? '' : 'border-right: none;'}
+          }
+        `
+      ),
+    [lead]
   );
 
   const additionalControls = useMemo(
@@ -631,6 +657,7 @@ export const DiscoverGrid = ({
             rowHeightsOptions={rowHeightsOptions}
             inMemory={isPlainRecord ? { level: 'sorting' } : undefined}
             gridStyle={GRID_STYLE}
+            css={leadControlColumnsCss}
           />
         </div>
         {showDisclaimer && (
