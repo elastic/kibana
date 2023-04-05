@@ -227,6 +227,7 @@ export function createSearchBar({
             iconType={props.iconType}
             nonKqlMode={props.nonKqlMode}
             customSubmitButton={props.customSubmitButton}
+            customDataViewPicker={props.customDataViewPicker}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
             {...overrideDefaultBehaviors(props)}
