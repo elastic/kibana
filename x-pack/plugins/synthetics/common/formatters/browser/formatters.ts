@@ -11,9 +11,6 @@ import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
-  tlsArrayToYamlFormatter,
-  tlsValueToStringFormatter,
-  tlsValueToYamlFormatter,
 } from '../formatting_utils';
 
 import { tlsFormatters } from '../tls/formatters';
@@ -35,20 +32,6 @@ const throttlingFormatter: Formatter = (fields) => {
     .join('/');
 };
 
-export const deprecatedZipUrlFormatters = {
-  [ConfigKey.SOURCE_ZIP_URL]: null,
-  [ConfigKey.SOURCE_ZIP_USERNAME]: null,
-  [ConfigKey.SOURCE_ZIP_PASSWORD]: null,
-  [ConfigKey.SOURCE_ZIP_FOLDER]: null,
-  [ConfigKey.SOURCE_ZIP_PROXY_URL]: null,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: tlsValueToYamlFormatter,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: tlsValueToYamlFormatter,
-  [ConfigKey.ZIP_URL_TLS_KEY]: tlsValueToYamlFormatter,
-  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: tlsValueToStringFormatter,
-  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: tlsValueToStringFormatter,
-  [ConfigKey.ZIP_URL_TLS_VERSION]: tlsArrayToYamlFormatter,
-};
-
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.PARAMS]: null,
@@ -68,7 +51,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
-  ...deprecatedZipUrlFormatters,
   ...commonFormatters,
   ...tlsFormatters,
 };
