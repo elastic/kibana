@@ -23,7 +23,7 @@ const RECT_ANNOTATION_TITLE = i18n.translate(
   }
 );
 
-export function AlertTimeRangeAnnotation({ alertStart, alertEnd, color, id }: Props) {
+export function AlertActiveTimeRangeAnnotation({ alertStart, alertEnd, color, id }: Props) {
   return (
     <RectAnnotation
       id={id}

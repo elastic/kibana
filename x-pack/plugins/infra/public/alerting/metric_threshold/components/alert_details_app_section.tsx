@@ -14,7 +14,7 @@ import { Rule } from '@kbn/alerting-plugin/common';
 import {
   AlertAnnotation,
   getPaddedAlertTimeRange,
-  AlertTimeRangeAnnotation,
+  AlertActiveTimeRangeAnnotation,
 } from '@kbn/observability-alert-details';
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
@@ -60,7 +60,7 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
       dateFormat={uiSettings.get('dateFormat') || DEFAULT_DATE_FORMAT}
       id={ALERT_START_ANNOTATION_ID}
     />,
-    <AlertTimeRangeAnnotation
+    <AlertActiveTimeRangeAnnotation
       alertStart={alert.start}
       alertEnd={alertEnd}
       color={euiTheme.colors.danger}

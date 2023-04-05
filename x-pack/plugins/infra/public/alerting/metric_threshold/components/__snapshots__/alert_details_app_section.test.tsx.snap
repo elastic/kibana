@@ -10,7 +10,7 @@ Array [
         dateFormat="YYYY-MM-DD HH:mm"
         id="alert_start_annotation"
       />,
-      <AlertTimeRangeAnnotation
+      <AlertActiveTimeRangeAnnotation
         alertStart={1678716383695}
         color="#BD271E"
         id="alert_time_range_annotation"
