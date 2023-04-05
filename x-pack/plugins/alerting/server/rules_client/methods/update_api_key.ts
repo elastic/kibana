@@ -91,17 +91,21 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     );
   }
 
-  let legacyActions: RawRule['actions'] = [];
-  let legacyActionsReferences: SavedObjectReference[] = [];
+  let resultedActions: RawRule['actions'] = [];
+  let resultedReferences: SavedObjectReference[] = [];
+  let hasLegacyActions = false;
 
   // migrate legacy actions only for SIEM rules
   if (attributes.consumer === AlertConsumers.SIEM) {
     const migratedActions = await migrateLegacyActions(context, {
       ruleId: id,
+      actions: attributes.actions,
+      references,
     });
 
-    legacyActions = migratedActions.legacyActions;
-    legacyActionsReferences = migratedActions.legacyActionsReferences;
+    resultedActions = migratedActions.actions;
+    resultedReferences = migratedActions.references;
+    hasLegacyActions = migratedActions.hasLegacyActions;
   }
 
   const updateAttributes = updateMeta(context, {
@@ -109,7 +113,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
     ...apiKeyAsAlertAttributes(createdAPIKey, username),
     updatedAt: new Date().toISOString(),
     updatedBy: username,
-    actions: [...attributes.actions, ...legacyActions],
+    ...(hasLegacyActions ? { actions: resultedActions } : {}),
   });
 
   context.auditLogger?.log(
@@ -125,9 +129,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
   try {
     await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
       version,
-      ...(legacyActionsReferences.length
-        ? { references: [...references, ...legacyActionsReferences] }
-        : {}),
+      ...(hasLegacyActions ? { references: resultedReferences } : {}),
     });
   } catch (e) {
     // Avoid unused API key

@@ -15,7 +15,7 @@ import {
   legacyGetWeeklyNotificationResult,
 } from './migrate_legacy_actions.mock';
 
-import { migrateLegacyActions } from './migrate_legacy_actions';
+import { retrieveMigratedLegacyActions } from './migrate_legacy_actions';
 
 import { find } from '../../methods/find';
 import { deleteRule } from '../../methods/delete';
@@ -64,7 +64,7 @@ describe('Legacy rule action migration logic', () => {
         saved_objects: [],
       });
 
-      const migratedProperties = await migrateLegacyActions(
+      const migratedProperties = await retrieveMigratedLegacyActions(
         {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
@@ -87,7 +87,7 @@ describe('Legacy rule action migration logic', () => {
         legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(['none'], ruleId, connectorId)
       );
 
-      const migratedProperties = await migrateLegacyActions(
+      const migratedProperties = await retrieveMigratedLegacyActions(
         {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
@@ -111,7 +111,7 @@ describe('Legacy rule action migration logic', () => {
         legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(['rule'], ruleId, connectorId)
       );
 
-      const migratedProperties = await migrateLegacyActions(
+      const migratedProperties = await retrieveMigratedLegacyActions(
         {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
@@ -141,7 +141,7 @@ describe('Legacy rule action migration logic', () => {
         legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(['daily'], ruleId, connectorId)
       );
 
-      const migratedProperties = await migrateLegacyActions(
+      const migratedProperties = await retrieveMigratedLegacyActions(
         {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
@@ -190,7 +190,7 @@ describe('Legacy rule action migration logic', () => {
         legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(['hourly'], ruleId, connectorId)
       );
 
-      const migratedProperties = await migrateLegacyActions(
+      const migratedProperties = await retrieveMigratedLegacyActions(
         {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
@@ -238,7 +238,7 @@ describe('Legacy rule action migration logic', () => {
         legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(['weekly'], ruleId, connectorId)
       );
 
-      const migratedProperties = await migrateLegacyActions(
+      const migratedProperties = await retrieveMigratedLegacyActions(
         {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,

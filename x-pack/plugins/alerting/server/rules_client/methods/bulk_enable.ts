@@ -144,24 +144,28 @@ const bulkEnableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
             }
 
-            let legacyActions: RawRule['actions'] = [];
-            let legacyActionsReferences: SavedObjectReference[] = [];
+            let resultedActions: RawRule['actions'] = [];
+            let resultedReferences: SavedObjectReference[] = [];
+            let hasLegacyActions = false;
 
             // migrate legacy actions only for SIEM rules
             if (rule.attributes.consumer === AlertConsumers.SIEM) {
               const migratedActions = await migrateLegacyActions(context, {
                 ruleId: rule.id,
+                actions: rule.attributes.actions,
+                references: rule.references,
               });
 
-              legacyActions = migratedActions.legacyActions;
-              legacyActionsReferences = migratedActions.legacyActionsReferences;
+              resultedActions = migratedActions.actions;
+              resultedReferences = migratedActions.references;
+              hasLegacyActions = migratedActions.hasLegacyActions;
             }
 
             const updatedAttributes = updateMeta(context, {
               ...rule.attributes,
               ...(!rule.attributes.apiKey &&
                 (await createNewAPIKeySet(context, { attributes: rule.attributes, username }))),
-              actions: [...rule.attributes.actions, ...legacyActions],
+              ...(hasLegacyActions ? { actions: resultedActions } : {}),
               enabled: true,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
@@ -197,7 +201,7 @@ const bulkEnableRulesWithOCC = async (
                 ...updatedAttributes,
                 ...(scheduledTaskId ? { scheduledTaskId } : undefined),
               },
-              references: [...rule.references, ...legacyActionsReferences],
+              ...(hasLegacyActions ? { references: resultedReferences } : {}),
             });
 
             context.auditLogger?.log(

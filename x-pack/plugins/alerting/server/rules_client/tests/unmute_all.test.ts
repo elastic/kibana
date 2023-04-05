@@ -282,6 +282,18 @@ describe('unmuteAll()', () => {
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         ruleId: '1',
+        actions: [
+          {
+            actionRef: '1',
+            actionTypeId: '1',
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        references: [],
       });
     });
 

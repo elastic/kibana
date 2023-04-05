@@ -92,30 +92,32 @@ async function snoozeWithOCC(
     throw Boom.badRequest(error.message);
   }
 
-  let legacyActions: RawRule['actions'] = [];
-  let legacyActionsReferences: SavedObjectReference[] = [];
+  let resultedActions: RawRule['actions'] = [];
+  let resultedReferences: SavedObjectReference[] = [];
+  let hasLegacyActions = false;
 
   // migrate legacy actions only for SIEM rules
   if (attributes.consumer === AlertConsumers.SIEM) {
     const migratedActions = await migrateLegacyActions(context, {
       ruleId: id,
+      actions: attributes.actions,
+      references,
     });
 
-    legacyActions = migratedActions.legacyActions;
-    legacyActionsReferences = migratedActions.legacyActionsReferences;
+    resultedActions = migratedActions.actions;
+    resultedReferences = migratedActions.references;
+    hasLegacyActions = migratedActions.hasLegacyActions;
   }
 
   const updateAttributes = updateMeta(context, {
     ...newAttrs,
-    ...(legacyActions.length ? { actions: [...attributes.actions, ...legacyActions] } : {}),
+    ...(hasLegacyActions ? { actions: resultedActions } : {}),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
   const updateOptions = {
     version,
-    ...(legacyActionsReferences.length
-      ? { references: [...references, ...legacyActionsReferences] }
-      : {}),
+    ...(hasLegacyActions ? { references: resultedReferences } : {}),
   };
 
   await partiallyUpdateAlert(

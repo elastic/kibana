@@ -75,17 +75,21 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === true) {
-    let legacyActions: RawRule['actions'] = [];
-    let legacyActionsReferences: SavedObjectReference[] = [];
+    let resultedActions: RawRule['actions'] = [];
+    let resultedReferences: SavedObjectReference[] = [];
+    let hasLegacyActions = false;
 
     // migrate legacy actions only for SIEM rules
     if (attributes.consumer === AlertConsumers.SIEM) {
       const migratedActions = await migrateLegacyActions(context, {
         ruleId: id,
+        actions: attributes.actions,
+        references,
       });
 
-      legacyActions = migratedActions.legacyActions;
-      legacyActionsReferences = migratedActions.legacyActionsReferences;
+      resultedActions = migratedActions.actions;
+      resultedReferences = migratedActions.references;
+      hasLegacyActions = migratedActions.hasLegacyActions;
     }
 
     await context.unsecuredSavedObjectsClient.update(
@@ -98,13 +102,11 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
         nextRun: null,
-        actions: [...attributes.actions, ...legacyActions],
+        ...(hasLegacyActions ? { actions: resultedActions } : {}),
       }),
       {
         version,
-        ...(legacyActionsReferences.length
-          ? { references: [...references, ...legacyActionsReferences] }
-          : {}),
+        ...(hasLegacyActions ? { references: resultedReferences } : {}),
       }
     );
 

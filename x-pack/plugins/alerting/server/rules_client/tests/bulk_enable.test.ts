@@ -807,9 +807,13 @@ describe('bulkEnableRules', () => {
       expect(migrateLegacyActions).toHaveBeenCalledTimes(2);
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         ruleId: siemRule1.id,
+        actions: [],
+        references: [],
       });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
         ruleId: siemRule2.id,
+        actions: [],
+        references: [],
       });
     });
   });

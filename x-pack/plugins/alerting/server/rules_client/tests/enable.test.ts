@@ -679,6 +679,18 @@ describe('enable()', () => {
       await rulesClient.enable({ id: '1' });
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        actions: [
+          {
+            actionRef: '1',
+            actionTypeId: '1',
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        references: [],
         ruleId: '1',
       });
     });

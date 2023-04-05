@@ -298,6 +298,8 @@ describe('muteInstance()', () => {
       await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        actions: [],
+        references: [],
         ruleId: '1',
       });
     });

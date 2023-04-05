@@ -120,22 +120,26 @@ const bulkDisableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
             }
 
-            let legacyActions: RawRule['actions'] = [];
-            let legacyActionsReferences: SavedObjectReference[] = [];
+            let resultedActions: RawRule['actions'] = [];
+            let resultedReferences: SavedObjectReference[] = [];
+            let hasLegacyActions = false;
 
             // migrate legacy actions only for SIEM rules
             if (rule.attributes.consumer === AlertConsumers.SIEM) {
               const migratedActions = await migrateLegacyActions(context, {
                 ruleId: rule.id,
+                actions: rule.attributes.actions,
+                references: rule.references,
               });
 
-              legacyActions = migratedActions.legacyActions;
-              legacyActionsReferences = migratedActions.legacyActionsReferences;
+              resultedActions = migratedActions.actions;
+              resultedReferences = migratedActions.references;
+              hasLegacyActions = migratedActions.hasLegacyActions;
             }
 
             const updatedAttributes = updateMeta(context, {
               ...rule.attributes,
-              actions: [...rule.attributes.actions, ...legacyActions],
+              ...(hasLegacyActions ? { actions: resultedActions } : {}),
               enabled: false,
               scheduledTaskId:
                 rule.attributes.scheduledTaskId === rule.id
@@ -150,7 +154,7 @@ const bulkDisableRulesWithOCC = async (
               attributes: {
                 ...updatedAttributes,
               },
-              references: [...rule.references, ...legacyActionsReferences],
+              ...(hasLegacyActions ? { references: resultedReferences } : {}),
             });
 
             context.auditLogger?.log(

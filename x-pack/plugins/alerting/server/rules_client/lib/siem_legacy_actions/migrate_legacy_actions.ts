@@ -17,19 +17,22 @@ import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from '
 
 import { transformFromLegacyActions } from './transform_legacy_actions';
 
-type MigrateLegacyActions = (
+type RetrieveMigratedLegacyActions = (
   context: RulesClientContext,
   { ruleId }: { ruleId: string }
 ) => Promise<{ legacyActions: RawRuleAction[]; legacyActionsReferences: SavedObjectReference[] }>;
 
 /**
- * @deprecated
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  * migrates legacy actions for SIEM rules
  * @param context RulesClient context
  * @param params.ruleId - id of rule to be migrated
  * @returns
  */
-export const migrateLegacyActions: MigrateLegacyActions = async (context, { ruleId }) => {
+export const retrieveMigratedLegacyActions: RetrieveMigratedLegacyActions = async (
+  context,
+  { ruleId }
+) => {
   const { unsecuredSavedObjectsClient } = context;
   try {
     if (ruleId == null) {
@@ -110,4 +113,35 @@ export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule
   }
 
   return { legacyActions: [], legacyActionsReferences: [] };
+};
+
+type MigrateLegacyActions = (
+  context: RulesClientContext,
+  { ruleId }: { ruleId: string; references?: SavedObjectReference[]; actions?: RawRuleAction[] }
+) => Promise<{
+  actions: RawRuleAction[];
+  references: SavedObjectReference[];
+  hasLegacyActions: boolean;
+}>;
+
+/**
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * migrates SIEM legacy  actions and merges rule actions and references
+ * @param context RulesClient context
+ * @param params
+ * @returns
+ */
+export const migrateLegacyActions: MigrateLegacyActions = async (
+  context: RulesClientContext,
+  { ruleId, actions = [], references = [] }
+) => {
+  const { legacyActions, legacyActionsReferences } = await retrieveMigratedLegacyActions(context, {
+    ruleId,
+  });
+
+  return {
+    actions: [...actions, ...legacyActions],
+    hasLegacyActions: legacyActions.length > 0,
+    references: [...references, ...legacyActionsReferences],
+  };
 };
