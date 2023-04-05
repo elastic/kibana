@@ -16,6 +16,7 @@ import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { openAlertsPopover } from './open_alerts_popover';
+import type { TopNavExtension } from '../../../../extensions';
 
 /**
  * Helper function to build the top nav links
@@ -28,6 +29,7 @@ export const getTopNavLinks = ({
   onOpenInspector,
   isPlainRecord,
   adHocDataViews,
+  topNavExtension,
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
@@ -36,6 +38,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
+  topNavExtension: TopNavExtension | undefined;
 }): TopNavMenuData[] => {
   const alerts = {
     id: 'alerts',
@@ -205,16 +208,37 @@ export const getTopNavLinks = ({
     },
   };
 
-  return [
-    newSearch,
-    openSearch,
-    shareSearch,
-    ...(services.triggersActionsUi &&
+  const defaultMenu = topNavExtension?.defaultMenu;
+  const entries = topNavExtension?.getMenuItems?.() ?? [];
+
+  if (!defaultMenu?.new?.disabled) {
+    entries.push({ data: newSearch, order: defaultMenu?.new?.order ?? 200 });
+  }
+
+  if (!defaultMenu?.open?.disabled) {
+    entries.push({ data: openSearch, order: defaultMenu?.open?.order ?? 300 });
+  }
+
+  if (!defaultMenu?.share?.disabled) {
+    entries.push({ data: shareSearch, order: defaultMenu?.share?.order ?? 400 });
+  }
+
+  if (
+    services.triggersActionsUi &&
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
-    !isPlainRecord
-      ? [alerts]
-      : []),
-    inspectSearch,
-    ...(services.capabilities.discover.save ? [saveSearch] : []),
-  ];
+    !isPlainRecord &&
+    !defaultMenu?.alerts?.disabled
+  ) {
+    entries.push({ data: alerts, order: defaultMenu?.alerts?.order ?? 500 });
+  }
+
+  if (!defaultMenu?.inspect?.disabled) {
+    entries.push({ data: inspectSearch, order: defaultMenu?.inspect?.order ?? 600 });
+  }
+
+  if (services.capabilities.discover.save && !defaultMenu?.save?.disabled) {
+    entries.push({ data: saveSearch, order: defaultMenu?.save?.order ?? 700 });
+  }
+
+  return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);
 };
