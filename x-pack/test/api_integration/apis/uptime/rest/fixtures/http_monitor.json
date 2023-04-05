@@ -28,7 +28,7 @@
   "check.response.body.negative": [],
   "check.response.body.positive": [],
   "response.include_body": "never",
-  "resposne.include_body_max_bytes": "1024",
+  "response.include_body_max_bytes": "1024",
   "check.request.headers": {
     "sampleHeader": "sampleHeaderValue"
   },
@@ -83,5 +83,7 @@
   "journey_id": "",
   "id": "",
   "hash": "",
-  "mode": "any"
+  "mode": "any",
+  "ipv4": true,
+  "ipv6": true
 }

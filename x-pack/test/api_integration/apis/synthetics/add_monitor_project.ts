@@ -382,6 +382,8 @@ export default function ({ getService }: FtrProviderContext) {
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
             mode: 'any',
+            ipv6: true,
+            ipv4: true,
           });
         }
       } finally {
@@ -491,6 +493,8 @@ export default function ({ getService }: FtrProviderContext) {
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
             mode: 'any',
+            ipv6: true,
+            ipv4: true,
           });
         }
       } finally {
@@ -596,6 +600,8 @@ export default function ({ getService }: FtrProviderContext) {
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
             mode: 'any',
+            ipv4: true,
+            ipv6: true,
           });
         }
       } finally {
