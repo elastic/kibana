@@ -15,7 +15,7 @@ import type {
 } from '../../../common/api';
 import { getCasesFromAlertsUrl } from '../../../common/api';
 import type { Cases, CasesStatus, CasesMetrics } from '../../../common/ui';
-import { getCases, getCasesMetrics, getCasesStatus } from '../../api';
+import { bulkGetCases, getCases, getCasesMetrics, getCasesStatus } from '../../api';
 import type { CasesUiStart } from '../../types';
 
 export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['api'] => {
@@ -32,6 +32,7 @@ export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['ap
         getCasesStatus({ http, query, signal }),
       getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal): Promise<CasesMetrics> =>
         getCasesMetrics({ http, signal, query }),
+      bulkGet: (params, signal?: AbortSignal) => bulkGetCases({ http, signal, params }),
     },
   };
 };
