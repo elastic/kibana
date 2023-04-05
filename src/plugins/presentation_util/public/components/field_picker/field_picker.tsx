@@ -12,7 +12,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { EuiSelectable, EuiSelectableOption, EuiSelectableProps, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiSelectableProps,
+  EuiSpacer,
+} from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { FieldTypeFilter } from './field_type_filter';
@@ -84,18 +90,22 @@ export const FieldPicker = ({
   );
 
   const fieldTypeFilter = (
-    <FieldTypeFilter
-      onFieldTypesChange={(types) => setTypesFilter(types)}
-      fieldTypesValue={typesFilter}
-      availableFieldTypes={uniqueTypes}
-      buttonProps={{ disabled: Boolean(selectableProps?.isLoading) }}
-    />
+    <EuiFormRow fullWidth={true}>
+      <FieldTypeFilter
+        onFieldTypesChange={(types) => setTypesFilter(types)}
+        fieldTypesValue={typesFilter}
+        availableFieldTypes={uniqueTypes}
+        buttonProps={{ disabled: Boolean(selectableProps?.isLoading) }}
+      />
+    </EuiFormRow>
   );
 
   return (
     <EuiSelectable
       {...selectableProps}
-      className="fieldPickerSelectable"
+      className={classNames('fieldPickerSelectable', {
+        fieldPickerSelectableLoading: selectableProps?.isLoading,
+      })}
       emptyMessage={i18n.translate('presentationUtil.fieldPicker.noFieldsLabel', {
         defaultMessage: 'No matching fields',
       })}

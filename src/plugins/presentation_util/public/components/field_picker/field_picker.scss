@@ -5,4 +5,10 @@
 
 .fieldPickerSelectable {
   height: $euiSizeXXL * 9; // 40 * 9 = 360px
+
+  &.fieldPickerSelectableLoading {
+    .euiSelectableMessage {
+      height: 100%;
+    }
+  }
 }
