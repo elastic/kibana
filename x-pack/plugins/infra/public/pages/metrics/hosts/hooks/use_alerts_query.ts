@@ -9,6 +9,7 @@ import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { BoolQuery, buildEsQuery, Filter } from '@kbn/es-query';
+import { SnapshotNode } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { HostsState } from './use_unified_search_url_state';
 import { useHostsViewContext } from './use_hosts_view';
@@ -21,21 +22,16 @@ export interface AlertsEsQuery {
 }
 
 export const useAlertsQueryImpl = () => {
-  const { getSortedHostNames } = useHostsViewContext();
+  const { hostNodes } = useHostsViewContext();
 
   const { searchCriteria } = useUnifiedSearchContext();
 
   const [alertStatus, setAlertStatus] = useState<AlertStatus>('all');
 
-  const sortedHostNames = useMemo(() => getSortedHostNames(), [getSortedHostNames]);
   const getAlertsEsQuery = useCallback(
     (status?: AlertStatus) =>
-      createAlertsEsQuery({
-        dateRange: searchCriteria.dateRange,
-        hostNodes: sortedHostNames,
-        status,
-      }),
-    [sortedHostNames, searchCriteria.dateRange]
+      createAlertsEsQuery({ dateRange: searchCriteria.dateRange, hostNodes, status }),
+    [hostNodes, searchCriteria.dateRange]
   );
 
   // Regenerate the query when status change even if is not used.
@@ -67,7 +63,7 @@ const createAlertsEsQuery = ({
   status,
 }: {
   dateRange: HostsState['dateRange'];
-  hostNodes: string[];
+  hostNodes: SnapshotNode[];
   status?: AlertStatus;
 }): AlertsEsQuery => {
   const alertStatusFilter = createAlertStatusFilter(status);

@@ -12,20 +12,16 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import createContainer from 'constate';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  GetHostsRequestBodyPayload,
-  GetHostsResponsePayload,
-  HostMetricType,
-} from '../../../../../common/http_api/hosts';
-import { InfraClientCoreStart } from '../../../../types';
+import { BoolQuery } from '@kbn/es-query';
+import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { useSourceContext } from '../../../../containers/metrics_source';
+import { useSnapshot, type UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { StringDateRangeTimestamp } from './use_unified_search_url_state';
 
-const HOST_TABLE_METRICS: Array<{ type: HostMetricType }> = [
+const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
   { type: 'tx' },
   { type: 'memory' },
@@ -36,60 +32,71 @@ const HOST_TABLE_METRICS: Array<{ type: HostMetricType }> = [
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
-  const { http } = useKibana<InfraClientCoreStart>().services;
-  const { buildQuery, getDateRangeAsTimestamp, searchCriteria } = useUnifiedSearchContext();
+  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
-  const hostRequest = useMemo<GetHostsRequestBodyPayload>(
-    () => ({
-      limit: searchCriteria.limit,
-      metrics: HOST_TABLE_METRICS,
-      query: buildQuery(),
-      timeRange: getDateRangeAsTimestamp(),
-      sortField: 'name',
-      sortDirection: 'asc',
-      sourceId,
-    }),
-    [searchCriteria.limit, buildQuery, getDateRangeAsTimestamp, sourceId]
+  const baseRequest = useMemo(
+    () =>
+      createSnapshotRequest({
+        dateRange: getDateRangeAsTimestamp(),
+        esQuery: buildQuery(),
+        sourceId,
+      }),
+    [buildQuery, getDateRangeAsTimestamp, sourceId]
   );
 
-  const abortCtrlRef = useRef(new AbortController());
-  const [{ loading, error, value }, refetch] = useAsyncFn(
-    (requestBody: GetHostsRequestBodyPayload) => {
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
-      return http.post<GetHostsResponsePayload>(`/api/metrics/hosts`, {
-        signal: abortCtrlRef.current.signal,
-        body: JSON.stringify(requestBody),
-      });
-    },
-    [http],
-    { loading: true }
-  );
-
-  const fetch = useCallback(
-    (newData?: Partial<GetHostsRequestBodyPayload>) => {
-      return refetch({ ...hostRequest, ...newData });
-    },
-    [hostRequest, refetch]
-  );
-
-  const getSortedHostNames = useCallback(
-    () => (value?.hosts ?? []).map((p) => p.name).sort(),
-    [value?.hosts]
-  );
-
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
-
-  return {
-    fetch,
+  // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
+  // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
+  // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
+  const {
     loading,
     error,
-    getSortedHostNames,
-    hostNodes: value?.hosts ?? [],
+    nodes: hostNodes,
+  } = useSnapshot(
+    {
+      ...baseRequest,
+      metrics: HOST_TABLE_METRICS,
+    },
+    { abortable: true }
+  );
+
+  return {
+    baseRequest,
+    loading,
+    error,
+    hostNodes,
   };
 };
 
 export const HostsView = createContainer(useHostsView);
 export const [HostsViewProvider, useHostsViewContext] = HostsView;
+
+/**
+ * Helpers
+ */
+const createSnapshotRequest = ({
+  esQuery,
+  sourceId,
+  dateRange,
+}: {
+  esQuery: { bool: BoolQuery };
+  sourceId: string;
+  dateRange: StringDateRangeTimestamp;
+}): UseSnapshotRequest => ({
+  filterQuery: JSON.stringify(esQuery),
+  metrics: [],
+  groupBy: [],
+  nodeType: 'host',
+  sourceId,
+  currentTime: dateRange.to,
+  includeTimeseries: false,
+  sendRequestImmediately: true,
+  timerange: {
+    interval: '1m',
+    from: dateRange.from,
+    to: dateRange.to,
+    ignoreLookback: true,
+  },
+  // The user might want to click on the submit button without changing the filters
+  // This makes sure all child components will re-render.
+  requestTs: Date.now(),
+});

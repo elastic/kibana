@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useMetricsDataViewContext } from '../hooks/use_data_view';
-import { UnifiedSearchBar } from './search_bar/unified_search_bar';
+import { UnifiedSearchBar } from './unified_search_bar';
 import { HostsTable } from './hosts_table';
 import { HostsViewProvider } from '../hooks/use_hosts_view';
 import { KPICharts } from './kpi_charts/kpi_charts';

@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
+import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -21,20 +22,19 @@ export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
-  const { loading, getSortedHostNames } = useHostsViewContext();
+  const { hostNodes, loading } = useHostsViewContext();
 
-  const sortedHostHanames = getSortedHostNames();
-  const hostsFilterQuery = useMemo(() => createHostsFilter(sortedHostHanames), [sortedHostHanames]);
+  const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
 
   const logsLinkToStreamQuery = useMemo(() => {
-    const hostsFilterQueryParam = createHostsFilterQueryParam(sortedHostHanames);
+    const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes);
 
     if (filterQuery.query && hostsFilterQueryParam) {
       return `${filterQuery.query} and ${hostsFilterQueryParam}`;
     }
 
     return filterQuery.query || hostsFilterQueryParam;
-  }, [filterQuery.query, sortedHostHanames]);
+  }, [filterQuery.query, hostNodes]);
 
   if (loading) {
     return (
@@ -80,12 +80,12 @@ export const LogsTabContent = () => {
   );
 };
 
-const createHostsFilterQueryParam = (hostNames: string[]): string => {
-  if (!hostNames.length) {
+const createHostsFilterQueryParam = (hostNodes: SnapshotNode[]): string => {
+  if (!hostNodes.length) {
     return '';
   }
 
-  const joinedHosts = hostNames.join(' or ');
+  const joinedHosts = hostNodes.map((p) => p.name).join(' or ');
   const hostsQueryParam = `host.name:(${joinedHosts})`;
 
   return hostsQueryParam;
