@@ -50,8 +50,11 @@ export class GisPageObject extends FtrService {
     await this.clickAddLayer();
     await this.testSubjects.click('emsBoundaries');
     try {
-      await this.testSubjects.exists('emsFileSelect', { timeout: 30000 }); // large timeout for EMS request
-      const isDisabled = await this.comboBox.isDisabled('emsFileSelect');
+      const emsFileElement = await this.testSubjects.find(comboBoxSelector,  { timeout: 120000 }); // large timeout for EMS request
+      if (!emsFileElement) {
+        throw new Error('Unable to find EMS file select');
+      }
+      const isDisabled = await this.comboBox.isDisabled(emsFileElement);
       if (isDisabled) {
         throw new Error('EMS file select is disabled');
       }

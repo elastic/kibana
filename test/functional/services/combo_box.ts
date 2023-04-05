@@ -324,9 +324,8 @@ export class ComboBoxService extends FtrService {
     await input.clearValueWithKeyboard();
   }
 
-  public async isDisabled(comboBoxSelector: string): Promise<boolean> {
-    this.log.debug(`comboBox.isDisabled, comboBoxSelector:${comboBoxSelector}`);
-    const comboBoxElement = await this.testSubjects.find(comboBoxSelector);
+  public async isDisabled(comboBoxElement: WebElementWrapper): Promise<boolean> {
+    this.log.debug(`comboBox.isDisabled`);
     const toggleListButton = await comboBoxElement.findByTestSubject('comboBoxToggleListButton');
     const isDisabled = await toggleListButton.getAttribute('disabled');
     this.log.debug(`isDisabled:${isDisabled}`);
