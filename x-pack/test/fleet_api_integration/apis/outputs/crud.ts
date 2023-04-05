@@ -101,14 +101,9 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/outputs`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'A Logstash Output',
-          type: 'logstash',
-          hosts: ['test.fr:443'],
-          ssl: {
-            certificate: 'CERTIFICATE',
-            key: 'KEY',
-            certificate_authorities: ['CA1', 'CA2'],
-          },
+          name: 'ESoutput',
+          type: 'elasticsearch',
+          hosts: ['https://test.fr'],
         })
         .expect(200);
       ESOutputId = postResponse1.item.id;
