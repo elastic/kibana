@@ -185,8 +185,6 @@ export const LogCategorizationPage: FC = () => {
         intervalMs
       );
 
-      // setCategories(resp.categories);
-      // setSparkLines(resp.sparkLinesPerCategory);
       setData({ categories: resp.categories, sparkLines: resp.sparkLinesPerCategory });
     } catch (error) {
       toasts.addError(error, {

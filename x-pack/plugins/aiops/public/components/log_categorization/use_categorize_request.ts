@@ -18,8 +18,6 @@ const EXAMPLE_LIMIT = 1;
 
 const USE_RANDOM_SAMPLING = true;
 const randomSamplerProbability = 0.1;
-// const randomSamplerProbability = 0.001;
-// const samplerShardSize = 200;
 
 interface CategoriesAgg {
   categories: {

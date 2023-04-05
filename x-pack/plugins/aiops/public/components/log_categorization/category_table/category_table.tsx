@@ -21,7 +21,6 @@ import {
   EuiTableSelectionType,
 } from '@elastic/eui';
 
-// import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
@@ -74,7 +73,6 @@ export const CategoryTable: FC<Props> = ({
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
-  // console.log(sparkLines);
 
   const openInDiscover = (mode: QueryMode, category?: Category) => {
     if (
