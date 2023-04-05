@@ -26,18 +26,21 @@ export interface TabProps {
   nodeType: InventoryItemType;
 }
 
+type SearchErrorType = undefined | { message: string };
+
 export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
   const nodeId = node.name;
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const {
     loading: metadataLoading,
-    error,
+    error: fetchMetadataError,
     metadata,
   } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
+  const [searchError, setSearchError] = useState<SearchErrorType>(undefined);
   const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
     hostFlyoutOpen.metadataSearch ? Query.parse(hostFlyoutOpen.metadataSearch) : Query.MATCH_ALL
@@ -53,26 +56,23 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
   );
 
   const searchBarOnChange = useCallback(
-    ({ query, queryText }) => {
-      setSearchBarState(query);
-      debouncedSearchOnChange(queryText);
+    ({ query, queryText, error }) => {
+      if (error) {
+        setSearchError(error);
+      } else {
+        setSearchError(undefined);
+        setSearchBarState(query);
+        debouncedSearchOnChange(queryText);
+      }
     },
     [setSearchBarState, debouncedSearchOnChange]
   );
 
-  const getQueriedMetadata = () => {
-    try {
-      const metadataResult = EuiSearchBar.Query.execute(searchBarState, fields, {
-        defaultFields: ['name', 'value'],
-      });
-      return metadataResult;
-    } catch (errorM) {
-      // The error is shown in the search bar already
-      return [];
-    }
-  };
+  const queriedMetadata = EuiSearchBar.Query.execute(searchBarState, fields, {
+    defaultFields: ['name', 'value'],
+  });
 
-  if (error) {
+  if (fetchMetadataError) {
     return (
       <EuiCallOut
         title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorTitle', {
@@ -118,27 +118,11 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
       <EuiSpacer size="m" />
       {metadataLoading ? (
         <LoadingPlaceholder />
-      ) : fields.length > 0 ? (
-        getQueriedMetadata()?.length > 0 ? (
-          <Table rows={getQueriedMetadata()} />
-        ) : (
-          <EuiCallOut
-            data-test-subj="infraMetadataNoDataFound"
-            title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
-              defaultMessage: 'There is no data to display.',
-            })}
-            size="m"
-            iconType="iInCircle"
-          />
-        )
       ) : (
-        <EuiCallOut
-          data-test-subj="infraMetadataNoData"
-          title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
-            defaultMessage: 'Sorry, there is no metadata related to this host.',
-          })}
-          size="m"
-          iconType="iInCircle"
+        <MetadataContent
+          noMetadata={fields?.length === 0}
+          searchError={searchError}
+          queriedMetadata={queriedMetadata}
         />
       )}
     </>
@@ -159,5 +143,58 @@ const LoadingPlaceholder = () => {
     >
       <EuiLoadingChart data-test-subj="infraHostMetadataLoading" size="xl" />
     </div>
+  );
+};
+
+interface MetadataContentProps {
+  searchError: SearchErrorType;
+  noMetadata: boolean;
+  queriedMetadata: Array<{
+    name: string;
+    value: string | string[] | undefined;
+  }>;
+}
+
+const MetadataContent = ({ searchError, noMetadata, queriedMetadata }: MetadataContentProps) => {
+  if (noMetadata) {
+    return (
+      <EuiCallOut
+        data-test-subj="infraMetadataNoData"
+        title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
+          defaultMessage: 'Sorry, there is no metadata related to this host.',
+        })}
+        size="m"
+        iconType="iInCircle"
+      />
+    );
+  }
+
+  if (searchError) {
+    return (
+      <div data-test-subj="infraMetadataInvalidSearchQueryMessage">
+        <EuiSpacer size="l" />
+
+        <EuiCallOut
+          iconType="warning"
+          color="danger"
+          title={`Invalid search: ${searchError.message}`}
+        />
+      </div>
+    );
+  }
+
+  if (queriedMetadata?.length > 0) {
+    return <Table rows={queriedMetadata} />;
+  }
+
+  return (
+    <EuiCallOut
+      data-test-subj="infraMetadataNoDataFound"
+      title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
+        defaultMessage: 'No metadata found.',
+      })}
+      size="m"
+      iconType="iInCircle"
+    />
   );
 };
