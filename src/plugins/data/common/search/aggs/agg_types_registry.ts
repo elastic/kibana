@@ -47,7 +47,7 @@ export class AggTypesRegistry {
       },
       registerLegacy: <
         N extends string,
-        T extends (deps: AggTypesDependencies) => (BucketAggType<any> | MetricAggType<any>)
+        T extends (deps: AggTypesDependencies) => BucketAggType<any> | MetricAggType<any>
       >(
         name: N,
         type: T
@@ -77,12 +77,10 @@ export class AggTypesRegistry {
 
     return {
       get: (name: string) => {
-        const agg = this.bucketAggs.get(name) || this.metricAggs.get(name) || this.legacyAggs.get(name);
+        const agg =
+          this.bucketAggs.get(name) || this.metricAggs.get(name) || this.legacyAggs.get(name);
         return agg
-          ? getInitializedFromCache<BucketAggType<any> | MetricAggType<any>>(
-            name,
-            agg
-          )
+          ? getInitializedFromCache<BucketAggType<any> | MetricAggType<any>>(name, agg)
           : undefined;
       },
       getAll: () => ({
