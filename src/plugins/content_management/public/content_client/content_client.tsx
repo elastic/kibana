@@ -142,7 +142,7 @@ export class ContentClient {
     );
   }
 
-  mSearch<T = unknown>(input: MSearchIn): Promise<MSearchResult> {
+  mSearch<T = unknown>(input: MSearchIn): Promise<MSearchResult<T>> {
     const crudClient = this.crudClientProvider();
     if (!crudClient.mSearch) {
       throw new Error('mSearch is not supported by provided crud client');
@@ -153,6 +153,6 @@ export class ContentClient {
       contentTypes: input.contentTypes.map((contentType) =>
         addVersion(contentType, this.contentTypeRegistry)
       ),
-    }) as Promise<MSearchResult>;
+    }) as Promise<MSearchResult<T>>;
   }
 }
