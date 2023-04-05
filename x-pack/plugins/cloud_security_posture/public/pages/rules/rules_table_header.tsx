@@ -76,13 +76,13 @@ const SearchField = ({
 
 const CurrentPageOfTotal = ({ pageSize, total }: RuleTableCount) => (
   <EuiFlexItem grow={true}>
-  <EuiSpacer size='xl' />
-  <EuiText size="xs" textAlign='left' color="subdued" style={{ marginLeft: '8px'}}>
-    <FormattedMessage
-      id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-      defaultMessage="Showing {pageSize} of of {total, plural, one {# rule} other {# rules}}"
-      values={{ pageSize, total }}
-    />
-  </EuiText>
+    <EuiSpacer size="xl" />
+    <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+      <FormattedMessage
+        id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
+        defaultMessage="Showing {pageSize} of of {total, plural, one {# rule} other {# rules}}"
+        values={{ pageSize, total }}
+      />
+    </EuiText>
   </EuiFlexItem>
 );
