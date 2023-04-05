@@ -44,6 +44,7 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
       FIELD(readOnly)[ConfigKey.REQUEST_HEADERS_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_BODY_CHECK],
       FIELD(readOnly)[ConfigKey.MODE],
+      FIELD(readOnly)[ConfigKey.IPV4],
     ],
   },
   responseConfig: {
@@ -96,6 +97,7 @@ export const TCP_ADVANCED = (readOnly: boolean) => ({
       FIELD(readOnly)[`${ConfigKey.PROXY_URL}__tcp`],
       FIELD(readOnly)[ConfigKey.REQUEST_SEND_CHECK],
       FIELD(readOnly)[ConfigKey.MODE],
+      FIELD(readOnly)[ConfigKey.IPV4],
     ],
   },
   responseChecks: {
@@ -123,7 +125,7 @@ export const ICMP_ADVANCED = (readOnly: boolean) => ({
         defaultMessage: 'Configure the payload sent to the remote host.',
       }
     ),
-    components: [FIELD(readOnly)[ConfigKey.MODE]],
+    components: [FIELD(readOnly)[ConfigKey.MODE], FIELD(readOnly)[ConfigKey.IPV4]],
   },
 });
 

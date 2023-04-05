@@ -24,7 +24,6 @@ export const Field = memo<Props>(
     props,
     fieldKey,
     controlled,
-    showWhen,
     shouldUseSetValue,
     required,
     validation,
@@ -42,13 +41,7 @@ export const Field = memo<Props>(
     const [dependenciesFieldMeta, setDependenciesFieldMeta] = useState<
       Record<string, ControllerFieldState>
     >({});
-    let show = true;
     let dependenciesValues: unknown[] = [];
-    if (showWhen) {
-      const [showKey, expectedValue] = showWhen;
-      const [actualValue] = watch([showKey]);
-      show = actualValue === expectedValue;
-    }
     if (dependencies) {
       dependenciesValues = watch(dependencies);
     }
@@ -65,7 +58,7 @@ export const Field = memo<Props>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [JSON.stringify(dependenciesValues || []), dependencies, getFieldState]);
 
-    if (!show) {
+    if (hidden && !hidden(dependenciesValues)) {
       return null;
     }
 
@@ -74,7 +67,6 @@ export const Field = memo<Props>(
       'aria-label': ariaLabel,
       helpText,
       fullWidth: true,
-      style: hidden && hidden(dependenciesValues) ? { display: 'none' } : undefined,
     };
 
     return controlled ? (

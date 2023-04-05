@@ -63,7 +63,7 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   label?: string;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
-  hidden?: (depenencies?: unknown[]) => boolean;
+  hidden?: (depenencies: unknown[]) => boolean;
   props?: (params: {
     field?: ControllerRenderProps<FormConfig, TFieldKey>;
     formState: FormState<FormConfig>;
@@ -89,7 +89,6 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
     event: React.ChangeEvent<HTMLInputElement>,
     formOnChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   ) => void;
-  showWhen?: [keyof FormConfig, any]; // show field when another field equals an arbitrary value
   validation?: (dependencies: unknown[]) => Parameters<UseFormReturn['register']>[1];
   error?: React.ReactNode;
   dependencies?: Array<keyof FormConfig>; // fields that another field may depend for or validation. Values are passed to the validation function
@@ -145,4 +144,5 @@ export interface FieldMap {
   [ConfigKey.SYNTHETICS_ARGS]: FieldMeta<ConfigKey.SYNTHETICS_ARGS>;
   [ConfigKey.IGNORE_HTTPS_ERRORS]: FieldMeta<ConfigKey.IGNORE_HTTPS_ERRORS>;
   [ConfigKey.MODE]: FieldMeta<ConfigKey.MODE>;
+  [ConfigKey.IPV4]: FieldMeta<ConfigKey.IPV4>;
 }

@@ -74,6 +74,8 @@ export enum ConfigKey {
   TIMEOUT = 'timeout',
   THROTTLING_CONFIG = 'throttling.config',
   IS_THROTTLING_ENABLED = 'throttling.is_enabled',
+  IPV4 = 'ipv4',
+  IPV6 = 'ipv6',
   DOWNLOAD_SPEED = 'throttling.download_speed',
   UPLOAD_SPEED = 'throttling.upload_speed',
   LATENCY = 'throttling.latency',

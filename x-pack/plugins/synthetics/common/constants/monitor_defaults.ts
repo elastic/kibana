@@ -135,6 +135,8 @@ export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
   [ConfigKey.USERNAME]: '',
   [ConfigKey.MODE]: Mode.ANY,
   [ConfigKey.RESPONSE_BODY_MAX_BYTES]: '1024',
+  [ConfigKey.IPV4]: true,
+  [ConfigKey.IPV6]: true,
 };
 
 export const DEFAULT_ICMP_SIMPLE_FIELDS: ICMPSimpleFields = {
@@ -163,10 +165,14 @@ export const DEFAULT_TCP_ADVANCED_FIELDS: TCPAdvancedFields = {
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: '',
   [ConfigKey.REQUEST_SEND_CHECK]: '',
   [ConfigKey.MODE]: Mode.ANY,
+  [ConfigKey.IPV4]: true,
+  [ConfigKey.IPV6]: true,
 };
 
 export const DEFAULT_ICMP_ADVANCED_FIELDS = {
   [ConfigKey.MODE]: Mode.ANY,
+  [ConfigKey.IPV4]: true,
+  [ConfigKey.IPV6]: true,
 };
 
 export const DEFAULT_TLS_FIELDS: TLSFields = {

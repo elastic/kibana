@@ -119,6 +119,8 @@ export const TCPAdvancedFieldsCodec = t.intersection([
   }),
   t.partial({
     [ConfigKey.MODE]: ModeCodec,
+    [ConfigKey.IPV4]: t.boolean,
+    [ConfigKey.IPV6]: t.boolean,
   }),
 ]);
 
@@ -163,6 +165,8 @@ export type ICMPSimpleFields = t.TypeOf<typeof ICMPSimpleFieldsCodec>;
 // ICMPAdvancedFields
 export const ICMPAdvancedFieldsCodec = t.partial({
   [ConfigKey.MODE]: ModeCodec,
+  [ConfigKey.IPV4]: t.boolean,
+  [ConfigKey.IPV6]: t.boolean,
 });
 
 // ICMPFields
@@ -195,6 +199,8 @@ export const HTTPAdvancedFieldsCodec = t.intersection([
   t.partial({
     [ConfigKey.MODE]: ModeCodec,
     [ConfigKey.RESPONSE_BODY_MAX_BYTES]: t.string,
+    [ConfigKey.IPV4]: t.boolean,
+    [ConfigKey.IPV6]: t.boolean,
   }),
 ]);
 

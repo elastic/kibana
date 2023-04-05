@@ -24,6 +24,8 @@ export const tcpFormatters: TCPFormatMap = {
   [ConfigKey.PORT]: null,
   [ConfigKey.URLS]: null,
   [ConfigKey.MODE]: null,
+  [ConfigKey.IPV4]: null,
+  [ConfigKey.IPV6]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };

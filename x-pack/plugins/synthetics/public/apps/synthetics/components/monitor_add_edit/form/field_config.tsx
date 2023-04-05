@@ -973,7 +973,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate. If the Subject Alternative Name is empty, it returns an error.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiSelectProps => ({
       options: Object.values(VerificationMode).map((method) => ({
         value: method,
@@ -989,7 +993,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Supported TLS protocols',
     }),
     controlled: true,
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: ({ field, setValue }): EuiComboBoxProps<TLSVersion> => {
       return {
         options: Object.values(TLSVersion).map((version) => ({
@@ -1017,7 +1025,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.certificateAuthorities.helpText', {
       defaultMessage: 'PEM-formatted custom certificate authorities.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiTextAreaProps => ({
       readOnly,
     }),
@@ -1031,7 +1043,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.clientCertificate.helpText', {
       defaultMessage: 'PEM-formatted certificate for TLS client authentication.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiTextAreaProps => ({
       readOnly,
     }),
@@ -1045,7 +1061,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.clientKey.helpText', {
       defaultMessage: 'PEM-formatted certificate key for TLS client authentication.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiTextAreaProps => ({
       readOnly,
     }),
@@ -1059,7 +1079,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.clientKeyPassphrase.helpText', {
       defaultMessage: 'Certificate key passphrase for TLS client authentication.',
     }),
-    showWhen: ['isTLSEnabled', true],
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
     props: (): EuiFieldPasswordProps => ({
       readOnly,
     }),
@@ -1296,5 +1320,52 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     },
     props: (): EuiFieldNumberProps => ({ min: 1, step: 'any', readOnly }),
     dependencies: [ConfigKey.RESPONSE_BODY_INDEX],
+  },
+  [ConfigKey.IPV4]: {
+    fieldKey: ConfigKey.IPV4, // also controls ipv6
+    component: ComboBox,
+    label: i18n.translate('xpack.synthetics.monitorConfig.ipv4.label', {
+      defaultMessage: 'IP protocols',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.ipv4.helpText', {
+      defaultMessage: 'Specifies which IP procols to use when pinging the remote host.',
+    }),
+    controlled: true,
+    dependencies: [ConfigKey.IPV6],
+    props: ({ field, setValue, dependencies }): EuiComboBoxProps<string> => {
+      const [ipv6] = dependencies;
+      const ipv4 = field?.value;
+      const values: string[] = [];
+      if (ipv4) {
+        values.push('IPv4');
+      }
+      if (ipv6) {
+        values.push('IPv6');
+      }
+      return {
+        options: [
+          {
+            label: 'IPv4',
+          },
+          {
+            label: 'IPv6',
+          },
+        ],
+        selectedOptions: values.map((version) => ({
+          label: version,
+        })),
+        onChange: (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
+          setValue(
+            ConfigKey.IPV4,
+            updatedValues.some((value) => value.label === 'IPv4')
+          );
+          setValue(
+            ConfigKey.IPV6,
+            updatedValues.some((value) => value.label === 'IPv6')
+          );
+        },
+        isDisabled: readOnly,
+      };
+    },
   },
 });

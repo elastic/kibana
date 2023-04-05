@@ -35,6 +35,8 @@ export const httpFormatters: HTTPFormatMap = {
       : null,
   [ConfigKey.RESPONSE_BODY_MAX_BYTES]: null,
   [ConfigKey.MODE]: null,
+  [ConfigKey.IPV4]: null,
+  [ConfigKey.IPV6]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };
