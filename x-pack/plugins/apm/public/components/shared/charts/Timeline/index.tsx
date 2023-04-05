@@ -6,11 +6,11 @@
  */
 import React, { useState } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
-import { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
-import { ErrorMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
+import { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_agent_marks';
+import { ErrorMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_error_marks';
 import { getPlotValues } from './plot_utils';
 import { TimelineAxis } from './timeline_axis';
-import { Vertical_lines } from './vertical_lines';
+import { VerticalLines } from './vertical_lines';
 
 export type Mark = AgentMark | ErrorMark;
 
@@ -51,7 +51,7 @@ function TimeLineContainer({
         marks={marks}
         topTraceDuration={topTraceDuration}
       />
-      <Vertical_lines
+      <VerticalLines
         plotValues={plotValues}
         marks={marks}
         topTraceDuration={topTraceDuration}

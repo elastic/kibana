@@ -9,7 +9,7 @@ import React from 'react';
 import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks';
 import { PlotValues } from './plot_utils';
-import {isFiniteNumber} from "../../../../../common/utils/is_finite_number";
+import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
 
 interface VerticalLinesProps {
   marks?: Mark[];
@@ -17,11 +17,11 @@ interface VerticalLinesProps {
   topTraceDuration: number;
 }
 
-export function Vertical_lines({
-                                 topTraceDuration,
-                                 plotValues,
-                                 marks = [],
-                               }: VerticalLinesProps) {
+export function VerticalLines({
+  topTraceDuration,
+  plotValues,
+  marks = [],
+}: VerticalLinesProps) {
   const { width, height, margins, tickValues, xScale } = plotValues;
 
   const markTimes = marks
