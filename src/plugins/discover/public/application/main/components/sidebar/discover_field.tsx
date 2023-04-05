@@ -16,6 +16,9 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiHighlight,
+  EuiPopoverFooter,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -27,9 +30,10 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
-  FieldPopoverVisualize,
+  FieldVisualizeButton,
   getFieldIconProps,
 } from '@kbn/unified-field-list-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -349,6 +353,8 @@ function DiscoverFieldComponent({
     [field.name]
   );
 
+  const fieldPopoverExtension = useObservable(services.extensions.get$('field_popover'));
+
   if (field.type === '_source') {
     return (
       <FieldButton
@@ -430,15 +436,32 @@ function DiscoverFieldComponent({
           </>
         )}
 
-        <FieldPopoverVisualize
-          field={field}
-          dataView={dataView}
-          multiFields={rawMultiFields}
-          trackUiMetric={trackUiMetric}
-          contextualFields={contextualFields}
-          originatingApp={PLUGIN_ID}
-          uiActions={getUiActions()}
-        />
+        {(!fieldPopoverExtension?.disableDefaultBottomButton ||
+          fieldPopoverExtension.CustomBottomButton) && (
+          <EuiPopoverFooter>
+            <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
+              {!fieldPopoverExtension?.disableDefaultBottomButton && (
+                <EuiFlexItem>
+                  <FieldVisualizeButton
+                    field={field}
+                    dataView={dataView}
+                    multiFields={rawMultiFields}
+                    trackUiMetric={trackUiMetric}
+                    contextualFields={contextualFields}
+                    originatingApp={PLUGIN_ID}
+                    uiActions={getUiActions()}
+                  />
+                </EuiFlexItem>
+              )}
+
+              {fieldPopoverExtension?.CustomBottomButton && (
+                <EuiFlexItem>
+                  <fieldPopoverExtension.CustomBottomButton />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        )}
       </>
     );
   };
