@@ -49,7 +49,7 @@ export const transformFromLegacyActions = (
         actionRef,
         actionTypeId,
         frequency: {
-          summary: false,
+          summary: true,
           notifyWhen: transformToNotifyWhen(legacyActionsAttr.ruleThrottle) ?? 'onThrottleInterval',
           throttle: legacyActionsAttr.ruleThrottle,
         },
