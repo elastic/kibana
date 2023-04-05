@@ -13,19 +13,22 @@ import { ALERTS_PATH } from '../../../../../common/constants';
 
 export const useGetAlertDetailsFlyoutLink = ({
   _id,
+  _index,
   timestamp,
 }: {
-  _id?: string;
-  timestamp?: string;
+  _id: string;
+  _index: string;
+  timestamp: string;
 }) => {
   const { getAppUrl } = useAppUrl();
   const { pathname } = useLocation();
+  // getAppUrl accounts for the users selected space
   const alertDetailsLink = useMemo(() => {
     const url = getAppUrl({
-      path: `${ALERTS_PATH}/${_id}/${timestamp}`,
+      path: `${ALERTS_PATH}/${_id}?index=${_index}&timestamp=${timestamp}`,
     });
     return `${window.location.origin}${url}`;
-  }, [_id, getAppUrl, timestamp]);
+  }, [_id, _index, getAppUrl, timestamp]);
 
   const isOnAlertsPage = pathname === ALERTS_PATH;
 

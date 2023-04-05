@@ -25,17 +25,13 @@ const AlertsRoute = () => (
   </TrackApplicationView>
 );
 
-// TODO: Delete old alert_details page ../alert_details/*
 const AlertsContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   return (
     <Switch>
       <Route path={ALERTS_PATH} exact component={AlertsRoute} />
       {/* Redirect to the summary page if only the detail name is provided  */}
-      <Route
-        path={`${ALERTS_PATH}/:alertId/:timestamp`}
-        render={(props) => <AlertDetailsRedirect {...props} />}
-      />
+      <Route path={`${ALERTS_PATH}/:alertId`} component={AlertDetailsRedirect} />
       <Route component={NotFoundPage} />
     </Switch>
   );

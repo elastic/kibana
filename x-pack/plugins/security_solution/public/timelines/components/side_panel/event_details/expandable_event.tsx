@@ -55,10 +55,11 @@ interface Props {
 
 interface ExpandableEventTitleProps {
   eventId: string;
+  eventIndex: string;
   isAlert: boolean;
   loading: boolean;
   ruleName?: string;
-  timestamp?: string;
+  timestamp: string;
   handleOnEventClosed?: HandleOnEventClosed;
 }
 
@@ -79,7 +80,7 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
-  ({ eventId, isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => {
+  ({ eventId, eventIndex, isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => {
     const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
     const { onClick } = useGetSecuritySolutionLinkProps()({
       deepLinkId: SecurityPageName.alerts,
@@ -88,6 +89,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
 
     const { isOnAlertsPage, alertDetailsLink } = useGetAlertDetailsFlyoutLink({
       _id: eventId,
+      _index: eventIndex,
       timestamp,
     });
 

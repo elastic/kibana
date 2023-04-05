@@ -7,23 +7,21 @@
 
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation, useParams } from 'react-router-dom';
 
 import moment from 'moment';
 import { encode } from '@kbn/rison';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { ALERTS_PATH } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
 
-export const AlertDetailsRedirect = ({
-  match: {
-    params: { alertId, timestamp },
-  },
-}) => {
-  // TODO: spaceId isn't set when this redirect is initialized. We may have to store it in the url as well
-  // TODO: Updatee timestamp & space as query params rather than path params
-  const spaceId = useSpaceId();
+export const AlertDetailsRedirect = () => {
+  const { alertId } = useParams<{ alertId: string }>();
+  const { search } = useLocation();
+  const searchParams = new URLSearchParams(search);
+  const timestamp = searchParams.get('timestamp');
+  const index = searchParams.get('index');
+
   const getInputSelector = useMemo(() => inputsSelectors.inputsSelector(), []);
   const inputState = useSelector(getInputSelector);
   const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
@@ -54,17 +52,13 @@ export const AlertDetailsRedirect = ({
     panelView: 'eventDetail',
     params: {
       eventId: alertId,
-      indexName: `${DEFAULT_ALERTS_INDEX}-${spaceId ?? 'default'}`,
+      indexName: index,
     },
   });
 
-  // TODO: Does a builder for this already exist somewhere?
-  const queryString = encode({
-    language: 'kuery',
-    query: `_id: ${alertId}`,
-  });
+  const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${alertId}` });
 
-  const url = `${ALERTS_PATH}?${URL_PARAM_KEY.appQuery}=${queryString}&${URL_PARAM_KEY.timerange}=${timerange}&${URL_PARAM_KEY.flyout}=${flyoutString}`;
+  const url = `${ALERTS_PATH}?${URL_PARAM_KEY.appQuery}=${kqlAppQuery}&${URL_PARAM_KEY.timerange}=${timerange}&${URL_PARAM_KEY.flyout}=${flyoutString}`;
 
   return <Redirect to={url} />;
 };
