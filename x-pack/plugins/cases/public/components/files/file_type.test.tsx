@@ -15,6 +15,7 @@ import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 import { createAppMockRenderer } from '../../common/mock';
 import { basicCase, basicFileMock } from '../../containers/mock';
 import { getFileType } from './file_type';
+import userEvent from '@testing-library/user-event';
 
 describe('getFileType', () => {
   const fileType = getFileType();
@@ -60,6 +61,30 @@ describe('getFileType', () => {
       appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).actions);
 
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
+    });
+
+    it('actions renders a delete button', async () => {
+      appMockRender = createAppMockRenderer();
+
+      // @ts-ignore
+      appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).actions);
+
+      expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
+    });
+
+    it('clicking the delete button in actions opens deletion modal', async () => {
+      appMockRender = createAppMockRenderer();
+
+      // @ts-ignore
+      appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).actions);
+
+      const deleteButton = await screen.findByTestId('cases-files-delete-button');
+
+      expect(deleteButton).toBeInTheDocument();
+
+      userEvent.click(deleteButton);
+
+      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
 
     it('empty externalReferenceMetadata returns blank FileAttachmentViewObject', () => {

@@ -49,7 +49,7 @@ describe('FileDeleteButtonIcon', () => {
 
     userEvent.click(deleteButton);
 
-    expect(await screen.findAllByTestId('property-actions-confirm-modal'));
+    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
   });
 
   it('clicking delete button in the confirmation modal calls deleteFileAttachment with proper params', async () => {
@@ -61,7 +61,7 @@ describe('FileDeleteButtonIcon', () => {
 
     userEvent.click(deleteButton);
 
-    expect(await screen.findAllByTestId('property-actions-confirm-modal'));
+    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
