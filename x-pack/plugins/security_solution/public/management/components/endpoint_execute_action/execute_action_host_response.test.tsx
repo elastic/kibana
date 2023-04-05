@@ -52,6 +52,13 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     expect(renderResult.getByTestId(`test-executeResponseOutput-cwd`)).toBeTruthy();
   });
 
+  it('should show execute context accordion as `closed`', async () => {
+    render();
+    expect(renderResult.getByTestId('test-executeResponseOutput-context').className).toEqual(
+      'euiAccordion'
+    );
+  });
+
   it('should show current working directory', async () => {
     render();
     expect(renderResult.getByTestId(`test-executeResponseOutput-context`)).toBeTruthy();
@@ -61,6 +68,7 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
   it('should show execute output and execute errors', async () => {
     render();
     expect(renderResult.getByTestId(`test-executeResponseOutput-${outputSuffix}`)).toBeTruthy();
+    expect(renderResult.getByTestId(`test-executeResponseOutput-error`)).toBeTruthy();
   });
 
   it('should show execute output accordion as `open`', async () => {
