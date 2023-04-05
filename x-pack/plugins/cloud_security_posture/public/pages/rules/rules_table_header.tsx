@@ -5,19 +5,26 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexItem, EuiTextColor, formatNumber, EuiText, EuiSpacer } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from 'react-intl';
 
 interface RulesTableToolbarProps {
   search(value: string): void;
   totalRulesCount: number;
   searchValue: string;
   isSearching: boolean;
+  pageSize: number;
 }
 
-export const RulesTableHeader = ({ search, searchValue, isSearching }: RulesTableToolbarProps) => (
-  <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
+interface RuleTableCount {
+  pageSize: number;
+  total: number;
+}
+
+export const RulesTableHeader = ({ search, searchValue, isSearching, totalRulesCount, pageSize }: RulesTableToolbarProps) => (
+  <SearchField isSearching={isSearching} searchValue={searchValue} search={search} totalRulesCount={totalRulesCount} pageSize={pageSize}/>
 );
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -26,12 +33,15 @@ const SearchField = ({
   search,
   isSearching,
   searchValue,
-}: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue' | 'search'>) => {
+  totalRulesCount,
+  pageSize,
+}: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue' | 'search' | 'totalRulesCount' | 'pageSize'>) => {
   const [localValue, setLocalValue] = useState(searchValue);
 
   useDebounce(() => search(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
 
   return (
+    <div>
     <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
       <EuiFieldSearch
         isLoading={isSearching}
@@ -44,5 +54,23 @@ const SearchField = ({
         fullWidth
       />
     </EuiFlexItem>
+    <CurrentPageOfTotal pageSize={pageSize} total={totalRulesCount}/>
+    </div>
   );
 };
+
+const CurrentPageOfTotal = ({
+  pageSize,
+  total,
+}: RuleTableCount) => (
+  <EuiFlexItem grow={true}>
+  <EuiSpacer size='xl' />
+  <EuiText size="xs" textAlign='left' color="subdued" style={{ marginLeft: '8px'}}>
+    <FormattedMessage
+      id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
+      defaultMessage="Showing {pageSize} of {total} rules"
+      values={{ pageSize, total }}
+    />
+  </EuiText>
+  </EuiFlexItem>
+);
