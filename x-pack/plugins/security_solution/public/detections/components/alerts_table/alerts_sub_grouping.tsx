@@ -245,6 +245,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       pageIndex,
       pageSize,
       renderChildComponent,
+      resetGroupChildrenPagination,
       selectedGroup,
       setPageIndex,
       setPageSize,

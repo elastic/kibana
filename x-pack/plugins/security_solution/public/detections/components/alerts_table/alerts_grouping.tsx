@@ -104,9 +104,13 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const [pageIndex, setPageIndex] = useState<number[]>([DEFAULT_PAGE_INDEX]);
   const [pageSize, setPageSize] = useState<number[]>([DEFAULT_PAGE_SIZE]);
 
-  useEffect(() => {
+  const resetAllPagination = useCallback(() => {
     setPageIndex((curr) => curr.map(() => DEFAULT_PAGE_INDEX));
-  }, [selectedGroups]);
+  }, []);
+
+  useEffect(() => {
+    resetAllPagination();
+  }, [resetAllPagination, selectedGroups]);
 
   const setPageVar = useCallback(
     (newNumber: number, groupingLevel: number, pageType: 'index' | 'size') => {
@@ -128,6 +132,24 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     },
     []
   );
+
+  const nonGroupingFilters = useRef({
+    defaultFilters: props.defaultFilters,
+    globalFilters: props.globalFilters,
+    globalQuery: props.globalQuery,
+  });
+
+  useEffect(() => {
+    const nonGrouping = {
+      defaultFilters: props.defaultFilters,
+      globalFilters: props.globalFilters,
+      globalQuery: props.globalQuery,
+    };
+    if (!isEqual(nonGroupingFilters.current, nonGrouping)) {
+      resetAllPagination();
+      nonGroupingFilters.current = nonGrouping;
+    }
+  }, [props.defaultFilters, props.globalFilters, props.globalQuery, resetAllPagination]);
 
   const getLevel = useCallback(
     (level: number, selectedGroup: string, parentGroupingFilter?: string) => {
