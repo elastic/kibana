@@ -24,7 +24,7 @@ import { css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { navigateToUptime } from './links/navigate_to_uptime';
-import { LinkToApmTraces } from './links/link_to_apm_traces';
+import { LinkToApmServices } from './links/link_to_apm_services';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import { metadataTab } from './metadata';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
@@ -81,7 +81,7 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <LinkToApmTraces hostName={node.name} apmField={'host.hostname'} />
+            <LinkToApmServices hostName={node.name} apmField={'host.hostname'} />
           </EuiFlexItem>
           <EuiFlexItem
             grow={false}

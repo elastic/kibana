@@ -243,7 +243,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(metadataTab).to.contain('Metadata');
       });
 
-      it('should navigate to APM traces after click', async () => {
+      it('should navigate to Uptime after click', async () => {
         await pageObjects.infraHostsView.clickFlyoutUptimeLink();
         await pageObjects.infraHome.waitForLoading();
         const url = await browser.getCurrentUrl();
@@ -254,11 +254,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.waitForLoading();
       });
 
-      it('should navigate to Uptime traces after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutApmTracesLink();
+      it('should navigate to APM services after click', async () => {
+        await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
         await pageObjects.infraHome.waitForLoading();
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('app/apm/traces?kuery=host.hostname%3A%22Jennys-MBP.fritz.box%22');
+        expect(url).to.contain('app/apm/services?kuery=host.hostname%3A%22Jennys-MBP.fritz.box%22');
         await browser.goBack();
         await pageObjects.infraHome.waitForLoading();
       });
