@@ -5,67 +5,63 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
-import { getSavedObjectsClient, getToasts } from '../../kibana_services';
+import { getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
-import { APP_ID, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { APP_ID } from '../../../common/constants';
+import type { MapItem } from '../../../common/content_management';
 
 interface Props {
   history: ScopedHistory;
   stateTransfer: EmbeddableStateTransfer;
 }
 
-export class LoadListAndRender extends Component<Props> {
-  _isMounted: boolean = false;
+export class LoadListAndRender extends PureComponent<Props> {
   state = {
     mapsLoaded: false,
-    hasSavedMaps: null,
+    hasSavedMaps: false,
   };
 
   componentDidMount() {
-    this._isMounted = true;
     this.props.stateTransfer.clearEditorState(APP_ID);
-    this._loadMapsList();
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  async _loadMapsList() {
-    try {
-      const results = await getSavedObjectsClient().find({
-        type: MAP_SAVED_OBJECT_TYPE,
-        perPage: 1,
-        fields: ['title'],
+  /**
+   * Handler to execute every time the maps are loaded in the list. If there is a filter applied when
+   * searching for the maps we will mark the state "hasSavedMaps" to `true`, we don't want to redirect
+   * to "/map" in that case.
+   *
+   * @param err Possible error while loading the maps
+   * @param maps The maps loaded
+   * @param isFiltered Flag to indicate if there is a filter applied to the loaded maps
+   */
+  onMapsLoaded = (err: null | any, maps: MapItem[], isFiltered = false) => {
+    if (err !== null) {
+      getToasts().addDanger({
+        title: i18n.translate('xpack.maps.mapListing.errorAttemptingToLoadSavedMaps', {
+          defaultMessage: `Unable to load maps`,
+        }),
+        text: `${err}`,
       });
-      if (this._isMounted) {
-        this.setState({ mapsLoaded: true, hasSavedMaps: !!results.savedObjects.length });
-      }
-    } catch (err) {
-      if (this._isMounted) {
-        this.setState({ mapsLoaded: true, hasSavedMaps: false });
-        getToasts().addDanger({
-          title: i18n.translate('xpack.maps.mapListing.errorAttemptingToLoadSavedMaps', {
-            defaultMessage: `Unable to load maps`,
-          }),
-          text: `${err}`,
-        });
-      }
     }
-  }
+
+    this.setState({
+      mapsLoaded: true,
+      hasSavedMaps: isFiltered ? true : maps.length > 0,
+    });
+  };
 
   render() {
     const { mapsLoaded, hasSavedMaps } = this.state;
 
-    if (mapsLoaded) {
-      return hasSavedMaps ? <MapsListView history={this.props.history} /> : <Redirect to="/map" />;
-    } else {
-      return null;
+    if (mapsLoaded && !hasSavedMaps) {
+      return <Redirect to="/map" />;
     }
+
+    return <MapsListView history={this.props.history} onMapsLoaded={this.onMapsLoaded} />;
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../content_management';
 import { LayerDescriptor } from '../descriptor_types';
 
 // In 7.14, attribution added to the layer_descriptor. Prior to 7.14, 2 sources, WMS and TMS, had attribution on source descriptor.

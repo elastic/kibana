@@ -14,7 +14,7 @@ import {
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import { LayoutDirection } from '@elastic/charts';
-import { visType } from '../types';
+import { MetricVisRenderConfig, visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
@@ -82,6 +82,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.color.help', {
         defaultMessage: 'Provides a static visualization color. Overridden by palette.',
+      }),
+    },
+    icon: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.icon.help', {
+        defaultMessage: 'Provides a static visualization icon.',
       }),
     },
     palette: {
@@ -181,6 +187,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             subtitle: args.subtitle,
             secondaryPrefix: args.secondaryPrefix,
             color: args.color,
+            icon: args.icon,
             palette: args.palette?.params,
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,
@@ -194,6 +201,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             breakdownBy: args.breakdownBy,
           },
         },
+        overrides: handlers.variables?.overrides as MetricVisRenderConfig['overrides'],
       },
     };
   },

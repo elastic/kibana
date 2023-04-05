@@ -121,7 +121,22 @@ describe('RPC -> bulkGet()', () => {
     test('should validate that the response is an object or an array of object', () => {
       let error = validate(
         {
-          any: 'object',
+          hits: [
+            {
+              contentTypeId: '123',
+              result: {
+                item: {
+                  any: 'object',
+                },
+                meta: {
+                  foo: 'bar',
+                },
+              },
+            },
+          ],
+          meta: {
+            foo: 'bar',
+          },
         },
         outputSchema
       );
@@ -129,22 +144,20 @@ describe('RPC -> bulkGet()', () => {
       expect(error).toBe(null);
 
       error = validate(
-        [
-          {
-            any: 'object',
-          },
-        ],
+        {
+          hits: [
+            {
+              contentTypeId: '123',
+              result: 123,
+            },
+          ],
+        },
         outputSchema
       );
 
-      expect(error).toBe(null);
-
-      error = validate(123, outputSchema);
-
       expect(error?.message).toContain(
-        'expected a plain object value, but found [number] instead.'
+        '[hits.0.result]: expected a plain object value, but found [number] instead.'
       );
-      expect(error?.message).toContain('expected value of type [array] but got [number]');
     });
   });
 
@@ -173,7 +186,16 @@ describe('RPC -> bulkGet()', () => {
     test('should return the storage bulkGet() result', async () => {
       const { ctx, storage } = setup();
 
-      const expected = ['Item1', 'Item2'];
+      const expected = {
+        hits: [
+          {
+            item: 'Item1',
+          },
+          {
+            item: 'Item2',
+          },
+        ],
+      };
       storage.bulkGet.mockResolvedValueOnce(expected);
 
       const result = await fn(ctx, {
@@ -184,7 +206,7 @@ describe('RPC -> bulkGet()', () => {
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
-        items: expected,
+        result: expected,
       });
 
       expect(storage.bulkGet).toHaveBeenCalledWith(

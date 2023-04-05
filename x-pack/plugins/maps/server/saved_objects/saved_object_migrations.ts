@@ -21,7 +21,7 @@ import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin'
 import { moveAttribution } from '../../common/migrations/move_attribution';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
 import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
-import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../../common/content_management';
 
 function logMigrationWarning(
   context: SavedObjectMigrationContext,

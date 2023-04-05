@@ -14,6 +14,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CLEAR_FILTER,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_FILTER,
@@ -58,7 +60,27 @@ export const scrollWithinDocumentDetailsExpandableFlyoutRightSection = (x: numbe
  * Open the Overview tab in the document details expandable flyout right section
  */
 export const openOverviewTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).scrollIntoView().should('be.visible').click();
+
+/**
+ * Toggle the Overview tab description section in the document details expandable flyout right section
+ */
+export const toggleOverviewTabInvestigationSection = () =>
+  cy
+    .get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER)
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
+
+/**
+ * Toggle the Overview tab description section in the document details expandable flyout right section
+ */
+export const toggleOverviewTabDescriptionSection = () =>
+  cy
+    .get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER)
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
 
 /**
  * Open the Table tab in the document details expandable flyout right section

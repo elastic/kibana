@@ -249,10 +249,11 @@ export const formatMlPipelineBody = async (
   const models = await esClient.ml.getTrainedModels({ model_id: modelId });
   const model = models.trained_model_configs[0];
   return generateMlInferencePipelineBody({
-    destinationField,
     inferenceConfig,
     model,
     pipelineName,
-    sourceField,
+    fieldMappings: {
+      [sourceField]: destinationField,
+    },
   });
 };

@@ -11,9 +11,10 @@ import type { SavedObjectMigrationMap } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { APP_ICON, getFullPath } from '../../common/constants';
+import { CONTENT_ID } from '../../common/content_management';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
-import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../../common/content_management';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(
@@ -22,7 +23,7 @@ export function setupSavedObjects(
   getDataViewMigrations: () => MigrateFunctionsObject
 ) {
   core.savedObjects.registerType<MapSavedObjectAttributes>({
-    name: 'map',
+    name: CONTENT_ID,
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',

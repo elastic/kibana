@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../content_management';
 import { MapSettings } from '../descriptor_types';
 
 export class MapSettingsCollector {

@@ -9,7 +9,7 @@
 
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../content_management';
 import { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 
 interface IndexPatternReferenceDescriptor {

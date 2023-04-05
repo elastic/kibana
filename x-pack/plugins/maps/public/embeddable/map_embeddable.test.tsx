@@ -11,7 +11,7 @@ import { getControlledBy, MapEmbeddable } from './map_embeddable';
 import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
 import type { DataViewFieldBase, DataViewBase } from '@kbn/es-query';
 import { MapEmbeddableConfig, MapEmbeddableInput } from './types';
-import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../../common/content_management';
 
 jest.mock('../kibana_services', () => {
   return {

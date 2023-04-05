@@ -7,7 +7,7 @@
 
 import { LAYER_TYPE } from '../constants';
 import { LayerDescriptor } from '../descriptor_types';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../content_management';
 
 // LAYER_TYPE constants renamed in 8.1 to provide more distinguishable names that better refect layer.
 // TILED_VECTOR replaced with MVT_VECTOR
