@@ -19,7 +19,6 @@ $domDragDropZLevel3: 3;
 // Static styles for a drop area
 @mixin mixinDomDroppable {
   border: $euiBorderWidthThick dashed transparent;
-  transition: border $euiAnimSpeedFast ease-out, background-color $euiAnimSpeedFast ease-out;
 }
 
 // Hovering state for drag item and drop area

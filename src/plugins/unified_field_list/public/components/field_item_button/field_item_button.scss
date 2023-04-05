@@ -59,7 +59,6 @@
   }
 
   &:hover,
-  &:focus-within,
   &[class*='-isActive'] {
     .unifiedFieldListItemButton__action {
       opacity: 1;
