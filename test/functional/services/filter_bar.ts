@@ -208,7 +208,7 @@ export class FilterBarService extends FtrService {
     await addOrBtn.click();
   }
 
-  private async addAndFilter(path: string) {
+  public async addAndFilter(path: string) {
     const filterForm = await this.testSubjects.find(`filter-${path}`);
     const addAndBtn = await filterForm.findByTestSubject('add-and-filter');
     await addAndBtn.click();
@@ -273,7 +273,7 @@ export class FilterBarService extends FtrService {
     return 'filters' in filter && 'condition' in filter;
   }
 
-  private async createFilter(filter: Filter, path: string = '0'): Promise<unknown> {
+  public async createFilter(filter: Filter, path: string = '0'): Promise<unknown> {
     if (this.isFilterNode(filter)) {
       let startedAdding = false;
       for (const [index, f] of filter.filters.entries()) {
