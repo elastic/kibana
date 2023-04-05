@@ -153,18 +153,18 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
 
 export const EngineSchema: React.FC = () => {
   const { engineName } = useValues(EngineIndicesLogic);
+  const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
   const { isLoadingEngineSchema, schemaFields } = useValues(EngineViewLogic);
   const { fetchEngineSchema } = useActions(EngineViewLogic);
 
   const [isFilterByPopoverOpen, setIsFilterByPopoverOpen] = useState<boolean>(false);
-  const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
 
   const [totalFieldsWithConflicts, setTotalFieldsWithConflicts] = useState<number>(0);
 
-  // get all the elasticsearch FieldTypes
+  // get all the elasticsearch Field Types
   const esFieldTypes = Object.values(ES_FIELD_TYPES).map((dataTypeName) => ({
     checked: undefined,
     label: dataTypeName.toString(),
@@ -177,7 +177,7 @@ export const EngineSchema: React.FC = () => {
     setItemIdToExpandedRowMap({});
   }, [onlyShowConflicts]);
 
-  // update filteredDataTypes as filter by field type are selected
+  // update filteredDataTypes as filter by field types are selected
   const filteredDataTypes = useMemo(() => {
     const selectedDataTypes = selectedEsFieldTypes
       .filter((option) => option.checked === 'on')
@@ -186,7 +186,6 @@ export const EngineSchema: React.FC = () => {
   }, [selectedEsFieldTypes]);
 
   const filteredSchemaFields = useMemo(() => {
-    // callout doesn't need to be shown by default, hence setting total count to 0
     setTotalFieldsWithConflicts(0);
     if (onlyShowConflicts) {
       const fieldsWithConflicts = schemaFields.filter((field) => field.type === 'conflict');
