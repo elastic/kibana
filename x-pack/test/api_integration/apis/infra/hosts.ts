@@ -252,7 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       };
-      const response = await supertest.post(ENDPOINT).set('kbn-xsrf', 'xxx').send(body).expect(200);
+      const response = await makeRequest({ body, expectedHTTPCode: 200 });
 
       const names = (response.body as GetHostsResponsePayload).hosts.map((p) => p.name);
       expect(names).eql([
