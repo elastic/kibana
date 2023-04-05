@@ -181,15 +181,17 @@ async function validateTypeChanges(
   // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
   if (data?.type === outputType.Logstash && mergedIsDefault) {
     for (const policy of fleetServerPolicies) {
-      await agentPolicyService.update(
-        soClient,
-        esClient,
-        policy.id,
-        { data_output_id: defaultDataOutputId },
-        {
-          force: true,
-        }
-      );
+      if (!policy.data_output_id && !policy.is_preconfigured) {
+        await agentPolicyService.update(
+          soClient,
+          esClient,
+          policy.id,
+          { data_output_id: defaultDataOutputId },
+          {
+            force: true,
+          }
+        );
+      }
     }
   }
 }
@@ -312,12 +314,13 @@ class OutputService {
       }
     }
 
-    if (data.type === outputType.Logstash) {
+    if (data.type === outputType.Logstash && data.is_default) {
       const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
       const fleetServerPolicies = await findPoliciesWithFleetServer(soClient);
-      // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
-      if (data.is_default) {
-        for (const policy of fleetServerPolicies) {
+      // if a logstash output is updated to become default and the policy doesn't have a data_output_id already
+      // update the fleet server policies to use the default output
+      for (const policy of fleetServerPolicies) {
+        if (!policy.data_output_id && !policy.is_preconfigured) {
           await agentPolicyService.update(
             soClient,
             esClient,
@@ -548,6 +551,7 @@ class OutputService {
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
     const mergedType = data.type ?? originalOutput.type;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
+    // check when is cloud and find
 
     await validateTypeChanges(soClient, esClient, id, data, originalOutput, defaultDataOutputId);
 
