@@ -78,7 +78,7 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
  * By configuring a content type with a `MSearchConfig`, it can be searched in the multi-type search.
  * Underneath content management is using the `savedObjects.find` API to search the saved objects.
  */
-export interface MSearchConfig<T = unknown, SavedObjectAttributes = unknown> {
+export interface MSearchConfig<T = unknown, SavedObjectAttributes = object> {
   /**
    * The saved object type that corresponds to this content type.
    */
@@ -96,5 +96,5 @@ export interface MSearchConfig<T = unknown, SavedObjectAttributes = unknown> {
    * Additional fields to search on. These fields will be added to the search query.
    * By default, only `title` and `description` are searched.
    */
-  additionalSearchFields?: keyof SavedObjectAttributes[];
+  additionalSearchFields?: string[];
 }

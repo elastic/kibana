@@ -39,17 +39,21 @@ export class MSearchService {
       })
     );
 
-    const soSearchTypes = Array.from(contentTypeToMSearchConfig.values()).map(
-      (mSearchConfig) => mSearchConfig.savedObjectType
-    );
+    const mSearchConfigs = Array.from(contentTypeToMSearchConfig.values());
+    const soSearchTypes = mSearchConfigs.map((mSearchConfig) => mSearchConfig.savedObjectType);
+    const additionalSearchFields = new Set<string>();
+    mSearchConfigs.forEach((mSearchConfig) => {
+      if (mSearchConfig.additionalSearchFields) {
+        mSearchConfig.additionalSearchFields.forEach((f) => additionalSearchFields.add(f));
+      }
+    });
 
     const savedObjectsClient = await this.deps.getSavedObjectsClient();
     const soResult = await savedObjectsClient.find({
       type: soSearchTypes,
       search: query.text,
-      searchFields: [`title^3`, `description`],
+      searchFields: [`title^3`, `description`, ...additionalSearchFields],
       defaultSearchOperator: 'AND',
-      // TODO: additionalSearchFields
       // TODO: tags
       // TODO: pagination
       // TODO: sort

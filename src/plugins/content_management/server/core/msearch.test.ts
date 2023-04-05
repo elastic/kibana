@@ -15,16 +15,34 @@ import { StorageContext } from '.';
 
 const setup = () => {
   const contentRegistry = new ContentRegistry(new EventBus());
-  const storage = createMockedStorage();
-  storage.mSearch = {
-    savedObjectType: 'foo-type',
-    toItemResult: (ctx, so) => ({ item: so }),
-  };
+
   contentRegistry.register({
     id: `foo`,
-    storage,
+    storage: {
+      ...createMockedStorage(),
+      mSearch: {
+        savedObjectType: 'foo-type',
+        toItemResult: (ctx, so) => ({ itemFoo: so }),
+        additionalSearchFields: ['special-foo-field'],
+      },
+    },
     version: {
-      latest: 2,
+      latest: 1,
+    },
+  });
+
+  contentRegistry.register({
+    id: `bar`,
+    storage: {
+      ...createMockedStorage(),
+      mSearch: {
+        savedObjectType: 'bar-type',
+        toItemResult: (ctx, so) => ({ itemBar: so }),
+        additionalSearchFields: ['special-bar-field'],
+      },
+    },
+    version: {
+      latest: 1,
     },
   });
 
@@ -49,10 +67,10 @@ const mockStorageContext = (ctx: Partial<StorageContext> = {}): StorageContext =
   };
 };
 
-test('should search saved objects', async () => {
+test('should cross-content search using saved objects api', async () => {
   const { savedObjectsClient, mSearchService } = setup();
 
-  const soResult = {
+  const soResultFoo = {
     id: 'fooid',
     score: 0,
     type: 'foo-type',
@@ -62,21 +80,44 @@ test('should search saved objects', async () => {
     },
   };
 
+  const soResultBar = {
+    id: 'barid',
+    score: 0,
+    type: 'bar-type',
+    references: [],
+    attributes: {
+      title: 'bar',
+    },
+  };
+
   savedObjectsClient.find.mockResolvedValueOnce({
-    saved_objects: [soResult],
-    total: 1,
+    saved_objects: [soResultFoo, soResultBar],
+    total: 2,
     page: 1,
     per_page: 10,
   });
 
-  const result = await mSearchService.search([{ id: 'foo', ctx: mockStorageContext() }], {
-    text: 'foo',
+  const result = await mSearchService.search(
+    [
+      { id: 'foo', ctx: mockStorageContext() },
+      { id: 'bar', ctx: mockStorageContext() },
+    ],
+    {
+      text: 'search text',
+    }
+  );
+
+  expect(savedObjectsClient.find).toHaveBeenCalledWith({
+    defaultSearchOperator: 'AND',
+    search: 'search text',
+    searchFields: ['title^3', 'description', 'special-foo-field', 'special-bar-field'],
+    type: ['foo-type', 'bar-type'],
   });
 
   expect(result).toEqual({
-    hits: [{ item: soResult }],
+    hits: [{ itemFoo: soResultFoo }, { itemBar: soResultBar }],
     pagination: {
-      total: 1,
+      total: 2,
     },
   });
 });
