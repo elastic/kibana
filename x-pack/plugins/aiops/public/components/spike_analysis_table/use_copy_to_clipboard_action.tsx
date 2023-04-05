@@ -16,14 +16,14 @@ import { getTableItemAsKuery } from './get_table_item_as_kuery';
 import type { GroupTableItem, TableItemAction } from './types';
 
 const copyToClipboardSignificantTermMessage = i18n.translate(
-  'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardMessage',
+  'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardSignificantTermMessage',
   {
     defaultMessage: 'Copy field/value pair as KUERY filter to clipboard',
   }
 );
 
 const copyToClipboardGroupMessage = i18n.translate(
-  'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardMessage',
+  'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardGroupMessage',
   {
     defaultMessage: 'Copy group items as KUERY filter to clipboard',
   }
