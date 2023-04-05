@@ -14,7 +14,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { pagePathGetters } from '../../../../constants';
-import { useBreadcrumbs, useLink, useStartServices, useFleetStatus } from '../../../../hooks';
+import {
+  useBreadcrumbs,
+  useLink,
+  useStartServices,
+  useGetPackageVerificationKeyId,
+} from '../../../../hooks';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { PackageListItem } from '../../../../types';
@@ -121,7 +126,7 @@ export const InstalledPackages: React.FC<{
 }> = ({ installedPackages, isLoading }) => {
   useBreadcrumbs('integrations_installed');
 
-  const { packageVerificationKeyId } = useFleetStatus();
+  const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
 
   const { getHref, getAbsolutePath } = useLink();
 

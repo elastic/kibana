@@ -1,0 +1,39 @@
+get:
+  summary: Get package signature verification key ID
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              body:
+                type: object
+                properties:
+                  id: 
+                    type: string
+                    nullable: true
+                    description: the key ID of the GPG key used to verify package signatures
+              statusCode:
+                type: number
+              headers:
+                type: object
+  operationId: packages-get-verification-key-id
+parameters:
+  - schema:
+      type: string
+    name: pkgName
+    in: path
+    required: true
+  - schema:
+      type: string
+    name: pkgVersion
+    in: path
+    required: true
+  - schema:
+      type: string
+    name: filePath
+    in: path
+    required: true
