@@ -156,7 +156,7 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           const res = await fooContentCrud!.get(ctx, '1');
-          expect(res.item.item).toBeUndefined();
+          expect(res.result.item).toBeUndefined();
 
           cleanUp();
         });
@@ -167,7 +167,7 @@ describe('Content Core', () => {
           const res = await fooContentCrud!.get(ctx, '1', { forwardInResponse: { foo: 'bar' } });
           expect(res).toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: {
                 // Options forwared in response
                 options: { foo: 'bar' },
@@ -182,7 +182,7 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           const res = await fooContentCrud!.bulkGet(ctx, ['1', '2']);
-          expect(res.items).toEqual({
+          expect(res.result).toEqual({
             hits: [{ item: undefined }, { item: undefined }],
           });
 
@@ -198,7 +198,7 @@ describe('Content Core', () => {
 
           expect(res).toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            items: {
+            result: {
               hits: [
                 {
                   item: {
@@ -221,7 +221,7 @@ describe('Content Core', () => {
           const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
 
           const res = await fooContentCrud!.get(ctx, '1234');
-          expect(res.item.item).toBeUndefined();
+          expect(res.result.item).toBeUndefined();
           await fooContentCrud!.create(
             ctx,
             { title: 'Hello' },
@@ -229,7 +229,7 @@ describe('Content Core', () => {
           );
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: {
                 id: '1234',
                 title: 'Hello',
@@ -247,7 +247,7 @@ describe('Content Core', () => {
           await fooContentCrud!.update(ctx, '1234', { title: 'changed' });
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: {
                 id: '1234',
                 title: 'changed',
@@ -283,7 +283,7 @@ describe('Content Core', () => {
 
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: {
                 id: '1234',
                 title: 'changed',
@@ -300,14 +300,14 @@ describe('Content Core', () => {
           await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: expect.any(Object),
             },
           });
           await fooContentCrud!.delete(ctx, '1234');
           expect(fooContentCrud!.get(ctx, '1234')).resolves.toEqual({
             contentTypeId: FOO_CONTENT_ID,
-            item: {
+            result: {
               item: undefined,
             },
           });

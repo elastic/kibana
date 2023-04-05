@@ -206,7 +206,7 @@ describe('RPC -> bulkGet()', () => {
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
-        items: expected,
+        result: expected,
       });
 
       expect(storage.bulkGet).toHaveBeenCalledWith(

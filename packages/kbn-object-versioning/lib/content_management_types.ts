@@ -64,52 +64,52 @@ export interface ServicesDefinition {
 export interface ServiceTransforms {
   get: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   bulkGet: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   create: {
     in: {
-      data: ObjectTransforms;
-      options: ObjectTransforms;
+      data: ObjectTransforms<any, any, any, any>;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   update: {
     in: {
-      data: ObjectTransforms;
-      options: ObjectTransforms;
+      data: ObjectTransforms<any, any, any, any>;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   delete: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   search: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
 }

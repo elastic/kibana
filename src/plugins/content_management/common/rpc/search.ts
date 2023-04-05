@@ -20,7 +20,12 @@ export const searchSchemas: ProcedureSchemas = {
         schema.object(
           {
             text: schema.maybe(schema.string()),
-            tags: schema.maybe(schema.arrayOf(schema.arrayOf(schema.string()), { maxSize: 2 })),
+            tags: schema.maybe(
+              schema.object({
+                included: schema.maybe(schema.arrayOf(schema.string())),
+                excluded: schema.maybe(schema.arrayOf(schema.string())),
+              })
+            ),
             limit: schema.maybe(schema.number()),
             cursor: schema.maybe(schema.string()),
           },

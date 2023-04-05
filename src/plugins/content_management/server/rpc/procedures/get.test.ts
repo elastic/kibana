@@ -161,7 +161,7 @@ describe('RPC -> get()', () => {
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
-        item: expected,
+        result: expected,
       });
 
       expect(storage.get).toHaveBeenCalledWith(
