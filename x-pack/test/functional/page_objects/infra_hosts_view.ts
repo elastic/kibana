@@ -37,11 +37,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickFlyoutUptimeLink() {
-      return testSubjects.click('infraHostsViewFlyoutUptimeLink');
+      return testSubjects.click('hostsView-flyout-uptime-link');
     },
 
     async clickFlyoutApmServicesLink() {
-      return testSubjects.click('infraHostsViewFlyoutApmServicesLink');
+      return testSubjects.click('hostsView-flyout-apm-services-link');
     },
 
     async getHostsLandingPageDisabled() {

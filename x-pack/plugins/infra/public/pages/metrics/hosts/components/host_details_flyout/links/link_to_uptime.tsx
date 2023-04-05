@@ -25,7 +25,7 @@ export const LinkToUptime = ({ nodeType, node }: LinkTUptimeProps) => {
 
   return (
     <EuiLink
-      data-test-subj="infraHostsViewFlyoutUptimeLink"
+      data-test-subj="hostsView-flyout-uptime-link"
       onClick={() =>
         share.url.locators
           .get(uptimeOverviewLocatorID)!

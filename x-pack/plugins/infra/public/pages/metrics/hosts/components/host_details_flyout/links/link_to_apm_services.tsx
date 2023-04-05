@@ -35,7 +35,7 @@ export const LinkToApmServices = ({ hostName, apmField }: LinkToApmServicesProps
 
   return (
     <RedirectAppLinks coreStart={services}>
-      <EuiLink href={linkToApmServices} data-test-subj="infraHostsViewFlyoutApmServicesLink">
+      <EuiLink href={linkToApmServices} data-test-subj="hostsView-flyout-apm-services-link">
         <EuiIcon
           type="popout"
           css={css`
