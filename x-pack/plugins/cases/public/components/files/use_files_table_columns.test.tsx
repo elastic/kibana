@@ -12,7 +12,7 @@ import { createAppMockRenderer } from '../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import { basicCase } from '../../containers/mock';
 
-describe('useFilesTableColumns ', () => {
+describe('useFilesTableColumns', () => {
   let appMockRender: AppMockRenderer;
 
   const useFilesTableColumnsProps: FilesTableColumnsProps = {
