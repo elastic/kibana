@@ -20,7 +20,7 @@ export const categorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPlugin
     type: ACTION_CATEGORIZE_FIELD,
     id: ACTION_CATEGORIZE_FIELD,
     getDisplayName: () =>
-      i18n.translate('xpack.aipos.categorizeFieldAction.displayName', {
+      i18n.translate('xpack.aiops.categorizeFieldAction.displayName', {
         defaultMessage: 'Categorize field',
       }),
     isCompatible: async ({ field }: CategorizeFieldContext) => {
