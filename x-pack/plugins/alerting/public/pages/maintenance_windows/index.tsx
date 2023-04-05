@@ -45,3 +45,5 @@ export const MaintenanceWindowsPage = React.memo(() => {
   );
 });
 MaintenanceWindowsPage.displayName = 'MaintenanceWindowsPage';
+// eslint-disable-next-line import/no-default-export
+export { MaintenanceWindowsPage as default };

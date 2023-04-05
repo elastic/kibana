@@ -35,3 +35,5 @@ export const MaintenanceWindowsCreatePage = React.memo(() => {
   );
 });
 MaintenanceWindowsCreatePage.displayName = 'MaintenanceWindowsCreatePage';
+// eslint-disable-next-line import/no-default-export
+export { MaintenanceWindowsCreatePage as default };

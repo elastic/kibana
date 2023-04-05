@@ -11,7 +11,7 @@ export const APP_ID = 'management';
 export const paths = {
   alerting: {
     maintenanceWindows: `/${MAINTENANCE_WINDOWS_APP_ID}`,
-    maintenanceWindowsCreate: 'create',
+    maintenanceWindowsCreate: '/create',
   },
 };
 
