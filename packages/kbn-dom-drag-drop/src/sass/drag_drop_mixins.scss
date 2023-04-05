@@ -24,8 +24,8 @@ $domDragDropZLevel3: 3;
 // Hovering state for drag item and drop area
 @mixin mixinDomDragDropHover {
   &:hover {
-    transform: translateX(4px);
-    transition: transform .4s ease-out;
+    transform: translateX($euiSizeXS);
+    transition: transform $euiAnimSpeedSlow ease-out;
   }
 }
 
