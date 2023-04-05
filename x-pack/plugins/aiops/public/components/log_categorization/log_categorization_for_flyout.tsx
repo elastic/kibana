@@ -174,7 +174,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="flyoutTitle">
-            {i18n.translate('xpack.ml.jobSelector.flyoutTitle', {
+            {i18n.translate('xpack.aiops.categorizeFlyout.title', {
               defaultMessage: 'Categorize {name}',
               values: { name: selectedField.name },
             })}
