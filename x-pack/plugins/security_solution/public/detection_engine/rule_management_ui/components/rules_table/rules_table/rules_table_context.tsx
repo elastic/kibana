@@ -399,7 +399,10 @@ function useFindExtendedRules(...params: Parameters<typeof useFindRules>) {
     data: rulesSnoozeSettings,
     isError: isSnoozeSettingsFetchingError,
     refetch: refetchSnoozeSettings,
-  } = useFetchRulesSnoozeSettings(rules.map((x) => x.id));
+  } = useFetchRulesSnoozeSettings(
+    rules.map((x) => x.id),
+    { enabled: rules.length > 0 }
+  );
 
   const extendedData = useMemo<ExtendedData>(() => {
     if (isSnoozeSettingsFetchingError) {
