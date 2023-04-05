@@ -186,8 +186,8 @@ export const ComplianceDashboard = () => {
     hasCspmFindings,
     isKspmInstalled,
     isCspmInstalled,
-    isCspmIntegrationInstalled,
-    isKspmIntegrationInstalled,
+    canInstallCspmIntegration,
+    canInstallKspmIntegration,
   } = getCpmStatus(getSetupStatus);
 
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
@@ -258,7 +258,7 @@ export const ComplianceDashboard = () => {
                       CSPM_POLICY_TEMPLATE,
                       cspmIntegrationLink
                     )}
-                    isIntegrationInstalled={isCspmIntegrationInstalled}
+                    isIntegrationInstalled={canInstallCspmIntegration}
                   />
                 </div>
               </CloudPosturePage>
@@ -287,7 +287,7 @@ export const ComplianceDashboard = () => {
                       KSPM_POLICY_TEMPLATE,
                       kspmIntegrationLink
                     )}
-                    isIntegrationInstalled={isKspmIntegrationInstalled}
+                    isIntegrationInstalled={canInstallKspmIntegration}
                   />
                 </div>
               </CloudPosturePage>
@@ -306,8 +306,8 @@ export const ComplianceDashboard = () => {
       selectedTab,
       hasCspmFindings,
       hasKspmFindings,
-      isKspmIntegrationInstalled,
-      isCspmIntegrationInstalled,
+      canInstallKspmIntegration,
+      canInstallCspmIntegration,
       isCspmInstalled,
       isKspmInstalled,
     ]

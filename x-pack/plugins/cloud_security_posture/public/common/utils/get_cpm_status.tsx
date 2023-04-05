@@ -5,49 +5,78 @@
  * 2.0.
  */
 
-import { CspSetupStatus } from '../../../common/types';
+import {
+  LATEST_FINDINGS_INDEX_PATTERN,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+} from '../../../common/constants';
+import { CspSetupStatus, IndexDetails } from '../../../common/types';
 
 // Cloud Posture Management Status
 export const getCpmStatus = (cpmStatusData: CspSetupStatus | undefined) => {
   // if has findings in any of the integrations.
   const hasFindings =
-    cpmStatusData?.indicesDetails[0].status === 'not-empty' ||
+    hasLatestFindingsIndex(cpmStatusData?.indicesDetails, LATEST_FINDINGS_INDEX_PATTERN) ||
     cpmStatusData?.kspm?.status === 'indexed' ||
     cpmStatusData?.cspm?.status === 'indexed';
 
   // kspm
   const hasKspmFindings =
     cpmStatusData?.kspm?.status === 'indexed' ||
-    cpmStatusData?.indicesDetails[0].status === 'not-empty';
+    hasLatestFindingsIndex(cpmStatusData?.indicesDetails, LATEST_FINDINGS_INDEX_PATTERN);
 
   // cspm
   const hasCspmFindings =
     cpmStatusData?.cspm?.status === 'indexed' ||
-    cpmStatusData?.indicesDetails[0].status === 'not-empty';
+    hasLatestFindingsIndex(cpmStatusData?.indicesDetails, LATEST_FINDINGS_INDEX_PATTERN);
+
+  const hasVulnMgmtFindings =
+    cpmStatusData?.vuln_mgmt?.status === 'indexed' ||
+    hasLatestFindingsIndex(cpmStatusData?.indicesDetails, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
 
   const isKspmInstalled = cpmStatusData?.kspm?.status !== 'not-installed';
   const isCspmInstalled = cpmStatusData?.cspm?.status !== 'not-installed';
+  const isVulnMgmtInstalled = cpmStatusData?.vuln_mgmt?.status !== 'not-installed';
+
   const isKspmPrivileged = cpmStatusData?.kspm?.status !== 'unprivileged';
   const isCspmPrivileged = cpmStatusData?.cspm?.status !== 'unprivileged';
 
-  const isCspmIntegrationInstalled = isCspmInstalled && isCspmPrivileged;
-  const isKspmIntegrationInstalled = isKspmInstalled && isKspmPrivileged;
+  const canInstallCspmIntegration = isCspmInstalled && isCspmPrivileged;
+  const canInstallKspmIntegration = isKspmInstalled && isKspmPrivileged;
 
-  const isEmptyData =
-    cpmStatusData?.kspm?.status === 'not-installed' &&
-    cpmStatusData?.cspm?.status === 'not-installed' &&
-    cpmStatusData?.indicesDetails[0].status === 'empty';
+  const isLatestFindingsIndexEmpty =
+    !isKspmInstalled &&
+    !isCspmInstalled &&
+    !hasLatestFindingsIndex(cpmStatusData?.indicesDetails, LATEST_FINDINGS_INDEX_PATTERN);
+
+  const isVulnMgmtFindingsIndexEmpty =
+    !isVulnMgmtInstalled &&
+    !hasLatestFindingsIndex(cpmStatusData?.indicesDetails, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
 
   return {
     hasFindings,
     hasKspmFindings,
     hasCspmFindings,
+    hasVulnMgmtFindings,
     isCspmInstalled,
     isKspmInstalled,
+    isVulnMgmtInstalled,
     isKspmPrivileged,
     isCspmPrivileged,
-    isCspmIntegrationInstalled,
-    isKspmIntegrationInstalled,
-    isEmptyData,
+    canInstallCspmIntegration,
+    canInstallKspmIntegration,
+    isLatestFindingsIndexEmpty,
+    isVulnMgmtFindingsIndexEmpty,
   };
+};
+
+const hasLatestFindingsIndex = (
+  indexDetails: IndexDetails[] | undefined,
+  latestIndexTemplate: string
+): boolean => {
+  return indexDetails
+    ? indexDetails.some(
+        (indexTemplate) =>
+          indexTemplate?.index === latestIndexTemplate && indexTemplate?.status !== 'empty'
+      )
+    : false;
 };

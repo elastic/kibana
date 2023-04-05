@@ -19,13 +19,10 @@ import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { useLocation } from 'react-router-dom';
-import { BaseCspSetupStatus, CspStatusCode, IndexDetails } from '../../common/types';
 import {
   CONFIGURATIONS,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
@@ -354,16 +351,17 @@ export const CloudPosturePage = <TData, TError>({
   const vulnMgmtIntegrationLink = useCspIntegrationLink(VULN_MGMT_POLICY_TEMPLATE);
 
   const currentTab: FindingsTabsType = findingsTabs[location.pathname] ?? CONFIGURATIONS;
+  const { hasFindings, isLatestFindingsIndexEmpty, isVulnMgmtFindingsIndexEmpty } =
+    getCpmStatus(getSetupStatus);
 
   const showIntegrationInstalledPrompt =
-    showConfigurationIntegrationInstalledPrompt(getSetupStatus) ||
-    showVulnerabilitiesIntegrationInstalledPrompt(getSetupStatus, currentTab);
+    isLatestFindingsIndexEmpty ||
+    showVulnMgmtIntegrationInstalledPrompt(isVulnMgmtFindingsIndexEmpty, currentTab);
 
   const integrationLinksProps =
     currentTab === CONFIGURATIONS
       ? { kspmIntegrationLink, cspmIntegrationLink }
       : { vulnMgmtIntegrationLink };
-  const { isEmptyData, hasFindings } = getCpmStatus(getSetupStatus);
 
   const render = () => {
     if (subscriptionStatus.isError) {
@@ -417,39 +415,10 @@ export const CloudPosturePage = <TData, TError>({
   return <>{render()}</>;
 };
 
-const showConfigurationIntegrationInstalledPrompt = (
-  setupStatus: BaseCspSetupStatus | undefined
-): boolean => {
-  return (
-    !isIntegrationInstalled(setupStatus?.cspm?.status) &&
-    !isIntegrationInstalled(setupStatus?.kspm?.status) &&
-    !hasLatestFindings(setupStatus?.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS)
-  );
-};
-
-const showVulnerabilitiesIntegrationInstalledPrompt = (
-  setupStatus: BaseCspSetupStatus | undefined,
+// TODO: Move this to a utils file for integrations statuses
+const showVulnMgmtIntegrationInstalledPrompt = (
+  isVulnMgmtIndexEmpty: boolean,
   currentTab: FindingsTabsType
 ): boolean => {
-  return (
-    !isIntegrationInstalled(setupStatus?.vuln_mgmt?.status) &&
-    !hasLatestFindings(setupStatus?.indicesDetails, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS) &&
-    currentTab === VULNERABILITIES
-  );
-};
-
-const hasLatestFindings = (
-  indexDetails: IndexDetails[] | undefined,
-  latestIndexTemplate: string
-): boolean => {
-  return indexDetails
-    ? indexDetails.some(
-        (indexTemplate) =>
-          indexTemplate?.index === latestIndexTemplate && indexTemplate?.status !== 'empty'
-      )
-    : false;
-};
-
-const isIntegrationInstalled = (integrationStatus: CspStatusCode | undefined) => {
-  return integrationStatus !== 'not-installed';
+  return isVulnMgmtIndexEmpty && currentTab === VULNERABILITIES;
 };
