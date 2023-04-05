@@ -58,7 +58,7 @@ function timeScaleToUnit(t?: string) {
   if (!t || t === 's') return 'second';
   else if (t === 'h') return 'hour';
   else if (t === 'm') return 'minute';
-  else return 'day';
+  return 'day';
 }
 
 function buildMetricOperation<T extends MetricColumn<string>>({

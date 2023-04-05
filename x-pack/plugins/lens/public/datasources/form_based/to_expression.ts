@@ -8,7 +8,6 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
-import { parse } from '@kbn/tinymath';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
@@ -25,7 +24,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
-import { FormulaIndexPatternColumn, operationDefinitionMap } from './operations';
+import { operationDefinitionMap } from './operations';
 import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import {
@@ -37,6 +36,7 @@ import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
+import { isCounterRateFormula } from './operations/definitions/formula/util';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -404,26 +404,10 @@ function getExpressionForLayer(
           },
         };
 
-        if (col.operationType === 'formula') {
+        if (isColumnOfType('formula', col)) {
           // we need to check if formula is doing counter_rate(max(counter field))
-          const formula = (col as FormulaIndexPatternColumn).params.formula || '';
-          const ast = parse(formula);
-          if (typeof ast !== 'number' && ast.type === 'function') {
-            const { name, args } = ast;
-            if (
-              name === 'counter_rate' &&
-              typeof args[0] !== 'number' &&
-              args[0].type === 'function' &&
-              args[0].name === 'max' &&
-              args[0].args.length === 1 &&
-              typeof args[0].args[0] !== 'number' &&
-              args[0].args[0].type === 'namedArgument'
-            ) {
-              const fieldName = args[0].args[0].value;
-              if (indexPattern.getFieldByName(fieldName)?.timeSeriesMetric === 'counter') {
-                return [formatCall];
-              }
-            }
+          if (isCounterRateFormula(col, indexPattern)) {
+            return [formatCall];
           }
         }
         if (col.operationType === 'counter_rate') {

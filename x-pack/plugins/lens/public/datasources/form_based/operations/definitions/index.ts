@@ -566,6 +566,10 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
+   *
+   * actualColId: the columnId parameter passed to the field operations toEsAggs() function
+   * is not the actual column id on the layer but the id which should be used in
+   * aggregations.
    */
   toEsAggsFn: (
     column: C,
@@ -575,7 +579,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
     uiSettings: IUiSettingsClient,
     orderedColumnIds: string[],
     operationDefinitionMap?: Record<string, GenericOperationDefinition>,
-    colId?: string
+    actualColId?: string
   ) => ExpressionAstFunction;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
