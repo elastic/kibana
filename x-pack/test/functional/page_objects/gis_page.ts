@@ -45,6 +45,7 @@ export class GisPageObject extends FtrService {
   }
 
   async expectEmsToBeAvailable() {
+    this.log.debug(`expectEmsToBeAvailable`);
     await this.openNewMap();
     await this.clickAddLayer();
     await this.testSubjects.click('emsBoundaries');
@@ -52,9 +53,10 @@ export class GisPageObject extends FtrService {
       await this.testSubjects.exists('emsFileSelect', { timeout: 30000 }); // large timeout for EMS request
       const isDisabled = await this.comboBox.isDisabled('emsFileSelect');
       if (isDisabled) {
-        throw new Error();
+        throw new Error('EMS file select is disabled');
       }
     } catch (e) {
+      this.log.debug(`EMS is not available, error: ${e.message}`);
       throw new Error('Test requires access to Elastic Maps Service (EMS). EMS is not available');
     }
   }
