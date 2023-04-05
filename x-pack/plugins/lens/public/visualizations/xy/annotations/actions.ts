@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { LayerActionFromVisualization } from '../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../types';
 
-export const IGNORE_GLOBAL_FILTERS_ACTION_ID = 'ignoreGlobalFilters';
-export const KEEP_GLOBAL_FILTERS_ACTION_ID = 'keepGlobalFilters';
-
+// Leaving the stub for annotation groups
 export const createAnnotationActions = ({
   state,
   layer,
@@ -21,33 +18,5 @@ export const createAnnotationActions = ({
   layer: XYAnnotationLayerConfig;
   layerIndex: number;
 }): LayerActionFromVisualization[] => {
-  const label = !layer.ignoreGlobalFilters
-    ? i18n.translate('xpack.lens.xyChart.annotations.ignoreGlobalFiltersLabel', {
-        defaultMessage: 'Ignore global filters',
-      })
-    : i18n.translate('xpack.lens.xyChart.annotations.keepGlobalFiltersLabel', {
-        defaultMessage: 'Keep global filters',
-      });
-  return [
-    {
-      id: !layer.ignoreGlobalFilters
-        ? IGNORE_GLOBAL_FILTERS_ACTION_ID
-        : KEEP_GLOBAL_FILTERS_ACTION_ID,
-      displayName: label,
-      description: !layer.ignoreGlobalFilters
-        ? i18n.translate('xpack.lens.xyChart.annotations.ignoreGlobalFiltersDescription', {
-            defaultMessage:
-              'All the dimensions configured in this layer ignore filters defined at kibana level.',
-          })
-        : i18n.translate('xpack.lens.xyChart.annotations.keepGlobalFiltersDescription', {
-            defaultMessage:
-              'All the dimensions configured in this layer respect filters defined at kibana level.',
-          }),
-      icon: !layer.ignoreGlobalFilters ? 'filterIgnore' : 'filter',
-      isCompatible: true,
-      'data-test-subj': !layer.ignoreGlobalFilters
-        ? 'lnsXY_annotationLayer_ignoreFilters'
-        : 'lnsXY_annotationLayer_keepFilters',
-    },
-  ];
+  return [];
 };

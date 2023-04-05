@@ -1188,11 +1188,11 @@ export interface Visualization<T = unknown, P = T> {
   /**
    * Allows the visualization to announce whether or not it has any settings to show
    */
-  hasLayerSettings?: (props: VisualizationConfigProps<T>) => boolean;
+  hasLayerSettings?: (props: VisualizationConfigProps<T>) => Record<'data' | 'appereance', boolean>;
 
   renderLayerSettings?: (
     domElement: Element,
-    props: VisualizationLayerSettingsProps<T>
+    props: VisualizationLayerSettingsProps<T> & { section: 'data' | 'appereance' }
   ) => ((cleanupElement: Element) => void) | void;
 
   /**

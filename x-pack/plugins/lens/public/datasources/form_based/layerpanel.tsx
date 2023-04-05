@@ -8,10 +8,12 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 import { DatasourceLayerPanelProps } from '../../types';
 import { FormBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { getSamplingValue } from './utils';
+import { RandomSamplingIcon } from './sampling_icon';
 
 export interface FormBasedLayerPanelProps extends DatasourceLayerPanelProps<FormBasedPrivateState> {
   state: FormBasedPrivateState;
@@ -25,6 +27,7 @@ export function LayerPanel({
   dataViews,
 }: FormBasedLayerPanelProps) {
   const layer = state.layers[layerId];
+  const { euiTheme } = useEuiTheme();
 
   const indexPattern = dataViews.indexPatterns[layer.indexPatternId];
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
@@ -38,6 +41,21 @@ export function LayerPanel({
     };
   });
 
+  const samplingValue = getSamplingValue(layer);
+  const extraIconLabelProps =
+    samplingValue !== 1
+      ? {
+          icon: <RandomSamplingIcon color={euiTheme.colors.disabledText} fill="currentColor" />,
+          iconValue: `${samplingValue * 100}%`,
+          iconTooltipValue: i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
+            defaultMessage: '{value}% sampling',
+            values: {
+              value: samplingValue * 100,
+            },
+          }),
+        }
+      : {};
+
   return (
     <I18nProvider>
       <ChangeIndexPattern
@@ -48,7 +66,7 @@ export function LayerPanel({
           'data-test-subj': 'lns_layerIndexPatternLabel',
           size: 's',
           fontWeight: 'normal',
-          samplingValue: getSamplingValue(layer),
+          ...extraIconLabelProps,
         }}
         indexPatternId={layer.indexPatternId}
         indexPatternRefs={indexPatternRefs}
