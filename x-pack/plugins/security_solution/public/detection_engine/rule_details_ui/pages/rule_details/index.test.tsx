@@ -93,8 +93,8 @@ jest.mock('../../../../common/lib/kibana', () => {
   return {
     ...originalModule,
     useKibana: () => ({
-      ...originalModule.useKibana().services,
       services: {
+        ...originalModule.useKibana().services,
         storage: {
           get: jest.fn().mockReturnValue(true),
         },
@@ -154,7 +154,7 @@ jest.mock('../../../../common/lib/kibana', () => {
                     isMapped: true,
                   },
                 ],
-                getIndexPattern: () => 'hello*,world*,refreshed*',
+                getIndexPattern: () => title,
               }),
             get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
               Promise.resolve({

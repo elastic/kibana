@@ -31,6 +31,7 @@ import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -315,7 +316,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
-  // const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
 
   const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
     ruleType: rule?.type,
@@ -324,23 +325,23 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
-  const dataViewOptions = useCallback(() => {
-    const fetchDataViews = async () => {
+  const fetchDataViews = useCallback(() => {
+    const fetchDV = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
-      if (dataViewsRefs.length > 0) {
-        const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
-          (acc, item) => ({
-            ...acc,
-            [item.id]: item,
-          }),
-          {}
-        );
-        return dataViewIdIndexPatternMap;
-      }
-      return {};
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
     };
-    return fetchDataViews();
-  }, [data.dataViews]);
+    fetchDV();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => fetchDataViews(), [fetchDataViews]);
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
