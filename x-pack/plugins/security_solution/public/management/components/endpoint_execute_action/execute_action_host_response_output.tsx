@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -23,6 +23,12 @@ import { getEmptyValue } from '../../../common/components/empty_value';
 const emptyValue = getEmptyValue();
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
+  context: i18n.translate(
+    'xpack.securitySolution.responseActionExecuteAccordion.executionContext',
+    {
+      defaultMessage: 'Execution context',
+    }
+  ),
   output: {
     regular: i18n.translate(
       'xpack.securitySolution.responseActionExecuteAccordion.outputButtonTextRegular',
@@ -95,32 +101,51 @@ const ShellInfoContent = memo<ShellInfoContentProps>(({ content, textSize, title
 ShellInfoContent.displayName = 'ShellInfoContent';
 
 interface ExecuteActionOutputProps {
-  content?: string;
+  content?: string | React.ReactNode;
   initialIsOpen?: boolean;
   isTruncated?: boolean;
   textSize?: 's' | 'xs';
-  type: 'error' | 'output';
+  type: 'error' | 'output' | 'context';
+  'data-test-subj'?: string;
 }
 
 const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
-  ({ content = emptyValue, initialIsOpen = false, isTruncated = false, textSize, type }) => {
+  ({
+    content = emptyValue,
+    initialIsOpen = false,
+    isTruncated = false,
+    textSize,
+    type,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const id = useGeneratedHtmlId({
       prefix: 'executeActionOutputAccordions',
       suffix: type,
     });
+
+    const accordionButtonContent = useMemo(
+      () => (
+        <EuiText size={textSize}>
+          {type !== 'context'
+            ? isTruncated
+              ? ACCORDION_BUTTON_TEXT[type].truncated
+              : ACCORDION_BUTTON_TEXT[type].regular
+            : ACCORDION_BUTTON_TEXT[type]}
+        </EuiText>
+      ),
+      [isTruncated, textSize, type]
+    );
+
     return (
       <EuiAccordion
         id={id}
         initialIsOpen={initialIsOpen}
-        buttonContent={
-          <EuiText size={textSize}>
-            <strong>{ACCORDION_BUTTON_TEXT[type][isTruncated ? 'truncated' : 'regular']}</strong>
-          </EuiText>
-        }
+        buttonContent={accordionButtonContent}
         paddingSize="s"
+        data-test-subj={dataTestSubj}
       >
         <StyledEuiText size={textSize}>
-          <p>{content}</p>
+          {typeof content === 'string' ? <p>{content}</p> : content}
         </StyledEuiText>
       </EuiAccordion>
     );
@@ -135,53 +160,70 @@ export interface ExecuteActionHostResponseOutputProps {
 }
 
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
-  ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => (
-    <>
-      <EuiFlexItem data-test-subj={`${dataTestSubj}-shell`}>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={false}>
+  ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
+    const contextContent = useMemo(
+      () => (
+        <>
+          <EuiFlexGroup gutterSize="m" data-test-subj={`${dataTestSubj}-shell`}>
+            <EuiFlexItem grow={false}>
+              <ShellInfoContent
+                title={SHELL_INFO.shell}
+                content={outputContent.shell}
+                textSize={textSize}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ShellInfoContent
+                title={SHELL_INFO.returnCode}
+                content={outputContent.shell_code}
+                textSize={textSize}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <div data-test-subj={`${dataTestSubj}-cwd`}>
+            <EuiSpacer size="m" />
             <ShellInfoContent
-              title={SHELL_INFO.shell}
-              content={outputContent.shell}
+              title={SHELL_INFO.currentDir}
+              content={outputContent.cwd}
               textSize={textSize}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ShellInfoContent
-              title={SHELL_INFO.returnCode}
-              content={outputContent.shell_code}
-              textSize={textSize}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem data-test-subj={`${dataTestSubj}-cwd`}>
-        <EuiSpacer size="m" />
-        <ShellInfoContent
-          title={SHELL_INFO.currentDir}
-          content={outputContent.cwd}
-          textSize={textSize}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem data-test-subj={`${dataTestSubj}-output`}>
-        <EuiSpacer size="m" />
-        <ExecutionActionOutputAccordion
-          content={outputContent.stdout.length ? outputContent.stdout : undefined}
-          isTruncated={outputContent.stdout_truncated}
-          initialIsOpen
-          textSize={textSize}
-          type="output"
-        />
-        <EuiSpacer size="m" />
-        <ExecutionActionOutputAccordion
-          content={outputContent.stderr.length ? outputContent.stderr : undefined}
-          isTruncated={outputContent.stderr_truncated}
-          textSize={textSize}
-          type="error"
-        />
-      </EuiFlexItem>
-    </>
-  )
+          </div>
+        </>
+      ),
+      [dataTestSubj, outputContent.cwd, outputContent.shell, outputContent.shell_code, textSize]
+    );
+    return (
+      <>
+        <EuiFlexItem>
+          <EuiSpacer size="m" />
+          <ExecutionActionOutputAccordion
+            content={contextContent}
+            data-test-subj={`${dataTestSubj}-context`}
+            textSize={textSize}
+            type="context"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSpacer size="m" />
+          <ExecutionActionOutputAccordion
+            content={outputContent.stdout.length ? outputContent.stdout : undefined}
+            data-test-subj={`${dataTestSubj}-output`}
+            isTruncated={outputContent.stdout_truncated}
+            initialIsOpen
+            textSize={textSize}
+            type="output"
+          />
+          <EuiSpacer size="m" />
+          <ExecutionActionOutputAccordion
+            content={outputContent.stderr.length ? outputContent.stderr : undefined}
+            data-test-subj={`${dataTestSubj}-error`}
+            isTruncated={outputContent.stderr_truncated}
+            textSize={textSize}
+            type="error"
+          />
+        </EuiFlexItem>
+      </>
+    );
+  }
 );
 ExecuteActionHostResponseOutput.displayName = 'ExecuteActionHostResponseOutput';
