@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AccessorFn } from '@elastic/charts';
-import { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { AccessorFn } from '@elastic/charts';
+import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 
 export const getSplitDimensionAccessor = (

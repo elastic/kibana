@@ -50,6 +50,7 @@ const prepareGrid = (params: HeatmapVisParams) => {
 
 export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
+
   // fix formatter for percentage mode
   if (vis.params.percentageMode === true) {
     schemas.metric.forEach((metric: SchemaConfig) => {
