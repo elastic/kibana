@@ -9,9 +9,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import { INSIGHTS_HEADER_TEST_ID } from './test_ids';
-import { Insights } from './insights';
 import { TestProviders } from '../../../common/mock';
 import { mockGetFieldsData } from '../mocks/mock_context';
+import { InsightsSection } from './insights_section';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -23,7 +23,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-describe('<Insights />', () => {
+describe('<InsightsSection />', () => {
   it('should render insights component', () => {
     const contextValue = {
       eventId: 'some_Id',
@@ -33,7 +33,7 @@ describe('<Insights />', () => {
     const wrapper = render(
       <TestProviders>
         <RightPanelContext.Provider value={contextValue}>
-          <Insights />
+          <InsightsSection />
         </RightPanelContext.Provider>
       </TestProviders>
     );
@@ -52,7 +52,7 @@ describe('<Insights />', () => {
     const wrapper = render(
       <TestProviders>
         <RightPanelContext.Provider value={contextValue}>
-          <Insights expanded={true} />
+          <InsightsSection expanded={true} />
         </RightPanelContext.Provider>
       </TestProviders>
     );

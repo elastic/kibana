@@ -83,6 +83,7 @@ export const toggleOverviewTabInvestigationSection = () =>
 export const toggleOverviewTabDescriptionSection = () =>
   cy
     .get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER)
+    .scrollIntoView()
     .should('be.visible')
     .click();
 

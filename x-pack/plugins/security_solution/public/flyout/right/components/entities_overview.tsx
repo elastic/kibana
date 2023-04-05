@@ -17,10 +17,12 @@ import {
 import { ENTITIES_TITLE, ENTITIES_TEXT, VIEW_ALL } from './translations';
 import { EntityPanel } from './entity_panel';
 import { getField } from '../../shared/utils';
-import { ENTITY_TYPE, ENTITY_ICON } from '../../shared/constants';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
 import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
+
+const USER_ICON = 'user';
+const HOST_ICON = 'storage';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
@@ -57,7 +59,7 @@ export const EntitiesOverview: React.FC = () => {
           <EuiFlexItem>
             <EntityPanel
               title={userName}
-              iconType={ENTITY_ICON[ENTITY_TYPE.user]}
+              iconType={USER_ICON}
               content={<UserEntityOverview userName={userName} />}
             />
           </EuiFlexItem>
@@ -66,7 +68,7 @@ export const EntitiesOverview: React.FC = () => {
           <EuiFlexItem>
             <EntityPanel
               title={hostName}
-              iconType={ENTITY_ICON[ENTITY_TYPE.host]}
+              iconType={HOST_ICON}
               content={<HostEntityOverview hostName={hostName} />}
             />
           </EuiFlexItem>

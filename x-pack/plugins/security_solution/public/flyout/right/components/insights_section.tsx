@@ -21,7 +21,7 @@ export interface InsightsSectionProps {
 /**
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
-export const Insights: React.FC<InsightsSectionProps> = ({ expanded = false }) => {
+export const InsightsSection: React.FC<InsightsSectionProps> = ({ expanded = false }) => {
   return (
     <ExpandableSection title={INSIGHTS_TITLE} expanded={expanded} data-test-subj={INSIGHTS_TEST_ID}>
       <EntitiesOverview />
@@ -29,4 +29,4 @@ export const Insights: React.FC<InsightsSectionProps> = ({ expanded = false }) =
   );
 };
 
-Insights.displayName = 'Insights';
+InsightsSection.displayName = 'InsightsSection';
