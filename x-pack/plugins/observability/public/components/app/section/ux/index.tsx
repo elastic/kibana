@@ -82,8 +82,6 @@ export function UXSection({ bucketSize }: Props) {
     ]
   );
 
-  console.log('data', uxHasDataResponse);
-
   if (!uxHasDataResponse?.hasData) {
     return null;
   }
