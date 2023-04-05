@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  describe('Dashboard control group hierarchical chaining', () => {
+  describe.only('Dashboard control group hierarchical chaining', () => {
     const newDocuments: Array<{ index: string; id: string }> = [];
     let controlIds: string[];
 
