@@ -44,6 +44,7 @@ export interface FleetConfigType {
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;
   };
+  disableILMPolicies: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
