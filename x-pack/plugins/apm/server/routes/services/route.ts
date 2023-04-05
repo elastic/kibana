@@ -244,18 +244,9 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient,
-      config,
-      start,
-      end,
-      kuery: '',
-    });
-
     const serviceMetadataDetails = await getServiceMetadataDetails({
       serviceName,
       apmEventClient,
-      searchAggregatedTransactions,
       start,
       end,
     });
