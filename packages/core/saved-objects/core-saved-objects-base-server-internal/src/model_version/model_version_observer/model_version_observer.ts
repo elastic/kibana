@@ -110,9 +110,9 @@ export class ModelVersionObserver {
       while (true) {
         if (subscriber.closed) break;
         try {
-          const indices = await robustlyFetchMappings(this.client);
+          const indicesMappings = await robustlyFetchMappings(this.client);
           let modelVersionMap: ModelVersionMap = {};
-          for (const { mappings } of Object.values(indices)) {
+          for (const { mappings } of Object.values(indicesMappings)) {
             // Is this a Kibana system index for an SO type?
             if (!mappings?._meta) continue;
             modelVersionMap = {
