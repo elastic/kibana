@@ -8,7 +8,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import {
+  EuiDataGridColumn,
+  EuiDataGridControlColumn,
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
@@ -52,7 +58,7 @@ const select = {
   ),
 };
 
-export function getLeadControlColumns(canSetExpandedDoc: boolean) {
+export function getLeadControlColumns(canSetExpandedDoc: boolean): EuiDataGridControlColumn[] {
   if (!canSetExpandedDoc) {
     return [select];
   }
