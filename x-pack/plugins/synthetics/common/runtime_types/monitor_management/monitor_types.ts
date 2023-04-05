@@ -204,15 +204,20 @@ export const HTTPAdvancedFieldsCodec = t.intersection([
   }),
 ]);
 
-export const HTTPSensitiveAdvancedFieldsCodec = t.interface({
-  [ConfigKey.PASSWORD]: t.string,
-  [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: t.array(t.string),
-  [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: t.array(t.string),
-  [ConfigKey.RESPONSE_HEADERS_CHECK]: t.record(t.string, t.string),
-  [ConfigKey.REQUEST_BODY_CHECK]: t.interface({ value: t.string, type: CodeEditorModeCodec }),
-  [ConfigKey.REQUEST_HEADERS_CHECK]: t.record(t.string, t.string),
-  [ConfigKey.USERNAME]: t.string,
-});
+export const HTTPSensitiveAdvancedFieldsCodec = t.intersection([
+  t.interface({
+    [ConfigKey.PASSWORD]: t.string,
+    [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: t.array(t.string),
+    [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: t.array(t.string),
+    [ConfigKey.RESPONSE_HEADERS_CHECK]: t.record(t.string, t.string),
+    [ConfigKey.REQUEST_BODY_CHECK]: t.interface({ value: t.string, type: CodeEditorModeCodec }),
+    [ConfigKey.REQUEST_HEADERS_CHECK]: t.record(t.string, t.string),
+    [ConfigKey.USERNAME]: t.string,
+  }),
+  t.partial({
+    [ConfigKey.PROXY_HEADERS]: t.record(t.string, t.string),
+  }),
+]);
 
 export const HTTPAdvancedCodec = t.intersection([
   HTTPAdvancedFieldsCodec,

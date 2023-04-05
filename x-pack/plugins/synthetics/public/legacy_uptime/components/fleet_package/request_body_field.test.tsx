@@ -11,7 +11,7 @@ import React, { useState, useCallback } from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { RequestBodyField } from './request_body_field';
-import { Mode } from './types';
+import { CodeEditorMode } from './types';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
@@ -48,7 +48,7 @@ describe('<RequestBodyField />', () => {
         type={config.type}
         value={config.value}
         onChange={useCallback(
-          (code) => setConfig({ type: code.type as Mode, value: code.value }),
+          (code) => setConfig({ type: code.type as CodeEditorMode, value: code.value }),
           [setConfig]
         )}
       />

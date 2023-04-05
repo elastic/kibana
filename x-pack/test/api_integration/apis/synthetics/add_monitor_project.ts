@@ -359,9 +359,10 @@ export default function ({ getService }: FtrProviderContext) {
             username: '',
             password: '',
             proxy_url: '',
+            proxy_headers: {},
             'response.include_body': 'always',
             'response.include_headers': false,
-            'response.include_body_max_bytes': '1024',
+            'response.include_body_max_bytes': '900',
             revision: 1,
             schedule: {
               number: '60',
@@ -1804,6 +1805,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: '900',
                 },
                 'response.include_headers': false,
                 schedule: 60,

@@ -25,6 +25,7 @@
   "urls": "https://nextjs-test-synthetics.vercel.app/api/users",
   "url.port": null,
   "proxy_url": "http://proxy.com",
+  "proxy_headers": {},
   "check.response.body.negative": [],
   "check.response.body.positive": [],
   "response.include_body": "never",

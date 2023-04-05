@@ -39,10 +39,11 @@ const HTTP_ADVANCED = (readOnly: boolean) => ({
     components: [
       FIELD(readOnly)[ConfigKey.USERNAME],
       FIELD(readOnly)[ConfigKey.PASSWORD],
-      FIELD(readOnly)[ConfigKey.PROXY_URL],
       FIELD(readOnly)[ConfigKey.REQUEST_METHOD_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_HEADERS_CHECK],
       FIELD(readOnly)[ConfigKey.REQUEST_BODY_CHECK],
+      FIELD(readOnly)[ConfigKey.PROXY_URL],
+      FIELD(readOnly)[ConfigKey.PROXY_HEADERS],
       FIELD(readOnly)[ConfigKey.MODE],
       FIELD(readOnly)[ConfigKey.IPV4],
     ],

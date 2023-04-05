@@ -1368,4 +1368,24 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       };
     },
   },
+  [ConfigKey.PROXY_HEADERS]: {
+    fieldKey: ConfigKey.PROXY_HEADERS,
+    component: HeaderField,
+    label: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.label', {
+      defaultMessage: 'Proxy headers',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.helpText', {
+      defaultMessage: 'Additional headers to send to proxies during CONNECT requests.',
+    }),
+    controlled: true,
+    validation: () => ({
+      validate: (headers) => !validateHeaders(headers),
+    }),
+    error: i18n.translate('xpack.synthetics.monitorConfig.proxyHeaders.error', {
+      defaultMessage: 'Header key must be a valid HTTP token.',
+    }),
+    props: (): HeaderFieldProps => ({
+      readOnly,
+    }),
+  },
 });

@@ -38,6 +38,7 @@ export enum ConfigKey {
   ORIGINAL_SPACE = 'original_space', // the original space the montior was saved in. Used by push monitors to ensure uniqueness of monitor id sent to heartbeat and prevent data collisions
   PORT = 'url.port',
   PROXY_URL = 'proxy_url',
+  PROXY_HEADERS = 'proxy_headers',
   PROXY_USE_LOCAL_RESOLVER = 'proxy_use_local_resolver',
   RESPONSE_BODY_CHECK_NEGATIVE = 'check.response.body.negative',
   RESPONSE_BODY_CHECK_POSITIVE = 'check.response.body.positive',
@@ -92,6 +93,7 @@ export enum ConfigKey {
 }
 
 export const secretKeys = [
+  ConfigKey.PROXY_HEADERS,
   ConfigKey.PARAMS,
   ConfigKey.PASSWORD,
   ConfigKey.REQUEST_BODY_CHECK,

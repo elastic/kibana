@@ -123,6 +123,7 @@ export interface FieldMap {
   [ConfigKey.USERNAME]: FieldMeta<ConfigKey.USERNAME>;
   [ConfigKey.PASSWORD]: FieldMeta<ConfigKey.PASSWORD>;
   [ConfigKey.PROXY_URL]: FieldMeta<ConfigKey.PROXY_URL>;
+  [ConfigKey.PROXY_HEADERS]: FieldMeta<ConfigKey.PROXY_HEADERS>;
   ['proxy_url__tcp']: FieldMeta<ConfigKey.PROXY_URL>;
   [ConfigKey.REQUEST_METHOD_CHECK]: FieldMeta<ConfigKey.REQUEST_METHOD_CHECK>;
   [ConfigKey.REQUEST_HEADERS_CHECK]: FieldMeta<ConfigKey.REQUEST_HEADERS_CHECK>;

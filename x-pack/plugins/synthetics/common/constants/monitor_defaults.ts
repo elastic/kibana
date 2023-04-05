@@ -120,6 +120,7 @@ export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
 export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
   [ConfigKey.PASSWORD]: '',
   [ConfigKey.PROXY_URL]: '',
+  [ConfigKey.PROXY_HEADERS]: {},
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: [],
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: [],
   [ConfigKey.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,

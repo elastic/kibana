@@ -23,6 +23,7 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.USERNAME]: null,
   [ConfigKey.PASSWORD]: null,
   [ConfigKey.PROXY_URL]: null,
+  [ConfigKey.PROXY_HEADERS]: objectToJsonFormatter,
   [ConfigKey.PORT]: null,
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: arrayToJsonFormatter,
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: arrayToJsonFormatter,
