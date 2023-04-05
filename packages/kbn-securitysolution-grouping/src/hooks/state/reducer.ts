@@ -35,40 +35,6 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
             ...defaultGroup,
             ...groupsById[id],
             activeGroups,
-            // When any group is added or removed from the active groups
-            // reset the pagination on all active groups
-            pagingSettings: Object.keys(groupsById[id].pagingSettings).reduce(
-              (acc, group) => ({
-                ...acc,
-                [group]: {
-                  ...groupsById[id].pagingSettings[group],
-                  itemsPerPage: 25,
-                },
-              }),
-              {}
-            ),
-          },
-        },
-      };
-    }
-    case ActionType.updateGroupItemsPerPage: {
-      const { id, itemsPerPage, selectedGroup } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...groupsById,
-          [id]: {
-            ...defaultGroup,
-            ...groupsById[id],
-            pagingSettings: {
-              ...groupsById[id].pagingSettings,
-              [selectedGroup]: {
-                ...(groupsById[id].pagingSettings[selectedGroup] ?? {
-                  itemsPerPageOptions: [10, 25, 50, 100],
-                }),
-                itemsPerPage,
-              },
-            },
           },
         },
       };
@@ -98,6 +64,7 @@ export const groupsReducerWithStorage = (state: GroupMap, action: Action) => {
 
   const groupsById: GroupsById = {
     ...state.groupById,
+    ...groupsInStorage,
   };
 
   const newState = groupsReducer(state, action, groupsById);

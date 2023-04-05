@@ -103,10 +103,10 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   }, [dispatch, groupSelector, groupSelectorInRedux, selectedGroups]);
 
   const [pageIndex, setPageIndex] = useState<number[]>(
-    Array.from({ length: MAX_GROUPING_LEVELS }, () => DEFAULT_PAGE_INDEX)
+    Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_INDEX)
   );
   const [pageSize, setPageSize] = useState<number[]>(
-    Array.from({ length: MAX_GROUPING_LEVELS }, () => DEFAULT_PAGE_SIZE)
+    Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_SIZE)
   );
 
   const resetAllPagination = useCallback(() => {
