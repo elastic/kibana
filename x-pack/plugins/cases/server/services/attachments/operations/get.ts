@@ -7,6 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -31,6 +32,9 @@ import {
   injectAttachmentAttributesAndHandleErrors,
   injectAttachmentSOAttributesFromRefs,
 } from '../../so_references';
+import { partitionByCaseAssociation } from '../../../common/partitioning';
+import type { AttachmentSavedObject } from '../../../common/types';
+import { getCaseReferenceId } from '../../../common/references';
 
 type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
 
@@ -246,5 +250,89 @@ export class AttachmentGetter {
         },
       },
     };
+  }
+
+  public async getFileAttachments({
+    caseId,
+    fileIds,
+  }: {
+    caseId: string;
+    fileIds: string[];
+  }): Promise<Array<SavedObject<CommentAttributes>>> {
+    try {
+      this.context.log.debug('Attempting to find file attachments');
+
+      /**
+       * This is making a big assumption that a single file service saved object can only be associated within a single
+       * case. If a single file can be attached to multiple cases it will complicate deleting a file.
+       *
+       * The file's metadata would have to contain all case ids and deleting a file would need to removing a case id from
+       * array instead of deleting the entire saved object in the situation where the file is attached to multiple cases.
+       */
+      const references = fileIds.map((id) => ({ id, type: FILE_SO_TYPE }));
+
+      /**
+       * In the event that we add the ability to attach a file to a case that has already been uploaded we'll run into a
+       * scenario where a single file id could be associated with multiple case attachments. So we need
+       * to retrieve them all.
+       */
+      const finder =
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentAttributesWithoutRefs>(
+          {
+            type: CASE_COMMENT_SAVED_OBJECT,
+            hasReference: references,
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            perPage: MAX_DOCS_PER_PAGE,
+          }
+        );
+
+      const foundAttachments: Array<SavedObject<CommentAttributes>> = [];
+
+      for await (const attachmentSavedObjects of finder.find()) {
+        foundAttachments.push(
+          ...attachmentSavedObjects.saved_objects.map((attachment) => {
+            const modifiedAttachment = injectAttachmentSOAttributesFromRefs(
+              attachment,
+              this.context.persistableStateAttachmentTypeRegistry
+            );
+
+            return modifiedAttachment;
+          })
+        );
+      }
+
+      const [validFileAttachments, invalidFileAttachments] = partitionByCaseAssociation(
+        caseId,
+        foundAttachments
+      );
+
+      this.logInvalidFileAssociations(invalidFileAttachments, fileIds, caseId);
+
+      return validFileAttachments;
+    } catch (error) {
+      this.context.log.error(`Error retrieving file attachments file ids: ${fileIds}: ${error}`);
+      throw error;
+    }
+  }
+
+  private logInvalidFileAssociations(
+    attachments: AttachmentSavedObject[],
+    fileIds: string[],
+    targetCaseId: string
+  ) {
+    const caseIds: string[] = [];
+    for (const attachment of attachments) {
+      const caseRefId = getCaseReferenceId(attachment.references);
+      if (caseRefId != null) {
+        caseIds.push(caseRefId);
+      }
+    }
+
+    if (caseIds.length > 0) {
+      this.context.log.warn(
+        `Found files associated to cases outside of request: ${caseIds} file ids: ${fileIds} target case id: ${targetCaseId}`
+      );
+    }
   }
 }
