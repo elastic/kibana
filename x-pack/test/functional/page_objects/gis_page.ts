@@ -54,7 +54,7 @@ export class GisPageObject extends FtrService {
       if (isDisabled) {
         throw new Error();
       }
-    } catch(e) {
+    } catch (e) {
       throw new Error('Test requires access to Elastic Maps Service (EMS). EMS is not available');
     }
   }
