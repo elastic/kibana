@@ -48,7 +48,7 @@ describe('ModelVersionObserver', () => {
   beforeEach(() => {
     logger = loggerMock.create();
     client = {
-      indices: { get: jest.fn(() => ({})) },
+      indices: { getMapping: jest.fn(() => ({})) },
     } as unknown as jest.Mocked<ElasticsearchClient>;
   });
 
@@ -59,7 +59,7 @@ describe('ModelVersionObserver', () => {
   });
 
   it('continues polling at interval and broadcasts to all subscribers', async () => {
-    (client.indices.get as jest.Mock)
+    (client.indices.getMapping as jest.Mock)
       .mockResolvedValueOnce({
         a: { mappings: { _meta: { mappingVersions: { a: '1' } } } },
       })
@@ -72,7 +72,7 @@ describe('ModelVersionObserver', () => {
 
     const observer = createTestModelVersionObserver({ client, logger, pollInterval: 500 });
     // Does not eagerly call
-    expect(client.indices.get).not.toHaveBeenCalled();
+    expect(client.indices.getMapping).not.toHaveBeenCalled();
 
     const next1 = jest.fn();
     const sub1 = observer.modelVersionMap$.subscribe({ next: next1 });
@@ -81,7 +81,7 @@ describe('ModelVersionObserver', () => {
 
     await tickOnce();
 
-    expect(client.indices.get).toHaveBeenCalledTimes(1);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(1);
     expect(next1).toHaveBeenCalledTimes(1);
     expect(next2).toHaveBeenCalledTimes(1);
 
@@ -90,7 +90,7 @@ describe('ModelVersionObserver', () => {
     await tickOnce();
     await tickOnce();
 
-    expect(client.indices.get).toHaveBeenCalledTimes(3);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(3);
     expect(next1).toHaveBeenCalledTimes(1);
     expect(next2).toHaveBeenCalledTimes(3);
 
@@ -99,7 +99,7 @@ describe('ModelVersionObserver', () => {
   });
 
   it('will not emit if the model version map is unchanged', async () => {
-    (client.indices.get as jest.Mock).mockResolvedValue({
+    (client.indices.getMapping as jest.Mock).mockResolvedValue({
       a: { mappings: { _meta: { mappingVersions: { a: '1' } } } },
     });
 
@@ -108,15 +108,15 @@ describe('ModelVersionObserver', () => {
     const sub = observer.modelVersionMap$.subscribe({ next });
 
     await tickOnce();
-    expect(client.indices.get).toHaveBeenCalledTimes(1);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledTimes(1);
 
     await tickOnce();
-    expect(client.indices.get).toHaveBeenCalledTimes(2);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(2);
     expect(next).toHaveBeenCalledTimes(1);
 
     await tickOnce();
-    expect(client.indices.get).toHaveBeenCalledTimes(3);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(3);
     expect(next).toHaveBeenCalledTimes(1);
 
     sub.unsubscribe();
@@ -124,11 +124,11 @@ describe('ModelVersionObserver', () => {
 
   it('stops polling when no-one is subscribed', async () => {
     const observer = createTestModelVersionObserver({ client, logger, pollInterval: 500 });
-    expect(client.indices.get).not.toHaveBeenCalled();
+    expect(client.indices.getMapping).not.toHaveBeenCalled();
     const sub = observer.modelVersionMap$.subscribe();
     await tickOnce();
 
-    expect(client.indices.get).toHaveBeenCalledTimes(1);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(1);
     sub.unsubscribe();
 
     await tickOnce();
@@ -136,7 +136,7 @@ describe('ModelVersionObserver', () => {
     await tickOnce();
     await tickOnce();
 
-    expect(client.indices.get).toHaveBeenCalledTimes(1);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(1);
   });
 
   it('subscribers get same reference', async () => {
@@ -154,7 +154,7 @@ describe('ModelVersionObserver', () => {
   });
 
   it('retries retryable errors on a growing back-off which maxes at 10s', async () => {
-    (client.indices.get as jest.Mock).mockRejectedValue(new Error('test error'));
+    (client.indices.getMapping as jest.Mock).mockRejectedValue(new Error('test error'));
 
     const observer = createTestModelVersionObserver({ client, logger, pollInterval: 500 });
     const sub = observer.modelVersionMap$.subscribe();
@@ -169,12 +169,12 @@ describe('ModelVersionObserver', () => {
     await tickOnce(10_000);
     await tickOnce(10_000);
 
-    expect(client.indices.get).toHaveBeenCalledTimes(6); // 1 initial + 5 retries
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(6); // 1 initial + 5 retries
     expect(logger.error).toHaveBeenCalledTimes(1);
   });
 
   it('does not retry unretryable errors', async () => {
-    (client.indices.get as jest.Mock).mockRejectedValue(
+    (client.indices.getMapping as jest.Mock).mockRejectedValue(
       new errors.ResponseError({ statusCode: 400, meta: {} as any, warnings: [] })
     );
 
@@ -185,12 +185,12 @@ describe('ModelVersionObserver', () => {
     sub.unsubscribe(); // let's say we unsubbed.
     await tickOnce(10_000); // no further polling should occur
 
-    expect(client.indices.get).toHaveBeenCalledTimes(1);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledTimes(1);
   });
 
   it('emits the expected values', async () => {
-    (client.indices.get as jest.Mock).mockResolvedValueOnce({
+    (client.indices.getMapping as jest.Mock).mockResolvedValueOnce({
       '.kibana_type_123': {
         mappings: {
           _meta: {
@@ -207,7 +207,7 @@ describe('ModelVersionObserver', () => {
         },
       },
     } as IndicesGetResponse);
-    (client.indices.get as jest.Mock).mockResolvedValueOnce({
+    (client.indices.getMapping as jest.Mock).mockResolvedValueOnce({
       '.kibana_type_123': {
         mappings: {
           _meta: {
@@ -241,13 +241,13 @@ describe('ModelVersionObserver', () => {
     const observer = createTestModelVersionObserver({ client, logger, pollInterval: 500 });
     await expect(observer.getCurrentModelVersionMap()).resolves.toEqual({});
     await tickOnce(1000); // Ensure that we are not polling
-    expect(client.indices.get).toHaveBeenCalledTimes(1);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(1);
 
     await expect(observer.getCurrentModelVersionMap()).resolves.toEqual({});
     await tickOnce(1000); // Ensure that we are not polling
-    expect(client.indices.get).toHaveBeenCalledTimes(2);
+    expect(client.indices.getMapping).toHaveBeenCalledTimes(2);
 
-    (client.indices.get as jest.Mock).mockRejectedValueOnce(
+    (client.indices.getMapping as jest.Mock).mockRejectedValueOnce(
       new errors.ResponseError({ statusCode: 400, meta: {} as any, warnings: [] })
     );
     await expect(observer.getCurrentModelVersionMap()).rejects.toThrowError(errors.ResponseError);

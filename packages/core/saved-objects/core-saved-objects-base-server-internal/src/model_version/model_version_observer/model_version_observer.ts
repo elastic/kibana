@@ -9,7 +9,7 @@
 import * as Rx from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { errors } from '@elastic/elasticsearch';
-import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import pRetry from 'p-retry';
@@ -31,12 +31,15 @@ export interface Dependencies {
 }
 
 const POLL_INTERVAL_MS = 30_000;
+/** TODO: Is this the correct pattern? In this way we will also be matching indices after "the split" */
 const KIBANA_SYSTEM_INDICES_PATTERN = '.kibana_*';
 
-async function robustlyFetchIndices(client: ElasticsearchClient): Promise<IndicesGetResponse> {
+async function robustlyFetchIndices(
+  client: ElasticsearchClient
+): Promise<IndicesGetMappingResponse> {
   const run = async () => {
     try {
-      return await client.indices.get({
+      return await client.indices.getMapping({
         index: KIBANA_SYSTEM_INDICES_PATTERN,
         expand_wildcards: 'hidden',
       });
