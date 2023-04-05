@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/doc-table-browser",
+  "owner": "@elastic/TEAM_NAME"
+}
