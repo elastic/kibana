@@ -109,6 +109,7 @@ export const DiscoverTopNav = ({
     });
   }, [dataViewEditor, stateContainer]);
 
+  const topNavExtension = useObservable(services.extensions.get$('top_nav'));
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -120,6 +121,7 @@ export const DiscoverTopNav = ({
         isPlainRecord,
         adHocDataViews,
         persistDataView,
+        topNavExtension,
       }),
     [
       dataView,
@@ -129,7 +131,9 @@ export const DiscoverTopNav = ({
       onOpenInspector,
       isPlainRecord,
       adHocDataViews,
+      updateDataViewList,
       persistDataView,
+      topNavExtension,
     ]
   );
 
