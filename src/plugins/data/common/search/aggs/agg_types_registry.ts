@@ -65,13 +65,10 @@ export class AggTypesRegistry {
 
     const getInitializedFromCache = <T = unknown>(
       key: string,
-      agg: ((aggTypesDependencies: AggTypesDependencies) => T) | undefined
-    ): T | undefined => {
+      agg: (aggTypesDependencies: AggTypesDependencies) => T
+    ): T => {
       if (initializedAggTypes.has(key)) {
         return initializedAggTypes.get(key);
-      }
-      if (!agg) {
-        return;
       }
       const initialized = agg(aggTypesDependencies);
       initializedAggTypes.set(key, initialized);
@@ -79,11 +76,15 @@ export class AggTypesRegistry {
     };
 
     return {
-      get: (name: string) =>
-        getInitializedFromCache<BucketAggType<any> | MetricAggType<any>>(
-          name,
-          this.bucketAggs.get(name) || this.metricAggs.get(name) || this.legacyAggs.get(name)
-        ),
+      get: (name: string) => {
+        const agg = this.bucketAggs.get(name) || this.metricAggs.get(name) || this.legacyAggs.get(name);
+        return agg
+          ? getInitializedFromCache<BucketAggType<any> | MetricAggType<any>>(
+            name,
+            agg
+          )
+          : undefined;
+      },
       getAll: () => ({
         buckets: Array.from(this.bucketAggs.entries()).map(([key, value]) =>
           getInitializedFromCache<BucketAggType<any>>(key, value)
