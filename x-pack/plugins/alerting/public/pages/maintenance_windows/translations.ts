@@ -20,6 +20,13 @@ export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const CREATE_NEW_BUTTON = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createNewButton',
+  {
+    defaultMessage: 'Create new',
+  }
+);
+
 export const EMPTY_PROMPT_BUTTON = i18n.translate(
   'xpack.alerting.maintenanceWindows.emptyPrompt.button',
   {

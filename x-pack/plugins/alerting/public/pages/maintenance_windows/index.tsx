@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPageHeader } from '@elastic/eui';
+import { EuiButton, EuiPageHeader } from '@elastic/eui';
 import { useKibana } from '../../utils/kibana_react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EmptyPrompt } from './components/empty_prompt';
@@ -29,6 +29,8 @@ export const MaintenanceWindowsPage = React.memo(() => {
     navigateToCreateMaintenanceWindow();
   }, [navigateToCreateMaintenanceWindow]);
 
+  const showEmptyPrompt = !isLoading && maintenanceWindows.length === 0;
+
   if (isInitialLoading) {
     return <CenterJustifiedSpinner />;
   }
@@ -39,9 +41,18 @@ export const MaintenanceWindowsPage = React.memo(() => {
         bottomBorder
         pageTitle={i18n.MAINTENANCE_WINDOWS}
         description={i18n.MAINTENANCE_WINDOWS_DESCRIPTION}
+        rightSideItems={
+          !showEmptyPrompt
+            ? [
+                <EuiButton onClick={handleClickCreate} iconType="plusInCircle" fill>
+                  {i18n.CREATE_NEW_BUTTON}
+                </EuiButton>,
+              ]
+            : []
+        }
       />
 
-      {!isLoading && maintenanceWindows.length === 0 ? (
+      {showEmptyPrompt ? (
         <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks.links} />
       ) : (
         <MaintenanceWindowsList loading={isLoading} items={maintenanceWindows} />
