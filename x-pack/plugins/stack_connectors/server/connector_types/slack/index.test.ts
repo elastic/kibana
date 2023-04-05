@@ -48,7 +48,7 @@ beforeEach(() => {
 describe('connector registration', () => {
   test('returns connector type', () => {
     expect(connectorType.id).toEqual(ConnectorTypeId);
-    expect(connectorType.name).toEqual('Slack');
+    expect(connectorType.name).toEqual('Slack Webhook');
   });
 });
 
