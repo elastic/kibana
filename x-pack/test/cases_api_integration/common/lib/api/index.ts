@@ -43,10 +43,10 @@ import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
+import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
-import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
 
 export * from './attachments';
 export * from './case';
