@@ -1,0 +1,168 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { indexEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
+import { EndpointPolicyResponseGenerator } from '../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
+import type { HostInfo } from '../../../../common/endpoint/types';
+import { fetchEndpointMetadataList } from '../../common/endpoint_metadata_services';
+import { TOOL_TITLE } from '../constants';
+import type { DataFormatter } from '../../common/screen';
+import { ChoiceMenuFormatter, ScreenBaseClass } from '../../common/screen';
+import type { EmulatorRunContext } from '../services/emulator_run_context';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
+
+const policyResponseGenerator = new EndpointPolicyResponseGenerator();
+
+interface PolicyResponseOptions {
+  agentId: string;
+  hostMetadata: HostInfo;
+  responseType: string;
+}
+
+export class PolicyResponderScreen extends ScreenBaseClass {
+  private choices: ChoiceMenuFormatter = new ChoiceMenuFormatter([
+    {
+      title: 'Setup',
+      key: '1',
+    },
+    {
+      title: 'Send',
+      key: '2',
+    },
+  ]);
+
+  private options: PolicyResponseOptions | undefined = undefined;
+
+  constructor(private readonly emulatorContext: EmulatorRunContext) {
+    super();
+  }
+
+  protected header() {
+    return super.header(TOOL_TITLE, 'Policy Responder');
+  }
+
+  protected body(): string | DataFormatter {
+    return `Send a policy response for a given Endpoint host.
+
+  Selected Host: ${
+    this.options?.hostMetadata
+      ? this.options.hostMetadata.metadata.host.hostname
+      : 'None configured'
+  }
+
+Options:
+${this.choices.output}
+`;
+  }
+
+  protected onEnterChoice(choice: string) {
+    const choiceValue = choice.trim().toUpperCase();
+
+    switch (choiceValue) {
+      case '1':
+        this.configView();
+        break;
+
+      case '2':
+        this.sendPolicyResponse();
+        break;
+
+      default:
+        super.onEnterChoice(choice);
+    }
+  }
+
+  private async configView() {
+    let hostMetadata: HostInfo | undefined;
+
+    const userChoices = await this.prompt<Pick<PolicyResponseOptions, 'agentId' | 'responseType'>>({
+      questions: [
+        {
+          type: 'input',
+          name: 'agentId',
+          message: 'Agent id or host name: ',
+          validate: async (input: string): Promise<boolean | string> => {
+            const agentValue = input.trim();
+
+            if (!agentValue) {
+              return 'Value is required';
+            }
+
+            const { data } = await fetchEndpointMetadataList(this.emulatorContext.getKbnClient(), {
+              kuery: `united.endpoint.agent.id:  "${input}" or united.endpoint.host.hostname: "${input}"`,
+              pageSize: 1,
+            });
+
+            hostMetadata = data[0];
+
+            if (!hostMetadata) {
+              return `Endpoint "${input}" not found!`;
+            }
+
+            return true;
+          },
+        },
+        {
+          type: 'list',
+          name: 'responseType',
+          message: 'Policy response type: ',
+          choices: ['Success', 'Failure', 'Random'],
+          default: 'Success',
+        },
+      ],
+    });
+
+    if (hostMetadata) {
+      this.options = {
+        ...userChoices,
+        hostMetadata,
+      };
+    }
+
+    this.reRender();
+  }
+
+  private async sendPolicyResponse() {
+    if (!this.options || !this.options.hostMetadata) {
+      this.reRender();
+      this.showMessage('No host configured!', 'red');
+      return;
+    }
+
+    this.showMessage('Sending policy response...');
+
+    const { responseType, hostMetadata } = this.options;
+    const lastAppliedPolicy = hostMetadata.metadata.Endpoint.policy.applied;
+    const overallStatus: HostPolicyResponseActionStatus | undefined =
+      responseType === 'Success'
+        ? HostPolicyResponseActionStatus.success
+        : responseType === 'Failure'
+        ? HostPolicyResponseActionStatus.failure
+        : undefined;
+
+    const policyResponse = policyResponseGenerator.generate({
+      agent: hostMetadata.metadata.agent,
+      Endpoint: {
+        policy: {
+          applied: {
+            ...(overallStatus ? { status: overallStatus } : {}),
+            name: lastAppliedPolicy.name,
+            endpoint_policy_version: lastAppliedPolicy.endpoint_policy_version,
+            id: lastAppliedPolicy.id,
+            version: lastAppliedPolicy.version,
+          },
+        },
+      },
+    });
+
+    await indexEndpointPolicyResponse(this.emulatorContext.getEsClient(), policyResponse);
+
+    this.options = undefined;
+    this.reRender();
+    this.showMessage('Successful', 'green', true);
+  }
+}
