@@ -637,7 +637,9 @@ async function getUpdatedAttributesFromOperations(
 
         // TODO https://github.com/elastic/kibana/issues/148414
         // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-        const firstFrequency = updatedOperation.value[0]?.frequency;
+        const firstFrequency = updatedOperation.value.find(
+          (action) => action?.frequency
+        )?.frequency;
         if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
           ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
           if (!attributes.notifyWhen) {

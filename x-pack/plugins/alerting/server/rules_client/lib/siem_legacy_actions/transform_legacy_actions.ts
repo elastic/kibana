@@ -8,9 +8,8 @@
 import { v4 } from 'uuid';
 import { isEmpty } from 'lodash/fp';
 import type { SavedObjectReference } from '@kbn/core/server';
-
 import { RawRuleAction } from '../../../types';
-
+import { transformToNotifyWhen } from './transform_to_notify_when';
 import { LegacyIRuleActionsAttributes } from './types';
 
 /**
@@ -50,8 +49,8 @@ export const transformFromLegacyActions = (
         actionRef,
         actionTypeId,
         frequency: {
-          summary: true,
-          notifyWhen: 'onThrottleInterval',
+          summary: false,
+          notifyWhen: transformToNotifyWhen(legacyActionsAttr.ruleThrottle) ?? 'onThrottleInterval',
           throttle: legacyActionsAttr.ruleThrottle,
         },
       },

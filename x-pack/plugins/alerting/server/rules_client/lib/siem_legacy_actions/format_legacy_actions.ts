@@ -11,9 +11,8 @@ import pMap from 'p-map';
 import { RuleAction, Rule } from '../../../types';
 import type { RuleExecutorServices } from '../../..';
 import { injectReferencesIntoActions } from '../../common';
-
+import { transformToNotifyWhen } from './transform_to_notify_when';
 import { transformFromLegacyActions } from './transform_legacy_actions';
-
 import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
 
 /**
@@ -102,21 +101,12 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
 };
 
 /**
- * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen
- * on their saved object.
- * @params throttle The throttle from a "security_solution" rule
- * @returns The correct "NotifyWhen" for a Kibana alerting.
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * formats rules with associated SIEM legacy actions, if any
+ * @param rules - list of rules to format
+ * @param params - logger, savedObjectsClient
+ * @returns
  */
-export const transformToNotifyWhen = (throttle: string | null | undefined): string | null => {
-  if (throttle == null || throttle === 'no_actions') {
-    return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
-  } else if (throttle === 'rule') {
-    return 'onActiveAlert';
-  } else {
-    return 'onThrottleInterval';
-  }
-};
-
 export const formatLegacyActionsForSiemRules = async <T extends Rule>(
   rules: T[],
   { logger, savedObjectsClient }: Omit<LegacyGetBulkRuleActionsSavedObject, 'alertIds'>
@@ -137,7 +127,7 @@ export const formatLegacyActionsForSiemRules = async <T extends Rule>(
     return {
       ...rule,
       // TODO: investigate failure
-      actions: legacyRuleActions,
+      actions: [...rule.actions, ...legacyRuleActions],
       throttle: (legacyRuleActions.length ? ruleThrottle : rule.throttle) ?? 'no_actions',
       notifyWhen: transformToNotifyWhen(ruleThrottle),
       // muteAll property is disregarded in further rule processing in Security Solution when legacy actions are present.
