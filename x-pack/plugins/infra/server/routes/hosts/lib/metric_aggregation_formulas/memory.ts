@@ -7,21 +7,13 @@
 
 import { HostsMetricsAggregationQueryConfig } from '../types';
 
+const FIELD_NAME = 'system.memory.actual.used.pct';
+
 export const memory: HostsMetricsAggregationQueryConfig = {
-  filter: {
-    bool: {
-      filter: [
-        {
-          exists: {
-            field: 'system.memory.actual.used.pct',
-          },
-        },
-      ],
-    },
-  },
+  fieldName: FIELD_NAME,
   aggregation: {
     avg: {
-      field: 'system.memory.actual.used.pct',
+      field: FIELD_NAME,
     },
   },
 };

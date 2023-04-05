@@ -13,7 +13,7 @@ import {
   GetHostsResponsePayloadRT,
 } from '../../../common/http_api/hosts';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getHostsList } from './lib/get_hosts_list';
+import { getHosts } from './lib/get_hosts';
 
 export const initHostsRoute = (libs: InfraBackendLibs) => {
   const validateBody = createRouteValidationFunction(GetHostsRequestBodyPayloadRT);
@@ -37,8 +37,7 @@ export const initHostsRoute = (libs: InfraBackendLibs) => {
       const source = await libs.sources.getSourceConfiguration(soClient, params.sourceId);
 
       try {
-        const hosts = await getHostsList({ searchClient, source, params });
-
+        const hosts = await getHosts({ searchClient, source, params });
         return response.ok({
           body: GetHostsResponsePayloadRT.encode(hosts),
         });

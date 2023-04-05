@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
-import { HostsRandomSamplerAggregationResponseRT, GetHostsArgs } from './types';
+import { FilteredHostsSearchAggregationResponseRT, GetHostsArgs } from './types';
 import { BUCKET_KEY } from './constants';
 import { parseFilters } from './utils';
 import { createFilters, runQuery } from './helpers/query';
@@ -20,7 +20,7 @@ export const getFilteredHosts = async ({ searchClient, source, params }: GetHost
   const queryRequest = createQuery(params, source);
 
   return lastValueFrom(
-    runQuery(searchClient, queryRequest, decodeOrThrow(HostsRandomSamplerAggregationResponseRT))
+    runQuery(searchClient, queryRequest, decodeOrThrow(FilteredHostsSearchAggregationResponseRT))
   );
 };
 
@@ -36,10 +36,7 @@ const createQuery = (params: GetHostsRequestBodyPayload, source: InfraSource): E
       query: {
         bool: {
           ...parsedFilters.bool,
-          filter: [
-            ...(Array.isArray(parsedFilters.bool?.filter) ? parsedFilters.bool?.filter ?? [] : []),
-            ...createFilters({ params }),
-          ],
+          filter: createFilters({ params, extraFilter: parsedFilters }),
         },
       },
       aggs: {

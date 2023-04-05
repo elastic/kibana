@@ -32,20 +32,6 @@ export const createQueryFormulas = (metricTypes: HostMetricType[]) => {
     .filter((type) => !!metricsAggregationFormulas[type])
     .reduce(
       (acc, curr) => {
-        const hasRuntimeField = !!metricsAggregationFormulas[curr].runtimeField;
-        const currentMetricAggregation = hasRuntimeField
-          ? {
-              filter: metricsAggregationFormulas[curr].filter,
-              aggs: {
-                result: {
-                  ...metricsAggregationFormulas[curr].aggregation,
-                },
-              },
-            }
-          : {
-              ...metricsAggregationFormulas[curr].aggregation,
-            };
-
         return {
           ...acc,
           runtimeFields: {
@@ -54,7 +40,7 @@ export const createQueryFormulas = (metricTypes: HostMetricType[]) => {
           },
           metricAggregations: {
             ...acc.metricAggregations,
-            [curr]: currentMetricAggregation,
+            [curr]: metricsAggregationFormulas[curr].aggregation,
           },
         };
       },

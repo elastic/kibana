@@ -54,7 +54,7 @@ export const useHostsView = () => {
 
   const abortCtrlRef = useRef(new AbortController());
   const [{ loading, error, value }, refetch] = useAsyncFn(
-    (requestBody: HostsRequest) => {
+    (requestBody: GetHostsRequestBodyPayload) => {
       abortCtrlRef.current.abort();
       abortCtrlRef.current = new AbortController();
       return http.post<GetHostsResponsePayload>(`/api/metrics/hosts`, {
@@ -67,7 +67,7 @@ export const useHostsView = () => {
   );
 
   const fetch = useCallback(
-    (newData?: Partial<HostsRequest>) => {
+    (newData?: Partial<GetHostsRequestBodyPayload>) => {
       return refetch({ ...hostRequest, ...newData });
     },
     [hostRequest, refetch]

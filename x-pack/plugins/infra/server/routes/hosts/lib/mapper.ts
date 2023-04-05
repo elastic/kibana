@@ -15,24 +15,23 @@ import {
 
 import {
   FilteredMetricsTypeRT,
-  HostsMetricsSearchAggregationContentResponse,
   HostsMetricsSearchBucket,
   HostsMetricsSearchValue,
   HostsMetricsSearchValueRT,
 } from './types';
-import { METADATA_FIELD } from './constants';
+import { METADATA_AGGREGATION_NAME } from './constants';
 
 export const mapToApiResponse = (
   params: GetHostsRequestBodyPayload,
-  aggregations?: HostsMetricsSearchAggregationContentResponse | undefined
+  buckets?: HostsMetricsSearchBucket[] | undefined
 ): GetHostsResponsePayload => {
-  if (!aggregations) {
+  if (!buckets) {
     return {
       hosts: [],
     };
   }
 
-  const hosts = aggregations.hosts.buckets.map((bucket) => {
+  const hosts = buckets.map((bucket) => {
     const metrics = convertMetricBucket(params, bucket);
     const metadata = convertMetadataBucket(bucket);
 
@@ -45,7 +44,7 @@ export const mapToApiResponse = (
 };
 
 const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): HostMetadata[] => {
-  const metadataAggregation = bucket[METADATA_FIELD];
+  const metadataAggregation = bucket[METADATA_AGGREGATION_NAME];
   return TopMetricsTypeRT.is(metadataAggregation)
     ? metadataAggregation.top
         .flatMap((top) => Object.entries(top.metrics))
@@ -57,18 +56,6 @@ const convertMetadataBucket = (bucket: HostsMetricsSearchBucket): HostMetadata[]
             } as HostMetadata)
         )
     : [];
-};
-
-const getMetricValue = (valueObject: HostsMetricsSearchValue) => {
-  if (FilteredMetricsTypeRT.is(valueObject)) {
-    return valueObject.result.value;
-  }
-
-  if (BasicMetricValueRT.is(valueObject)) {
-    return valueObject.value;
-  }
-
-  return valueObject;
 };
 
 const convertMetricBucket = (
@@ -86,4 +73,16 @@ const convertMetricBucket = (
           : null,
       } as HostMetrics;
     });
+};
+
+export const getMetricValue = (valueObject: HostsMetricsSearchValue) => {
+  if (FilteredMetricsTypeRT.is(valueObject)) {
+    return valueObject.result.value;
+  }
+
+  if (BasicMetricValueRT.is(valueObject)) {
+    return valueObject.value;
+  }
+
+  return valueObject;
 };

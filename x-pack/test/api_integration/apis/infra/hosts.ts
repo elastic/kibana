@@ -53,7 +53,23 @@ export default function ({ getService }: FtrProviderContext) {
     sourceId: 'default',
   };
 
-  describe('POST Hosts', () => {
+  const makeRequest = async ({
+    body,
+    invalidBody,
+    expectedHTTPCode,
+  }: {
+    body?: GetHostsRequestBodyPayload;
+    invalidBody?: any;
+    expectedHTTPCode: number;
+  }) => {
+    return supertest
+      .post(ENDPOINT)
+      .set('kbn-xsrf', 'xxx')
+      .send(body ?? invalidBody)
+      .expect(expectedHTTPCode);
+  };
+
+  describe('Hosts', () => {
     before(() =>
       esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
     );
@@ -61,14 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
       esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
     );
 
-    describe('Success', () => {
+    describe('fetch hosts', () => {
       it('should return metrics for a host', async () => {
         const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 1 };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(200);
+        const response = await makeRequest({ body, expectedHTTPCode: 200 });
 
         expect(response.body.hosts).length(1);
         expect(response.body.hosts).eql([
@@ -147,11 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           sortField: 'cpu',
           sortDirection: 'desc',
         };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(200);
+        const response = await makeRequest({ body, expectedHTTPCode: 200 });
 
         expect(response.body.hosts).eql([
           {
@@ -177,11 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
           sortField: 'cpu',
           sortDirection: 'asc',
         };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(200);
+        const response = await makeRequest({ body, expectedHTTPCode: 200 });
 
         expect(response.body.hosts).eql([
           {
@@ -205,11 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           query: { bool: { filter: [{ term: { 'host.os.name': 'CentOS Linux' } }] } },
         };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(200);
+        const response = await makeRequest({ body, expectedHTTPCode: 200 });
 
         const names = (response.body as GetHostsResponsePayload).hosts.map((p) => p.name);
         expect(names).eql([
@@ -229,11 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           query: { bool: { filter: [{ term: { 'host.os.name': 'Ubuntu' } }] } },
         };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(200);
+        const response = await makeRequest({ body, expectedHTTPCode: 200 });
 
         const names = (response.body as GetHostsResponsePayload).hosts.map((p) => p.name);
         expect(names).eql([]);
@@ -265,14 +261,19 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
 
-    describe('Failure', () => {
+    describe('endpoint validations', () => {
+      it('should fail when limit is 0', async () => {
+        const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 0 };
+        const response = await makeRequest({ body, expectedHTTPCode: 400 });
+
+        expect(normalizeNewLine(response.body.message)).to.be(
+          '[request body]: Failed to validate:  in limit: 0 does not match expected type LimitRange in limit: 0 does not match expected type pipe(undefined, BooleanFromString)'
+        );
+      });
+
       it('should fail when limit is negative', async () => {
         const body: GetHostsRequestBodyPayload = { ...basePayload, limit: -2 };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(400);
+        const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
           '[request body]: Failed to validate:  in limit: -2 does not match expected type LimitRange in limit: -2 does not match expected type pipe(undefined, BooleanFromString)'
@@ -281,11 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should fail when limit above 100', async () => {
         const body: GetHostsRequestBodyPayload = { ...basePayload, limit: 150 };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(400);
+        const response = await makeRequest({ body, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
           '[request body]: Failed to validate:  in limit: 150 does not match expected type LimitRange in limit: 150 does not match expected type pipe(undefined, BooleanFromString)'
@@ -293,12 +290,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail when metric is invalid', async () => {
-        const body = { ...basePayload, metrics: [{ type: 'any' }] };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(400);
+        const invalidBody = { ...basePayload, metrics: [{ type: 'any' }] };
+        const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
           '[request body]: Failed to validate:  in metrics/0/type: "any" does not match expected type "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
@@ -306,12 +299,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail when sortDirection is invalid', async () => {
-        const body = { ...basePayload, sortDirection: 'any' };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(400);
+        const invalidBody = { ...basePayload, sortDirection: 'any' };
+        const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
           '[request body]: Failed to validate:  in sortDirection: "any" does not match expected type "desc" in sortDirection: "any" does not match expected type "asc"'
@@ -319,12 +308,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail when sortField is invalid', async () => {
-        const body = { ...basePayload, sortField: 'any' };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(400);
+        const invalidBody = { ...basePayload, sortField: 'any' };
+        const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
           '[request body]: Failed to validate:  in sortField: "any" does not match expected type "name" | "cpu" | "diskLatency" | "memory" | "memoryTotal" | "rx" | "tx"'
@@ -332,12 +317,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail when timeRange is not informed', async () => {
-        const body = { ...basePayload, timeRange: undefined };
-        const response = await supertest
-          .post(ENDPOINT)
-          .set('kbn-xsrf', 'xxx')
-          .send(body)
-          .expect(400);
+        const invalidBody = { ...basePayload, timeRange: undefined };
+        const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
           '[request body]: Failed to validate:  in timeRange: undefined does not match expected type { from: number, to: number }'

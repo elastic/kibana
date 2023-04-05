@@ -4,22 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { estypes } from '@elastic/elasticsearch';
+import { FILTER_AGGREGATION_SUB_AGG_NAME } from '../constants';
 import { HostsMetricsAggregationQueryConfig } from '../types';
 
-export const rx: HostsMetricsAggregationQueryConfig = {
-  filter: {
-    bool: {
-      filter: [
-        {
-          exists: {
-            field: 'host.network.ingress.bytes',
-          },
+const FIELD_NAME = 'rx_bytes_per_period';
+const FILTER: estypes.QueryDslQueryContainer = {
+  bool: {
+    filter: [
+      {
+        exists: {
+          field: 'host.network.ingress.bytes',
         },
-      ],
-    },
+      },
+    ],
   },
+};
+
+export const rx: HostsMetricsAggregationQueryConfig = {
+  fieldName: FIELD_NAME,
+  filter: FILTER,
   runtimeField: {
-    rx_bytes_per_period: {
+    [FIELD_NAME]: {
       type: 'double',
       script: `
           emit((doc['host.network.ingress.bytes'].value/(doc['metricset.period'].value / 1000)));
@@ -27,8 +33,13 @@ export const rx: HostsMetricsAggregationQueryConfig = {
     },
   },
   aggregation: {
-    avg: {
-      field: 'rx_bytes_per_period',
+    filter: FILTER,
+    aggs: {
+      [FILTER_AGGREGATION_SUB_AGG_NAME]: {
+        avg: {
+          field: FIELD_NAME,
+        },
+      },
     },
   },
 };

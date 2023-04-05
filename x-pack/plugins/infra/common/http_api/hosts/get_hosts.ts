@@ -67,20 +67,20 @@ export const GetHostsRequestBodyPayloadRT = rt.intersection([
   }),
 ]);
 
-export const HostMetricsResponseRT = rt.type({
+export const HostMetricsItemRT = rt.type({
   name: rt.string,
   metrics: rt.array(HostMetricsRT),
   metadata: rt.array(HostMetadataRT),
 });
 
 export const GetHostsResponsePayloadRT = rt.type({
-  hosts: rt.array(HostMetricsResponseRT),
+  hosts: rt.array(HostMetricsItemRT),
 });
 
 export type HostMetrics = rt.TypeOf<typeof HostMetricsRT>;
 export type HostMetadata = rt.TypeOf<typeof HostMetadataRT>;
 export type HostMetricType = rt.TypeOf<typeof HostMetricTypeRT>;
-export type HostSortField = rt.TypeOf<typeof HostSortFieldRT>;
+export type HostMetricsItem = rt.TypeOf<typeof HostMetricsItemRT>;
 
 export type GetHostsRequestBodyPayload = Omit<
   rt.TypeOf<typeof GetHostsRequestBodyPayloadRT>,
@@ -88,5 +88,4 @@ export type GetHostsRequestBodyPayload = Omit<
 > & {
   limit: number;
 };
-export type HostMetricsResponse = rt.TypeOf<typeof HostMetricsResponseRT>;
 export type GetHostsResponsePayload = rt.TypeOf<typeof GetHostsResponsePayloadRT>;

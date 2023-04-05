@@ -6,19 +6,13 @@
  */
 import { HostsMetricsAggregationQueryConfig } from '../types';
 
+const FIELD_NAME = 'system.memory.total';
+
 export const memoryTotal: HostsMetricsAggregationQueryConfig = {
-  filter: {
-    bool: {
-      filter: {
-        exists: {
-          field: 'system.memory.total',
-        },
-      },
-    },
-  },
+  fieldName: FIELD_NAME,
   aggregation: {
     avg: {
-      field: 'system.memory.total',
+      field: FIELD_NAME,
     },
   },
 };

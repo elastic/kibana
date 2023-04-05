@@ -40,60 +40,53 @@ const metricsApiRequest: GetHostsRequestBodyPayload = {
 
 describe('mapper', () => {
   test('should map the aggregation object to the expected response object', () => {
-    const hosts = mapToApiResponse(metricsApiRequest, {
-      doc_count: 155,
-      hosts: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 155,
-        buckets: [
-          {
-            key: 'host-0',
-            doc_count: 155,
-            diskLatency: {
-              doc_count: 0,
-              result: {
-                value: null,
-              },
-            },
-            memory: {
-              value: 0.542838307852529,
-            },
-            tx: {
-              doc_count: 155,
-              result: {
-                value: 100.26926542816672,
-              },
-            },
-            rx: {
-              doc_count: 155,
-              result: {
-                value: 3959.4930095127706,
-              },
-            },
-            memoryTotal: {
-              value: 66640704.099216014,
-            },
-            cpu: {
-              doc_count: 155,
-              result: {
-                value: 0.13271302652800487,
-              },
-            },
-            metadata: {
-              top: [
-                {
-                  sort: ['2023-04-04T06:35:13.793Z'],
-                  metrics: {
-                    'host.os.name': null,
-                    'cloud.provider': '',
-                  },
-                },
-              ],
-            },
+    const hosts = mapToApiResponse(metricsApiRequest, [
+      {
+        key: 'host-0',
+        doc_count: 155,
+        diskLatency: {
+          doc_count: 0,
+          result: {
+            value: null,
           },
-        ],
+        },
+        memory: {
+          value: 0.542838307852529,
+        },
+        tx: {
+          doc_count: 155,
+          result: {
+            value: 100.26926542816672,
+          },
+        },
+        rx: {
+          doc_count: 155,
+          result: {
+            value: 3959.4930095127706,
+          },
+        },
+        memoryTotal: {
+          value: 66640704.099216014,
+        },
+        cpu: {
+          doc_count: 155,
+          result: {
+            value: 0.13271302652800487,
+          },
+        },
+        metadata: {
+          top: [
+            {
+              sort: ['2023-04-04T06:35:13.793Z'],
+              metrics: {
+                'host.os.name': null,
+                'cloud.provider': '',
+              },
+            },
+          ],
+        },
       },
-    });
+    ]);
 
     expect(hosts).toEqual({
       hosts: [

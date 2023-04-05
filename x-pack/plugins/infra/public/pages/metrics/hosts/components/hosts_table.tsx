@@ -18,19 +18,20 @@ import { Flyout } from './host_details_flyout/flyout';
 export const HostsTable = () => {
   const { hostNodes, loading } = useHostsViewContext();
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
-
   const {
     columns,
     items,
-    isFlyoutOpen,
     closeFlyout,
-    clickedItem,
     onTableChange,
     pagination,
     sorting,
+    clickedItemUuid,
+    isFlyoutOpen,
   } = useHostsTable(hostNodes, {
     time: searchCriteria.dateRange,
   });
+
+  const clickedItem = items.find(({ uuid }) => uuid === clickedItemUuid);
 
   return (
     <>

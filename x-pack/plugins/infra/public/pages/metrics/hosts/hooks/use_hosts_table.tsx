@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
+import { v4 as uuidv4 } from 'uuid';
 
 import { isEqual } from 'lodash';
 import { CriteriaWithPagination } from '@elastic/eui';
-import { HostMetrics, HostMetricsResponse } from '../../../../../common/http_api/hosts';
+import { HostMetrics, HostMetricsItem } from '../../../../../common/http_api/hosts';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
@@ -49,7 +50,7 @@ const formatMetric = (type: HostMetrics['name'], value: number | undefined | nul
   return value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
 };
 
-const buildItemsList = (nodes: HostMetricsResponse[]): HostNodeRow[] => {
+const buildItemsList = (nodes: HostMetricsItem[]): HostNodeRow[] => {
   return nodes.map(({ metrics, metadata, name }) => ({
     uuid: uuidv4(),
     ...metadata.reduce(
@@ -120,16 +121,17 @@ const toggleDialogActionLabel = i18n.translate(
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
-export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableParams) => {
+export const useHostsTable = (nodes: HostMetricsItem[], { time }: HostTableParams) => {
   const { fetch } = useHostsViewContext();
   const [properties, setProperties] = useTableProperties();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [clickedItemUuid, setClickedItemUuid] = useState(() => uuidv4());
 
-  const closeFlyout = () => setHostFlyoutOpen({ clickedItemId: '' });
+  const closeFlyout = () => setIsFlyoutOpen(false);
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['name']) => {
@@ -149,25 +151,19 @@ export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableP
       {
         name: '',
         width: '40px',
-        field: 'id',
+        field: 'uuid',
         actions: [
           {
             name: toggleDialogActionLabel,
             description: toggleDialogActionLabel,
-            icon: ({ id }) =>
-              hostFlyoutOpen.clickedItemId && id === hostFlyoutOpen.clickedItemId
-                ? 'minimize'
-                : 'expand',
+            icon: ({ uuid }) => (isFlyoutOpen && uuid === clickedItemUuid ? 'minimize' : 'expand'),
             type: 'icon',
-            'data-test-subj': 'hostsView-flyout-button',
-            onClick: ({ id }) => {
-              setHostFlyoutOpen({
-                clickedItemId: id,
-              });
-              if (id === hostFlyoutOpen.clickedItemId) {
-                setHostFlyoutOpen({ clickedItemId: '' });
+            onClick: ({ uuid }) => {
+              setClickedItemUuid(uuid);
+              if (isFlyoutOpen && uuid === clickedItemUuid) {
+                setIsFlyoutOpen(false);
               } else {
-                setHostFlyoutOpen({ clickedItemId: id });
+                setIsFlyoutOpen(true);
               }
             },
           },
@@ -236,7 +232,7 @@ export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableP
         align: 'right',
       },
     ],
-    [hostFlyoutOpen.clickedItemId, reportHostEntryClick, setHostFlyoutOpen, time]
+    [clickedItemUuid, isFlyoutOpen, reportHostEntryClick, time]
   );
 
   const onTableChange = useCallback(
@@ -270,8 +266,9 @@ export const useHostsTable = (nodes: HostMetricsResponse[], { time }: HostTableP
   return {
     columns,
     items,
-    isFlyoutOpen: !!hostFlyoutOpen.clickedItemId,
     closeFlyout,
+    isFlyoutOpen,
+    clickedItemUuid,
     onTableChange,
     ...properties,
   };

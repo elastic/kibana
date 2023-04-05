@@ -10,7 +10,7 @@ import { ISearchClient } from '@kbn/data-plugin/common';
 import * as rt from 'io-ts';
 import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 
-import { GetHostsRequestBodyPayload, HostMetricTypeRT } from '../../../../common/http_api/hosts';
+import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
 import { BasicMetricValueRT, TopMetricsTypeRT } from '../../../lib/metrics/types';
 
 export const FilteredMetricsTypeRT = rt.type({
@@ -20,47 +20,34 @@ export const FilteredMetricsTypeRT = rt.type({
 
 export const HostsMetricsSearchValueRT = rt.union([
   BasicMetricValueRT,
-  TopMetricsTypeRT,
   FilteredMetricsTypeRT,
+  TopMetricsTypeRT,
 ]);
 
-const HostsSearchBucketMetricTypeRT = rt.keyof({
-  key: null,
-  doc_count: null,
-  metadata: null,
-  ...HostMetricTypeRT.keys,
-});
-
 export const HostsMetricsSearchBucketRT = rt.record(
-  HostsSearchBucketMetricTypeRT,
+  rt.union([rt.string, rt.undefined]),
   rt.union([rt.string, rt.number, HostsMetricsSearchValueRT])
 );
 
-export const HostsSearchBucketRT = rt.type({
+export const HostsNameBucketRT = rt.type({
   key: rt.string,
   doc_count: rt.number,
 });
 
-export const HostsMetricsSearchAggregationContentResponseRT = rt.type({
-  doc_count: rt.number,
-  hosts: rt.intersection([
-    rt.partial({
-      sum_other_doc_count: rt.number,
-      doc_count_error_upper_bound: rt.number,
-    }),
-    rt.type({ buckets: rt.array(HostsMetricsSearchBucketRT) }),
-  ]),
-});
-
 export const HostsMetricsSearchAggregationResponseRT = rt.union([
-  rt.partial({
-    sortedByMetric: HostsMetricsSearchAggregationContentResponseRT,
-    sortedByTerm: HostsMetricsSearchAggregationContentResponseRT,
+  rt.type({
+    hosts: rt.intersection([
+      rt.partial({
+        sum_other_doc_count: rt.number,
+        doc_count_error_upper_bound: rt.number,
+      }),
+      rt.type({ buckets: rt.array(HostsMetricsSearchBucketRT) }),
+    ]),
   }),
   rt.undefined,
 ]);
 
-export const HostsRandomSamplerAggregationResponseRT = rt.union([
+export const FilteredHostsSearchAggregationResponseRT = rt.union([
   rt.type({
     hosts: rt.intersection([
       rt.partial({
@@ -68,7 +55,7 @@ export const HostsRandomSamplerAggregationResponseRT = rt.union([
         doc_count_error_upper_bound: rt.number,
       }),
       rt.type({
-        buckets: rt.array(HostsSearchBucketRT),
+        buckets: rt.array(HostsNameBucketRT),
       }),
     ]),
   }),
@@ -76,9 +63,10 @@ export const HostsRandomSamplerAggregationResponseRT = rt.union([
 ]);
 
 export interface HostsMetricsAggregationQueryConfig {
-  filter: estypes.QueryDslQueryContainer;
-  runtimeField?: estypes.MappingRuntimeFields;
+  fieldName: string;
   aggregation: estypes.AggregationsAggregationContainer;
+  filter?: estypes.QueryDslQueryContainer;
+  runtimeField?: estypes.MappingRuntimeFields;
 }
 
 export interface GetHostsArgs {
@@ -89,14 +77,7 @@ export interface GetHostsArgs {
 
 export type HostsMetricsSearchValue = rt.TypeOf<typeof HostsMetricsSearchValueRT>;
 export type HostsMetricsSearchBucket = rt.TypeOf<typeof HostsMetricsSearchBucketRT>;
-export type HostsMetricsSearchAggregationContentResponse = rt.TypeOf<
-  typeof HostsMetricsSearchAggregationContentResponseRT
->;
 
 export type HostsMetricsSearchAggregationResponse = rt.TypeOf<
   typeof HostsMetricsSearchAggregationResponseRT
->;
-
-export type HostsRandomSamplerAggregationResponse = rt.TypeOf<
-  typeof HostsRandomSamplerAggregationResponseRT
 >;
