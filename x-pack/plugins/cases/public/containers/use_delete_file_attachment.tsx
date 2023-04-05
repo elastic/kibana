@@ -21,7 +21,7 @@ interface MutationArgs {
 
 export const useDeleteFileAttachment = () => {
   const { showErrorToast, showSuccessToast } = useCasesToast();
-  const refreshCaseViewPage = useRefreshCaseViewPage();
+  const refreshAttachmentsTable = useRefreshCaseViewPage();
 
   return useMutation(
     ({ caseId, fileId }: MutationArgs) => {
@@ -32,7 +32,7 @@ export const useDeleteFileAttachment = () => {
       mutationKey: casesMutationsKeys.deleteFileAttachment,
       onSuccess: (_, { successToasterTitle }) => {
         showSuccessToast(successToasterTitle);
-        refreshCaseViewPage();
+        refreshAttachmentsTable();
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
