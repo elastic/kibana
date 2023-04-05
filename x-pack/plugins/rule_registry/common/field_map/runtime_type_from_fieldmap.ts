@@ -54,7 +54,7 @@ const esFieldTypeMap = {
   short: t.union([t.number, NumberFromString]),
   double: t.union([t.number, NumberFromString]),
   float: t.union([t.number, NumberFromString]),
-  scaled_float: t.union([t.number, NumberFromString]),
+  scaled_float: t.union([t.number, t.null, NumberFromString]),
   unsigned_long: t.union([t.number, NumberFromString]),
   flattened: t.UnknownRecord,
 };

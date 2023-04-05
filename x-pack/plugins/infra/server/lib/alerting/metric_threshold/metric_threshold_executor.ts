@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUE, ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
@@ -124,7 +124,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         fields: {
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
-          [ALERT_EVALUATION_VALUE]: evaluationValues,
+          [ALERT_EVALUATION_VALUES]: evaluationValues,
           ...flattenAdditionalContext(additionalContext),
         },
       });
