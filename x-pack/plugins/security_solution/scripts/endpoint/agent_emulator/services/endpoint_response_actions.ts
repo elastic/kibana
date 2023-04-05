@@ -40,8 +40,6 @@ const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
 export const fleetActionGenerator = new FleetActionGenerator();
 
-export const endpointActionGenerator = new EndpointActionGenerator();
-
 export const sleep = (ms: number = 1000) => new Promise((r) => setTimeout(r, ms));
 
 export const fetchEndpointActionList = async (
@@ -118,6 +116,7 @@ export const sendEndpointActionResponse = async (
   action: ActionDetails,
   { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<LogsEndpointActionResponse> => {
+  const endpointActionGenerator = new EndpointActionGenerator();
   const endpointResponse = endpointActionGenerator.generateResponse({
     agent: { id: action.agents[0] },
     EndpointActions: {
@@ -137,15 +136,21 @@ export const sendEndpointActionResponse = async (
       message: 'Endpoint encountered an error and was unable to apply action to host',
     };
 
-    if (endpointResponse.EndpointActions.data.command === 'get-file') {
+    if (
+      endpointResponse.EndpointActions.data.command === 'get-file' &&
+      endpointResponse.EndpointActions.data.output
+    ) {
       (
-        endpointResponse.EndpointActions.data.output?.content as ResponseActionGetFileOutputContent
+        endpointResponse.EndpointActions.data.output.content as ResponseActionGetFileOutputContent
       ).code = endpointActionGenerator.randomGetFileFailureCode();
     }
 
-    if (endpointResponse.EndpointActions.data.command === 'execute') {
+    if (
+      endpointResponse.EndpointActions.data.command === 'execute' &&
+      endpointResponse.EndpointActions.data.output
+    ) {
       (
-        endpointResponse.EndpointActions.data.output?.content as ResponseActionExecuteOutputContent
+        endpointResponse.EndpointActions.data.output.content as ResponseActionExecuteOutputContent
       ).stderr = 'execute command timed out';
     }
   }
@@ -282,6 +287,7 @@ type ResponseOutput<TOutputContent extends object = object> = Pick<
 >;
 
 const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
+  const endpointActionGenerator = new EndpointActionGenerator();
   switch (action.command) {
     case 'running-processes':
       return {

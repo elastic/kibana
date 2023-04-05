@@ -338,14 +338,16 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    *
    * @param seed either a string to seed the random number generator or a random number generator function
    * @param MetadataGenerator
+   * @param endpointIsolated
    */
   constructor(
     seed: string | seedrandom.prng = Math.random().toString(),
-    MetadataGenerator: typeof EndpointMetadataGenerator = EndpointMetadataGenerator
+    MetadataGenerator: typeof EndpointMetadataGenerator = EndpointMetadataGenerator,
+    endpointIsolated?: boolean
   ) {
     super(seed);
     this.metadataGenerator = new MetadataGenerator(seed);
-    this.commonInfo = this.createHostData();
+    this.commonInfo = this.createHostData(endpointIsolated);
   }
 
   /**
@@ -387,9 +389,12 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     };
   }
 
-  private createHostData(): CommonHostInfo {
+  private createHostData(endpointIsolated?: boolean): CommonHostInfo {
     const { agent, elastic, host, Endpoint } = this.metadataGenerator.generate({
-      Endpoint: { policy: { applied: this.randomChoice(APPLIED_POLICIES) } },
+      Endpoint: {
+        policy: { applied: this.randomChoice(APPLIED_POLICIES) },
+        state: { isolation: endpointIsolated },
+      },
     });
 
     return { agent, elastic, host, Endpoint };

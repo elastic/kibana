@@ -18,6 +18,10 @@ interface CyIndexEndpointHosts {
 export const indexEndpointHosts = (
   options: {
     count?: number;
+    seed?: string;
+    disableEndpointActionsForHost?: boolean;
+    endpointIsolated?: boolean;
+    bothIsolatedAndNormalEndpoints?: boolean;
   } = {}
 ): Cypress.Chainable<CyIndexEndpointHosts> => {
   return cy.task('indexEndpointHosts', options, { timeout: 120000 }).then((indexHosts) => {

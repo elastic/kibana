@@ -8,6 +8,8 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { ActionDetails } from '../../../../common/endpoint/types';
+import { sendEndpointActionResponse } from '../../../../scripts/endpoint/agent_emulator/services/endpoint_response_actions';
 import type {
   IndexedEndpointRuleAlerts,
   DeletedIndexedEndpointRuleAlerts,
@@ -86,10 +88,20 @@ export const dataLoaders = (
       return null;
     },
 
-    indexEndpointHosts: async (options: { count?: number }) => {
+    indexEndpointHosts: async (options: {
+      count?: number;
+      seed?: string;
+      disableEndpointActionsForHost?: boolean;
+      endpointIsolated?: boolean;
+      bothIsolatedAndNormalEndpoints?: boolean;
+    }) => {
       const { kbnClient, esClient } = await stackServicesPromise;
       return cyLoadEndpointDataHandler(esClient, kbnClient, {
         numHosts: options.count,
+        generatorSeed: options.seed,
+        disableEndpointActionsForHost: options.disableEndpointActionsForHost,
+        endpointIsolated: options.endpointIsolated,
+        bothIsolatedAndNormalEndpoints: options.bothIsolatedAndNormalEndpoints,
       });
     },
 
@@ -98,7 +110,12 @@ export const dataLoaders = (
       return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData);
     },
 
-    indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {
+    indexEndpointRuleAlerts: async (options: {
+      endpointAgentId: string;
+      endpointHostname?: string;
+      endpointIsolated?: boolean;
+      count?: number;
+    }) => {
       const { esClient, log } = await stackServicesPromise;
       return (
         await indexEndpointRuleAlerts({
@@ -114,6 +131,14 @@ export const dataLoaders = (
     ): Promise<DeletedIndexedEndpointRuleAlerts> => {
       const { esClient, log } = await stackServicesPromise;
       return deleteIndexedEndpointRuleAlerts(esClient, data, log);
+    },
+
+    sendHostActionResponse: async (data: {
+      action: ActionDetails;
+      state: { state?: 'success' | 'failure' };
+    }) => {
+      const { esClient } = await stackServicesPromise;
+      return sendEndpointActionResponse(esClient, data.action, { state: data.state.state });
     },
   });
 };

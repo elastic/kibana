@@ -38,6 +38,9 @@ interface CyLoadEndpointDataOptions {
   generatorSeed: string;
   waitUntilTransformed: boolean;
   customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
+  disableEndpointActionsForHost?: boolean;
+  endpointIsolated?: boolean;
+  bothIsolatedAndNormalEndpoints?: boolean;
 }
 
 /**
@@ -59,6 +62,9 @@ export const cyLoadEndpointDataHandler = async (
     generatorSeed = `cy.${Math.random()}`,
     waitUntilTransformed = true,
     customIndexFn,
+    disableEndpointActionsForHost,
+    bothIsolatedAndNormalEndpoints,
+    endpointIsolated,
   } = options;
 
   if (waitUntilTransformed) {
@@ -84,7 +90,11 @@ export const cyLoadEndpointDataHandler = async (
         alertsPerHost,
         enableFleetIntegration,
         undefined,
-        CurrentKibanaVersionDocGenerator
+        CurrentKibanaVersionDocGenerator,
+        true,
+        disableEndpointActionsForHost,
+        bothIsolatedAndNormalEndpoints,
+        endpointIsolated
       );
 
   if (waitUntilTransformed) {
@@ -106,14 +116,18 @@ export const cyLoadEndpointDataHandler = async (
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the
 // `agent.version` to the current version
 const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
-  constructor(seedValue: string | seedrandom.prng) {
+  constructor(
+    seedValue: string | seedrandom.prng,
+    metadataGenerator?: typeof EndpointMetadataGenerator,
+    endpointIsolated?: boolean
+  ) {
     const MetadataGenerator = class extends EndpointMetadataGenerator {
       protected randomVersion(): string {
         return kibanaPackageJson.version;
       }
     };
 
-    super(seedValue, MetadataGenerator);
+    super(seedValue, MetadataGenerator, endpointIsolated);
   }
 };
 

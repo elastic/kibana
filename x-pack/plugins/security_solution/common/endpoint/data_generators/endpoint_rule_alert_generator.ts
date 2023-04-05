@@ -37,6 +37,8 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
     const endpointMetadataGenerator = new EndpointMetadataGenerator();
     const endpointMetadata = endpointMetadataGenerator.generate({
       agent: { version: kibanaPackageJson.version },
+      host: { hostname: overrides?.host?.hostname },
+      Endpoint: { state: { isolation: overrides?.Endpoint?.state?.isolation } },
     });
     const now = overrides['@timestamp'] ?? new Date().toISOString();
     const endpointAgentId = overrides?.agent?.id ?? this.seededUUIDv4();

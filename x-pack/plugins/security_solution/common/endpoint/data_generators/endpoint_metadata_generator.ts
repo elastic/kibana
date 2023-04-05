@@ -20,10 +20,10 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
   /** Generate an Endpoint host metadata document */
   generate(overrides: DeepPartial<HostMetadataInterface> = {}): HostMetadataInterface {
     const ts = overrides['@timestamp'] ?? new Date().getTime();
-    const hostName = this.randomHostname();
+    const hostName = overrides?.host?.hostname ?? this.randomHostname();
     const agentVersion = overrides?.agent?.version ?? this.randomVersion();
     const agentId = this.seededUUIDv4();
-    const isIsolated = this.randomBoolean(0.3);
+    const isIsolated = overrides?.Endpoint?.state?.isolation ?? this.randomBoolean(0.3);
     const capabilities: EndpointCapabilities[] = ['isolation'];
 
     // v8.4 introduced additional endpoint capabilities
