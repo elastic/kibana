@@ -9,19 +9,24 @@ import type { Type, ValidationError } from '@kbn/config-schema';
 
 export type Version = number;
 
-export type ObjectTransform<I extends object = any, O extends object = any> = (input: I) => O;
+export type ObjectTransform<I = unknown, O = unknown> = (input: I) => O;
 
-export interface VersionableObject<I extends object = any, O extends object = any> {
+export interface VersionableObject<
+  UpIn = unknown,
+  UpOut = unknown,
+  DownIn = unknown,
+  DownOut = unknown
+> {
   schema?: Type<any>;
-  down?: ObjectTransform;
-  up?: ObjectTransform;
+  down?: ObjectTransform<DownIn, DownOut>;
+  up?: ObjectTransform<UpIn, UpOut>;
 }
 
 export interface ObjectMigrationDefinition {
-  [version: Version]: VersionableObject;
+  [version: Version]: VersionableObject<any, any, any, any>;
 }
 
-export type TransformReturn<T = object> =
+export type TransformReturn<T = unknown> =
   | {
       value: T;
       error: null;
@@ -31,22 +36,27 @@ export type TransformReturn<T = object> =
       error: ValidationError | Error;
     };
 
-export interface ObjectTransforms<Current = any, Previous = any, Next = any> {
+export interface ObjectTransforms<
+  UpIn = unknown,
+  UpOut = unknown,
+  DownIn = unknown,
+  DownOut = unknown
+> {
   up: (
-    obj: Current,
+    obj: UpIn,
     version?: Version | 'latest',
     options?: {
       /** Validate the object _before_ up transform */
       validate?: boolean;
     }
-  ) => TransformReturn<Next>;
+  ) => TransformReturn<UpOut>;
   down: (
-    obj: Current,
+    obj: DownIn,
     version?: Version | 'latest',
     options?: {
       /** Validate the object _before_ down transform */
       validate?: boolean;
     }
-  ) => TransformReturn<Previous>;
+  ) => TransformReturn<DownOut>;
   validate: (obj: any, version?: Version) => ValidationError | null;
 }
