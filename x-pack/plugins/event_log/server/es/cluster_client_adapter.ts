@@ -16,6 +16,7 @@ import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } fro
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
+import { EsNames } from './names';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
@@ -32,6 +33,7 @@ type Wait = () => Promise<boolean>;
 export interface ConstructorOpts {
   logger: Logger;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  esNames: EsNames;
   wait: Wait;
 }
 
@@ -101,11 +103,13 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   private readonly docBuffer$: Subject<TDoc>;
   private readonly wait: Wait;
   private readonly docsBufferedFlushed: Promise<void>;
+  private readonly esNames: EsNames;
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
     this.wait = opts.wait;
+    this.esNames = opts.esNames;
     this.docBuffer$ = new Subject<TDoc>();
 
     // buffer event log docs for time / buffer length, ignore empty
@@ -148,16 +152,23 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
     const bulkBody: Array<Record<string, unknown>> = [];
 
+    let dataStream: string;
     for (const doc of docs) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: { _index: doc.index, require_alias: true } });
+      dataStream = doc.index;
+      bulkBody.push({ create: {} });
       bulkBody.push(doc.body);
     }
 
+    if (bulkBody.length === 0) return;
+
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const response = await esClient.bulk({ body: bulkBody });
+      const response = await esClient.bulk({
+        index: this.esNames.initialIndex,
+        body: bulkBody,
+      });
 
       if (response.errors) {
         const error = new Error('Error writing some bulk events');
@@ -225,6 +236,36 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       // if the template now exists. This scenario would happen if you startup multiple Kibana
       // instances at the same time.
       const existsNow = await this.doesIndexTemplateExist(name);
+      if (!existsNow) {
+        const error = new Error(`error creating index template: ${err.message}`);
+        Object.assign(error, { wrapped: err });
+        throw error;
+      }
+    }
+  }
+
+  public async doesComponentTemplateExist(name: string): Promise<boolean> {
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      const componentTemplateResult = await esClient.cluster.existsComponentTemplate({ name });
+      return componentTemplateResult;
+    } catch (err) {
+      throw new Error(`error checking existence of component template: ${err.message}`);
+    }
+  }
+
+  public async createComponentTemplate(
+    template: estypes.ClusterPutComponentTemplateRequest
+  ): Promise<void> {
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.cluster.putComponentTemplate(template);
+    } catch (err) {
+      // The error message doesn't have a type attribute we can look to guarantee it's due
+      // to the template already existing (only long message) so we'll check ourselves to see
+      // if the template now exists. This scenario would happen if you startup multiple Kibana
+      // instances at the same time.
+      const existsNow = await this.doesComponentTemplateExist(template.name);
       if (!existsNow) {
         const error = new Error(`error creating index template: ${err.message}`);
         Object.assign(error, { wrapped: err });
@@ -341,27 +382,25 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
-  public async doesAliasExist(name: string): Promise<boolean> {
+  public async doesDataStreamExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const body = await esClient.indices.existsAlias({ name });
-      return body as boolean;
+      const body = await esClient.indices.exists({
+        index: name,
+        expand_wildcards: 'all',
+      });
+      return body;
     } catch (err) {
-      throw new Error(`error checking existance of initial index: ${err.message}`);
+      throw new Error(`error checking existance of data stream: ${err.message}`);
     }
   }
 
-  public async createIndex(name: string, body: Record<string, unknown> = {}): Promise<void> {
+  public async createDataStream(name: string): Promise<void> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      await esClient.indices.create({
-        index: name,
-        body,
-      });
+      await esClient.indices.createDataStream({ name });
     } catch (err) {
-      if (err.body?.error?.type !== 'resource_already_exists_exception') {
-        throw new Error(`error creating initial index: ${err.message}`);
-      }
+      throw new Error(`error creating data stream: ${err.message}`);
     }
   }
 

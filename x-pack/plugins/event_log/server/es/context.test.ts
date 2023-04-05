@@ -75,7 +75,7 @@ describe('createEsContext', () => {
     elasticsearchClient.indices.existsTemplate.mockResponse(false);
     elasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
     elasticsearchClient.indices.existsAlias.mockResponse(false);
-    const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.alias);
+    const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.datastream);
     expect(doesAliasExist).toBeFalsy();
 
     const doesIndexTemplateExist = await context.esAdapter.doesIndexTemplateExist(
@@ -99,7 +99,7 @@ describe('createEsContext', () => {
     );
     expect(doesIlmPolicyExist).toBeTruthy();
 
-    const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.alias);
+    const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.datastream);
     expect(doesAliasExist).toBeTruthy();
 
     const doesIndexTemplateExist = await context.esAdapter.doesIndexTemplateExist(

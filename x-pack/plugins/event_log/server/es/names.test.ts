@@ -17,7 +17,7 @@ describe('getEsNames()', () => {
     const kibanaVersion = '1.2.3';
     const esNames = getEsNames(base, kibanaVersion);
     expect(esNames.base).toEqual(base);
-    expect(esNames.alias).toEqual(`${base}-event-log-${kibanaVersion}`);
+    expect(esNames.datastream).toEqual(`${base}-event-log-${kibanaVersion}`);
     expect(esNames.ilmPolicy).toEqual(`${base}-event-log-policy`);
     expect(esNames.indexPattern).toEqual(`${base}-event-log-*`);
     expect(esNames.indexPatternWithVersion).toEqual(`${base}-event-log-${kibanaVersion}-*`);

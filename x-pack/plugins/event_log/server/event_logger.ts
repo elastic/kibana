@@ -95,7 +95,7 @@ export class EventLogger implements IEventLogger {
     }
 
     const doc: Doc = {
-      index: this.esContext.esNames.alias,
+      index: 'this needs to be removed, is ignored for now',
       body: validatedEvent,
     };
 

@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import { groupBy } from 'lodash';
 import pRetry, { FailedAttemptError } from 'p-retry';
-import { getIlmPolicy, getIndexTemplate } from './documents';
+import { getIlmPolicy, getIndexTemplate, getComponentTemplate } from './documents';
 import { EsContext } from './context';
 
 const MAX_RETRY_DELAY = 30000;
@@ -34,8 +34,9 @@ async function initializeEsResources(esContext: EsContext) {
   // today, setExistingAssetsToHidden() never throws, but just in case ...
   await retry(steps.setExistingAssetsToHidden);
   await retry(steps.createIlmPolicyIfNotExists);
+  await retry(steps.createComponentTemplateIfNotExists);
   await retry(steps.createIndexTemplateIfNotExists);
-  await retry(steps.createInitialIndexIfNotExists);
+  await retry(steps.createDataStreamIfNotExists);
 
   async function retry(stepMethod: () => Promise<void>): Promise<void> {
     // call the step method with retry options via p-retry
@@ -104,7 +105,7 @@ class EsInitializationSteps {
         const hidden: string | boolean = indexTemplates[indexTemplateName]?.settings?.index?.hidden;
         // Check to see if this index template is hidden
         if (hidden !== true && hidden !== 'true') {
-          this.esContext.logger.debug(
+          this.esContext.logger.info(
             `setting existing "${indexTemplateName}" index template to hidden.`
           );
 
@@ -142,7 +143,7 @@ class EsInitializationSteps {
 
         // Check to see if this index template is hidden
         if (hidden !== true && hidden !== 'true') {
-          this.esContext.logger.debug(`setting existing ${indexName} index to hidden.`);
+          this.esContext.logger.info(`setting existing ${indexName} index to hidden.`);
           await this.esContext.esAdapter.setIndexToHidden(indexName);
         }
       } catch (err) {
@@ -180,7 +181,7 @@ class EsInitializationSteps {
         const aliasData = indexAliasData[aliasName];
         const isNotHidden = aliasData.some((data) => data.is_hidden !== true);
         if (isNotHidden) {
-          this.esContext.logger.debug(`setting existing "${aliasName}" index alias to hidden.`);
+          this.esContext.logger.info(`setting existing "${aliasName}" index alias to hidden.`);
           await this.esContext.esAdapter.setIndexAliasToHidden(
             aliasName,
             indexAliasData[aliasName]
@@ -207,6 +208,7 @@ class EsInitializationSteps {
       this.esContext.esNames.ilmPolicy
     );
     if (!exists) {
+      this.esContext.logger.info('creating ILM policy');
       await this.esContext.esAdapter.createIlmPolicy(
         this.esContext.esNames.ilmPolicy,
         getIlmPolicy()
@@ -219,6 +221,7 @@ class EsInitializationSteps {
       this.esContext.esNames.indexTemplate
     );
     if (!exists) {
+      this.esContext.logger.info('creating index template');
       const templateBody = getIndexTemplate(this.esContext.esNames);
       await this.esContext.esAdapter.createIndexTemplate(
         this.esContext.esNames.indexTemplate,
@@ -227,17 +230,30 @@ class EsInitializationSteps {
     }
   }
 
-  async createInitialIndexIfNotExists(): Promise<void> {
-    const exists = await this.esContext.esAdapter.doesAliasExist(this.esContext.esNames.alias);
+  async createComponentTemplateIfNotExists(): Promise<void> {
+    const exists = await this.esContext.esAdapter.doesComponentTemplateExist(
+      this.esContext.esNames.componentTemplate
+    );
     if (!exists) {
-      await this.esContext.esAdapter.createIndex(this.esContext.esNames.initialIndex, {
-        aliases: {
-          [this.esContext.esNames.alias]: {
-            is_write_index: true,
-            is_hidden: true,
-          },
-        },
-      });
+      this.esContext.logger.info('creating component template');
+      const templateBody = getComponentTemplate(this.esContext.esNames);
+      await this.esContext.esAdapter.createComponentTemplate(templateBody);
+    }
+  }
+
+  async createDataStreamIfNotExists(): Promise<void> {
+    const exists = await this.esContext.esAdapter.doesDataStreamExist(
+      this.esContext.esNames.datastream
+    );
+    if (!exists) {
+      this.esContext.logger.info('creating datastream');
+      try {
+        await this.esContext.esAdapter.createDataStream(this.esContext.esNames.initialIndex);
+      } catch (err) {
+        if (err.body?.error?.type !== 'resource_already_exists_exception') {
+          throw new Error(`error creating initial index: ${err.message}`);
+        }
+      }
     }
   }
 }
