@@ -22,6 +22,7 @@ import {
   FieldPopoverFooter,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
+import useObservable from 'react-use/lib/useObservable';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
@@ -256,6 +257,8 @@ function DiscoverFieldComponent({
     }),
     [field.name]
   );
+
+  const fieldPopoverExtension = useObservable(services.extensions.get$('field_popover'));
 
   const renderPopover = () => {
     return (
