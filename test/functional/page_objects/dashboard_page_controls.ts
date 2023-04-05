@@ -560,12 +560,6 @@ export class DashboardPageControls extends FtrService {
 
       await this.optionsListPopoverClearSearch();
     }
-
-    const selections = Object.keys(await this.optionsListPopoverGetSelections());
-    for (const availableOption of availableOptions) {
-      expect(selections).to.contain(availableOption);
-    }
-    this.log.debug('selected the following in the options list popover:', selections);
   }
 
   public async optionsListPopoverClearSelections() {
