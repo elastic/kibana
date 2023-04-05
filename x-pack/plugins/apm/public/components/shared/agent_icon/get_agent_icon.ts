@@ -18,6 +18,7 @@ import cppIcon from './icons/cpp.svg';
 import darkCppIcon from './icons/cpp_dark.svg';
 import dotNetIcon from './icons/dot_net.svg';
 import erlangIcon from './icons/erlang.svg';
+import darkErlangIcon from './icons/erlang_dark.svg';
 import goIcon from './icons/go.svg';
 import iosIcon from './icons/ios.svg';
 import darkIosIcon from './icons/ios_dark.svg';
@@ -56,6 +57,7 @@ const agentIcons: { [key: string]: string } = {
 const darkAgentIcons: { [key: string]: string } = {
   ...agentIcons,
   cpp: darkCppIcon,
+  erlang: darkErlangIcon,
   ios: darkIosIcon,
   php: darkPhpIcon,
   rum: darkRumJsIcon,
