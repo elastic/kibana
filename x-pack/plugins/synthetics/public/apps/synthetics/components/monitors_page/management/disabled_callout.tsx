@@ -8,15 +8,12 @@
 import React from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
-import { monitorManagementListSelector } from '../../state/selectors';
-import { useEnablement } from '../../components/monitor_management/hooks/use_enablement';
+import { useEnablement } from '../../../hooks';
 
-export const DisabledCallout = () => {
+export const DisabledCallout = ({ total }: { total: number }) => {
   const { enablement, enableSynthetics } = useEnablement();
-  const { list: monitorList } = useSelector(monitorManagementListSelector);
 
-  const showDisableCallout = !enablement.isEnabled && monitorList.total && monitorList.total > 0;
+  const showDisableCallout = !enablement.isEnabled && total > 0;
 
   if (!showDisableCallout) {
     return null;

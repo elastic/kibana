@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { useSelector } from 'react-redux';
+import { DisabledCallout } from './disabled_callout';
+import { InvalidApiKeyCalloutCallout } from './invalid_api_key_callout';
 import type { useMonitorList } from '../hooks/use_monitor_list';
 import { MonitorAsyncError } from './monitor_errors/monitor_async_error';
 import { ListFilters } from '../common/monitor_filters/list_filters';
@@ -51,6 +53,8 @@ export const MonitorListContainer = ({
 
   return (
     <>
+      <DisabledCallout total={total} />
+      <InvalidApiKeyCalloutCallout />
       <MonitorAsyncError />
       <ListFilters handleFilterChange={handleFilterChange} />
       <EuiSpacer />

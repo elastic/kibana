@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEnablement } from '../../components/monitor_management/hooks/use_enablement';
+import { useEnablement } from '../../../hooks';
 
 export const InvalidApiKeyCalloutCallout = () => {
   const { enablement, enableSynthetics, invalidApiKeyError } = useEnablement();
