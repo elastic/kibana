@@ -114,3 +114,18 @@ export interface VisualizationEmbeddableProps extends LensEmbeddableComponentPro
   isDonut?: boolean;
   label?: string;
 }
+
+export interface VisualizationResponse<Hit = {}, Aggregations = {} | undefined> {
+  took: number;
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  aggregations?: Aggregations;
+  hits: {
+    total: number;
+    hits: Hit[];
+  };
+}

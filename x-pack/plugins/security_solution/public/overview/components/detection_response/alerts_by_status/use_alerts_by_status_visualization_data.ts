@@ -5,40 +5,32 @@
  * 2.0.
  */
 
-import { parseVisualizationData } from '../../../../common/components/visualization_actions/utils';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { inputsSelectors } from '../../../../common/store/inputs';
-import type { VisualizationAlertsByStatusResponse } from './types';
+import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 
+export const openAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-open`;
+export const acknowledgedAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}- acknowledged`;
+export const closedAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-closed`;
+
 export const useAlertsByStatusVisualizationData = () => {
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const { inspect: inspectOpenAlerts } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-open`)
-  );
-  const { inspect: inspectAcknowledgedAlerts } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-acknowledged`)
-  );
-  const { inspect: inspectClosedAlerts } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-closed`)
-  );
+  const openAlertsResponse = useVisualizationResponse({
+    visualizationId: openAlertsVisualizationId,
+  });
+
+  const acknowledgedAlertsResponse = useVisualizationResponse({
+    visualizationId: acknowledgedAlertsVisualizationId,
+  });
+
+  const closedAlertsResponse = useVisualizationResponse({
+    visualizationId: closedAlertsVisualizationId,
+  });
+
   const visualizationOpenAlertsData =
-    inspectOpenAlerts != null
-      ? parseVisualizationData<VisualizationAlertsByStatusResponse>(inspectOpenAlerts?.response)[0]
-          .hits.total
-      : 0;
+    openAlertsResponse != null ? openAlertsResponse[0].hits.total : 0;
   const visualizationAcknowledgedAlertsData =
-    inspectAcknowledgedAlerts != null
-      ? parseVisualizationData<VisualizationAlertsByStatusResponse>(
-          inspectAcknowledgedAlerts?.response
-        )[0].hits.total
-      : 0;
+    acknowledgedAlertsResponse != null ? acknowledgedAlertsResponse[0].hits.total : 0;
   const visualizationClosedAlertsData =
-    inspectClosedAlerts != null
-      ? parseVisualizationData<VisualizationAlertsByStatusResponse>(
-          inspectClosedAlerts?.response
-        )[0].hits.total
-      : 0;
+    closedAlertsResponse != null ? closedAlertsResponse[0].hits.total : 0;
 
   const visualizationTotalAlertsData =
     visualizationOpenAlertsData +
