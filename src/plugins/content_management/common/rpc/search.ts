@@ -11,22 +11,24 @@ import { versionSchema } from './constants';
 
 import type { ProcedureSchemas } from './types';
 
-export const searchQuerySchema = schema.object(
-  {
-    text: schema.maybe(schema.string()),
-    tags: schema.maybe(
-      schema.object({
-        included: schema.maybe(schema.arrayOf(schema.string())),
-        excluded: schema.maybe(schema.arrayOf(schema.string())),
-      })
-    ),
-    limit: schema.maybe(schema.number()),
-    cursor: schema.maybe(schema.string()),
-  },
-  {
-    unknowns: 'forbid',
-  }
-);
+export const searchQuerySchema = schema.oneOf([
+  schema.object(
+    {
+      text: schema.maybe(schema.string()),
+      tags: schema.maybe(
+        schema.object({
+          included: schema.maybe(schema.arrayOf(schema.string())),
+          excluded: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
+      limit: schema.maybe(schema.number()),
+      cursor: schema.maybe(schema.string()),
+    },
+    {
+      unknowns: 'forbid',
+    }
+  ),
+]);
 
 export const searchResultSchema = schema.object({
   hits: schema.arrayOf(schema.any()),

@@ -56,6 +56,10 @@ describe('RPC -> search()', () => {
           expectedError: '[version]: expected value of type [number] but got [string]',
         },
         {
+          input: omit(validInput, 'query'),
+          expectedError: '[query]: expected at least one defined value but got [undefined]',
+        },
+        {
           input: { ...validInput, query: 123 }, // query is not an object
           expectedError: '[query]: expected a plain object value, but found [number] instead.',
         },
