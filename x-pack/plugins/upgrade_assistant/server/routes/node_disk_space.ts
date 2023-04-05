@@ -90,7 +90,7 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
               );
 
               // If the percentage available is < the low disk watermark setting, mark node as having low disk space
-              if (percentageAvailable < rawLowDiskWatermarkPercentageValue) {
+              if (percentageAvailable < 100 - rawLowDiskWatermarkPercentageValue) {
                 nodesWithLowDiskSpace.push({
                   nodeId,
                   nodeName: node.name || nodeId,
