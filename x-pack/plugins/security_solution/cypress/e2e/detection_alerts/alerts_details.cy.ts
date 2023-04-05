@@ -90,7 +90,7 @@ describe('Alert details flyout', () => {
         });
     });
   });
-  describe.only('Url state management', { testIsolation: false }, () => {
+  describe('Url state management', { testIsolation: false }, () => {
     const testRule = getNewRule();
     before(() => {
       cleanKibana();
