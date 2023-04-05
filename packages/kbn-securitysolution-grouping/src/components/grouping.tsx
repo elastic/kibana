@@ -26,19 +26,16 @@ import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupPanelRenderer, RawBucket } from './types';
 import { GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
-import { Action, GroupMap } from '../hooks/types';
 
 export interface GroupingProps<T> {
   activePage: number;
   data?: GroupingAggregation<T>;
-  dispatch: React.Dispatch<Action>;
   groupPanelRenderer?: GroupPanelRenderer<T>;
   groupSelector?: JSX.Element;
   // list of custom UI components which correspond to your custom rendered metrics aggregations
   groupStatsRenderer?: GroupStatsRenderer<T>;
   groupingId: string;
   groupingLevel?: number;
-  groupingState: GroupMap;
   inspectButton?: JSX.Element;
   isLoading: boolean;
   itemsPerPage: number;
