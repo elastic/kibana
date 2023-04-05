@@ -8,7 +8,11 @@
 
 import Path from 'path';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsIndexPattern,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import {
   readLog,
@@ -54,7 +58,8 @@ describe('split .kibana index into multiple system indices', () => {
         (type: SavedObjectsType<any>) => {
           return {
             ...type,
-            indexPattern: RELOCATE_TYPES[type.name] ?? type.indexPattern,
+            indexPattern: (RELOCATE_TYPES[type.name] ??
+              type.indexPattern) as SavedObjectsIndexPattern,
           };
         }
       );

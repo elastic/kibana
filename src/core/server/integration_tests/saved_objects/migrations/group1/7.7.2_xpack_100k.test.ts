@@ -19,6 +19,7 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = path.join(__dirname, '7.7.2_xpack_100k.log');
@@ -105,7 +106,9 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   };
 
-  const migratedIndex = `.kibana_${kibanaVersion}_001`;
+  const migratedIndices = SavedObjectsIndexPatterns.map(
+    (indexPattern) => `.${indexPattern}_${kibanaVersion}_001`
+  );
 
   beforeAll(async () => {
     await removeLogFile();
@@ -121,7 +124,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
 
   it('copies all the document of the previous index to the new one', async () => {
     const migratedIndexResponse = await esClient.count({
-      index: migratedIndex,
+      index: migratedIndices,
     });
     const oldIndexResponse = await esClient.count({
       index: '.kibana_1',

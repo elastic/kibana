@@ -46,6 +46,7 @@ import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
+import { SavedObjectsIndexPatterns } from '@kbn/core-saved-objects-server';
 
 export * from './attachments';
 export * from './case';
@@ -190,7 +191,7 @@ export const deleteAllCaseItems = async (es: Client) => {
 
 export const deleteCasesUserActions = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: SavedObjectsIndexPatterns,
     q: 'type:cases-user-actions',
     wait_for_completion: true,
     refresh: true,
@@ -201,7 +202,7 @@ export const deleteCasesUserActions = async (es: Client): Promise<void> => {
 
 export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: SavedObjectsIndexPatterns,
     q: 'type:cases',
     wait_for_completion: true,
     refresh: true,
@@ -212,7 +213,7 @@ export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
 
 export const deleteComments = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: SavedObjectsIndexPatterns,
     q: 'type:cases-comments',
     wait_for_completion: true,
     refresh: true,
@@ -223,7 +224,7 @@ export const deleteComments = async (es: Client): Promise<void> => {
 
 export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: SavedObjectsIndexPatterns,
     q: 'type:cases-configure',
     wait_for_completion: true,
     refresh: true,
@@ -234,7 +235,7 @@ export const deleteConfiguration = async (es: Client): Promise<void> => {
 
 export const deleteMappings = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: SavedObjectsIndexPatterns,
     q: 'type:cases-connector-mappings',
     wait_for_completion: true,
     refresh: true,
@@ -289,7 +290,7 @@ export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
     unknown
   > = await es.search(
     {
-      index: '.kibana',
+      index: SavedObjectsIndexPatterns,
       body: {
         query: {
           term: {
@@ -319,7 +320,7 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => 
     unknown
   > = await es.search(
     {
-      index: '.kibana',
+      index: SavedObjectsIndexPatterns,
       body: {
         query: {
           term: {
@@ -342,7 +343,7 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
     unknown
   > = await es.search(
     {
-      index: '.kibana',
+      index: SavedObjectsIndexPatterns,
       body: {
         query: {
           term: {
@@ -724,7 +725,7 @@ export const getSOFromKibanaIndex = async ({
 }) => {
   const esResponse = await es.get<SavedObjectsRawDocSource>(
     {
-      index: '.kibana',
+      index: SavedObjectsIndexPatterns,
       id: `${soType}:${soId}`,
     },
     { meta: true }

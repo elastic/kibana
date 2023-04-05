@@ -14,6 +14,10 @@ import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  MAIN_SAVED_OBJECT_INDEX,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
@@ -96,8 +100,8 @@ export function createCreateIndexStream({
 
   async function handleIndex(record: DocRecord) {
     const { index, settings, mappings, aliases } = record.value;
-    const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
-    const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
+    const isKibanaTaskManager = index.startsWith(TASK_MANAGER_SAVED_OBJECT_INDEX);
+    const isKibana = index.startsWith(MAIN_SAVED_OBJECT_INDEX) && !isKibanaTaskManager;
 
     if (docsOnly) {
       return;

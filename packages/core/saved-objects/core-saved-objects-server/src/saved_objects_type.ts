@@ -18,6 +18,7 @@ import type {
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
 } from './model_version';
+import type { SavedObjectsIndexPattern } from './saved_objects_index_pattern';
 
 /**
  * @public
@@ -52,7 +53,7 @@ export interface SavedObjectsType<Attributes = any> {
   /**
    * If defined, the type instances will be stored in the given index instead of the default one.
    */
-  indexPattern?: string;
+  indexPattern?: SavedObjectsIndexPattern;
   /**
    * If defined, will be used to convert the type to an alias.
    */

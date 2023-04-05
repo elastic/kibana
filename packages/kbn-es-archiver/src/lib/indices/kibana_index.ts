@@ -11,12 +11,17 @@ import { inspect } from 'util';
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
+import {
+  MAIN_SAVED_OBJECT_INDEX,
+  SavedObjectsIndexPatterns,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 /**
- * Deletes all indices that start with `.kibana`, or if onlyTaskManager==true, all indices that start with `.kibana_task_manager`
+ * Deletes all saved object indices, or if onlyTaskManager==true, it deletes task_manager indices
  */
 export async function deleteKibanaIndices({
   client,
@@ -29,8 +34,10 @@ export async function deleteKibanaIndices({
   onlyTaskManager?: boolean;
   log: ToolingLog;
 }) {
-  const indexPattern = onlyTaskManager ? '.kibana_task_manager*' : '.kibana*';
-  const indexNames = await fetchKibanaIndices(client, indexPattern);
+  // WARNING note that we are deleting ALL .kibana* indices here, NOT only the saved object ones
+  const indexNames = (await fetchKibanaIndices(client)).filter(
+    (indexName) => !onlyTaskManager || indexName.includes(TASK_MANAGER_SAVED_OBJECT_INDEX)
+  );
   if (!indexNames.length) {
     return;
   }
@@ -65,22 +72,28 @@ export async function migrateKibanaIndex(kbnClient: KbnClient) {
 }
 
 /**
- * Migrations mean that the Kibana index will look something like:
- * .kibana, .kibana_1, .kibana_323, etc. This finds all indices starting
- * with .kibana, then filters out any that aren't actually Kibana's core
- * index (e.g. we don't want to remove .kibana_task_manager or the like).
+ * Check if the given index is a Kibana saved object index.
+ * This includes most .kibana_*
+ * but we must make sure that indices such as '.kibana_security_session_1' are NOT deleted.
+ *
+ * IMPORTANT
+ * Note that we can have more than 2 system indices (different SO types can go to different indices)
+ * ATM we have '.kibana', '.kibana_task_manager', '.kibana_cases'
+ * This method also takes into account legacy indices: .kibana_1, .kibana_task_manager_1.
+ * @param [index] the name of the index to check
+ * @returns boolean 'true' if the index is a Kibana saved object index.
  */
+
+const LEGACY_INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})(:?_\\d*)?$`);
+const INDICES_REGEXP = new RegExp(`^(${SavedObjectsIndexPatterns.join('|')})_(pre)?\\d+.\\d+.\\d+`);
+
 function isKibanaIndex(index?: string): index is string {
-  return Boolean(
-    index &&
-      (/^\.kibana(:?_\d*)?$/.test(index) ||
-        /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index))
-  );
+  return Boolean(index && (LEGACY_INDICES_REGEXP.test(index) || INDICES_REGEXP.test(index)));
 }
 
-async function fetchKibanaIndices(client: Client, indexPattern: string) {
+async function fetchKibanaIndices(client: Client) {
   const resp = await client.cat.indices(
-    { index: indexPattern, format: 'json' },
+    { index: `${MAIN_SAVED_OBJECT_INDEX}*`, format: 'json' },
     {
       headers: ES_CLIENT_HEADERS,
     }
@@ -107,7 +120,7 @@ export async function cleanKibanaIndices({
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: `.kibana,.kibana_task_manager`,
+        index: SavedObjectsIndexPatterns,
         body: {
           query: {
             bool: {
@@ -144,7 +157,7 @@ export async function cleanKibanaIndices({
       `.kibana rather than deleting the whole index`
   );
 
-  stats.deletedIndex('.kibana');
+  SavedObjectsIndexPatterns.forEach((indexPattern) => stats.deletedIndex(indexPattern));
 }
 
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {

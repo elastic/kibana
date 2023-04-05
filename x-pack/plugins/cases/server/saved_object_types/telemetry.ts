@@ -6,10 +6,11 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { CASE_TELEMETRY_SAVED_OBJECT } from '../../common/constants';
+import { CASES_INDEX, CASE_TELEMETRY_SAVED_OBJECT } from '../../common/constants';
 
 export const casesTelemetrySavedObjectType: SavedObjectsType = {
   name: CASE_TELEMETRY_SAVED_OBJECT,
+  indexPattern: CASES_INDEX,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
