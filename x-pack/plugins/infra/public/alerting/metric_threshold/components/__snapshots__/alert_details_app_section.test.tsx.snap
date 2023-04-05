@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AlertDetailsAppSection should render annotation 1`] = `
+exports[`AlertDetailsAppSection should render annotations 1`] = `
 Array [
   Object {
     "annotations": Array [
@@ -8,7 +8,12 @@ Array [
         alertStart={1678716383695}
         color="#BD271E"
         dateFormat="YYYY-MM-DD HH:mm"
-        id="annotation_alert_start"
+        id="alert_start_annotation"
+      />,
+      <AlertTimeRangeAnnotation
+        alertStart={1678716383695}
+        color="#BD271E"
+        id="alert_time_range_annotation"
       />,
     ],
     "chartType": "line",

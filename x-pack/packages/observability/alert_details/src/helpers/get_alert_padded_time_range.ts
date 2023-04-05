@@ -13,7 +13,7 @@ export interface TimeRange {
   interval?: string;
 }
 
-export const getAlertTimeRange = (alertStart: string, alertEnd?: string): TimeRange => {
+export const getAlertPaddedTimeRange = (alertStart: string, alertEnd?: string): TimeRange => {
   const alertDuration = moment.duration(moment(alertEnd).diff(moment(alertStart)));
   const now = moment().toISOString();
   const durationMs =

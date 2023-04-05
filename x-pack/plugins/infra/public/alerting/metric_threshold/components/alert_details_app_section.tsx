@@ -6,11 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
+import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
-import { AlertAnnotation, getAlertTimeRange } from '@kbn/observability-alert-details';
+import {
+  AlertAnnotation,
+  getAlertPaddedTimeRange,
+  AlertTimeRangeAnnotation,
+} from '@kbn/observability-alert-details';
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
@@ -28,7 +33,8 @@ export type MetricThresholdRule = Rule<
 export type MetricThresholdAlert = TopAlert;
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
-const ALERT_START_ANNOTATION_ID = 'annotation_alert_start';
+const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
+const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 
 interface AppSectionProps {
   rule: MetricThresholdRule;
@@ -44,7 +50,8 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
   );
-  const timeRange = getAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
+  const timeRange = getAlertPaddedTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const annotations = [
     <AlertAnnotation
       key={ALERT_START_ANNOTATION_ID}
@@ -52,6 +59,12 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
       color={euiTheme.colors.danger}
       dateFormat={uiSettings.get('dateFormat') || DEFAULT_DATE_FORMAT}
       id={ALERT_START_ANNOTATION_ID}
+    />,
+    <AlertTimeRangeAnnotation
+      alertStart={alert.start}
+      alertEnd={alertEnd}
+      color={euiTheme.colors.danger}
+      id={ALERT_TIME_RANGE_ANNOTATION_ID}
     />,
   ];
 
