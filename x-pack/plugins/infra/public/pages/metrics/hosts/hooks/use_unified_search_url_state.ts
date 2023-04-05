@@ -54,16 +54,16 @@ export const useHostsUrlState = (): [HostsState, HostsStateUpdater] => {
     writeDefaultState: true,
   });
 
-  useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, urlState.dateRange, (dateRange) =>
-    setState({ dateRange })
-  );
-
-  const [state, setState] = useReducer(reducer, urlState);
-  if (!deepEqual(state, urlState)) {
-    setUrlState(state);
+  const [search, setSearch] = useReducer(reducer, urlState);
+  if (!deepEqual(search, urlState)) {
+    setUrlState(search);
   }
 
-  return [state, setState];
+  useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, urlState.dateRange, (dateRange) =>
+    setSearch({ dateRange })
+  );
+
+  return [search, setSearch];
 };
 
 const HostsFilterRT = rt.intersection([
@@ -84,7 +84,7 @@ const HostsFilterRT = rt.intersection([
   }),
   rt.partial({
     query: rt.record(rt.string, rt.any),
-    $state: rt.type({
+    $search: rt.type({
       store: enumeration('FilterStateStore', FilterStateStore),
     }),
   }),

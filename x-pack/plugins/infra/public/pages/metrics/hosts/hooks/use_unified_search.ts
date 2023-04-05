@@ -37,41 +37,58 @@ const buildQuerySubmittedPayload = (
 
 const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
 
-const getDefaultFromTimestamp = () => Date.now() - DEFAULT_FROM_IN_MILLISECONDS;
-const getDefaultToTimestamp = () => Date.now();
+const getDefaultTimestamps = () => {
+  const now = Date.now();
+
+  return {
+    from: now - DEFAULT_FROM_IN_MILLISECONDS,
+    to: now,
+  };
+};
 
 export const useUnifiedSearch = () => {
-  const [state, setState] = useHostsUrlState();
+  const [searchCriteria, setSearch] = useHostsUrlState();
   const { dataView } = useMetricsDataViewContext();
   const { services } = useKibanaContextForPlugin();
   const {
     data: {
       query: {
         filterManager: filterManagerService,
-        timefilter: timeFilterService,
         queryString: queryStringService,
+        timefilter: timeFilterService,
       },
     },
     telemetry,
   } = services;
 
-  const onSubmit = (params?: HostsSearchPayload) => setState(params ?? {});
+  const onSubmit = (params?: HostsSearchPayload) => setSearch(params ?? {});
 
-  const loadFiltersFromState = useCallback(() => {
-    if (!deepEqual(filterManagerService.getFilters(), state.filters)) {
-      filterManagerService.setFilters(state.filters);
-    }
-  }, [filterManagerService, state.filters]);
+  const getDateRangeAsTimestamp = useCallback(() => {
+    const defaults = getDefaultTimestamps();
 
-  const loadQueryFromState = useCallback(() => {
-    if (!deepEqual(queryStringService.getQuery(), state.query)) {
-      queryStringService.setQuery(state.query);
-    }
-  }, [queryStringService, state.query]);
+    const from = DateMath.parse(searchCriteria.dateRange.from)?.valueOf() ?? defaults.from;
+    const to =
+      DateMath.parse(searchCriteria.dateRange.to, { roundUp: true })?.valueOf() ?? defaults.to;
+
+    return { from, to };
+  }, [searchCriteria.dateRange]);
+
+  const buildQuery = useCallback(() => {
+    return buildEsQuery(dataView, searchCriteria.query, [
+      ...searchCriteria.filters,
+      ...searchCriteria.panelFilters,
+    ]);
+  }, [dataView, searchCriteria.query, searchCriteria.filters, searchCriteria.panelFilters]);
 
   useEffectOnce(() => {
-    loadFiltersFromState();
-    loadQueryFromState();
+    // Sync filtersService from state
+    if (!deepEqual(filterManagerService.getFilters(), searchCriteria.filters)) {
+      filterManagerService.setFilters(searchCriteria.filters);
+    }
+    // Sync queryService from state
+    if (!deepEqual(queryStringService.getQuery(), searchCriteria.query)) {
+      queryStringService.setQuery(searchCriteria.query);
+    }
   });
 
   useEffect(() => {
@@ -90,43 +107,26 @@ export const useUnifiedSearch = () => {
       query: query$,
     })
       .pipe(skip(1))
-      .subscribe(({ filters, query }) => {
-        setState({
-          query,
-          filters,
-        });
-      });
+      .subscribe(setSearch);
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [filterManagerService, setState, queryStringService, timeFilterService.timefilter]);
-
-  const getDateRangeAsTimestamp = useCallback(() => {
-    const from = DateMath.parse(state.dateRange.from)?.valueOf() ?? getDefaultFromTimestamp();
-    const to =
-      DateMath.parse(state.dateRange.to, { roundUp: true })?.valueOf() ?? getDefaultToTimestamp();
-
-    return { from, to };
-  }, [state.dateRange]);
+  }, [filterManagerService, setSearch, queryStringService, timeFilterService.timefilter]);
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {
     const dateRangeTimestamp = getDateRangeAsTimestamp();
     telemetry.reportHostsViewQuerySubmitted(
-      buildQuerySubmittedPayload({ ...state, dateRangeTimestamp })
+      buildQuerySubmittedPayload({ ...searchCriteria, dateRangeTimestamp })
     );
-  }, [getDateRangeAsTimestamp, state, telemetry]);
-
-  const buildQuery = useCallback(() => {
-    return buildEsQuery(dataView, state.query, [...state.filters, ...state.panelFilters]);
-  }, [dataView, state.query, state.filters, state.panelFilters]);
+  }, [getDateRangeAsTimestamp, searchCriteria, telemetry]);
 
   return {
     buildQuery,
     onSubmit,
     getDateRangeAsTimestamp,
-    searchCriteria: state,
+    searchCriteria,
   };
 };
 
