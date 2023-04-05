@@ -10,7 +10,7 @@ import { TypeOf } from '@kbn/config-schema';
 import type { ActionTypeExecutorOptions as ConnectorTypeExecutorOptions } from '@kbn/actions-plugin/server/types';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import {
-  ExecutorPostMessageParamsSchema,
+  PostMessageParamsSchema,
   PostMessageSubActionParamsSchema,
   SlackApiSecretsSchema,
   SlackApiParamsSchema,
@@ -18,7 +18,7 @@ import {
 
 export type SlackApiSecrets = TypeOf<typeof SlackApiSecretsSchema>;
 
-export type PostMessageParams = TypeOf<typeof ExecutorPostMessageParamsSchema>;
+export type PostMessageParams = TypeOf<typeof PostMessageParamsSchema>;
 export type PostMessageSubActionParams = TypeOf<typeof PostMessageSubActionParamsSchema>;
 export type SlackApiParams = TypeOf<typeof SlackApiParamsSchema>;
 export type SlackApiConnectorType = ConnectorType<{}, SlackApiSecrets, SlackApiParams, unknown>;

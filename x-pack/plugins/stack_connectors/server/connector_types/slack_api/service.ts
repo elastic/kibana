@@ -19,7 +19,6 @@ import type {
   SlackApiService,
   PostMessageResponse,
 } from '../../../common/slack_api/types';
-import { SLACK_URL } from '../../../common/slack_api/constants';
 import {
   retryResultSeconds,
   retryResult,
@@ -27,7 +26,7 @@ import {
   errorResult,
   successResult,
 } from '../../../common/slack_api/lib';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
+import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 const buildSlackExecutorErrorResponse = ({

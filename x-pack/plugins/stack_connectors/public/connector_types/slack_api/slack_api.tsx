@@ -35,7 +35,6 @@ export const getConnectorType = (): ConnectorTypeModel<
   validateParams: async (
     actionParams: SlackApiActionParams
   ): Promise<GenericValidationResult<unknown>> => {
-    // can we use something instead of unknown?
     const errors = {
       text: new Array<string>(),
       channels: new Array<string>(),

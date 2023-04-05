@@ -7,10 +7,8 @@
 
 import type { PostMessageSubActionParams, SlackApiService } from '../../../common/slack_api/types';
 
-const getChannelsHandler = async ({ externalService }: { externalService: SlackApiService }) => {
-  const res = await externalService.getChannels();
-  return res;
-};
+const getChannelsHandler = async ({ externalService }: { externalService: SlackApiService }) =>
+  await externalService.getChannels();
 
 const postMessageHandler = async ({
   externalService,
@@ -18,10 +16,7 @@ const postMessageHandler = async ({
 }: {
   externalService: SlackApiService;
   params: PostMessageSubActionParams;
-}) => {
-  const res = await externalService.postMessage({ channels, text });
-  return res;
-};
+}) => await externalService.postMessage({ channels, text });
 
 export const api = {
   getChannels: getChannelsHandler,

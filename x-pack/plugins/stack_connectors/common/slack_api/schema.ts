@@ -11,22 +11,20 @@ export const SlackApiSecretsSchema = schema.object({
   token: schema.string({ minLength: 1 }),
 });
 
-export const ExecutorGetChannelsParamsSchema = schema.object({
+export const GetChannelsParamsSchema = schema.object({
   subAction: schema.literal('getChannels'),
 });
 
 export const PostMessageSubActionParamsSchema = schema.object({
-  // rename
   channels: schema.arrayOf(schema.string()),
-  text: schema.string(), // maybe better message?
+  text: schema.string(),
 });
-export const ExecutorPostMessageParamsSchema = schema.object({
-  // rename
+export const PostMessageParamsSchema = schema.object({
   subAction: schema.literal('postMessage'),
   subActionParams: PostMessageSubActionParamsSchema,
 });
 
 export const SlackApiParamsSchema = schema.oneOf([
-  ExecutorGetChannelsParamsSchema,
-  ExecutorPostMessageParamsSchema,
+  GetChannelsParamsSchema,
+  PostMessageParamsSchema,
 ]);

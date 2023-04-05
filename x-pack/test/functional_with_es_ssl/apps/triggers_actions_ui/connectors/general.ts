@@ -70,7 +70,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(searchResults).to.eql([
         {
           name: connectorName,
-          actionType: 'Slack',
+          actionType: 'Slack Webhook',
         },
       ]);
       const connector = await getConnectorByName(connectorName, supertest);
@@ -113,7 +113,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(searchResultsAfterEdit).to.eql([
         {
           name: updatedConnectorName,
-          actionType: 'Slack',
+          actionType: 'Slack Webhook',
         },
       ]);
     });

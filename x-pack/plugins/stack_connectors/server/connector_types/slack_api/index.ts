@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
@@ -60,10 +60,13 @@ const renderParameterTemplates = (params: SlackApiParams, variables: Record<stri
   return params;
 };
 
-const slackApiExecutor = async (
-  execOptions: SlackApiExecutorOptions
-): Promise<ConnectorTypeExecutorResult<unknown>> => {
-  const { actionId, params, secrets, configurationUtilities, logger } = execOptions;
+const slackApiExecutor = async ({
+  actionId,
+  params,
+  secrets,
+  configurationUtilities,
+  logger,
+}: SlackApiExecutorOptions): Promise<ActionTypeExecutorResult<unknown>> => {
   const subAction = params.subAction;
 
   if (!api[subAction]) {
