@@ -34,8 +34,8 @@ describe('RPC -> mSearch()', () => {
     const query: MSearchQuery = { text: 'hello' };
     const validInput: MSearchIn = {
       contentTypes: [
-        { id: 'foo', version: 1 },
-        { id: 'bar', version: 2 },
+        { contentTypeId: 'foo', version: 1 },
+        { contentTypeId: 'bar', version: 2 },
       ],
       query,
     };
@@ -52,7 +52,7 @@ describe('RPC -> mSearch()', () => {
           expectedError: '[contentTypes]: array size is [0], but cannot be smaller than [1]',
         },
         {
-          input: { ...validInput, contentTypes: [{ id: 'foo' }] }, // contentTypes has no version
+          input: { ...validInput, contentTypes: [{ contentTypeId: 'foo' }] }, // contentTypes has no version
           expectedError:
             '[contentTypes.0.version]: expected value of type [number] but got [undefined]',
         },
@@ -159,12 +159,12 @@ describe('RPC -> mSearch()', () => {
       });
 
       const result = await fn(ctx, {
-        contentTypes: [{ id: 'foo', version: 1 }],
+        contentTypes: [{ contentTypeId: 'foo', version: 1 }],
         query: { text: 'Hello' },
       });
 
       expect(result).toEqual({
-        contentTypes: [{ id: 'foo', version: 1 }],
+        contentTypes: [{ contentTypeId: 'foo', version: 1 }],
         result: {
           hits: [{ item: soResult }],
           pagination: {
@@ -176,7 +176,7 @@ describe('RPC -> mSearch()', () => {
       expect(mSearchSpy).toHaveBeenCalledWith(
         [
           {
-            id: 'foo',
+            contentTypeId: 'foo',
             ctx: {
               requestHandlerContext: ctx.requestHandlerContext,
               version: {
@@ -197,14 +197,20 @@ describe('RPC -> mSearch()', () => {
       test('should validate that content type definition exist', () => {
         const { ctx } = setup();
         expect(() =>
-          fn(ctx, { contentTypes: [{ id: 'unknown', version: 1 }], query: { text: 'Hello' } })
+          fn(ctx, {
+            contentTypes: [{ contentTypeId: 'unknown', version: 1 }],
+            query: { text: 'Hello' },
+          })
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
       test('should throw if the request version is higher than the registered version', () => {
         const { ctx } = setup();
         expect(() =>
-          fn(ctx, { contentTypes: [{ id: 'foo', version: 7 }], query: { text: 'Hello' } })
+          fn(ctx, {
+            contentTypes: [{ contentTypeId: 'foo', version: 7 }],
+            query: { text: 'Hello' },
+          })
         ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
       });
     });

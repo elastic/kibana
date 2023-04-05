@@ -15,16 +15,21 @@ import type { ProcedureSchemas } from './types';
 export const mSearchSchemas: ProcedureSchemas = {
   in: schema.object(
     {
-      contentTypes: schema.arrayOf(schema.object({ id: schema.string(), version: versionSchema }), {
-        minSize: 1,
-      }),
+      contentTypes: schema.arrayOf(
+        schema.object({ contentTypeId: schema.string(), version: versionSchema }),
+        {
+          minSize: 1,
+        }
+      ),
       query: searchQuerySchema,
     },
     { unknowns: 'forbid' }
   ),
   out: schema.object(
     {
-      contentTypes: schema.arrayOf(schema.object({ id: schema.string(), version: versionSchema })),
+      contentTypes: schema.arrayOf(
+        schema.object({ contentTypeId: schema.string(), version: versionSchema })
+      ),
       result: searchResultSchema,
     },
     { unknowns: 'forbid' }
@@ -34,13 +39,13 @@ export const mSearchSchemas: ProcedureSchemas = {
 export type MSearchQuery = SearchQuery;
 
 export interface MSearchIn {
-  contentTypes: Array<{ id: string; version: Version }>;
+  contentTypes: Array<{ contentTypeId: string; version?: Version }>;
   query: MSearchQuery;
 }
 
 export type MSearchResult<T = unknown> = SearchResult<T>;
 
 export interface MSearchOut<T = unknown> {
-  contentTypes: Array<{ id: string; version: Version }>;
+  contentTypes: Array<{ contentTypeId: string; version?: Version }>;
   result: MSearchResult<T>;
 }

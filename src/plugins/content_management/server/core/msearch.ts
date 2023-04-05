@@ -20,17 +20,18 @@ export class MSearchService {
   ) {}
 
   async search(
-    contentTypes: Array<{ id: string; ctx: StorageContext }>,
+    contentTypes: Array<{ contentTypeId: string; ctx: StorageContext }>,
     query: SearchQuery
   ): Promise<MSearchResult> {
-    const contentTypeToCtx = new Map(contentTypes.map((ct) => [ct.id, ct.ctx]));
+    const contentTypeToCtx = new Map(contentTypes.map((ct) => [ct.contentTypeId, ct.ctx]));
     const contentTypeToMSearchConfig = new Map(
       contentTypes.map((ct) => {
-        const mSearchConfig = this.deps.contentRegistry.getDefinition(ct.id).storage.mSearch;
+        const mSearchConfig = this.deps.contentRegistry.getDefinition(ct.contentTypeId).storage
+          .mSearch;
         if (!mSearchConfig) {
-          throw new Error(`Content type ${ct.id} does not support mSearch`);
+          throw new Error(`Content type ${ct.contentTypeId} does not support mSearch`);
         }
-        return [ct.id, mSearchConfig];
+        return [ct.contentTypeId, mSearchConfig];
       })
     );
     const soTypeToMSearchConfig = new Map(

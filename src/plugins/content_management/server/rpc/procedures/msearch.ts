@@ -17,7 +17,7 @@ export const mSearch: ProcedureDefinition<Context, MSearchIn, MSearchOut> = {
   schemas: rpcSchemas.mSearch,
   fn: async (ctx, { contentTypes: contentTypes, query }) => {
     const contentTypesWithStorageContext = contentTypes.map(
-      ({ id: contentTypeId, version: _version }) => {
+      ({ contentTypeId, version: _version }) => {
         const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
         const version = validateRequestVersion(_version, contentDefinition.version.latest);
         const storageContext: StorageContext = {
@@ -32,7 +32,7 @@ export const mSearch: ProcedureDefinition<Context, MSearchIn, MSearchOut> = {
         };
 
         return {
-          id: contentTypeId,
+          contentTypeId,
           ctx: storageContext,
         };
       }

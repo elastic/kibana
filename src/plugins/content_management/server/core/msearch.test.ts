@@ -99,8 +99,8 @@ test('should cross-content search using saved objects api', async () => {
 
   const result = await mSearchService.search(
     [
-      { id: 'foo', ctx: mockStorageContext() },
-      { id: 'bar', ctx: mockStorageContext() },
+      { contentTypeId: 'foo', ctx: mockStorageContext() },
+      { contentTypeId: 'bar', ctx: mockStorageContext() },
     ],
     {
       text: 'search text',
@@ -128,8 +128,8 @@ test('should error if content is not registered', async () => {
   await expect(
     mSearchService.search(
       [
-        { id: 'foo', ctx: mockStorageContext() },
-        { id: 'foo-fake', ctx: mockStorageContext() },
+        { contentTypeId: 'foo', ctx: mockStorageContext() },
+        { contentTypeId: 'foo-fake', ctx: mockStorageContext() },
       ],
       {
         text: 'foo',
@@ -152,8 +152,8 @@ test('should error if content is registered, but no mSearch support', async () =
   await expect(
     mSearchService.search(
       [
-        { id: 'foo', ctx: mockStorageContext() },
-        { id: 'foo2', ctx: mockStorageContext() },
+        { contentTypeId: 'foo', ctx: mockStorageContext() },
+        { contentTypeId: 'foo2', ctx: mockStorageContext() },
       ],
       {
         text: 'foo',
