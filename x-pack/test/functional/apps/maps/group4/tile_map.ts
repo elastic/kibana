@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'lens', 'maps', 'timePicker']);
 
-  describe.only('tile_map visualization', () => {
+  describe('tile_map visualization', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.visualize.loadSavedVisualization(
