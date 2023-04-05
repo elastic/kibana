@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
 import { debug } from '../../common/debug_log';
-import { AssetType, assetType } from '../../common/types_api';
+import { AssetType, assetTypeRT, relationRT } from '../../common/types_api';
 import { ASSET_MANAGER_API_BASE } from '../constants';
 import { getAssets } from '../lib/get_assets';
 import { getAllRelatedAssets } from '../lib/get_all_related_assets';
@@ -18,20 +18,21 @@ import { getEsClientFromContext } from './utils';
 const getAssetsQueryOptions = schema.object({
   from: schema.maybe(schema.string()),
   to: schema.maybe(schema.string()),
-  type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
+  type: schema.maybe(schema.oneOf([schema.arrayOf(assetTypeRT), assetTypeRT])),
   ean: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
   size: schema.maybe(schema.number()),
 });
 
-const getAssetsAncestorsQueryOptions = schema.object({
+const getRelatedAssetsQueryOptions = schema.object({
   from: schema.string(), // ISO timestamp or ES datemath
   to: schema.maybe(schema.string()), // ISO timestamp or ES datemath
   ean: schema.string(),
-  type: schema.maybe(schema.oneOf([assetType, schema.arrayOf(assetType)])),
+  relation: relationRT,
+  type: schema.maybe(schema.oneOf([assetTypeRT, schema.arrayOf(assetTypeRT)])),
   maxDistance: schema.maybe(schema.number()),
   size: schema.maybe(schema.number()),
 });
-type GetAssetsAncestorsQueryOptions = typeof getAssetsAncestorsQueryOptions.type;
+type GetRelatedAssetsQueryOptions = typeof getRelatedAssetsQueryOptions.type;
 
 export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupRouteOptions<T>) {
   // GET /assets
@@ -64,16 +65,17 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   );
 
   // GET assets/ancestors
-  router.get<unknown, GetAssetsAncestorsQueryOptions, unknown>(
+  router.get<unknown, GetRelatedAssetsQueryOptions, unknown>(
     {
-      // Maybe we can just make this one endpoint, /assets/related?
-      path: `${ASSET_MANAGER_API_BASE}/assets/ancestors`,
+      path: `${ASSET_MANAGER_API_BASE}/assets/related`,
       validate: {
-        query: getAssetsAncestorsQueryOptions,
+        query: getRelatedAssetsQueryOptions,
       },
     },
     async (context, req, res) => {
-      const { from, to, ean } = req.query || {};
+      // Add references into sample data and write integration tests
+
+      const { from, to, ean, relation } = req.query || {};
       const esClient = await getEsClientFromContext(context);
 
       // What if maxDistance is below 1?
@@ -85,20 +87,20 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       try {
         return res.ok({
           body: {
-            results: getAllRelatedAssets(esClient, {
+            results: await getAllRelatedAssets(esClient, {
               ean,
               from,
               to,
               type,
               maxDistance,
               size,
-              relation: 'ancestors',
+              relation,
             }),
           },
         });
-      } catch (error: unknown) {
+      } catch (error: any) {
         debug('error looking up asset records', error);
-        return res.customError({ statusCode: 500, body: 'Gello' });
+        return res.customError({ statusCode: 500, body: error.message });
       }
     }
   );

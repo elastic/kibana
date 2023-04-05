@@ -67,6 +67,7 @@ async function findPrimary(
   });
 
   if (primaryResults.length === 0) {
+    // This should probably result in a 404
     throw new Error(`Could not find asset with ean=${ean}`);
   }
 

@@ -7,12 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const assetType = schema.oneOf([
+export const assetTypeRT = schema.oneOf([
   schema.literal('k8s.pod'),
   schema.literal('k8s.cluster'),
   schema.literal('k8s.node'),
 ]);
-export type AssetType = typeof assetType.type;
+export type AssetType = typeof assetTypeRT.type;
 
 export type AssetKind = 'unknown' | 'node';
 export type AssetStatus =
@@ -130,7 +130,13 @@ export interface AssetFilters {
   to?: string;
 }
 
-export type Relation = 'ancestors' | 'descendants' | 'references';
+export const relationRT = schema.oneOf([
+  schema.literal('ancestors'),
+  schema.literal('descendants'),
+  schema.literal('references'),
+]);
+
+export type Relation = typeof relationRT.type;
 export type RelationField = keyof Pick<
   Asset,
   'asset.children' | 'asset.parents' | 'asset.references'
