@@ -330,5 +330,6 @@ export function suggestions({
     .map((suggestion) => ({
       ...suggestion,
       hide: shouldHideSuggestion || incompleteConfiguration || suggestion.hide,
+      incomplete: incompleteConfiguration,
     }));
 }

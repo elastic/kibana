@@ -153,6 +153,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getAllAlertsAttachToCase: jest.fn(),
     getCaseCommentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
+    getFileAttachments: jest.fn(),
   };
 
   return service as unknown as AttachmentGetterServiceMock;
@@ -163,7 +164,7 @@ type FakeAttachmentService = PublicMethodsOf<AttachmentService> & AttachmentServ
 export const createAttachmentServiceMock = (): AttachmentServiceMock => {
   const service: FakeAttachmentService = {
     getter: createAttachmentGetterServiceMock(),
-    delete: jest.fn(),
+    bulkDelete: jest.fn(),
     create: jest.fn(),
     bulkCreate: jest.fn(),
     update: jest.fn(),
