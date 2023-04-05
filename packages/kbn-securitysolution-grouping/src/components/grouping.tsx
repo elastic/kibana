@@ -27,7 +27,6 @@ import type { GroupingAggregation, GroupPanelRenderer, RawBucket } from './types
 import { GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 import { Action, GroupMap } from '../hooks/types';
-import { useGroupingPagination } from '../hooks/use_grouping_pagination';
 
 export interface GroupingProps<T> {
   childGroups: string[];
@@ -54,6 +53,8 @@ export interface GroupingProps<T> {
   onChangeGroupsPage?: (index: number) => void;
   onChangeGroupsItemsPerPage?: (size: number) => void;
   groupingState: GroupMap;
+  itemsPerPage: number;
+  activePage: number;
 }
 
 const GroupingComponent = <T,>({
@@ -75,14 +76,12 @@ const GroupingComponent = <T,>({
   unit = defaultUnit,
   onChangeGroupsPage,
   onChangeGroupsItemsPerPage,
-  groupingState,
+  itemsPerPage,
+  activePage,
 }: GroupingProps<T>) => {
   const [trigger, setTrigger] = useState<
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
   >({});
-  const [activePage, setActivePage] = useState<number>(0);
-
-  const pagination = useGroupingPagination({ groupingId, groupingState, dispatch });
 
   const unitCount = data?.unitsCount?.value ?? 0;
   const unitCountText = useMemo(() => {
@@ -149,9 +148,7 @@ const GroupingComponent = <T,>({
         );
       }),
     [
-      childGroups,
       data?.groupByFields?.buckets,
-      dispatch,
       groupPanelRenderer,
       groupStatsRenderer,
       groupingId,
@@ -166,11 +163,8 @@ const GroupingComponent = <T,>({
     ]
   );
   const pageCount = useMemo(
-    () =>
-      groupCount
-        ? Math.ceil(groupCount / (pagination.pagingSettings[selectedGroup]?.itemsPerPage ?? 25))
-        : 1,
-    [groupCount, pagination.pagingSettings, selectedGroup]
+    () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
+    [groupCount, itemsPerPage]
   );
   return (
     <>
@@ -221,20 +215,14 @@ const GroupingComponent = <T,>({
                 <EuiTablePagination
                   activePage={activePage}
                   data-test-subj="grouping-table-pagination"
-                  itemsPerPage={pagination.pagingSettings[selectedGroup]?.itemsPerPage ?? 25}
-                  itemsPerPageOptions={
-                    pagination.pagingSettings[selectedGroup]?.itemsPerPageOptions ?? [
-                      10, 25, 50, 100,
-                    ]
-                  }
+                  itemsPerPage={itemsPerPage}
+                  itemsPerPageOptions={[10, 25, 50, 100]}
                   onChangeItemsPerPage={(pageSize: number) => {
-                    pagination.onChangeItemsPerPage(pageSize, selectedGroup);
                     if (onChangeGroupsItemsPerPage) {
                       onChangeGroupsItemsPerPage(pageSize);
                     }
                   }}
                   onChangePage={(pageIndex: number) => {
-                    setActivePage(pageIndex);
                     if (onChangeGroupsPage) {
                       onChangeGroupsPage(pageIndex);
                     }

@@ -120,11 +120,11 @@ export const useGrouping = <T,>({
           {...componentProps}
           {...props}
           childGroups={selectedGroups.slice((props.groupingLevel ?? 0) + 1, selectedGroups.length)}
-          groupingId={groupingId}
-          groupSelector={groupSelector}
-          tracker={tracker}
           dispatch={dispatch}
+          groupSelector={groupSelector}
+          groupingId={groupingId}
           groupingState={groupingState}
+          tracker={tracker}
         />
       ),
     [componentProps, groupSelector, groupingId, groupingState, selectedGroups, tracker]

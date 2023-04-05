@@ -26,10 +26,9 @@ export const useGroupingPagination = ({
   groupingState,
   dispatch,
 }: UseGroupingPaginationArgs): GroupingPagination => {
-  const { pagingSettings } = useMemo(
-    () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
-    [groupingId, groupingState]
-  );
+  const { pagingSettings } = useMemo(() => {
+    return groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
+  }, [groupingId, groupingState]);
 
   const setGroupsItemsPerPage = useCallback(
     (newItemsPerPage: number, selectedGroup: string) => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { BoolQuery, Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
@@ -47,16 +47,17 @@ interface OwnProps {
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;
+  pageIndex: number;
+  pageSize: number;
   parentGroupingFilter?: string;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
+  runtimeMappings: MappingRuntimeFields;
   selectedGroup: string;
+  setPageIndex: (newIndex: number) => void;
+  setPageSize: (newSize: number) => void;
   signalIndexName: string | null;
   tableId: TableIdLiteral;
   to: string;
-  runtimeMappings: MappingRuntimeFields;
-  additionalFilters?: Array<{
-    bool: BoolQuery;
-  }>;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -72,19 +73,21 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   hasIndexMaintenance,
   hasIndexWrite,
   loading,
+  pageIndex,
+  pageSize,
   parentGroupingFilter,
   renderChildComponent,
+  runtimeMappings,
   selectedGroup,
+  setPageIndex,
+  setPageSize,
   signalIndexName,
   tableId,
-  runtimeMappings,
   to,
 }) => {
   const {
     services: { uiSettings },
   } = useKibana();
-  const [pageIndex, setPageIndex] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(25);
   const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
   const getGlobalQuery = useCallback(
@@ -223,6 +226,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         renderChildComponent,
         selectedGroup,
         takeActionItems: getTakeActionItems,
+        itemsPerPage: pageSize,
+        activePage: pageIndex,
         onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
         onChangeGroupsPage: (index) => setPageIndex(index),
       }),
@@ -234,8 +239,12 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       inspect,
       isLoadingGroups,
       loading,
+      pageIndex,
+      pageSize,
       renderChildComponent,
       selectedGroup,
+      setPageIndex,
+      setPageSize,
     ]
   );
 };

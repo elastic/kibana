@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
@@ -40,6 +40,9 @@ export interface AlertsTableComponentProps {
   tableId: TableIdLiteral;
   to: string;
 }
+
+const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_INDEX = 0;
 
 export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
@@ -98,6 +101,34 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     }
   }, [dispatch, groupSelector, groupSelectorInRedux, selectedGroups]);
 
+  const [pageIndex, setPageIndex] = useState<number[]>([DEFAULT_PAGE_INDEX]);
+  const [pageSize, setPageSize] = useState<number[]>([DEFAULT_PAGE_SIZE]);
+
+  useEffect(() => {
+    setPageIndex((curr) => curr.map(() => DEFAULT_PAGE_INDEX));
+  }, [selectedGroups]);
+
+  const setPageVar = useCallback(
+    (newNumber: number, groupingLevel: number, pageType: 'index' | 'size') => {
+      if (pageType === 'index') {
+        setPageIndex((currentIndex) => {
+          const newArr = [...currentIndex];
+          newArr[groupingLevel] = newNumber;
+          return newArr;
+        });
+      }
+
+      if (pageType === 'size') {
+        setPageSize((currentIndex) => {
+          const newArr = [...currentIndex];
+          newArr[groupingLevel] = newNumber;
+          return newArr;
+        });
+      }
+    },
+    []
+  );
+
   const getLevel = useCallback(
     (level: number, selectedGroup: string, parentGroupingFilter?: string) => {
       let rcc;
@@ -120,18 +151,32 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           ]);
         };
       }
+
+      const levelPageSize = pageSize[level];
+      if (levelPageSize == null) {
+        setPageVar(DEFAULT_PAGE_SIZE, level, 'size');
+      }
+      const levelPageIndex = pageIndex[level];
+      if (levelPageIndex == null) {
+        setPageVar(DEFAULT_PAGE_INDEX, level, 'index');
+      }
+
       return (
         <GroupedSubLevel
           {...props}
           getGrouping={getGrouping}
           groupingLevel={level}
+          pageIndex={pageIndex[level] ?? DEFAULT_PAGE_INDEX}
+          pageSize={pageSize[level] ?? DEFAULT_PAGE_SIZE}
+          parentGroupingFilter={parentGroupingFilter}
           renderChildComponent={rcc}
           selectedGroup={selectedGroup}
-          parentGroupingFilter={parentGroupingFilter}
+          setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
+          setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
         />
       );
     },
-    [getGrouping, props, selectedGroups]
+    [getGrouping, pageIndex, pageSize, props, selectedGroups, setPageVar]
   );
 
   if (isEmpty(selectedPatterns)) {
