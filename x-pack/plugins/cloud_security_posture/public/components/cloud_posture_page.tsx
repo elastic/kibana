@@ -38,6 +38,7 @@ import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_
 
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { cspIntegrationDocsNavigation, findingsTabs } from '../common/navigation/constants';
+import { getCpmStatus } from '../common/utils/get_cpm_status';
 import { FindingsTabsType } from '../common/navigation/types';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
@@ -345,7 +346,7 @@ export const CloudPosturePage = <TData, TError>({
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
-  const getSetupStatus = useCspSetupStatusApi();
+  const { data: getSetupStatus, isLoading, isError, error } = useCspSetupStatusApi();
   const location = useLocation();
 
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
@@ -355,13 +356,14 @@ export const CloudPosturePage = <TData, TError>({
   const currentTab: FindingsTabsType = findingsTabs[location.pathname] ?? CONFIGURATIONS;
 
   const showIntegrationInstalledPrompt =
-    showConfigurationIntegrationInstalledPrompt(getSetupStatus.data) ||
-    showVulnerabilitiesIntegrationInstalledPrompt(getSetupStatus.data, currentTab);
+    showConfigurationIntegrationInstalledPrompt(getSetupStatus) ||
+    showVulnerabilitiesIntegrationInstalledPrompt(getSetupStatus, currentTab);
 
   const integrationLinksProps =
     currentTab === CONFIGURATIONS
       ? { kspmIntegrationLink, cspmIntegrationLink }
       : { vulnMgmtIntegrationLink };
+  const { isEmptyData, hasFindings } = getCpmStatus(getSetupStatus);
 
   const render = () => {
     if (subscriptionStatus.isError) {
@@ -376,17 +378,21 @@ export const CloudPosturePage = <TData, TError>({
       return subscriptionNotAllowedRenderer();
     }
 
-    if (getSetupStatus.isError) {
-      return defaultErrorRenderer(getSetupStatus.error);
+    if (isError) {
+      return defaultErrorRenderer(error);
     }
 
-    if (getSetupStatus.isLoading) {
+    if (isLoading) {
       return defaultLoadingRenderer();
     }
 
     /* Checks if its a completely new user which means no integration has been installed and no latest findings default index has been found */
     if (showIntegrationInstalledPrompt) {
       return packageNotInstalledRenderer({ integrationLinksProps, currentTab });
+    }
+
+    if (!hasFindings) {
+      return children;
     }
 
     if (!query) {
