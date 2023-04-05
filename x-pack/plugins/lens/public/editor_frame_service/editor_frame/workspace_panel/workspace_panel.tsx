@@ -282,7 +282,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     severity: 'error',
   });
 
-  const [existingErrors, setExistingErrors] = useState<UserMessage[]>([]);
+  const [appliedErrors, setAppliedErrors] = useState<UserMessage[]>([]);
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
@@ -310,7 +310,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           return null;
         }
       } catch (e) {
-        // this causes lens to freeze (infinite loop ?)
         removeExpressionBuildErrorsRef.current = addUserMessages([
           {
             uniqueId: EXPRESSION_BUILD_ERROR_ID,
@@ -361,13 +360,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   useEffect(() => {
     if (shouldApplyExpression) {
-      setExistingErrors(workspaceErrors);
+      setAppliedErrors(workspaceErrors);
       setLocalState((s) => ({
         ...s,
         expressionToRender: unappliedExpression,
       }));
     }
-  }, [unappliedExpression, shouldApplyExpression, workspaceErrors]);
+  }, [unappliedExpression, shouldApplyExpression]);
 
   const expressionExists = Boolean(localState.expressionToRender);
 
@@ -559,7 +558,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
         localState={{ ...localState }}
-        errors={existingErrors}
+        errors={appliedErrors}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
         activeDatasourceId={activeDatasourceId}
