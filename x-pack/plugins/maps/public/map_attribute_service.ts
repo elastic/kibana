@@ -9,7 +9,7 @@ import { SavedObjectReference } from '@kbn/core/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';

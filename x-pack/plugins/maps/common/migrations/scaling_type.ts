@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { SOURCE_TYPES, SCALING_TYPES } from '../constants';
 import { LayerDescriptor, ESSearchSourceDescriptor } from '../descriptor_types';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../content_management';
 
 function isEsDocumentSource(layerDescriptor: LayerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');

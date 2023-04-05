@@ -8,7 +8,7 @@
 import { asyncForEach } from '@kbn/std';
 import type { ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../../common/content_management';
 
 export async function findMaps(
   savedObjectsClient: Pick<ISavedObjectsRepository, 'find'>,

@@ -19,7 +19,7 @@ import {
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../content_management';
 import { EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, RESOLUTION_KEYS, SCALING_KEYS } from './types';
 
 export class LayerStatsCollector {

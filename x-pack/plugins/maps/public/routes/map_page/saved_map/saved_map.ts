@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../../../../common/content_management';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import { MapSettings } from '../../../../common/descriptor_types';

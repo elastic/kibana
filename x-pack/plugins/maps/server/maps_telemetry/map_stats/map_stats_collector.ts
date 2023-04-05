@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../../../common/content_management';
 import {
   EMS_BASEMAP_KEYS,
   JOIN_KEYS,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../content_management';
 import { JoinDescriptor, LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 import { SOURCE_TYPES } from '../constants';
 

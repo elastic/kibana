@@ -13,7 +13,7 @@ import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { APP_ICON, getFullPath } from '../../common/constants';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
-import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../../common/content_management';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(

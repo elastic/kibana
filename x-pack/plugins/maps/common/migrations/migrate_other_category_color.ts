@@ -12,7 +12,7 @@ import {
   LayerDescriptor,
   VectorStyleDescriptor,
 } from '../descriptor_types';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../content_management';
 
 const COLOR_STYLES = [
   VECTOR_STYLES.FILL_COLOR,
