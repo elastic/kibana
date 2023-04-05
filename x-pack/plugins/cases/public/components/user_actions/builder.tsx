@@ -8,7 +8,7 @@
 import { createAssigneesUserActionBuilder } from './assignees';
 import { createCommentUserActionBuilder } from './comment/comment';
 import { createConnectorUserActionBuilder } from './connector';
-import { createDescriptionUserActionBuilder } from './description';
+// import { createDescriptionUserActionBuilder } from './description';
 import { createPushedUserActionBuilder } from './pushed';
 import { createSettingsUserActionBuilder } from './settings';
 import { createSeverityUserActionBuilder } from './severity';
@@ -27,7 +27,7 @@ export const builderMap: UserActionBuilderMap = {
   severity: createSeverityUserActionBuilder,
   pushed: createPushedUserActionBuilder,
   comment: createCommentUserActionBuilder,
-  description: createDescriptionUserActionBuilder,
+  // description: createDescriptionUserActionBuilder,
   settings: createSettingsUserActionBuilder,
   assignees: createAssigneesUserActionBuilder,
 };

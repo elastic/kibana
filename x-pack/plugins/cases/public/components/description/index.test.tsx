@@ -12,8 +12,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { Actions } from '../../../common/api';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
-import { createDescriptionUserActionBuilder, getDescriptionUserAction } from './description';
-import { getMockBuilderArgs } from './mock';
+import { createDescriptionUserActionBuilder, getDescriptionUserAction } from '.';
+import { getMockBuilderArgs } from '../user_actions/mock';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('../../common/lib/kibana');
