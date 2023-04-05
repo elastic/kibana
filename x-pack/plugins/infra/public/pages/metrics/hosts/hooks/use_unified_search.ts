@@ -16,6 +16,7 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from './use_data_view';
 import {
+  HostsSearchPayload,
   useHostsUrlState,
   type HostsState,
   type StringDateRangeTimestamp,
@@ -54,7 +55,7 @@ export const useUnifiedSearch = () => {
     telemetry,
   } = services;
 
-  const onSubmit = setState;
+  const onSubmit = (params?: HostsSearchPayload) => setState(params ?? {});
 
   const loadFiltersFromState = useCallback(() => {
     if (!deepEqual(filterManagerService.getFilters(), state.filters)) {

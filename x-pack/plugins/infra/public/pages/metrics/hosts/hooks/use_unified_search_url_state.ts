@@ -34,7 +34,7 @@ const INITIAL_HOSTS_STATE: HostsState = {
   dateRange: INITIAL_DATE_RANGE,
 };
 
-const reducer = (prevState: HostsState, params: HostsSearchPayload = {}) => {
+const reducer = (prevState: HostsState, params: HostsSearchPayload) => {
   const payload = Object.fromEntries(Object.entries(params).filter(([_, v]) => !!v));
 
   return {
@@ -116,7 +116,7 @@ export type HostsState = rt.TypeOf<typeof HostsStateRT>;
 
 export type HostsSearchPayload = Partial<HostsState>;
 
-export type HostsStateUpdater = (params?: HostsSearchPayload) => void;
+export type HostsStateUpdater = (params: HostsSearchPayload) => void;
 
 export interface StringDateRangeTimestamp {
   from: number;
