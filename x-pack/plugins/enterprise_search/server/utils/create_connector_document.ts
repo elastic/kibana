@@ -91,6 +91,7 @@ export function createConnectorDocument({
     language,
     last_seen: null,
     last_sync_error: null,
+    last_sync_scheduled_at: null,
     last_sync_status: null,
     last_synced: null,
     name: indexName.startsWith('search-') ? indexName.substring(7) : indexName,
