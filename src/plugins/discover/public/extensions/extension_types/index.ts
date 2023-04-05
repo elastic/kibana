@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './extension_types';
-export * from './extension_registry';
+export * from './data_grid_extension';
+export * from './field_popover_extension';
+export * from './search_bar_extension';
+export * from './top_nav_extension';

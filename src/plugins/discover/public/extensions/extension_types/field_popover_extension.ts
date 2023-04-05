@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './extension_types';
-export * from './extension_registry';
+import type { ComponentType } from 'react';
+
+export interface FieldPopoverExtension {
+  id: 'field_popover';
+  disableDefaultBottomButton?: boolean;
+  CustomBottomButton?: ComponentType;
+}

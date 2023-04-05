@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './extension_types';
-export * from './extension_registry';
+import type { ComponentType } from 'react';
+
+export interface SearchBarExtension {
+  id: 'search_bar';
+  CustomDataViewPicker?: ComponentType;
+}

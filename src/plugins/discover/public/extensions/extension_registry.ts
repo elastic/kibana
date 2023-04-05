@@ -7,10 +7,18 @@
  */
 
 import { filter, map, Observable, startWith, Subject } from 'rxjs';
+import type {
+  DataGridExtension,
+  FieldPopoverExtension,
+  SearchBarExtension,
+  TopNavExtension,
+} from './extension_types';
 
-export interface DiscoverExtension {
-  id: string;
-}
+export type DiscoverExtension =
+  | DataGridExtension
+  | FieldPopoverExtension
+  | SearchBarExtension
+  | TopNavExtension;
 
 export type DiscoverExtensionId = DiscoverExtension['id'];
 
