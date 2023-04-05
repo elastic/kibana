@@ -175,6 +175,7 @@ function getMonitorDetailsMockSlice() {
   return {
     lastRun: {
       loading: false,
+      loaded: true,
       data: {
         summary: { up: 1, down: 0 },
         agent: {
