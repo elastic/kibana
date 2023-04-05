@@ -7,6 +7,7 @@
  */
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
+import { css } from '@emotion/react';
 import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
@@ -33,6 +34,10 @@ import { defaultMonacoEditorWidth } from './constants';
 import { type ShouldShowFieldInTableHandler } from '../../utils/get_should_show_field_handler';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
+
+const jsonContainerStyles = css`
+  min-width: ${defaultMonacoEditorWidth};
+`;
 
 export const getRenderCellValueFn =
   (
@@ -201,7 +206,7 @@ function renderPopoverContent({
             <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: defaultMonacoEditorWidth }}>
+        <EuiFlexItem css={jsonContainerStyles}>
           <JsonCodeEditor json={getJSON(columnId, row, useTopLevelObjectColumns)} height={300} />
         </EuiFlexItem>
       </EuiFlexGroup>

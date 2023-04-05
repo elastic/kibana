@@ -120,7 +120,7 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon euiButtonIcon--xSmall css-1q7ycil-euiButtonIcon-empty-primary-hoverStyles\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><div class=\\"euiText css-f0maoj-euiText-m\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon euiButtonIcon--xSmall css-1q7ycil-euiButtonIcon-empty-primary-hoverStyles\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -146,7 +146,7 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon euiButtonIcon--xSmall css-1q7ycil-euiButtonIcon-empty-primary-hoverStyles\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><div class=\\"euiText css-f0maoj-euiText-m\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon euiButtonIcon--xSmall css-1q7ycil-euiButtonIcon-empty-primary-hoverStyles\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
@@ -275,9 +275,21 @@ describe('Discover grid cell rendering', function () {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          css={
+            Object {
+              "map": undefined,
+              "name": "1eiwchg",
+              "next": undefined,
+              "styles": "
+        min-width: 370;
+      ",
+              "toString": [Function],
+            }
+          }
+        >
           <JsonCodeEditor
-            height={200}
+            height={300}
             json={
               Object {
                 "_id": "1",
@@ -294,7 +306,6 @@ describe('Discover grid cell rendering', function () {
                 },
               }
             }
-            width={370}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -507,9 +518,21 @@ describe('Discover grid cell rendering', function () {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          css={
+            Object {
+              "map": undefined,
+              "name": "1eiwchg",
+              "next": undefined,
+              "styles": "
+        min-width: 370;
+      ",
+              "toString": [Function],
+            }
+          }
+        >
           <JsonCodeEditor
-            height={200}
+            height={300}
             json={
               Object {
                 "_id": "1",
@@ -531,7 +554,6 @@ describe('Discover grid cell rendering', function () {
                 },
               }
             }
-            width={370}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -671,9 +693,21 @@ describe('Discover grid cell rendering', function () {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          css={
+            Object {
+              "map": undefined,
+              "name": "1eiwchg",
+              "next": undefined,
+              "styles": "
+        min-width: 370;
+      ",
+              "toString": [Function],
+            }
+          }
+        >
           <JsonCodeEditor
-            height={200}
+            height={300}
             json={
               Object {
                 "object.value": Array [
@@ -681,7 +715,6 @@ describe('Discover grid cell rendering', function () {
                 ],
               }
             }
-            width={370}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -865,16 +898,18 @@ describe('Discover grid cell rendering', function () {
         responsive={false}
       >
         <EuiFlexItem>
-          <span
-            className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": Array [
-                  ".gz",
-                ],
+          <EuiText>
+            <span
+              className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": Array [
+                    ".gz",
+                  ],
+                }
               }
-            }
-          />
+            />
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}
