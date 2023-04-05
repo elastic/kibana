@@ -28,9 +28,9 @@ import {
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON,
 } from '../screens/document_expandable_flyout';
 import { EXPAND_ALERT_BTN } from '../screens/alerts';
 import { getClassSelector } from '../helpers/common';
@@ -169,9 +169,6 @@ export const openPrevalence = () =>
     .should('be.visible')
     .click();
 
-/**
- * Open the Correlations tab  under the Visuablize tab in the document details expandable flyout left section
- */
 export const openCorrelations = () =>
   cy
     .get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON)
