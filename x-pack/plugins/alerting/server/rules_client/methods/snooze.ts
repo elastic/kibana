@@ -102,6 +102,7 @@ async function snoozeWithOCC(
       ruleId: id,
       actions: attributes.actions,
       references,
+      attributes,
     });
 
     resultedActions = migratedActions.actions;

@@ -43,6 +43,7 @@ export async function clearExpiredSnoozes(
       ruleId: id,
       actions: attributes.actions,
       references,
+      attributes,
     });
 
     resultedActions = migratedActions.actions;

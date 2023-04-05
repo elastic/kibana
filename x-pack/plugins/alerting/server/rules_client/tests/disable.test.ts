@@ -594,6 +594,7 @@ describe('disable()', () => {
       await rulesClient.disable({ id: '1' });
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         actions: [
           {
             actionRef: '1',

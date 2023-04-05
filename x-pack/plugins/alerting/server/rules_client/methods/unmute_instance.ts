@@ -82,6 +82,7 @@ async function unmuteInstanceWithOCC(
         ruleId: alertId,
         actions: attributes.actions,
         references,
+        attributes,
       });
 
       resultedActions = migratedActions.actions;

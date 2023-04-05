@@ -281,6 +281,7 @@ describe('unmuteAll()', () => {
       await rulesClient.unmuteAll({ id: '1' });
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         ruleId: '1',
         actions: [
           {

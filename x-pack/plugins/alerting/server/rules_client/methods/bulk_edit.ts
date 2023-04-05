@@ -448,6 +448,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
         ruleId: rule.id,
         actions: rule.attributes.actions,
         references: rule.references,
+        attributes: rule.attributes,
       });
 
       if (migratedActions.hasLegacyActions) {

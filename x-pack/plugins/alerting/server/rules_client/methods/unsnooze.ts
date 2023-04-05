@@ -78,6 +78,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
       ruleId: id,
       actions: attributes.actions,
       references,
+      attributes,
     });
 
     resultedActions = migratedActions.actions;

@@ -70,6 +70,7 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
       ruleId: id,
       actions: attributes.actions,
       references,
+      attributes,
     });
 
     resultedActions = migratedActions.actions;

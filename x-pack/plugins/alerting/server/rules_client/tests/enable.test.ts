@@ -679,6 +679,7 @@ describe('enable()', () => {
       await rulesClient.enable({ id: '1' });
 
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         actions: [
           {
             actionRef: '1',

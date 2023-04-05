@@ -73,6 +73,7 @@ async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: strin
       ruleId: id,
       actions: attributes.actions,
       references,
+      attributes,
     });
 
     resultedActions = migratedActions.actions;

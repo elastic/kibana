@@ -490,7 +490,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('edit action', () => {
+    describe.only('edit action', () => {
       describe('tags actions', () => {
         const overwriteTagsCases = [
           {
@@ -1088,7 +1088,6 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         });
-
         expect(setTagsBody.attributes.summary).to.eql({
           failed: 0,
           skipped: 0,

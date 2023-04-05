@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -2382,11 +2383,13 @@ describe('bulkEdit()', () => {
 
       expect(migrateLegacyActions).toHaveBeenCalledTimes(2);
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         ruleId: siemRule1.id,
         actions: [],
         references: [],
       });
       expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         ruleId: siemRule2.id,
         actions: [],
         references: [],

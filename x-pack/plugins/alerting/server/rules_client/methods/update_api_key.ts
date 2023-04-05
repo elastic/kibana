@@ -101,6 +101,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: { id: st
       ruleId: id,
       actions: attributes.actions,
       references,
+      attributes,
     });
 
     resultedActions = migratedActions.actions;

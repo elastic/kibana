@@ -130,6 +130,7 @@ const bulkDisableRulesWithOCC = async (
                 ruleId: rule.id,
                 actions: rule.attributes.actions,
                 references: rule.references,
+                attributes: rule.attributes,
               });
 
               resultedActions = migratedActions.actions;

@@ -77,6 +77,7 @@ async function muteInstanceWithOCC(
         ruleId: alertId,
         actions: attributes.actions,
         references,
+        attributes,
       });
 
       resultedActions = migratedActions.actions;
