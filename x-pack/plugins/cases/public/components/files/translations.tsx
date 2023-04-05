@@ -91,6 +91,10 @@ export const DOWNLOAD = i18n.translate('xpack.cases.caseView.files.download', {
   defaultMessage: 'download',
 });
 
-export const FILE_DELETE_SUCCESS = i18n.translate('xpack.cases.caseView.files.deleteSuccess', {
-  defaultMessage: 'File deleted successfully',
+export const DELETE = i18n.translate('xpack.cases.caseView.files.delete', {
+  defaultMessage: 'Delete',
+});
+
+export const DELETE_FILE_TITLE = i18n.translate('xpack.cases.caseView.files.deleteThisFile', {
+  defaultMessage: 'Delete this file?',
 });

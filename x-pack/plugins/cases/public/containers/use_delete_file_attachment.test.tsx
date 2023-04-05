@@ -18,8 +18,6 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
-const successToasterTitle = 'Deleted';
-
 describe('useDeleteFileAttachment', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
@@ -33,14 +31,6 @@ describe('useDeleteFileAttachment', () => {
     jest.clearAllMocks();
   });
 
-  it('init', async () => {
-    const { result } = renderHook(() => useDeleteFileAttachment(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    expect(result.current).toBeTruthy();
-  });
-
   it('calls deleteFileAttachment with correct arguments - case', async () => {
     const spyOnDeleteFileAttachments = jest.spyOn(api, 'deleteFileAttachments');
 
@@ -52,7 +42,6 @@ describe('useDeleteFileAttachment', () => {
       result.current.mutate({
         caseId: basicCaseId,
         fileId: basicFileMock.id,
-        successToasterTitle,
       });
     });
 
@@ -74,7 +63,6 @@ describe('useDeleteFileAttachment', () => {
       result.current.mutate({
         caseId: basicCaseId,
         fileId: basicFileMock.id,
-        successToasterTitle,
       })
     );
 
@@ -92,14 +80,13 @@ describe('useDeleteFileAttachment', () => {
       result.current.mutate({
         caseId: basicCaseId,
         fileId: basicFileMock.id,
-        successToasterTitle,
       })
     );
 
     await waitForNextUpdate();
 
     expect(addSuccess).toHaveBeenCalledWith({
-      title: successToasterTitle,
+      title: 'File deleted successfully',
       className: 'eui-textBreakWord',
     });
   });
@@ -116,7 +103,6 @@ describe('useDeleteFileAttachment', () => {
       result.current.mutate({
         caseId: basicCaseId,
         fileId: basicFileMock.id,
-        successToasterTitle,
       })
     );
 

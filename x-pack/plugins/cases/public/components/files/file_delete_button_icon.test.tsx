@@ -40,7 +40,7 @@ describe('FileDeleteButtonIcon', () => {
     expect(useDeleteFileAttachmentMock).toBeCalledTimes(1);
   });
 
-  it('clicking delete button calls deleteFileAttachment with proper params', async () => {
+  it('clicking delete button opens the confirmation modal', async () => {
     appMockRender.render(<FileDeleteButtonIcon caseId={basicCaseId} fileId={basicFileMock.id} />);
 
     const deleteButton = await screen.findByTestId('cases-files-delete-button');
@@ -49,12 +49,27 @@ describe('FileDeleteButtonIcon', () => {
 
     userEvent.click(deleteButton);
 
+    expect(await screen.findAllByTestId('property-actions-confirm-modal'));
+  });
+
+  it('clicking delete button in the confirmation modal calls deleteFileAttachment with proper params', async () => {
+    appMockRender.render(<FileDeleteButtonIcon caseId={basicCaseId} fileId={basicFileMock.id} />);
+
+    const deleteButton = await screen.findByTestId('cases-files-delete-button');
+
+    expect(deleteButton).toBeInTheDocument();
+
+    userEvent.click(deleteButton);
+
+    expect(await screen.findAllByTestId('property-actions-confirm-modal'));
+
+    userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+
     await waitFor(() => {
       expect(mutate).toHaveBeenCalledTimes(1);
       expect(mutate).toHaveBeenCalledWith({
         caseId: basicCaseId,
         fileId: basicFileMock.id,
-        successToasterTitle: 'File deleted successfully',
       });
     });
   });

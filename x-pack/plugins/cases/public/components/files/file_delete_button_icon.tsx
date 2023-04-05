@@ -10,6 +10,8 @@ import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import * as i18n from './translations';
 import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
+import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
+import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
 
 interface FileDeleteButtonIconProps {
   caseId: string;
@@ -19,17 +21,29 @@ interface FileDeleteButtonIconProps {
 const FileDeleteButtonIconComponent: React.FC<FileDeleteButtonIconProps> = ({ caseId, fileId }) => {
   const { isLoading, mutate: deleteFileAttachment } = useDeleteFileAttachment();
 
+  const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
+    onDelete: () => deleteFileAttachment({ caseId, fileId }),
+  });
+
   return (
-    <EuiButtonIcon
-      iconType={'trash'}
-      aria-label={i18n.DELETE_FILE}
-      color={'danger'}
-      isDisabled={isLoading}
-      onClick={() =>
-        deleteFileAttachment({ caseId, fileId, successToasterTitle: i18n.FILE_DELETE_SUCCESS })
-      }
-      data-test-subj={'cases-files-delete-button'}
-    />
+    <>
+      <EuiButtonIcon
+        iconType={'trash'}
+        aria-label={i18n.DELETE_FILE}
+        color={'danger'}
+        isDisabled={isLoading}
+        onClick={onModalOpen}
+        data-test-subj={'cases-files-delete-button'}
+      />
+      {showDeletionModal ? (
+        <DeleteAttachmentConfirmationModal
+          title={i18n.DELETE_FILE_TITLE}
+          confirmButtonText={i18n.DELETE}
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+        />
+      ) : null}
+    </>
   );
 };
 FileDeleteButtonIconComponent.displayName = 'FileDeleteButtonIcon';

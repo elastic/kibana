@@ -411,7 +411,7 @@ export const deleteFileAttachments = async ({
   fileIds: string[];
   signal: AbortSignal;
 }): Promise<void> => {
-  await KibanaServices.get().http.fetch<CaseResponse>(
+  await KibanaServices.get().http.fetch(
     INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', caseId),
     {
       method: 'POST',

@@ -16,7 +16,6 @@ import * as i18n from './translations';
 interface MutationArgs {
   caseId: string;
   fileId: string;
-  successToasterTitle: string;
 }
 
 export const useDeleteFileAttachment = () => {
@@ -30,12 +29,12 @@ export const useDeleteFileAttachment = () => {
     },
     {
       mutationKey: casesMutationsKeys.deleteFileAttachment,
-      onSuccess: (_, { successToasterTitle }) => {
-        showSuccessToast(successToasterTitle);
+      onSuccess: () => {
+        showSuccessToast(i18n.FILE_DELETE_SUCCESS);
         refreshAttachmentsTable();
       },
       onError: (error: ServerError) => {
-        showErrorToast(error, { title: i18n.ERROR_TITLE });
+        showErrorToast(error, { title: i18n.ERROR_DELETING_FILE });
       },
     }
   );
