@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { APMConfig } from '../..';
 import { isOpenTelemetryAgentName } from '../../../common/agent_name';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import {
-  ElasticApmAgentLatestVersion,
-  fetchAgentsLatestVersion,
-  OtelAgentLatestVersion,
-} from './fetch_agents_latest_version';
 import { getAgentDocsPageUrl } from './get_agent_url_repository';
 import { getAgentsItems } from './get_agents_items';
 
@@ -29,15 +22,6 @@ const getOtelAgentVersion = (item: {
     : item.agentVersion;
 };
 
-const getOtelLatestAgentVersion = (
-  agentTelemetryAutoVersion: string[],
-  otelLatestVersion?: OtelAgentLatestVersion
-) => {
-  return agentTelemetryAutoVersion.length > 0
-    ? otelLatestVersion?.auto_latest_version
-    : otelLatestVersion?.sdk_latest_version;
-};
-
 export interface AgentExplorerAgentsResponse {
   items: Array<{
     agentDocsPageUrl: string | undefined;
@@ -45,6 +29,7 @@ export interface AgentExplorerAgentsResponse {
     environments: string[];
     agentName: AgentName;
     agentVersion: string[];
+    agentTelemetryAutoVersion: string[];
     instances: number;
     latestVersion?: string;
   }>;
@@ -60,8 +45,6 @@ export async function getAgents({
   start,
   end,
   randomSampler,
-  logger,
-  config,
 }: {
   environment: string;
   serviceName?: string;
@@ -71,51 +54,34 @@ export async function getAgents({
   start: number;
   end: number;
   randomSampler: RandomSampler;
-  logger: Logger;
-  config: APMConfig;
 }): Promise<AgentExplorerAgentsResponse> {
-  const [items, latestVersions] = await Promise.all([
-    getAgentsItems({
-      environment,
-      serviceName,
-      agentLanguage,
-      kuery,
-      apmEventClient,
-      start,
-      end,
-      randomSampler,
-    }),
-    fetchAgentsLatestVersion(logger, config.latestAgentVersionsUrl),
-  ]);
-
-  const { data: latestVersionsData, error } = latestVersions;
+  const items = await getAgentsItems({
+    environment,
+    serviceName,
+    agentLanguage,
+    kuery,
+    apmEventClient,
+    start,
+    end,
+    randomSampler,
+  });
 
   return {
     items: items.map((item) => {
-      const { agentTelemetryAutoVersion, ...rest } = item;
-
       const agentDocsPageUrl = getAgentDocsPageUrl(item.agentName);
 
       if (isOpenTelemetryAgentName(item.agentName)) {
         return {
-          ...rest,
+          ...item,
           agentVersion: getOtelAgentVersion(item),
           agentDocsPageUrl,
-          latestVersion: getOtelLatestAgentVersion(
-            agentTelemetryAutoVersion,
-            latestVersionsData[item.agentName] as OtelAgentLatestVersion
-          ),
         };
       }
 
       return {
-        ...rest,
+        ...item,
         agentDocsPageUrl,
-        latestVersion: (
-          latestVersionsData[item.agentName] as ElasticApmAgentLatestVersion
-        )?.latest_version,
       };
     }),
-    latestVersionError: error,
   };
 }

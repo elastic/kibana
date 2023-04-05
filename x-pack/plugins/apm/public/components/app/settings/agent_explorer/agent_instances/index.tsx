@@ -58,12 +58,14 @@ function useAgentInstancesFetcher({ serviceName }: { serviceName: string }) {
 
 interface Props {
   agent: AgentExplorerItem;
+  isLatestVersionsLoading: boolean;
   latestVersionsFailed: boolean;
   onClose: () => void;
 }
 
 export function AgentInstances({
   agent,
+  isLatestVersionsLoading,
   latestVersionsFailed,
   onClose,
 }: Props) {
@@ -102,6 +104,7 @@ export function AgentInstances({
             instances={agent.instances}
             latestVersion={agent.latestVersion}
             query={query}
+            isLatestVersionsLoading={isLatestVersionsLoading}
             latestVersionsFailed={latestVersionsFailed}
           />
           <EuiHorizontalRule margin="m" />

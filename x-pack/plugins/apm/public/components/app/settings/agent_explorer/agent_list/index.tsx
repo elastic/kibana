@@ -35,11 +35,13 @@ export type AgentExplorerItem = ValuesType<
 
 export function getAgentsColumns({
   selectedAgent,
+  isLatestVersionsLoading,
   latestAgentVersionEnabled,
   latestVersionsFailed,
   onAgentSelected,
 }: {
   selectedAgent?: AgentExplorerItem;
+  isLatestVersionsLoading: boolean;
   latestAgentVersionEnabled: boolean;
   latestVersionsFailed: boolean;
   onAgentSelected: (agent: AgentExplorerItem) => void;
@@ -198,6 +200,7 @@ export function getAgentsColumns({
             ) => (
               <AgentLatestVersion
                 agentName={agentName as AgentName}
+                isLoading={isLatestVersionsLoading}
                 latestVersion={latestVersion}
                 failed={latestVersionsFailed}
               />
@@ -229,6 +232,7 @@ interface Props {
   items: AgentExplorerItem[];
   noItemsMessage: React.ReactNode;
   isLoading: boolean;
+  isLatestVersionsLoading: boolean;
   latestVersionsFailed: boolean;
 }
 
@@ -236,6 +240,7 @@ export function AgentList({
   items,
   noItemsMessage,
   isLoading,
+  isLatestVersionsLoading,
   latestVersionsFailed,
 }: Props) {
   const { config } = useApmPluginContext();
@@ -255,11 +260,17 @@ export function AgentList({
     () =>
       getAgentsColumns({
         selectedAgent,
+        isLatestVersionsLoading,
         latestAgentVersionEnabled,
         latestVersionsFailed,
         onAgentSelected,
       }),
-    [selectedAgent, latestAgentVersionEnabled, latestVersionsFailed]
+    [
+      selectedAgent,
+      latestAgentVersionEnabled,
+      isLatestVersionsLoading,
+      latestVersionsFailed,
+    ]
   );
 
   return (
@@ -267,6 +278,7 @@ export function AgentList({
       {selectedAgent && (
         <AgentInstances
           agent={selectedAgent}
+          isLatestVersionsLoading={isLatestVersionsLoading}
           latestVersionsFailed={latestVersionsFailed}
           onClose={onCloseFlyout}
         />

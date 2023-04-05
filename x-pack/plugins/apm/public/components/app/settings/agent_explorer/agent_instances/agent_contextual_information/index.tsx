@@ -63,6 +63,7 @@ export function AgentContextualInformation({
   instances,
   latestVersion,
   query,
+  isLatestVersionsLoading,
   latestVersionsFailed,
 }: {
   agentName: AgentName;
@@ -71,6 +72,7 @@ export function AgentContextualInformation({
   instances: number;
   latestVersion?: string;
   query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
+  isLatestVersionsLoading: boolean;
   latestVersionsFailed: boolean;
 }) {
   const { core, config } = useApmPluginContext();
@@ -137,6 +139,7 @@ export function AgentContextualInformation({
             val: (
               <AgentLatestVersion
                 agentName={agentName as AgentName}
+                isLoading={isLatestVersionsLoading}
                 latestVersion={latestVersion}
                 failed={latestVersionsFailed}
               />

@@ -20,6 +20,10 @@ import {
   AgentExplorerAgentInstancesResponse,
   getAgentInstances,
 } from './get_agent_instances';
+import {
+  AgentLatestVersionsResponse,
+  fetchAgentsLatestVersion,
+} from './fetch_agents_latest_version';
 
 const agentExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/get_agents_per_service',
@@ -41,8 +45,6 @@ const agentExplorerRoute = createApmServerRoute({
       params,
       request,
       plugins: { security },
-      logger,
-      config,
     } = resources;
 
     const {
@@ -69,9 +71,17 @@ const agentExplorerRoute = createApmServerRoute({
       start,
       end,
       randomSampler,
-      logger,
-      config,
     });
+  },
+});
+
+const latestAgentVersionsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/get_latest_agent_versions',
+  options: { tags: ['access:apm'] },
+  async handler(resources): Promise<AgentLatestVersionsResponse> {
+    const { logger, config } = resources;
+
+    return fetchAgentsLatestVersion(logger, config.latestAgentVersionsUrl);
   },
 });
 
@@ -108,5 +118,6 @@ const agentExplorerInstanceRoute = createApmServerRoute({
 
 export const agentExplorerRouteRepository = {
   ...agentExplorerRoute,
+  ...latestAgentVersionsRoute,
   ...agentExplorerInstanceRoute,
 };

@@ -21,7 +21,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const goServiceName = 'opbeans-go';
   const nodeServiceName = 'opbeans-node';
   const otelJavaServiceName = 'opbeans-java-otel';
-  const unlistedAgentServiceName = 'opbeans-unlisted-agent';
 
   async function callApi(
     overrides?: RecursivePartial<
@@ -104,18 +103,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             'service.language.name': 'javascript',
           });
 
-        const serviceUnlistedAgentDev = apm
-          .service({
-            name: unlistedAgentServiceName,
-            environment: 'staging',
-            agentName: 'my-agent',
-          })
-          .instance('instance-my-agent-dev')
-          .defaults({
-            'agent.version': '1.0.3',
-            'service.language.name': 'javascript',
-          });
-
         await synthtraceEsClient.index([
           timerange(start, end)
             .interval('5m')
@@ -153,15 +140,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .duration(2000)
                 .timestamp(timestamp)
             ),
-          timerange(start, end)
-            .interval('5m')
-            .rate(1)
-            .generator((timestamp) =>
-              serviceUnlistedAgentDev
-                .transaction({ transactionName: 'GET /api/payment/list' })
-                .duration(2000)
-                .timestamp(timestamp)
-            ),
         ]);
       });
 
@@ -181,7 +159,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns correct agents information', async () => {
         const { status, body } = await callApi();
         expect(status).to.be(200);
-        expect(body.items).to.have.length(4);
+        expect(body.items).to.have.length(3);
 
         const agents = keyBy(body.items, 'serviceName');
 
@@ -249,28 +227,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
           expect(status).to.be(200);
           expect(body.items).to.be.empty();
-        });
-      });
-
-      describe('agent latest version', () => {
-        it('returns a version when agent is listed in the file', async () => {
-          const { status, body } = await callApi();
-          expect(status).to.be(200);
-
-          const agents = keyBy(body.items, 'serviceName');
-
-          const nodeAgent = agents[nodeServiceName];
-          expect(nodeAgent?.latestVersion).not.to.be(undefined);
-        });
-
-        it('returns undefined when agent is not listed in the file', async () => {
-          const { status, body } = await callApi();
-          expect(status).to.be(200);
-
-          const agents = keyBy(body.items, 'serviceName');
-
-          const unlistedAgent = agents[unlistedAgentServiceName];
-          expect(unlistedAgent?.latestVersion).to.be(undefined);
         });
       });
     });

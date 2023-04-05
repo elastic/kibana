@@ -6,19 +6,15 @@
  */
 import { Logger } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import fetch from 'node-fetch';
+import {
+  ElasticApmAgentLatestVersion,
+  OtelAgentLatestVersion,
+} from '../../../common/agent_explorer';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { fetchWithTimeout } from '../../lib/helpers/fetch_with_timeout';
+import { ErrorWithStatusCode } from './error_with_status_code';
 
-export interface ElasticApmAgentLatestVersion {
-  latest_version: string;
-}
-
-export interface OtelAgentLatestVersion {
-  sdk_latest_version: string;
-  auto_latest_version?: string;
-}
-
-interface AgentLatestVersionsResponse {
+export interface AgentLatestVersionsResponse {
   data: AgentLatestVersions;
   error?: { message: string; type?: string; statusCode?: string };
 }
@@ -35,16 +31,21 @@ export const fetchAgentsLatestVersion = async (
   if (isEmpty(latestAgentVersionsUrl)) {
     return { data: {} as AgentLatestVersions };
   }
-
   try {
-    const data = await fetchWithTimeout(latestAgentVersionsUrl);
+    const response = await fetch(latestAgentVersionsUrl);
+
+    if (response.status !== 200) {
+      throw new ErrorWithStatusCode(
+        `${response.status} - ${await response.text()}`,
+        `${response.status}`
+      );
+    }
+
+    const data = await response.json();
 
     return { data };
   } catch (error) {
-    const didTimeout = error.name === 'AbortError';
-    const message = didTimeout
-      ? 'Failed to retrieve latest APM Agent versions due to a timeout'
-      : `Failed to retrieve latest APM Agent versions due to ${error}`;
+    const message = `Failed to retrieve latest APM Agent versions due to ${error}`;
     logger.warn(message);
 
     return {
