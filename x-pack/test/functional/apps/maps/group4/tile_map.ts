@@ -14,11 +14,13 @@ export default function ({ getPageObjects }: FtrProviderContext) {
   describe('tile_map visualization', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.visualize.loadSavedVisualization(
-        'Visualization TileMap',
-        { navigateToVisualize: false }
+      await PageObjects.visualize.loadSavedVisualization('Visualization TileMap', {
+        navigateToVisualize: false,
+      });
+      await PageObjects.timePicker.setAbsoluteRange(
+        PageObjects.timePicker.defaultStartTime,
+        PageObjects.timePicker.defaultEndTime
       );
-      await PageObjects.timePicker.setAbsoluteRange(PageObjects.timePicker.defaultStartTime, PageObjects.timePicker.defaultEndTime);
       await PageObjects.maps.waitForLayersToLoad();
     });
 
@@ -27,9 +29,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       await PageObjects.maps.waitForLayersToLoad();
 
       expect(await PageObjects.maps.getNumberOfLayers()).to.eql(2);
-      expect(await PageObjects.maps.doesLayerExist('Visualization TileMap')).to.be(
-        true
-      );
+      expect(await PageObjects.maps.doesLayerExist('Visualization TileMap')).to.be(true);
     });
   });
 }
