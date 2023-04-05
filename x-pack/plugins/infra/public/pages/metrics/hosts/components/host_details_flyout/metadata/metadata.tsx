@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingChart } from '@elastic/eui';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingChart, EuiLink, EuiSearchBar, EuiSpacer, Query } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { debounce } from 'lodash';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
@@ -36,6 +36,29 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
   } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
+
+  const [metadataSearchFilter, setMetadataSearchFilter] = useState('');
+  const [searchBarState, setSearchBarState] = useState<Query>(() =>
+    metadataSearchFilter ? Query.parse(metadataSearchFilter) : Query.MATCH_ALL
+  );
+
+  const debouncedSearchOnChange = useMemo(
+    () =>
+      debounce<(queryText: string) => void>((queryText) => setMetadataSearchFilter(queryText), 500),
+    [setMetadataSearchFilter]
+  );
+
+  const searchBarOnChange = useCallback(
+    ({ query, queryText }) => {
+      setSearchBarState(query);
+      debouncedSearchOnChange(queryText);
+    },
+    [setSearchBarState, debouncedSearchOnChange]
+  );
+
+  const queriedMetadata = EuiSearchBar.Query.execute(searchBarState, fields, {
+    defaultFields: ['name', 'value'],
+  });
 
   if (metadataLoading) {
     return <LoadingPlaceholder />;
@@ -70,9 +93,32 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
       </EuiCallOut>
     );
   }
-
   return fields.length > 0 ? (
-    <Table rows={fields} />
+    <>
+      <EuiSearchBar
+        query={searchBarState}
+        onChange={searchBarOnChange}
+        box={{
+          incremental: true,
+          placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
+            defaultMessage: 'Search for metadata…',
+          }),
+        }}
+      />
+      <EuiSpacer size="m" />
+      {queriedMetadata.length > 0 ? (
+        <Table rows={queriedMetadata} />
+      ) : (
+        <EuiCallOut
+          data-test-subj="infraMetadataNoDataFound"
+          title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
+            defaultMessage: 'There is no data to display.',
+          })}
+          size="m"
+          iconType="iInCircle"
+        />
+      )}
+    </>
   ) : (
     <EuiCallOut
       data-test-subj="infraMetadataNoData"
