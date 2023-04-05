@@ -161,7 +161,7 @@ export function UnifiedSearchBar({
     >
       <SearchBar
         appName={i18n.translate('xpack.apm.appName', {
-          defaultMessage: 'Service Transaction',
+          defaultMessage: 'APM',
         })}
         iconType="search"
         placeholder={searchbarPlaceholder}
