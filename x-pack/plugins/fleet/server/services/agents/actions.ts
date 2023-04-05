@@ -22,6 +22,8 @@ import {
 } from '../../../common/constants';
 import { AgentActionNotFoundError } from '../../errors';
 
+import { auditLoggingService } from '../audit_logging';
+
 import { bulkUpdateAgents } from './crud';
 
 const ONE_MONTH_IN_MS = 2592000000;
@@ -55,6 +57,10 @@ export async function createAgentAction(
     id: uuidv4(),
     body,
     refresh: 'wait_for',
+  });
+
+  auditLoggingService.writeCustomAuditLog({
+    message: `User created Fleet action [id=${actionId}]`,
   });
 
   return {
@@ -104,6 +110,12 @@ export async function bulkCreateAgentActions(
       ];
     }),
   });
+
+  for (const action of actions) {
+    auditLoggingService.writeCustomAuditLog({
+      message: `User created Fleet action [id=${action.id}]`,
+    });
+  }
 
   return actions;
 }
@@ -164,6 +176,12 @@ export async function bulkCreateAgentActionResults(
     ];
   });
 
+  for (const result of results) {
+    auditLoggingService.writeCustomAuditLog({
+      message: `User created Fleet action result [id=${result.actionId}]`,
+    });
+  }
+
   await esClient.bulk({
     index: AGENT_ACTIONS_RESULTS_INDEX,
     body: bulkBody,
@@ -192,10 +210,20 @@ export async function getAgentActions(esClient: ElasticsearchClient, actionId: s
     throw new AgentActionNotFoundError('Action not found');
   }
 
-  return res.hits.hits.map((hit) => ({
-    ...hit._source,
-    id: hit._id,
-  }));
+  const result: FleetServerAgentAction[] = [];
+
+  for (const hit of res.hits.hits) {
+    auditLoggingService.writeCustomAuditLog({
+      message: `User retrieved Fleet action [id=${hit._source?.action_id}]`,
+    });
+
+    result.push({
+      ...hit._source,
+      id: hit._id,
+    });
+  }
+
+  return result;
 }
 
 export async function getUnenrollAgentActions(
@@ -227,10 +255,20 @@ export async function getUnenrollAgentActions(
     size: SO_SEARCH_LIMIT,
   });
 
-  return res.hits.hits.map((hit) => ({
-    ...hit._source,
-    id: hit._id,
-  }));
+  const result: FleetServerAgentAction[] = [];
+
+  for (const hit of res.hits.hits) {
+    auditLoggingService.writeCustomAuditLog({
+      message: `User retrieved Fleet action [id=${hit._source?.action_id}]`,
+    });
+
+    result.push({
+      ...hit._source,
+      id: hit._id,
+    });
+  }
+
+  return result;
 }
 
 export async function cancelAgentAction(esClient: ElasticsearchClient, actionId: string) {
@@ -253,6 +291,12 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
 
     if (res.hits.hits.length === 0) {
       throw new AgentActionNotFoundError('Action not found');
+    }
+
+    for (const hit of res.hits.hits) {
+      auditLoggingService.writeCustomAuditLog({
+        message: `User retrieved Fleet action [id=${hit._source?.action_id}]}]`,
+      });
     }
 
     const upgradeActions: FleetServerAgentAction[] = res.hits.hits
@@ -347,6 +391,51 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
   } as AgentAction;
 }
 
+async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: string[]) {
+  const res = await esClient.search<FleetServerAgentAction>({
+    index: AGENT_ACTIONS_INDEX,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              action_id: actionIds,
+            },
+          },
+        ],
+      },
+    },
+    size: SO_SEARCH_LIMIT,
+  });
+
+  if (res.hits.hits.length === 0) {
+    throw new AgentActionNotFoundError('Action not found');
+  }
+
+  const result: FleetServerAgentAction[] = [];
+
+  for (const hit of res.hits.hits) {
+    auditLoggingService.writeCustomAuditLog({
+      message: `User retrieved Fleet action [id=${hit._source?.action_id}]`,
+    });
+
+    result.push({
+      ...hit._source,
+      id: hit._id,
+    });
+  }
+
+  return result;
+}
+
+export const getAgentsByActionsIds = async (
+  esClient: ElasticsearchClient,
+  actionsIds: string[]
+) => {
+  const actions = await getAgentActionsByIds(esClient, actionsIds);
+  return actions.flatMap((a) => a?.agents).filter((agent) => !!agent) as string[];
+};
+
 export interface ActionsService {
   getAgent: (
     esClient: ElasticsearchClient,
@@ -360,6 +449,5 @@ export interface ActionsService {
     esClient: ElasticsearchClient,
     newAgentAction: Omit<AgentAction, 'id'>
   ) => Promise<AgentAction>;
-
   getAgentActions: (esClient: ElasticsearchClient, actionId: string) => Promise<any[]>;
 }

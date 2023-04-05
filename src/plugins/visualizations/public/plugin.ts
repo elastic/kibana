@@ -57,6 +57,7 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -98,6 +99,7 @@ import {
   setFieldFormats,
   setSavedObjectTagging,
   setUsageCollection,
+  setSavedObjectsManagement,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
@@ -147,6 +149,7 @@ export interface VisualizationsStartDeps {
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 /**
@@ -379,6 +382,7 @@ export class VisualizationsPlugin
       savedObjectsTaggingOss,
       fieldFormats,
       usageCollection,
+      savedObjectsManagement,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -399,6 +403,7 @@ export class VisualizationsPlugin
     setChrome(core.chrome);
     setFieldFormats(fieldFormats);
     setUsageCollection(usageCollection);
+    setSavedObjectsManagement(savedObjectsManagement);
 
     if (spaces) {
       setSpaces(spaces);

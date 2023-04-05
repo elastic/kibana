@@ -29,7 +29,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, dataTypes } from '../../../../../../../common/constants';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  dataTypes,
+  DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
+} from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useStartServices, useConfig, useGetAgentPolicies } from '../../../../hooks';
 
@@ -66,7 +70,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const { docLinks } = useStartServices();
   const config = useConfig();
   const maxAgentPoliciesWithInactivityTimeout =
-    config.developer?.maxAgentPoliciesWithInactivityTimeout ?? 0;
+    config.developer?.maxAgentPoliciesWithInactivityTimeout ??
+    DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT;
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const {
     dataOutputOptions,

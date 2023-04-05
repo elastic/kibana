@@ -93,7 +93,7 @@ export function TestNowMode({
       )}
 
       {(hasBlockingError && !isPushing && (
-        <EuiCallOut title={blockingErrorMessage} color="danger" iconType="alert" />
+        <EuiCallOut title={blockingErrorMessage} color="danger" iconType="warning" />
       )) ||
         null}
 

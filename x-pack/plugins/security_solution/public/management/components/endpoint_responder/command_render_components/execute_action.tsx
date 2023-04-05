@@ -14,7 +14,7 @@ import type { ResponseActionExecuteOutputContent } from '../../../../../common/e
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { parsedExecuteTimeout } from '../lib/utils';
-import { ExecuteActionHostResponseOutput } from '../../endpoint_execute_action';
+import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
   ActionRequestComponentProps<{
@@ -72,9 +72,12 @@ export const ExecuteActionResult = memo<
         { defaultMessage: 'Command execution was successful.' }
       )}
     >
-      <ExecuteActionHostResponseOutput
+      <ExecuteActionHostResponse
         action={completedActionDetails}
+        canAccessFileDownloadLink={true}
         agentId={command.commandDefinition?.meta?.endpointId}
+        textSize="s"
+        data-test-subj="console"
       />
     </ResultComponent>
   );

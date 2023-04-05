@@ -22,6 +22,7 @@ import { canAppendWildcard } from '../../lib';
 import { schema } from '../form_schema';
 import { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
+import { TitleDocsPopover } from './title_docs_popover';
 
 interface TitleFieldProps {
   isRollup: boolean;
@@ -194,6 +195,8 @@ export const TitleField = ({
               isLoading={field.isValidating}
               fullWidth
               data-test-subj="createIndexPatternTitleInput"
+              append={<TitleDocsPopover />}
+              placeholder="example-*"
             />
           </EuiFormRow>
         );

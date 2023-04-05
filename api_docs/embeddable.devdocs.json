@@ -7185,9 +7185,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "savedObjects",
+                "pluginId": "savedObjectsFinder",
                 "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
+                "docId": "kibSavedObjectsFinderPluginApi",
                 "section": "def-public.SavedObjectMetaData",
                 "text": "SavedObjectMetaData"
               },
@@ -8169,6 +8169,26 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-public.Start",
                 "text": "Start"
+              }
+            ],
+            "path": "src/plugins/embeddable/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableStartDependencies.savedObjectsManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementPluginStart",
+                "text": "SavedObjectsManagementPluginStart"
               }
             ],
             "path": "src/plugins/embeddable/public/plugin.tsx",
@@ -10508,6 +10528,21 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.PANEL_HOVER_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "PANEL_HOVER_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"PANEL_HOVER_TRIGGER\""
+        ],
+        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.PANEL_NOTIFICATION_TRIGGER",
         "type": "string",
         "tags": [],
@@ -10698,6 +10733,59 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.panelBadgeTrigger.description",
+            "type": "Any",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.panelHoverTrigger",
+        "type": "Object",
+        "tags": [],
+        "label": "panelHoverTrigger",
+        "description": [],
+        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.panelHoverTrigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.panelHoverTrigger.title",
+            "type": "Any",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.panelHoverTrigger.description",
             "type": "Any",
             "tags": [],
             "label": "description",

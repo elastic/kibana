@@ -10,7 +10,12 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
+import {
+  LEGACY_BASE_ALERT_API_PATH,
+  DefaultRuleAggregationResult,
+  getDefaultRuleAggregation,
+  formatDefaultAggregationResult,
+} from '../../../common';
 import { renameKeys } from '../lib/rename_keys';
 import { FindOptions } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
@@ -77,9 +82,16 @@ export const aggregateAlertRoute = (
           : [query.search_fields];
       }
 
-      const aggregateResult = await rulesClient.aggregate({ options });
+      const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResult>({
+        options,
+        aggs: getDefaultRuleAggregation(),
+      });
+      const { ruleExecutionStatus, ...rest } = formatDefaultAggregationResult(aggregateResult);
       return res.ok({
-        body: aggregateResult,
+        body: {
+          ...rest,
+          alertExecutionStatus: ruleExecutionStatus,
+        },
       });
     })
   );

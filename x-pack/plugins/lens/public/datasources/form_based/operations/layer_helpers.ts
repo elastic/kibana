@@ -10,7 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DateRange } from '../../../../common';
+import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -360,7 +360,7 @@ export function insertNewColumn({
       // TODO: need to create on the fly the new columns for Formula,
       // like we do for fullReferences to show a seamless transition
     }
-    const possibleOperation = operationDefinition.getPossibleOperation();
+    const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
     const buildColumnFn = columnParams
@@ -1689,7 +1689,7 @@ export function isOperationAllowedAsReference({
     hasValidMetadata =
       Boolean(metadata) && validation.validateMetadata(metadata!, operationType, field.name);
   } else if (operationDefinition.input === 'none') {
-    const metadata = operationDefinition.getPossibleOperation();
+    const metadata = operationDefinition.getPossibleOperation(indexPattern);
     hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else if (operationDefinition.input === 'fullReference') {
     const metadata = operationDefinition.getPossibleOperation(indexPattern);

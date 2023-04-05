@@ -34,7 +34,7 @@ import {
   getThresholdRuleForSignalTesting,
   startSignalsMigration,
   waitFor,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -186,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
           '.siem-signals-*',
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -225,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: QueryRuleCreateProps = getRuleForSignalTesting([`.siem-signals-*`]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -368,6 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.threat': [],
           'kibana.alert.rule.to': 'now',
           'kibana.alert.rule.references': [],
+          'kibana.alert.rule.revision': 0,
           'kibana.alert.rule.version': 1,
           'kibana.alert.rule.exceptions_list': [],
           'kibana.alert.rule.immutable': false,
@@ -385,7 +386,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -528,6 +529,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.threat': [],
           'kibana.alert.rule.to': 'now',
           'kibana.alert.rule.references': [],
+          'kibana.alert.rule.revision': 0,
           'kibana.alert.rule.version': 1,
           'kibana.alert.rule.exceptions_list': [],
           'kibana.alert.rule.immutable': false,
@@ -560,7 +562,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.siem-signals-*`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -573,7 +575,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -599,7 +601,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting(['.siem-signals-*']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -612,7 +614,7 @@ export default ({ getService }: FtrProviderContext) => {
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -648,7 +650,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -669,7 +671,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);

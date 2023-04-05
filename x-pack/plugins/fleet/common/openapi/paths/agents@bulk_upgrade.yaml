@@ -1,16 +1,17 @@
 post:
-  summary: Agents - Bulk Upgrade
-  tags: []
+  summary: Bulk upgrade agents
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
       content:
         application/json:
           schema:
-              type: object
-              properties:
-                actionId: 
-                  type: string
+            type: object
+            properties:
+              actionId:
+                type: string
     '400':
       $ref: ../components/responses/error.yaml
   operationId: bulk-upgrade-agents

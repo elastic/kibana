@@ -8,7 +8,7 @@
 export interface KeyValuePair {
   label: string;
   order?: number | null;
-  value: string | null;
+  value: string | number | boolean | null;
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
@@ -149,6 +149,7 @@ export interface Connector {
   language: string | null;
   last_seen: string | null;
   last_sync_error: string | null;
+  last_sync_scheduled_at: string | null;
   last_sync_status: SyncStatus | null;
   last_synced: string | null;
   name: string;
