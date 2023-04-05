@@ -69,7 +69,7 @@ export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFly
   const commands = useCommands(policyId, target);
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} data-test-subj="uninstall-command-flyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>

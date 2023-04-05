@@ -85,6 +85,7 @@ export const TableRowActions: React.FunctionComponent<{
       <EuiContextMenuItem
         disabled={!hasFleetAllPrivileges || !agent.active}
         icon="trash"
+        key="unenroll-agent"
         onClick={() => {
           onUnenrollClick();
         }}
@@ -103,6 +104,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         icon="refresh"
+        key="upgrade-agent"
         disabled={!isAgentUpgradeable(agent, kibanaVersion)}
         onClick={() => {
           onUpgradeClick();
@@ -125,6 +127,7 @@ export const TableRowActions: React.FunctionComponent<{
           }}
           disabled={!agent.active}
           key="getUninstallCommand"
+          data-test-subj="get-uninstall-command-menu-item"
         >
           <FormattedMessage
             id="xpack.fleet.agentList.getUninstallCommand"
@@ -138,6 +141,7 @@ export const TableRowActions: React.FunctionComponent<{
       menuItems.push(
         <EuiContextMenuItem
           icon="download"
+          key="request-diagnostics"
           disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
           onClick={() => {
             onRequestDiagnosticsClick();
