@@ -23,6 +23,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiPopover,
+  EuiPopoverFooter,
   EuiSelectable,
   EuiSwitch,
   EuiText,
@@ -343,7 +344,7 @@ export const EngineSchema: React.FC = () => {
       numActiveFilters={filteredDataTypes.length}
       isSelected={isFilterByPopoverOpen}
     >
-      {i18n.translate('xpack.enterpriseSearch.content.engine.schema.filter', {
+      {i18n.translate('xpack.enterpriseSearch.content.engine.schema.filters', {
         defaultMessage: 'Field types',
       })}
     </EuiFilterButton>
@@ -376,7 +377,7 @@ export const EngineSchema: React.FC = () => {
             />
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.enterpriseSearch.content.engine.schema.filter.label', {
+                {i18n.translate('xpack.enterpriseSearch.content.engine.schema.filters.label', {
                   defaultMessage: 'Filter By',
                 })}
               </EuiFlexItem>
@@ -386,6 +387,7 @@ export const EngineSchema: React.FC = () => {
                   isOpen={isFilterByPopoverOpen}
                   closePopover={() => setIsFilterByPopoverOpen(false)}
                   panelPaddingSize="m"
+                  anchorPosition="downCenter"
                 >
                   <EuiSelectable
                     searchable
@@ -402,6 +404,23 @@ export const EngineSchema: React.FC = () => {
                       </div>
                     )}
                   </EuiSelectable>
+                  <EuiPopoverFooter>
+                    <EuiFlexGroup justifyContent="spaceAround">
+                      <EuiButtonEmpty
+                        color="danger"
+                        iconType="error"
+                        size="s"
+                        onClick={() => setSelectedEsFieldTypes(esFieldTypes)}
+                      >
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.engine.schema.filters.clearAll',
+                          {
+                            defaultMessage: 'Clear all ',
+                          }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiFlexGroup>
+                  </EuiPopoverFooter>
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -419,7 +438,7 @@ export const EngineSchema: React.FC = () => {
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.engine.schema.filter.conflict.callout.title"
+                  id="xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.title"
                   defaultMessage="There are {totalFieldsWithConflicts} more conflicts not displayed here"
                   values={{ totalFieldsWithConflicts }}
                 />
@@ -429,7 +448,7 @@ export const EngineSchema: React.FC = () => {
             >
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.schema.filter.conflict.callout.subTitle',
+                  'xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.subTitle',
                   {
                     defaultMessage:
                       'In order to see all field conflicts you must clear your field filters',
@@ -437,7 +456,12 @@ export const EngineSchema: React.FC = () => {
                 )}
               </p>
               <EuiButton fill color="danger" onClick={() => setSelectedEsFieldTypes(esFieldTypes)}>
-                Clear filter
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.clearFilters',
+                  {
+                    defaultMessage: 'Clear filters ',
+                  }
+                )}
               </EuiButton>
             </EuiCallOut>
           ) : (
