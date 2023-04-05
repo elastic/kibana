@@ -7,7 +7,7 @@
 
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
-import { InventoryItemType } from '../../../../../../../common/inventory_models/types';
+import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
 import type { HostNodeRow } from '../../../hooks/use_hosts_table';
 
 export const navigateToUptime = (
