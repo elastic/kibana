@@ -427,8 +427,10 @@ function useFindExtendedRules(...params: Parameters<typeof useFindRules>) {
     };
   }, [rules, total, rulesSnoozeSettings, isSnoozeSettingsFetchingError]);
   const refetchRulesAndSnoozeSettings = useCallback(async () => {
-    await refetchRules();
+    const response = await refetchRules();
     await refetchSnoozeSettings();
+
+    return response;
   }, [refetchRules, refetchSnoozeSettings]);
 
   return {
