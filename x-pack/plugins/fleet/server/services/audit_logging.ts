@@ -14,6 +14,10 @@ class AuditLoggingService {
   /**
    * Write a custom audit log record. If a current request is available, the log will include
    * user/session data. If not, an unscoped audit logger will be used.
+   *
+   * Note: all Fleet audit logs written via this method will have a `labels.application` value
+   * of `elastic/fleet`. Consumers aren't able to override this value, and a custom `labels.application`
+   * value provided as an argument will be overwritten.
    */
   public writeCustomAuditLog(args: AuditEvent) {
     const securitySetup = appContextService.getSecuritySetup();
