@@ -6,12 +6,14 @@
  */
 
 import axios from 'axios';
-import { createExternalService } from './service';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { SlackApiService } from '../../../common/slack_api/types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { createExternalService } from './service';
+import { SlackApiService } from '../../../common/slack_api/types';
+import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
+
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
@@ -99,7 +101,7 @@ describe('Slack API service', () => {
           logger,
           configurationUtilities
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"[Action][Slack]: Wrong configuration."`);
+      ).toThrowErrorMatchingInlineSnapshot(`"[Action][Slack API]: Wrong configuration."`);
     });
   });
 
@@ -108,7 +110,7 @@ describe('Slack API service', () => {
       requestMock.mockImplementation(() => getChannelsResponse);
       const res = await service.getChannels();
       expect(res).toEqual({
-        actionId: '.slack',
+        actionId: SLACK_API_CONNECTOR_ID,
         data: {
           ok: true,
           channels,
@@ -136,7 +138,7 @@ describe('Slack API service', () => {
       });
 
       expect(await service.getChannels()).toEqual({
-        actionId: '.slack',
+        actionId: SLACK_API_CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'request fail',
         status: 'error',
@@ -169,7 +171,7 @@ describe('Slack API service', () => {
       expect(
         await service.postMessage({ channels: ['general', 'privat'], text: 'a message' })
       ).toEqual({
-        actionId: '.slack',
+        actionId: SLACK_API_CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'request fail',
         status: 'error',

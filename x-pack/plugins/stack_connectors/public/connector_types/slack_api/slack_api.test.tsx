@@ -6,8 +6,8 @@
  */
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { registerConnectorTypes } from '..';
 import { registrationServicesMock } from '../../mocks';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 
@@ -21,25 +21,15 @@ beforeAll(async () => {
     connectorTypeModel = getResult;
   }
 });
-describe('connectorTypeRegistry.get() works', () => {
+
+describe('connectorTypeRegistry.get works', () => {
   test('connector type static data is as expected', () => {
     expect(connectorTypeModel.id).toEqual(SLACK_API_CONNECTOR_ID);
     expect(connectorTypeModel.iconClass).toEqual('logoSlack');
   });
 });
 
-describe('slack action params validation', () => {
-  // test('should succeed when action params include valid message', async () => {
-  //   const actionParams = {
-  //     message: 'message {test}',
-  //   };
-  //   expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-  //     errors: {
-  //       message: [],
-  //       'subActionParams.channels': [],
-  //     },
-  //   });
-  // });
+describe('Slack action params validation', () => {
   test('should succeed when action params include valid message and channels list', async () => {
     const actionParams = {
       subAction: 'postMessage',

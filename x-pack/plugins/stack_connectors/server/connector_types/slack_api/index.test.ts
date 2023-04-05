@@ -62,30 +62,30 @@ describe('validate params', () => {
       `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
     );
   });
-});
 
-test('should validate and pass when params are valid for post message', () => {
-  expect(
-    validateParams(
-      connectorType,
-      { subAction: 'postMessage', subActionParams: { channels: ['general'], text: 'a text' } },
-      { configurationUtilities }
-    )
-  ).toEqual({
-    subAction: 'postMessage',
-    subActionParams: { channels: ['general'], text: 'a text' },
+  test('should validate and pass when params are valid for post message', () => {
+    expect(
+      validateParams(
+        connectorType,
+        { subAction: 'postMessage', subActionParams: { channels: ['general'], text: 'a text' } },
+        { configurationUtilities }
+      )
+    ).toEqual({
+      subAction: 'postMessage',
+      subActionParams: { channels: ['general'], text: 'a text' },
+    });
+  });
+
+  test('should validate and pass when params are valid for get channels', () => {
+    expect(
+      validateParams(connectorType, { subAction: 'getChannels' }, { configurationUtilities })
+    ).toEqual({
+      subAction: 'getChannels',
+    });
   });
 });
 
-test('should validate and pass when params are valid for get channels', () => {
-  expect(
-    validateParams(connectorType, { subAction: 'getChannels' }, { configurationUtilities })
-  ).toEqual({
-    subAction: 'getChannels',
-  });
-});
-
-describe('validate config, secrets and connector', () => {
+describe('validate secrets', () => {
   test('should validate and throw error when secrets is empty', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
@@ -103,6 +103,7 @@ describe('validate config, secrets and connector', () => {
       { configurationUtilities }
     );
   });
+
   test('should validate and throw error when secrets is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, { token: 1 }, { configurationUtilities });
@@ -118,6 +119,7 @@ describe('execute', () => {
     axios.create = jest.fn().mockImplementation(() => axios);
     connectorType = getConnectorType();
   });
+
   test('should fail if params does not include subAction', async () => {
     requestMock.mockImplementation(() => ({
       data: {
