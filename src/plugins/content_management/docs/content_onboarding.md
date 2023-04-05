@@ -2,7 +2,7 @@
 
 This documentation lays down the steps to migrate away from the saved object public client by using the content management registries (public and server) and its public client.
 
-## High level arquitecture
+## High level arquitecture
 
 * New content is registered both in the browser and the server CM registries. 
 * When registring on the server, a storage instance is required. This storage instance exposes CRUD and search functionalities for the content (by calling the saved object client apis).
@@ -15,7 +15,7 @@ With the above step:
 
 ## Steps
 
-### 1. Add Kibana plugin dependency to the contentManagement plugin
+### 1. Add Kibana plugin dependency to the contentManagement plugin
 
 ```
 // kibana.jsonc
@@ -112,7 +112,7 @@ export type {
 } from './latest';
 ```
 
-#### 2.b. Content management services definition
+#### 2.b. Content management services definition
 
 Now that we have the TS interfaces defined, let's create a content management services definition. This is where you will declare runtime validation schemas and `up()` and `down()` transform functions to convert your objects to previous/next version of your content. We won't add those just yet because we only have one version, but at the end of this doc we will see how to declare a new version of our content.
 
@@ -505,9 +505,9 @@ With serverless we need to support the case where the server is on a more recent
 
 Let's imagine that the map `"title"` fields needs to be changed to `"name"`. We make the required changes in the mappings for the SO migrations and the "title" field is removed/renamed in the DB, the server is on "v2" and start accepting request from clients either on "v1" or on "v2". When creating a new map, the "v2" server expects the object to contain a "name" field, (and not "title" anymore).
 
-#### Create a "v2" folder for the new TS interfaces and CM services definition
+Create a "v2" folder for the new TS interfaces and CM services definition
 
-* Update the types
+#### 1. Update the types
 
 ```ts
 // common/content_management/v2/types
@@ -531,14 +531,14 @@ export type MapCreateIn = CreateIn<MapContentType, MapAttributes, CreateOptions>
 // Re-export all other types, either explicitely either re-exporting the "v1" ones.
 ```
 
-* Update `latest.ts` to point to the new version
+#### 2. Update `latest.ts` to point to the new version
 
 ```ts
 // common/content_management/latest.ts
 export * from './v2';
 ```
 
-* Create a new cm services definition
+#### 3. Create a new cm services definition
 
 ```ts
 // common/content_management/v2/cm_services.ts
@@ -628,7 +628,7 @@ export const serviceDefinition: ServicesDefinition = {
 };
 ```
 
-* Add the new CM services definition to the map
+#### 4. Add the new CM services definition to the map
 
 ```ts
 // common/content_management/cm_services.ts
@@ -643,7 +643,9 @@ export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = 
 };
 ```
 
-* Update the "v1" services definition and add `up()` transforms to the object coming "in" (input parameters of the storage instance methods)
+#### 5. Update the "v1" services definition and add `up()` transforms
+
+Note: Use `up()` transforms are for the object coming "in" (input parameters of the storage instance methods)
 
 ```ts
 // common/content_management/v1/cm_services.ts
