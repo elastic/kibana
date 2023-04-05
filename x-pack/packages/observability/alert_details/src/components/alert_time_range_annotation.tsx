@@ -16,9 +16,12 @@ interface Props {
   id: string;
 }
 
-const RECT_ANNOTATION_TITLE = i18n.translate('observabilityAlertDetails.alertTimeRangeRect.title', {
-  defaultMessage: 'Active',
-});
+const RECT_ANNOTATION_TITLE = i18n.translate(
+  'observabilityAlertDetails.alertTimeRangeAnnotation.detailsTooltip',
+  {
+    defaultMessage: 'Active',
+  }
+);
 
 export function AlertTimeRangeAnnotation({ alertStart, alertEnd, color, id }: Props) {
   return (
