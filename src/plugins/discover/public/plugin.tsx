@@ -71,7 +71,6 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
-import { ExtraFieldActionsRegistry } from './services/doc_views/extra_field_actions_registry';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -122,9 +121,6 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  extraFieldOptions: {
-    register: ExtraFieldActionsRegistry['addExtraFieldAction'];
-  };
 }
 
 export interface DiscoverStart {
@@ -212,7 +208,6 @@ export class DiscoverPlugin
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
-  private extraFieldActionsRegistry: ExtraFieldActionsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
@@ -234,8 +229,6 @@ export class DiscoverPlugin
         new DiscoverSingleDocLocatorDefinition()
       );
     }
-
-    this.extraFieldActionsRegistry = new ExtraFieldActionsRegistry();
 
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
@@ -379,11 +372,6 @@ export class DiscoverPlugin
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
       },
       locator: this.locator,
-      extraFieldOptions: {
-        register: this.extraFieldActionsRegistry.addExtraFieldAction.bind(
-          this.extraFieldActionsRegistry
-        ),
-      },
     };
   }
 
