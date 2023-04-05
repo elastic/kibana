@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexItem, EuiTextColor, formatNumber, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from 'react-intl';
@@ -68,7 +68,7 @@ const CurrentPageOfTotal = ({
   <EuiText size="xs" textAlign='left' color="subdued" style={{ marginLeft: '8px'}}>
     <FormattedMessage
       id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-      defaultMessage="Showing {pageSize} of {total} rules"
+      defaultMessage="Showing {pageSize} of of {total, plural, one {# rule} other {# rules}}"
       values={{ pageSize, total }}
     />
   </EuiText>
