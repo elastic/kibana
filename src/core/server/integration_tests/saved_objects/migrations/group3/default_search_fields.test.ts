@@ -9,6 +9,16 @@
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 
 describe('SO default search fields', () => {
+  let root: ReturnType<typeof createRoot>;
+
+  afterEach(() => {
+    try {
+      root?.shutdown();
+    } catch (e) {
+      /* trap */
+    }
+  });
+
   interface InvalidMappingTuple {
     type: string;
     field: string;
@@ -16,7 +26,7 @@ describe('SO default search fields', () => {
 
   // identify / avoid scenarios of https://github.com/elastic/kibana/issues/130616
   it('make sure management types have the correct mappings for default search fields', async () => {
-    const root = createRoot({}, { oss: false });
+    root = createRoot({}, { oss: false });
     await root.preboot();
     const setup = await root.setup();
 
