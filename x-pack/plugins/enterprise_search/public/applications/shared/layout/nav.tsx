@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   ANALYTICS_PLUGIN,
+  APPLICATIONS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
@@ -21,19 +22,19 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import {
-  ENGINES_PATH,
-  SEARCH_INDICES_PATH,
-  SETTINGS_PATH,
-  EngineViewTabs,
-} from '../../enterprise_search_content/routes';
+  SEARCH_APPLICATION_PATH,
+  SEARCH_APPLICATIONS_PATH,
+  SearchApplicationViewTabs,
+} from '../../applications/routes';
+import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
+import { generateEncodedPath } from '../encode_path_params';
+
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
   const { productAccess, productFeatures } = useValues(KibanaLogic);
-
-  const searchAppsSectionEnabled = productFeatures.hasSearchApplications;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -97,26 +98,47 @@ export const useEnterpriseSearchNav = () => {
       }),
     },
     {
-      id: 'enterpriseSearchAnalytics',
+      id: 'applications',
       items: [
         {
-          id: 'analytics_collections',
-          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollectionsTitle', {
-            defaultMessage: 'Collections',
+          id: 'search_applications',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchApplicationsTitle', {
+            defaultMessage: 'Search Applications',
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
+            to: APPLICATIONS_PLUGIN.URL + SEARCH_APPLICATIONS_PATH,
+          }),
+        },
+        {
+          id: 'analytics_collections',
+          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsApplicationsTitle', {
+            defaultMessage: 'Analytics',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
             to: ANALYTICS_PLUGIN.URL,
           }),
         },
       ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
-        defaultMessage: 'Behavioral Analytics',
+      name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
+        defaultMessage: 'Applications',
       }),
     },
     {
-      id: 'search',
+      id: 'enterpriseSearch',
       items: [
+        {
+          id: 'entsearch_getting_started',
+          name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchGettingStartedTitle', {
+            defaultMessage: 'Getting Started',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+          }),
+        },
         ...(productAccess.hasAppSearchAccess
           ? [
               {
@@ -150,86 +172,6 @@ export const useEnterpriseSearchNav = () => {
     },
   ];
 
-  if (searchAppsSectionEnabled) {
-    return [
-      navItems[0], // Overview
-      navItems[1], // Content
-      {
-        id: 'applications',
-        items: [
-          {
-            id: 'search_applications',
-            name: i18n.translate('xpack.enterpriseSearch.nav.searchApplicationsTitle', {
-              defaultMessage: 'Search Applications',
-            }),
-            ...generateNavLink({
-              shouldNotCreateHref: true,
-              to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
-            }),
-          },
-          {
-            id: 'analytics_collections',
-            name: i18n.translate('xpack.enterpriseSearch.nav.analyticsApplicationsTitle', {
-              defaultMessage: 'Analytics',
-            }),
-            ...generateNavLink({
-              shouldNotCreateHref: true,
-              shouldShowActiveForSubroutes: true,
-              to: ANALYTICS_PLUGIN.URL,
-            }),
-          },
-        ],
-        name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
-          defaultMessage: 'Applications',
-        }),
-      },
-      {
-        id: 'enterpriseSearch',
-        items: [
-          {
-            id: 'entsearch_getting_started',
-            name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchGettingStartedTitle', {
-              defaultMessage: 'Getting Started',
-            }),
-            ...generateNavLink({
-              shouldNotCreateHref: true,
-              to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-            }),
-          },
-          ...(productAccess.hasAppSearchAccess
-            ? [
-                {
-                  id: 'app_search',
-                  name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
-                    defaultMessage: 'App Search',
-                  }),
-                  ...generateNavLink({
-                    shouldNotCreateHref: true,
-                    to: APP_SEARCH_PLUGIN.URL,
-                  }),
-                },
-              ]
-            : []),
-          ...(productAccess.hasWorkplaceSearchAccess
-            ? [
-                {
-                  id: 'workplace_search',
-                  name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
-                    defaultMessage: 'Workplace Search',
-                  }),
-                  ...generateNavLink({
-                    shouldNotCreateHref: true,
-                    to: WORKPLACE_SEARCH_PLUGIN.URL,
-                  }),
-                },
-              ]
-            : []),
-        ],
-        name: ENTERPRISE_SEARCH_PRODUCT_NAME,
-      },
-    ];
-  }
-
   return navItems;
 };
 
@@ -243,7 +185,9 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
   );
   if (!searchAppsItem) return navItems;
 
-  const enginePath = `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${ENGINES_PATH}/${engineName}`;
+  const enginePath = `${APPLICATIONS_PLUGIN.URL}${generateEncodedPath(SEARCH_APPLICATION_PATH, {
+    searchApplicationName: engineName,
+  })}`;
 
   searchAppsItem.items = !isEmptyState
     ? [
@@ -262,7 +206,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.OVERVIEW}`,
+                to: `${enginePath}/${SearchApplicationViewTabs.OVERVIEW}`,
               }),
             },
             {
@@ -272,7 +216,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.INDICES}`,
+                to: `${enginePath}/${SearchApplicationViewTabs.INDICES}`,
               }),
             },
             {
@@ -282,7 +226,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
+                to: `${enginePath}/${SearchApplicationViewTabs.SCHEMA}`,
               }),
             },
             {
@@ -292,7 +236,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
+                to: `${enginePath}/${SearchApplicationViewTabs.PREVIEW}`,
               }),
             },
             {
@@ -302,7 +246,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.API}`,
+                to: `${enginePath}/${SearchApplicationViewTabs.API}`,
               }),
             },
           ],

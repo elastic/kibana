@@ -13229,8 +13229,6 @@
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslDisabledLabel": "禁用 SSL (true/false)",
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.usernameLabel": "用户名",
     "xpack.enterpriseSearch.nativeConnectors.mysql.name": "MySQL",
-    "xpack.enterpriseSearch.nav.analyticsCollectionsTitle": "集合",
-    "xpack.enterpriseSearch.nav.analyticsTitle": "行为分析",
     "xpack.enterpriseSearch.nav.appSearchTitle": "App Search",
     "xpack.enterpriseSearch.nav.contentSettingsTitle": "设置",
     "xpack.enterpriseSearch.nav.contentTitle": "内容",

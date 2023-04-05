@@ -57,6 +57,9 @@ export const APPLICATIONS_PLUGIN = {
   NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
     defaultMessage: 'Applications',
   }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
+    defaultMessage: 'Applications',
+  }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.applications.productDescription', {
     defaultMessage:
       'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
