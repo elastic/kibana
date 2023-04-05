@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
@@ -187,6 +188,8 @@ export const DiscoverTopNav = ({
     [navigateTo, services, stateContainer]
   );
 
+  const searchBarExtension = useObservable(services.extensions.get$('search_bar'));
+
   return (
     <AggregateQueryTopNavMenu
       appName="discover"
@@ -202,7 +205,14 @@ export const DiscoverTopNav = ({
       showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
       showSearchBar={true}
       useDefaultBehaviors={true}
-      dataViewPickerComponentProps={dataViewPickerProps}
+      customDataViewPicker={
+        searchBarExtension?.CustomDataViewPicker ? (
+          <searchBarExtension.CustomDataViewPicker />
+        ) : undefined
+      }
+      dataViewPickerComponentProps={
+        searchBarExtension?.CustomDataViewPicker ? undefined : dataViewPickerProps
+      }
       displayStyle="detached"
       textBasedLanguageModeErrors={
         textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
