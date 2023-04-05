@@ -194,7 +194,7 @@ function renderPopoverContent({
         gutterSize="none"
         direction="column"
         justifyContent="flexEnd"
-        className="dscDiscoverGrid__cellPopover"
+        className="dscDiscoverGrid__cellPopoverValueContainer"
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>

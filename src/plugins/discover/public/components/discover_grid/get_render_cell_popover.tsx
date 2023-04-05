@@ -6,28 +6,40 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
+import classnames from 'classnames';
 import { EuiDataGridProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 const containerStyles = css`
   height: 100%;
 `;
 
-export const getRenderCellPopoverFn: EuiDataGridProps['renderCellPopover'] = ({
-  cellActions,
-  children,
-}) => {
-  return (
-    <EuiFlexGroup
-      responsive={false}
-      direction="column"
-      gutterSize="none"
-      css={containerStyles}
-      className="dscDiscoverGrid__cellPopoverWrapper"
-    >
-      <EuiFlexItem grow={true}>{children}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{cellActions}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+export const getRenderCellPopoverFn =
+  (): EuiDataGridProps['renderCellPopover'] =>
+  ({ cellActions, setCellPopoverProps, children }) => {
+    useEffect(() => {
+      setCellPopoverProps({
+        panelClassName: classnames('dscDiscoverGrid__cellPopover', {
+          'dscDiscoverGrid__cellPopover--withJson':
+            children &&
+            typeof children === 'object' &&
+            'props' in children &&
+            children.props?.schema === 'kibana-json',
+        }),
+      });
+    }, [setCellPopoverProps, children]);
+
+    return (
+      <EuiFlexGroup
+        responsive={false}
+        direction="column"
+        gutterSize="none"
+        css={containerStyles}
+        className="dscDiscoverGrid__cellPopoverContainer"
+      >
+        <EuiFlexItem grow={true}>{children}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{cellActions}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };

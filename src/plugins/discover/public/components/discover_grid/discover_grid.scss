@@ -39,26 +39,29 @@
   font-family: $euiCodeFontFamily;
 }
 
-.euiDataGridRowCell__popover:has(.dscDiscoverGrid__cellPopoverWrapper) {
+.dscDiscoverGrid__cellPopover {
   min-width: 100px;
   min-height: 100px;
-  width: 516px;
   max-width: 900px !important;
   max-height: 800px !important;
-  resize: horizontal;
+
+  &.dscDiscoverGrid__cellPopover--withJson {
+    resize: horizontal;
+    width: 516px;
+  }
+
+  &:not(.dscDiscoverGrid__cellPopover--withJson) {
+    resize: both;
+    width: 400px;
+    height: 150px;
+  }
 
   & > div {
     height: 100%;
   }
 }
 
-.euiDataGridRowCell__popover:has(.dscDiscoverGrid__cellPopoverValue) {
-  resize: both;
-  width: 400px;
-  height: 150px;
-}
-
-.dscDiscoverGrid__cellPopover {
+.dscDiscoverGrid__cellPopoverValueContainer {
   height: 100%;
 
   // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome

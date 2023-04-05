@@ -381,6 +381,8 @@ export const DiscoverGrid = ({
     [dataView, displayedRows, useNewFieldsApi, shouldShowFieldHandler, services.uiSettings]
   );
 
+  const renderCellPopover = useMemo(() => getRenderCellPopoverFn(), []);
+
   /**
    * Render variables
    */
@@ -602,7 +604,7 @@ export const DiscoverGrid = ({
             onColumnResize={onResize}
             pagination={paginationObj}
             renderCellValue={renderCellValue}
-            renderCellPopover={getRenderCellPopoverFn}
+            renderCellPopover={renderCellPopover}
             ref={dataGridRef}
             rowCount={rowCount}
             schemaDetectors={schemaDetectors}
