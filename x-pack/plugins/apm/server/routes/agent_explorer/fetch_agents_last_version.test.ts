@@ -5,43 +5,55 @@
  * 2.0.
  */
 
-import fetchMock from 'fetch-mock';
-
+jest.mock('node-fetch');
 import { loggerMock } from '@kbn/logging-mocks';
 import { fetchAgentsLatestVersion } from './fetch_agents_latest_version';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fetchMock = require('node-fetch') as jest.Mock;
 
 describe('ApmFetchAgentslatestsVersion', () => {
   const logger = loggerMock.create();
 
-  afterEach(() => {
-    fetchMock.restore();
+  beforeEach(() => {
+    jest.resetAllMocks();
   });
 
   it('when url is empty should not fetch latest versions', async () => {
     const { data, error } = await fetchAgentsLatestVersion(logger, '');
 
-    expect(fetchMock.called()).toBeFalsy();
+    expect(fetchMock).toBeCalledTimes(0);
     expect(data).toEqual({});
     expect(error).toBeFalsy();
   });
 
   describe('when url is defined', () => {
     it('should handle errors gracefully', async () => {
-      fetchMock.mock('*', { status: 408 });
+      fetchMock.mockResolvedValue({
+        text: () => 'Request Timeout',
+        status: 408,
+        ok: false,
+      });
 
       const { data, error } = await fetchAgentsLatestVersion(logger, 'my-url');
 
-      expect(fetchMock.called()).toBeTruthy();
+      expect(fetchMock).toBeCalledTimes(1);
       expect(data).toEqual({});
       expect(error?.statusCode).toEqual('408');
     });
 
     it('should return latest agents version', async () => {
-      fetchMock.mock('*', { java: '1.1.0' });
+      fetchMock.mockResolvedValue({
+        json: () => ({
+          java: '1.1.0',
+        }),
+        status: 200,
+        ok: true,
+      });
 
       const { data, error } = await fetchAgentsLatestVersion(logger, 'my-url');
 
-      expect(fetchMock.called()).toBeTruthy();
+      expect(fetchMock).toBeCalledTimes(1);
       expect(data).toEqual({ java: '1.1.0' });
       expect(error).toBeFalsy();
     });
