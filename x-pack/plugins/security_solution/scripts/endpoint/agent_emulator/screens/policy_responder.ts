@@ -69,6 +69,7 @@ export class PolicyResponderScreen extends ScreenBaseClass {
       ? this.options.hostMetadata.metadata.host.hostname
       : 'None configured'
   }
+  Response Type: ${this.options?.responseType ? this.options.responseType : 'None configured'}
 
 Options:
 ${this.choices.output}
