@@ -29,7 +29,7 @@ import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { RuleNotifyWhenType, RuleAction } from '../../../types';
-import { DEFAULT_FREQUENCY } from '../../../common/constants';
+import { DEFAULT_FREQUENCY, DEFAULT_SIEM_FREQUENCY } from '../../../common/constants';
 
 export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
   {
@@ -118,6 +118,49 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
   },
 ];
 
+const SIEM_NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
+  {
+    value: 'onActiveAlert',
+    inputDisplay: i18n.translate(
+      'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.siem.onActiveAlert.display',
+      {
+        defaultMessage: 'Per rule run',
+      }
+    ),
+    'data-test-subj': 'onActiveAlert',
+    dropdownDisplay: (
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            defaultMessage="Per rule run"
+            id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.siem.onActiveAlert.label"
+          />
+        </p>
+      </EuiText>
+    ),
+  },
+  {
+    value: 'onThrottleInterval',
+    inputDisplay: i18n.translate(
+      'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.siem.onThrottleInterval.display',
+      {
+        defaultMessage: 'Custom frequency',
+      }
+    ),
+    'data-test-subj': 'onThrottleInterval',
+    dropdownDisplay: (
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            defaultMessage="Custom frequency"
+            id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.siem.onThrottleInterval.label"
+          />
+        </p>
+      </EuiText>
+    ),
+  },
+];
+
 interface ActionNotifyWhenProps {
   frequency: RuleAction['frequency'];
   throttle: number | null;
@@ -128,6 +171,7 @@ interface ActionNotifyWhenProps {
   hasSummary?: boolean;
   showMinimumThrottleWarning?: boolean;
   showMinimumThrottleUnitWarning?: boolean;
+  isSiem?: boolean;
 }
 
 export const ActionNotifyWhen = ({
@@ -140,10 +184,11 @@ export const ActionNotifyWhen = ({
   onSummaryChange,
   showMinimumThrottleWarning,
   showMinimumThrottleUnitWarning,
+  isSiem,
 }: ActionNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] = useState<RuleNotifyWhenType>(
-    DEFAULT_FREQUENCY.notifyWhen
+    isSiem ? DEFAULT_SIEM_FREQUENCY.notifyWhen : DEFAULT_FREQUENCY.notifyWhen
   );
 
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
@@ -185,9 +230,11 @@ export const ActionNotifyWhen = ({
       setSummaryMenuOpen(false);
       if (summary && frequency.notifyWhen === RuleNotifyWhen.CHANGE) {
         onNotifyWhenChange(RuleNotifyWhen.ACTIVE);
+      } else if (isSiem && !summary && frequency.notifyWhen === RuleNotifyWhen.THROTTLE) {
+        onNotifyWhenChange(RuleNotifyWhen.ACTIVE);
       }
     },
-    [onSummaryChange, frequency.notifyWhen, onNotifyWhenChange]
+    [onSummaryChange, frequency.notifyWhen, isSiem, onNotifyWhenChange]
   );
 
   const summaryOptions = useMemo(
@@ -198,6 +245,7 @@ export const ActionNotifyWhen = ({
         onClick={() => selectSummaryOption(true)}
         icon={frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-summary"
+        data-test-subj="actionNotifyWhen-option-summary"
       >
         {SUMMARY_OF_ALERTS}
       </SummaryContextMenuOption>,
@@ -207,6 +255,7 @@ export const ActionNotifyWhen = ({
         onClick={() => selectSummaryOption(false)}
         icon={!frequency.summary ? 'check' : 'empty'}
         id="actionNotifyWhen-option-for_each"
+        data-test-subj="actionNotifyWhen-option-for_each"
       >
         {FOR_EACH_ALERT}
       </SummaryContextMenuOption>,
@@ -242,13 +291,16 @@ export const ActionNotifyWhen = ({
     </EuiPopover>
   );
 
-  const notifyWhenOptions = useMemo(
-    () =>
-      frequency.summary
-        ? NOTIFY_WHEN_OPTIONS.filter((o) => o.value !== RuleNotifyWhen.CHANGE)
-        : NOTIFY_WHEN_OPTIONS,
-    [frequency.summary]
-  );
+  const notifyWhenOptions = useMemo(() => {
+    if (isSiem) {
+      return frequency.summary
+        ? SIEM_NOTIFY_WHEN_OPTIONS
+        : SIEM_NOTIFY_WHEN_OPTIONS.filter((o) => o.value === RuleNotifyWhen.ACTIVE);
+    }
+    return frequency.summary
+      ? NOTIFY_WHEN_OPTIONS.filter((o) => o.value !== RuleNotifyWhen.CHANGE)
+      : NOTIFY_WHEN_OPTIONS;
+  }, [frequency.summary, isSiem]);
 
   return (
     <EuiFormRow

@@ -20,7 +20,7 @@ import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
-import { DEFAULT_FREQUENCY } from '../../../common/constants';
+import { DEFAULT_FREQUENCY, DEFAULT_SIEM_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 
@@ -363,6 +363,110 @@ describe('action_type_form', () => {
       ],
     ]);
   });
+
+  describe('Security Solution', () => {
+    it('should not have "On status changes" notify when option for summary actions', async () => {
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: '.pagerduty',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        actionParamsFields: mockedActionParamsFields,
+        defaultActionParams: {
+          dedupKey: 'test',
+          eventAction: 'resolve',
+        },
+      });
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      const actionItem = {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'default',
+        params: {},
+        frequency: DEFAULT_SIEM_FREQUENCY,
+      };
+      const wrapper = render(
+        <IntlProvider locale="en">
+          {getActionTypeForm({
+            index: 1,
+            actionItem,
+            isSiem: true,
+          })}
+        </IntlProvider>
+      );
+
+      wrapper.getByTestId('notifyWhenSelect').click();
+      await act(async () => {
+        expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
+        expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
+        expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
+
+        expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
+        expect(wrapper.getAllByText('Custom frequency')).toBeTruthy();
+
+        expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
+        expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
+        expect(wrapper.getByTestId('onThrottleInterval')).toBeTruthy();
+      });
+    });
+
+    it('should have only "Per rule run" notify when option for "For each alert" actions', async () => {
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: '.pagerduty',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        actionParamsFields: mockedActionParamsFields,
+        defaultActionParams: {
+          dedupKey: 'test',
+          eventAction: 'resolve',
+        },
+      });
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      const actionItem = {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'default',
+        params: {},
+        frequency: {
+          notifyWhen: RuleNotifyWhen.ACTIVE,
+          throttle: null,
+          summary: false,
+        },
+      };
+      const wrapper = render(
+        <IntlProvider locale="en">
+          {getActionTypeForm({
+            index: 1,
+            actionItem,
+            isSiem: true,
+          })}
+        </IntlProvider>
+      );
+
+      wrapper.getByTestId('notifyWhenSelect').click();
+      await act(async () => {
+        expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
+        expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
+        expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
+
+        expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
+        expect(wrapper.queryByText('Custom frequency')).not.toBeTruthy();
+
+        expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
+        expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
+        expect(wrapper.queryByTestId('onThrottleInterval')).not.toBeTruthy();
+      });
+    });
+  });
 });
 
 function getActionTypeForm({
@@ -378,6 +482,7 @@ function getActionTypeForm({
   setActionFrequencyProperty,
   hasSummary = true,
   messageVariables = { context: [], state: [], params: [] },
+  isSiem = false,
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
@@ -391,6 +496,7 @@ function getActionTypeForm({
   setActionFrequencyProperty?: () => void;
   hasSummary?: boolean;
   messageVariables?: ActionVariables;
+  isSiem?: boolean;
 }) {
   const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
@@ -474,6 +580,7 @@ function getActionTypeForm({
       actionTypeRegistry={actionTypeRegistry}
       hasSummary={hasSummary}
       messageVariables={messageVariables}
+      isSiem={isSiem}
     />
   );
 }
