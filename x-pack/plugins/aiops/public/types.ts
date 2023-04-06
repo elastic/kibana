@@ -10,13 +10,13 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-export interface AiopsPluginSetupDeps {
-  uiActions: UiActionsSetup;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AiopsPluginSetupDeps {}
 
 export interface AiopsPluginStartDeps {
   data: DataPublicPluginStart;
@@ -27,6 +27,7 @@ export interface AiopsPluginStartDeps {
   share: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
+  licensing: LicensingPluginStart;
 }
 
 /**

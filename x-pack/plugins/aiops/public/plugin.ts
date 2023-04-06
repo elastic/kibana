@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin } from '@kbn/core/public';
+import { firstValueFrom } from 'rxjs';
 
 import {
   AiopsPluginSetup,
@@ -17,22 +18,30 @@ import {
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
-  public setup(coreSetup: CoreSetup<AiopsPluginStartDeps>, plugins: AiopsPluginSetupDeps) {
+  public setup() {
+    return {};
+  }
+
+  public start(core: CoreStart, plugins: AiopsPluginStartDeps) {
     // importing async to keep the aiops plugin size to a minimum
     Promise.all([
       import('@kbn/ui-actions-plugin/public'),
       import('./categorize_field_actions'),
-    ]).then(([uiActionsImports, { categorizeFieldAction }]) => {
-      const { CATEGORIZE_FIELD_TRIGGER } = uiActionsImports;
-      plugins.uiActions.addTriggerAction(
-        CATEGORIZE_FIELD_TRIGGER,
-        categorizeFieldAction(coreSetup)
-      );
-    });
-    return {};
-  }
+      firstValueFrom(plugins.licensing.license$),
+    ]).then(([uiActionsImports, { categorizeFieldAction }, license]) => {
+      if (license.hasAtLeast('platinum')) {
+        const { ACTION_CATEGORIZE_FIELD, CATEGORIZE_FIELD_TRIGGER } = uiActionsImports;
+        if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD)) {
+          plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD);
+        }
 
-  public start() {
+        plugins.uiActions.addTriggerAction(
+          CATEGORIZE_FIELD_TRIGGER,
+          categorizeFieldAction(core, plugins)
+        );
+      }
+    });
+
     return {};
   }
 

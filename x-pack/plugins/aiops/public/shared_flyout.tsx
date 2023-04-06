@@ -9,7 +9,7 @@ import React from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
 import { pick } from 'lodash';
-import type { CoreSetup } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import {
   toMountPoint,
@@ -26,18 +26,18 @@ import { AiopsPluginStartDeps } from './types';
 export async function showCategorizeFlyout(
   field: DataViewField,
   dataView: DataView,
-  coreSetup: CoreSetup<AiopsPluginStartDeps>,
+  coreStart: CoreStart,
+  plugins: AiopsPluginStartDeps,
   onAddFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void
 ): Promise<void> {
+  const { http, theme, overlays, application, notifications, uiSettings } = coreStart;
+
   return new Promise(async (resolve, reject) => {
     try {
       const onFlyoutClose = () => {
         flyoutSession.close();
         resolve();
       };
-
-      const [coreStart, plugins] = await coreSetup.getStartServices();
-      const { http, theme, overlays, application, notifications, uiSettings } = coreStart;
 
       const appDependencies = {
         notifications,
