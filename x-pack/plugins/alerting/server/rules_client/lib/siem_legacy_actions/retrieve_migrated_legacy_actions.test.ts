@@ -13,7 +13,7 @@ import {
   legacyGetHourlyNotificationResult,
   legacyGetSiemNotificationRuleActionsSOResultWithSingleHit,
   legacyGetWeeklyNotificationResult,
-} from './migrate_legacy_actions.mock';
+} from './retrieve_migrated_legacy_actions.mock';
 
 import { retrieveMigratedLegacyActions } from './retrieve_migrated_legacy_actions';
 
