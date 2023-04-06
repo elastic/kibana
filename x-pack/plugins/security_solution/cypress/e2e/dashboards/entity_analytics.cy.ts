@@ -167,8 +167,8 @@ describe('Entity Analytics Dashboard', () => {
 
         cy.get(OPTION_LIST_LABELS).eq(0).should('include.text', 'Status');
         cy.get(OPTION_LIST_VALUES(0)).should('include.text', 'open');
-        cy.get(OPTION_LIST_LABELS).eq(3).should('include.text', 'Host');
-        cy.get(OPTION_LIST_VALUES(3)).should('include.text', SIEM_KIBANA_HOST_NAME);
+        cy.get(OPTION_LIST_LABELS).eq(1).should('include.text', 'Host');
+        cy.get(OPTION_LIST_VALUES(1)).should('include.text', SIEM_KIBANA_HOST_NAME);
       });
     });
   });
