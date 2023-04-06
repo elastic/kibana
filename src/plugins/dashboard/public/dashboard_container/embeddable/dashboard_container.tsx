@@ -316,7 +316,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       this.controlGroup = await startControlGroupIntegration.bind(this)(initialInput);
     }
 
-    // now that the input with the initial panel state has been set, we can tell the container class it's time to start loading children.
+    // now that the input with the initial panel state has been set and the control group is ready, we can tell the container class it's time to start loading children.
     readyToInitializeChildren$.next(initialInput);
 
     // start diffing dashboard state

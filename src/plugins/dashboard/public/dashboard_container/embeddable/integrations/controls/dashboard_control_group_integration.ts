@@ -66,7 +66,6 @@ export async function startControlGroupIntegration(
   }
 
   this.untilInitialized().then(() => {
-    console.log('initialized');
     const stopSyncingControlGroup =
       startSyncingDashboardControlGroup.bind(this)()?.stopSyncingWithControlGroup;
     this.onDestroyControlGroup = () => {
