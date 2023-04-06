@@ -473,4 +473,35 @@ export class EndpointPolicyResponseGenerator extends BaseDataGenerator {
 
     return action;
   }
+
+  generateMacosSystemExtFailure(): HostPolicyResponse {
+    const policyResponse = this.generate({
+      Endpoint: { policy: { applied: { status: HostPolicyResponseActionStatus.success } } },
+    });
+    const appliedPolicy = policyResponse.Endpoint.policy.applied;
+    const actionMessage = 'Failed to connected to kernel minifilter component';
+
+    // Adjust connect_kernel action to represent a Macos system extension failure
+    const connectKernelAction = appliedPolicy.actions.find(
+      (action) => action.name === 'connect_kernel'
+    ) ?? {
+      name: 'connect_kernel',
+      message: actionMessage,
+      status: HostPolicyResponseActionStatus.failure,
+    };
+    const needsToBeAdded = connectKernelAction.message === '';
+
+    if (needsToBeAdded) {
+      appliedPolicy.actions.push(connectKernelAction);
+      appliedPolicy.response.configurations.malware.concerned_actions.push(
+        connectKernelAction.name
+      );
+      appliedPolicy.response.configurations.malware.status = HostPolicyResponseActionStatus.failure;
+    } else {
+      connectKernelAction.message = actionMessage;
+      connectKernelAction.status = HostPolicyResponseActionStatus.failure;
+    }
+
+    return policyResponse;
+  }
 }
