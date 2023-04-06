@@ -91,7 +91,6 @@ export const cyLoadEndpointDataHandler = async (
         enableFleetIntegration,
         undefined,
         CurrentKibanaVersionDocGenerator,
-        true,
         disableEndpointActionsForHost,
         bothIsolatedAndNormalEndpoints,
         endpointIsolated
