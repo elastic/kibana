@@ -231,6 +231,60 @@ describe('generateMlInferencePipelineBody lib function', () => {
       })
     );
   });
+
+  it('should return something expected with multiple fields', () => {
+    const actual: MlInferencePipeline = generateMlInferencePipelineBody({
+      description: 'my-description',
+      model: mockModel,
+      pipelineName: 'my-pipeline',
+      fieldMappings: [
+        { sourceField: 'my-source-field1', targetField: 'my-destination-field1' },
+        { sourceField: 'my-source-field2', targetField: 'my-destination-field2' },
+        { sourceField: 'my-source-field3', targetField: 'my-destination-field3' },
+      ],
+    });
+
+    expect(actual).toEqual(expect.objectContaining({
+      processors: expect.arrayContaining([
+        {
+          remove: expect.objectContaining({
+            field: 'ml.inference.my-destination-field1',
+          }),
+        },
+        {
+          remove: expect.objectContaining({
+            field: 'ml.inference.my-destination-field2',
+          }),
+        },
+        {
+          remove: expect.objectContaining({
+            field: 'ml.inference.my-destination-field3',
+          }),
+        },
+        {
+          inference: expect.objectContaining({
+            field_map: {
+              'my-source-field1': 'MODEL_INPUT_FIELD',
+            },
+          }),
+        },
+        {
+          inference: expect.objectContaining({
+            field_map: {
+              'my-source-field2': 'MODEL_INPUT_FIELD',
+            },
+          }),
+        },
+        {
+          inference: expect.objectContaining({
+            field_map: {
+              'my-source-field3': 'MODEL_INPUT_FIELD',
+            },
+          }),
+        },
+      ]),
+    }));
+  });
 });
 
 describe('parseMlInferenceParametersFromPipeline', () => {

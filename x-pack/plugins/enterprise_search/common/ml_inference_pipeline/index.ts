@@ -6,6 +6,7 @@
  */
 
 import {
+  IngestInferenceProcessor,
   IngestPipeline,
   IngestRemoveProcessor,
   IngestSetProcessor,
@@ -54,67 +55,85 @@ export const generateMlInferencePipelineBody = ({
   model,
   pipelineName,
 }: MlInferencePipelineParams): MlInferencePipeline => {
-  // if model returned no input field, insert a placeholder
+  const inferenceType = Object.keys(model.inference_config)[0];
+  const pipelineDefinition: MlInferencePipeline = {
+    description: description ?? '',
+    processors: [],
+    version: 1,
+  };
+
+  // Add remove and inference processors
+  fieldMappings.forEach(({ sourceField, targetField }) => {
+    const remove = getRemoveProcessorForInferenceType(targetField, inferenceType);
+    const inference = getInferenceProcessor(sourceField, targetField, inferenceConfig, model, pipelineName);
+
+    pipelineDefinition.processors?.push({
+      remove: {
+        field: getMlInferencePrefixedFieldName(targetField),
+        ignore_missing: true,
+      },
+    });
+    remove && pipelineDefinition.processors?.push({ remove });
+    pipelineDefinition.processors?.push({ inference });
+  });
+
+  // Add single append processor
+  pipelineDefinition.processors?.push({
+    append: {
+      field: '_source._ingest.processors',
+      value: [
+        {
+          model_version: model.version,
+          pipeline: pipelineName,
+          processed_timestamp: '{{{ _ingest.timestamp }}}',
+          types: getMlModelTypesForModelConfig(model),
+        },
+      ],
+    },
+  });
+
+  // Add set processors
+  fieldMappings.forEach(({ sourceField, targetField }) => {
+    const set = getSetProcessorForInferenceType(targetField, inferenceType);
+
+    set && pipelineDefinition.processors?.push({ set });
+  });
+
+  return pipelineDefinition;
+};
+
+export const getInferenceProcessor = (
+  sourceField: string,
+  targetField: string,
+  inferenceConfig: InferencePipelineInferenceConfig | undefined,
+  model: MlTrainedModelConfig,
+  pipelineName: string,
+): IngestInferenceProcessor => {
+  // If model returned no input field, insert a placeholder
   const modelInputField =
     model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
 
-  // For now this only works for a single field mapping
-  const sourceField = fieldMappings[0].sourceField;
-  const targetField = fieldMappings[0].targetField;
-  const inferenceType = Object.keys(model.inference_config)[0];
-  const remove = getRemoveProcessorForInferenceType(targetField, inferenceType);
-  const set = getSetProcessorForInferenceType(targetField, inferenceType);
-
   return {
-    description: description ?? '',
-    processors: [
-      {
-        remove: {
-          field: getMlInferencePrefixedFieldName(targetField),
-          ignore_missing: true,
-        },
-      },
-      ...(remove ? [{ remove }] : []),
-      {
-        inference: {
-          field_map: {
-            [sourceField]: modelInputField,
-          },
-          inference_config: inferenceConfig,
-          model_id: model.model_id,
-          on_failure: [
-            {
-              append: {
-                field: '_source._ingest.inference_errors',
-                value: [
-                  {
-                    message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
-                    pipeline: pipelineName,
-                    timestamp: '{{{ _ingest.timestamp }}}',
-                  },
-                ],
-              },
-            },
-          ],
-          target_field: getMlInferencePrefixedFieldName(targetField),
-        },
-      },
+    field_map: {
+      [sourceField]: modelInputField,
+    },
+    inference_config: inferenceConfig,
+    model_id: model.model_id,
+    on_failure: [
       {
         append: {
-          field: '_source._ingest.processors',
+          field: '_source._ingest.inference_errors',
           value: [
             {
-              model_version: model.version,
+              message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
               pipeline: pipelineName,
-              processed_timestamp: '{{{ _ingest.timestamp }}}',
-              types: getMlModelTypesForModelConfig(model),
+              timestamp: '{{{ _ingest.timestamp }}}',
             },
           ],
         },
       },
-      ...(set ? [{ set }] : []),
     ],
-    version: 1,
+    target_field: getMlInferencePrefixedFieldName(targetField),
   };
 };
 
