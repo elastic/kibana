@@ -154,6 +154,16 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
         platform: 'debian',
         full: 'Debian 10.12',
       },
+      {
+        name: 'macOS',
+        full: 'macOS Monterey',
+        version: '12.6.1',
+        platform: 'macOS',
+        family: 'macOS',
+        Ext: {
+          variant: 'Darwin',
+        },
+      },
     ]);
   }
 }

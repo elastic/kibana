@@ -474,10 +474,21 @@ export class EndpointPolicyResponseGenerator extends BaseDataGenerator {
     return action;
   }
 
-  generateMacosSystemExtFailure(): HostPolicyResponse {
-    const policyResponse = this.generate({
-      Endpoint: { policy: { applied: { status: HostPolicyResponseActionStatus.success } } },
-    });
+  /**
+   * Generates a Policy Response for `connect_kernel`, which is a typical error on MacOS when
+   * no system extension failure
+   */
+  generateConnectKernelFailure(
+    overrides: DeepPartial<HostPolicyResponse> = {}
+  ): HostPolicyResponse {
+    const policyResponse = this.generate(
+      mergeAndReplaceArrays(
+        {
+          Endpoint: { policy: { applied: { status: HostPolicyResponseActionStatus.success } } },
+        },
+        overrides
+      )
+    );
     const appliedPolicy = policyResponse.Endpoint.policy.applied;
     const actionMessage = 'Failed to connected to kernel minifilter component';
 

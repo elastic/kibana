@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { DeepPartial } from '@kbn/utility-types';
 import { indexEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import { EndpointPolicyResponseGenerator } from '../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
-import type { HostInfo } from '../../../../common/endpoint/types';
+import type { HostInfo, HostPolicyResponse } from '../../../../common/endpoint/types';
 import {
   fetchEndpointMetadataList,
   sendEndpointMetadataUpdate,
@@ -20,6 +21,8 @@ import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/type
 
 const policyResponseGenerator = new EndpointPolicyResponseGenerator();
 
+const macOsSysExtTypeLabel = 'macOS System Ext. Failure';
+
 const policyResponseStatusesTypes: Readonly<
   Record<string, HostPolicyResponseActionStatus | undefined>
 > = Object.freeze({
@@ -27,6 +30,7 @@ const policyResponseStatusesTypes: Readonly<
   Failure: HostPolicyResponseActionStatus.failure,
   Warning: HostPolicyResponseActionStatus.warning,
   Random: undefined,
+  [macOsSysExtTypeLabel]: HostPolicyResponseActionStatus.failure,
 });
 
 interface PolicyResponseOptions {
@@ -161,14 +165,19 @@ ${this.choices.output}
       version: lastAppliedPolicy.version,
     };
 
-    const policyResponse = policyResponseGenerator.generate({
+    const policyResponseOverrides: DeepPartial<HostPolicyResponse> = {
       agent: hostMetadata.metadata.agent,
       Endpoint: {
         policy: {
           applied: policyApplied,
         },
       },
-    });
+    };
+
+    const policyResponse =
+      responseType === macOsSysExtTypeLabel
+        ? policyResponseGenerator.generateConnectKernelFailure(policyResponseOverrides)
+        : policyResponseGenerator.generate(policyResponseOverrides);
 
     // Create policy response and update the host's metadata.
     await indexEndpointPolicyResponse(esClient, policyResponse);
@@ -180,7 +189,6 @@ ${this.choices.output}
       },
     });
 
-    this.options = undefined;
     this.reRender();
     this.showMessage('Successful', 'green', true);
   }
