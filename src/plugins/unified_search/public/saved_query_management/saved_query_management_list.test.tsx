@@ -136,7 +136,7 @@ describe('Saved query management list component', () => {
         .find('[data-test-subj="saved-query-management-apply-changes-button"]')
         .first()
         .text()
-    ).toBe('Apply saved query');
+    ).toBe('Apply query');
 
     const newProps = {
       ...props,
@@ -149,7 +149,7 @@ describe('Saved query management list component', () => {
         .find('[data-test-subj="saved-query-management-apply-changes-button"]')
         .first()
         .text()
-    ).toBe('Replace with selected saved query');
+    ).toBe('Replace with selected query');
   });
 
   it('should render the modal on delete', async () => {
