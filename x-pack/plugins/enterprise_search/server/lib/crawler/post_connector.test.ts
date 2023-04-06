@@ -92,6 +92,7 @@ describe('recreateConnectorDocument lib function', () => {
         language: '',
         last_seen: null,
         last_sync_error: null,
+        last_sync_scheduled_at: null,
         last_sync_status: null,
         last_synced: null,
         name: 'indexName',
