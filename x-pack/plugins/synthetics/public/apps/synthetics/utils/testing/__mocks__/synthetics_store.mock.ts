@@ -175,6 +175,7 @@ function getMonitorDetailsMockSlice() {
   return {
     lastRun: {
       loading: false,
+      loaded: true,
       data: {
         summary: { up: 1, down: 0 },
         agent: {
@@ -416,7 +417,6 @@ function getMonitorDetailsMockSlice() {
       playwright_options: '',
       __ui: {
         script_source: { is_generated_script: false, file_name: '' },
-        is_zip_url_tls_enabled: false,
         is_tls_enabled: false,
       },
       params: '',
@@ -424,11 +424,6 @@ function getMonitorDetailsMockSlice() {
       'source.inline.script':
         "step('Goto one pixel image', async () => {\\n    await page.goto('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==');\\n});",
       'source.project.content': '',
-      'source.zip_url.url': '',
-      'source.zip_url.username': '',
-      'source.zip_url.password': '',
-      'source.zip_url.folder': '',
-      'source.zip_url.proxy_url': '',
       urls: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
       screenshots: 'on',
       synthetics_args: [],
