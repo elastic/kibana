@@ -61,12 +61,20 @@ export function buildDefaultSettings({
       : defaultFields
   ).map((field) => field.name);
 
+  const ILMPolicyDisabled = !(
+    appContextService.getConfig()?.internal?.ILMPoliciesDisabled ?? false
+  );
+
   return {
     index: {
-      // ILM Policy must be added here, for now point to the default global ILM policy name
-      lifecycle: {
-        name: ilmPolicy ? ilmPolicy : type,
-      },
+      ...(ILMPolicyDisabled
+        ? {}
+        : {
+            // ILM Policy must be added here, for now point to the default global ILM policy name
+            lifecycle: {
+              name: ilmPolicy ? ilmPolicy : type,
+            },
+          }),
       // What should be our default for the compression?
       codec: 'best_compression',
       // All the default fields which should be queried have to be added here.

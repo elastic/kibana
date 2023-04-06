@@ -153,7 +153,7 @@ export async function _installPackage({
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    if (!(appContextService.getConfig()?.disableILMPolicies ?? false)) {
+    if (!(appContextService.getConfig()?.internal?.ILMPoliciesDisabled ?? false)) {
       esReferences = await withPackageSpan('Install ILM policies', () =>
         installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
       );
