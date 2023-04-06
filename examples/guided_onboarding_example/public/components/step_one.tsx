@@ -77,7 +77,9 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
         >
           <EuiButton
             onClick={async () => {
-              await guidedOnboardingApi?.completeGuideStep('testGuide', 'step1');
+              await guidedOnboardingApi?.completeGuideStep('testGuide', 'step1', {
+                indexName: 'test1234',
+              });
             }}
           >
             Complete step 1

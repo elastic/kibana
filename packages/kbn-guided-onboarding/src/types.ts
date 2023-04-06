@@ -21,11 +21,14 @@ type TestGuideIds = 'step1' | 'step2' | 'step3';
 
 export type GuideStepIds = KubernetesStepIds | SiemStepIds | SearchStepIds | TestGuideIds;
 
+export type GuideParams = Record<string, string>;
+
 export interface GuideState {
   guideId: GuideId;
   status: GuideStatus;
   isActive?: boolean; // Drives the current guide shown in the dropdown panel
   steps: GuideStep[];
+  params?: GuideParams;
 }
 
 /**
@@ -95,6 +98,7 @@ export interface StepConfig {
   location?: {
     appID: string;
     path: string;
+    params?: string[];
   };
   status?: StepStatus;
   integration?: string;

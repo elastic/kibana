@@ -51,7 +51,8 @@ export const testGuideConfig: GuideConfig = {
       ],
       location: {
         appID: 'guidedOnboardingExample',
-        path: 'stepTwo',
+        path: 'stepTwo/{indexName}',
+        params: ['indexName'],
       },
       manualCompletion: {
         title: 'Manual completion step title',

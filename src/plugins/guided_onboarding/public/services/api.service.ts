@@ -23,6 +23,7 @@ import type {
   GuideStep,
   GuideStepIds,
   GuideConfig,
+  GuideParams,
 } from '@kbn/guided-onboarding';
 
 import { API_BASE_PATH } from '../../common';
@@ -360,7 +361,8 @@ export class ApiService implements GuidedOnboardingApi {
    */
   public async completeGuideStep(
     guideId: GuideId,
-    stepId: GuideStepIds
+    stepId: GuideStepIds,
+    params?: GuideParams
   ): Promise<{ pluginState: PluginState } | undefined> {
     const pluginState = await firstValueFrom(this.fetchPluginState$());
     // For now, returning undefined if consumer attempts to complete a step for a guide that isn't active
@@ -395,6 +397,7 @@ export class ApiService implements GuidedOnboardingApi {
         isActive: true,
         status,
         steps: updatedSteps,
+        params,
       };
 
       return await this.updatePluginState(
