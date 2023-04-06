@@ -166,7 +166,7 @@ describe('Integration package with custom dataset create and edit package policy
   });
 });
 
-describe.only('Integration package with fixed dataset create and edit package policy', () => {
+describe('Integration package with fixed dataset create and edit package policy', () => {
   const agentPolicyId = 'test-integration-package-policy';
   const agentPolicyName = 'Test integration package policy';
   const packagePolicyName = 'integration-package-policy';
