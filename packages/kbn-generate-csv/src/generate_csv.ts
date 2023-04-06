@@ -23,14 +23,13 @@ import {
   CancellationToken,
   AuthenticationExpiredError,
   ReportingError,
-  CONTENT_TYPE_CSV,
   TaskRunResult,
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { i18nTexts } from './i18n_texts';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
-import { CsvConfig, JobParams } from '../types';
+import { CONTENT_TYPE_CSV, CsvConfig, JobParams } from '../types';
 
 interface Clients {
   es: IScopedClusterClient;

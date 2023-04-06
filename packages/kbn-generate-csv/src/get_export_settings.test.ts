@@ -7,10 +7,8 @@
  */
 
 import {
-  UI_SETTINGS_DATEFORMAT_TZ,
-  UI_SETTINGS_CSV_QUOTE_VALUES,
-  UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
+  UI_SETTINGS_DATEFORMAT_TZ,
 } from '@kbn/reporting-common';
 import { IUiSettingsClient } from '@kbn/core/server';
 import {
@@ -19,7 +17,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { getExportSettings } from './get_export_settings';
-import { CsvConfig } from '../types';
+import { CsvConfig, UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from '../types';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
