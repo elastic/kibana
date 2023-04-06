@@ -15,6 +15,7 @@ import type { Logger } from '@kbn/logging';
 import { type SignificantTerm } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
+import { RANDOM_SAMPLER_SEED } from '../../../common/constants';
 import type { SignificantTermDuplicateGroup, ItemsetResult } from '../../../common/types';
 
 interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggregation {
@@ -109,7 +110,10 @@ export async function fetchFrequentItemSets(
     },
   };
 
-  const { wrap, unwrap } = createRandomSamplerWrapper({ probability: sampleProbability });
+  const { wrap, unwrap } = createRandomSamplerWrapper({
+    probability: sampleProbability,
+    seed: RANDOM_SAMPLER_SEED,
+  });
 
   const esBody = {
     query,

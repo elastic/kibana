@@ -140,6 +140,7 @@ export type FieldsForHistograms = Array<
  * @param samplerShardSize shard_size parameter of the sampler aggregation
  * @param runtimeMappings optional runtime mappings
  * @param randomSamplerProbability optional random sampler probability
+ * @param randomSamplerSeed optional random sampler seed
  * @returns an array of histogram data for each supplied field
  */
 export const fetchHistogramsForFields = async (
@@ -150,7 +151,8 @@ export const fetchHistogramsForFields = async (
   samplerShardSize: number,
   runtimeMappings?: estypes.MappingRuntimeFields,
   abortSignal?: AbortSignal,
-  randomSamplerProbability?: number
+  randomSamplerProbability?: number,
+  randomSamplerSeed?: number
 ) => {
   if (
     samplerShardSize >= 1 &&
@@ -169,7 +171,8 @@ export const fetchHistogramsForFields = async (
       samplerShardSize,
       runtimeMappings,
       abortSignal,
-      randomSamplerProbability
+      randomSamplerProbability,
+      randomSamplerSeed
     )),
     ...fields.filter(isNumericHistogramFieldWithColumnStats).reduce((p, field) => {
       const { interval, min, max, fieldName } = field;
@@ -214,6 +217,7 @@ export const fetchHistogramsForFields = async (
 
   const { wrap, unwrap } = createRandomSamplerWrapper({
     probability: randomSamplerProbability ?? 1,
+    seed: randomSamplerSeed,
   });
 
   const body = await client.search(

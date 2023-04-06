@@ -24,6 +24,7 @@ import type {
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 
+import { RANDOM_SAMPLER_SEED } from '../../common/constants';
 import {
   addSignificantTermsAction,
   addSignificantTermsGroupAction,
@@ -382,7 +383,8 @@ export const defineExplainLogRateSpikesRoute = (
                   -1,
                   undefined,
                   abortSignal,
-                  sampleProbability
+                  sampleProbability,
+                  RANDOM_SAMPLER_SEED
                 )) as [NumericChartData]
               )[0];
             } catch (e) {
@@ -511,7 +513,8 @@ export const defineExplainLogRateSpikesRoute = (
                             -1,
                             undefined,
                             abortSignal,
-                            sampleProbability
+                            sampleProbability,
+                            RANDOM_SAMPLER_SEED
                           )) as [NumericChartData]
                         )[0];
                       } catch (e) {
@@ -607,7 +610,8 @@ export const defineExplainLogRateSpikesRoute = (
                         -1,
                         undefined,
                         abortSignal,
-                        sampleProbability
+                        sampleProbability,
+                        RANDOM_SAMPLER_SEED
                       )) as [NumericChartData]
                     )[0];
                   } catch (e) {

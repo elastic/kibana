@@ -12,10 +12,6 @@ import { getSampleProbability } from './get_sample_probability';
 
 const DEFAULT_AGG_NAME = 'sample';
 
-// For the technical preview of Explain Log Rate Spikes we use a hard coded seed.
-// In future versions we might use a user specific seed or let the user costumise it.
-export const RANDOM_SAMPLER_SEED = 3867412;
-
 interface RandomSamplerOptionsBase {
   aggName?: string;
   seed?: number;
@@ -63,7 +59,7 @@ export const createRandomSamplerWrapper = (options: RandomSamplerOptions) => {
         // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
         random_sampler: {
           probability,
-          seed: options.seed ?? RANDOM_SAMPLER_SEED,
+          ...(options.seed ? { seed: options.seed } : {}),
         },
         aggs,
       },

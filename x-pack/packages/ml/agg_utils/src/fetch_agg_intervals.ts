@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { stringHash } from '@kbn/ml-string-hash';
-import { randomSampler } from '@kbn/ml-random-sampler-utils';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
@@ -32,7 +32,8 @@ export const fetchAggIntervals = async (
   samplerShardSize: number,
   runtimeMappings?: estypes.MappingRuntimeFields,
   abortSignal?: AbortSignal,
-  randomSamplerProbability?: number
+  randomSamplerProbability?: number,
+  randomSamplerSeed?: number
 ): Promise<NumericColumnStatsMap> => {
   if (
     samplerShardSize >= 1 &&
@@ -60,7 +61,10 @@ export const fetchAggIntervals = async (
     return aggs;
   }, {} as Record<string, object>);
 
-  const rs = randomSampler({ probability: randomSamplerProbability ?? 1 });
+  const { wrap, unwrap } = createRandomSamplerWrapper({
+    probability: randomSamplerProbability ?? 1,
+    seed: randomSamplerSeed,
+  });
 
   const body = await client.search(
     {
@@ -71,7 +75,7 @@ export const fetchAggIntervals = async (
         aggs:
           randomSamplerProbability === undefined
             ? buildSamplerAggregation(minMaxAggs, samplerShardSize)
-            : rs.wrap(minMaxAggs),
+            : wrap(minMaxAggs),
         size: 0,
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
@@ -86,8 +90,8 @@ export const fetchAggIntervals = async (
   const aggregations =
     aggsPath.length > 0
       ? get(body.aggregations, aggsPath)
-      : randomSamplerProbability !== undefined
-      ? rs.unwrap(body.aggregations)
+      : randomSamplerProbability !== undefined && body.aggregations !== undefined
+      ? unwrap(body.aggregations)
       : body.aggregations;
 
   return Object.keys(aggregations).reduce((p, aggName) => {

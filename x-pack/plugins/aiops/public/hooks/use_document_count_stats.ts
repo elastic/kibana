@@ -13,6 +13,8 @@ import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
+import { RANDOM_SAMPLER_SEED } from '../../common/constants';
+
 import { extractErrorProperties } from '../application/utils/error_utils';
 import {
   DocumentCountStats,
@@ -106,7 +108,10 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       const totalHitsStats = processDocumentCountStats(totalHitsResp?.rawResponse, searchParams);
       const totalCount = totalHitsStats?.totalCount ?? 0;
 
-      const randomSamplerWrapper = createRandomSamplerWrapper({ totalNumDocs: totalCount });
+      const randomSamplerWrapper = createRandomSamplerWrapper({
+        totalNumDocs: totalCount,
+        seed: RANDOM_SAMPLER_SEED,
+      });
 
       const resp = await lastValueFrom(
         data.search.search(
