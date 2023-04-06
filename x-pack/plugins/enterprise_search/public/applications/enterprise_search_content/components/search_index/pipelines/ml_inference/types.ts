@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FieldMapping } from '@kbn/enterprise-search-plugin/common/ml_inference_pipeline';
 import { InferencePipelineInferenceConfig } from '../../../../../../../common/types/pipelines';
 
 export interface InferencePipelineConfiguration {
@@ -14,6 +15,7 @@ export interface InferencePipelineConfiguration {
   modelID: string;
   pipelineName: string;
   sourceField: string;
+  fieldMappings?: FieldMapping[];
 }
 
 export interface AddInferencePipelineFormErrors {

@@ -307,6 +307,7 @@ export const ConfigurePipeline: React.FC = () => {
                       ...configuration,
                       inferenceConfig: undefined,
                       modelID: value,
+                      fieldMappings: undefined,
                     })
                   }
                   options={modelOptions}

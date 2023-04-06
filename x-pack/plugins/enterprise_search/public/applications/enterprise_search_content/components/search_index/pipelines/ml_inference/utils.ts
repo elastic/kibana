@@ -53,6 +53,12 @@ export const validateInferencePipelineFields = (
   config: InferencePipelineConfiguration
 ): AddInferencePipelineFormErrors => {
   const errors: AddInferencePipelineFormErrors = {};
+  
+  // TODO: update
+  if (Object.keys(config.fieldMappings || {}).length > 0) {
+    return errors;
+  }
+
   if (config.sourceField.trim().length === 0) {
     errors.sourceField = FIELD_REQUIRED_ERROR;
   }
