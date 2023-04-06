@@ -210,6 +210,7 @@ export class DataGridService extends FtrService {
     const toggle = await row[0].findByTestSubject(testSubj);
 
     await this.retry.try(async () => {
+      await toggle.scrollIntoViewIfNecessary();
       await toggle.click();
       if (isFlyoutOpen) {
         // should close the flyout
