@@ -17,7 +17,7 @@ const INPUT_TEST_PACKAGE = 'input_package-1.0.0';
 const INTEGRATION_TEST_PACKAGE = 'logs_integration-1.0.0';
 const INTEGRATION_TEST_PACKAGE_NO_DATASET = 'logs_int_no_dataset-1.0.0';
 
-describe.skip('Input package create and edit package policy', () => {
+describe('Input package create and edit package policy', () => {
   const agentPolicyId = 'test-input-package-policy';
   const agentPolicyName = 'Test input package policy';
   const packagePolicyName = 'input-package-policy';
@@ -101,7 +101,7 @@ describe.skip('Input package create and edit package policy', () => {
   });
 });
 
-describe.skip('Integration package with custom dataset create and edit package policy', () => {
+describe('Integration package with custom dataset create and edit package policy', () => {
   const agentPolicyId = 'test-logs-integration-package-policy';
   const agentPolicyName = 'Test integration with custom dataset package policy';
   const packagePolicyName = 'logs-integration-package-policy';
