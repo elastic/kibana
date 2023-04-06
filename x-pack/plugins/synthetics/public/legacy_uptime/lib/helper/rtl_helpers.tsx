@@ -139,6 +139,10 @@ export const mockCore: () => Partial<CoreStart> = () => {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
       },
+    },
+    exploratoryView: {
+      createExploratoryViewUrl: jest.fn(),
+      getAppDataView: jest.fn(),
       ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
     },
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
@@ -163,6 +167,7 @@ export function MockKibanaProvider<ExtraCore>({
         <UptimeStartupPluginsContextProvider
           data={(coreOptions as any).data}
           observability={(coreOptions as any).observability}
+          exploratoryView={(coreOptions as any).exploratoryView}
         >
           <EuiThemeProvider darkMode={false}>
             <I18nProvider>{children}</I18nProvider>
