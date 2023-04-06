@@ -141,13 +141,15 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting an external reference attachment with getAttachmentRemovalObject defined', async () => {
+      const getAttachmentRemovalObject = jest.fn().mockReturnValue({
+        event: 'removed my own attachment',
+      });
+
       const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
       const attachment = getExternalReferenceAttachment();
       externalReferenceAttachmentTypeRegistry.register({
         ...attachment,
-        getAttachmentRemovalObject: () => ({
-          event: 'removed my own attachment',
-        }),
+        getAttachmentRemovalObject,
       });
 
       const userAction = getExternalReferenceUserAction({ action: Actions.delete });
@@ -155,6 +157,10 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         externalReferenceAttachmentTypeRegistry,
         userAction,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
       });
 
       const createdUserAction = builder.build();
@@ -165,6 +171,14 @@ describe('createCommentUserActionBuilder', () => {
       );
 
       expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
+      expect(getAttachmentRemovalObject).toBeCalledWith({
+        caseData: {
+          id: 'basic-case-id',
+          title: 'Another horrible breach!!',
+        },
+        externalReferenceId: 'my-id',
+        externalReferenceMetadata: null,
+      });
     });
 
     it('renders correctly when deleting an external reference attachment without getAttachmentRemovalObject defined', async () => {
@@ -207,13 +221,15 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting a persistable state attachment with getAttachmentRemovalObject defined', async () => {
+      const getAttachmentRemovalObject = jest.fn().mockReturnValue({
+        event: 'removed my own attachment',
+      });
+
       const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
       const attachment = getPersistableStateAttachment();
       persistableStateAttachmentTypeRegistry.register({
         ...attachment,
-        getAttachmentRemovalObject: () => ({
-          event: 'removed my own attachment',
-        }),
+        getAttachmentRemovalObject,
       });
 
       const userAction = getPersistableStateUserAction({ action: Actions.delete });
@@ -221,6 +237,10 @@ describe('createCommentUserActionBuilder', () => {
         ...builderArgs,
         persistableStateAttachmentTypeRegistry,
         userAction,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [persistableStateAttachment],
+        },
       });
 
       const createdUserAction = builder.build();
@@ -231,6 +251,16 @@ describe('createCommentUserActionBuilder', () => {
       );
 
       expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
+      expect(getAttachmentRemovalObject).toBeCalledWith({
+        caseData: {
+          id: 'basic-case-id',
+          title: 'Another horrible breach!!',
+        },
+        persistableStateAttachmentTypeId: '.test',
+        persistableStateAttachmentState: {
+          test_foo: 'foo',
+        },
+      });
     });
 
     it('renders correctly when deleting a persistable state attachment without getAttachmentRemovalObject defined', async () => {
@@ -294,7 +324,7 @@ describe('createCommentUserActionBuilder', () => {
         </TestProviders>
       );
 
-      expect(result.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
 
       await deleteAttachment(result, 'trash', 'Delete');
 
@@ -317,20 +347,20 @@ describe('createCommentUserActionBuilder', () => {
       });
 
       const createdUserAction = builder.build();
-      const result = render(
+      render(
         <TestProviders>
           <EuiCommentList comments={createdUserAction} />
         </TestProviders>
       );
 
-      expect(result.getByText('Solve this fast!')).toBeInTheDocument();
-      expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
-      expect(result.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
-      userEvent.click(result.getByTestId('property-actions-user-action-pencil'));
+      expect(screen.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
+      userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
 
       await waitFor(() => {
         expect(builderArgs.handleManageMarkdownEditId).toHaveBeenCalledWith('basic-comment-id');
@@ -348,20 +378,20 @@ describe('createCommentUserActionBuilder', () => {
       });
 
       const createdUserAction = builder.build();
-      const result = render(
+      render(
         <TestProviders>
           <EuiCommentList comments={createdUserAction} />
         </TestProviders>
       );
 
-      expect(result.getByText('Solve this fast!')).toBeInTheDocument();
-      expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
-      expect(result.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
-      userEvent.click(result.getByTestId('property-actions-user-action-quote'));
+      expect(screen.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
+      userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
 
       await waitFor(() => {
         expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('Solve this fast!');
@@ -440,14 +470,14 @@ describe('createCommentUserActionBuilder', () => {
       });
 
       const createdUserAction = builder.build();
-      const result = render(
+      render(
         <TestProviders>
           <EuiCommentList comments={createdUserAction} />
         </TestProviders>
       );
 
-      expect(result.getByTestId('comment-action-show-alert-alert-action-id')).toBeInTheDocument();
-      userEvent.click(result.getByTestId('comment-action-show-alert-alert-action-id'));
+      expect(screen.getByTestId('comment-action-show-alert-alert-action-id')).toBeInTheDocument();
+      userEvent.click(screen.getByTestId('comment-action-show-alert-alert-action-id'));
 
       await waitFor(() => {
         expect(builderArgs.onShowAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
@@ -615,11 +645,11 @@ describe('createCommentUserActionBuilder', () => {
         });
 
         const createdUserAction = builder.build();
-        const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+        appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-        expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
-        expect(result.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
-        expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+        expect(screen.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
+        expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
         expect(screen.getByText('added a chart')).toBeInTheDocument();
       });
 
@@ -639,9 +669,9 @@ describe('createCommentUserActionBuilder', () => {
         });
 
         const createdUserAction = builder.build();
-        const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+        appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-        expect(result.getByTestId('comment-externalReference-not-found')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-externalReference-not-found')).toBeInTheDocument();
         expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
         expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
       });
@@ -665,7 +695,7 @@ describe('createCommentUserActionBuilder', () => {
         const createdUserAction = builder.build();
         const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-        expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
 
         await deleteAttachment(result, 'trash', 'Delete');
 
@@ -725,14 +755,14 @@ describe('createCommentUserActionBuilder', () => {
         const result = appMockRender.render(<EuiCommentList comments={builder.build()} />);
 
         await waitFor(() => {
-          expect(result.getByTestId('attachment_01')).toBeInTheDocument();
+          expect(screen.getByTestId('attachment_01')).toBeInTheDocument();
           expect(MockComponent).toHaveBeenCalledTimes(1);
           expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
         });
 
-        expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
-        expect(result.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
-        expect(result.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+        expect(screen.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
+        expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
         expect(screen.getByText('added an embeddable')).toBeInTheDocument();
 
         result.unmount();
@@ -775,9 +805,9 @@ describe('createCommentUserActionBuilder', () => {
         });
 
         const createdUserAction = builder.build();
-        const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+        appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-        expect(result.getByTestId('comment-persistableState-not-found')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-persistableState-not-found')).toBeInTheDocument();
         expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
         expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
       });
@@ -801,7 +831,7 @@ describe('createCommentUserActionBuilder', () => {
         const createdUserAction = builder.build();
         const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-        expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
 
         await deleteAttachment(result, 'trash', 'Delete');
 
@@ -994,18 +1024,18 @@ describe('createCommentUserActionBuilder', () => {
 });
 
 const deleteAttachment = async (result: RenderResult, deleteIcon: string, buttonLabel: string) => {
-  expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+  expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-  userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+  userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
   await waitForEuiPopoverOpen();
 
-  expect(result.queryByTestId(`property-actions-user-action-${deleteIcon}`)).toBeInTheDocument();
+  expect(screen.queryByTestId(`property-actions-user-action-${deleteIcon}`)).toBeInTheDocument();
 
-  userEvent.click(result.getByTestId(`property-actions-user-action-${deleteIcon}`));
+  userEvent.click(screen.getByTestId(`property-actions-user-action-${deleteIcon}`));
 
   await waitFor(() => {
-    expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+    expect(screen.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
   });
 
-  userEvent.click(result.getByText(buttonLabel));
+  userEvent.click(screen.getByText(buttonLabel));
 };

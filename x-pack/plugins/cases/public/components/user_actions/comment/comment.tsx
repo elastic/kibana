@@ -63,8 +63,8 @@ const getDeleteLabelTitle = ({
       registry: persistableStateAttachmentTypeRegistry,
       getId: () => comment.persistableStateAttachmentTypeId,
       getAttachmentProps: () => ({
-        externalReferenceId: comment.persistableStateAttachmentTypeId,
-        externalReferenceMetadata: comment.persistableStateAttachmentState,
+        persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
+        persistableStateAttachmentState: comment.persistableStateAttachmentState,
       }),
     });
   }
