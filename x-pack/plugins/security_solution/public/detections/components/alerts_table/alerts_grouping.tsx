@@ -110,31 +110,15 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const selectorOptions = useRef<GroupOption[]>([]);
 
   useEffect(() => {
-    if (props.stinky) {
-      console.log('useEffect', {
-        selectedGroups,
-        con:
-          isNoneGroup(selectedGroups) &&
-          groupSelector.props.options.length > 0 &&
-          (groupSelectorInRedux == null ||
-            !isEqual(selectorOptions.current, groupSelector.props.options)),
-        con1: isNoneGroup(selectedGroups),
-        con2: groupSelector.props.options.length > 0,
-        con3a: groupSelectorInRedux == null,
-        con3b: !isEqual(selectorOptions.current, groupSelector.props.options),
-      });
-    }
     if (
       isNoneGroup(selectedGroups) &&
       groupSelector.props.options.length > 0 &&
       (groupSelectorInRedux == null ||
         !isEqual(selectorOptions.current, groupSelector.props.options))
     ) {
-      if (props.stinky) console.log('useEffect dispatch1');
       selectorOptions.current = groupSelector.props.options;
       dispatch(updateGroupSelector({ groupSelector }));
     } else if (!isNoneGroup(selectedGroups) && groupSelectorInRedux !== null) {
-      if (props.stinky) console.log('useEffect dispatch2');
       dispatch(updateGroupSelector({ groupSelector: null }));
     }
   }, [dispatch, groupSelector, groupSelectorInRedux, selectedGroups]);
