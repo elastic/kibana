@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 
-import { createAppMockRenderer } from '../../common/mock';
+import { buildCasesPermissions, createAppMockRenderer } from '../../common/mock';
 import { basicCaseId, basicFileMock } from '../../containers/mock';
 import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
 import { FileDeleteButtonIcon } from './file_delete_button_icon';
@@ -72,5 +72,15 @@ describe('FileDeleteButtonIcon', () => {
         fileId: basicFileMock.id,
       });
     });
+  });
+
+  it('delete button is disabled if user has no delete permission', async () => {
+    appMockRender = createAppMockRenderer({
+      permissions: buildCasesPermissions({ delete: false }),
+    });
+
+    appMockRender.render(<FileDeleteButtonIcon caseId={basicCaseId} fileId={basicFileMock.id} />);
+
+    expect(await screen.findByTestId('cases-files-delete-button')).toBeDisabled();
   });
 });
