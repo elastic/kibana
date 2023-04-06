@@ -78,7 +78,7 @@ const PassedFailedCounters = ({ passed, failed }: Pick<Props, 'passed' | 'failed
         label={i18n.translate('xpack.csp.findings.distributionBar.totalFailedLabel', {
           defaultMessage: 'Failed Findings',
         })}
-        color={euiTheme.colors.danger}
+        color={"rgb(255, 126, 98)"}
         value={failed}
       />
     </div>
@@ -130,7 +130,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
       />
       <DistributionBarPart
         value={failed}
-        color={euiTheme.colors.danger}
+        color={"rgb(255, 126, 98)"}
         distributionOnClick={() => {
           distributionOnClick(RULE_FAILED);
         }}
