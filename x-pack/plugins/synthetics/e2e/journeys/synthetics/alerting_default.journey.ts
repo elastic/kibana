@@ -42,7 +42,7 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.click('.euiComboBox__inputWrap');
     await page.click("text=There aren't any options available");
     await page.click('button:has-text("Add connector")');
-    await page.click('p:has-text("Slack")');
+    await page.click('p:has-text("Slack Webhook")');
     await page.click('input[type="text"]');
     await page.fill('input[type="text"]', 'Test slack');
     await page.press('input[type="text"]', 'Tab');
