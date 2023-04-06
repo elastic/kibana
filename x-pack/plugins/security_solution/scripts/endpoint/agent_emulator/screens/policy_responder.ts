@@ -8,7 +8,10 @@
 import { indexEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import { EndpointPolicyResponseGenerator } from '../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
 import type { HostInfo } from '../../../../common/endpoint/types';
-import { fetchEndpointMetadataList } from '../../common/endpoint_metadata_services';
+import {
+  fetchEndpointMetadataList,
+  sendEndpointMetadataUpdate,
+} from '../../common/endpoint_metadata_services';
 import { TOOL_TITLE } from '../constants';
 import type { DataFormatter } from '../../common/screen';
 import { ChoiceMenuFormatter, ScreenBaseClass } from '../../common/screen';
@@ -135,6 +138,7 @@ ${this.choices.output}
 
     this.showMessage('Sending policy response...');
 
+    const esClient = this.emulatorContext.getEsClient();
     const { responseType, hostMetadata } = this.options;
     const lastAppliedPolicy = hostMetadata.metadata.Endpoint.policy.applied;
     const overallStatus: HostPolicyResponseActionStatus | undefined =
@@ -144,22 +148,32 @@ ${this.choices.output}
         ? HostPolicyResponseActionStatus.failure
         : undefined;
 
+    const policyApplied: Partial<HostInfo['metadata']['Endpoint']['policy']['applied']> = {
+      ...(overallStatus ? { status: overallStatus } : {}),
+      name: lastAppliedPolicy.name,
+      endpoint_policy_version: lastAppliedPolicy.endpoint_policy_version,
+      id: lastAppliedPolicy.id,
+      version: lastAppliedPolicy.version,
+    };
+
     const policyResponse = policyResponseGenerator.generate({
       agent: hostMetadata.metadata.agent,
       Endpoint: {
         policy: {
-          applied: {
-            ...(overallStatus ? { status: overallStatus } : {}),
-            name: lastAppliedPolicy.name,
-            endpoint_policy_version: lastAppliedPolicy.endpoint_policy_version,
-            id: lastAppliedPolicy.id,
-            version: lastAppliedPolicy.version,
-          },
+          applied: policyApplied,
         },
       },
     });
 
-    await indexEndpointPolicyResponse(this.emulatorContext.getEsClient(), policyResponse);
+    // Create policy response and update the host's metadata.
+    await indexEndpointPolicyResponse(esClient, policyResponse);
+    await sendEndpointMetadataUpdate(esClient, hostMetadata.metadata.agent.id, {
+      Endpoint: {
+        policy: {
+          applied: policyApplied,
+        },
+      },
+    });
 
     this.options = undefined;
     this.reRender();
