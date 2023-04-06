@@ -13,7 +13,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { type SignificantTerm } from '@kbn/ml-agg-utils';
-import { randomSampler } from '@kbn/ml-random-sampler-utils';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import type { SignificantTermDuplicateGroup, ItemsetResult } from '../../../common/types';
 
@@ -109,11 +109,11 @@ export async function fetchFrequentItemSets(
     },
   };
 
-  const rs = randomSampler({ probability: sampleProbability });
+  const { wrap, unwrap } = createRandomSamplerWrapper({ probability: sampleProbability });
 
   const esBody = {
     query,
-    aggs: rs.wrap(frequentItemSetsAgg),
+    aggs: wrap(frequentItemSetsAgg),
     size: 0,
     track_total_hits: true,
   };
@@ -142,7 +142,7 @@ export async function fetchFrequentItemSets(
 
   const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
 
-  const frequentItemSets = rs.unwrap(
+  const frequentItemSets = unwrap(
     body.aggregations as Record<string, estypes.AggregationsAggregate>
   ) as FrequentItemSetsAggregation;
 

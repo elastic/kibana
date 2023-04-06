@@ -6,11 +6,8 @@
  */
 
 import { get } from 'lodash';
-
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-
 import { getSampleProbability } from './get_sample_probability';
 
 const DEFAULT_AGG_NAME = 'sample';
@@ -38,12 +35,12 @@ interface RandomSamplerOptionTotalNumDocs extends RandomSamplerOptionsBase {
 
 type RandomSamplerOptions = RandomSamplerOptionProbability | RandomSamplerOptionTotalNumDocs;
 
-function isValidProbability(d: unknown): d is number {
+export function isValidProbability(d: unknown): d is number {
   return typeof d === 'number' && d > 0 && d <= 1;
 }
 
-export type RandomSampler = ReturnType<typeof randomSampler>;
-export const randomSampler = (options: RandomSamplerOptions) => {
+export type RandomSamplerWrapper = ReturnType<typeof createRandomSamplerWrapper>;
+export const createRandomSamplerWrapper = (options: RandomSamplerOptions) => {
   let probability: number | null = 1;
 
   if (isRandomSamplerOptionProbability(options)) {
@@ -73,11 +70,9 @@ export const randomSampler = (options: RandomSamplerOptions) => {
     } as Record<string, estypes.AggregationsAggregationContainer>;
   };
 
-  const unwrap = <T extends estypes.SearchResponse['aggregations']>(responseAggs: T) => {
-    if (responseAggs !== undefined) {
-      return !isValidProbability(probability) ? responseAggs : get(responseAggs, [aggName]);
-    }
-  };
+  const unwrap = <T extends Exclude<estypes.SearchResponse['aggregations'], undefined>>(
+    responseAggs: T
+  ) => (!isValidProbability(probability) ? responseAggs : get(responseAggs, [aggName]));
 
   return { wrap, unwrap };
 };

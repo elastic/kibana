@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { randomSampler } from './random_sampler';
+import { createRandomSamplerWrapper } from './random_sampler_wrapper';
 
-describe('randomSampler', () => {
+describe('createRandomSamplerWrapper', () => {
   const testAggs = {
     bytes_stats: {
       stats: { field: 'bytes' },
@@ -15,7 +15,7 @@ describe('randomSampler', () => {
   };
 
   test('returns wrapped random sampler aggregation for probability of 0.01', () => {
-    expect(randomSampler({ probability: 0.01 }).wrap(testAggs)).toEqual({
+    expect(createRandomSamplerWrapper({ probability: 0.01 }).wrap(testAggs)).toEqual({
       sample: {
         random_sampler: {
           probability: 0.01,
@@ -27,6 +27,6 @@ describe('randomSampler', () => {
   });
 
   test('returns un-sampled aggregation as-is for probability of null', () => {
-    expect(randomSampler({ probability: null }).wrap(testAggs)).toEqual(testAggs);
+    expect(createRandomSamplerWrapper({ probability: null }).wrap(testAggs)).toEqual(testAggs);
   });
 });

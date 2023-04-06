@@ -12,7 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
-import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
 import { GroupTableItem } from './components/spike_analysis_table/types';
@@ -42,7 +42,7 @@ export interface DocumentStatsSearchStrategyParams {
 
 export const getDocumentCountStatsRequest = (
   params: DocumentStatsSearchStrategyParams,
-  randomSampler?: RandomSampler
+  randomSamplerWrapper?: RandomSamplerWrapper
 ) => {
   const {
     index,
@@ -88,7 +88,7 @@ export const getDocumentCountStatsRequest = (
     },
   };
 
-  const aggs = randomSampler ? randomSampler.wrap(rawAggs) : rawAggs;
+  const aggs = randomSamplerWrapper ? randomSamplerWrapper.wrap(rawAggs) : rawAggs;
 
   const searchBody = {
     query: {
@@ -112,7 +112,7 @@ export const getDocumentCountStatsRequest = (
 export const processDocumentCountStats = (
   body: estypes.SearchResponse | undefined,
   params: DocumentStatsSearchStrategyParams,
-  randomSampler?: RandomSampler
+  randomSamplerWrapper?: RandomSamplerWrapper
 ): DocumentCountStats | undefined => {
   if (!body) return undefined;
 
@@ -129,7 +129,9 @@ export const processDocumentCountStats = (
   }
   const buckets: { [key: string]: number } = {};
   const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
-    randomSampler ? randomSampler.unwrap(body.aggregations) : body.aggregations,
+    randomSamplerWrapper && body.aggregations !== undefined
+      ? randomSamplerWrapper.unwrap(body.aggregations)
+      : body.aggregations,
     ['eventRate', 'buckets'],
     []
   );

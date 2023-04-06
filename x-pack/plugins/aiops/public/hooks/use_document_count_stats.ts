@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
-import { randomSampler } from '@kbn/ml-random-sampler-utils';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { extractErrorProperties } from '../application/utils/error_utils';
 import {
@@ -106,18 +106,25 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       const totalHitsStats = processDocumentCountStats(totalHitsResp?.rawResponse, searchParams);
       const totalCount = totalHitsStats?.totalCount ?? 0;
 
-      const rs = randomSampler({ totalNumDocs: totalCount });
+      const randomSamplerWrapper = createRandomSamplerWrapper({ totalNumDocs: totalCount });
 
       const resp = await lastValueFrom(
         data.search.search(
           {
-            params: getDocumentCountStatsRequest({ ...searchParams, trackTotalHits: false }, rs),
+            params: getDocumentCountStatsRequest(
+              { ...searchParams, trackTotalHits: false },
+              randomSamplerWrapper
+            ),
           },
           { abortSignal: abortCtrl.current.signal }
         )
       );
 
-      const documentCountStats = processDocumentCountStats(resp?.rawResponse, searchParams, rs);
+      const documentCountStats = processDocumentCountStats(
+        resp?.rawResponse,
+        searchParams,
+        randomSamplerWrapper
+      );
 
       const newStats: DocumentStats = {
         documentCountStats,
@@ -130,7 +137,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
             {
               params: getDocumentCountStatsRequest(
                 { ...searchParamsCompare, trackTotalHits: false },
-                rs
+                randomSamplerWrapper
               ),
             },
             { abortSignal: abortCtrl.current.signal }
@@ -140,7 +147,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         const documentCountStatsCompare = processDocumentCountStats(
           respCompare?.rawResponse,
           searchParamsCompare,
-          rs
+          randomSamplerWrapper
         );
 
         newStats.documentCountStatsCompare = documentCountStatsCompare;

@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { stringHash } from '@kbn/ml-string-hash';
-import { randomSampler } from '@kbn/ml-random-sampler-utils';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { fetchAggIntervals } from './fetch_agg_intervals';
@@ -212,7 +212,9 @@ export const fetchHistogramsForFields = async (
     return [];
   }
 
-  const rs = randomSampler({ probability: randomSamplerProbability ?? 1 });
+  const { wrap, unwrap } = createRandomSamplerWrapper({
+    probability: randomSamplerProbability ?? 1,
+  });
 
   const body = await client.search(
     {
@@ -223,7 +225,7 @@ export const fetchHistogramsForFields = async (
         aggs:
           randomSamplerProbability === undefined
             ? buildSamplerAggregation(chartDataAggs, samplerShardSize)
-            : rs.wrap(chartDataAggs),
+            : wrap(chartDataAggs),
         size: 0,
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
@@ -238,8 +240,8 @@ export const fetchHistogramsForFields = async (
   const aggregations =
     aggsPath.length > 0
       ? get(body.aggregations, aggsPath)
-      : randomSamplerProbability !== undefined
-      ? rs.unwrap(body.aggregations)
+      : randomSamplerProbability !== undefined && body.aggregations !== undefined
+      ? unwrap(body.aggregations)
       : body.aggregations;
 
   return fields.map((field) => {
