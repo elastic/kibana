@@ -51,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'visualization',
             coreMigrationVersion: '8.8.0',
             typeMigrationVersion: resp.body.typeMigrationVersion,
+            managed: resp.body.managed,
             updated_at: resp.body.updated_at,
             created_at: resp.body.created_at,
             version: resp.body.version,
@@ -61,6 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
             namespaces: ['default'],
           });
           expect(resp.body.typeMigrationVersion).to.be.ok();
+          expect(resp.body.managed).to.not.be.ok();
         });
     });
 

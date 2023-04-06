@@ -73,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 coreMigrationVersion: '8.8.0',
                 typeMigrationVersion: resp.body.saved_objects[0].typeMigrationVersion,
+                managed: resp.body.saved_objects[0].managed,
                 namespaces: ['default'],
                 references: [
                   {
@@ -104,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
                 namespaces: ['default'],
                 coreMigrationVersion: '8.8.0',
                 typeMigrationVersion: resp.body.saved_objects[2].typeMigrationVersion,
+                managed: resp.body.saved_objects[2].managed,
                 references: [],
               },
             ],

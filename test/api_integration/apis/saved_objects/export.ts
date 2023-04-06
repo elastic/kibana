@@ -350,6 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: objects[0].typeMigrationVersion,
+              managed: objects[0].managed,
               references: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -363,6 +364,7 @@ export default function ({ getService }: FtrProviderContext) {
               version: objects[0].version,
             });
             expect(objects[0].typeMigrationVersion).to.be.ok();
+            expect(objects[0].managed).to.not.be.ok();
             expect(() =>
               JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
             ).not.to.throwError();
@@ -411,6 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: objects[0].typeMigrationVersion,
+              managed: objects[0].managed,
               references: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -424,6 +427,7 @@ export default function ({ getService }: FtrProviderContext) {
               version: objects[0].version,
             });
             expect(objects[0].typeMigrationVersion).to.be.ok();
+            expect(objects[0].managed).to.not.be.ok();
             expect(() =>
               JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
             ).not.to.throwError();
@@ -477,6 +481,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
               coreMigrationVersion: '8.8.0',
               typeMigrationVersion: objects[0].typeMigrationVersion,
+              managed: objects[0].managed,
               references: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -490,6 +495,7 @@ export default function ({ getService }: FtrProviderContext) {
               version: objects[0].version,
             });
             expect(objects[0].typeMigrationVersion).to.be.ok();
+            expect(objects[0].managed).to.not.be.ok();
             expect(() =>
               JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
             ).not.to.throwError();
