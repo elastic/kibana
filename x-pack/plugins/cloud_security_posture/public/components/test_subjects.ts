@@ -19,3 +19,5 @@ export const NO_FINDINGS_STATUS_TEST_SUBJ = {
   UNPRIVILEGED: 'status-api-unprivileged',
   NO_FINDINGS: 'no-findings-found',
 };
+
+export const EMPTY_STATE_TEST_SUBJ = 'csp:empty-state';
