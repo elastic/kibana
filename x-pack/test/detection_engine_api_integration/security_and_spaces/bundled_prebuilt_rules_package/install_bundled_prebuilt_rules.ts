@@ -13,7 +13,6 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
 } from '../../utils';
 import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_all_prebuilt_rule_assets';
-import { installPrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/install_prebuilt_rules_fleet_package';
 import { deletePrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/delete_prebuilt_rules_fleet_package';
 import { BUNDLED_PACKAGE_DIR } from './config';
 import {
@@ -52,25 +51,20 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
 
       await bundlePackage(
-        'security_detection_engine-8.7.1',
+        'security_detection_engine_8.7.1',
         BUNDLED_PACKAGE_DIR,
         BUNDLED_FLEET_PACKAGE_DIR
       );
-      await installPrebuiltRulesFleetPackage({
-        supertest,
-        overrideExistingPackage: true,
-        version: '8.7.1',
-      });
 
       const bundledInstallResponse = await supertest
-        .post(`/api/fleet/epm/packages/security_detection_engine/8.7.1`)
+        .post(`/api/fleet/epm/packages/_bulk`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/json')
-        .send({ force: true })
+        .send({ packages: ['security_detection_engine_8.7.1'], force: true })
         .expect(200);
 
       // As opposed to "registry"
-      expect(bundledInstallResponse.body._meta.install_source).toBe('bundled');
+      expect(bundledInstallResponse.body.items[0].result.installSource).toBe('bundled');
 
       // Verify that status is updated after package installation
       const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
