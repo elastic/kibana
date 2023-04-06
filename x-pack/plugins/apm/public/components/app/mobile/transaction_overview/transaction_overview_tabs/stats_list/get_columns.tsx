@@ -17,6 +17,7 @@ import { SparkPlot } from '../../../../../shared/charts/spark_plot';
 import { isTimeComparison } from '../../../../../shared/time_comparison/get_comparison_options';
 import {
   asMillisecondDuration,
+  asPercent,
   asTransactionRate,
 } from '../../../../../../../common/utils/formatters';
 import { ITableColumn } from '../../../../../shared/managed_table';
@@ -162,7 +163,7 @@ export function getColumns({
       render: (_, { crashRate }) => {
         return (
           <EuiText size="s" textAlign="right">
-            {crashRate.toFixed(2) + '%'}
+            {asPercent(crashRate, 1)}
           </EuiText>
         );
       },
