@@ -28,7 +28,7 @@ export const usePostCase = () => {
       return postCase(request, abortCtrlRef.signal);
     },
     {
-      mutationKey: casesMutationsKeys.deleteCases,
+      mutationKey: casesMutationsKeys.createCase,
       onSuccess: () => {
         refreshCases();
       },
