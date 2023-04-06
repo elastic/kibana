@@ -48,7 +48,6 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param fleet
  * @param options
  * @param DocGenerator
- * @param startTransform
  * @param disableEndpointActionsForHost
  * @param bothIsolatedAndNormalEndpoints
  * @param endpointIsolated
@@ -67,7 +66,6 @@ export async function indexHostsAndAlerts(
   fleet: boolean,
   options: TreeOptions = {},
   DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
-  startTransform = true,
   disableEndpointActionsForHost = false,
   bothIsolatedAndNormalEndpoints = false,
   endpointIsolated?: boolean
@@ -104,8 +102,11 @@ export async function indexHostsAndAlerts(
   // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
-  await waitForMetadataTransformsReady(client);
-  await stopMetadataTransforms(client);
+  const shouldWaitForEndpointMetadataDocs = fleet;
+  if (shouldWaitForEndpointMetadataDocs) {
+    await waitForMetadataTransformsReady(client);
+    await stopMetadataTransforms(client);
+  }
 
   for (let i = 0; i < numHosts; i++) {
     const isolateHost = bothIsolatedAndNormalEndpoints && i % 2 === 0;
@@ -135,7 +136,7 @@ export async function indexHostsAndAlerts(
     });
   }
 
-  if (startTransform) {
+  if (shouldWaitForEndpointMetadataDocs) {
     await startMetadataTransforms(
       client,
       response.agents.map((agent) => agent.id)
