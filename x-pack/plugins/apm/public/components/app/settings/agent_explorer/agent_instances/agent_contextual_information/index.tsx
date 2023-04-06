@@ -138,7 +138,7 @@ export function AgentContextualInformation({
             fieldName: latestVersionLabel,
             val: (
               <AgentLatestVersion
-                agentName={agentName as AgentName}
+                agentName={agentName}
                 isLoading={isLatestVersionsLoading}
                 latestVersion={latestVersion}
                 failed={latestVersionsFailed}

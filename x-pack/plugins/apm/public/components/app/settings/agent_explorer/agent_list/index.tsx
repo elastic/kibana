@@ -199,7 +199,7 @@ export function getAgentsColumns({
               { agentName, latestVersion }: AgentExplorerItem
             ) => (
               <AgentLatestVersion
-                agentName={agentName as AgentName}
+                agentName={agentName}
                 isLoading={isLatestVersionsLoading}
                 latestVersion={latestVersion}
                 failed={latestVersionsFailed}

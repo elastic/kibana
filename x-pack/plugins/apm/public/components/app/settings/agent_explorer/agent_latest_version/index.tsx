@@ -20,7 +20,7 @@ export function AgentLatestVersion({
   agentName: AgentName;
   isLoading: boolean;
   latestVersion?: string;
-  failed?: boolean;
+  failed: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
 
