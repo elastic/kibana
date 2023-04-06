@@ -188,10 +188,9 @@ describe('generateMlInferencePipelineBody lib function', () => {
   it('should return something expected', () => {
     const actual: MlInferencePipeline = generateMlInferencePipelineBody({
       description: 'my-description',
-      destinationField: 'my-destination-field',
       model: mockModel,
       pipelineName: 'my-pipeline',
-      sourceField: 'my-source-field',
+      fieldMappings: { 'my-source-field': 'my-destination-field' },
     });
 
     expect(actual).toEqual(expected);
@@ -204,10 +203,9 @@ describe('generateMlInferencePipelineBody lib function', () => {
     };
     const actual: MlInferencePipeline = generateMlInferencePipelineBody({
       description: 'my-description',
-      destinationField: 'my-destination-field',
       model: mockTextClassificationModel,
       pipelineName: 'my-pipeline',
-      sourceField: 'my-source-field',
+      fieldMappings: { 'my-source-field': 'my-destination-field' },
     });
 
     expect(actual).toEqual(

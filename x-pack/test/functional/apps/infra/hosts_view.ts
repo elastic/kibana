@@ -160,6 +160,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
         kibanaServer.savedObjects.cleanStandardList(),
       ]);
+      await browser.setWindowSize(1600, 1200);
     });
 
     after(() => {
@@ -241,6 +242,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should render metadata tab', async () => {
         const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
         expect(metadataTab).to.contain('Metadata');
+      });
+
+      it('should navigate to Uptime after click', async () => {
+        await pageObjects.infraHostsView.clickFlyoutUptimeLink();
+        await pageObjects.infraHome.waitForLoading();
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(
+          'app/uptime/?search=host.name%3A%20%22Jennys-MBP.fritz.box%22%20OR%20host.ip%3A%20%22192.168.1.79%22'
+        );
+        await browser.goBack();
+        await pageObjects.infraHome.waitForLoading();
+      });
+
+      it('should navigate to APM services after click', async () => {
+        await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
+        await pageObjects.infraHome.waitForLoading();
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain('app/apm/services?kuery=host.hostname%3A%22Jennys-MBP.fritz.box%22');
+        await browser.goBack();
+        await pageObjects.infraHome.waitForLoading();
       });
 
       describe('should render processes tab', async () => {
