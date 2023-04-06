@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef } from 'react';
 
-import { EuiBetaBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -82,7 +82,7 @@ export const ApiRequestFlyout: React.FunctionComponent<ApiRequestFlyoutProps> = 
     defaultMessage: 'Perform these request against Kibana',
   }),
 }) => {
-  const { application, share } = useStartServices();
+  const { docLinks, application, share } = useStartServices();
 
   return (
     <ViewApiRequestFlyout
@@ -90,8 +90,25 @@ export const ApiRequestFlyout: React.FunctionComponent<ApiRequestFlyoutProps> = 
       title={
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      subtitle={
+        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiBetaBadge label="beta" />
+            <FormattedMessage
+              id="xpack.fleet.apiRequestFlyout.devtoolsRequestDescription"
+              defaultMessage="{learnMore}"
+              values={{
+                learnMore: (
+                  <EuiLink href={docLinks.links.fleet.api}>
+                    <FormattedMessage
+                      id="xpack.fleet.epm.packageDetails.apiReference.learnMoreLink"
+                      defaultMessage="Learn more about Fleet API"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       }
