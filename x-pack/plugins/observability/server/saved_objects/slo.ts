@@ -20,7 +20,7 @@ export const slo: SavedObjectsType = {
     dynamic: false,
     properties: {
       id: { type: 'keyword' },
-      name: { type: 'keyword' },
+      name: { type: 'text' },
       description: { type: 'text' },
       indicator: {
         properties: {
