@@ -6,16 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { Subscription } from 'rxjs';
+import { ILicense } from '@kbn/licensing-plugin/public';
+import { CoreStart, CoreSetup, Plugin } from '@kbn/core/public';
 
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
 import { SetupDependencies, StartDependencies } from './types';
 import { IngestPipelinesLocatorDefinition } from './locator';
 
+
 export class IngestPipelinesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
+  private license: (ILicense | null) = null;
+  private licensingSubscription?: Subscription;
+
   public setup(coreSetup: CoreSetup<StartDependencies>, plugins: SetupDependencies): void {
     const { management, usageCollection, share } = plugins;
     const { http, getStartServices } = coreSetup;
@@ -42,7 +48,10 @@ export class IngestPipelinesPlugin
         docTitle.change(pluginName);
 
         const { mountManagementSection } = await import('./application/mount_management_section');
-        const unmountAppCallback = await mountManagementSection(coreSetup, params);
+        const unmountAppCallback = await mountManagementSection(coreSetup, {
+          ...params,
+          license: this.license,
+        });
 
         return () => {
           docTitle.reset();
@@ -58,7 +67,13 @@ export class IngestPipelinesPlugin
     );
   }
 
-  public start() {}
+  public start(core: CoreStart, { licensing }: StartDependencies) {
+    this.licensingSubscription = licensing?.license$.subscribe((license) => {
+      this.license = license;
+    });
+  }
 
-  public stop() {}
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
+  }
 }

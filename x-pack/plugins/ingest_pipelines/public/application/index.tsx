@@ -11,6 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 
 import { ApplicationStart } from '@kbn/core/public';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { NotificationsSetup, IUiSettingsClient, CoreTheme } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -42,6 +43,7 @@ export interface AppServices {
   share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
   application: ApplicationStart;
+  license: ILicense | null;
 }
 
 export interface CoreServices {
