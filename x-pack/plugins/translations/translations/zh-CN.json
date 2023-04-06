@@ -5808,7 +5808,6 @@
     "unifiedSearch.queryBarTopRow.submitButton.refresh": "刷新查询",
     "unifiedSearch.queryBarTopRow.submitButton.run": "运行查询",
     "unifiedSearch.queryBarTopRow.submitButton.update": "需要更新",
-    "unifiedSearch.search.searchBar.savedQuery": "已保存查询",
     "unifiedSearch.search.searchBar.savedQueryDescriptionText": "保存想要再次使用的查询文本和筛选。",
     "unifiedSearch.search.searchBar.savedQueryForm.titleConflictText": "标题与现有已保存查询有冲突",
     "unifiedSearch.search.searchBar.savedQueryForm.titleExistsText": "“名称”必填。",
