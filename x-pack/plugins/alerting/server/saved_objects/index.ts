@@ -132,7 +132,7 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'single',
+    namespaceType: 'multiple-isolated',
     mappings: maintenanceWindowMappings,
   });
 
