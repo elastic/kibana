@@ -75,7 +75,9 @@ import {
   validateInferencePipelineFields,
   EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD,
   EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS,
+  EXISTING_PIPELINE_DISABLED_ELSER,
 } from './utils';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   destinationField: '',
@@ -513,15 +515,18 @@ export const MLInferenceLogic = kea<
 
             let disabled: boolean = false;
             let disabledReason: string | undefined;
+            const mlModel = supportedMLModels.find((model) => model.model_id === modelId);
+            const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
             if (!(sourceFields?.includes(sourceField) ?? false)) {
               disabled = true;
               disabledReason = EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD;
             } else if (indexProcessorNames.includes(pipelineName)) {
               disabled = true;
               disabledReason = EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS;
+            } else if (modelType === SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) {
+              disabled = true;
+              disabledReason = EXISTING_PIPELINE_DISABLED_ELSER;
             }
-            const mlModel = supportedMLModels.find((model) => model.model_id === modelId);
-            const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
 
             return {
               destinationField: destinationField ?? '',

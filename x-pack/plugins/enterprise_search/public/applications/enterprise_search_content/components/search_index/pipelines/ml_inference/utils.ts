@@ -81,6 +81,13 @@ export const EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS = i18n.translate(
   }
 );
 
+export const EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledElserNotSupportedDescription',
+  {
+    defaultMessage: 'This pipeline cannot be selected because attaching an ELSER pipeline is not supported yet.',
+  }
+);
+
 export const MODEL_SELECT_PLACEHOLDER = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.model.placeholder',
   { defaultMessage: 'Select a model' }
