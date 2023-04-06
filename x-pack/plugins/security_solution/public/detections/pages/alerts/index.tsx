@@ -30,7 +30,7 @@ const AlertsContainerComponent: React.FC = () => {
   return (
     <Switch>
       <Route path={ALERTS_PATH} exact component={AlertsRoute} />
-      {/* Redirect to the summary page if only the detail name is provided  */}
+      {/* Redirect to the alerts page filtered for the given alert id */}
       <Route path={`${ALERTS_PATH}/:alertId`} component={AlertDetailsRedirect} />
       <Route component={NotFoundPage} />
     </Switch>
