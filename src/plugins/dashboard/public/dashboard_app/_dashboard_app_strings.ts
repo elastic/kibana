@@ -46,6 +46,11 @@ export const unsavedChangesBadgeStrings = {
     i18n.translate('dashboard.unsavedChangesBadge', {
       defaultMessage: 'Unsaved changes',
     }),
+  getUnsavedChangedBadgeToolTipContent: () =>
+    i18n.translate('dashboard.unsavedChangesBadgeToolTipContent', {
+      defaultMessage:
+        ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
+    }),
 };
 
 export const leaveConfirmStrings = {

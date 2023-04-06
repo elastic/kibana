@@ -144,17 +144,17 @@ export const WorkpadHeader: FC<Props> = ({
     {
       iconType: 'visText',
       label: elementStrings.markdown.displayName,
-      onClick: () => createElement('markdown'),
+      onClick: createElement('markdown'),
     },
     {
       iconType: 'node',
       label: elementStrings.shape.displayName,
-      onClick: () => createElement('shape'),
+      onClick: createElement('shape'),
     },
     {
       iconType: 'image',
       label: elementStrings.image.displayName,
-      onClick: () => createElement('image'),
+      onClick: createElement('image'),
     },
   ];
 
