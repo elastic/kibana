@@ -26,7 +26,7 @@ import {
   TaskRunResult,
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
-import { CONTENT_TYPE_CSV, CsvConfig, JobParams } from '@kbn/generate-csv';
+import { CONTENT_TYPE_CSV, CsvConfig, JobParams } from '../types';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { i18nTexts } from './i18n_texts';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';

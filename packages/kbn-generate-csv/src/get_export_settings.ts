@@ -18,7 +18,7 @@ import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
-} from '@kbn/generate-csv';
+} from '../types';
 
 export interface CsvExportSettings {
   timezone: string;
