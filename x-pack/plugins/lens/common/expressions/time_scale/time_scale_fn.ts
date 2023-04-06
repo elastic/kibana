@@ -34,7 +34,7 @@ function safelySetTimeZone(timeZone: string) {
  * a different configured timezone. To be sure the time bounds are computed relative to the same passed timezone,
  * temporarily switch the default moment timezone to the one passed, and switch it back after the calculation is done.
  */
-function getTimeBounds(timeRange: TimeRange, timeZone?: string, getForceNow?: () => Date) {
+export function getTimeBounds(timeRange: TimeRange, timeZone?: string, getForceNow?: () => Date) {
   if (timeZone) {
     // the `defaultZone` property is injected by moment.timezone.
     // If is not available is it fine to keep undefined because calling setDefault() will automatically reset to default
