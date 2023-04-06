@@ -59,12 +59,6 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   );
 
   // GET /assets/diff
-  const assetType = schema.oneOf([
-    schema.literal('k8s.pod'),
-    schema.literal('k8s.cluster'),
-    schema.literal('k8s.node'),
-  ]);
-
   const getAssetsDiffQueryOptions = schema.object({
     aFrom: schema.string(),
     aTo: schema.string(),
