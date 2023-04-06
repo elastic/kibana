@@ -66,7 +66,7 @@ export async function getCurrentIndexTypesMap({
   }
 }
 
-export async function getIndicesInvoledInRelocation({
+export async function getIndicesInvolvedInRelocation({
   client,
   mainIndex,
   indexTypesMap,
