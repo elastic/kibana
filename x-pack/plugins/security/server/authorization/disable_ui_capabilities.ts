@@ -74,9 +74,17 @@ export function disableUICapabilitiesFactory(
   ) => {
     // This method answers: 'Do we wish to disable a feature based on privileges?'
 
+    // always toggle cataglogue features (Need to understand what this is actually doing)
+    if (featureId === 'catalogue') return true; // return uiCapability === 'indexPatterns';
+
     // if the feature is 'navLinks', return true if the nav link was registered
     // (i.e. found in the 'app' property of a registered Kibana feature)
-    if (featureId === 'navLinks') return featureNavLinkIds.includes(uiCapability);
+    if (featureId === 'navLinks') {
+      // console.log(
+      //   `******** NAVLINK: ${uiCapability}, found: ${featureNavLinkIds.includes(uiCapability)}`
+      // );
+      return featureNavLinkIds.includes(uiCapability);
+    }
 
     // if the feature is a Kibana feature, return true if it defines privileges
     // (i.e. it adheres to the Kibana security model)
@@ -87,6 +95,8 @@ export function disableUICapabilitiesFactory(
 
     // Lastly return true if the feature is a registered es feature (we always want to affect these),
     // otherwise false(we don't know what this feature is so we don't touch it)
+    // if (!elasticsearchFeatureMap[featureId])
+    //   console.log(`****** unknown featureId: ${featureId}, capability: ${uiCapability}`);
     return !!elasticsearchFeatureMap[featureId];
   };
 
@@ -209,6 +219,9 @@ export function disableUICapabilitiesFactory(
           );
         } else if (isManagementFeature) {
           const [managementSectionId, managementEntryId] = uiCapabilityParts;
+          // console.log(
+          //   `**** management section: ${managementSectionId}, entry: ${managementEntryId}`
+          // );
           const featureGrantsManagementEntry =
             (esFeature.management ?? {}).hasOwnProperty(managementSectionId) &&
             esFeature.management![managementSectionId].includes(managementEntryId);
@@ -245,13 +258,18 @@ export function disableUICapabilitiesFactory(
         (value: boolean | Record<string, boolean>, uiCapability) => {
           if (typeof value === 'boolean') {
             if (!shouldDisableFeatureUICapability(featureId!, uiCapability!)) {
+              // console.log(`**** capability: ${uiCapability}, feature: ${featureId}, untouched`);
               return value;
             }
+            // console.log(`**** capability: ${uiCapability}, feature: ${featureId}, altered`);
             return checkPrivilegesForCapability(value, featureId!, uiCapability!);
           }
 
           if (isObject(value)) {
             const res = mapValues(value, (enabled, subUiCapability) => {
+              // console.log(
+              //   `**** capability: ${uiCapability}, feature: ${featureId}, subCap: ${subUiCapability}, altered`
+              // );
               return checkPrivilegesForCapability(
                 enabled,
                 featureId!,
