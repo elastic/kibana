@@ -46,7 +46,6 @@ import {
   VALID_SELECTOR_NAME_REGEX,
   MAX_SELECTOR_NAME_LENGTH,
   MAX_CONDITION_VALUE_LENGTH_BYTES,
-  MAX_FILE_PATH_VALUE_LENGTH_BYTES,
 } from '../../common/constants';
 
 const { translate } = i18nLib;
@@ -290,7 +289,9 @@ export const ControlGeneralViewSelector = ({
         errors.push(i18n.errorValueRequired);
       }
 
-      const { pattern, patternError } = SelectorConditionsMap[prop];
+      const conditionOptions = SelectorConditionsMap[prop];
+      const { pattern, patternError } = conditionOptions;
+      let { maxValueBytes } = conditionOptions;
 
       values.forEach((value) => {
         const bytes = new Blob([value]).size;
@@ -306,12 +307,17 @@ export const ControlGeneralViewSelector = ({
               })
             );
           }
-        } else if (prop === 'targetFilePath') {
-          if (bytes > MAX_FILE_PATH_VALUE_LENGTH_BYTES) {
-            errors.push(i18n.errorValueLengthExceeded);
-          }
-        } else if (bytes > MAX_CONDITION_VALUE_LENGTH_BYTES) {
-          errors.push(i18n.errorValueLengthExceeded);
+        }
+
+        maxValueBytes = maxValueBytes || MAX_CONDITION_VALUE_LENGTH_BYTES;
+
+        if (bytes > maxValueBytes) {
+          errors.push(
+            translate('xpack.cloudDefend.errorMaxValueBytesExceeded', {
+              defaultMessage: '"{prop}" values cannot exceed {maxValueBytes} bytes',
+              values: { prop, maxValueBytes },
+            })
+          );
         }
       });
 

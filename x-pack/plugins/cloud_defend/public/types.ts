@@ -87,6 +87,7 @@ export interface SelectorConditionOptions {
   pattern?: string;
   patternError?: string;
   selectorType?: SelectorType;
+  maxValueBytes?: number; // defaults to const MAX_FILE_PATH_VALUE_LENGTH_BYTES
   not?: SelectorCondition[];
   values?:
     | {
@@ -131,14 +132,18 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
       process: ['fork', 'exec'],
     },
   },
-  targetFilePath: { selectorType: 'file', type: 'stringArray' },
+  targetFilePath: {
+    selectorType: 'file',
+    type: 'stringArray',
+    maxValueBytes: 255,
+  },
   ignoreVolumeFiles: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeMounts'] },
   ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
   processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
   processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
   processUserId: { selectorType: 'process', type: 'stringArray' },
   sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
-  sessionLeaderName: { selectorType: 'process', type: 'stringArray' },
+  sessionLeaderName: { selectorType: 'process', type: 'stringArray', maxValueBytes: 16 },
 };
 
 export type ResponseAction = 'log' | 'alert' | 'block';
