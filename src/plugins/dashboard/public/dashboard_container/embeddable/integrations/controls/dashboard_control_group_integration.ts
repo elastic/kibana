@@ -66,6 +66,7 @@ export async function startControlGroupIntegration(
   }
 
   this.untilInitialized().then(() => {
+    console.log('initialized');
     const stopSyncingControlGroup =
       startSyncingDashboardControlGroup.bind(this)()?.stopSyncingWithControlGroup;
     this.onDestroyControlGroup = () => {
@@ -176,15 +177,12 @@ function startSyncingDashboardControlGroup(this: DashboardContainer) {
     this.controlGroup
       .getOutput$()
       .pipe(
-        // distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
-        //   compareAllFilters(filtersA, filtersB)
-        // ),
+        distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
+          compareAllFilters(filtersA, filtersB)
+        ),
         skip(1) // skip first filter output because it will have been applied in initialize
       )
-      .subscribe((output) => {
-        console.log('subscription from dashboard -- controlGroup output changed', output);
-        this.forceRefresh();
-      })
+      .subscribe(() => this.forceRefresh())
   );
 
   subscriptions.add(
