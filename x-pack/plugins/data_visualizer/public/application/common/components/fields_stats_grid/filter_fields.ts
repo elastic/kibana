@@ -10,6 +10,11 @@ import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 interface CommonFieldConfig {
   type: string;
   fieldName?: string;
+  secondaryType?: string;
+}
+
+export function matchFieldType<T extends CommonFieldConfig>(fieldType: string, config: T) {
+  return fieldType === config.secondaryType || fieldType === config.type;
 }
 export function filterFields<T extends CommonFieldConfig>(
   fields: T[],
@@ -20,12 +25,12 @@ export function filterFields<T extends CommonFieldConfig>(
 
   if (visibleFieldTypes && visibleFieldTypes.length > 0) {
     items = items.filter(
-      (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
+      (config) => visibleFieldTypes.findIndex((fieldType) => matchFieldType(fieldType, config)) > -1
     );
   }
   if (visibleFieldNames && visibleFieldNames.length > 0) {
     items = items.filter((config) => {
-      return visibleFieldNames.findIndex((field) => field === config.fieldName) > -1;
+      return visibleFieldNames.findIndex((fieldName) => fieldName === config.fieldName) > -1;
     });
   }
 
