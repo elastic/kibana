@@ -20,4 +20,3 @@ export const SavedObjectsIndexPatterns = [
   TASK_MANAGER_SAVED_OBJECT_INDEX,
   `${MAIN_SAVED_OBJECT_INDEX}_cases`,
 ];
-export type SavedObjectsIndexPattern = '.kibana' | '.kibana_task_manager' | '.kibana_cases';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectsIndexPattern } from '@kbn/core-saved-objects-server';
 import type { CasesFeaturesAllRequired } from '../ui/types';
 
 export * from './owners';
@@ -19,7 +18,7 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
  * Saved objects
  */
 
-export const CASES_INDEX: SavedObjectsIndexPattern = '.kibana_cases';
+export const CASES_INDEX = '.kibana_cases';
 export const CASE_SAVED_OBJECT = 'cases' as const;
 export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings' as const;
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;

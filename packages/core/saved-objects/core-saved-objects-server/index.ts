@@ -56,7 +56,6 @@ export {
   MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
   SavedObjectsIndexPatterns,
-  type SavedObjectsIndexPattern,
 } from './src/saved_objects_index_pattern';
 export type {
   SavedObjectsType,
