@@ -98,7 +98,7 @@ export async function indexEndpointHostDocs({
   policyResponseIndex: string;
   enrollFleet: boolean;
   generator: EndpointDocGenerator;
-  disableEndpointActionsForHost: boolean;
+  disableEndpointActionsForHost?: boolean;
 }): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
