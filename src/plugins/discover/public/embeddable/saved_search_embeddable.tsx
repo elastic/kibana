@@ -198,6 +198,8 @@ export class SavedSearchEmbeddable
 
     this.searchProps!.isLoading = true;
 
+    const wasAlreadyRendered = this.getOutput().rendered;
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
@@ -205,8 +207,8 @@ export class SavedSearchEmbeddable
       error: undefined,
     });
 
-    if (this.node) {
-      // to show a loading indicator we need to rerender here
+    if (wasAlreadyRendered && this.node) {
+      // to show a loading indicator during a refetch, we need to rerender here
       this.render(this.node);
     }
 
