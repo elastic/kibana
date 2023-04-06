@@ -29,8 +29,8 @@ export const useUrlState = () => {
 
 export enum URL_PARAM_KEY {
   appQuery = 'query',
+  eventFlyout = 'eventFlyout',
   filters = 'filters',
-  flyout = 'flyout',
   savedQuery = 'savedQuery',
   sourcerer = 'sourcerer',
   timeline = 'timeline',

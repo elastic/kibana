@@ -102,14 +102,14 @@ describe('Alert details flyout', () => {
     it('should store the flyout state in the url when it is opened', () => {
       expandFirstAlert();
       cy.get(OVERVIEW_RULE).should('be.visible');
-      cy.url().should('include', 'flyout=');
+      cy.url().should('include', 'eventFlyout=');
     });
 
     it('should remove the flyout state from the url when it is closed', () => {
       expandFirstAlert();
       cy.get(OVERVIEW_RULE).should('be.visible');
       closeAlertFlyout();
-      cy.url().should('not.include', 'flyout=');
+      cy.url().should('not.include', 'eventFlyout=');
     });
 
     it('should open the alert flyout when the page is refreshed', () => {

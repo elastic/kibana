@@ -61,7 +61,7 @@ export const AlertDetailsRedirect = () => {
 
   const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${alertId}` });
 
-  const url = `${ALERTS_PATH}?${URL_PARAM_KEY.appQuery}=${kqlAppQuery}&${URL_PARAM_KEY.timerange}=${timerange}&${URL_PARAM_KEY.flyout}=${flyoutString}`;
+  const url = `${ALERTS_PATH}?${URL_PARAM_KEY.appQuery}=${kqlAppQuery}&${URL_PARAM_KEY.timerange}=${timerange}&${URL_PARAM_KEY.eventFlyout}=${flyoutString}`;
 
   return <Redirect to={url} />;
 };

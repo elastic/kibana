@@ -57,5 +57,5 @@ export const useInitFlyoutFromUrlParam = () => {
     }
   }, [hasLoadedUrlDetails, loadExpandedDetailFromUrl]);
 
-  useInitializeUrlParam(URL_PARAM_KEY.flyout, onInitialize);
+  useInitializeUrlParam(URL_PARAM_KEY.eventFlyout, onInitialize);
 };

@@ -18,7 +18,7 @@ import { tableDefaults } from '../../store/data_table/defaults';
 import type { FlyoutUrlState } from './types';
 
 export const useSyncFlyoutUrlParam = () => {
-  const updateUrlParam = useUpdateUrlParam<FlyoutUrlState>(URL_PARAM_KEY.flyout);
+  const updateUrlParam = useUpdateUrlParam<FlyoutUrlState>(URL_PARAM_KEY.eventFlyout);
   const { pathname } = useLocation();
   const dispatch = useDispatch();
   const getDataTable = dataTableSelectors.getTableByIdSelector();
