@@ -61,9 +61,7 @@ export function buildDefaultSettings({
       : defaultFields
   ).map((field) => field.name);
 
-  const ILMPolicyDisabled = !(
-    appContextService.getConfig()?.internal?.ILMPoliciesDisabled ?? false
-  );
+  const ILMPolicyDisabled = appContextService.getConfig()?.internal?.ILMPoliciesDisabled ?? false;
 
   return {
     index: {
