@@ -30,20 +30,10 @@ export const querySavedObjectType: SavedObjectsType = {
     },
   },
   mappings: {
+    dynamic: false,
     properties: {
       title: { type: 'text' },
       description: { type: 'text' },
-      query: {
-        dynamic: false,
-        properties: {
-          language: { type: 'keyword' },
-        },
-      },
-      filters: {
-        dynamic: false,
-        properties: {},
-      },
-      timefilter: { dynamic: false, properties: {} },
     },
   },
   migrations: savedQueryMigrations,
