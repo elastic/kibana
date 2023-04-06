@@ -6,10 +6,10 @@
  */
 
 export const fnOperationTypeMapping: Record<string, string> = {
-  min: 'min',
-  max: 'max',
-  sum: 'sum',
   avg: 'average',
+  max: 'max',
+  min: 'min',
+  sum: 'sum',
 } as const;
 
 export const DEFAULT_AGG_FUNCTION = 'avg';
