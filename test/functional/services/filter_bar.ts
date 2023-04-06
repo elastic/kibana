@@ -302,9 +302,12 @@ export class FilterBarService extends FtrService {
 
       await this.createFilter(filter);
 
+      await this.testSubjects.scrollIntoView('saveFilter');
       await this.testSubjects.clickWhenNotDisabled('saveFilter');
     });
-    await this.testSubjects.waitForDeleted('saveFilter');
+    await this.retry.try(async () => {
+      await this.testSubjects.waitForDeleted('saveFilter');
+    });
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
