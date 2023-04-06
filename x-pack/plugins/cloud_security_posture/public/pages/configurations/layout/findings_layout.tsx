@@ -94,7 +94,7 @@ const baseColumns = [
     name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel', {
       defaultMessage: 'Result',
     }),
-    width: '100px',
+    width: '80px',
     sortable: true,
     render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
       <CspEvaluationBadge type={type} />
@@ -108,7 +108,7 @@ const baseColumns = [
     ),
     sortable: true,
     truncateText: true,
-    width: '120px',
+    width: '10%',
   },
   {
     field: 'resource.name',
@@ -117,8 +117,8 @@ const baseColumns = [
       { defaultMessage: 'Resource Name' }
     ),
     sortable: true,
-    width: '180px',
     truncateText: true,
+    width: '12%',
     render: (name: FindingsByResourcePage['resource.name']) => {
       if (!name) return;
 
@@ -151,7 +151,7 @@ const baseColumns = [
       }
     ),
     sortable: true,
-    width: '100px',
+    width: '120px',
   },
   {
     field: 'rule.benchmark.name',
