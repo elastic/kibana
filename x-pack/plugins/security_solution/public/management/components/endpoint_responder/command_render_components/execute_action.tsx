@@ -8,16 +8,13 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem } from '@elastic/eui';
 import type { ExecuteActionRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ResponseActionExecuteOutputContent } from '../../../../../common/endpoint/types';
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { parsedExecuteTimeout } from '../lib/utils';
-import { ExecuteActionHostResponseOutput } from '../../endpoint_execute_action';
-import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
-import { EXECUTE_FILE_LINK_TITLE } from '../../endpoint_response_actions_list/translations';
+import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
   ActionRequestComponentProps<{
@@ -75,20 +72,12 @@ export const ExecuteActionResult = memo<
         { defaultMessage: 'Command execution was successful.' }
       )}
     >
-      <EuiFlexItem>
-        <ResponseActionFileDownloadLink
-          action={completedActionDetails}
-          buttonTitle={EXECUTE_FILE_LINK_TITLE}
-          canAccessFileDownloadLink={true}
-          data-test-subj="consoleGetExecuteLink"
-          textSize="s"
-        />
-      </EuiFlexItem>
-      <ExecuteActionHostResponseOutput
+      <ExecuteActionHostResponse
         action={completedActionDetails}
+        canAccessFileDownloadLink={true}
         agentId={command.commandDefinition?.meta?.endpointId}
-        data-test-subj="consoleExecuteResponseOutput"
         textSize="s"
+        data-test-subj="console"
       />
     </ResultComponent>
   );
