@@ -17,13 +17,13 @@ import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 
-type AddToExistingFlyoutProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
+type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
   toastTitle?: string;
   toastContent?: string;
   onSuccess?: (theCase: Case) => void;
 };
 
-export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps = {}) => {
+export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProps = {}) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
     onClose: props.onClose,
     onSuccess: (theCase?: Case) => {

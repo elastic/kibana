@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import type { CasePostRequest } from '../../common/api';
 import { postCase } from './api';
 import * as i18n from './translations';
 import { useCasesToast } from '../common/use_cases_toast';
 import type { ServerError } from '../types';
-import { casesMutationsKeys, casesQueriesKeys } from './constants';
+import { casesMutationsKeys } from './constants';
+import { useRefreshCases } from '../components/all_cases/use_on_refresh_cases';
 
 interface MutationArgs {
   request: CasePostRequest;
 }
 
 export const usePostCase = () => {
-  const queryClient = useQueryClient();
   const { showErrorToast } = useCasesToast();
+  const refreshCases = useRefreshCases();
 
   return useMutation(
     ({ request }: MutationArgs) => {
@@ -29,9 +30,7 @@ export const usePostCase = () => {
     {
       mutationKey: casesMutationsKeys.deleteCases,
       onSuccess: () => {
-        queryClient.invalidateQueries(casesQueriesKeys.casesList());
-        queryClient.invalidateQueries(casesQueriesKeys.tags());
-        queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
+        refreshCases();
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_CREATING_CASE });
