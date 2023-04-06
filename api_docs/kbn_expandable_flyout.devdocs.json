@@ -26,7 +26,7 @@
         "tags": [],
         "label": "ExpandableFlyout",
         "description": [
-          "\nExpandable flyout UI React component.\nDisplays 3 sections (right, left, preview) depending on the panels in the context."
+          "\nExpandable flyout UI React component.\nDisplays 3 sections (right, left, preview) depending on the panels in the context.\n\nThe behavior expects that the left and preview sections should only be displayed is a right section\nis already rendered."
         ],
         "signature": [
           "{ ({ registeredPanels, handleOnFlyoutClosed, ...flyoutProps }: React.PropsWithChildren<",

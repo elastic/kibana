@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useMemo } from 'react';
+
+import React, { memo } from 'react';
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type {
-  ActionDetails,
-  MaybeImmutable,
-  ResponseActionExecuteOutputContent,
-} from '../../../../common/endpoint/types';
+import type { ResponseActionExecuteOutputContent } from '../../../../common/endpoint/types';
 import { getEmptyValue } from '../../../common/components/empty_value';
 
 const emptyValue = getEmptyValue();
@@ -84,45 +81,30 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
 ExecutionActionOutputAccordion.displayName = 'ExecutionActionOutputAccordion';
 
 export interface ExecuteActionHostResponseOutputProps {
-  action: MaybeImmutable<ActionDetails>;
-  agentId?: string;
+  outputContent: ResponseActionExecuteOutputContent;
   'data-test-subj'?: string;
   textSize?: 's' | 'xs';
 }
 
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
-  ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
-    const outputContent = useMemo(
-      () =>
-        action.outputs &&
-        action.outputs[agentId] &&
-        (action.outputs[agentId].content as ResponseActionExecuteOutputContent),
-      [action.outputs, agentId]
-    );
-
-    if (!outputContent) {
-      return <></>;
-    }
-
-    return (
-      <EuiFlexItem data-test-subj={dataTestSubj}>
-        <EuiSpacer size="m" />
-        <ExecutionActionOutputAccordion
-          content={outputContent.stdout}
-          isTruncated={outputContent.stdout_truncated}
-          initialIsOpen
-          textSize={textSize}
-          type="output"
-        />
-        <EuiSpacer size="m" />
-        <ExecutionActionOutputAccordion
-          content={outputContent.stderr}
-          isTruncated={outputContent.stderr_truncated}
-          textSize={textSize}
-          type="error"
-        />
-      </EuiFlexItem>
-    );
-  }
+  ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => (
+    <EuiFlexItem data-test-subj={dataTestSubj}>
+      <EuiSpacer size="m" />
+      <ExecutionActionOutputAccordion
+        content={outputContent.stdout.length ? outputContent.stdout : undefined}
+        isTruncated={outputContent.stdout_truncated}
+        initialIsOpen
+        textSize={textSize}
+        type="output"
+      />
+      <EuiSpacer size="m" />
+      <ExecutionActionOutputAccordion
+        content={outputContent.stderr.length ? outputContent.stderr : undefined}
+        isTruncated={outputContent.stderr_truncated}
+        textSize={textSize}
+        type="error"
+      />
+    </EuiFlexItem>
+  )
 );
 ExecuteActionHostResponseOutput.displayName = 'ExecuteActionHostResponseOutput';
