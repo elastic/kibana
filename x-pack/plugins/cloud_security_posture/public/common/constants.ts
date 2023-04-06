@@ -139,7 +139,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS EKS',
         }),
         icon: eksLogo,
-        tooltip: i18n.translate('xpack.csp.kspmIntegration.aksOption.tooltipContent', {
+        tooltip: i18n.translate('xpack.csp.kspmIntegration.eksOption.tooltipContent', {
           defaultMessage: 'Elastic Kubernetes Service',
         }),
       },
