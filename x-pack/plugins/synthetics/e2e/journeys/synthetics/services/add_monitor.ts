@@ -117,18 +117,12 @@ export const testDataMonitor = {
   playwright_options: '',
   __ui: {
     script_source: { is_generated_script: false, file_name: '' },
-    is_zip_url_tls_enabled: false,
   },
   params: '',
   'url.port': null,
   'source.inline.script':
     "step('Go to https://www.google.com', async () => {\n          await page.goto('https://www.google.com');\n          expect(await page.isVisible('text=Data')).toBeTruthy();\n        });",
   'source.project.content': '',
-  'source.zip_url.url': '',
-  'source.zip_url.username': '',
-  'source.zip_url.password': '',
-  'source.zip_url.folder': '',
-  'source.zip_url.proxy_url': '',
   playwright_text_assertion: 'Data',
   urls: 'https://www.google.com',
   screenshots: 'on',
