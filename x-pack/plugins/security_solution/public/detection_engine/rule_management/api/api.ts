@@ -24,21 +24,26 @@ import {
 } from '../../../../common/constants';
 
 import {
+  GET_PREBUILT_RULES_STATUS_URL,
+  PERFORM_RULE_INSTALLATION_URL,
+  PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
+  REVIEW_RULE_INSTALLATION_URL,
+  REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/detection_engine/prebuilt_rules';
 
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
 
 import type {
-  BulkActionEditPayload,
   BulkActionDuplicatePayload,
+  BulkActionEditPayload,
 } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import type {
-  RuleResponse,
   PreviewResponse,
+  RuleResponse,
 } from '../../../../common/detection_engine/rule_schema';
 
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -59,6 +64,11 @@ import type {
   UpdateRulesProps,
 } from '../logic/types';
 import { convertRulesFilterToKQL } from '../logic/utils';
+import { GetPrebuiltRulesStatusResponseBody } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
+import { ReviewRuleUpgradeResponseBody } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
+import { ReviewRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+
+// TODO: Can we just go ahead and generate this file plz?
 
 /**
  * Create provided Rule
@@ -542,3 +552,90 @@ export const bulkInstallFleetPackages = ({
     }
   );
 };
+
+/**
+ * NEW PREBUILT RULES ROUTES START HERE! 👋
+ * USE THESE ONES! THEY'RE THE NICE ONES, PROMISE!
+ */
+
+/**
+ * Get prebuilt rules status
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getPrebuiltRulesStatus = async ({
+  signal,
+}: {
+  signal: AbortSignal | undefined;
+}): Promise<GetPrebuiltRulesStatusResponseBody> =>
+  KibanaServices.get().http.fetch<GetPrebuiltRulesStatusResponseBody>(
+    GET_PREBUILT_RULES_STATUS_URL,
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+/**
+ * Review prebuilt rules upgrade
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const reviewRuleUpgrade = async ({
+  signal,
+}: {
+  signal: AbortSignal | undefined;
+}): Promise<ReviewRuleUpgradeResponseBody> =>
+  KibanaServices.get().http.fetch(REVIEW_RULE_UPGRADE_URL, {
+    method: 'POST',
+    signal,
+  });
+
+/**
+ * Perform prebuilt rules upgrade
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+// TODO: Add return Promise<PerformRuleUpgradeResponseBody> when API added
+export const performRuleUpgrade = async ({ signal }: { signal: AbortSignal | undefined }) =>
+  KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
+    method: 'POST',
+    signal,
+  });
+
+/**
+ * Review prebuilt rules install (new rules)
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const reviewRuleInstall = async ({
+  signal,
+}: {
+  signal: AbortSignal | undefined;
+}): Promise<ReviewRuleInstallationResponseBody> =>
+  KibanaServices.get().http.fetch(REVIEW_RULE_INSTALLATION_URL, {
+    method: 'POST',
+    signal,
+  });
+
+/**
+ * Perform prebuilt rules install (new rules)
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+// TODO: Add return Promise<PerformRuleInstallationResponseBody> when API added
+export const performRuleInstall = async ({ signal }: { signal: AbortSignal | undefined }) =>
+  KibanaServices.get().http.fetch(PERFORM_RULE_INSTALLATION_URL, {
+    method: 'POST',
+    signal,
+  });

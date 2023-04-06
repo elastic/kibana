@@ -103,7 +103,7 @@ const getRuleDiffCalculationArgs = (
   latestRules: PrebuiltRuleAsset[]
 ): CalculateRuleDiffArgs[] => {
   const installedRulesMap = new Map(installedRules.map((r) => [r.rule_id, r]));
-  const baseRulesMap = new Map(baseRules.map((r) => [r.rule_id, r]));
+  // const baseRulesMap = new Map(baseRules.map((r) => [r.rule_id, r]));
   const latestRulesMap = new Map(latestRules.map((r) => [r.rule_id, r]));
 
   const result: CalculateRuleDiffArgs[] = [];
@@ -111,16 +111,17 @@ const getRuleDiffCalculationArgs = (
   installedVersionsToUpgrade.forEach((versionToUpgrade) => {
     const ruleId = versionToUpgrade.rule_id;
     const installedRule = installedRulesMap.get(ruleId);
-    const baseRule = baseRulesMap.get(ruleId);
+    // const baseRule = baseRulesMap.get(ruleId);
     const latestRule = latestRulesMap.get(ruleId);
 
     // TODO: https://github.com/elastic/kibana/issues/148189
     // Make base versions optional for diff calculation. We need to support this in order to be able
     // to still show diffs for rule assets coming from packages without historical versions.
-    if (installedRule != null && baseRule != null && latestRule != null) {
+    // if (installedRule != null && baseRule != null && latestRule != null) {
+    if (installedRule != null && latestRule != null) {
       result.push({
         currentVersion: installedRule,
-        baseVersion: baseRule,
+        baseVersion: latestRule, // baseRule
         targetVersion: latestRule,
       });
     }

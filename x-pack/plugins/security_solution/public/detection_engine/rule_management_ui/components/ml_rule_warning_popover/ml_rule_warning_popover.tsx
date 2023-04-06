@@ -81,7 +81,7 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
       </div>
       <EuiSpacer size="s" />
       {notRunningJobs.map((job) => (
-        <EuiText>{job.customSettings?.security_app_display_name ?? job.id}</EuiText>
+        <EuiText key={job.id}>{job.customSettings?.security_app_display_name ?? job.id}</EuiText>
       ))}
       <EuiPopoverFooter>
         <SecuritySolutionLinkButton

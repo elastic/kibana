@@ -73,6 +73,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const {
     state: {
       rules,
+      rulesToUpgrade,
+      rulesToInstall,
       filterOptions,
       isPreflightInProgress,
       isAllSelected,
@@ -131,15 +133,31 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     executeBulkActionsDryRun,
   });
 
-  const paginationMemo = useMemo(
-    () => ({
-      pageIndex: pagination.page - 1,
-      pageSize: pagination.perPage,
-      totalItemCount: pagination.total,
-      pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-    }),
-    [pagination]
-  );
+  const paginationMemo = useMemo(() => {
+    switch (selectedTab) {
+      case AllRulesTabs.addRules:
+        return {
+          pageIndex: 0,
+          pageSize: 20,
+          totalItemCount: rulesToInstall.length,
+          pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+        };
+      case AllRulesTabs.updates:
+        return {
+          pageIndex: 0,
+          pageSize: 20,
+          totalItemCount: rulesToUpgrade.length,
+          pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+        };
+      default:
+        return {
+          pageIndex: pagination.page - 1,
+          pageSize: pagination.perPage,
+          totalItemCount: pagination.total,
+          pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+        };
+    }
+  }, [pagination, selectedTab]);
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
@@ -222,32 +240,38 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
   let tableProps;
+  let currentRules;
   switch (selectedTab) {
     case AllRulesTabs.installed:
+      currentRules = rules;
       tableProps = {
         'data-test-subj': 'rules-management-table',
         columns: rulesColumns,
       };
       break;
     case AllRulesTabs.monitoring:
+      currentRules = rules;
       tableProps = {
         'data-test-subj': 'rules-monitoring-table',
         columns: monitoringColumns,
       };
       break;
     case AllRulesTabs.updates:
+      currentRules = rulesToUpgrade.map((r) => r.rule);
       tableProps = {
         'data-test-subj': 'rules-updates-table',
         columns: rulesColumns,
       };
       break;
     case AllRulesTabs.addRules:
+      currentRules = rulesToInstall;
       tableProps = {
         'data-test-subj': 'rules-new-table',
         columns: rulesColumns,
       };
       break;
     default:
+      currentRules = rules;
       tableProps = {
         'data-test-subj': 'rules-management-table',
         columns: rulesColumns,
@@ -324,7 +348,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           />
           <EuiBasicTable
             itemId="id"
-            items={rules}
+            items={currentRules}
             isSelectable={hasPermissions}
             noItemsMessage={NO_ITEMS_MESSAGE}
             onChange={tableOnChangeCallback}

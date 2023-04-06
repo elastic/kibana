@@ -45,8 +45,14 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
+import { RuleInstallationInfoForReview } from '../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import { DiffableRule } from '../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
 
-export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
+export type TableColumn =
+  | EuiBasicTableColumn<Rule>
+  | EuiTableActionsColumnType<Rule>
+  | EuiTableActionsColumnType<DiffableRule>
+  | EuiTableActionsColumnType<RuleInstallationInfoForReview>;
 
 interface ColumnsProps {
   hasCRUDPermissions: boolean;
@@ -177,7 +183,7 @@ const TAGS_COLUMN: TableColumn = {
   name: null,
   align: 'center',
   render: (tags: Rule['tags']) => {
-    if (tags.length === 0) {
+    if (tags == null || tags.length === 0) {
       return null;
     }
 

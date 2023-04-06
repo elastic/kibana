@@ -22,9 +22,9 @@ export const ML_RULE_JOBS_WARNING_BUTTON_LABEL = i18n.translate(
   }
 );
 
-export const INSTALLED_RULES_TAB = (ruleCount: number) =>
+export const INSTALLED_RULES_TAB = (ruleCount?: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules', {
-    defaultMessage: `Installed Rules [{ruleCount}]`,
+    defaultMessage: `Installed Rules${ruleCount ? ' [{ruleCount}]' : ''}`,
     values: { ruleCount },
   });
 
@@ -36,7 +36,7 @@ export const RULE_MONITORING_TAB = (ruleCount: number) =>
 
 export const RULE_UPDATES_TAB = (ruleCount: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.tabs.updates', {
-    defaultMessage: 'Rule Updates [{ruleCount} New]',
+    defaultMessage: 'Rule Updates [{ruleCount}]',
     values: { ruleCount },
   });
 
