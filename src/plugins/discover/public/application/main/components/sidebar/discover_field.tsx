@@ -450,7 +450,6 @@ function DiscoverFieldComponent({
         <FieldPopoverCategorize
           field={field}
           dataView={dataView}
-          multiFields={rawMultiFields}
           trackUiMetric={trackUiMetric}
           contextualFields={contextualFields}
           originatingApp={PLUGIN_ID}

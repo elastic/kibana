@@ -26,7 +26,7 @@ export const FieldCategorizeButtonInner: React.FC<FieldVisualizeButtonInnerProps
       <EuiButton
         fullWidth
         size="s"
-        data-test-subj={`fieldVisualize-${fieldName}`}
+        data-test-subj={`fieldCategorize-${fieldName}`}
         {...(buttonProps || {})}
         onClick={handleVisualizeLinkClick}
         iconSide="left"

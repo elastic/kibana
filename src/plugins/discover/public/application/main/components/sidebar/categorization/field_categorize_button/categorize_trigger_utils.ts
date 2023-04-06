@@ -17,13 +17,11 @@ async function getCompatibleActions(
   uiActions: UiActionsStart,
   field: DataViewField,
   dataView: DataView,
-  contextualFields: string[] = [],
   trigger: typeof CATEGORIZE_FIELD_TRIGGER
 ) {
   const compatibleActions = await uiActions.getTriggerCompatibleActions(trigger, {
     dataView,
     field,
-    contextualFields,
   });
   return compatibleActions;
 }
@@ -31,7 +29,6 @@ async function getCompatibleActions(
 export function triggerCategorizeActions(
   uiActions: UiActionsStart,
   field: DataViewField,
-  contextualFields: string[] = [],
   originatingApp: string,
   dataView?: DataView,
   onAddDSLFilter?: (field: DataViewField | string, values: unknown, alias?: string) => void
@@ -40,7 +37,6 @@ export function triggerCategorizeActions(
   const triggerOptions: CategorizeFieldContext = {
     dataView,
     field,
-    contextualFields,
     originatingApp,
     onAddDSLFilter,
   };
@@ -50,21 +46,13 @@ export function triggerCategorizeActions(
 export async function canCategorize(
   uiActions: UiActionsStart,
   field: DataViewField,
-  dataView: DataView | undefined,
-  contextualFields: string[] = [],
-  multiFields: DataViewField[] = []
-) {
+  dataView: DataView | undefined
+): Promise<boolean> {
   if (field.name === '_id' || !dataView?.id || !field.esTypes?.includes('text')) {
     return false;
   }
 
-  const actions = await getCompatibleActions(
-    uiActions,
-    field,
-    dataView,
-    contextualFields,
-    CATEGORIZE_FIELD_TRIGGER
-  );
+  const actions = await getCompatibleActions(uiActions, field, dataView, CATEGORIZE_FIELD_TRIGGER);
 
   return actions.length > 0;
 }

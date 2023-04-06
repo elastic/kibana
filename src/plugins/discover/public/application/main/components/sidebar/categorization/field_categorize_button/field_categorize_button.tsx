@@ -19,7 +19,6 @@ export interface FieldCategorizeButtonProps {
   dataView: DataView;
   originatingApp: string; // plugin id
   uiActions: UiActionsStart;
-  multiFields?: DataViewField[];
   contextualFields?: string[]; // names of fields which were also selected (like columns in Discover grid)
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   buttonProps?: Partial<EuiButtonProps>;
@@ -32,9 +31,7 @@ export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React
   ({
     field,
     dataView,
-    contextualFields,
     trackUiMetric,
-    multiFields,
     originatingApp,
     uiActions,
     buttonProps,
@@ -45,10 +42,8 @@ export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React
     const [canCategorizeField, setCanCategorizeField] = useState<boolean>(false);
 
     useEffect(() => {
-      canCategorize(uiActions, field, dataView, contextualFields, multiFields).then(
-        setCanCategorizeField
-      );
-    }, [contextualFields, field, dataView, multiFields, uiActions]);
+      canCategorize(uiActions, field, dataView).then(setCanCategorizeField);
+    }, [field, dataView, uiActions]);
 
     if (canCategorizeField === false) {
       return null;
@@ -61,14 +56,7 @@ export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React
       event.preventDefault();
       const triggerVisualization = (updatedDataView: DataView) => {
         trackUiMetric?.(METRIC_TYPE.CLICK, 'categorize_link_click');
-        triggerCategorizeActions(
-          uiActions,
-          field,
-          contextualFields,
-          originatingApp,
-          updatedDataView,
-          onAddDSLFilter
-        );
+        triggerCategorizeActions(uiActions, field, originatingApp, updatedDataView, onAddDSLFilter);
       };
       triggerVisualization(dataView);
       if (closePopover) {

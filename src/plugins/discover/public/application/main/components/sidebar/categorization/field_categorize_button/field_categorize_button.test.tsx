@@ -15,23 +15,18 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { FieldCategorizeButton } from './field_categorize_button';
-import {
-  ACTION_VISUALIZE_LENS_FIELD,
-  VISUALIZE_FIELD_TRIGGER,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-  VisualizeFieldContext,
-} from '@kbn/ui-actions-plugin/public';
-import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import { ACTION_CATEGORIZE_FIELD, CategorizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { CATEGORIZE_FIELD_TRIGGER, TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 
 const ORIGINATING_APP = 'test';
 const mockExecuteAction = jest.fn();
 const uiActions = uiActionsPluginMock.createStartContract();
-const visualizeAction = new ActionInternal({
-  type: ACTION_VISUALIZE_LENS_FIELD,
-  id: ACTION_VISUALIZE_LENS_FIELD,
+const categorizeAction = new ActionInternal({
+  type: ACTION_CATEGORIZE_FIELD,
+  id: ACTION_CATEGORIZE_FIELD,
   getDisplayName: () => 'test',
   isCompatible: async () => true,
-  execute: async (context: VisualizeFieldContext) => {
+  execute: async (context: CategorizeFieldContext) => {
     mockExecuteAction(context);
   },
   getHref: async () => '/app/test',
@@ -39,9 +34,9 @@ const visualizeAction = new ActionInternal({
 
 jest
   .spyOn(uiActions, 'getTriggerCompatibleActions')
-  .mockResolvedValue([visualizeAction as ActionInternal<object>]);
+  .mockResolvedValue([categorizeAction as ActionInternal<object>]);
 jest.spyOn(uiActions, 'getTrigger').mockReturnValue({
-  id: ACTION_VISUALIZE_LENS_FIELD,
+  id: ACTION_CATEGORIZE_FIELD,
   exec: mockExecuteAction,
 } as unknown as TriggerContract<object>);
 
@@ -49,11 +44,6 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
   it('should render correctly', async () => {
     const fieldName = 'extension';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
-    const fieldNameKeyword = 'extension.keyword';
-    const fieldKeyword = dataView.fields.find((f) => f.name === fieldNameKeyword)!;
-    const contextualFields = ['bytes'];
-    jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => false);
-    jest.spyOn(fieldKeyword, 'visualizable', 'get').mockImplementationOnce(() => true);
     let wrapper: ReactWrapper;
 
     await act(async () => {
@@ -61,8 +51,6 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
         <FieldCategorizeButton
           field={field}
           dataView={dataView}
-          multiFields={[fieldKeyword]}
-          contextualFields={contextualFields}
           originatingApp={ORIGINATING_APP}
           uiActions={uiActions}
           wrapInContainer={(element) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
@@ -72,30 +60,26 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
 
     await wrapper!.update();
 
-    expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(VISUALIZE_FIELD_TRIGGER, {
-      contextualFields,
-      dataViewSpec: dataView.toSpec(false),
-      fieldName: fieldNameKeyword,
+    expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(CATEGORIZE_FIELD_TRIGGER, {
+      dataView,
+      field,
     });
 
-    expect(wrapper!.text()).toBe('Visualize');
-    wrapper!.find('a[data-test-subj="fieldVisualize-extension"]').simulate('click');
+    expect(wrapper!.text()).toBe('Categorize');
+    wrapper!.find(`button[data-test-subj="fieldCategorize-${fieldName}"]`).simulate('click');
 
     expect(mockExecuteAction).toHaveBeenCalledWith({
-      contextualFields,
-      dataViewSpec: dataView.toSpec(false),
-      fieldName: fieldNameKeyword,
+      dataView,
+      field,
       originatingApp: ORIGINATING_APP,
     });
 
-    expect(wrapper!.find(EuiButton).prop('href')).toBe('/app/test');
-    expect(wrapper!.find(EuiPopoverFooter).find(EuiButton).exists()).toBeTruthy(); // wrapped in a container
+    expect(wrapper!.find(EuiPopoverFooter).find(EuiButton).exists()).toBeTruthy();
   });
 
-  it('should render correctly for geo fields', async () => {
-    const fieldName = 'geo.coordinates';
+  it('should not render for non text field', async () => {
+    const fieldName = 'phpmemory';
     const field = dataView.fields.find((f) => f.name === fieldName)!;
-    jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => true);
     let wrapper: ReactWrapper;
 
     await act(async () => {
@@ -105,29 +89,17 @@ describe('UnifiedFieldList <FieldCategorizeButton />', () => {
           dataView={dataView}
           originatingApp={ORIGINATING_APP}
           uiActions={uiActions}
+          wrapInContainer={(element) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
         />
       );
     });
 
     await wrapper!.update();
 
-    expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(
-      VISUALIZE_GEO_FIELD_TRIGGER,
-      {
-        contextualFields: [],
-        dataViewSpec: dataView.toSpec(false),
-        fieldName,
-      }
+    expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledTimes(1);
+    wrapper!.find(`button[data-test-subj="fieldCategorize-${fieldName}"]`).exists();
+    expect(wrapper!.find(`button[data-test-subj="fieldCategorize-${fieldName}"]`).exists()).toBe(
+      false
     );
-
-    expect(wrapper!.text()).toBe('Visualize');
-    wrapper!.find('a[data-test-subj="fieldVisualize-geo.coordinates"]').simulate('click');
-
-    expect(mockExecuteAction).toHaveBeenCalledWith({
-      contextualFields: [],
-      dataViewSpec: dataView.toSpec(false),
-      fieldName,
-      originatingApp: ORIGINATING_APP,
-    });
   });
 });

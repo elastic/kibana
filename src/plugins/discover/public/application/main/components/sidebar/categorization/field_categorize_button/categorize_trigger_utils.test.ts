@@ -6,123 +6,69 @@
  * Side Public License, v 1.
  */
 
-// import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-// import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-// import { getCategorizeInformation } from './categorize_trigger_utils';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { canCategorize } from './categorize_trigger_utils';
 
-// const field = {
-//   name: 'fieldName',
-//   type: 'string',
-//   esTypes: ['text'],
-//   count: 1,
-//   scripted: false,
-//   searchable: true,
-//   aggregatable: true,
-//   readFromDocValues: true,
-//   visualizable: true,
-// } as DataViewField;
+const textField = {
+  name: 'fieldName',
+  type: 'string',
+  esTypes: ['text'],
+  count: 1,
+  scripted: false,
+  searchable: true,
+  aggregatable: true,
+  readFromDocValues: true,
+  visualizable: true,
+} as DataViewField;
+
+const numberField = {
+  name: 'fieldName',
+  type: 'number',
+  esTypes: ['double'],
+  count: 1,
+  scripted: false,
+  searchable: true,
+  aggregatable: true,
+  readFromDocValues: true,
+  visualizable: true,
+} as DataViewField;
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
 );
 
-// const uiActions = {
-//   getTriggerCompatibleActions: mockGetActions,
-// } as unknown as UiActionsStart;
+const uiActions = {
+  getTriggerCompatibleActions: mockGetActions,
+} as unknown as UiActionsStart;
 
-// const action: Action = {
-//   id: 'action',
-//   type: 'VISUALIZE_FIELD',
-//   getIconType: () => undefined,
-//   getDisplayName: () => 'Action',
-//   isCompatible: () => Promise.resolve(true),
-//   execute: () => Promise.resolve(),
-// };
+const action: Action = {
+  id: 'action',
+  type: 'CATEGORIZE_FIELD',
+  getIconType: () => undefined,
+  getDisplayName: () => 'Action',
+  isCompatible: () => Promise.resolve(true),
+  execute: () => Promise.resolve(),
+};
 
-// const dataViewMock = { id: '1', toSpec: () => ({}) } as DataView;
+const dataViewMock = { id: '1', toSpec: () => ({}) } as DataView;
 
-describe('visualize_trigger_utils', () => {
+describe('categorize_trigger_utils', () => {
   afterEach(() => {
     mockGetActions.mockReset();
   });
 
   describe('getCategorizeInformation', () => {
-    // it('should return for a visualizeable field with an action', async () => {
-    //   mockGetActions.mockResolvedValue([action]);
-    //   const information = await getCategorizeInformation(
-    //     uiActions,
-    //     field,
-    //     dataViewMock,
-    //     [],
-    //     undefined
-    //   );
-    //   expect(information).not.toBeUndefined();
-    //   expect(information?.field).toHaveProperty('name', 'fieldName');
-    //   expect(information?.href).toBeUndefined();
-    // });
-    // it('should return field and href from the action', async () => {
-    //   mockGetActions.mockResolvedValue([{ ...action, getHref: () => Promise.resolve('hreflink') }]);
-    //   const information = await getCategorizeInformation(
-    //     uiActions,
-    //     field,
-    //     dataViewMock,
-    //     [],
-    //     undefined
-    //   );
-    //   expect(information).not.toBeUndefined();
-    //   expect(information?.field).toHaveProperty('name', 'fieldName');
-    //   expect(information).toHaveProperty('href', 'hreflink');
-    // });
-    // it('should return undefined if no field has a compatible action', async () => {
-    //   mockGetActions.mockResolvedValue([]);
-    //   const information = await getCategorizeInformation(
-    //     uiActions,
-    //     { ...field, name: 'rootField' } as DataViewField,
-    //     dataViewMock,
-    //     [],
-    //     [
-    //       { ...field, name: 'multi1' },
-    //       { ...field, name: 'multi2' },
-    //     ] as DataViewField[]
-    //   );
-    //   expect(information).toBeUndefined();
-    // });
-    // it('should return information for the root field, when multi fields and root are having actions', async () => {
-    //   mockGetActions.mockResolvedValue([action]);
-    //   const information = await getCategorizeInformation(
-    //     uiActions,
-    //     { ...field, name: 'rootField' } as DataViewField,
-    //     dataViewMock,
-    //     [],
-    //     [
-    //       { ...field, name: 'multi1' },
-    //       { ...field, name: 'multi2' },
-    //     ] as DataViewField[]
-    //   );
-    //   expect(information).not.toBeUndefined();
-    //   expect(information?.field).toHaveProperty('name', 'rootField');
-    // });
-    // it('should return information for first multi field that has a compatible action', async () => {
-    //   mockGetActions.mockImplementation(async (_, { fieldName }) => {
-    //     if (fieldName === 'multi2' || fieldName === 'multi3') {
-    //       return [action];
-    //     }
-    //     return [];
-    //   });
-    //   const information = await getCategorizeInformation(
-    //     uiActions,
-    //     { ...field, name: 'rootField' } as DataViewField,
-    //     dataViewMock,
-    //     [],
-    //     [
-    //       { ...field, name: 'multi1' },
-    //       { ...field, name: 'multi2' },
-    //       { ...field, name: 'multi3' },
-    //     ] as DataViewField[]
-    //   );
-    //   expect(information).not.toBeUndefined();
-    //   expect(information?.field).toHaveProperty('name', 'multi2');
-    // });
+    it('should return true for a categorizable field with an action', async () => {
+      mockGetActions.mockResolvedValue([action]);
+      const resp = await canCategorize(uiActions, textField, dataViewMock);
+      expect(resp).toBe(true);
+    });
+
+    it('should return false for a non-categorizable field with an action', async () => {
+      mockGetActions.mockResolvedValue([action]);
+      const resp = await canCategorize(uiActions, numberField, dataViewMock);
+      expect(resp).toBe(false);
+    });
   });
 });
