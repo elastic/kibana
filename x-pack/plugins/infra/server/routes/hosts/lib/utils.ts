@@ -12,7 +12,7 @@ import { GetHostsRequestBodyPayload } from '../../../../common/http_api/hosts';
 type FilterClauses = keyof estypes.QueryDslBoolQuery;
 const validClauses: FilterClauses[] = ['must', 'filter', 'must_not', 'should'];
 
-const isValidFilter = (query?: any | undefined): query is estypes.QueryDslQueryContainer => {
+const isValidFilter = (query: any): query is estypes.QueryDslQueryContainer => {
   const boolClause = (query as estypes.QueryDslQueryContainer).bool;
 
   if (!boolClause) {

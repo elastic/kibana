@@ -22,7 +22,7 @@ export const createFilters = ({
   extraFilter?: QueryDslQueryContainer;
 }) => {
   const extrafilterClause = extraFilter?.bool?.filter;
-  const extraFilterArray = !!extrafilterClause
+  const extraFilterList = !!extrafilterClause
     ? Array.isArray(extrafilterClause)
       ? extrafilterClause
       : [extrafilterClause]
@@ -60,7 +60,7 @@ export const createFilters = ({
         'event.module': 'system',
       },
     },
-    ...extraFilterArray,
+    ...extraFilterList,
   ];
 };
 
