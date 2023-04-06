@@ -87,7 +87,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
       path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
     });
 
-    const { isOnAlertsPage, alertDetailsLink } = useGetAlertDetailsFlyoutLink({
+    const alertDetailsLink = useGetAlertDetailsFlyoutLink({
       _id: eventId,
       _index: eventIndex,
       timestamp,
@@ -128,7 +128,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
             <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
           </EuiFlexItem>
         )}
-        {isAlert && isOnAlertsPage && (
+        {isAlert && (
           <EuiCopy textToCopy={alertDetailsLink}>
             {(copy) => (
               <EuiButtonEmpty

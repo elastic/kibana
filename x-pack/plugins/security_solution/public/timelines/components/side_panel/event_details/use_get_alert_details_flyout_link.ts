@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 
-import { useLocation } from 'react-router-dom';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import { ALERTS_PATH } from '../../../../../common/constants';
 
@@ -21,7 +20,6 @@ export const useGetAlertDetailsFlyoutLink = ({
   timestamp: string;
 }) => {
   const { getAppUrl } = useAppUrl();
-  const { pathname } = useLocation();
   // getAppUrl accounts for the users selected space
   const alertDetailsLink = useMemo(() => {
     const url = getAppUrl({
@@ -30,7 +28,5 @@ export const useGetAlertDetailsFlyoutLink = ({
     return `${window.location.origin}${url}`;
   }, [_id, _index, getAppUrl, timestamp]);
 
-  const isOnAlertsPage = pathname === ALERTS_PATH;
-
-  return { isOnAlertsPage, alertDetailsLink };
+  return alertDetailsLink;
 };
