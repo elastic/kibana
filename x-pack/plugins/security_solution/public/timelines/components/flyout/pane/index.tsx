@@ -38,28 +38,28 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   );
 
   return (
-    <div ref={ref}>
-      {ref?.current && (
-        <EuiPortal insert={!visible ? { sibling: ref?.current, position: 'after' } : undefined}>
-          <div
-            aria-label={i18n.TIMELINE_DESCRIPTION}
-            className="euiFlyout timeline-flyout"
-            data-test-subj="eui-flyout"
-            css={css`
-              min-width: 150px;
-              height: calc(100% - 96px);
-              top: 96px;
-              background: white;
-              position: fixed;
-              width: 100%;
-              z-index: ${euiThemeVars.euiZFlyout};
-              display: ${visible ? 'block' : 'none'};
-            `}
-          >
-            {timeline}
-          </div>
-        </EuiPortal>
-      )}
+    <div data-test-subj="flyout-pane" ref={ref}>
+      <EuiPortal
+        insert={!visible && ref?.current ? { sibling: ref?.current, position: 'after' } : undefined}
+      >
+        <div
+          aria-label={i18n.TIMELINE_DESCRIPTION}
+          className="euiFlyout"
+          data-test-subj="timeline-flyout"
+          css={css`
+            min-width: 150px;
+            height: calc(100% - 96px);
+            top: 96px;
+            background: white;
+            position: fixed;
+            width: 100%;
+            z-index: ${euiThemeVars.euiZFlyout};
+            display: ${visible ? 'block' : 'none'};
+          `}
+        >
+          {timeline}
+        </div>
+      </EuiPortal>
     </div>
   );
 };
