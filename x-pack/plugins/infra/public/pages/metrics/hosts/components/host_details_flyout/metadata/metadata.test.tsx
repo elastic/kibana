@@ -114,6 +114,14 @@ describe('Single Host Metadata (Hosts View)', () => {
     expect(result.queryByTestId('infraMetadataNoData')).toBeInTheDocument();
   });
 
+  it('should show the metadata table if the metadata is returned', async () => {
+    mockUseMetadata({ metadata: [{ name: 'host.os.name', value: 'Ubuntu' }] });
+    const result = renderHostMetadata();
+
+    expect(result.queryByTestId('infraMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraMetadataTable')).toBeInTheDocument();
+  });
+
   it('should return spinner if loading', async () => {
     mockUseMetadata({ loading: true });
     const result = renderHostMetadata();

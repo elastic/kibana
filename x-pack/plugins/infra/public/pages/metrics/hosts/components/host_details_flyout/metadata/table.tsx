@@ -5,11 +5,22 @@
  * 2.0.
  */
 
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiInMemoryTable,
+  EuiSearchBarProps,
+  EuiLoadingChart,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useToggle from 'react-use/lib/useToggle';
+import { debounce } from 'lodash';
+import { Query } from '@elastic/eui';
+import { useHostFlyoutOpen } from '../../../hooks/use_host_flyout_open_url_state';
 
 interface Row {
   name: string;
@@ -18,7 +29,10 @@ interface Row {
 
 interface Props {
   rows: Row[];
+  loading: boolean;
 }
+
+type SearchErrorType = undefined | { message: string };
 
 /**
  * Columns translations
@@ -32,7 +46,48 @@ const VALUE_LABEL = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadat
 });
 
 export const Table = (props: Props) => {
-  const { rows } = props;
+  const { rows, loading } = props;
+  const [searchError, setSearchError] = useState<SearchErrorType>(undefined);
+  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+  const [searchBarState, setSearchBarState] = useState<Query>(() =>
+    hostFlyoutOpen.metadataSearch ? Query.parse(hostFlyoutOpen.metadataSearch) : Query.MATCH_ALL
+  );
+
+  const debouncedSearchOnChange = useMemo(
+    () =>
+      debounce<(queryText: string) => void>(
+        (queryText) => setHostFlyoutOpen({ metadataSearch: String(queryText) ?? '' }),
+        500
+      ),
+    [setHostFlyoutOpen]
+  );
+
+  const searchBarOnChange = useCallback(
+    ({ query, queryText, error }) => {
+      if (error) {
+        setSearchError(error);
+      } else {
+        setSearchError(undefined);
+        setSearchBarState(query);
+        debouncedSearchOnChange(queryText);
+      }
+    },
+    [setSearchBarState, debouncedSearchOnChange]
+  );
+
+  const search: EuiSearchBarProps = {
+    onChange: searchBarOnChange,
+    box: {
+      'data-test-subj': 'infraMetadataSearchBarInput',
+      incremental: true,
+      schema: true,
+      placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
+        defaultMessage: 'Search for metadata…',
+      }),
+    },
+    query: searchBarState,
+  };
+
   const columns = useMemo(
     () => [
       {
@@ -54,12 +109,26 @@ export const Table = (props: Props) => {
   );
 
   return (
-    <EuiBasicTable
+    <EuiInMemoryTable
       data-test-subj="infraMetadataTable"
       tableLayout={'fixed'}
       responsive={false}
       columns={columns}
       items={rows}
+      search={search}
+      loading={loading}
+      error={searchError ? `Invalid search: ${searchError.message}` : ''}
+      message={
+        loading ? (
+          <LoadingPlaceholder />
+        ) : (
+          <div data-test-subj="infraMetadataNoData">
+            {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
+              defaultMessage: 'No metadata found.',
+            })}
+          </div>
+        )
+      }
     />
   );
 };
@@ -112,5 +181,22 @@ const ExpandableContent = (props: ExpandableContentProps) => {
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
+  );
+};
+
+const LoadingPlaceholder = () => {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '200px',
+        padding: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <EuiLoadingChart data-test-subj="infraHostMetadataLoading" size="xl" />
+    </div>
   );
 };
