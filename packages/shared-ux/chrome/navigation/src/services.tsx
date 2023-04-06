@@ -16,9 +16,11 @@ const Context = React.createContext<NavigationServices | null>(null);
  * A Context Provider that provides services to the component and its dependencies.
  */
 export const NavigationProvider: FC<NavigationServices> = ({ children, ...services }) => {
-  const { getLocator, recentItems, navIsOpen } = services;
+  const { getLocator, recentItems, navIsOpen, setActiveNavItemId } = services;
   return (
-    <Context.Provider value={{ getLocator, recentItems, navIsOpen }}>{children}</Context.Provider>
+    <Context.Provider value={{ getLocator, recentItems, navIsOpen, setActiveNavItemId }}>
+      {children}
+    </Context.Provider>
   );
 };
 
@@ -37,10 +39,15 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   const getLocator = (id: string) => dependencies.share.url.locators.get(id);
   const navIsOpen = useObservable(dependencies.core.chrome.getProjectNavIsOpen$(), true);
 
+  const setActiveNavItemId = (id: string | number) => {
+    console.log({ newActiveItemId: id });
+  };
+
   const value: NavigationServices = {
+    navIsOpen,
     recentItems,
     getLocator,
-    navIsOpen,
+    setActiveNavItemId,
   };
 
   return (

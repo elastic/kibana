@@ -10,6 +10,7 @@ import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { SerializableRecord } from '@kbn/utility-types';
 import { action } from '@storybook/addon-actions';
 import { NavigationProps, NavigationServices } from '../../types';
+import { GetLocatorFn } from '../../types/internal';
 
 type Arguments = NavigationProps & NavigationServices;
 export type Params = Pick<
@@ -33,16 +34,22 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
   getServices(params: Params): NavigationServices {
     const { navIsOpen, recentItems } = params;
 
-    const navAction = action('Navigation');
+    const navAction = action('Navigate to');
+    const activeNavItemIdAction = action('Set active item');
 
-    const getLocator = (locatorId: string) => ({
+    const getLocator: GetLocatorFn = (locatorId: string) => ({
       navigateSync: (locatorParams?: SerializableRecord) => {
         navAction(`Locator: ${locatorId} / Params: ${JSON.stringify(locatorParams)}`);
       },
     });
 
+    const setActiveNavItemId = (id: string | number) => {
+      activeNavItemIdAction(id);
+    };
+
     return {
       getLocator,
+      setActiveNavItemId,
       navIsOpen,
       recentItems,
     };

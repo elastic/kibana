@@ -8,7 +8,13 @@
 
 import type { EuiSideNavItemType, IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { GetLocatorFn, ILocatorDefinition, LocatorNavigationFn, RecentItem } from './internal';
+import {
+  GetLocatorFn,
+  ILocatorDefinition,
+  LocatorNavigationFn,
+  RecentItem,
+  SetActiveNavItemIdFn,
+} from './internal';
 
 /**
  * A list of services that are consumed by this component.
@@ -16,6 +22,7 @@ import { GetLocatorFn, ILocatorDefinition, LocatorNavigationFn, RecentItem } fro
  */
 export interface NavigationServices {
   getLocator: GetLocatorFn;
+  setActiveNavItemId: SetActiveNavItemIdFn;
   navIsOpen: boolean;
   recentItems: RecentItem[];
 }
@@ -45,10 +52,7 @@ export interface NavigationKibanaDependencies {
  * Props for the `NavItem` component representing the content of a navigational item with optional children.
  * @public
  */
-export type NavItemProps<T = unknown> = Pick<
-  EuiSideNavItemType<T>,
-  'id' | 'name' | 'isSelected'
-> & {
+export type NavItemProps<T = unknown> = Pick<EuiSideNavItemType<T>, 'id' | 'name'> & {
   items?: Array<NavItemProps<T>>;
   /**
    * ID of a registered LocatorDefinition

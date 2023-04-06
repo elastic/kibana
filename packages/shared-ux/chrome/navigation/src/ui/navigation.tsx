@@ -28,11 +28,11 @@ export const Navigation = (props: NavigationProps) => {
   // const { euiTheme } = useEuiTheme();
   // const { fontSize: navSectionFontSize } = useEuiFontSize('m');
   // const { fontSize: navItemFontSize } = useEuiFontSize('s');
-  const { getLocator, recentItems, navIsOpen } = useNavigation();
+  const { getLocator, recentItems, navIsOpen, setActiveNavItemId } = useNavigation();
 
   const { euiTheme } = useEuiTheme();
 
-  const locatorNavigation = getLocatorNavigation(getLocator);
+  const locatorNavigation = getLocatorNavigation(getLocator, setActiveNavItemId);
 
   let euiSideNavRecentItems: Array<EuiSideNavItemType<unknown>> | undefined;
   if (recentItems) {

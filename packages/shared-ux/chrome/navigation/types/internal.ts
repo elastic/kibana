@@ -7,6 +7,7 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
+import { NavItemProps } from '.';
 
 /**
  * @internal
@@ -18,7 +19,12 @@ export interface ILocatorPublic {
 /**
  * @internal
  */
-export type GetLocatorFn = (id: string) => ILocatorPublic | undefined;
+export type GetLocatorFn = (locatorId: string) => ILocatorPublic | undefined;
+
+/**
+ * @internal
+ */
+export type SetActiveNavItemIdFn = (activeNavItemId: string | number) => void;
 
 /**
  * @internal
@@ -44,4 +50,4 @@ export interface ILocatorDefinition<P = SerializableRecord> {
   params?: P;
 }
 
-export type LocatorNavigationFn = (locator: ILocatorDefinition | undefined) => () => void;
+export type LocatorNavigationFn = (item: NavItemProps | undefined) => () => void;

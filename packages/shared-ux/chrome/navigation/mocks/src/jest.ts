@@ -12,9 +12,8 @@ export const getServicesMock = (): NavigationServices => {
   const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
 
   return {
-    getLocator() {
-      return { navigateSync: jest.fn() };
-    },
+    getLocator: () => ({ navigateSync: jest.fn() }),
+    setActiveNavItemId: jest.fn(),
     navIsOpen: true,
     recentItems,
   };

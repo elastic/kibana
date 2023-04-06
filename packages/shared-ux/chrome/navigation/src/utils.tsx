@@ -8,18 +8,25 @@
 
 import { EuiSideNavItemType } from '@elastic/eui';
 import { NavItemProps, PlatformSectionConfig } from '../types';
-import { GetLocatorFn, ILocatorDefinition, LocatorNavigationFn } from '../types/internal';
+import { GetLocatorFn, LocatorNavigationFn, SetActiveNavItemIdFn } from '../types/internal';
 
-export const getLocatorNavigation = (getLocator: GetLocatorFn): LocatorNavigationFn => {
-  const locatorNavigation = (locator: ILocatorDefinition | undefined) => () => {
-    if (locator) {
-      const locatorInstance = getLocator(locator.id);
+export const getLocatorNavigation = (
+  getLocator: GetLocatorFn,
+  setActiveNavItemId: SetActiveNavItemIdFn
+): LocatorNavigationFn => {
+  const locatorNavigation = (item: NavItemProps | undefined) => () => {
+    if (item) {
+      const { locator, id } = item;
+      setActiveNavItemId(id);
+      if (locator) {
+        const locatorInstance = getLocator(locator.id);
 
-      if (!locatorInstance) {
-        throw new Error(`Unresolved Locator instance for ${locator.id}`);
+        if (!locatorInstance) {
+          throw new Error(`Unresolved Locator instance for ${locator.id}`);
+        }
+
+        locatorInstance.navigateSync(locator.params ?? {});
       }
-
-      locatorInstance.navigateSync(locator.params ?? {});
     }
   };
   return locatorNavigation;
@@ -43,12 +50,12 @@ export const convertNavItemsToEui = (
       return accum;
     }
 
+    const fullId = [parentNavPath, id].filter(Boolean).join('.');
+
     let onClick: OnClickFn | undefined;
     if (item.locator) {
-      onClick = locatorNavigation(item.locator);
+      onClick = locatorNavigation({ ...item, id: fullId });
     }
-
-    const fullId = [parentNavPath, id].filter(Boolean).join('.');
 
     let filteredSubNav: NavItemProps[] | undefined;
     if (subNav) {
