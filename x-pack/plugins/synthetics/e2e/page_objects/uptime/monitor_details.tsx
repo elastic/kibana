@@ -6,8 +6,8 @@
  */
 
 import { Page } from '@elastic/synthetics';
+import { utilsPageProvider } from '../utils';
 import { byTestId, delay } from '../../helpers/utils';
-import { monitorManagementPageProvider } from './monitor_management';
 
 interface AlertType {
   id: string;
@@ -16,8 +16,7 @@ interface AlertType {
 
 export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
   return {
-    ...monitorManagementPageProvider({ page, kibanaUrl }),
-
+    ...utilsPageProvider({ page }),
     async navigateToMonitorDetails(monitorId: string) {
       await page.click(byTestId(`monitor-page-link-${monitorId}`));
     },
@@ -104,8 +103,8 @@ export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; ki
     },
 
     async selectAlertThreshold(threshold: string) {
-      await this.clickByTestSubj('uptimeAnomalySeverity');
-      await this.clickByTestSubj('anomalySeveritySelect');
+      await page.click(byTestId('uptimeAnomalySeverity'));
+      await page.click(byTestId('anomalySeveritySelect'));
       await page.click(`text=${threshold}`);
     },
 
