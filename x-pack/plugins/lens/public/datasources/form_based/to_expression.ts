@@ -27,10 +27,7 @@ import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
 import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
-import {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from './operations/definitions/column_types';
+import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
@@ -411,8 +408,7 @@ function getExpressionForLayer(
           }
         }
         if (ifColumnOfType<CounterRateIndexPatternColumn>('counter_rate', col)) {
-          const metric =
-            layer.columns[col.references[0]];
+          const metric = layer.columns[col.references[0]];
           if (
             metric &&
             'sourceField' in metric &&
