@@ -33,7 +33,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation,
 
   const timeRange = useTimeRangeUpdates();
   const { dataView } = useDataSource();
-  const { bucketInterval } = useChangePointDetectionContext();
+  const { bucketInterval, resultQuery } = useChangePointDetectionContext();
 
   const filters = useMemo(() => {
     return annotation.group
@@ -153,10 +153,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation,
               : []),
           ],
         },
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: resultQuery,
         filters,
         datasourceStates: {
           formBased: {
@@ -204,7 +201,15 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation,
         adHocDataViews: {},
       },
     };
-  }, [dataView.id, dataView.timeFieldName, annotation, fieldConfig, filters, bucketInterval]);
+  }, [
+    dataView.id,
+    dataView.timeFieldName,
+    annotation,
+    fieldConfig,
+    filters,
+    bucketInterval,
+    resultQuery,
+  ]);
 
   return (
     <EmbeddableComponent
@@ -212,6 +217,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation,
       style={{ height: 350 }}
       timeRange={timeRange}
       attributes={attributes}
+      query={resultQuery}
       renderMode={'view'}
       executionContext={{
         type: 'aiops_change_point_detection_chart',

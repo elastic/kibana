@@ -192,7 +192,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
 
   const timeRange = useTimeRangeUpdates();
   const { dataView } = useDataSource();
-  const { bucketInterval } = useChangePointDetectionContext();
+  const { bucketInterval, resultQuery } = useChangePointDetectionContext();
 
   const filters = useMemo(() => {
     return annotation.group
@@ -313,10 +313,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
               : []),
           ],
         },
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: resultQuery,
         filters,
         datasourceStates: {
           formBased: {
@@ -364,7 +361,18 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
         adHocDataViews: {},
       },
     };
-  }, [dataView.id, dataView.timeFieldName, annotation, fieldConfig, filters, bucketInterval]);
+  }, [
+    annotation.group?.value,
+    annotation.timestamp,
+    annotation.label,
+    dataView.id,
+    dataView.timeFieldName,
+    resultQuery,
+    filters,
+    bucketInterval.expression,
+    fieldConfig.fn,
+    fieldConfig.metricField,
+  ]);
 
   return (
     <div>
@@ -372,6 +380,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}
         timeRange={timeRange}
+        query={resultQuery}
         attributes={attributes}
         renderMode={'view'}
         executionContext={{
