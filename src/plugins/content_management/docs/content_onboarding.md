@@ -245,7 +245,7 @@ function savedObjectToMapItem(
     type,
     updated_at: updatedAt,
     created_at: createdAt,
-    attributes: { title, description, layerListJSON, mapStateJSON, uiStateJSON },
+    attributes: { title, description, ... },
     references,
     error,
     namespaces,
@@ -259,9 +259,9 @@ function savedObjectToMapItem(
     attributes: {
       title,
       description,
-      layerListJSON,
-      mapStateJSON,
-      uiStateJSON,
+      // other attributes. Ideally **not** stringified JSON
+      // but proper objects that can be versionned and transformed
+      ...
     },
     references,
     error,
