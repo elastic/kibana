@@ -19,9 +19,9 @@ interface Props {
   id: string;
 }
 export const MonitorErrorSparklines = ({ from, to, monitorId, id }: Props) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
 
