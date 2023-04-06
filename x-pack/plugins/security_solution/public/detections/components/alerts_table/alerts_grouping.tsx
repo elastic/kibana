@@ -52,7 +52,7 @@ const useStorage = (storage: Storage, tableId: string) =>
       getStoragePageSize: (): number[] => {
         const pageSizes = storage.get(`grouping-table-${tableId}`);
         if (!pageSizes) {
-          return Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_INDEX);
+          return Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_SIZE);
         }
         return pageSizes;
       },
@@ -110,14 +110,31 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const selectorOptions = useRef<GroupOption[]>([]);
 
   useEffect(() => {
+    if (props.stinky) {
+      console.log('useEffect', {
+        selectedGroups,
+        con:
+          isNoneGroup(selectedGroups) &&
+          groupSelector.props.options.length > 0 &&
+          (groupSelectorInRedux == null ||
+            !isEqual(selectorOptions.current, groupSelector.props.options)),
+        con1: isNoneGroup(selectedGroups),
+        con2: groupSelector.props.options.length > 0,
+        con3a: groupSelectorInRedux == null,
+        con3b: !isEqual(selectorOptions.current, groupSelector.props.options),
+      });
+    }
     if (
       isNoneGroup(selectedGroups) &&
+      groupSelector.props.options.length > 0 &&
       (groupSelectorInRedux == null ||
         !isEqual(selectorOptions.current, groupSelector.props.options))
     ) {
+      if (props.stinky) console.log('useEffect dispatch1');
       selectorOptions.current = groupSelector.props.options;
       dispatch(updateGroupSelector({ groupSelector }));
     } else if (!isNoneGroup(selectedGroups) && groupSelectorInRedux !== null) {
+      if (props.stinky) console.log('useEffect dispatch2');
       dispatch(updateGroupSelector({ groupSelector: null }));
     }
   }, [dispatch, groupSelector, groupSelectorInRedux, selectedGroups]);
@@ -204,7 +221,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
           return [...allPages, ...resetPages.map(() => DEFAULT_PAGE_INDEX)];
         });
       };
-
       return (
         <GroupedSubLevel
           {...props}

@@ -151,6 +151,7 @@ const GroupingComponent = <T,>({
       groupingId,
       groupingLevel,
       isLoading,
+      onGroupClose,
       onGroupToggle,
       renderChildComponent,
       selectedGroup,
@@ -163,6 +164,7 @@ const GroupingComponent = <T,>({
     () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
     [groupCount, itemsPerPage]
   );
+
   return (
     <>
       {groupingLevel > 0 ? null : (
