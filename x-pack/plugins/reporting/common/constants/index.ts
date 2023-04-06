@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CONTENT_TYPE_CSV } from '@kbn/generate-csv';
+import { CONTENT_TYPE_CSV } from '@kbn/generate-csv-types';
 import * as reportTypes from './report_types';
 import * as jobTypes from './job_types';
 
