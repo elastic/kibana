@@ -1,9 +1,9 @@
 {
   "name": "Legacy notification with one action",
-  "interval": "1m",
+  "interval": "1d",
   "actions": [
     {
-      "id": "0cae9900-6e54-11ec-a124-bfe603780ab8",
+      "id": "b2fd3f90-cd81-11ed-9f6d-a746729ca213",
       "group": "default",
       "params": {
         "message": "Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts"

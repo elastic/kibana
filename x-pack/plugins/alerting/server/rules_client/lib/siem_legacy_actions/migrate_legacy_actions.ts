@@ -62,6 +62,20 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
     });
   }
 
+  // fix references for a case when actions present in a rule
+  if (actions.length) {
+    legacyActions.forEach((legacyAction, i) => {
+      const oldReference = legacyAction.actionRef;
+      const legacyReference = legacyActionsReferences.find(({ name }) => name === oldReference);
+      const newReference = `action_${actions.length + i}`;
+      legacyAction.actionRef = newReference;
+
+      if (legacyReference) {
+        legacyReference.name = newReference;
+      }
+    });
+  }
+
   return {
     actions: [...actions, ...legacyActions],
     hasLegacyActions: legacyActions.length > 0,
