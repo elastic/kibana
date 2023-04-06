@@ -15,6 +15,7 @@ import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { CSV_REPORTING_ACTION } from '@kbn/generate-csv-types';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
@@ -38,7 +39,7 @@ interface Params {
 export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> {
   private isDownloading: boolean;
   public readonly type = '';
-  public readonly id = 'downloadCsvReport';
+  public readonly id = CSV_REPORTING_ACTION;
   private licenseHasDownloadCsv: boolean = false;
   private capabilityHasDownloadCsv: boolean = false;
   private notifications: NotificationsSetup;
