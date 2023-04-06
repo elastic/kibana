@@ -54,7 +54,7 @@ const esFieldTypeMap = {
   short: t.union([t.number, NumberFromString]),
   double: t.union([t.number, NumberFromString]),
   float: t.union([t.number, NumberFromString]),
-  scaled_float: t.union([t.number, t.null, NumberFromString]),
+  scaled_float: t.union([t.number, NumberFromString]),
   unsigned_long: t.union([t.number, NumberFromString]),
   flattened: t.UnknownRecord,
 };
@@ -77,7 +77,7 @@ type CastSingle<T extends t.Type<any>> = t.Type<
 >;
 
 const createCastArrayRt = <T extends t.Type<any>>(type: T): CastArray<T> => {
-  const union = t.union([type, t.array(type)]);
+  const union = t.union([type, t.array(t.union([type, t.nullType]))]);
 
   return new t.Type('castArray', union.is, union.validate, (a) => (Array.isArray(a) ? a : [a]));
 };
