@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
+        .post('/api/fleet/epm/packages/synthetics/0.12.0')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -1816,11 +1816,13 @@ export default function ({ getService }: FtrProviderContext) {
                 timeout: { value: '80s', type: 'text' },
                 max_redirects: { value: '0', type: 'integer' },
                 proxy_url: { value: '', type: 'text' },
+                proxy_headers: { value: null, type: 'yaml' },
                 tags: { value: '["tag2","tag2"]', type: 'yaml' },
                 username: { value: '', type: 'text' },
                 password: { value: '', type: 'password' },
                 'response.include_headers': { value: false, type: 'bool' },
                 'response.include_body': { value: 'always', type: 'text' },
+                'response.include_body_max_bytes': { value: '900', type: 'text' },
                 'check.request.method': { value: 'POST', type: 'text' },
                 'check.request.headers': {
                   value: '{"Content-Type":"application/x-www-form-urlencoded"}',
@@ -1831,6 +1833,10 @@ export default function ({ getService }: FtrProviderContext) {
                 'check.response.headers': { value: null, type: 'yaml' },
                 'check.response.body.positive': { value: '["Saved","saved"]', type: 'yaml' },
                 'check.response.body.negative': { value: null, type: 'yaml' },
+                'check.response.json': {
+                  value: '[{"description":"check status","expression":"foo.bar == \\"myValue\\""}]',
+                  type: 'yaml',
+                },
                 'ssl.certificate_authorities': { value: null, type: 'yaml' },
                 'ssl.certificate': { value: null, type: 'yaml' },
                 'ssl.key': { value: null, type: 'yaml' },
@@ -1856,6 +1862,9 @@ export default function ({ getService }: FtrProviderContext) {
                   type: 'text',
                   value: 'test-suite',
                 },
+                ipv4: { type: 'bool', value: true },
+                ipv6: { type: 'bool', value: true },
+                mode: { type: 'text', value: 'any' },
               },
               id: `synthetics/http-http-${id}-${testPolicyId}`,
               compiled_stream: {
@@ -1880,6 +1889,15 @@ export default function ({ getService }: FtrProviderContext) {
                 'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
                 'run_from.geo.name': 'Test private location 0',
                 'run_from.id': 'Test private location 0',
+                'check.response.json': [
+                  {
+                    description: 'check status',
+                    expression: 'foo.bar == "myValue"',
+                  },
+                ],
+                ipv4: true,
+                ipv6: true,
+                mode: 'any',
                 processors: [
                   {
                     add_fields: {

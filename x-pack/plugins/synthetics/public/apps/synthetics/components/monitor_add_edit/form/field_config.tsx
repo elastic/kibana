@@ -975,7 +975,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     hidden: (dependencies) => {
       const [isTLSEnabled] = dependencies;
-      return Boolean(isTLSEnabled);
+      return !Boolean(isTLSEnabled);
     },
     dependencies: ['isTLSEnabled'],
     props: (): EuiSelectProps => ({
@@ -995,7 +995,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     controlled: true,
     hidden: (dependencies) => {
       const [isTLSEnabled] = dependencies;
-      return Boolean(isTLSEnabled);
+      return !Boolean(isTLSEnabled);
     },
     dependencies: ['isTLSEnabled'],
     props: ({ field, setValue }): EuiComboBoxProps<TLSVersion> => {
@@ -1027,7 +1027,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     hidden: (dependencies) => {
       const [isTLSEnabled] = dependencies;
-      return Boolean(isTLSEnabled);
+      return !Boolean(isTLSEnabled);
     },
     dependencies: ['isTLSEnabled'],
     props: (): EuiTextAreaProps => ({
@@ -1045,7 +1045,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     hidden: (dependencies) => {
       const [isTLSEnabled] = dependencies;
-      return Boolean(isTLSEnabled);
+      return !Boolean(isTLSEnabled);
     },
     dependencies: ['isTLSEnabled'],
     props: (): EuiTextAreaProps => ({
@@ -1063,7 +1063,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     hidden: (dependencies) => {
       const [isTLSEnabled] = dependencies;
-      return Boolean(isTLSEnabled);
+      return !Boolean(isTLSEnabled);
     },
     dependencies: ['isTLSEnabled'],
     props: (): EuiTextAreaProps => ({
@@ -1081,7 +1081,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     hidden: (dependencies) => {
       const [isTLSEnabled] = dependencies;
-      return Boolean(isTLSEnabled);
+      return !Boolean(isTLSEnabled);
     },
     dependencies: ['isTLSEnabled'],
     props: (): EuiFieldPasswordProps => ({

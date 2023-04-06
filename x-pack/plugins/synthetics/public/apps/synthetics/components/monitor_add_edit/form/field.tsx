@@ -58,7 +58,7 @@ export const Field = memo<Props>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [JSON.stringify(dependenciesValues || []), dependencies, getFieldState]);
 
-    if (hidden && !hidden(dependenciesValues)) {
+    if (hidden && hidden(dependenciesValues)) {
       return null;
     }
 
