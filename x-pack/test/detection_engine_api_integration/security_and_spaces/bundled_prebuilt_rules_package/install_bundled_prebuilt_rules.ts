@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import fs from 'fs/promises';
 import path from 'path';
-
 import expect from 'expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -19,6 +17,10 @@ import { installPrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/ins
 import { installPrebuiltRulesAndTimelines } from '../../utils/prebuilt_rules/install_prebuilt_rules_and_timelines';
 import { deletePrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/delete_prebuilt_rules_fleet_package';
 import { BUNDLED_PACKAGE_DIR } from './config';
+import {
+  bundlePackage,
+  removeBundledPackages,
+} from '../../utils/prebuilt_rules/bundle_fleet_package';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -28,34 +30,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const BUNDLED_FLEET_PACKAGE_DIR = path.join(
     path.dirname(__filename),
-    './tmp/fleet_bundled_packages'
+    './tmp_fleet_bundled_packages'
   );
-
-  const bundlePackage = async (name: string) => {
-    try {
-      await fs.access(BUNDLED_PACKAGE_DIR);
-    } catch (error) {
-      await fs.mkdir(BUNDLED_PACKAGE_DIR);
-    }
-
-    await fs.copyFile(
-      path.join(BUNDLED_FLEET_PACKAGE_DIR, `${name}.zip`),
-      path.join(BUNDLED_PACKAGE_DIR, `${name}.zip`)
-    );
-  };
-
-  const removeBundledPackages = async () => {
-    try {
-      const files = await fs.readdir(BUNDLED_PACKAGE_DIR);
-
-      for (const file of files) {
-        await fs.unlink(path.join(BUNDLED_PACKAGE_DIR, file));
-      }
-    } catch (error) {
-      log.error('Error removing bundled packages');
-      log.error(error);
-    }
-  };
 
   describe('install_bundled_prebuilt_rules', () => {
     beforeEach(async () => {
@@ -66,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await removeBundledPackages();
+      await removeBundledPackages(BUNDLED_FLEET_PACKAGE_DIR);
     });
 
     it('should install prebuilt rules from the package that comes bundled with Kibana', async () => {
@@ -76,7 +52,11 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusBeforePackageInstallation.rules_not_installed).toBe(0);
       expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
 
-      await bundlePackage('security_detection_engine-8.7.1');
+      await bundlePackage(
+        'security_detection_engine-8.7.1',
+        BUNDLED_PACKAGE_DIR,
+        BUNDLED_FLEET_PACKAGE_DIR
+      );
       await installPrebuiltRulesFleetPackage({
         supertest,
         overrideExistingPackage: true,

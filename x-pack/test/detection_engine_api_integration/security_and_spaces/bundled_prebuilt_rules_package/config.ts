@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
+import path from 'path';
 
-export const BUNDLED_PACKAGE_DIR = './fleet_bundled_packages';
+export const BUNDLED_PACKAGE_DIR = path.join(path.dirname(__filename), './fleet_bundled_packages');
 
 const registryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
@@ -16,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
+    testFiles: [require.resolve('./install_bundled_prebuilt_rules.ts')],
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
