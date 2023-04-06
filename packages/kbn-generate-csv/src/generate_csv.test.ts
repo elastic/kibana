@@ -24,13 +24,13 @@ import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 import { CsvGenerator } from './generate_csv';
+import { CancellationToken, UI_SETTINGS_DATEFORMAT_TZ } from '@kbn/reporting-common';
 import {
-  CancellationToken,
+  CsvConfig,
+  JobParams,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
-  UI_SETTINGS_DATEFORMAT_TZ,
-} from '@kbn/reporting-common';
-import { CsvConfig, JobParams } from '../types';
+} from '../types';
 
 const createMockJob = (baseObj: any = {}): JobParams => ({
   ...baseObj,
