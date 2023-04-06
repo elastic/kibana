@@ -31,6 +31,16 @@ export const updateRules = async ({
     return null;
   }
 
+  const actions =
+    ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [];
+  const throttleAndNotifyWhen =
+    !actions.length || !actions[0].frequency
+      ? {
+          throttle: transformToAlertThrottle(ruleUpdate.throttle),
+          notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
+        }
+      : {};
+
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
   const newInternalRule: InternalRuleUpdate = {
@@ -72,8 +82,7 @@ export const updateRules = async ({
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
     actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
-    throttle: transformToAlertThrottle(ruleUpdate.throttle),
-    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
+    ...throttleAndNotifyWhen,
   };
 
   const update = await rulesClient.update({

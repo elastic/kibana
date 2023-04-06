@@ -72,8 +72,12 @@ export const bulkEditActionToRulesClientOperation = (
           operation: 'add',
           value: action.value.actions,
         },
-        getThrottleOperation(action.value.throttle),
-        getNotifyWhenOperation(action.value.throttle),
+        ...(action.value.throttle
+          ? [
+              getThrottleOperation(action.value.throttle),
+              getNotifyWhenOperation(action.value.throttle),
+            ]
+          : []),
       ];
 
     case BulkActionEditType.set_rule_actions:
@@ -83,8 +87,12 @@ export const bulkEditActionToRulesClientOperation = (
           operation: 'set',
           value: action.value.actions,
         },
-        getThrottleOperation(action.value.throttle),
-        getNotifyWhenOperation(action.value.throttle),
+        ...(action.value.throttle
+          ? [
+              getThrottleOperation(action.value.throttle),
+              getNotifyWhenOperation(action.value.throttle),
+            ]
+          : []),
       ];
 
     // schedule actions

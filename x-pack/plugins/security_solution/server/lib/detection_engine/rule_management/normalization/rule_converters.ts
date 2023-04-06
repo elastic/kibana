@@ -401,6 +401,22 @@ export const convertPatchAPIToInternalSchema = (
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
+
+  const actions = nextParams.actions
+    ? nextParams.actions.map(transformRuleToAlertAction)
+    : existingRule.actions;
+  const throttleAndNotifyWhen =
+    !actions.length || !actions[0].frequency
+      ? {
+          throttle: nextParams.throttle
+            ? transformToAlertThrottle(nextParams.throttle)
+            : existingRule.throttle ?? null,
+          notifyWhen: nextParams.throttle
+            ? transformToNotifyWhen(nextParams.throttle)
+            : existingRule.notifyWhen ?? null,
+        }
+      : {};
+
   return {
     name: nextParams.name ?? existingRule.name,
     tags: nextParams.tags ?? existingRule.tags,
@@ -440,15 +456,8 @@ export const convertPatchAPIToInternalSchema = (
       ...typeSpecificParams,
     },
     schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
-    actions: nextParams.actions
-      ? nextParams.actions.map(transformRuleToAlertAction)
-      : existingRule.actions,
-    throttle: nextParams.throttle
-      ? transformToAlertThrottle(nextParams.throttle)
-      : existingRule.throttle ?? null,
-    notifyWhen: nextParams.throttle
-      ? transformToNotifyWhen(nextParams.throttle)
-      : existingRule.notifyWhen ?? null,
+    actions,
+    ...throttleAndNotifyWhen,
   };
 };
 
@@ -464,6 +473,15 @@ export const convertCreateAPIToInternalSchema = (
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
+
+  const throttleAndNotifyWhen =
+    !input.actions?.length || !input.actions[0].frequency
+      ? {
+          throttle: transformToAlertThrottle(input.throttle),
+          notifyWhen: transformToNotifyWhen(input.throttle),
+        }
+      : {};
+
   return {
     name: input.name,
     tags: input.tags ?? [],
@@ -505,8 +523,7 @@ export const convertCreateAPIToInternalSchema = (
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
     actions: input.actions?.map(transformRuleToAlertAction) ?? [],
-    throttle: transformToAlertThrottle(input.throttle),
-    notifyWhen: transformToNotifyWhen(input.throttle),
+    ...throttleAndNotifyWhen,
   };
 };
 

@@ -9,6 +9,7 @@ import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 import * as t from 'io-ts';
 import { saved_object_attributes } from '../saved_object_attributes';
+import { RuleActionFrequency } from '../frequency';
 
 export type RuleActionGroup = t.TypeOf<typeof RuleActionGroup>;
 export const RuleActionGroup = t.string;
@@ -38,7 +39,7 @@ export const RuleAction = t.exact(
       action_type_id: RuleActionTypeId,
       params: RuleActionParams,
     }),
-    t.partial({ uuid: RuleActionUuid }),
+    t.partial({ uuid: RuleActionUuid, frequency: RuleActionFrequency }),
   ])
 );
 
@@ -54,7 +55,7 @@ export const RuleActionCamel = t.exact(
       actionTypeId: RuleActionTypeId,
       params: RuleActionParams,
     }),
-    t.partial({ uuid: RuleActionUuid }),
+    t.partial({ uuid: RuleActionUuid, frequency: RuleActionFrequency }),
   ])
 );
 
