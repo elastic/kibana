@@ -49,7 +49,7 @@ export const manageLinks: LinkItem = {
 export const manageCategories: LinkCategories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurityPosture', {
-      defaultMessage: 'CLOUD SECURITY POSTURE',
+      defaultMessage: 'CLOUD SECURITY',
     }),
     linkIds: [
       SecurityPageName.cloudSecurityPostureBenchmarks,
