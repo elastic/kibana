@@ -14,19 +14,17 @@ import {
   TABLE_CONTAINER,
   TABLE_ROWS,
 } from '../../screens/alerts_details';
-
 import { closeAlertFlyout, expandFirstAlert } from '../../tasks/alerts';
-import { openJsonView, openTable } from '../../tasks/alerts_details';
+import { filterBy, openJsonView, openTable } from '../../tasks/alerts_details';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
-
 import { getUnmappedRule, getNewRule } from '../../objects/rule';
-
 import { ALERTS_URL } from '../../urls/navigation';
 import { tablePageSelector } from '../../screens/table_pagination';
+import { ALERTS_COUNT } from '../../screens/alerts';
 
 describe('Alert details flyout', () => {
   describe('With unmapped fields', { testIsolation: false }, () => {
@@ -90,6 +88,7 @@ describe('Alert details flyout', () => {
         });
     });
   });
+
   describe('Url state management', { testIsolation: false }, () => {
     const testRule = getNewRule();
     before(() => {
@@ -130,7 +129,16 @@ describe('Alert details flyout', () => {
 
     it('should open the flyout given the custom url', () => {
       expandFirstAlert();
-      cy.get(COPY_ALERT_FLYOUT_LINK).should('be.visible');
+      openTable();
+      filterBy('_id');
+      cy.get('[data-test-subj="formatted-field-_id"]')
+        .invoke('text')
+        .then((alertId) => {
+          cy.visit(`http://localhost:5620/app/security/alerts/${alertId}`);
+          cy.get('[data-test-subj="unifiedQueryInput"]').should('have.text', `_id: ${alertId}`);
+          cy.get(ALERTS_COUNT).should('have.text', '1 alert');
+          cy.get(OVERVIEW_RULE).should('be.visible');
+        });
     });
   });
 });

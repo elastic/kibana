@@ -11,7 +11,7 @@ import { Redirect, useLocation, useParams } from 'react-router-dom';
 
 import moment from 'moment';
 import { encode } from '@kbn/rison';
-import { ALERTS_PATH } from '../../../../common/constants';
+import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
 
@@ -20,15 +20,18 @@ export const AlertDetailsRedirect = () => {
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
   const timestamp = searchParams.get('timestamp');
-  const index = searchParams.get('index');
+  // Although we use the 'default' space here when an index isn't provided or accidentally deleted
+  // It's a safe catch all as we reset the '.internal.alerts-*` indices with the correct space in the flyout
+  // Here: x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/helpers.tsx
+  const index = searchParams.get('index') ?? `.internal${DEFAULT_ALERTS_INDEX}-default`;
 
   const getInputSelector = useMemo(() => inputsSelectors.inputsSelector(), []);
   const inputState = useSelector(getInputSelector);
   const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
   const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
+  // Default to the existing global timerange if we don't get this query param for whatever reason
   const fromTime = timestamp ?? globalTimerange.from;
-
   // Add 1 millisecond to the alert timestamp as the alert table is non-inclusive of the end time
   // So we have to extend slightly beyond the range of the timestamp of the given alert
   const toTime = moment(timestamp ?? globalTimerange.to).add('1', 'millisecond');
