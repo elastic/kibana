@@ -6,8 +6,6 @@
  */
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
-import { CATEGORIZE_FIELD_TRIGGER, ACTION_CATEGORIZE_FIELD } from '@kbn/ui-actions-plugin/public';
-import { categorizeFieldAction } from './categorize_field_actions';
 
 import {
   AiopsPluginSetup,
@@ -24,13 +22,21 @@ export class AiopsPlugin
   }
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps) {
-    if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD)) {
-      plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD);
-    }
-    plugins.uiActions.addTriggerAction(
-      CATEGORIZE_FIELD_TRIGGER,
-      categorizeFieldAction(core, plugins)
-    );
+    // importing async to keep the aiops plugin size to a minimum
+    Promise.all([
+      import('@kbn/ui-actions-plugin/public'),
+      import('./categorize_field_actions'),
+    ]).then(([uiActionsImports, { categorizeFieldAction }]) => {
+      const { ACTION_CATEGORIZE_FIELD, CATEGORIZE_FIELD_TRIGGER } = uiActionsImports;
+      if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD)) {
+        plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD);
+      }
+
+      plugins.uiActions.addTriggerAction(
+        CATEGORIZE_FIELD_TRIGGER,
+        categorizeFieldAction(core, plugins)
+      );
+    });
 
     return {};
   }
