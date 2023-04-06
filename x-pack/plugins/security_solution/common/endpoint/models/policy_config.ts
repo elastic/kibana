@@ -12,9 +12,11 @@ import { ProtectionModes } from '../types';
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
 export const policyFactory = (license = ''): PolicyConfig => {
+  // endpointAppContextService;
   return {
     meta: {
       license,
+      cloud,
     },
     windows: {
       events: {

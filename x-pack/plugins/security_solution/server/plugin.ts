@@ -494,6 +494,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       manifestManager,
       registerIngestCallback,
       licenseService,
+      cloud: plugins.cloud,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,

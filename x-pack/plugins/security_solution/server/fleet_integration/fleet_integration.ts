@@ -20,6 +20,7 @@ import type {
   PackagePolicy,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
@@ -52,7 +53,8 @@ export const getPackagePolicyCreateCallback = (
   securitySolutionRequestContextFactory: IRequestContextFactory,
   alerts: AlertsStartContract,
   licenseService: LicenseService,
-  exceptionsClient: ExceptionListClient | undefined
+  exceptionsClient: ExceptionListClient | undefined,
+  cloud: CloudSetup
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -114,7 +116,12 @@ export const getPackagePolicyCreateCallback = (
     ]);
 
     // Add the default endpoint security policy
-    const defaultPolicyValue = createDefaultPolicy(licenseService, endpointIntegrationConfig);
+    const defaultPolicyValue = createDefaultPolicy(
+      licenseService,
+      endpointIntegrationConfig,
+      cloud,
+      logger
+    );
 
     return {
       // We cast the type here so that any changes to the Endpoint

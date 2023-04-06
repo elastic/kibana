@@ -256,6 +256,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     licenseService.start(plugins.licensing.license$);
 
+    if (plugins.cloud) {
+      const { cloudId } = plugins.cloud;
+    }
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
