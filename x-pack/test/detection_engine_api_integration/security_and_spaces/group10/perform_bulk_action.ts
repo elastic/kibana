@@ -490,7 +490,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe.only('edit action', () => {
+    describe('edit action', () => {
       describe('tags actions', () => {
         const overwriteTagsCases = [
           {
