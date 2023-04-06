@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
-  rows: Array<{ label: string; value: React.ReactNode }>;
+  rows: Array<{ label: string | React.ReactNode; value: React.ReactNode }>;
 }
 
 export function KeyValueList({ rows }: Props) {
